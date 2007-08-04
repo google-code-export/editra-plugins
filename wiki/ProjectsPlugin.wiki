@@ -1,0 +1,53 @@
+#summary Projects plugin summary and planned features
+
+= Introduction =
+
+The Projects plugin integrates the features of a file manager and source control into a self-contained, easy to use side panel.  Simplicity and transparency is the main focus of the Projects plugin.  It requires no "project files" and almost no configuration.  The Projects plugin treats directories as projects.  You simply add a directory as a project and the Projects plugin automatically tracks files in that directory.  If the files are under source control (currently either CVS or Subversion), the icons for those files will indicate the status of the files.  You can also do most source control operations using the right-click menu.
+
+
+= Current Features =
+
+This plugin is still in early development, but is quite useful in its current implementation nonetheless.  Below is a list of the current features.
+
+  * Add/remove project directories
+  * Files and directories are automatically synchronized with the file system
+  * Copy/Cut/Paste of files and directories
+  * Open files and directories in editor
+  * Open files using Finder (Mac only)
+  * Reveal files in Finder (Mac only)
+  * Delete files and directories
+  * Automatically filter out temp and bak files from view
+
+The following are the currently implemented source control (CVS and Subversion) features and can be executed on either files or directories.  The status features are automatic.  Other features are accessed using the right-click menu.
+
+  * Display status of files in icons when folder is opened
+  * Refresh status
+  * Update files
+  * Compare to previous version using FileMerge (Mac only)
+  * Revert to repository version (current directory only for CVS)
+
+
+= Planned Features =
+
+The following source control features are planned for the future.  All source control features will work with individual files or on directories (recursively).
+
+  * Configurable commands for CVS and Subversion
+  * Configurable environment variables based on file/directory path
+  * Revision history window with ability to compare playpen version to any previous version, as well being able to compare any two repository versions
+  * Commit changes (dialog for message entry)
+  * Remove from repository
+  * Add to repository
+  * Synchronizing drag-and-drop and general file management functions with source control functions (e.g., renames, deletes, etc.)
+  * Status indicators on directories
+
+Other source control commands will also be added as appropriate.
+
+The following list of features are planned for general file management.
+
+  * Configurable list of file pattern filters
+  * Integrate copy/cut/paste into operating system functions for the same operations (utilizing Trash/Recycle Bin as available)
+  * Rename by editing tree node text
+  * Drag-and-drop moves, additions, and deletions
+  * Multiple file/directory selections
+  * Progress indicators for long operations
+  * File type appropriate icons
