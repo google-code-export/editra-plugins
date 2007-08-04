@@ -1,0 +1,13 @@
+#summary Index for pages about individual plugins
+
+= Introduction =
+
+This page contains a list of links to pages about individual plugins and their respective documentation. If you have contributed a plugin to this project please create a page for your plugin and add some usage/configuration information to it.
+
+
+= Plugins =
+
+||Plugin Name    || Short Description ||
+||ProjectsPlugin || _Project management plugin with integrated source control_ ||
+
+
