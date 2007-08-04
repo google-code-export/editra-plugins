@@ -85,6 +85,12 @@ class ProjectTree(wx.Panel):
                         '*.a','*.o','.poem','.dll','._*','.localized',
                         '.svn','*.pyc','*.bak','#*','*.pyo','*%*',
                         '*.previous','*.swp']
+        self.commands = {
+            'cvs': 'cvs',
+            'svn': 'svn',
+            'diff': 'opendiff',
+        }                
+                        
         self.watchers = {}
         self.clipboard = {}
         
@@ -341,19 +347,21 @@ class ProjectTree(wx.Panel):
             type = self.getSCType(node)
             if type == 'cvs':
                 #print os.path.dirname(path), os.path.basename(path)
-                content = os.popen('cd %s && cvs checkout -p %s' % 
+                content = os.popen('cd "%s" && %s checkout -p %s' % 
                                     (os.path.dirname(path),
+                                     self.commands['cvs'],
                                      os.path.basename(path))).read()
             elif type == 'svn':
-                content = os.popen('cd %s && svn cat %s' % 
+                content = os.popen('cd "%s" && %s cat %s' % 
                                     (os.path.dirname(path),
+                                     self.commands['svn'],
                                      os.path.basename(path))).read()
             if not content.strip():
                 return wx.MessageDialog(self, 'The requested file could not be retrieved from the source control system.', 
                                         'Could not retrieve file', 
                                         style=wx.OK|wx.ICON_ERROR).ShowModal()
             open('%s.previous' % path, 'w').write(content)
-            subprocess.call(['opendiff', '%s.previous' % path, path]) 
+            subprocess.call([self.commands['diff'], '%s.previous' % path, path]) 
             time.sleep(3)
             os.remove('%s.previous' % path)
         t = threading.Thread(target=diff)
@@ -411,14 +419,16 @@ class ProjectTree(wx.Panel):
               current node.
         """
         for file in self.cvsStatus(path):
-            os.system('cd %s && cvs checkout -p %s > %s' % (path, file, file))
+            os.system('cd "%s" && %s checkout -p %s > %s' % \
+                       (path, self.commands['cvs'], file, file))
 
     def svnRevert(self, path):
         filename = '.'
         if not os.path.isdir(path):
             path, filename = os.path.split(path)
         # Go to the directory and run svn update
-        os.system('cd %s && svn revert -R %s' % (path, filename))
+        os.system('cd "%"s && %s revert -R %s' % \
+                   (path, self.commands['svn'], filename))
     
     def scUpdate(self, node):
         return self.scCommand(node, 'update')
@@ -429,14 +439,16 @@ class ProjectTree(wx.Panel):
             path, filename = os.path.split(path)
         root = open(os.path.join(path,'CVS','Root')).read().strip()
         # Go to the directory and run cvs update
-        os.system('cd %s && cvs -d%s update -R %s' % (path, root, filename))
+        os.system('cd "%s" && %s -d%s update -R %s' % 
+                   (path, self.commands['cvs'], root, filename))
         
     def svnUpdate(self, path):
         filename = ''
         if not os.path.isdir(path):
             path, filename = os.path.split(path)        
         # Go to the directory and run svn update
-        os.system('cd %s && svn update %s' % (path, filename))
+        os.system('cd "%s" && %s update %s' % \
+                   (path, self.commands['svn'], filename))
 
     def scStatus(self, node):
         """
@@ -510,7 +522,8 @@ class ProjectTree(wx.Panel):
         
         root = open(os.path.join(path,'CVS','Root')).read().strip()
         # Go to the directory and run cvs status
-        for line in os.popen('cd %s && cvs -d%s status -l %s' % (path, root, filename)):
+        for line in os.popen('cd "%s" && %s -d%s status -l %s' % \
+                              (path, self.commands['cvs'], root, filename)):
             m = status_re.match(line) 
             if not m:
                 continue
@@ -528,7 +541,8 @@ class ProjectTree(wx.Panel):
             path, filename = os.path.split(path)
         
         # Go to the directory and run svn status
-        for line in os.popen('cd %s && svn -vN status %s' % (path, filename)):
+        for line in os.popen('cd "%s" && %s -vN status %s' % \
+                              (path, self.commands['svn'], filename)):
             name = line.strip().split()[-1]
             try: status[name] = codes[line[0]]
             except KeyError: pass
