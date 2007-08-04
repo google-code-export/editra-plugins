@@ -83,7 +83,7 @@ class ProjectTree(wx.Panel):
         
         self.filters = ['CVS','dntnd','.DS_Store','.dpp','.newpp','*~',
                         '*.a','*.o','.poem','.dll','._*','.localized',
-                        '.svn','*.pyc','*.bak','#*','*.pyo','*%*','Icon?',
+                        '.svn','*.pyc','*.bak','#*','*.pyo','*%*',
                         '*.previous','*.swp']
         self.watchers = {}
         self.clipboard = {}
@@ -573,6 +573,8 @@ class ProjectTree(wx.Panel):
             filtered out.
         
         """
+        if name.endswith('\r'):
+            return
         for pattern in self.filters:
             if fnmatch.fnmatchcase(name, pattern):
                 return
@@ -745,35 +747,58 @@ class ProjectTree(wx.Panel):
         """ Diff the file to the file in the repository """
         for node in self.getSelectedNodes():
             self.diffToPrevious(node)
+            
+    def _clearClipboard(self):
+        """ Remove any previously cut files/directories """
+        cutfiles = self.clipboard.pop('cut-files', [])
+        self.clipboard.pop('copied-files', None)
+ 
+        def delete():
+            # Delete previously cut files
+            for path in cutfiles:
+                if os.path.isdir(path):
+                    shutil.rmtree(path, ignore_errors=True)
+                else:
+                    try: os.remove(path)
+                    except OSError: pass
+       
+        if cutfiles:             
+            threading.Thread(target=delete).start()
 
     def onPopupCut(self, event):
         """ Cut the files to the clipboard """
-        tmp = self.clipboard['tmpdir'] = tempfile.mkdtemp()
-        files = self.clipboard['files'] = []
+        self._clearClipboard()
+        # Cut selected files
+        self.clipboard['cut-files'] = []
         for path in self.getSelectedPaths():
-            if os.path.isdir(path):
-                continue
-            newpath = os.path.join(tmp, os.path.basename(path))
-            shutil.copy2(path, newpath)
-            os.remove(path)
-            files.append(newpath)
+            dirname, basename = os.path.split(path)
+            newpath = os.path.join(dirname, '.'+basename+'\r')
+            os.rename(path, newpath)
+            self.clipboard['cut-files'].append(newpath)
 
     def onPopupCopy(self, event):
         """ Copy the files to the clipboard """
-        self.clipboard['files'] = [x for x in self.getSelectedPaths()
-                                     if not os.path.isdir(x)]
-        if 'tmpdir' in self.clipboard:
-            if os.path.isdir(self.clipboard['tmpdir']):
-                shutil.rmtree(self.clipboard['tmpdir'], ignore_errors=True)
-            del self.clipboard['tmpdir']
+        self._clearClipboard() 
+        self.clipboard['copied-files'] = self.getSelectedPaths()
         
     def onPopupPaste(self, event):
         """ Paste the files to the selected directory """
         dest = self.getSelectedPaths()[0]
         if not os.path.isdir(dest):
-            return
-        for file in self.clipboard.get('files',[]):
-            shutil.copy2(file, dest)
+            dest = os.path.dirname(dest)
+        for file in self.clipboard.get('copied-files', []):
+            newpath = os.path.join(dest, os.path.basename(file))
+            if os.path.isdir(file):
+                shutil.copytree(file, newpath, True)
+            else:
+                shutil.copy2(file, newpath)
+        for file in self.clipboard.get('cut-files', []):
+            # Remove '.' and '\r' from file before copying
+            newpath = os.path.join(dest, os.path.basename(file)[1:-1])
+            if os.path.isdir(file):
+                shutil.copytree(file, newpath, True)
+            else:
+                shutil.copy2(file, newpath)
 
     def onPopupSCRefresh(self, event):
         """ Refresh SC status for selected nodes """
@@ -804,9 +829,25 @@ class ProjectTree(wx.Panel):
 
     def onPopupDelete(self, event):
         """ Delete selected files/directories """
-        for file in self.getSelectedPaths():
-            try: os.remove(file)
-            except OSError: pass
+        rc = wx.MessageDialog(self, 'This operation will permanently delete selected ' +
+                              'files and directories.  Are you sure you want to continue?', 
+                              'Permanently delete files and directories?', 
+                              style=wx.YES_NO|wx.NO_DEFAULT|wx.ICON_EXCLAMATION).ShowModal()
+        if rc not in [wx.ID_OK, wx.ID_YES]:
+            return 
+            
+        files = self.getSelectedPaths()
+ 
+        def delete():
+            # Delete previously cut files
+            for path in files:
+                if os.path.isdir(path):
+                    shutil.rmtree(path, ignore_errors=True)
+                else:
+                    try: os.remove(path)
+                    except OSError: pass
+        if files:             
+            threading.Thread(target=delete).start()
 
     def OnActivate(self, event):
         """
@@ -824,7 +865,6 @@ class ProjectTree(wx.Panel):
                     to_open.append(fname)
             except:
                 pass
-        print to_open
         wx.GetApp().GetMainWindow().nb.OnDrop(to_open)
 
     def watchDirectory(self, path, func, data=None, flag=True, delay=2):
@@ -885,8 +925,7 @@ class ProjectTree(wx.Panel):
         for value in self.watchers.values():
             value.pop()
         # Remove any temp files
-        if self.clipboard.get('tmpdir'):
-            shutil.rmtree(self.clipboard['tmpdir'], ignore_errors=True)
+        self._clearClipboard()
     
             
 class ProjectPane(wx.Panel):
