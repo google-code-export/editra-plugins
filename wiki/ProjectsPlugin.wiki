@@ -42,7 +42,7 @@ The following source control features are planned for the future.  All source co
 
 Other source control commands will also be added as appropriate.
 
-The following list of features are planned for general file management.
+The following list of features are planned for general file management and editing.
 
   * Configurable list of file pattern filters
   * Integrate copy/cut/paste into operating system functions for the same operations (utilizing Trash/Recycle Bin as available)
@@ -51,3 +51,4 @@ The following list of features are planned for general file management.
   * Multiple file/directory selections
   * Progress indicators for long operations
   * File type appropriate icons
+  * Automatically display file from currently selected editor tab in project view (if file exists in a project)
