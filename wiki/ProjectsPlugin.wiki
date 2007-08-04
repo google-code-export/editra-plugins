@@ -52,3 +52,8 @@ The following list of features are planned for general file management and editi
   * Progress indicators for long operations
   * File type appropriate icons
   * Automatically display file from currently selected editor tab in project view (if file exists in a project)
+
+Other basic "features" that need to be implemented or just cleaned up are listing below.
+
+  * Timeouts on source control commands
+  * Clean up threads on shutdown
