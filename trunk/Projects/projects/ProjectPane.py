@@ -13,6 +13,10 @@ import tempfile
 import subprocess
 import shutil 
 
+# Make sure that all processes use a standard shell
+if wx.Platform != '__WXMAC__':
+    os.environ['SHELL'] = '/bin/sh'
+
 ID_PROJECTPANE = wx.NewId()
 ID_PROJECTTREE = wx.NewId()
 
@@ -108,6 +112,12 @@ class ProjectTree(wx.Panel):
         #self.Bind(wx.EVT_TREE_END_LABEL_EDIT, self.OnEndEdit, self.tree)
         self.Bind(wx.EVT_TREE_ITEM_ACTIVATED, self.OnActivate, self.tree)
         self.Bind(wx.EVT_CONTEXT_MENU, self.OnContextMenu)
+        
+        try:
+            import extern.flatnotebook as fnb
+            #self.Bind(fnb.EVT_FLATNOTEBOOK_PAGE_CHANGING,
+            self.Bind(fnb.EVT_FLATNOTEBOOK_PAGE_CHANGED, self.OnPageChanged, self.tree)
+        except ImportError: pass
 
         #self.tree.Bind(wx.EVT_LEFT_DCLICK, self.OnLeftDClick)
         #self.tree.Bind(wx.EVT_RIGHT_DOWN, self.OnRightDown)
@@ -261,6 +271,10 @@ class ProjectTree(wx.Panel):
             paths.append(self.tree.GetPyData(item)['path'])
         return paths
 
+    def OnPageChanged(self, event):
+        print 'PAGE CHANGED'
+        event.Skip()
+
     def OnRightDown(self, event):
         pt = event.GetPosition();
         item, flags = self.tree.HitTest(pt)
@@ -375,7 +389,7 @@ class ProjectTree(wx.Panel):
         elif self.isSVNControlled(node):
             return 'svn'
 
-    def scCommand(self, node, command):
+    def scCommand(self, node, command, **options):
         """
         Run a SC command 
         
@@ -398,7 +412,7 @@ class ProjectTree(wx.Panel):
             method = getattr(self, sctype+command.title(), None)
             if method:
                 # Run command
-                method(data['path'])
+                method(data['path'], **options)
             
                 # Unlock
                 del data['sclock']
@@ -429,6 +443,36 @@ class ProjectTree(wx.Panel):
         # Go to the directory and run svn update
         os.system('cd "%"s && %s revert -R %s' % \
                    (path, self.commands['svn'], filename))
+
+    def scCommit(self, node, **options):       
+        ted = wx.TextEntryDialog(self, 
+                 'This text will be used as the message text for the commit',
+                 'Please enter commit message')
+        if ted.ShowModal() == wx.ID_CANCEL:
+            return
+        message = ted.GetValue()
+        if not message:
+            return
+        else:
+            message = message.replace('"', '\\"')
+        return self.scCommand(node, 'commit', message=message)
+       
+    def cvsCommit(self, path, message=None):
+        filename = ''
+        if not os.path.isdir(path):
+            path, filename = os.path.split(path)
+        root = open(os.path.join(path,'CVS','Root')).read().strip()
+        # Go to the directory and run cvs commit
+        os.system('cd "%s" && %s -d%s commit -R -m "%s" %s' % 
+                   (path, self.commands['cvs'], message, root, filename))
+        
+    def svnCommit(self, path, message=None):
+        filename = ''
+        if not os.path.isdir(path):
+            path, filename = os.path.split(path)        
+        # Go to the directory and run svn commit
+        os.system('cd "%s" && %s commit -m "%s" %s' % \
+                   (path, self.commands['svn'], message, filename))
     
     def scUpdate(self, node):
         return self.scCommand(node, 'update')
@@ -721,7 +765,7 @@ class ProjectTree(wx.Panel):
             (self.popupIDSCUpdate, "Update", None, True),
             (self.popupIDSCDiff, "Compare to previous version", None, True),
             (self.popupIDSCHistory, "Show revision history", None, False),
-            (self.popupIDSCCommit, "Commit changes", None, False),
+            (self.popupIDSCCommit, "Commit changes", None, True),
             (self.popupIDSCRemove, "Remove from repository", None, False),
             (self.popupIDSCRevert, "Revert to repository version", None, True),
             (self.popupIDSCAdd, "Add to repository", None, False),
@@ -827,9 +871,8 @@ class ProjectTree(wx.Panel):
         self.log.WriteText("Popup nine\n")
 
     def onPopupSCCommit(self, event):
-        pass
-        #path = self.getSelectedPaths()[0]
-        #subprocess.call(['cvs', commit)
+        for node in self.getSelectedNodes():
+            self.scCommit(node)
 
     def onPopupSCRemove(self, event):
         self.log.WriteText("Popup nine\n")
