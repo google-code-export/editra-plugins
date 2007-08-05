@@ -25,6 +25,7 @@ The following are the currently implemented source control (CVS and Subversion) 
   * Update files
   * Compare to previous version using FileMerge (Mac only)
   * Revert to repository version (current directory only for CVS)
+  * Commit changes (dialog for message entry)
 
 
 = Planned Features =
@@ -34,7 +35,6 @@ The following source control features are planned for the future.  All source co
   * Configurable commands for CVS and Subversion
   * Configurable environment variables based on file/directory path
   * Revision history window with ability to compare playpen version to any previous version, as well being able to compare any two repository versions
-  * Commit changes (dialog for message entry)
   * Remove from repository
   * Add to repository
   * Synchronizing drag-and-drop and general file management functions with source control functions (e.g., renames, deletes, etc.)
