@@ -444,17 +444,16 @@ class ProjectTree(wx.Panel):
         os.system('cd "%"s && %s revert -R %s' % \
                    (path, self.commands['svn'], filename))
 
-    def scCommit(self, node, **options):       
-        ted = wx.TextEntryDialog(self, 
-                 'This text will be used as the message text for the commit',
-                 'Please enter commit message')
-        if ted.ShowModal() == wx.ID_CANCEL:
-            return
-        message = ted.GetValue()
-        if not message:
-            return
-        else:
-            message = message.replace('"', '\\"')
+    def scCommit(self, node, **options): 
+        while True:      
+            ted = wx.TextEntryDialog(self, 
+                     'This text will be used as the message text for the commit',
+                     'Please enter commit message')
+            if ted.ShowModal() != wx.ID_OK:
+                return
+            message = ted.GetValue().strip().replace('"', '\\"')
+            if message:
+                break
         return self.scCommand(node, 'commit', message=message)
        
     def cvsCommit(self, path, message=None):
