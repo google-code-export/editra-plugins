@@ -17,6 +17,9 @@ import shutil
 if wx.Platform != '__WXMAC__':
     os.environ['SHELL'] = '/bin/sh'
 
+# i18n support
+_ = wx.GetTranslation
+
 ID_PROJECTPANE = wx.NewId()
 ID_PROJECTTREE = wx.NewId()
 
@@ -370,8 +373,8 @@ class ProjectTree(wx.Panel):
                                     (os.path.dirname(path),
                                      self.commands['svn'],
                                      os.path.basename(path))).read()
-            if not content.strip():
-                return wx.MessageDialog(self, 'The requested file could not be retrieved from the source control system.', 
+            if not content.strip(): 
+                return wx.MessageDialog(self, _('The requested file could not be retrieved from the source control system.'), 
                                         'Could not retrieve file', 
                                         style=wx.OK|wx.ICON_ERROR).ShowModal()
             open('%s.previous' % path, 'w').write(content)
@@ -447,8 +450,8 @@ class ProjectTree(wx.Panel):
     def scCommit(self, node, **options): 
         while True:      
             ted = wx.TextEntryDialog(self, 
-                     'This text will be used as the message text for the commit',
-                     'Please enter commit message')
+                     _('This text will be used as the message text for the commit',
+                     'Please enter commit message'))
             if ted.ShowModal() != wx.ID_OK:
                 return
             message = ted.GetValue().strip().replace('"', '\\"')
@@ -752,30 +755,30 @@ class ProjectTree(wx.Panel):
         # make a menu
         menu = wx.Menu()
         items = [
-            (self.popupIDEdit, 'Edit', None, True),
-            (self.popupIDOpen, 'Open', None, True),
-            (self.popupIDReveal, 'Reveal in Finder', None, True),
+            (self.popupIDEdit, _('Edit'), None, True),
+            (self.popupIDOpen, _('Open'), None, True),
+            (self.popupIDReveal, _('Reveal in Finder'), None, True),
             (None, None, None, None),
-            (self.popupIDCut, 'Cut', 'cut', True),
-            (self.popupIDCopy, 'Copy', 'copy', True),
-            (self.popupIDPaste, 'Paste', 'paste', True),
+            (self.popupIDCut, _('Cut'), 'cut', True),
+            (self.popupIDCopy, _('Copy'), 'copy', True),
+            (self.popupIDPaste, _('Paste'), 'paste', True),
             (None, None, None, None),
-            (self.popupIDSCRefresh, "Refresh status", None, True),
-            (self.popupIDSCUpdate, "Update", None, True),
-            (self.popupIDSCDiff, "Compare to previous version", None, True),
-            (self.popupIDSCHistory, "Show revision history", None, False),
-            (self.popupIDSCCommit, "Commit changes", None, True),
-            (self.popupIDSCRemove, "Remove from repository", None, False),
-            (self.popupIDSCRevert, "Revert to repository version", None, True),
-            (self.popupIDSCAdd, "Add to repository", None, False),
+            (self.popupIDSCRefresh, _("Refresh status"), None, True),
+            (self.popupIDSCUpdate, _("Update"), None, True),
+            (self.popupIDSCDiff, _("Compare to previous version"), None, True),
+            (self.popupIDSCHistory, _("Show revision history"), None, False),
+            (self.popupIDSCCommit, _("Commit changes"), None, True),
+            (self.popupIDSCRemove, _("Remove from repository"), None, False),
+            (self.popupIDSCRevert, _("Revert to repository version"), None, True),
+            (self.popupIDSCAdd, _("Add to repository"), None, False),
             (None, None, None, None),
-            (self.popupIDDelete, "Delete", 'delete', True),
+            (self.popupIDDelete, _("Delete"), 'delete', True),
         ]
         for id, title, icon, enabled in items:
             if id is None:
                 menu.AppendSeparator()
                 continue
-            item = wx.MenuItem(menu, id, title)
+            item = wx.MenuItem(menu, id, _(title))
             if icon: 
                 item.SetBitmap(self.menuicons[icon])
             item.Enable(enabled)
@@ -885,9 +888,10 @@ class ProjectTree(wx.Panel):
 
     def onPopupDelete(self, event):
         """ Delete selected files/directories """
-        rc = wx.MessageDialog(self, 'This operation will permanently delete selected ' +
-                              'files and directories.  Are you sure you want to continue?', 
-                              'Permanently delete files and directories?', 
+        rc = wx.MessageDialog(self, 
+                              _('This operation will permanently delete selected ' \
+                              'files and directories.  Are you sure you want to continue?'), 
+                              _('Permanently delete files and directories?'), 
                               style=wx.YES_NO|wx.NO_DEFAULT|wx.ICON_EXCLAMATION).ShowModal()
         if rc not in [wx.ID_OK, wx.ID_YES]:
             return 
@@ -1020,7 +1024,7 @@ class ProjectPane(wx.Panel):
         """ Add/Remove projects """
         e_id = evt.GetId()
         if e_id == self.ID_ADD_PROJECT:
-            dialog = wx.DirDialog(self, 'Choose a Project Directory')
+            dialog = wx.DirDialog(self, _('Choose a Project Directory'))
             if dialog.ShowModal() == wx.ID_OK:
                 self.projects.addProject(dialog.GetPath())
         elif e_id == self.ID_REMOVE_PROJECT:
