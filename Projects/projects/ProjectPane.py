@@ -12,6 +12,7 @@ import FileIcons
 import tempfile
 import subprocess
 import shutil 
+import util         # from Editra.src
 
 # Make sure that all processes use a standard shell
 if wx.Platform != '__WXMAC__':
@@ -42,7 +43,7 @@ class ProjectTree(wx.Panel):
 
     def __init__(self, parent, log):
         # Use the WANTS_CHARS style so the panel doesn't eat the Return key.
-        wx.Panel.__init__(self, parent, -1, style=wx.WANTS_CHARS)
+        wx.Panel.__init__(self, parent, -1, style=wx.WANTS_CHARS|wx.SUNKEN_BORDER)
         self.Bind(wx.EVT_SIZE, self.OnSize)
         self.log = log
         tID = wx.NewId()
@@ -1047,22 +1048,51 @@ class ProjectPane(wx.Panel):
         self.projects = ProjectTree(self, None)
 
         # Layout Panes
-        buttonbox = wx.BoxSizer(wx.HORIZONTAL)
-        addbutton = wx.BitmapButton(self, self.ID_ADD_PROJECT, self.projects.il.GetBitmap(self.projects.icons['project-add']), size=(16,16), style=wx.NO_BORDER)
-        removebutton = wx.BitmapButton(self, self.ID_REMOVE_PROJECT, self.projects.il.GetBitmap(self.projects.icons['project-delete']), size=(16,16), style=wx.NO_BORDER)
-        buttonbox.Add((10,30))
-        buttonbox.Add(addbutton, 0, wx.ALIGN_CENTER_VERTICAL)
-        buttonbox.Add((12,1))
-        buttonbox.Add(removebutton, 0, wx.ALIGN_CENTER_VERTICAL)
-        sizer.Add(buttonbox, 0)
+        self.buttonbox = wx.BoxSizer(wx.HORIZONTAL)
+        addbutton = wx.BitmapButton(self, self.ID_ADD_PROJECT, 
+                                    self.projects.il.GetBitmap(self.projects.icons['project-add']), 
+                                    size=(16,16), style=wx.NO_BORDER)
+        addbutton.SetToolTip(wx.ToolTip(_("Add Project")))
+        removebutton = wx.BitmapButton(self, self.ID_REMOVE_PROJECT, 
+                                       self.projects.il.GetBitmap(self.projects.icons['project-delete']), 
+                                       size=(16,16), style=wx.NO_BORDER)
+        removebutton.SetToolTip(wx.ToolTip(_("Remove Project")))
+        self.buttonbox.Add((10,24))
+        self.buttonbox.Add(addbutton, 0, wx.ALIGN_CENTER_VERTICAL)
+        self.buttonbox.Add((12,1))
+        self.buttonbox.Add(removebutton, 0, wx.ALIGN_CENTER_VERTICAL)
+        sizer.Add(self.buttonbox, 0)
 
         sizer.Add(self.projects, 1, wx.EXPAND)
 
         self.SetSizer(sizer)
 
         # Event Handlers
-        #self.Bind(wx.EVT_PAINT, self.OnPaint)
+        self.Bind(wx.EVT_PAINT, self.OnPaint)
         self.Bind(wx.EVT_BUTTON, self.OnPress)
+
+    def OnPaint(self, evt):
+        """Paint the button area of the panel with a gradient"""
+        dc = wx.PaintDC(self)
+        gc = wx.GraphicsContext.Create(dc)
+
+        # Get some system colors
+        col1 = wx.SystemSettings_GetColour(wx.SYS_COLOUR_3DFACE)
+        col2 = util.AdjustColour(col1, 50)
+        col1 = util.AdjustColour(col1, -50)
+
+        rect = self.GetRect()
+        grad = gc.CreateLinearGradientBrush(0, 1, 0, self.buttonbox.GetSize()[1], col2, col1)
+        gc.SetBrush(grad)
+
+        # Create the background path
+        path = gc.CreatePath()
+        path.AddRectangle(0, 0, rect.width - 0.5, rect.height - 0.5)
+
+        gc.SetPen(wx.Pen(util.AdjustColour(col1, -60), 1))
+        gc.DrawPath(path)
+
+        evt.Skip()
 
     def OnPress(self, evt):
         """ Add/Remove projects """
