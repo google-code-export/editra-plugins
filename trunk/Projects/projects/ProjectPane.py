@@ -78,10 +78,20 @@ class ProjectTree(wx.Panel):
             menuicons['paste'] = wx.ArtProvider_GetBitmap(wx.ART_PASTE, wx.ART_OTHER, isz)
             menuicons['delete'] = wx.ArtProvider_GetBitmap(wx.ART_DELETE, wx.ART_OTHER, isz)
 
+        menuicons['blank'] = FileIcons.getBlankBitmap()
+        menuicons['sc-commit'] = FileIcons.getScCommitBitmap()
+        menuicons['sc-diff'] = FileIcons.getScDiffBitmap()
+        menuicons['sc-history'] = FileIcons.getScHistoryBitmap()
+        menuicons['sc-remove'] = FileIcons.getScRemoveBitmap()
+        menuicons['sc-status'] = FileIcons.getScStatusBitmap()
+        menuicons['sc-update'] = FileIcons.getScUpdateBitmap()
+        menuicons['sc-revert'] = FileIcons.getScRevertBitmap()
+
         icons['file'] = il.Add(FileIcons.getFileBitmap())
         icons['file-uptodate'] = il.Add(FileIcons.getFileUptodateBitmap())
         icons['file-modified'] = il.Add(FileIcons.getFileModifiedBitmap())
-        icons['file-merge'] = il.Add(FileIcons.getFileMergeBitmap())
+        icons['file-conflict'] = il.Add(FileIcons.getFileConflictBitmap())
+        icons['file-added'] = il.Add(FileIcons.getFileAddedBitmap())
         icons['project-add'] = il.Add(FileIcons.getProjectAddBitmap())
         icons['project-delete'] = il.Add(FileIcons.getProjectDeleteBitmap())
 
@@ -106,13 +116,13 @@ class ProjectTree(wx.Panel):
         self.tree.SetItemImage(self.root, self.icons['folder'], wx.TreeItemIcon_Normal)
         self.tree.SetItemImage(self.root, self.icons['folder-open'], wx.TreeItemIcon_Expanded)
 
-        self.loadProjects()
+        self.loadSettings()
 
         self.Bind(wx.EVT_TREE_ITEM_EXPANDED, self.OnItemExpanded, self.tree)
         self.Bind(wx.EVT_TREE_ITEM_COLLAPSED, self.OnItemCollapsed, self.tree)
         #self.Bind(wx.EVT_TREE_SEL_CHANGED, self.OnSelChanged, self.tree)
         #self.Bind(wx.EVT_TREE_BEGIN_LABEL_EDIT, self.OnBeginEdit, self.tree)
-        #self.Bind(wx.EVT_TREE_END_LABEL_EDIT, self.OnEndEdit, self.tree)
+        self.Bind(wx.EVT_TREE_END_LABEL_EDIT, self.OnEndEdit, self.tree)
         self.Bind(wx.EVT_TREE_ITEM_ACTIVATED, self.OnActivate, self.tree)
         self.Bind(wx.EVT_CONTEXT_MENU, self.OnContextMenu)
         
@@ -174,14 +184,30 @@ class ProjectTree(wx.Panel):
         except (ImportError, OSError):
             pass
 
-    def loadProjects(self):
+    def loadSettings(self):
         """ Load projects from config file """
-        for p in self.readConfig().get('projects',[]):
+        config = self.readConfig()
+        for p in config.get('projects',[]):
             self.addProject(p, save=False)
+
+        self.filters = config.get('filters', self.filters)
+
+        for c in config.get('commands',[]):
+            key, value = c.split(' ', 1)
+            self.commands[key] = value
 
     def saveProjects(self):
         """ Save projects to config file """
         self.writeConfig(projects=self.getProjectPaths())
+
+    def saveFilters(self):
+        self.writeConfig(filters=self.filters)
+        
+    def saveCommands(self):
+        commands = []
+        for key, value in self.commands.items():
+            commands.append('%s %s' % (key, value))
+        self.writeConfig(commands=commands)
 
     def addProject(self, path, save=True):
         """
@@ -249,7 +275,7 @@ class ProjectTree(wx.Panel):
         deleted -- files that were deleted
         parent -- tree node corresponding to the directory
         
-        """
+        """            
         children = {}
         for child in self.getChildren(parent):
             children[self.tree.GetItemText(child)] = child
@@ -260,7 +286,8 @@ class ProjectTree(wx.Panel):
                     self.tree.Delete(children[item])
 
         for item in added:
-            self.addPath(parent, item)
+            if os.path.basename(item) not in children:
+                self.addPath(parent, item)
 
         self.tree.SortChildren(parent)
 
@@ -296,34 +323,18 @@ class ProjectTree(wx.Panel):
 
     def OnBeginEdit(self, event):
         self.log.WriteText("OnBeginEdit\n")
-        # show how to prevent edit...
-        item = event.GetItem()
-        if item and self.tree.GetItemText(item) == "The Root Item":
-            wx.Bell()
-            self.log.WriteText("You can't edit this one...\n")
-
-            # Lets just see what's visible of its children
-            cookie = 0
-            root = event.GetItem()
-            (child, cookie) = self.tree.GetFirstChild(root)
-
-            while child.IsOk():
-                self.log.WriteText("Child [%s] visible = %d" %
-                                   (self.tree.GetItemText(child),
-                                    self.tree.IsVisible(child)))
-                (child, cookie) = self.tree.GetNextChild(root, cookie)
-
-            event.Veto()
-
+ 
     def OnEndEdit(self, event):
-        self.log.WriteText("OnEndEdit: %s %s\n" %
-                           (event.IsEditCancelled(), event.GetLabel()) )
-        # show how to reject edit, we'll not allow any digits
-        for x in event.GetLabel():
-            if x in string.digits:
-                self.log.WriteText("You can't enter digits...\n")
-                event.Veto()
-                return
+        if event.IsEditCancelled():
+            return
+        node = event.GetItem()
+        data = self.tree.GetPyData(node)
+        path = data['path']
+        newpath = os.path.join(os.path.dirname(path),event.GetLabel())
+        try: 
+            os.rename(path, newpath)
+            data['path'] = newpath
+        except OSError: pass
 
     def OnLeftDClick(self, event):
         pt = event.GetPosition();
@@ -476,6 +487,27 @@ class ProjectTree(wx.Panel):
         os.system('cd "%s" && %s commit -m "%s" %s' % \
                    (path, self.commands['svn'], message, filename))
     
+    def scAdd(self, node):
+        return self.scCommand(node, 'add')
+        
+    def cvsAdd(self, path):
+        """ NOTE: This method needs to be updated to be recursive """
+        filename = '*'
+        if not os.path.isdir(path):
+            path, filename = os.path.split(path)
+        root = open(os.path.join(path,'CVS','Root')).read().strip()
+        # Go to the directory and run cvs add
+        os.system('cd "%s" && %s -d%s add %s' % 
+                   (path, self.commands['cvs'], root, filename))
+        
+    def svnAdd(self, path):
+        filename = '*'
+        if not os.path.isdir(path):
+            path, filename = os.path.split(path)        
+        # Go to the directory and run svn add
+        os.system('cd "%s" && %s add %s' % \
+                   (path, self.commands['svn'], filename))
+
     def scUpdate(self, node):
         return self.scCommand(node, 'update')
         
@@ -579,7 +611,7 @@ class ProjectTree(wx.Panel):
     def svnStatus(self, path):
         """ Get SVN status information from given file/directory """
         status = {}
-        codes = {' ':'uptodate', 'A':'added', 'C':'conflict', 'D':'deleted',
+        codes = {' ':'uptodate', 'A':'added', 'C':'merge', 'D':'deleted',
                  'M':'modified', 'R':'replaced', 'I':'ignored'}
 
         filename = ''
@@ -735,6 +767,7 @@ class ProjectTree(wx.Panel):
             self.popupIDSCRevert = wx.NewId()
             self.popupIDSCAdd = wx.NewId()
             self.popupIDDelete = wx.NewId()
+            self.popupIDRename = wx.NewId()
 
             self.Bind(wx.EVT_MENU, self.onPopupEdit, id=self.popupIDEdit)
             self.Bind(wx.EVT_MENU, self.onPopupOpen, id=self.popupIDOpen)
@@ -751,6 +784,7 @@ class ProjectTree(wx.Panel):
             self.Bind(wx.EVT_MENU, self.onPopupSCRevert, id=self.popupIDSCRevert)
             self.Bind(wx.EVT_MENU, self.onPopupSCAdd, id=self.popupIDSCAdd)
             self.Bind(wx.EVT_MENU, self.onPopupDelete, id=self.popupIDDelete)
+            self.Bind(wx.EVT_MENU, self.onPopupRename, id=self.popupIDRename)
 
         # make a menu
         menu = wx.Menu()
@@ -763,14 +797,16 @@ class ProjectTree(wx.Panel):
             (self.popupIDCopy, _('Copy'), 'copy', True),
             (self.popupIDPaste, _('Paste'), 'paste', True),
             (None, None, None, None),
-            (self.popupIDSCRefresh, _("Refresh status"), None, True),
-            (self.popupIDSCUpdate, _("Update"), None, True),
-            (self.popupIDSCDiff, _("Compare to previous version"), None, True),
-            (self.popupIDSCHistory, _("Show revision history"), None, False),
-            (self.popupIDSCCommit, _("Commit changes"), None, True),
-            (self.popupIDSCRemove, _("Remove from repository"), None, False),
-            (self.popupIDSCRevert, _("Revert to repository version"), None, True),
-            (self.popupIDSCAdd, _("Add to repository"), None, False),
+            (self.popupIDRename, _('Rename'), None, True),
+            (None, None, None, None),
+            (self.popupIDSCRefresh, _("Refresh status"), 'sc-status', True),
+            (self.popupIDSCUpdate, _("Update"), 'sc-update', True),
+            (self.popupIDSCDiff, _("Compare to previous version"), 'sc-diff', True),
+            (self.popupIDSCHistory, _("Show revision history"), 'sc-history', False),
+            (self.popupIDSCCommit, _("Commit changes"), 'sc-commit', True),
+            (self.popupIDSCRemove, _("Remove from repository"), 'sc-remove', False),
+            (self.popupIDSCRevert, _("Revert to repository version"), 'sc-revert', True),
+            (self.popupIDSCAdd, _("Add to repository"), None, True),
             (None, None, None, None),
             (self.popupIDDelete, _("Delete"), 'delete', True),
         ]
@@ -781,6 +817,8 @@ class ProjectTree(wx.Panel):
             item = wx.MenuItem(menu, id, _(title))
             if icon: 
                 item.SetBitmap(self.menuicons[icon])
+            else:
+                item.SetBitmap(self.menuicons['blank'])
             item.Enable(enabled)
             menu.AppendItem(item)
 
@@ -802,6 +840,11 @@ class ProjectTree(wx.Panel):
         """ Open the Finder to the parent directory """
         for file in self.getSelectedPaths():
             subprocess.call(['open', os.path.dirname(file)])
+
+    def onPopupRename(self, event):
+        """ Rename the current selection """
+        for node in self.getSelectedNodes():
+            self.tree.EditLabel(node)
 
     def onPopupSCDiff(self, event):
         """ Diff the file to the file in the repository """
@@ -884,7 +927,8 @@ class ProjectTree(wx.Panel):
             self.scRevert(node)
 
     def onPopupSCAdd(self, event):
-        self.log.WriteText("Popup nine\n")
+        for node in self.getSelectedNodes():
+            self.scAdd(node)
 
     def onPopupDelete(self, event):
         """ Delete selected files/directories """

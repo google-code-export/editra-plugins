@@ -3,7 +3,7 @@
 import os, glob
 
 for i, png in enumerate(glob.glob('Icons/*.png')):
-    name = os.path.splitext(png)[0].replace('-', ' ').title().replace(' ','')
+    name = os.path.splitext(os.path.basename(png))[0].replace('-', ' ').title().replace(' ','')
     if i == 0:
         os.system('img2py -n %s %s FileIcons.py' % (name, png))
     else:
