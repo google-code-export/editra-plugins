@@ -1,0 +1,14 @@
+#summary Description page for TerminalPlugin
+
+= Introduction =
+
+This plugin should act as a terminal emulator and provide to the user/system's shell (i.e Bash, Cmd). 
+
+
+= Desired Features =
+
+This is a beginning of a list of desired features for this plugin.
+
+  * Integrated with Editra's docking windows and perspectives system
+  * Shells opened as notebook pages to allow for multiple shells to be open at once
+
