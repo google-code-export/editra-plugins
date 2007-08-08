@@ -14,60 +14,40 @@ class SVN(SourceControl):
 
     def add(self, paths):
         for path in paths:
-            root = path
-            if os.path.isdir(path):
-                root = os.path.dirname(path)
-            out = self.run(self.getWorkingDirectory(root), 
-                           ['add',os.path.basename(path)])
+            root, files = self.splitFiles(path)
+            out = self.run(root, ['add'] + files)
+            print out.read()
         
     def checkout(self, paths):
         for path in paths:
-            root = path
-            if os.path.isdir(path):
-                root = os.path.dirname(path)
-            out = self.run(self.getWorkingDirectory(root), 
-                           ['checkout',os.path.basename(path)])
+            root, files = self.splitFiles(path)
+            out = self.run(root, ['checkout'] + files)
+            print out.read()
         
     def commit(self, paths, message=''):
         for path in paths:
-            root = path
-            if os.path.isdir(path):
-                root = os.path.dirname(path)
-            out = self.run(self.getWorkingDirectory(root), 
-                           ['commit','-m',message,os.path.basename(path)])
+            root, files = self.splitFiles(path)
+            out = self.run(root, ['commit', '-m', message] + files)
             print out.read()
                                    
     def diff(self, paths):
         for path in paths:
-            out = self.run(self.getWorkingDirectory(path), 
-                           ['diff'] + self.getPathList([path], type=self.TYPE_FILE))
+            root, files = self.splitFiles(path)
+            out = self.run(root, ['diff'] + files)
         
     def history(self, paths):
         history = []
         for path in paths:
-            out = self.run(self.getWorkingDirectory(path), 
-                           ['log'] + self.getPathList([path]))
-            if out:
-                revision_re = re.compile(r'^revision\s+(\S+)')
-                dasl_re = re.compile(r'^date:\s+(\S+\s+\S+);\s+author:\s+(\S+);\s+state:\s+(\S+);')
-                for line in out:
-                    if line.startswith('----------'):
-                        current = history.append({})
-                        current['revision'] = revision_re.match(out.next()).group(1)
-                        m = dasl_re.match(out.next())
-                        current['date'] = m.group(1)
-                        current['author'] = m.group(2)
-                        current['state'] = m.group(3)
-                        current['comment'] = out.next().strip()
+            root, files = self.splitFiles(path)
+            out = self.run(root, ['log'] + files)
+            print out.read()
         return history
         
     def remove(self, paths):
         for path in paths:
-            root = path
-            if os.path.isdir(path):
-                root = os.path.dirname(path)
-            out = self.run(self.getWorkingDirectory(root), 
-                           ['remove',os.path.basename(path)])
+            root, files = self.splitFiles(path)
+            out = self.run(root, ['remove'] + files)
+            print out.read()
         
     def status(self, paths, recursive=False):
         """ Get SVN status information from given file/directory """
@@ -78,13 +58,11 @@ class SVN(SourceControl):
         if not recursive:
             options.append('-N')
         for path in paths:
-            if os.path.isdir(path):
-                out = self.run(self.getWorkingDirectory(path), options)
-            else:
-                out = self.run(self.getWorkingDirectory(path), options + [path])
+            root, files = self.splitFiles(path)
+            out = self.run(root, options + files)
             if out:
                 for line in out:
-                    print line
+                    print line,
                     name = line.strip().split()[-1]
                     try: status[name] = {'status':codes[line[0]]}
                     except KeyError: pass
@@ -92,29 +70,24 @@ class SVN(SourceControl):
         return status
 
     def update(self, paths):
-        print paths
         for path in paths:
-            root = path
-            if os.path.isdir(path):
-                root = os.path.dirname(path)
-            out = self.run(self.getWorkingDirectory(root), 
-                           ['update', os.path.basename(path)])
-        
+            root, files = self.splitFiles(path)
+            out = self.run(root, ['update'] + files)
+            print out.read()
+            
     def revert(self, paths):
         for path in paths:
-            root = path
-            if os.path.isdir(path):
-                root = os.path.dirname(path)
-            out = self.run(self.getWorkingDirectory(root), 
-                           ['revert','-R',os.path.basename(path)])
-
+            root, files = self.splitFiles(path)
+            out = self.run(root, ['revert','-R'] + files)
+            print out.read()
+            
     def fetch(self, paths):
         output = []
         for path in paths:
             if os.path.isdir(path):
                 continue
-            out = self.run(self.getWorkingDirectory(path),
-                           ['cat',path])
+            root, files = self.splitFiles(path)
+            out = self.run(root, ['cat'] + files)
             if out:
                 output.append(out.read())
             else:

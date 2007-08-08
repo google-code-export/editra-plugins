@@ -24,32 +24,38 @@ class CVS(SourceControl):
 
     def add(self, paths):
         for path in paths:
-            out = self.run(self.getWorkingDirectory(path), 
-                           ['add'] + self.getPathList([path]))
+            root, files = self.splitFiles(path, forcefiles=True)
+            out = self.run(root, ['add'] + files)
+            print out.read()
         
     def checkout(self, paths):
         for path in paths:
-            out = self.run(self.getWorkingDirectory(path), 
-                           ['checkout'] + self.getPathList([path]))
-        
+            root, files = self.splitFiles(path, forcefiles=True)
+            out = self.run(root, ['checkout'] + files)
+            print out.read()
+            
     def commit(self, paths, message=''):
         for path in paths:
-            out = self.run(self.getWorkingDirectory(path), 
-                           ['commit','-R','-m',message] + self.getPathList([path]))
-        
+            root, files = self.splitFiles(path)
+            out = self.run(root, ['commit', '-R', '-m', message] + files)
+            print out.read()
+            
     def diff(self, paths):
         for path in paths:
-            out = self.run(self.getWorkingDirectory(path), 
-                           ['diff'] + self.getPathList([path]))
-        
+            root, files = self.splitFiles(path)
+            out = self.run(root, ['diff'] + files)
+            print out.read()
+            
     def history(self, paths):
         history = []
         for path in paths:
-            out = self.run(directory, ['rlog'] + self.getPathList([path]))
+            root, files = self.splitFiles(path)           
+            out = self.run(root, ['rlog'] + files)
             if out:
                 revision_re = re.compile(r'^revision\s+(\S+)')
                 dasl_re = re.compile(r'^date:\s+(\S+\s+\S+);\s+author:\s+(\S+);\s+state:\s+(\S+);')
                 for line in out:
+                    print line,
                     if line.startswith('----------'):
                         current = history.append({})
                         current['revision'] = revision_re.match(out.next()).group(1)
@@ -62,19 +68,18 @@ class CVS(SourceControl):
         
     def remove(self, paths):
         for path in paths:
-            out = self.run(self.getWorkingDirectory(path), 
-                           ['remove'] + self.getPathList([path], topdown=False))
-        
+            root, files = self.splitFiles(path, forcefiles=True, topdown=False)           
+            out = self.run(root, ['remove'] + files)
+            print out.read()
+            
     def status(self, paths, recursive=False):
         status = {}
-        options = ['status','-l']
+        rec = []
         if recursive:
-            options.append('-R')
+            rec = ['-R']
         for path in paths:
-            if os.path.isdir(path):
-                out = self.run(self.getWorkingDirectory(path), options)
-            else:
-                out = self.run(self.getWorkingDirectory(path), options + [path])
+            root, files = self.splitFiles(path)
+            out = self.run(root, ['status', '-l'] + rec + files)
             if out:
                 status_re = re.compile(r'^File:\s+(\S+)\s+Status:\s+(.+?)\s*$')        
                 rep_re = re.compile(r'^\s*Working revision:\s*(\S+)')        
@@ -85,6 +90,7 @@ class CVS(SourceControl):
                 directory_re = re.compile(r'^cvs server: Examining (\S+)')
                 dir = ''        
                 for line in out:
+                    print line,
                     if status_re.match(line):
                         m = status_re.match(line)
                         key, value = m.group(1), m.group(2) 
@@ -124,26 +130,33 @@ class CVS(SourceControl):
 
     def update(self, paths):
         for path in paths:
-            out = self.run(self.getWorkingDirectory(path), 
-                           ['update','-R'] + self.getPathList([path]))
-        
+            root, files = self.splitFiles(path)
+            out = self.run(root, ['update','-R'] + files)
+            print out.read()
+            
     def revert(self, paths):
         for path in paths:
-            for path in self.getPathList([path], type=TYPE_FILE):
-                out = self.run(self.getWorkingDirectory(path),
-                               ['checkout','-p',path])
+            root, files = self.splitFiles(path, forcefiles=True, type=self.TYPE_FILE)
+            for file in files:
+                out = self.run(root, ['checkout','-p'] + files)
                 if out:
-                    open(path, 'w').write(out.read())
+                    content = out.read() 
+                    if not content.startswith('cvs server'):
+                        open(path, 'w').write(content)
     
     def fetch(self, paths):
         output = []
         for path in paths:
             if os.path.isdir(path):
                 continue
-            out = self.run(self.getWorkingDirectory(path),
-                           ['checkout','-p',path])
+            root, files = self.splitFiles(path)
+            out = self.run(root, ['checkout', '-p'] + files)
             if out:
-                output.append(out.read())
+                content = out.read() 
+                if not content.startswith('cvs server'):
+                    output.append(content)
+                else:
+                    output.append(None)
             else:
                 output.append(None)
         return output
