@@ -35,6 +35,7 @@ class SVN(SourceControl):
                 root = os.path.dirname(path)
             out = self.run(self.getWorkingDirectory(root), 
                            ['commit','-m',message,os.path.basename(path)])
+            print out.read()
                                    
     def diff(self, paths):
         for path in paths:
@@ -77,10 +78,13 @@ class SVN(SourceControl):
         if not recursive:
             options.append('-N')
         for path in paths:
-            out = self.run(self.getWorkingDirectory(path), 
-                           options + self.getPathList([path]))
+            if os.path.isdir(path):
+                out = self.run(self.getWorkingDirectory(path), options)
+            else:
+                out = self.run(self.getWorkingDirectory(path), options + [path])
             if out:
                 for line in out:
+                    print line
                     name = line.strip().split()[-1]
                     try: status[name] = {'status':codes[line[0]]}
                     except KeyError: pass
@@ -103,6 +107,19 @@ class SVN(SourceControl):
                 root = os.path.dirname(path)
             out = self.run(self.getWorkingDirectory(root), 
                            ['revert','-R',os.path.basename(path)])
+
+    def fetch(self, paths):
+        output = []
+        for path in paths:
+            if os.path.isdir(path):
+                continue
+            out = self.run(self.getWorkingDirectory(path),
+                           ['cat',path])
+            if out:
+                output.append(out.read())
+            else:
+                output.append(None)
+        return output
                
 if __name__ == '__main__':
     svn = SVN()

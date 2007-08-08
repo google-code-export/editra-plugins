@@ -71,8 +71,10 @@ class CVS(SourceControl):
         if recursive:
             options.append('-R')
         for path in paths:
-            out = self.run(self.getWorkingDirectory(path), 
-                           options + self.getPathList([path]))
+            if os.path.isdir(path):
+                out = self.run(self.getWorkingDirectory(path), options)
+            else:
+                out = self.run(self.getWorkingDirectory(path), options + [path])
             if out:
                 status_re = re.compile(r'^File:\s+(\S+)\s+Status:\s+(.+?)\s*$')        
                 rep_re = re.compile(r'^\s*Working revision:\s*(\S+)')        
@@ -132,7 +134,20 @@ class CVS(SourceControl):
                                ['checkout','-p',path])
                 if out:
                     open(path, 'w').write(out.read())
-                
+    
+    def fetch(self, paths):
+        output = []
+        for path in paths:
+            if os.path.isdir(path):
+                continue
+            out = self.run(self.getWorkingDirectory(path),
+                           ['checkout','-p',path])
+            if out:
+                output.append(out.read())
+            else:
+                output.append(None)
+        return output
+                        
 if __name__ == '__main__':
     cvs = CVS()
     print cvs.status(['.'], recursive=True)
