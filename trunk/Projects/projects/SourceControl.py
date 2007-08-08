@@ -11,10 +11,32 @@ class SourceControl(object):
     filters = []
     command = ''
 
-    def getWorkingDirectory(self, path):
-        if os.path.isdir(path):
-            return path
-        return os.path.dirname(path)
+    def splitFiles(self, path, forcefiles=False, type=None, topdown=True):
+        """ 
+        Split path into a working directory and list of files 
+        
+        Required Arguments:
+        path -- path to split
+        forcefiles -- boolean indicating if the list of recursive files
+            should be returned explicitly
+        type -- type of files/directories to return
+        topdown -- boolean indicating if the files should be listed
+            before directories
+            
+        Returns: two element tuple where the first element is the 
+            starting directory and the second element is a list of the
+            files in that directory tree.  The file list will be
+            empty if forcefiles is False and the path passed in is a 
+            directory.
+        
+        """
+        root, files = path, []
+        if not os.path.isdir(path):
+            root, files = os.path.split(path)
+            files = self.filterPaths([files])
+        elif forcefiles:
+            files = self.getPathList(path, type, topdown)
+        return root, files
 
     def addRootOption(self, directory, options):
         """ Add the repository root option to the command """
