@@ -489,6 +489,35 @@ class ProjectTree(wx.Panel):
             t.setDaemon(True)
             t.start()
 
+    def diffToPrevious(self, node):
+        """ Use opendiff to compare playpen version to repository version """
+        def diff():
+            path = self.tree.GetPyData(node)['path']
+            # Only do files
+            if os.path.isdir(path):
+                return
+
+            sc = self.getSCSystem(path)
+            if sc is None:
+                return
+
+            content = sc.fetch([path])
+            if content and content[0] is None:
+                return wx.MessageDialog(self, 
+                                        'The requested file could not be ' +
+                                        'retrieved from the source control system.', 
+                                        'Could not retrieve file', 
+                                        style=wx.OK|wx.ICON_ERROR).ShowModal()
+                                        
+            open('%s.previous' % path, 'w').write(content[0])
+            subprocess.call([self.commands['diff'], '%s.previous' % path, path]) 
+            time.sleep(3)
+            os.remove('%s.previous' % path)
+            
+        t = threading.Thread(target=diff)
+        t.setDaemon(True)
+        t.start()
+
     def addDirectoryWatcher(self, node):                
         """
         Add a directory watcher thread to the given node
@@ -667,7 +696,7 @@ class ProjectTree(wx.Panel):
             (self.popupIDSCDiff, _("Compare to previous version"), 'sc-diff', True),
             (self.popupIDSCHistory, _("Show revision history"), 'sc-history', False),
             (self.popupIDSCCommit, _("Commit changes"), 'sc-commit', True),
-            (self.popupIDSCRemove, _("Remove from repository"), 'sc-remove', False),
+            (self.popupIDSCRemove, _("Remove from repository"), 'sc-remove', True),
             (self.popupIDSCRevert, _("Revert to repository version"), 'sc-revert', True),
             (self.popupIDSCAdd, _("Add to repository"), None, True),
             (None, None, None, None),
