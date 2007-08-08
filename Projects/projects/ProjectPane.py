@@ -12,7 +12,10 @@ import FileIcons
 import tempfile
 import subprocess
 import shutil 
-import util         # from Editra.src
+try: import util         # from Editra.src
+except ImportError: util = None
+from CVS import CVS
+from SVN import SVN
 
 # Make sure that all processes use a standard shell
 if wx.Platform != '__WXMAC__':
@@ -102,12 +105,13 @@ class ProjectTree(wx.Panel):
         self.filters = ['CVS','dntnd','.DS_Store','.dpp','.newpp','*~',
                         '*.a','*.o','.poem','.dll','._*','.localized',
                         '.svn','*.pyc','*.bak','#*','*.pyo','*%*',
-                        '*.previous','*.swp']
+                        '*.previous','*.swp','.#*']
         self.commands = {
-            'cvs': 'cvs',
-            'svn': 'svn',
             'diff': 'opendiff',
         }                
+        self.sourceControl = {'cvs': CVS(), 'svn': SVN()}
+        for key, value in self.sourceControl.items():
+            value.filters = self.filters
                         
         self.watchers = {}
         self.clipboard = {}
@@ -363,103 +367,68 @@ class ProjectTree(wx.Panel):
             self.addPath(parent, item)
         self.tree.SortChildren(parent)
         self.addDirectoryWatcher(parent)        
-        self.scStatus(parent)
+        self.scStatus([parent])
+        
+    def getSCSystem(self, path):
+        # Make sure that the directory is under source control
+        sc = None
+        for key, value in self.sourceControl.items():
+            if value.isControlled(path):
+                return value            
 
-    def diffToPrevious(self, node):
-        """ Use opendiff to compare playpen version to repository version """
-        def diff():
-            path = self.tree.GetPyData(node)['path']
-            # Only do files
-            if os.path.isdir(path):
-                return
-            filename = os.path.basename(path)
-            type = self.getSCType(node)
-            if type == 'cvs':
-                #print os.path.dirname(path), os.path.basename(path)
-                content = os.popen('cd "%s" && %s checkout -p %s' % 
-                                    (os.path.dirname(path),
-                                     self.commands['cvs'],
-                                     os.path.basename(path))).read()
-            elif type == 'svn':
-                content = os.popen('cd "%s" && %s cat %s' % 
-                                    (os.path.dirname(path),
-                                     self.commands['svn'],
-                                     os.path.basename(path))).read()
-            if not content.strip(): 
-                return wx.MessageDialog(self, _('The requested file could not be retrieved from the source control system.'), 
-                                        'Could not retrieve file', 
-                                        style=wx.OK|wx.ICON_ERROR).ShowModal()
-            open('%s.previous' % path, 'w').write(content)
-            subprocess.call([self.commands['diff'], '%s.previous' % path, path]) 
-            time.sleep(3)
-            os.remove('%s.previous' % path)
-        t = threading.Thread(target=diff)
-        t.setDaemon(True)
-        t.start()
+    def scAdd(self, nodes):
+        self.scCommand(nodes, 'add') 
 
-    def getSCType(self, node):
-        """ Get the version control system used for the given node """
-        if self.isCVSControlled(node):
-            return 'cvs'
-        elif self.isSVNControlled(node):
-            return 'svn'
+    def scRemove(self, nodes):
+        self.scCommand(nodes, 'remove') 
 
-    def scCommand(self, node, command, **options):
+    def scUpdate(self, nodes):
+        self.scCommand(nodes, 'update') 
+
+    def scRevert(self, nodes):
+        self.scCommand(nodes, 'revert') 
+
+    def scCheckout(self, nodes):
+        self.scCommand(nodes, 'checkout') 
+
+    def scCommand(self, nodes, command, **options):
         """
-        Run a SC command 
+        Run a source control command 
         
         Required Arguments:
-        node -- selected tree node
+        nodes -- selected tree nodes
         command -- name of command type to run
         
         """
-        data = self.tree.GetPyData(node)
-        if data.get('sclock', None):
-            return
+        for node in nodes:
+            #print command
+            data = self.tree.GetPyData(node)
+            if data.get('sclock', None):
+                return
             
-        sctype = self.getSCType(node)
-        if not sctype:
-            return
-            
-        data['sclock'] = True 
+            sc = self.getSCSystem(data['path'])
+            if sc is None:
+                return
+                
+            data['sclock'] = True 
 
-        def run():
-            method = getattr(self, sctype+command.title(), None)
-            if method:
-                # Run command
-                method(data['path'], **options)
-            
-                # Unlock
-                del data['sclock']
-            
-                # Update status
-                self.scStatus(node)
+            def run():
+                method = getattr(sc, command, None)
+                if method:
+                    # Run command
+                    method([data['path']], **options)
+                
+                    # Unlock
+                    del data['sclock']
+                
+                    # Update status
+                    self.scStatus([node])
 
-        t = threading.Thread(target=run)
-        t.setDaemon(True)
-        t.start()    
+            t = threading.Thread(target=run)
+            t.setDaemon(True)
+            t.start()    
         
-    def scRevert(self, node):
-        return self.scCommand(node, 'revert')
-
-    def cvsRevert(self, path):
-        """
-        NOTE: This method is not recursive, it only reverts files in the
-              current node.
-        """
-        for file in self.cvsStatus(path):
-            os.system('cd "%s" && %s checkout -p %s > %s' % \
-                       (path, self.commands['cvs'], file, file))
-
-    def svnRevert(self, path):
-        filename = '.'
-        if not os.path.isdir(path):
-            path, filename = os.path.split(path)
-        # Go to the directory and run svn update
-        os.system('cd "%"s && %s revert -R %s' % \
-                   (path, self.commands['svn'], filename))
-
-    def scCommit(self, node, **options): 
+    def scCommit(self, nodes, **options): 
         while True:      
             ted = wx.TextEntryDialog(self, 
                      _('This text will be used as the message text for the commit',
@@ -469,67 +438,9 @@ class ProjectTree(wx.Panel):
             message = ted.GetValue().strip().replace('"', '\\"')
             if message:
                 break
-        return self.scCommand(node, 'commit', message=message)
+        self.scCommand(nodes, 'commit', message=message)
        
-    def cvsCommit(self, path, message=None):
-        filename = ''
-        if not os.path.isdir(path):
-            path, filename = os.path.split(path)
-        root = open(os.path.join(path,'CVS','Root')).read().strip()
-        # Go to the directory and run cvs commit
-        os.system('cd "%s" && %s -d%s commit -R -m "%s" %s' % 
-                   (path, self.commands['cvs'], message, root, filename))
-        
-    def svnCommit(self, path, message=None):
-        filename = ''
-        if not os.path.isdir(path):
-            path, filename = os.path.split(path)        
-        # Go to the directory and run svn commit
-        os.system('cd "%s" && %s commit -m "%s" %s' % \
-                   (path, self.commands['svn'], message, filename))
-    
-    def scAdd(self, node):
-        return self.scCommand(node, 'add')
-        
-    def cvsAdd(self, path):
-        """ NOTE: This method needs to be updated to be recursive """
-        filename = '*'
-        if not os.path.isdir(path):
-            path, filename = os.path.split(path)
-        root = open(os.path.join(path,'CVS','Root')).read().strip()
-        # Go to the directory and run cvs add
-        os.system('cd "%s" && %s -d%s add %s' % 
-                   (path, self.commands['cvs'], root, filename))
-        
-    def svnAdd(self, path):
-        filename = '*'
-        if not os.path.isdir(path):
-            path, filename = os.path.split(path)        
-        # Go to the directory and run svn add
-        os.system('cd "%s" && %s add %s' % \
-                   (path, self.commands['svn'], filename))
-
-    def scUpdate(self, node):
-        return self.scCommand(node, 'update')
-        
-    def cvsUpdate(self, path):
-        filename = ''
-        if not os.path.isdir(path):
-            path, filename = os.path.split(path)
-        root = open(os.path.join(path,'CVS','Root')).read().strip()
-        # Go to the directory and run cvs update
-        os.system('cd "%s" && %s -d%s update -R %s' % 
-                   (path, self.commands['cvs'], root, filename))
-        
-    def svnUpdate(self, path):
-        filename = ''
-        if not os.path.isdir(path):
-            path, filename = os.path.split(path)        
-        # Go to the directory and run svn update
-        os.system('cd "%s" && %s update %s' % \
-                   (path, self.commands['svn'], filename))
-
-    def scStatus(self, node):
+    def scStatus(self, nodes):
         """
         Update the CVS/SVN status of the files in the given node
 
@@ -537,95 +448,46 @@ class ProjectTree(wx.Panel):
         node -- tree node of items to get the status of
 
         """
-        data = self.tree.GetPyData(node)
-        if data.get('sclock', None):
-            return
+        for node in nodes:
+            data = self.tree.GetPyData(node)
+            if data.get('sclock', None):
+                return
+                
+            sc = self.getSCSystem(data['path'])
+            if sc is None:
+                return
+                
+            data['sclock'] = True 
             
-        sctype = self.getSCType(node)
-        if not sctype:
-            return
-            
-        data['sclock'] = True 
-        
-        def update():
-            time.sleep(0.1)
-            try:
-                if not hasattr(self, '%sStatus' % sctype):
-                    return
-                status = getattr(self, '%sStatus' % sctype)(data['path'])
-                # Update the icons for the file nodes
-                if os.path.isdir(data['path']):
-                    for child in self.getChildren(node):
-                        text = self.tree.GetItemText(child)
-                        if text not in status:
-                            continue
-                        icon = self.icons.get('file-'+status[text])
-                        if icon and not os.path.isdir(os.path.join(data['path'],text)):
-                            self.tree.SetItemImage(child, icon,
-                                                   wx.TreeItemIcon_Normal)
-                else:
-                    text = self.tree.GetItemText(node)
-                    if text in status:
-                        icon = self.icons.get('file-'+status[text])
-                        if icon:
-                            self.tree.SetItemImage(node, icon,
-                                 wx.TreeItemIcon_Normal)
-            except (OSError, IOError):
-                pass
-            del data['sclock']
+            def update():
+                time.sleep(0.2)
+                try:
+                    print 'start'
+                    status = sc.status([data['path']])
+                    # Update the icons for the file nodes
+                    if os.path.isdir(data['path']):
+                        for child in self.getChildren(node):
+                            text = self.tree.GetItemText(child)
+                            if text not in status:
+                                continue
+                            icon = self.icons.get('file-'+status[text]['status'])
+                            if icon and not os.path.isdir(os.path.join(data['path'],text)):
+                                self.tree.SetItemImage(child, icon,
+                                                       wx.TreeItemIcon_Normal)
+                    else:
+                        text = self.tree.GetItemText(node)
+                        if text in status:
+                            icon = self.icons.get('file-'+status[text]['status'])
+                            if icon:
+                                self.tree.SetItemImage(node, icon,
+                                     wx.TreeItemIcon_Normal)
+                except (OSError, IOError):
+                    raise
+                del data['sclock']
 
-        t = threading.Thread(target=update)
-        t.setDaemon(True)
-        t.start()
-
-    def isCVSControlled(self, node):
-        path = self.tree.GetPyData(node)['path']
-        if not os.path.isdir(path):
-            path = os.path.dirname(path)
-        return os.path.isdir(os.path.join(path,'CVS'))
-        
-    def isSVNControlled(self, node):
-        path = self.tree.GetPyData(node)['path']
-        if not os.path.isdir(path):
-            path = os.path.dirname(path)
-        return os.path.isdir(os.path.join(path,'.svn'))
-    
-    def cvsStatus(self, path):
-        """ Get CVS status information from given file/directory """
-        status = {}
-        status_re = re.compile(r'^File:\s+(\S+)\s+Status:\s+(.+?)\s*$')
-        
-        filename = ''
-        if not os.path.isdir(path):
-            path, filename = os.path.split(path)
-        
-        root = open(os.path.join(path,'CVS','Root')).read().strip()
-        # Go to the directory and run cvs status
-        for line in os.popen('cd "%s" && %s -d%s status -l %s' % \
-                              (path, self.commands['cvs'], root, filename)):
-            m = status_re.match(line) 
-            if not m:
-                continue
-            status[m.group(1)] = m.group(2).replace('-','').split()[-1].lower()
-        return status
-
-    def svnStatus(self, path):
-        """ Get SVN status information from given file/directory """
-        status = {}
-        codes = {' ':'uptodate', 'A':'added', 'C':'merge', 'D':'deleted',
-                 'M':'modified', 'R':'replaced', 'I':'ignored'}
-
-        filename = ''
-        if not os.path.isdir(path):
-            path, filename = os.path.split(path)
-        
-        # Go to the directory and run svn status
-        for line in os.popen('cd "%s" && %s -vN status %s' % \
-                              (path, self.commands['svn'], filename)):
-            name = line.strip().split()[-1]
-            try: status[name] = codes[line[0]]
-            except KeyError: pass
-        return status
+            t = threading.Thread(target=update)
+            t.setDaemon(True)
+            t.start()
 
     def addDirectoryWatcher(self, node):                
         """
@@ -905,31 +767,25 @@ class ProjectTree(wx.Panel):
                 shutil.copy2(file, newpath)
 
     def onPopupSCRefresh(self, event):
-        """ Refresh SC status for selected nodes """
-        for node in self.getSelectedNodes():
-            self.scStatus(node)
+        self.scStatus(self.getSelectedNodes())
 
     def onPopupSCUpdate(self, event):
-        for node in self.getSelectedNodes():
-            self.scUpdate(node)
+        self.scUpdate(self.getSelectedNodes())
 
     def onPopupSCHistory(self, event):
-        self.log.WriteText("Popup nine\n")
+        self.scHistory(self.getSelectedNodes())
 
     def onPopupSCCommit(self, event):
-        for node in self.getSelectedNodes():
-            self.scCommit(node)
+        self.scCommit(self.getSelectedNodes())
 
     def onPopupSCRemove(self, event):
-        self.log.WriteText("Popup nine\n")
+        self.scRemove(self.getSelectedNodes())
 
     def onPopupSCRevert(self, event):
-        for node in self.getSelectedNodes():
-            self.scRevert(node)
+        self.scRevert(self.getSelectedNodes())
 
     def onPopupSCAdd(self, event):
-        for node in self.getSelectedNodes():
-            self.scAdd(node)
+        self.scAdd(self.getSelectedNodes())
 
     def onPopupDelete(self, event):
         """ Delete selected files/directories """
@@ -1073,6 +929,10 @@ class ProjectPane(wx.Panel):
 
     def OnPaint(self, evt):
         """Paint the button area of the panel with a gradient"""
+        if not util:
+            evt.Skip()
+            return
+            
         dc = wx.PaintDC(self)
         gc = wx.GraphicsContext.Create(dc)
 
