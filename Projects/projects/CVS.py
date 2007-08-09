@@ -12,16 +12,6 @@ class CVS(SourceControl):
             path = os.path.dirname(path)
         return os.path.isdir(os.path.join(path,'CVS'))
 
-    def addRootOption(self, directory, options):
-        """ Add CVS root option """
-        return options
-        try: 
-            root = open(os.path.join(directory,'CVS','Root')).read().strip()
-            return ['-d',root] + list(options)
-        except OSError: 
-            pass
-        return options        
-
     def add(self, paths):
         for path in paths:
             root, files = self.splitFiles(path, forcefiles=True)
