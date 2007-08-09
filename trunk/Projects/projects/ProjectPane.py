@@ -70,7 +70,7 @@ class ProjectTree(wx.Panel):
                                wx.TR_DEFAULT_STYLE
                                #wx.TR_HAS_BUTTONS
                                #| wx.TR_EDIT_LABELS
-                               #| wx.TR_MULTIPLE
+                               | wx.TR_MULTIPLE
                                | wx.TR_HIDE_ROOT
                                , self.log)
 
@@ -429,7 +429,7 @@ class ProjectTree(wx.Panel):
                 
             data['sclock'] = True 
 
-            def run():
+            def run(node, data, sc):
                 method = getattr(sc, command, None)
                 if method:
                     # Run command
@@ -441,9 +441,10 @@ class ProjectTree(wx.Panel):
                     # Update status
                     self.scStatus([node])
 
-            t = threading.Thread(target=run)
+            t = threading.Thread(target=run, args=(node, data, sc))
             t.setDaemon(True)
             t.start()    
+            t.join(60)
         
     def scCommit(self, nodes, **options): 
         while True:      
@@ -476,7 +477,7 @@ class ProjectTree(wx.Panel):
                 
             data['sclock'] = True 
             
-            def update():
+            def update(node, data, sc):
                 time.sleep(0.2)
                 try:
                     status = sc.status([data['path']])
@@ -501,9 +502,10 @@ class ProjectTree(wx.Panel):
                     raise
                 del data['sclock']
 
-            t = threading.Thread(target=update)
+            t = threading.Thread(target=update, args=(node,data,sc))
             t.setDaemon(True)
             t.start()
+            t.join(60)
 
     def diffToPrevious(self, node):
         """ Use opendiff to compare playpen version to repository version """
@@ -511,6 +513,8 @@ class ProjectTree(wx.Panel):
             path = self.tree.GetPyData(node)['path']
             # Only do files
             if os.path.isdir(path):
+                for child in self.getChildren(node):
+                    self.diffToPrevious(child)
                 return
 
             sc = self.getSCSystem(path)
