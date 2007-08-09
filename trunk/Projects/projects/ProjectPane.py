@@ -149,7 +149,8 @@ class ProjectTree(wx.Panel):
         try:
             import extern.flatnotebook as fnb
             #self.Bind(fnb.EVT_FLATNOTEBOOK_PAGE_CHANGING,
-            self.Bind(fnb.EVT_FLATNOTEBOOK_PAGE_CHANGED, self.OnPageChanged, self.tree)
+            mw = self.GetGrandParent()
+            mw.nb.Bind(fnb.EVT_FLATNOTEBOOK_PAGE_CHANGED, self.OnPageChanged)#, self.tree)
         except ImportError: pass
 
         #self.tree.Bind(wx.EVT_LEFT_DCLICK, self.OnLeftDClick)
