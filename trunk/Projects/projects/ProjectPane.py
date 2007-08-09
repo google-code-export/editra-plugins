@@ -377,6 +377,8 @@ class ProjectTree(wx.Panel):
         """
         parent = event.GetItem()
         if not parent: return
+        # Remove dummy child added in self.addFolder
+        self.tree.DeleteChildren(parent)
         path = self.tree.GetPyData(parent)['path']
         for item in os.listdir(path):
             self.addPath(parent, item)
@@ -477,7 +479,6 @@ class ProjectTree(wx.Panel):
             def update():
                 time.sleep(0.2)
                 try:
-                    print 'start'
                     status = sc.status([data['path']])
                     # Update the icons for the file nodes
                     if os.path.isdir(data['path']):
@@ -597,6 +598,9 @@ class ProjectTree(wx.Panel):
         """
         parentpath = self.tree.GetPyData(parent)['path']
         node = self.tree.AppendItem(parent, name)
+        # Work around Windows bug where folders cannot expand unless it
+        # has children.  This item is deleted when the folder is expanded.
+        self.tree.AppendItem(node, '')
         self.tree.SetItemHasChildren(node)
         self.tree.SetPyData(node, {'path':os.path.join(parentpath,name)})
         self.tree.SetItemImage(node, self.icons['folder'], wx.TreeItemIcon_Normal)
