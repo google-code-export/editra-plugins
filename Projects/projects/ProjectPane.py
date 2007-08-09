@@ -21,6 +21,21 @@ from SVN import SVN
 if wx.Platform != '__WXMAC__':
     os.environ['SHELL'] = '/bin/sh'
 
+# Configure Platform specific commands
+if wx.Platform == '__WXMAC__': # MAC
+    FILEMAN = 'Finder'
+    FILEMAN_CMD = 'open'
+elif wx.Platform == '__WXMSW__': # Windows
+    FILEMAN = 'Explorer'
+    FILEMAN_CMD = 'explorer'
+else: # Other/Linux
+    # TODO how to check what desktop environment is in use
+    # this will work for Gnome but not KDE
+    FILEMAN = 'Nautilus'
+    FILEMAN_CMD = 'nautilus'
+    #FILEMAN = 'Konqueror'
+    #FILEMAN_CMD = 'konqueror'
+    
 # i18n support
 _ = wx.GetTranslation
 
@@ -311,7 +326,7 @@ class ProjectTree(wx.Panel):
         event.Skip()
 
     def OnRightDown(self, event):
-        pt = event.GetPosition();
+        pt = event.GetPosition()
         item, flags = self.tree.HitTest(pt)
         if item:
             self.log.WriteText("OnRightClick: %s, %s, %s\n" %
@@ -319,7 +334,7 @@ class ProjectTree(wx.Panel):
             self.tree.SelectItem(item)
 
     def OnRightUp(self, event):
-        pt = event.GetPosition();
+        pt = event.GetPosition()
         item, flags = self.tree.HitTest(pt)
         if item:        
             self.log.WriteText("OnRightUp: %s (manually starting label edit)\n"
@@ -366,7 +381,7 @@ class ProjectTree(wx.Panel):
         for item in os.listdir(path):
             self.addPath(parent, item)
         self.tree.SortChildren(parent)
-        self.addDirectoryWatcher(parent)        
+        self.addDirectoryWatcher(parent)
         self.scStatus([parent])
         
     def getSCSystem(self, path):
@@ -683,7 +698,7 @@ class ProjectTree(wx.Panel):
         items = [
             (self.popupIDEdit, _('Edit'), None, True),
             (self.popupIDOpen, _('Open'), None, True),
-            (self.popupIDReveal, _('Reveal in Finder'), None, True),
+            (self.popupIDReveal, _("Reveal in %s" % FILEMAN), None, True),
             (None, None, None, None),
             (self.popupIDCut, _('Cut'), 'cut', True),
             (self.popupIDCopy, _('Copy'), 'copy', True),
@@ -726,12 +741,12 @@ class ProjectTree(wx.Panel):
     def onPopupOpen(self, event):
         """ Open the current file using Finder """
         for file in self.getSelectedPaths():
-            subprocess.call(['open', file])
+            subprocess.call([FILEMAN_CMD, file])
 
     def onPopupReveal(self, event):
         """ Open the Finder to the parent directory """
         for file in self.getSelectedPaths():
-            subprocess.call(['open', os.path.dirname(file)])
+            subprocess.call([FILEMAN_CMD, os.path.dirname(file)])
 
     def onPopupRename(self, event):
         """ Rename the current selection """
