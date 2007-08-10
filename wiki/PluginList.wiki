@@ -1,4 +1,5 @@
 #summary Index for pages about individual plugins
+#labels Featured
 
 = Introduction =
 
