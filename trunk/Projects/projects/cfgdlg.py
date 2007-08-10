@@ -185,6 +185,18 @@ class ConfigPanel(wx.Panel):
 
     def GetData(self):
         """Get the configuration data from the dialog"""
+        for child in self.GetChildren():
+            id = child.GetId()
+            if id == self.ID_CVS_PATH:
+                self._data.SetCvsPath(child.GetPath())
+            elif id == self.ID_SVN_PATH:
+                self._data.SetSvnPath(child.GetPath())
+            elif id == self.ID_DIFF_PATH:
+                self._data.SetDiffPath(child.GetPath())
+            elif id == self.ID_FILTERS:
+                self._data.SetFileFilters(child.GetValue())
+            else:
+                pass
         return self._data
 
     def OnCheck(self, evt):
