@@ -14,4 +14,6 @@ This page contains a list of links to pages about individual plugins and their r
 = Plugins Wanted =
 ||Plugin Name       || Short Description ||
 ||ClassBrowser      || Window for quick browsing of classes and objects in a file||
+||FtpClient         || Plugin for remote editing and file transfer||
+||RegExWorkShop     || Side pane for testing and developing regular expressions||
 ||TerminalPlugin    || Built in system shell window ||
