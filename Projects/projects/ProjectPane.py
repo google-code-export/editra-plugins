@@ -220,6 +220,16 @@ class ProjectTree(wx.Panel):
             key, value = c.split(' ', 1)
             self.commands[key] = value
 
+        for c in config.get('sourcecontrol',[]):
+            key, value = c.split(' ', 1)
+            self.sourceControl[key] = value
+
+    def saveSettings(self):
+        self.saveProjects()
+        self.saveFilters()
+        self.saveCommands()
+        self.saveSourceControl()
+
     def saveProjects(self):
         """ Save projects to config file """
         self.writeConfig(projects=self.getProjectPaths())
@@ -233,6 +243,12 @@ class ProjectTree(wx.Panel):
             commands.append('%s %s' % (key, value))
         self.writeConfig(commands=commands)
 
+    def saveSourceControl(self):
+        commands = []
+        for key, value in self.sourceControl.items():
+            commands.append('%s %s' % (key, value))
+        self.writeConfig(sourcecontrol=commands)
+
     def addProject(self, path, save=True):
         """
         Add a project for the given path
@@ -244,6 +260,7 @@ class ProjectTree(wx.Panel):
         
         """
         node = self.tree.AppendItem(self.tree.GetRootItem(), os.path.basename(path))
+        self.tree.AppendItem(node, '')
         self.tree.SetItemHasChildren(node)
         self.tree.SetPyData(node, {'path':path})
         self.tree.SetItemImage(node, self.icons['folder'], wx.TreeItemIcon_Normal)
@@ -1009,6 +1026,15 @@ class ProjectPane(wx.Panel):
         e_id = evt.GetId()
         if e_id == self.ID_CFGDLG:
             val = evt.GetValue()
+            if 'filters' in val:
+                self.projects.filters = re.split(r'\s+', val['filters'])
+            if 'diff' in val:
+                self.projects.commands['diff'] = val['diff']
+            for key, value in self.projects.sourceControl.items():
+                if key in val:
+                    self.projects.sourceControl[key].command = val[key]
+                    self.projects.sourceControl[key].filters = self.projects.filters
+            self.projects.saveSettings()
             print "CONFIG DATA = ", val
         else:
             evt.Skip()
@@ -1050,8 +1076,15 @@ class ProjectPane(wx.Panel):
         elif e_id == self.ID_REMOVE_PROJECT:
             self.projects.removeSelectedProject()
         elif e_id == self.ID_CONFIG:
+            data = {}
+            for key, value in self.projects.sourceControl.items():
+                data[key] = value.command
+            data['filters'] = ' '.join(self.projects.filters)
+            for key, value in self.projects.commands.items():
+                data[key] = value
             if not self.FindWindowById(self.ID_CFGDLG):
-                cfg = cfgdlg.ConfigDlg(self, self.ID_CFGDLG, cfgdlg.ConfigData(cvs="Hello CVS", svn="Hello SVN"))
+                cfg = cfgdlg.ConfigDlg(self, self.ID_CFGDLG, 
+                             cfgdlg.ConfigData(**data))
                 cfg.Show()
             else:
                 pass
@@ -1067,6 +1100,7 @@ class CommitDialog(wx.Dialog):
         # Attributes
         self._caption = wx.StaticText(self, label=caption)
         self._commit = wx.Button(self, wx.ID_OK, _("Commit"))
+        self._commit.SetDefault()
         self._cancel = wx.Button(self, wx.ID_CANCEL)
         self._entry = wx.TextCtrl(self, style=wx.TE_MULTILINE|wx.NO_BORDER)
         self._entry.SetValue(default)
