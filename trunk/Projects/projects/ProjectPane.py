@@ -450,9 +450,8 @@ class ProjectTree(wx.Panel):
         
     def scCommit(self, nodes, **options): 
         while True:      
-            ted = wx.TextEntryDialog(self, 
-                     _('This text will be used as the message text for the commit',
-                     'Please enter commit message'))
+            ted = CommitDialog(self, _("Commit Dialog"), 
+                               _("Enter your commit message:"))
             if ted.ShowModal() != wx.ID_OK:
                 return
             message = ted.GetValue().strip().replace('"', '\\"')
@@ -1048,7 +1047,39 @@ class ProjectPane(wx.Panel):
         else:
             evt.Skip()
 
+#-----------------------------------------------------------------------------#
+class CommitDialog(wx.Dialog):
+    """Dialog for entering commit messages"""
+    def __init__(self, parent, title=u'', caption=u'', default=u''):
+        wx.Dialog.__init__(self, parent, title=title)
+        
+        # Attributes
+        self._caption = wx.StaticText(self, label=caption)
+        self._commit = wx.Button(self, wx.ID_OK, _("Commit"))
+        self._cancel = wx.Button(self, wx.ID_CANCEL)
+        self._entry = wx.TextCtrl(self, style=wx.TE_MULTILINE|wx.NO_BORDER)
+        self._entry.SetValue(default)
+        
+        # Layout
+        self._DoLayout()
+        self.CenterOnParent()
 
+    def _DoLayout(self):
+        sizer = wx.GridBagSizer(5, 5)
+
+        sizer.Add((5, 5), (0, 0))
+        sizer.AddMany([(self._caption, (1, 1), (1, 4)),
+                       (self._entry, (2, 1), (10, 6), wx.EXPAND),
+                       (self._cancel, (12, 5)), (self._commit, (12, 6)),
+                       ((5, 5), (13, 0)), ((5, 5), (13, 7))])
+        self.SetSizer(sizer)
+        self.SetInitialSize()
+
+    def GetValue(self):
+        """Return the value of the commit message"""
+        return self._entry.GetValue()
+
+#-----------------------------------------------------------------------------#
 if __name__ == '__main__':
         
     class MyApp(wx.App):
