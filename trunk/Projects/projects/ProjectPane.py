@@ -222,7 +222,7 @@ class ProjectTree(wx.Panel):
 
         for c in config.get('sourcecontrol',[]):
             key, value = c.split(' ', 1)
-            self.sourceControl[key] = value
+            self.sourceControl[key].command = value
 
     def saveSettings(self):
         self.saveProjects()
@@ -343,7 +343,6 @@ class ProjectTree(wx.Panel):
         return paths
         
     def OnPageChanged(self, evt):
-        print 'page changed'
         notebook = evt.GetEventObject()
         pg_num = evt.GetSelection()
         txt_ctrl = notebook.GetPage(pg_num)
@@ -351,6 +350,8 @@ class ProjectTree(wx.Panel):
         # With the text control (ed_stc.EDSTC) this will return the full path of the file or 
         # a wx.EmptyString if the buffer does not contain an on disk file
         filename = txt_ctrl.GetFileName()
+
+        print 'TAB SELECTED', filename
 
         # Very important this must be called in the handler at some point
         evt.Skip()
