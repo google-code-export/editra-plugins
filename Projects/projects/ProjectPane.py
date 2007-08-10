@@ -14,6 +14,7 @@ import subprocess
 import shutil 
 try: import util         # from Editra.src
 except ImportError: util = None
+import cfgdlg
 from CVS import CVS
 from SVN import SVN
 
@@ -946,6 +947,8 @@ class ProjectPane(wx.Panel):
     """Creates a project pane"""
     ID_REMOVE_PROJECT = wx.NewId()
     ID_ADD_PROJECT = wx.NewId()
+    ID_CONFIG = wx.NewId()
+    ID_CFGDLG = wx.NewId()
 
     def __init__(self, parent, id=ID_PROJECTPANE, pos=wx.DefaultPosition,
                  size=wx.DefaultSize, style=wx.NO_BORDER):
@@ -966,10 +969,20 @@ class ProjectPane(wx.Panel):
                                        self.projects.il.GetBitmap(self.projects.icons['project-delete']), 
                                        size=(16,16), style=wx.NO_BORDER)
         removebutton.SetToolTip(wx.ToolTip(_("Remove Project")))
+        try:
+            import ed_glob
+            cfgbmp = wx.ArtProvider.GetBitmap(str(ed_glob.ID_PREF), wx.ART_MENU)
+        except ImportError:
+            cfgbmp = wx.ArtProvider.GetBitmap(wx.ART_EXECUTABLE_FILE, wx.ART_MENU)
+        configbutton = wx.BitmapButton(self, self.ID_CONFIG, cfgbmp,
+                                       size=(16,16), style=wx.NO_BORDER)
+        configbutton.SetToolTip(wx.ToolTip(_("Configure")))
         self.buttonbox.Add((10,24))
         self.buttonbox.Add(addbutton, 0, wx.ALIGN_CENTER_VERTICAL)
         self.buttonbox.Add((12,1))
         self.buttonbox.Add(removebutton, 0, wx.ALIGN_CENTER_VERTICAL)
+        self.buttonbox.Add((12, 1))
+        self.buttonbox.Add(configbutton, 0, wx.ALIGN_CENTER_VERTICAL)
         sizer.Add(self.buttonbox, 0)
 
         sizer.Add(self.projects, 1, wx.EXPAND)
@@ -1016,6 +1029,12 @@ class ProjectPane(wx.Panel):
                 self.projects.addProject(dialog.GetPath())
         elif e_id == self.ID_REMOVE_PROJECT:
             self.projects.removeSelectedProject()
+        elif e_id == self.ID_CONFIG:
+            if not self.FindWindowById(self.ID_CFGDLG):
+                cfg = cfgdlg.ConfigDlg(self, self.ID_CFGDLG, cfgdlg.ConfigData())
+                cfg.Show()
+            else:
+                pass
         else:
             evt.Skip()
 
