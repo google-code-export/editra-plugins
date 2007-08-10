@@ -96,7 +96,7 @@ class CVS(SourceControl):
                             current['status'] = 'uptodate'
                         elif 'remove' in value:
                             current['status'] = 'deleted'
-                        elif 'merge' in value:
+                        elif 'conflict' in value:
                             current['status'] = 'conflict'
                     elif directory_re.match(line):
                         dir = directory_re.match(line).group(1)
