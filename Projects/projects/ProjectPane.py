@@ -260,7 +260,8 @@ class ProjectTree(wx.Panel):
         
         """
         node = self.tree.AppendItem(self.tree.GetRootItem(), os.path.basename(path))
-        self.tree.AppendItem(node, '')
+        proj = self.tree.AppendItem(node, '')
+        self.tree.AppendItem(proj, '')  # <- workaround for windows
         self.tree.SetItemHasChildren(node)
         self.tree.SetPyData(node, {'path':path})
         self.tree.SetItemImage(node, self.icons['folder'], wx.TreeItemIcon_Normal)
@@ -670,6 +671,7 @@ class ProjectTree(wx.Panel):
         self.tree.CollapseAllChildren(item)
         
         self.tree.DeleteChildren(item)
+        self.tree.AppendItem(item, '')  # <- Dummy node workaround for MSW
         
         # Kill the watcher thread
         data = self.tree.GetPyData(item)
