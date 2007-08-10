@@ -992,6 +992,16 @@ class ProjectPane(wx.Panel):
         # Event Handlers
         self.Bind(wx.EVT_PAINT, self.OnPaint)
         self.Bind(wx.EVT_BUTTON, self.OnPress)
+        self.Bind(cfgdlg.EVT_CFG_EXIT, self.OnCfgClose)
+
+    def OnCfgClose(self, evt):
+        """Recieve configuration data when dialog is closed"""
+        e_id = evt.GetId()
+        if e_id == self.ID_CFGDLG:
+            val = evt.GetValue()
+            print "CONFIG DATA = ", val
+        else:
+            evt.Skip()
 
     def OnPaint(self, evt):
         """Paint the button area of the panel with a gradient"""
@@ -1031,7 +1041,7 @@ class ProjectPane(wx.Panel):
             self.projects.removeSelectedProject()
         elif e_id == self.ID_CONFIG:
             if not self.FindWindowById(self.ID_CFGDLG):
-                cfg = cfgdlg.ConfigDlg(self, self.ID_CFGDLG, cfgdlg.ConfigData())
+                cfg = cfgdlg.ConfigDlg(self, self.ID_CFGDLG, cfgdlg.ConfigData(cvs="Hello CVS", svn="Hello SVN"))
                 cfg.Show()
             else:
                 pass

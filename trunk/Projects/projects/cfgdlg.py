@@ -43,6 +43,39 @@ import wx
 
 _ = wx.GetTranslation
 #--------------------------------------------------------------------------#
+# ConfigDlg Events
+cfgEVT_CFG_EXIT = wx.NewEventType()
+EVT_CFG_EXIT = wx.PyEventBinder(cfgEVT_CFG_EXIT, 1)
+class ConfigDlgEvent(wx.PyCommandEvent):
+    """Config dialog closer event"""
+    def __init__(self, etype, eid, value=None):
+        wx.PyCommandEvent.__init__(self, etype, eid)
+        self._etype = etype
+        self._id = eid
+        self._value = value
+
+    def GetEvtType(self):
+        """Returns the event type
+        @return: this events event type (ed_event)
+
+        """
+        return self._etype
+
+    def GetId(self):
+        """Returns the event id
+        @return: the identifier of this event
+
+        """
+        return self._id
+
+    def GetValue(self):
+        """Returns the value from the event.
+        @return: the value of this event
+
+        """
+        return self._value
+
+#--------------------------------------------------------------------------#
 
 class ConfigDlg(wx.MiniFrame):
     """Dialog for configuring the Projects plugin settings"""
@@ -60,9 +93,21 @@ class ConfigDlg(wx.MiniFrame):
         self.SetInitialSize()
         self.CenterOnParent()
 
+        # Event Handlers
+        self.Bind(wx.EVT_CLOSE, self.OnClose)
+
     def GetConfigData(self):
         """Get the configuration data from the controls"""
         return self._panel.GetData()
+
+    def OnClose(self, evt):
+        """Catch the closure event and post the data to the dialogs
+        parent.
+
+        """
+        wx.PostEvent(self.GetParent(), 
+                     ConfigDlgEvent(cfgEVT_CFG_EXIT, self.GetId(), self.GetConfigData()))
+        evt.Skip()
 
 #--------------------------------------------------------------------------#
 
