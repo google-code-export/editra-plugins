@@ -12,8 +12,10 @@ import FileIcons
 import tempfile
 import subprocess
 import shutil 
-try: import util         # from Editra.src
-except ImportError: util = None
+try: 
+    import util         # from Editra.src
+except ImportError: 
+    util = None
 import cfgdlg
 from CVS import CVS
 from SVN import SVN
@@ -322,11 +324,20 @@ class ProjectTree(wx.Panel):
         for item in self.getSelectedNodes():
             paths.append(self.tree.GetPyData(item)['path'])
         return paths
+        
+    def OnPageChanged(self, evt):
+        print 'page changed'
+        notebook = evt.GetEventObject()
+        pg_num = evt.GetSelection()
+        txt_ctrl = notebook.GetPage(pg_num)
 
-    def OnPageChanged(self, event):
-        print 'PAGE CHANGED'
-        event.Skip()
+        # With the text control (ed_stc.EDSTC) this will return the full path of the file or 
+        # a wx.EmptyString if the buffer does not contain an on disk file
+        filename = txt_ctrl.GetFileName()
 
+        # Very important this must be called in the handler at some point
+        evt.Skip()
+    
     def OnRightDown(self, event):
         pt = event.GetPosition()
         item, flags = self.tree.HitTest(pt)
@@ -379,11 +390,11 @@ class ProjectTree(wx.Panel):
         """
         parent = event.GetItem()
         if not parent: return
-        # Remove dummy child added in self.addFolder
-        self.tree.DeleteChildren(parent)
         path = self.tree.GetPyData(parent)['path']
         for item in os.listdir(path):
             self.addPath(parent, item)
+        # Delete dummy node from self.addFolder
+        self.tree.Delete(self.tree.GetFirstChild(parent)[0])
         self.tree.SortChildren(parent)
         self.addDirectoryWatcher(parent)
         self.scStatus([parent])
