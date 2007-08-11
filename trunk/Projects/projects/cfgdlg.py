@@ -118,6 +118,7 @@ class ConfigPanel(wx.Panel):
     ID_DIFF_PATH = wx.NewId()
     ID_FILTERS = wx.NewId()
     ID_SVN_PATH = wx.NewId()
+    ID_SYNC_NB = wx.NewId()
     def __init__(self, parent, data):
         wx.Panel.__init__(self, parent)
         
@@ -231,6 +232,7 @@ class ConfigData(dict):
     DIFF = 'diff'
     FILTERS = 'filters'
     SVN = 'svn'
+    SYNCNB = 'syncwithnotebook'
     def __init__(self, **kargs):
         dict.__init__(self)
 
@@ -255,6 +257,9 @@ class ConfigData(dict):
     def GetSvnPath(self):
         """Get the path to svn from the data"""
         return self.get(self.SVN, wx.EmptyString)
+        
+    def GetSyncWithNotebook(self):
+        return self.get(self.SYNCNB, True)
 
     def SetCvsPath(self, path):
         """Set the path to cvs executable"""
@@ -274,6 +279,9 @@ class ConfigData(dict):
     def SetSvnPath(self, path):
         """Set the path to svn executable"""
         self.__setitem__(self.SVN, path)
+        
+    def SetSyncWithNotebook(self, bool):
+        self.__setitem__(self.SYNCNB, bool)
 
 #--------------------------------------------------------------------------#
 # For testing
