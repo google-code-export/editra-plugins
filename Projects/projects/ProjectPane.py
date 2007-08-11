@@ -120,13 +120,14 @@ class ProjectTree(wx.Panel):
         self.tree.SetImageList(il)
         self.il = il
         
-        self.filters = ['CVS','dntnd','.DS_Store','.dpp','.newpp','*~',
+        self.filters = sorted(['CVS','dntnd','.DS_Store','.dpp','.newpp','*~',
                         '*.a','*.o','.poem','.dll','._*','.localized',
                         '.svn','*.pyc','*.bak','#*','*.pyo','*%*',
-                        '*.previous','*.swp','.#*']
+                        '*.previous','*.swp','.#*'])
         self.commands = {
             'diff': 'opendiff',
         }                
+        self.syncWithNotebook = True
         self.sourceControl = {'cvs': CVS(), 'svn': SVN()}
         for key, value in self.sourceControl.items():
             value.filters = self.filters
@@ -214,7 +215,7 @@ class ProjectTree(wx.Panel):
         for p in config.get('projects',[]):
             self.addProject(p, save=False)
 
-        self.filters = config.get('filters', self.filters)
+        self.filters = sorted(config.get('filters', self.filters))
 
         for c in config.get('commands',[]):
             key, value = c.split(' ', 1)
@@ -223,19 +224,32 @@ class ProjectTree(wx.Panel):
         for c in config.get('sourcecontrol',[]):
             key, value = c.split(' ', 1)
             self.sourceControl[key].command = value
+        
+        for c in config.get('syncwithnotebook',[]):
+            if c == 'yes':
+                self.syncWithNotebook = True
+            else:
+                self.syncWithNotebook = False
 
     def saveSettings(self):
         self.saveProjects()
         self.saveFilters()
         self.saveCommands()
         self.saveSourceControl()
+        self.saveSyncWithNotebook()
 
     def saveProjects(self):
         """ Save projects to config file """
         self.writeConfig(projects=self.getProjectPaths())
 
     def saveFilters(self):
-        self.writeConfig(filters=self.filters)
+        self.writeConfig(filters=sorted(self.filters))
+
+    def saveSyncWithNotebook(self):
+        if self.syncWithNotebook:
+            self.writeConfig(syncwithnotebook=['yes'])
+        else:
+            self.writeConfig(syncwithnotebook=['no'])
         
     def saveCommands(self):
         commands = []
@@ -246,7 +260,7 @@ class ProjectTree(wx.Panel):
     def saveSourceControl(self):
         commands = []
         for key, value in self.sourceControl.items():
-            commands.append('%s %s' % (key, value))
+            commands.append('%s %s' % (key, value.command))
         self.writeConfig(sourcecontrol=commands)
 
     def addProject(self, path, save=True):
@@ -351,8 +365,29 @@ class ProjectTree(wx.Panel):
         # With the text control (ed_stc.EDSTC) this will return the full path of the file or 
         # a wx.EmptyString if the buffer does not contain an on disk file
         filename = txt_ctrl.GetFileName()
-
-        print 'TAB SELECTED', filename
+        
+        for project in self.getChildren(self.root):
+            dir = path = self.tree.GetPyData(project)['path']
+            if not os.path.isdir(dir):
+                dir = os.path.dirname(dir)
+            if not dir.endswith(os.sep):
+                dir += os.sep
+            if filename.startswith(dir):
+                filename = filename[len(dir):].split(os.sep)
+                self.tree.Expand(project)
+                folder = project
+                try:
+                    while filename:
+                        name = filename.pop(0)
+                        for item in self.getChildren(folder):
+                            if self.tree.GetItemText(item) == name:
+                                self.tree.Expand(item)
+                                folder = item
+                                continue
+                except: pass
+                self.tree.UnselectAll()
+                self.tree.SelectItem(folder)
+                break
 
         # Very important this must be called in the handler at some point
         evt.Skip()
@@ -744,8 +779,8 @@ class ProjectTree(wx.Panel):
             (self.popupIDCopy, _('Copy'), 'copy', True),
             (self.popupIDPaste, _('Paste'), 'paste', True),
             (None, None, None, None),
-            (self.popupIDRename, _('Rename'), None, True),
-            (None, None, None, None),
+            #(self.popupIDRename, _('Rename'), None, True),
+            #(None, None, None, None),
             (self.popupIDSCRefresh, _("Refresh status"), 'sc-status', True),
             (self.popupIDSCUpdate, _("Update"), 'sc-update', True),
             (self.popupIDSCDiff, _("Compare to previous version"), 'sc-diff', True),
@@ -1030,7 +1065,7 @@ class ProjectPane(wx.Panel):
         if e_id == self.ID_CFGDLG:
             val = evt.GetValue()
             if 'filters' in val:
-                self.projects.filters = re.split(r'\s+', val['filters'])
+                self.projects.filters = sorted(re.split(r'\s+', val['filters']))
             if 'diff' in val:
                 self.projects.commands['diff'] = val['diff']
             for key, value in self.projects.sourceControl.items():
@@ -1083,6 +1118,7 @@ class ProjectPane(wx.Panel):
             for key, value in self.projects.sourceControl.items():
                 data[key] = value.command
             data['filters'] = ' '.join(self.projects.filters)
+            data['syncwithnotebook'] = self.projects.syncWithNotebook
             for key, value in self.projects.commands.items():
                 data[key] = value
             if not self.FindWindowById(self.ID_CFGDLG):
@@ -1107,6 +1143,7 @@ class CommitDialog(wx.Dialog):
         self._cancel = wx.Button(self, wx.ID_CANCEL)
         self._entry = wx.TextCtrl(self, style=wx.TE_MULTILINE|wx.NO_BORDER)
         self._entry.SetValue(default)
+        self._entry.SetFocus()
         
         # Layout
         self._DoLayout()
