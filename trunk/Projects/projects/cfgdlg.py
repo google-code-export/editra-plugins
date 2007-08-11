@@ -117,6 +117,7 @@ class ConfigPanel(wx.Panel):
     ID_DEFAULT_DIFF = wx.NewId()
     ID_DIFF_PATH = wx.NewId()
     ID_FILTERS = wx.NewId()
+    ID_NBSYNC = wx.NewId()
     ID_SVN_PATH = wx.NewId()
     ID_SYNC_NB = wx.NewId()
     def __init__(self, parent, data):
@@ -179,8 +180,15 @@ class ConfigPanel(wx.Panel):
         filters.SetToolTip(tt)
         fboxsz.Add(filters, 1, wx.EXPAND)
         sizer.Add(fboxsz, (7, 1), (4, 7), wx.EXPAND)
-        sizer.AddMany([((5, 5), (11, 0)), ((5, 5), (11, 8))])
-        
+
+        # Misc
+        miscbsz = wx.StaticBoxSizer(wx.StaticBox(self, label=_("Miscellaneous")), wx.HORIZONTAL)
+        nbsync = wx.CheckBox(self, self.ID_NBSYNC, _("Syncronize with notebook"))
+        nbsync.SetValue(self._data.GetSyncWithNotebook())
+        miscbsz.Add(nbsync, 1, wx.EXPAND)
+        sizer.Add(miscbsz, (12, 1), (1, 7), wx.EXPAND)
+
+        sizer.AddMany([((5, 5), (13, 0)), ((5, 5), (13, 8))])
         self.SetSizer(sizer)
         self.SetInitialSize()
 
@@ -192,10 +200,14 @@ class ConfigPanel(wx.Panel):
                 self._data.SetCvsPath(child.GetPath())
             elif id == self.ID_SVN_PATH:
                 self._data.SetSvnPath(child.GetPath())
+            elif id == self.ID_DEFAULT_DIFF:
+                self._data.SetUseBuiltinDiff(child.GetValue())
             elif id == self.ID_DIFF_PATH:
                 self._data.SetDiffPath(child.GetPath())
             elif id == self.ID_FILTERS:
                 self._data.SetFileFilters(child.GetValue())
+            elif id == self.ID_SYNC_NB:
+                self._data.SetSyncWithNotebook(child.GetValue())
             else:
                 pass
         return self._data
@@ -203,11 +215,15 @@ class ConfigPanel(wx.Panel):
     def OnCheck(self, evt):
         """Handle check box events"""
         e_id = evt.GetId()
+        e_obj = evt.GetEventObject()
         if e_id == self.ID_DEFAULT_DIFF:
-            val = evt.GetEventObject().GetValue()
+            val = e_obj.GetValue()
             differ = self.FindWindowById(self.ID_DIFF_PATH)
             if differ != None:
                 differ.Enable(not val)
+            self._data.SetUseBuiltinDiff(val)
+        elif e_id == self.ID_SYNC_NB:
+            self._data.SetSyncWithNotebook(e_obj.GetValue())
         else:
             evt.Skip()
 
@@ -230,6 +246,7 @@ class ConfigData(dict):
     """Class for holding configuration data for the configdlg"""
     CVS = 'cvs'
     DIFF = 'diff'
+    BUILTIN_DIFF = 'use_default_diff'
     FILTERS = 'filters'
     SVN = 'svn'
     SYNCNB = 'syncwithnotebook'
@@ -261,6 +278,9 @@ class ConfigData(dict):
     def GetSyncWithNotebook(self):
         return self.get(self.SYNCNB, True)
 
+    def GetUseBuiltinDiff(self):
+        return self.get(self.BUILTIN_DIFF, True)
+
     def SetCvsPath(self, path):
         """Set the path to cvs executable"""
         self.__setitem__(self.CVS, path)
@@ -280,8 +300,11 @@ class ConfigData(dict):
         """Set the path to svn executable"""
         self.__setitem__(self.SVN, path)
         
-    def SetSyncWithNotebook(self, bool):
-        self.__setitem__(self.SYNCNB, bool)
+    def SetSyncWithNotebook(self, sync):
+        self.__setitem__(self.SYNCNB, sync)
+
+    def SetUseBuiltinDiff(self, builtin):
+        self.__setitem__(self.BUILTIN_DIFF, builtin)
 
 #--------------------------------------------------------------------------#
 # For testing
