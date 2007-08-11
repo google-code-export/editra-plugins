@@ -226,7 +226,7 @@ class ProjectTree(wx.Panel):
             self.sourceControl[key].command = value
         
         for c in config.get('syncwithnotebook',[]):
-            if c == 'yes':
+            if 'yes' in c:
                 self.syncWithNotebook = True
             else:
                 self.syncWithNotebook = False
@@ -365,6 +365,9 @@ class ProjectTree(wx.Panel):
         # With the text control (ed_stc.EDSTC) this will return the full path of the file or 
         # a wx.EmptyString if the buffer does not contain an on disk file
         filename = txt_ctrl.GetFileName()
+        
+        if filename in self.getSelectedPaths():
+            return
         
         for project in self.getChildren(self.root):
             dir = path = self.tree.GetPyData(project)['path']
