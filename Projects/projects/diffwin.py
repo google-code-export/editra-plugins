@@ -80,7 +80,7 @@ class DiffBook(FNB.FlatNotebook):
     """Notebook for holding multiple diff panels"""
     def __init__(self, parent):
         """Initialize the book"""
-        FNB.FlatNotebook.__init__(self, parent) 
+        FNB.FlatNotebook.__init__(self, parent,
                                   style=FNB.FNB_FF2 | \
                                         FNB.FNB_HIDE_ON_SINGLE_TAB | \
                                         FNB.FNB_X_ON_TAB)
