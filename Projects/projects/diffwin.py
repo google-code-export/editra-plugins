@@ -228,7 +228,7 @@ def GenerateDiff(left, right, tabwidth=8, html=False):
     else:
         return list(difflib.Differ().compare(lfile, rfile))
 
-def CleanupTempFiles(self):
+def CleanupTempFiles():
     """Cleanup all temporary diff files"""
     for tmp in _tmpfiles:
         try:
