@@ -470,7 +470,7 @@ class ProjectTree(wx.Panel):
         self.scCommand(nodes, 'remove') 
 
     def scUpdate(self, nodes):
-        self.scCommand(nodes, 'update') 
+        self.scCommand(nodes, 'update')
 
     def scRevert(self, nodes):
         self.scCommand(nodes, 'revert') 
@@ -1024,6 +1024,7 @@ class ProjectPane(wx.Panel):
         
         # Attributes
         sizer = wx.BoxSizer(wx.VERTICAL)
+        self.timer = wx.Timer(self)
 
         self.projects = ProjectTree(self, None)
 
@@ -1045,22 +1046,32 @@ class ProjectPane(wx.Panel):
         configbutton = wx.BitmapButton(self, self.ID_CONFIG, cfgbmp,
                                        size=(16,16), style=wx.NO_BORDER)
         configbutton.SetToolTip(wx.ToolTip(_("Configure")))
+        self.busy = wx.Gauge(self, size=(50, 16), style=wx.GA_HORIZONTAL)
+        self.busy.Hide()
         self.buttonbox.Add((10,24))
         self.buttonbox.Add(addbutton, 0, wx.ALIGN_CENTER_VERTICAL)
         self.buttonbox.Add((12,1))
         self.buttonbox.Add(removebutton, 0, wx.ALIGN_CENTER_VERTICAL)
         self.buttonbox.Add((12, 1))
         self.buttonbox.Add(configbutton, 0, wx.ALIGN_CENTER_VERTICAL)
-        sizer.Add(self.buttonbox, 0)
+        self.buttonbox.AddStretchSpacer()
+        sizer.Add(self.buttonbox, 0, wx.EXPAND)
 
         sizer.Add(self.projects, 1, wx.EXPAND)
 
         self.SetSizer(sizer)
+        self.SetAutoLayout(True)
 
         # Event Handlers
         self.Bind(wx.EVT_PAINT, self.OnPaint)
         self.Bind(wx.EVT_BUTTON, self.OnPress)
+        self.Bind(wx.EVT_TIMER, self.OnTick)
         self.Bind(cfgdlg.EVT_CFG_EXIT, self.OnCfgClose)
+
+    def __del__(self):
+        """Make sure the timer is stopped"""
+        if self.timer.IsRunning():
+            self.timer.Stop()
 
     def OnCfgClose(self, evt):
         """Recieve configuration data when dialog is closed"""
@@ -1132,6 +1143,34 @@ class ProjectPane(wx.Panel):
                 pass
         else:
             evt.Skip()
+
+    def OnTick(self, evt):
+        """Pulse the indicator on every tick of the clock"""
+        self.busy.Pulse()
+
+    def StartBusy(self):
+        """Show and start the busy indicator"""
+        running = False
+        for item in self.buttonbox.GetChildren():
+            win = item.GetWindow()
+            if isinstance(win, wx.Gauge):
+                running = True
+                break
+        if not running:
+            self.buttonbox.Add(self.busy, 1, 
+                               wx.ALIGN_CENTER_VERTICAL | wx.ALIGN_RIGHT)
+            self.buttonbox.Add((10, 24), 0, wx.ALIGN_RIGHT)
+
+        self.busy.Show()
+        self.buttonbox.Layout()
+        self.timer.Start(100)
+
+    def StopBusy(self):
+        """Stop and then hide the busy indicator"""
+        if self.timer.IsRunning():
+            self.timer.Stop()
+        self.busy.SetValue(0)
+        wx.CallLater(1200, self.busy.Hide)
 
 #-----------------------------------------------------------------------------#
 class CommitDialog(wx.Dialog):
