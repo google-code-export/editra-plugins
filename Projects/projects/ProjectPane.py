@@ -11,7 +11,8 @@ import re
 import FileIcons
 import tempfile
 import subprocess
-import shutil 
+import shutil
+import wx.lib.delayedresult 
 try: 
     import util         # from Editra.src
 except ImportError: 
@@ -128,6 +129,7 @@ class ProjectTree(wx.Panel):
             'diff': 'opendiff',
         }                
         self.syncWithNotebook = True
+        self.useBuiltinDiff = False
         self.sourceControl = {'cvs': CVS(), 'svn': SVN()}
         for key, value in self.sourceControl.items():
             value.filters = self.filters
@@ -478,43 +480,8 @@ class ProjectTree(wx.Panel):
     def scCheckout(self, nodes):
         self.scCommand(nodes, 'checkout') 
 
-    def scCommand(self, nodes, command, **options):
-        """
-        Run a source control command 
-        
-        Required Arguments:
-        nodes -- selected tree nodes
-        command -- name of command type to run
-        
-        """
-        for node in nodes:
-            #print command
-            data = self.tree.GetPyData(node)
-            if data.get('sclock', None):
-                return
-            
-            sc = self.getSCSystem(data['path'])
-            if sc is None:
-                return
-                
-            data['sclock'] = True 
-
-            def run(node, data, sc):
-                method = getattr(sc, command, None)
-                if method:
-                    # Run command
-                    method([data['path']], **options)
-                
-                    # Unlock
-                    del data['sclock']
-                
-                    # Update status
-                    self.scStatus([node])
-
-            t = threading.Thread(target=run, args=(node, data, sc))
-            t.setDaemon(True)
-            t.start()    
-            t.join(60)
+    def scStatus(self, nodes):
+        self.scCommand(nodes, 'status') 
         
     def scCommit(self, nodes, **options): 
         while True:      
@@ -526,55 +493,82 @@ class ProjectTree(wx.Panel):
             if message:
                 break
         self.scCommand(nodes, 'commit', message=message)
-       
-    def scStatus(self, nodes):
-        """
-        Update the CVS/SVN status of the files in the given node
 
+    def scCommand(self, nodes, command, **options):
+        """
+        Run a source control command 
+        
         Required Arguments:
-        node -- tree node of items to get the status of
-
+        nodes -- selected tree nodes
+        command -- name of command type to run
+        
         """
-        for node in nodes:
-            data = self.tree.GetPyData(node)
-            if data.get('sclock', None):
-                return
+        self.GetParent().StartBusy()
+        
+        def run(nodes, command, **options):
+            for node in nodes:
+                #print command
+                data = self.tree.GetPyData(node)
+                if data.get('sclock', None):
+                    continue
                 
-            sc = self.getSCSystem(data['path'])
-            if sc is None:
-                return
+                sc = self.getSCSystem(data['path'])
+                if sc is None:
+                    continue
                 
-            data['sclock'] = True 
-            
-            def update(node, data, sc):
-                time.sleep(0.2)
-                try:
-                    status = sc.status([data['path']])
-                    # Update the icons for the file nodes
-                    if os.path.isdir(data['path']):
-                        for child in self.getChildren(node):
-                            text = self.tree.GetItemText(child)
-                            if text not in status:
-                                continue
-                            icon = self.icons.get('file-'+status[text]['status'])
-                            if icon and not os.path.isdir(os.path.join(data['path'],text)):
-                                self.tree.SetItemImage(child, icon,
-                                                       wx.TreeItemIcon_Normal)
-                    else:
-                        text = self.tree.GetItemText(node)
-                        if text in status:
-                            icon = self.icons.get('file-'+status[text]['status'])
-                            if icon:
-                                self.tree.SetItemImage(node, icon,
-                                     wx.TreeItemIcon_Normal)
-                except (OSError, IOError):
-                    raise
-                del data['sclock']
+                # Lock node while command is running    
+                data['sclock'] = True 
+                
+                # Find correct method
+                method = getattr(sc, command, None)
+                if method:
+                    # Run command (only if it isn't the status command)
+                    if command != 'status':
+                        method([data['path']], **options)
 
-            t = threading.Thread(target=update, args=(node,data,sc))
-            t.setDaemon(True)
-            t.start()
-            t.join(60)
+                    self._updateStatus(node, data, sc)
+                    
+                # Unlock
+                del data['sclock']
+        
+        wx.lib.delayedresult.startWorker(self.endSCCommand, run, 
+                                         wargs=(nodes, command), 
+                                         wkwargs=options)
+        
+    def _updateStatus(self, node, data, sc):
+        """
+        Update the icons in the tree view to show the status of the files
+                
+        """
+        # Update status of nodes
+        try:
+            status = sc.status([data['path']])
+            # Update the icons for the file nodes
+            if os.path.isdir(data['path']):
+                for child in self.getChildren(node):
+                    text = self.tree.GetItemText(child)
+                    if text not in status:
+                        continue
+                    if os.path.isdir(os.path.join(data['path'],text)):
+                        if self.tree.IsExpanded(child):
+                            self._updateStatus(child, self.tree.GetPyData(child), sc)
+                    else:
+                        icon = self.icons.get('file-'+status[text]['status'])
+                        if icon:
+                            self.tree.SetItemImage(child, icon,
+                                                   wx.TreeItemIcon_Normal)
+            else:
+                text = self.tree.GetItemText(node)
+                if text in status:
+                    icon = self.icons.get('file-'+status[text]['status'])
+                    if icon:
+                        self.tree.SetItemImage(node, icon,
+                             wx.TreeItemIcon_Normal)
+        except (OSError, IOError):
+            pass
+            
+    def endSCCommand(self, delayedresult):
+        self.GetParent().StopBusy()
 
     def diffToPrevious(self, node):
         """ Use opendiff to compare playpen version to repository version """
@@ -604,7 +598,6 @@ class ProjectTree(wx.Panel):
             os.remove('%s.previous' % path)
             
         t = threading.Thread(target=diff)
-        t.setDaemon(True)
         t.start()
 
     def addDirectoryWatcher(self, node):                
@@ -1082,6 +1075,8 @@ class ProjectPane(wx.Panel):
                 self.projects.filters = sorted(re.split(r'\s+', val['filters']))
             if 'diff' in val:
                 self.projects.commands['diff'] = val['diff']
+            if 'syncwithnotebook' in val:
+                self.projects.syncWithNotebook = val['syncwithnotebook']
             for key, value in self.projects.sourceControl.items():
                 if key in val:
                     self.projects.sourceControl[key].command = val[key]
