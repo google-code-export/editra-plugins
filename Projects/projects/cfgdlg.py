@@ -162,8 +162,8 @@ class ConfigPanel(wx.Panel):
         differ = wx.FilePickerCtrl(self, self.ID_DIFF_PATH, diff,
                                    message=_("Select Diff Program"))
         diffcb = wx.CheckBox(self, self.ID_DEFAULT_DIFF, _("Use Builtin"))
-        diffcb.SetValue(diff == wx.EmptyString)
-        differ.Enable(diff != wx.EmptyString)
+        diffcb.SetValue(self._data.GetUseBuiltinDiff())
+        differ.Enable(not diffcb.GetValue())
         diffsz.AddMany([(difftxt, 0, wx.ALIGN_CENTER_VERTICAL),
                         ((5, 5)), (differ, 1, wx.EXPAND)])
         dboxsz.AddMany([(diffcb, 0), (diffsz, 1, wx.EXPAND)])
