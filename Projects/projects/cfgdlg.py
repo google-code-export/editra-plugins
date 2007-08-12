@@ -197,13 +197,13 @@ class ConfigPanel(wx.Panel):
         for child in self.GetChildren():
             id = child.GetId()
             if id == self.ID_CVS_PATH:
-                self._data.SetCvsPath(child.GetPath())
+                self._data.SetCvsPath(child.GetTextCtrl().GetValue())
             elif id == self.ID_SVN_PATH:
-                self._data.SetSvnPath(child.GetPath())
+                self._data.SetSvnPath(child.GetTextCtrl().GetValue())
             elif id == self.ID_DEFAULT_DIFF:
                 self._data.SetUseBuiltinDiff(child.GetValue())
             elif id == self.ID_DIFF_PATH:
-                self._data.SetDiffPath(child.GetPath())
+                self._data.SetDiffPath(child.GetTextCtrl().GetValue())
             elif id == self.ID_FILTERS:
                 self._data.SetFileFilters(child.GetValue())
             elif id == self.ID_SYNC_NB:
