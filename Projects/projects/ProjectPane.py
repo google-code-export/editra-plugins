@@ -506,6 +506,7 @@ class ProjectTree(wx.Panel):
         self.GetParent().StartBusy()
         
         def run(nodes, command, **options):
+            updates = []
             for node in nodes:
                 #print command
                 data = self.tree.GetPyData(node)
@@ -526,16 +527,18 @@ class ProjectTree(wx.Panel):
                     if command != 'status':
                         method([data['path']], **options)
 
-                    self._updateStatus(node, data, sc)
+                    self._updateStatus(node, data, sc, updates=updates)
                     
                 # Unlock
                 del data['sclock']
+                
+            return updates
         
         wx.lib.delayedresult.startWorker(self.endSCCommand, run, 
                                          wargs=(nodes, command), 
                                          wkwargs=options)
         
-    def _updateStatus(self, node, data, sc):
+    def _updateStatus(self, node, data, sc, updates=[]):
         """
         Update the icons in the tree view to show the status of the files
                 
@@ -551,23 +554,28 @@ class ProjectTree(wx.Panel):
                         continue
                     if os.path.isdir(os.path.join(data['path'],text)):
                         if self.tree.IsExpanded(child):
-                            self._updateStatus(child, self.tree.GetPyData(child), sc)
+                            self._updateStatus(child, self.tree.GetPyData(child), sc, updates)
                     else:
                         icon = self.icons.get('file-'+status[text]['status'])
                         if icon:
-                            self.tree.SetItemImage(child, icon,
-                                                   wx.TreeItemIcon_Normal)
+                            updates.append((self.tree.SetItemImage, child, icon, wx.TreeItemIcon_Normal))
             else:
                 text = self.tree.GetItemText(node)
                 if text in status:
                     icon = self.icons.get('file-'+status[text]['status'])
                     if icon:
-                        self.tree.SetItemImage(node, icon,
-                             wx.TreeItemIcon_Normal)
+                        updates.append((self.tree.SetItemImage, node, icon, wx.TreeItemIcon_Normal))
         except (OSError, IOError):
             pass
+        return updates
             
     def endSCCommand(self, delayedresult):
+        # Apply updates to tree view
+        for update in delayedresult.get():
+            update = list(update)
+            method = update.pop(0)
+            method(*update)
+        # Update progress indicator
         self.GetParent().StopBusy()
 
     def diffToPrevious(self, node):
@@ -1018,6 +1026,7 @@ class ProjectPane(wx.Panel):
         # Attributes
         sizer = wx.BoxSizer(wx.VERTICAL)
         self.timer = wx.Timer(self)
+        self.isBusy = 0
 
         self.projects = ProjectTree(self, None)
 
@@ -1145,6 +1154,9 @@ class ProjectPane(wx.Panel):
 
     def StartBusy(self):
         """Show and start the busy indicator"""
+        self.isBusy += 1
+        if self.isBusy > 1:
+            return
         running = False
         for item in self.buttonbox.GetChildren():
             win = item.GetWindow()
@@ -1162,6 +1174,9 @@ class ProjectPane(wx.Panel):
 
     def StopBusy(self):
         """Stop and then hide the busy indicator"""
+        self.isBusy -= 1
+        if self.isBusy > 0:
+            return
         if self.timer.IsRunning():
             self.timer.Stop()
         self.busy.SetValue(0)
