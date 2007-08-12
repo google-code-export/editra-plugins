@@ -233,6 +233,12 @@ class ProjectTree(wx.Panel):
             else:
                 self.syncWithNotebook = False
 
+        for c in config.get('usebuiltindiff',[]):
+            if 'yes' in c:
+                self.useBuiltinDiff = True
+            else:
+                self.useBuiltinDiff = False
+
     def saveSettings(self):
         self.saveProjects()
         self.saveFilters()
@@ -252,6 +258,12 @@ class ProjectTree(wx.Panel):
             self.writeConfig(syncwithnotebook=['yes'])
         else:
             self.writeConfig(syncwithnotebook=['no'])
+        
+    def saveUseBuiltinDiff(self):
+        if self.useBuiltinDiff:
+            self.writeConfig(usebuiltindiff=['yes'])
+        else:
+            self.writeConfig(usebuiltindiff=['no'])
         
     def saveCommands(self):
         commands = []
@@ -360,6 +372,10 @@ class ProjectTree(wx.Panel):
         return paths
         
     def OnPageChanged(self, evt):
+        if not self.syncWithNotebook:
+            evt.Skip()
+            return
+        
         notebook = evt.GetEventObject()
         pg_num = evt.GetSelection()
         txt_ctrl = notebook.GetPage(pg_num)
@@ -1092,6 +1108,8 @@ class ProjectPane(wx.Panel):
                 self.projects.filters = sorted(re.split(r'\s+', val['filters']))
             if 'diff' in val:
                 self.projects.commands['diff'] = val['diff']
+            if 'use_default_diff' in val:
+                self.projects.useBuiltinDiff = val['use_default_diff']
             if 'syncwithnotebook' in val:
                 self.projects.syncWithNotebook = val['syncwithnotebook']
             for key, value in self.projects.sourceControl.items():
@@ -1145,6 +1163,7 @@ class ProjectPane(wx.Panel):
                 data[key] = value.command
             data['filters'] = ' '.join(self.projects.filters)
             data['syncwithnotebook'] = self.projects.syncWithNotebook
+            data['use_default_diff'] = self.projects.useBuiltinDiff
             for key, value in self.projects.commands.items():
                 data[key] = value
             if not self.FindWindowById(self.ID_CFGDLG):
