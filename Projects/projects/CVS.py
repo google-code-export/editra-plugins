@@ -63,8 +63,7 @@ class CVS(SourceControl):
             out = self.run(root, ['remove'] + files)
             self.logOutput(out)
             
-    def status(self, paths, recursive=False):
-        status = {}
+    def status(self, paths, recursive=False, status={}):
         rec = []
         if recursive:
             rec = ['-R']

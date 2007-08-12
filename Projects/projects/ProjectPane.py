@@ -137,6 +137,10 @@ class ProjectTree(wx.Panel):
         self.watchers = {}
         self.clipboard = {}
         
+        # Number of seconds to allow a source control command to run
+        # before timing out
+        self.scTimeout = 60
+        
         self.root = self.tree.AddRoot('Projects')
         self.tree.SetPyData(self.root, None)
         self.tree.SetItemImage(self.root, self.icons['folder'], wx.TreeItemIcon_Normal)
@@ -540,10 +544,13 @@ class ProjectTree(wx.Panel):
                 method = getattr(sc, command, None)
                 if method:
                     # Run command (only if it isn't the status command)
+                    rc = True
                     if command != 'status':
-                        method([data['path']], **options)
-
-                    self._updateStatus(node, data, sc, updates=updates)
+                        rc = self._timeoutCommand(method, [data['path']], **options)
+                        
+                    # Only update status if last command didn't time out
+                    if rc:
+                        self._updateStatus(node, data, sc, updates=updates)
                     
                 # Unlock
                 del data['sclock']
@@ -553,6 +560,18 @@ class ProjectTree(wx.Panel):
         wx.lib.delayedresult.startWorker(self.endSCCommand, run, 
                                          wargs=(nodes, command), 
                                          wkwargs=options)
+                                         
+    def _timeoutCommand(self, method, *args, **kwargs):
+        """ Run command, but kill it if it takes longer than `timeout` secs """
+        t = threading.Thread(target=method, args=args, kwargs=kwargs)
+        t.start()
+        t.join(self.scTimeout)
+        if t.isAlive():
+            t._Thread__stop()
+            #print 'COMMAND TIMED OUT'
+            return False
+        #print 'COMMAND SUCCEEDED'
+        return True
         
     def _updateStatus(self, node, data, sc, updates=[]):
         """
@@ -561,7 +580,10 @@ class ProjectTree(wx.Panel):
         """
         # Update status of nodes
         try:
-            status = sc.status([data['path']])
+            status = {}
+            rc = self._timeoutCommand(sc.status, [data['path']], status=status)
+            if not rc:
+                return updates
             # Update the icons for the file nodes
             if os.path.isdir(data['path']):
                 for child in self.getChildren(node):
