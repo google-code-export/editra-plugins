@@ -13,8 +13,8 @@ This plugin is still in early development, but is quite useful in its current im
   * Files and directories are automatically synchronized with the file system
   * Copy/Cut/Paste of files and directories
   * Open files and directories in editor
-  * Open files using Finder (Mac only)
-  * Reveal files in Finder (Mac only)
+  * Open files using Finder/Explorer
+  * Reveal files in Finder/Explorer
   * Delete files and directories
   * Automatically filter out temp and bak files from view
   * Configurable list of file pattern filters
@@ -28,8 +28,8 @@ The following are the currently implemented source control (CVS and Subversion) 
   * Display status of files in icons when folder is opened
   * Refresh status
   * Update files
-  * Compare to previous version using FileMerge (Mac only)
-  * Revert to repository version (current directory only for CVS)
+  * Compare to previous version using FileMerge or other file comparing tool
+  * Revert to repository version
   * Commit changes (dialog for message entry)
   * Configurable commands for CVS and Subversion
   * Add to repository
