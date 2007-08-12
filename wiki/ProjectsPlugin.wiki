@@ -20,6 +20,7 @@ This plugin is still in early development, but is quite useful in its current im
   * Configurable list of file pattern filters
   * Rename by editing tree node text
   * Multiple file/directory selections
+  * Progress indicator for long operations
   * Automatically display file from currently selected editor tab in project view (if file exists in a project)
 
 The following are the currently implemented source control (CVS and Subversion) features and can be executed on either files or directories.  The status features are automatic.  Other features are accessed using the right-click menu.
@@ -50,7 +51,6 @@ The following list of features are planned for general file management and editi
 
   * Integrate copy/cut/paste into operating system functions for the same operations (utilizing Trash/Recycle Bin as available)
   * Drag-and-drop moves, additions, and deletions
-  * Throbbers for long operations
   * File type appropriate icons
 
 Other basic "features" that need to be implemented or just cleaned up are listing below.
