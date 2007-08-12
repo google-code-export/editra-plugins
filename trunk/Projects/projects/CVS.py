@@ -133,7 +133,7 @@ class CVS(SourceControl):
                 out = self.run(root, ['checkout','-p'] + files)
                 if out:
                     content = out.stdout.read() 
-                    if not content.startswith('cvs server'):
+                    if content.strip():
                         open(path, 'w').write(content)
                     self.logOutput(out)
     

@@ -577,6 +577,9 @@ class ProjectTree(wx.Panel):
             method(*update)
         # Update progress indicator
         self.GetParent().StopBusy()
+        
+    def endPaste(self, delayedresult):
+        self.GetParent().StopBusy()
 
     def diffToPrevious(self, node):
         """ Use opendiff to compare playpen version to repository version """
@@ -606,6 +609,7 @@ class ProjectTree(wx.Panel):
             os.remove('%s.previous' % path)
             
         t = threading.Thread(target=diff)
+        t.setDaemon(True)
         t.start()
 
     def addDirectoryWatcher(self, node):                
@@ -875,19 +879,23 @@ class ProjectTree(wx.Panel):
         dest = self.getSelectedPaths()[0]
         if not os.path.isdir(dest):
             dest = os.path.dirname(dest)
-        for file in self.clipboard.get('copied-files', []):
-            newpath = os.path.join(dest, os.path.basename(file))
-            if os.path.isdir(file):
-                shutil.copytree(file, newpath, True)
-            else:
-                shutil.copy2(file, newpath)
-        for file in self.clipboard.get('cut-files', []):
-            # Remove '.' and '\r' from file before copying
-            newpath = os.path.join(dest, os.path.basename(file)[1:-1])
-            if os.path.isdir(file):
-                shutil.copytree(file, newpath, True)
-            else:
-                shutil.copy2(file, newpath)
+            
+        def run(dest):
+            for file in self.clipboard.get('copied-files', []):
+                newpath = os.path.join(dest, os.path.basename(file))
+                if os.path.isdir(file):
+                    shutil.copytree(file, newpath, True)
+                else:
+                    shutil.copy2(file, newpath)
+            for file in self.clipboard.get('cut-files', []):
+                # Remove '.' and '\r' from file before copying
+                newpath = os.path.join(dest, os.path.basename(file)[1:-1])
+                if os.path.isdir(file):
+                    shutil.copytree(file, newpath, True)
+                else:
+                    shutil.copy2(file, newpath)
+
+        wx.lib.delayedresult.startWorker(self.endPaste, run, wargs=(dest,))
 
     def onPopupSCRefresh(self, event):
         self.scStatus(self.getSelectedNodes())
