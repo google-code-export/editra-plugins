@@ -52,7 +52,3 @@ The following list of features are planned for general file management and editi
   * Integrate copy/cut/paste into operating system functions for the same operations (utilizing Trash/Recycle Bin as available)
   * Drag-and-drop moves, additions, and deletions
   * File type appropriate icons
-
-Other basic "features" that need to be implemented or just cleaned up are listing below.
-
-  * Timeouts on source control commands
