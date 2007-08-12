@@ -43,7 +43,7 @@ The following source control features are planned for the future.  All source co
   * Configurable environment variables based on file/directory path
   * Revision history window with ability to compare playpen version to any previous version, as well being able to compare any two repository versions
   * Synchronizing drag-and-drop and general file management functions with source control functions (e.g., renames, deletes, etc.)
-  * Status indicators on directories
+  * Status indicators on directories (SVN)
 
 Other source control commands will also be added as appropriate.
 
@@ -56,4 +56,3 @@ The following list of features are planned for general file management and editi
 Other basic "features" that need to be implemented or just cleaned up are listing below.
 
   * Timeouts on source control commands
-  * Clean up threads on shutdown
