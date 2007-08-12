@@ -117,7 +117,6 @@ class ConfigPanel(wx.Panel):
     ID_DEFAULT_DIFF = wx.NewId()
     ID_DIFF_PATH = wx.NewId()
     ID_FILTERS = wx.NewId()
-    ID_NBSYNC = wx.NewId()
     ID_SVN_PATH = wx.NewId()
     ID_SYNC_NB = wx.NewId()
     def __init__(self, parent, data):
@@ -183,7 +182,7 @@ class ConfigPanel(wx.Panel):
 
         # Misc
         miscbsz = wx.StaticBoxSizer(wx.StaticBox(self, label=_("Miscellaneous")), wx.HORIZONTAL)
-        nbsync = wx.CheckBox(self, self.ID_NBSYNC, _("Syncronize with notebook"))
+        nbsync = wx.CheckBox(self, self.ID_SYNC_NB, _("Syncronize with notebook"))
         nbsync.SetValue(self._data.GetSyncWithNotebook())
         miscbsz.Add(nbsync, 1, wx.EXPAND)
         sizer.Add(miscbsz, (12, 1), (1, 7), wx.EXPAND)
