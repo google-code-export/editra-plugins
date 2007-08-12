@@ -16,25 +16,25 @@ class CVS(SourceControl):
         for path in paths:
             root, files = self.splitFiles(path, forcefiles=True)
             out = self.run(root, ['add'] + files)
-            print out.read()
+            self.logOutput(out)
         
     def checkout(self, paths):
         for path in paths:
             root, files = self.splitFiles(path, forcefiles=True)
             out = self.run(root, ['checkout'] + files)
-            print out.read()
+            self.logOutput(out)
             
     def commit(self, paths, message=''):
         for path in paths:
             root, files = self.splitFiles(path)
             out = self.run(root, ['commit', '-R', '-m', message] + files)
-            print out.read()
+            self.logOutput(out)
             
     def diff(self, paths):
         for path in paths:
             root, files = self.splitFiles(path)
             out = self.run(root, ['diff'] + files)
-            print out.read()
+            self.logOutput(out)
             
     def history(self, paths):
         history = []
@@ -44,8 +44,8 @@ class CVS(SourceControl):
             if out:
                 revision_re = re.compile(r'^revision\s+(\S+)')
                 dasl_re = re.compile(r'^date:\s+(\S+\s+\S+);\s+author:\s+(\S+);\s+state:\s+(\S+);')
-                for line in out:
-                    print line,
+                for line in out.stdout:
+                    self.log(line)
                     if line.startswith('----------'):
                         current = history.append({})
                         current['revision'] = revision_re.match(out.next()).group(1)
@@ -54,13 +54,14 @@ class CVS(SourceControl):
                         current['author'] = m.group(2)
                         current['state'] = m.group(3)
                         current['comment'] = out.next().strip()
+                self.logOutput(out)
         return history
         
     def remove(self, paths):
         for path in paths:
             root, files = self.splitFiles(path, forcefiles=True, topdown=False)           
             out = self.run(root, ['remove'] + files)
-            print out.read()
+            self.logOutput(out)
             
     def status(self, paths, recursive=False):
         status = {}
@@ -69,7 +70,7 @@ class CVS(SourceControl):
             rec = ['-R']
         for path in paths:
             root, files = self.splitFiles(path)
-            out = self.run(root, ['status', '-l'] + rec + files)
+            out = self.run(root, ['status', '-l'] + rec + files, mergeerr=True)
             if out:
                 status_re = re.compile(r'^File:\s+(\S+)\s+Status:\s+(.+?)\s*$')        
                 rep_re = re.compile(r'^\s*Working revision:\s*(\S+)')        
@@ -79,8 +80,8 @@ class CVS(SourceControl):
                 options_re = re.compile(r'^\s*Sticky Options:\s*(\S+)')
                 directory_re = re.compile(r'^cvs server: Examining (\S+)')
                 dir = ''        
-                for line in out:
-                    print line,
+                for line in out.stdout:
+                    self.log(line)
                     if status_re.match(line):
                         m = status_re.match(line)
                         key, value = m.group(1), m.group(2) 
@@ -116,13 +117,14 @@ class CVS(SourceControl):
                         current['options'] = options_re.match(line).group(1)
                         if current['options'] == '(none)':
                             del current['options']
+                self.logOutput(out)
         return status
 
     def update(self, paths):
         for path in paths:
             root, files = self.splitFiles(path)
             out = self.run(root, ['update','-R'] + files)
-            print out.read()
+            self.logOutput(out)
             
     def revert(self, paths):
         for path in paths:
@@ -130,9 +132,10 @@ class CVS(SourceControl):
             for file in files:
                 out = self.run(root, ['checkout','-p'] + files)
                 if out:
-                    content = out.read() 
+                    content = out.stdout.read() 
                     if not content.startswith('cvs server'):
                         open(path, 'w').write(content)
+                    self.logOutput(out)
     
     def fetch(self, paths):
         output = []
@@ -142,8 +145,9 @@ class CVS(SourceControl):
             root, files = self.splitFiles(path)
             out = self.run(root, ['checkout', '-p'] + files)
             if out:
-                content = out.read() 
-                if not content.startswith('cvs server'):
+                content = out.stdout.read() 
+                self.logOutput(out)
+                if content.strip():
                     output.append(content)
                 else:
                     output.append(None)

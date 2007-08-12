@@ -16,38 +16,39 @@ class SVN(SourceControl):
         for path in paths:
             root, files = self.splitFiles(path)
             out = self.run(root, ['add'] + files)
-            print out.read()
+            self.logOutput(out)
         
     def checkout(self, paths):
         for path in paths:
             root, files = self.splitFiles(path)
             out = self.run(root, ['checkout'] + files)
-            print out.read()
+            self.logOutput(out)
         
     def commit(self, paths, message=''):
         for path in paths:
             root, files = self.splitFiles(path)
             out = self.run(root, ['commit', '-m', message] + files)
-            print out.read()
+            self.logOutput(out)
                                    
     def diff(self, paths):
         for path in paths:
             root, files = self.splitFiles(path)
             out = self.run(root, ['diff'] + files)
+            self.closeProcess(out)
         
     def history(self, paths):
         history = []
         for path in paths:
             root, files = self.splitFiles(path)
             out = self.run(root, ['log'] + files)
-            print out.read()
+            self.logOutput(out)
         return history
         
     def remove(self, paths):
         for path in paths:
             root, files = self.splitFiles(path)
             out = self.run(root, ['remove'] + files)
-            print out.read()
+            self.logOutput(out)
         
     def status(self, paths, recursive=False):
         """ Get SVN status information from given file/directory """
@@ -61,25 +62,25 @@ class SVN(SourceControl):
             root, files = self.splitFiles(path)
             out = self.run(root, options + files)
             if out:
-                for line in out:
-                    print line,
+                for line in out.stdout:
+                    self.log(line)
                     name = line.strip().split()[-1]
                     try: status[name] = {'status':codes[line[0]]}
                     except KeyError: pass
-            #print status
+                self.logOutput(out)
         return status
 
     def update(self, paths):
         for path in paths:
             root, files = self.splitFiles(path)
             out = self.run(root, ['update'] + files)
-            print out.read()
+            self.logOutput(out)
             
     def revert(self, paths):
         for path in paths:
             root, files = self.splitFiles(path)
             out = self.run(root, ['revert','-R'] + files)
-            print out.read()
+            self.logOutput(out)
             
     def fetch(self, paths):
         output = []
@@ -89,7 +90,8 @@ class SVN(SourceControl):
             root, files = self.splitFiles(path)
             out = self.run(root, ['cat'] + files)
             if out:
-                output.append(out.read())
+                output.append(out.stdout.read())
+                self.logOutput(out)
             else:
                 output.append(None)
         return output

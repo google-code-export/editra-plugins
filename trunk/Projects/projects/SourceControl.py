@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-import os, fnmatch, subprocess
+import os, fnmatch, subprocess, sys
 
 class SourceControl(object):
 
@@ -10,6 +10,12 @@ class SourceControl(object):
 
     filters = []
     command = ''
+    
+    def __init__(self, console=None):
+        if console is None:
+            self.console = sys.stdout
+        else:
+            self.console = console
 
     def splitFiles(self, path, forcefiles=False, type=None, topdown=True):
         """ 
@@ -46,19 +52,21 @@ class SourceControl(object):
         """ Is the directory controlled by source control? """
         return False
 
-    def run(self, directory, options, env=None):
+    def run(self, directory, options, env=None, mergeerr=False):
         """ Run a CVS command in the given directory with given options """
-        print directory, self.command, ' '.join(options)
+        self.console.write('%s %s %s' % (directory, self.command, ' '.join(options)))
         #return
         try:
+            stderr = subprocess.PIPE
+            if mergeerr:
+                stderr = subprocess.STDOUT
             return subprocess.Popen([self.command] +
                                     self.addRootOption(directory, options),
                                     cwd=directory,
                                     stdin=subprocess.PIPE,
                                     stdout=subprocess.PIPE,
-                                    stderr=subprocess.STDOUT,
-                                    close_fds=True,
-                                    env=env).stdout
+                                    stderr=stderr,
+                                    env=env)
         except OSError: 
             pass
         
@@ -113,3 +121,40 @@ class SourceControl(object):
                 newpaths.append(os.path.basename(path))
         return self.filterPaths(newpaths)
 
+    def log(self, s):
+        if hasattr(self.console, 'write'):
+            self.console.write(s)
+        elif hasattr(self.console, 'WriteText'):
+            self.console.WriteText(s)
+
+    def logOutput(self, p, close=True):
+        """ Read and print stdout/stderr """
+        if not p:
+            return
+        write = None
+        if hasattr(self.console, 'write'):
+            write = self.console.write
+        elif hasattr(self.console, 'WriteText'):
+            write = self.console.WriteText
+        while write:
+            err = out = None
+            if p.stderr:
+                err = p.stderr.readline()
+                if err:
+                    write(err)
+            if p.stdout:
+                out = p.stdout.readline()
+                if out:
+                    write(out)
+                if not err and not out:
+                    return
+        if close:
+            self.closeProcess(p)
+
+    def closeProcess(self, p):
+        try: p.stdout.close()
+        except: pass
+        try: p.stderr.close()
+        except: pass
+        try: p.stdin.close()
+        except: pass
