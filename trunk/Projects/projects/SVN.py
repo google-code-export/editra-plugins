@@ -50,9 +50,8 @@ class SVN(SourceControl):
             out = self.run(root, ['remove'] + files)
             self.logOutput(out)
         
-    def status(self, paths, recursive=False):
+    def status(self, paths, recursive=False, status={}):
         """ Get SVN status information from given file/directory """
-        status = {}
         codes = {' ':'uptodate', 'A':'added', 'C':'conflict', 'D':'deleted',
                  'M':'modified'}
         options = ['status', '-v']
