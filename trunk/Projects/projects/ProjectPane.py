@@ -86,16 +86,20 @@ class ProjectTree(wx.Panel):
 
         try:
             import ed_glob
-            icons['folder'] = il.Add(wx.ArtProvider.GetBitmap(str(ed_glob.ID_FOLDER), wx.ART_MENU))
-            icons['folder-open'] = il.Add(wx.ArtProvider.GetBitmap(str(ed_glob.ID_OPEN), wx.ART_MENU))
+            folder = wx.ArtProvider.GetBitmap(str(ed_glob.ID_FOLDER), wx.ART_MENU)
+            folderopen = wx.ArtProvider.GetBitmap(str(ed_glob.ID_OPEN), wx.ART_MENU)
+            icons['folder'] = il.Add(folder)
+            icons['folder-open'] = il.Add(folderopen)
             menuicons['copy'] = wx.ArtProvider.GetBitmap(str(ed_glob.ID_COPY), wx.ART_MENU)
             menuicons['cut'] = wx.ArtProvider.GetBitmap(str(ed_glob.ID_CUT), wx.ART_MENU)
             menuicons['paste'] = wx.ArtProvider.GetBitmap(str(ed_glob.ID_PASTE), wx.ART_MENU)
             menuicons['delete'] = wx.ArtProvider.GetBitmap(str(ed_glob.ID_DELETE), wx.ART_MENU)
 
         except ImportError:
-            icons['folder'] = il.Add(wx.ArtProvider_GetBitmap(wx.ART_FOLDER, wx.ART_OTHER, isz))
-            icons['folder-open'] = il.Add(wx.ArtProvider_GetBitmap(wx.ART_FILE_OPEN, wx.ART_OTHER, isz))
+            folder = wx.ArtProvider_GetBitmap(wx.ART_FOLDER, wx.ART_OTHER, isz)
+            folderopen = wx.ArtProvider_GetBitmap(wx.ART_FOLDER_OPEN, wx.ART_OTHER, isz)
+            icons['folder'] = il.Add(folder)
+            icons['folder-open'] = il.Add(folderopen)
             menuicons['copy'] = wx.ArtProvider_GetBitmap(wx.ART_COPY, wx.ART_OTHER, isz)
             menuicons['cut'] = wx.ArtProvider_GetBitmap(wx.ART_CUT, wx.ART_OTHER, isz)
             menuicons['paste'] = wx.ArtProvider_GetBitmap(wx.ART_PASTE, wx.ART_OTHER, isz)
@@ -111,10 +115,21 @@ class ProjectTree(wx.Panel):
         menuicons['sc-revert'] = FileIcons.getScRevertBitmap()
 
         icons['file'] = il.Add(FileIcons.getFileBitmap())
-        icons['file-uptodate'] = il.Add(FileIcons.getFileUptodateBitmap())
-        icons['file-modified'] = il.Add(FileIcons.getFileModifiedBitmap())
-        icons['file-conflict'] = il.Add(FileIcons.getFileConflictBitmap())
-        icons['file-added'] = il.Add(FileIcons.getFileAddedBitmap())
+        
+        # Create badged icons
+        for badge in ['uptodate','modified','conflict','added']:
+            badgeicon = getattr(FileIcons, 'getBadge'+badge.title()+'Bitmap')().ConvertToImage()
+            badgeicon.Rescale(8,8)
+            for type in ['file','folder','folder-open']:
+                if type == 'file':
+                    icon = wx.MemoryDC(FileIcons.getFileBitmap())
+                elif type == 'folder':
+                    icon = wx.MemoryDC(folder)
+                else:
+                    icon = wx.MemoryDC(folderopen)
+                icon.DrawBitmap(wx.BitmapFromImage(badgeicon), 6, 7, True)
+                icons[type+'-'+badge] = il.Add(icon.GetAsBitmap())
+                
         icons['project-add'] = il.Add(FileIcons.getProjectAddBitmap())
         icons['project-delete'] = il.Add(FileIcons.getProjectDeleteBitmap())
 
@@ -591,18 +606,33 @@ class ProjectTree(wx.Panel):
                     if text not in status:
                         continue
                     if os.path.isdir(os.path.join(data['path'],text)):
+                        # Closed folder icon
+                        icon = self.icons.get('folder-'+status[text]['status'])
+                        if icon:                    
+                            updates.append((self.tree.SetItemImage, child, icon, wx.TreeItemIcon_Normal))
+                        # Open folder icon
+                        icon = self.icons.get('folder-open-'+status[text]['status'])
+                        if icon:                    
+                            updates.append((self.tree.SetItemImage, child, icon, wx.TreeItemIcon_Expanded))
+                        # Update children status if opened
                         if self.tree.IsExpanded(child):
                             self._updateStatus(child, self.tree.GetPyData(child), sc, updates)
                     else:
                         icon = self.icons.get('file-'+status[text]['status'])
                         if icon:
                             updates.append((self.tree.SetItemImage, child, icon, wx.TreeItemIcon_Normal))
+                        if 'tag' in status[text]:
+                            updates.append((self.tree.SetToolTip, wx.ToolTip('Tag: %s' % status[text]['tag'])))
             else:
                 text = self.tree.GetItemText(node)
                 if text in status:
                     icon = self.icons.get('file-'+status[text]['status'])
+                    icon = self.icons['file']
+                    
                     if icon:
                         updates.append((self.tree.SetItemImage, node, icon, wx.TreeItemIcon_Normal))
+                    if 'tag' in status[text]:
+                        updates.append((self.tree.SetToolTip, wx.ToolTip('Tag: %s' % status[text]['tag'])))
         except (OSError, IOError):
             pass
         return updates
