@@ -338,7 +338,7 @@ class ProjectTree(wx.Panel):
     def getChildren(self, parent):
         """
         Return a list of children for the given node
-        
+                
         Required Arguments:
         parent -- node to search
         
@@ -371,15 +371,33 @@ class ProjectTree(wx.Panel):
         for child in self.getChildren(parent):
             children[self.tree.GetItemText(child)] = child
             
+        updates = []
+            
         if children:
             for item in deleted:
                 if item in children:
-                    self.tree.Delete(children[item])
+                    self.tree.Delete(children[item])                    
+
+            # Update status on modified files
+            for item in modified:
+                if item not in children:
+                    continue
+                updates.append(children[item])
 
         for item in added:
             if os.path.basename(item) not in children:
-                self.addPath(parent, item)
+                updates.append(self.addPath(parent, item))
 
+        # Update tree icons
+        items = []
+        for item in updates:
+            try:
+                if not os.path.isdir(self.tree.GetPyData(item)['path']):
+                    items.append(item)
+            except ValueError: pass
+        if items:
+            self.scStatus(items)
+        
         self.tree.SortChildren(parent)
 
     def getSelectedNodes(self):
@@ -540,16 +558,21 @@ class ProjectTree(wx.Panel):
         command -- name of command type to run
         
         """
-        self.GetParent().StartBusy()
+        try: self.GetParent().StartBusy()
+        except: pass
         
         def run(nodes, command, **options):
             updates = []
             for node in nodes:
                 #print command
-                data = self.tree.GetPyData(node)
+                try: data = self.tree.GetPyData(node)
+                except: data = {}
                 if data.get('sclock', None):
                     continue
-                
+
+                if 'path' not in data:
+                    continue
+                                    
                 sc = self.getSCSystem(data['path'])
                 if sc is None:
                     continue
@@ -623,18 +646,16 @@ class ProjectTree(wx.Panel):
                         icon = self.icons.get('file-'+status[text]['status'])
                         if icon:
                             updates.append((self.tree.SetItemImage, child, icon, wx.TreeItemIcon_Normal))
-                        if 'tag' in status[text]:
-                            updates.append((self.tree.SetToolTip, wx.ToolTip('Tag: %s' % status[text]['tag'])))
+                        #if 'tag' in status[text]:
+                        #    updates.append((self.tree.SetToolTip, wx.ToolTip('Tag: %s' % status[text]['tag'])))
             else:
                 text = self.tree.GetItemText(node)
                 if text in status:
                     icon = self.icons.get('file-'+status[text]['status'])
-                    icon = self.icons['file']
-                    
                     if icon:
                         updates.append((self.tree.SetItemImage, node, icon, wx.TreeItemIcon_Normal))
-                    if 'tag' in status[text]:
-                        updates.append((self.tree.SetToolTip, wx.ToolTip('Tag: %s' % status[text]['tag'])))
+                    #if 'tag' in status[text]:
+                    #    updates.append((self.tree.SetToolTip, wx.ToolTip('Tag: %s' % status[text]['tag'])))
         except (OSError, IOError):
             pass
         return updates
@@ -644,7 +665,8 @@ class ProjectTree(wx.Panel):
         for update in delayedresult.get():
             update = list(update)
             method = update.pop(0)
-            method(*update)
+            try: method(*update)
+            except: pass
         # Update progress indicator
         self.GetParent().StopBusy()
         
@@ -753,6 +775,7 @@ class ProjectTree(wx.Panel):
         self.tree.SetPyData(node, {'path':os.path.join(parentpath,name)})
         self.tree.SetItemImage(node, self.icons['folder'], wx.TreeItemIcon_Normal)
         self.tree.SetItemImage(node, self.icons['folder-open'], wx.TreeItemIcon_Expanded)
+        #self.scStatus([node])
         return node
 
     def addFile(self, parent, name):
@@ -770,6 +793,7 @@ class ProjectTree(wx.Panel):
         node = self.tree.AppendItem(parent, name)
         self.tree.SetPyData(node, {'path':os.path.join(parentpath,name)})
         self.tree.SetItemImage(node, self.icons['file'], wx.TreeItemIcon_Normal)
+        #self.scStatus([node])
         return node
 
     def OnItemCollapsed(self, event):
