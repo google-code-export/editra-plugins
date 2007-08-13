@@ -25,7 +25,7 @@ This plugin is still in early development, but is quite useful in its current im
 
 The following are the currently implemented source control (CVS and Subversion) features and can be executed on either files or directories.  The status features are automatic.  Other features are accessed using the right-click menu.
 
-  * Display status of files in icons when folder is opened
+  * Automatically displays status of files and directories in icons when folder is opened
   * Refresh status
   * Update files
   * Compare to previous version using FileMerge or other file comparing tool
@@ -43,7 +43,6 @@ The following source control features are planned for the future.  All source co
   * Configurable environment variables based on file/directory path
   * Revision history window with ability to compare playpen version to any previous version, as well being able to compare any two repository versions
   * Synchronizing drag-and-drop and general file management functions with source control functions (e.g., renames, deletes, etc.)
-  * Status indicators on directories (SVN)
 
 Other source control commands will also be added as appropriate.
 
