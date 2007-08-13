@@ -54,7 +54,7 @@ class SourceControl(object):
 
     def run(self, directory, options, env=None, mergeerr=False):
         """ Run a CVS command in the given directory with given options """
-        self.console.write('%s %s %s' % (directory, self.command, ' '.join(options)))
+        self.console.write('%s %s %s\n' % (directory, self.command, ' '.join(options)))
         #return
         try:
             stderr = subprocess.PIPE
@@ -131,21 +131,27 @@ class SourceControl(object):
         """ Read and print stdout/stderr """
         if not p:
             return
-        write = None
+        flush = write = None
         if hasattr(self.console, 'write'):
             write = self.console.write
         elif hasattr(self.console, 'WriteText'):
             write = self.console.WriteText
+        if hasattr(self.console, 'flush'):
+            flush = self.console.flush
         while write:
             err = out = None
             if p.stderr:
                 err = p.stderr.readline()
                 if err:
                     write(err)
+                    if flush:
+                        flush()
             if p.stdout:
                 out = p.stdout.readline()
                 if out:
                     write(out)
+                    if flush:
+                        flush()
                 if not err and not out:
                     return
         if close:
