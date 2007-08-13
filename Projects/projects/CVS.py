@@ -125,16 +125,13 @@ class CVS(SourceControl):
             out = self.run(root, ['update','-R'] + files)
             self.logOutput(out)
             
-    def revert(self, paths):
+    def revert(self, paths): 
         for path in paths:
             root, files = self.splitFiles(path, forcefiles=True, type=self.TYPE_FILE)
             for file in files:
-                out = self.run(root, ['checkout','-p'] + files)
-                if out:
-                    content = out.stdout.read() 
-                    if content.strip():
-                        open(path, 'w').write(content)
-                    self.logOutput(out)
+                out = self.fetch([os.path.join(root,file)])[0]
+                if out is not None:
+                    open(os.path.join(root,file), 'w').write(out)
     
     def fetch(self, paths):
         output = []
@@ -142,6 +139,10 @@ class CVS(SourceControl):
             if os.path.isdir(path):
                 continue
             root, files = self.splitFiles(path)
+            for i, file in enumerate(files):
+                rep = open(os.path.join(root, 'CVS', 'Repository')).read().strip()
+                files[i] = os.path.join(rep, file)
+            
             out = self.run(root, ['checkout', '-p'] + files)
             if out:
                 content = out.stdout.read() 
