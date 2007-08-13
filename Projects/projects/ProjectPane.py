@@ -119,7 +119,7 @@ class ProjectTree(wx.Panel):
         # Create badged icons
         for badge in ['uptodate','modified','conflict','added']:
             badgeicon = getattr(FileIcons, 'getBadge'+badge.title()+'Bitmap')().ConvertToImage()
-            badgeicon.Rescale(8,8)
+            badgeicon.Rescale(11, 11, wx.IMAGE_QUALITY_HIGH)
             for type in ['file','folder','folder-open']:
                 if type == 'file':
                     icon = wx.MemoryDC(FileIcons.getFileBitmap())
@@ -127,8 +127,10 @@ class ProjectTree(wx.Panel):
                     icon = wx.MemoryDC(folder)
                 else:
                     icon = wx.MemoryDC(folderopen)
-                icon.DrawBitmap(wx.BitmapFromImage(badgeicon), 6, 7, True)
+                icon.SetBrush(wx.TRANSPARENT_BRUSH)
+                icon.DrawBitmap(wx.BitmapFromImage(badgeicon), 5, 5, True)
                 icons[type+'-'+badge] = il.Add(icon.GetAsBitmap())
+                icon.SelectObject(wx.NullBitmap)
                 
         icons['project-add'] = il.Add(FileIcons.getProjectAddBitmap())
         icons['project-delete'] = il.Add(FileIcons.getProjectDeleteBitmap())
