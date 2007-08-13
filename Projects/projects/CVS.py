@@ -58,12 +58,26 @@ class CVS(SourceControl):
         return history
         
     def remove(self, paths):
-        for path in paths:
-            root, files = self.splitFiles(path, forcefiles=True, topdown=False)           
-            out = self.run(root, ['remove'] + files)
+        """ Remove paths from source control """
+        # Reverse paths so that files get deleted first
+        for path in reversed(sorted(paths)):
+            root, files = self.splitFiles(path)           
+            out = self.run(root, ['remove', '-R', '-f'] + files)
             self.logOutput(out)
             
     def status(self, paths, recursive=False, status={}):
+        """
+        Get the status of all given paths
+        
+        Required Arguments:
+        paths -- list of paths to get the status of
+        
+        Keyword Arguments:
+        recursive -- boolean indicating if the status should be recursive
+        status -- dictionary containing status information.  This value
+            is also the return value
+        
+        """
         rec = []
         if recursive:
             rec = ['-R']
