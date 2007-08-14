@@ -8,11 +8,13 @@ class SVN(SourceControl):
     command = 'svn'
     
     def isControlled(self, path):
+        """ Is the directory controlled by SVN? """
         if not os.path.isdir(path):
             path = os.path.dirname(path)
         return os.path.isdir(os.path.join(path,'.svn'))
 
     def add(self, paths):
+        """ Add paths to the repository """
         for path in paths:
             root, files = self.splitFiles(path)
             out = self.run(root, ['add'] + files)
@@ -25,6 +27,7 @@ class SVN(SourceControl):
             self.logOutput(out)
         
     def commit(self, paths, message=''):
+        """ Commit paths to the repository """
         for path in paths:
             root, files = self.splitFiles(path)
             out = self.run(root, ['commit', '-m', message] + files)
@@ -45,6 +48,7 @@ class SVN(SourceControl):
         return history
         
     def remove(self, paths):
+        """ Recursively remove paths from repository """
         for path in paths:
             root, files = self.splitFiles(path)
             out = self.run(root, ['remove'] + files)
@@ -70,18 +74,23 @@ class SVN(SourceControl):
         return status
 
     def update(self, paths):
+        """ Recursively update paths """
         for path in paths:
             root, files = self.splitFiles(path)
             out = self.run(root, ['update'] + files)
             self.logOutput(out)
             
     def revert(self, paths):
+        """ Recursively revert paths to repository version """
         for path in paths:
             root, files = self.splitFiles(path)
+            if not files:
+                files = ['.']
             out = self.run(root, ['revert','-R'] + files)
             self.logOutput(out)
             
     def fetch(self, paths):
+        """ Fetch a copy of the paths' contents """
         output = []
         for path in paths:
             if os.path.isdir(path):
