@@ -871,12 +871,17 @@ class ProjectTree(wx.Panel):
             self.Bind(wx.EVT_MENU, self.onPopupDelete, id=self.popupIDDelete)
             self.Bind(wx.EVT_MENU, self.onPopupRename, id=self.popupIDRename)
 
+        paths = self.getSelectedPaths()
+
         # Do we have something to paste
-        pastable = not(not(self.clipboard.get('copied-files', self.clipboard.get('cut-files', None))))
+        pastable = False
+        if len(paths) == 1 and os.path.isdir(paths[0]):
+            pastable = not(not(self.clipboard.get('copied-files', 
+                               self.clipboard.get('cut-files', None))))
 
         # Is directory controlled by source control
         scenabled = False
-        for item in self.getSelectedPaths():
+        for item in paths:
             if self.getSCSystem(item):
                 scenabled = True
                 break
