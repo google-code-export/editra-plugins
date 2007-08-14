@@ -8,6 +8,7 @@ class CVS(SourceControl):
     command = 'cvs'
     
     def isControlled(self, path):
+        """ Is the path controlled by CVS? """
         if not os.path.isdir(path):
             path = os.path.dirname(path)
         return os.path.isdir(os.path.join(path,'CVS'))
@@ -58,7 +59,7 @@ class CVS(SourceControl):
         return history
         
     def remove(self, paths):
-        """ Remove paths from source control """
+        """ Recursively remove paths from source control """
         # Reverse paths so that files get deleted first
         for path in reversed(sorted(paths)):
             root, files = self.splitFiles(path)           
@@ -134,12 +135,14 @@ class CVS(SourceControl):
         return status
 
     def update(self, paths):
+        """ Recursively update paths """
         for path in paths:
             root, files = self.splitFiles(path)
             out = self.run(root, ['update','-R'] + files)
             self.logOutput(out)
             
     def revert(self, paths): 
+        """ Revert paths to repository versions """
         for path in paths:
             root, files = self.splitFiles(path, forcefiles=True, type=self.TYPE_FILE)
             for file in files:
@@ -148,6 +151,7 @@ class CVS(SourceControl):
                     open(os.path.join(root,file), 'w').write(out)
     
     def fetch(self, paths):
+        """ Fetch a copy of the paths from the repository """
         output = []
         for path in paths:
             if os.path.isdir(path):
