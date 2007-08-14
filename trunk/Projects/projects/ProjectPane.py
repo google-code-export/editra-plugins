@@ -107,6 +107,7 @@ class ProjectTree(wx.Panel):
 
         menuicons['blank'] = FileIcons.getBlankBitmap()
         menuicons['sc-commit'] = FileIcons.getScCommitBitmap()
+        menuicons['sc-add'] = FileIcons.getScAddBitmap()
         menuicons['sc-diff'] = FileIcons.getScDiffBitmap()
         menuicons['sc-history'] = FileIcons.getScHistoryBitmap()
         menuicons['sc-remove'] = FileIcons.getScRemoveBitmap()
@@ -632,18 +633,18 @@ class ProjectTree(wx.Panel):
                         continue
                     if os.path.isdir(os.path.join(data['path'],text)):
                         # Closed folder icon
-                        icon = self.icons.get('folder-'+status[text]['status'])
+                        icon = self.icons.get('folder-'+status[text].get('status',''))
                         if icon:                    
                             updates.append((self.tree.SetItemImage, child, icon, wx.TreeItemIcon_Normal))
                         # Open folder icon
-                        icon = self.icons.get('folder-open-'+status[text]['status'])
+                        icon = self.icons.get('folder-open-'+status[text].get('status',''))
                         if icon:                    
                             updates.append((self.tree.SetItemImage, child, icon, wx.TreeItemIcon_Expanded))
                         # Update children status if opened
                         if self.tree.IsExpanded(child):
                             self._updateStatus(child, self.tree.GetPyData(child), sc, updates)
                     else:
-                        icon = self.icons.get('file-'+status[text]['status'])
+                        icon = self.icons.get('file-'+status[text].get('status',''))
                         if icon:
                             updates.append((self.tree.SetItemImage, child, icon, wx.TreeItemIcon_Normal))
                         #if 'tag' in status[text]:
@@ -651,7 +652,7 @@ class ProjectTree(wx.Panel):
             else:
                 text = self.tree.GetItemText(node)
                 if text in status:
-                    icon = self.icons.get('file-'+status[text]['status'])
+                    icon = self.icons.get('file-'+status[text].get('status',''))
                     if icon:
                         updates.append((self.tree.SetItemImage, node, icon, wx.TreeItemIcon_Normal))
                     #if 'tag' in status[text]:
@@ -870,6 +871,16 @@ class ProjectTree(wx.Panel):
             self.Bind(wx.EVT_MENU, self.onPopupDelete, id=self.popupIDDelete)
             self.Bind(wx.EVT_MENU, self.onPopupRename, id=self.popupIDRename)
 
+        # Do we have something to paste
+        pastable = not(not(self.clipboard.get('copied-files', self.clipboard.get('cut-files', None))))
+
+        # Is directory controlled by source control
+        scenabled = False
+        for item in self.getSelectedPaths():
+            if self.getSCSystem(item):
+                scenabled = True
+                break
+
         # make a menu
         menu = wx.Menu()
         items = [
@@ -879,18 +890,18 @@ class ProjectTree(wx.Panel):
             (None, None, None, None),
             (self.popupIDCut, _('Cut'), 'cut', True),
             (self.popupIDCopy, _('Copy'), 'copy', True),
-            (self.popupIDPaste, _('Paste'), 'paste', True),
+            (self.popupIDPaste, _('Paste'), 'paste', pastable),
             (None, None, None, None),
             #(self.popupIDRename, _('Rename'), None, True),
             #(None, None, None, None),
-            (self.popupIDSCRefresh, _("Refresh status"), 'sc-status', True),
-            (self.popupIDSCUpdate, _("Update"), 'sc-update', True),
-            (self.popupIDSCDiff, _("Compare to previous version"), 'sc-diff', True),
+            (self.popupIDSCRefresh, _("Refresh status"), 'sc-status', scenabled),
+            (self.popupIDSCUpdate, _("Update"), 'sc-update', scenabled),
+            (self.popupIDSCDiff, _("Compare to previous version"), 'sc-diff', scenabled),
             (self.popupIDSCHistory, _("Show revision history"), 'sc-history', False),
-            (self.popupIDSCCommit, _("Commit changes"), 'sc-commit', True),
-            (self.popupIDSCRemove, _("Remove from repository"), 'sc-remove', True),
-            (self.popupIDSCRevert, _("Revert to repository version"), 'sc-revert', True),
-            (self.popupIDSCAdd, _("Add to repository"), None, True),
+            (self.popupIDSCCommit, _("Commit changes"), 'sc-commit', scenabled),
+            (self.popupIDSCRemove, _("Remove from repository"), 'sc-remove', scenabled),
+            (self.popupIDSCRevert, _("Revert to repository version"), 'sc-revert', scenabled),
+            (self.popupIDSCAdd, _("Add to repository"), 'sc-add', scenabled),
             (None, None, None, None),
             (self.popupIDDelete, _("Delete"), 'delete', True),
         ]
