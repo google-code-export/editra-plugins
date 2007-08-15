@@ -954,6 +954,8 @@ class ProjectTree(wx.Panel):
         """ Cut the files to the clipboard """
         self.clipboard['files'] = self.getSelectedPaths()
         self.clipboard['delete'] = True
+        for item in self.getSelectedNodes():
+            self.tree.SetItemTextColour(item, wx.Colour(192,192,192))
 
     def onPopupCopy(self, event):
         """ Copy the files to the clipboard """
