@@ -52,10 +52,13 @@ class SourceControl(object):
         """ Is the directory controlled by source control? """
         return False
 
-    def run(self, directory, options, env=None, mergeerr=False):
+    def run(self, directory, options, env={}, mergeerr=False):
         """ Run a CVS command in the given directory with given options """
         self.console.write('%s %s %s\n' % (directory, self.command, ' '.join(options)))
         #return
+        environ = os.environ.copy()
+        environ.update(env)
+        environ['CVS_RSH'] = 'ssh'
         try:
             stderr = subprocess.PIPE
             if mergeerr:
@@ -66,7 +69,7 @@ class SourceControl(object):
                                     stdin=subprocess.PIPE,
                                     stdout=subprocess.PIPE,
                                     stderr=stderr,
-                                    env=env)
+                                    env=environ)
         except OSError: 
             pass
         
