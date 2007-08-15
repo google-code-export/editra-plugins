@@ -962,6 +962,9 @@ class ProjectTree(wx.Panel):
         
     def onPopupPaste(self, event):
         """ Paste the files to the selected directory """
+        try: self.GetParent().StartBusy()
+        except: pass
+
         dest = self.getSelectedPaths()[0]
         if not os.path.isdir(dest):
             dest = os.path.dirname(dest)
@@ -970,7 +973,7 @@ class ProjectTree(wx.Panel):
             delete = self.clipboard['delete']
             self.clipboard['delete'] = False
             newclipboard = []
-            for file in self.clipboard['files']:
+            for i, file in enumerate(self.clipboard['files']):
                 try:
                     newpath = os.path.join(dest, os.path.basename(file))
                     newclipboard.append(newpath)
@@ -984,7 +987,22 @@ class ProjectTree(wx.Panel):
                 except (OSError, IOError), msg:
                     newclipboard.pop()
                     newclipboard.append(file)
-                    print 'Error pasting files/directorios:', msg
+                    # Do we have more files to copy/move?
+                    if i < (len(self.clipboard['files'])-1):
+                        rc = wx.MessageDialog(self, 
+                          _('The system returned the following message when ' \
+                            'attempting to move/copy %s: %s. ' \
+                            'Do you wish to continue?' % (path, msg)), 
+                          _('Error occurred when copying/moving files'), 
+                          style=wx.YES_NO|wx.YES_DEFAULT|wx.ICON_ERROR).ShowModal()
+                        if rc == wx.ID_NO:
+                            break 
+                    else:
+                        rc = wx.MessageDialog(self, 
+                          _('The system returned the following message when ' \
+                            'attempting to move/copy %s: %s.' % (path, msg)), 
+                          _('Error occurred when copying/moving files'), 
+                          style=wx.OK|wx.ICON_ERROR).ShowModal()
             self.clipboard['files'] = newclipboard
 
         wx.lib.delayedresult.startWorker(self.endPaste, run, wargs=(dest,))
@@ -1031,7 +1049,7 @@ class ProjectTree(wx.Panel):
                     shutil.rmtree(path, ignore_errors=True)
                 else:
                     try: os.remove(path)
-                    except OSError: pass
+                    except (OSError, IOError), msg: pass
                 # If node is a project, remove it
                 if node in projects:
                     self.tree.CollapseAllChildren(node)
