@@ -153,7 +153,7 @@ class ProjectTree(wx.Panel):
             value.filters = self.filters
                         
         self.watchers = {}
-        self.clipboard = {}
+        self.clipboard = {'files':[], 'delete':False}
         
         # Number of seconds to allow a source control command to run
         # before timing out
@@ -876,9 +876,8 @@ class ProjectTree(wx.Panel):
         # Do we have something to paste
         pastable = False
         if len(paths) == 1 and os.path.isdir(paths[0]):
-            pastable = not(not(self.clipboard.get('copied-files', 
-                               self.clipboard.get('cut-files', None))))
-
+            pastable = not(not(self.clipboard['files'])) 
+        
         # Is directory controlled by source control
         scenabled = False
         for item in paths:
@@ -951,38 +950,15 @@ class ProjectTree(wx.Panel):
         for node in self.getSelectedNodes():
             self.diffToPrevious(node)
             
-    def _clearClipboard(self):
-        """ Remove any previously cut files/directories """
-        cutfiles = self.clipboard.pop('cut-files', [])
-        self.clipboard.pop('copied-files', None)
- 
-        def delete():
-            # Delete previously cut files
-            for path in cutfiles:
-                if os.path.isdir(path):
-                    shutil.rmtree(path, ignore_errors=True)
-                else:
-                    try: os.remove(path)
-                    except OSError: pass
-       
-        if cutfiles:             
-            threading.Thread(target=delete).start()
-
     def onPopupCut(self, event):
         """ Cut the files to the clipboard """
-        self._clearClipboard()
-        # Cut selected files
-        self.clipboard['cut-files'] = []
-        for path in self.getSelectedPaths():
-            dirname, basename = os.path.split(path)
-            newpath = os.path.join(dirname, '.'+basename+'\r')
-            os.rename(path, newpath)
-            self.clipboard['cut-files'].append(newpath)
+        self.clipboard['files'] = self.getSelectedPaths()
+        self.clipboard['delete'] = True
 
     def onPopupCopy(self, event):
         """ Copy the files to the clipboard """
-        self._clearClipboard() 
-        self.clipboard['copied-files'] = self.getSelectedPaths()
+        self.clipboard['files'] = self.getSelectedPaths()
+        self.clipboard['delete'] = False
         
     def onPopupPaste(self, event):
         """ Paste the files to the selected directory """
@@ -991,19 +967,25 @@ class ProjectTree(wx.Panel):
             dest = os.path.dirname(dest)
             
         def run(dest):
-            for file in self.clipboard.get('copied-files', []):
-                newpath = os.path.join(dest, os.path.basename(file))
-                if os.path.isdir(file):
-                    shutil.copytree(file, newpath, True)
-                else:
-                    shutil.copy2(file, newpath)
-            for file in self.clipboard.get('cut-files', []):
-                # Remove '.' and '\r' from file before copying
-                newpath = os.path.join(dest, os.path.basename(file)[1:-1])
-                if os.path.isdir(file):
-                    shutil.copytree(file, newpath, True)
-                else:
-                    shutil.copy2(file, newpath)
+            delete = self.clipboard['delete']
+            self.clipboard['delete'] = False
+            newclipboard = []
+            for file in self.clipboard['files']:
+                try:
+                    newpath = os.path.join(dest, os.path.basename(file))
+                    newclipboard.append(newpath)
+                    if delete:
+                        shutil.move(file, newpath)
+                    else:
+                        if os.path.isdir(file):
+                            shutil.copytree(file, newpath, True)
+                        else:
+                            shutil.copy2(file, newpath)
+                except (OSError, IOError), msg:
+                    newclipboard.pop()
+                    newclipboard.append(file)
+                    print 'Error pasting files/directorios:', msg
+            self.clipboard['files'] = newclipboard
 
         wx.lib.delayedresult.startWorker(self.endPaste, run, wargs=(dest,))
 
@@ -1038,17 +1020,25 @@ class ProjectTree(wx.Panel):
         if rc not in [wx.ID_OK, wx.ID_YES]:
             return 
             
-        files = self.getSelectedPaths()
+        projects = self.getChildren(self.root)
+        selections = [(x, self.tree.GetPyData(x)['path']) 
+                      for x in self.getSelectedNodes()]
  
         def delete():
             # Delete previously cut files
-            for path in files:
+            for node, path in selections:
                 if os.path.isdir(path):
                     shutil.rmtree(path, ignore_errors=True)
                 else:
                     try: os.remove(path)
                     except OSError: pass
-        if files:             
+                # If node is a project, remove it
+                if node in projects:
+                    self.tree.CollapseAllChildren(node)
+                    self.tree.Delete(node)
+                    self.saveProjects()
+
+        if selections:             
             threading.Thread(target=delete).start()
 
     def OnActivate(self, event):
@@ -1126,8 +1116,6 @@ class ProjectTree(wx.Panel):
         # Kill all watcher threads
         for value in self.watchers.values():
             value.pop()
-        # Remove any temp files
-        self._clearClipboard()
     
             
 class ProjectPane(wx.Panel):
