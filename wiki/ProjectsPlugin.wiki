@@ -48,6 +48,6 @@ Other source control commands will also be added as appropriate.
 
 The following list of features are planned for general file management and editing.
 
-  * Integrate copy/cut/paste into operating system functions for the same operations (utilizing Trash/Recycle Bin as available)
+  * Utilize system's Trash / Recycle Bin
   * Drag-and-drop moves, additions, and deletions
   * File type appropriate icons
