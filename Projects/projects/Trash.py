@@ -69,6 +69,19 @@ def _ensurePermissions(path):
     if not os.access(path, os.W_OK):
         raise TrashPermissionsError, ('You do not have permissions to remove this path', path)
 
+def _winTrash(paths):
+    recycleexe = 'x:\path\to\app\recycle.exe'
+
+    # See if we can even do this
+    _ensurePermissions(path)
+
+    for path in paths:
+        try:
+            if not os.spawnv(os.P_WAIT, recycleexe, [recycleexe]+[path]):
+                raise TrashMoveError, ('Could not move path', path, '%s' % rc)
+        except (IOError, OSError), msg:
+            raise TrashMoveError, ('Could not move path', path, msg)
+
 def _osxTrash(paths):
     """ Move paths to OS X Trash can """
     trashdir = os.path.join(os.path.expanduser('~'),'.Trash')
