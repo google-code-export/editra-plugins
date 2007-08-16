@@ -70,10 +70,11 @@ def _ensurePermissions(path):
         raise TrashPermissionsError, ('You do not have permissions to remove this path', path)
 
 def _winTrash(paths):
-    recycleexe = 'x:\path\to\app\recycle.exe'
-
     # See if we can even do this
     _ensurePermissions(path)
+
+    from util import ResolvConfigDir
+    recycleexe = os.path.join(ResolvConfigDir('', sys_only=True)'recycle.exe')
 
     for path in paths:
         try:
