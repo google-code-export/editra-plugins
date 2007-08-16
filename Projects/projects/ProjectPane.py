@@ -154,6 +154,7 @@ class ProjectTree(wx.Panel):
                         
         self.watchers = {}
         self.clipboard = {'files':[], 'delete':False}
+        self.isClosing = False
         
         # Number of seconds to allow a source control command to run
         # before timing out
@@ -178,7 +179,8 @@ class ProjectTree(wx.Panel):
             import extern.flatnotebook as fnb
             #self.Bind(fnb.EVT_FLATNOTEBOOK_PAGE_CHANGING,
             mw = self.GetGrandParent()
-            mw.nb.Bind(fnb.EVT_FLATNOTEBOOK_PAGE_CHANGED, self.OnPageChanged)#, self.tree)
+            mw.nb.Bind(fnb.EVT_FLATNOTEBOOK_PAGE_CHANGED, self.OnPageChanged)
+            mw.nb.Bind(fnb.EVT_FLATNOTEBOOK_PAGE_CLOSING, self.OnPageClosing)
         except ImportError: pass
 
         #self.tree.Bind(wx.EVT_LEFT_DCLICK, self.OnLeftDClick)
@@ -372,6 +374,12 @@ class ProjectTree(wx.Panel):
         for child in self.getChildren(parent):
             children[self.tree.GetItemText(child)] = child
             
+        # Sort so that files in directories get operated on
+        # before the directories themselves
+        added = list(reversed(sorted(added)))
+        modified = list(reversed(sorted(modified)))
+        deleted = list(reversed(sorted(deleted)))
+
         updates = []
             
         if children:
@@ -411,7 +419,17 @@ class ProjectTree(wx.Panel):
             paths.append(self.tree.GetPyData(item)['path'])
         return paths
         
+    def OnPageClosing(self, evt):
+        self.isClosing = True
+        evt.Skip()
+        
     def OnPageChanged(self, evt):
+        # Don't sync when a tab was just closed
+        if self.isClosing:
+            self.isClosing = False
+            evt.Skip()
+            return
+            
         if not self.syncWithNotebook:
             evt.Skip()
             return
