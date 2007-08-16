@@ -74,7 +74,7 @@ def _winTrash(paths):
     _ensurePermissions(path)
 
     from util import ResolvConfigDir
-    recycleexe = os.path.join(ResolvConfigDir('', sys_only=True)'recycle.exe')
+    recycleexe = os.path.join(ResolvConfigDir('', sys_only=True), 'recycle.exe')
 
     for path in paths:
         try:
