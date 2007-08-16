@@ -58,7 +58,6 @@ class SourceControl(object):
         #return
         environ = os.environ.copy()
         environ.update(env)
-        environ['CVS_RSH'] = 'ssh'
         try:
             stderr = subprocess.PIPE
             if mergeerr:
