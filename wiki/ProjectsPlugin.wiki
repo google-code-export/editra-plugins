@@ -51,3 +51,5 @@ The following list of features are planned for general file management and editi
   * Utilize system's Trash / Recycle Bin
   * Drag-and-drop moves, additions, and deletions
   * File type appropriate icons
+  * Interactive filtering of tree (like in wxPython demo app)
+  * Run shell commands on files/directories
