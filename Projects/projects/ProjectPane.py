@@ -957,6 +957,10 @@ class ProjectTree(wx.Panel):
         return self.OnActivate(event)
         
     def onPopupExecuteCommand(self, event):
+#       ecd = ExecuteCommandDialog(self, wx.NewId())
+#       rc = ecd.ShowModal()
+#       return rc
+    
         ted = wx.TextEntryDialog(self, 
               _('The following command will be executed on all selected\n' \
                 'files and files contained in selected directories.'),
@@ -1117,16 +1121,26 @@ class ProjectTree(wx.Panel):
         the notebook.
 
         """
-        files = self.getSelectedPaths()
-        to_open = list()
-        for fname in files:
+        files = []
+        for fname in self.getSelectedPaths():
             try:
                 st = os.stat(fname)[0]
-                if stat.S_ISREG(st) or stat.S_ISDIR(st) or stat.S_ISLNK:
-                    to_open.append(fname)
-            except:
-                pass
-        wx.GetApp().GetMainWindow().nb.OnDrop(to_open)
+                if stat.S_ISREG(st) or stat.S_ISDIR(st) or stat.S_ISLNK(st):
+                    files.append(fname)
+            except (IOError, OSError): pass
+
+        nb = wx.GetApp().GetMainWindow().nb
+
+        for item in files:
+            if nb.HasFileOpen(item):
+                for page in xrange(nb.GetPageCount()):
+                  ctrl = nb.GetPage(page)
+                  if item == os.path.join(ctrl.dirname, ctrl.filename):
+                      nb.SetSelection(page)
+                      nb.ChangePage(page)
+                      break
+            else:
+                nb.OnDrop([item])
 
     def watchDirectory(self, path, func, data=None, flag=True, delay=2):
         """
@@ -1393,6 +1407,26 @@ class CommitDialog(wx.Dialog):
     def GetValue(self):
         """Return the value of the commit message"""
         return self._entry.GetValue()
+        
+        
+class ExecuteCommandDialog(wx.Dialog):
+
+    def __init__(self, parent, id):
+        wx.Dialog.__init__(self, parent, id, _('Execute command on files'))
+        
+        sizer = wx.BoxSizer(wx.VERTICAL)
+        
+        hsizer = wx.BoxSizer(wx.HORIZONTAL)
+        hsizer.Add(wx.StaticText(self, -1, 
+            _('Enter a command to be executed on all selected files ' \
+              'and files in selected directories.')))
+
+        sizer.Add(hsizer)
+        sizer.Add(self.CreateButtonSizer(wx.OK|wx.CANCEL), wx.ALIGN_RIGHT)
+
+        self.SetSizer(sizer)
+        self.SetAutoLayout(True)
+
 
 #-----------------------------------------------------------------------------#
 if __name__ == '__main__':
