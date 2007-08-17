@@ -385,7 +385,10 @@ class ProjectTree(wx.Panel):
         if children:
             for item in deleted:
                 if item in children:
-                    self.tree.Delete(children[item])                    
+                    node = children[item]
+                    if os.path.isdir(self.tree.GetPyData(node)['path']):
+                        self.tree.Collapse(node)
+                    self.tree.Delete(node)                    
 
             # Update status on modified files
             for item in modified:
@@ -767,7 +770,10 @@ class ProjectTree(wx.Panel):
         for pattern in self.filters:
             if fnmatch.fnmatchcase(name, pattern):
                 return
-        parentpath = self.tree.GetPyData(parent)['path']
+        data = self.tree.GetPyData(parent)
+        if data is None:
+            return
+        parentpath = data['path']
         itempath = os.path.join(parentpath,name)
         if os.path.isfile(itempath):
             return self.addFile(parent, name)
@@ -794,7 +800,6 @@ class ProjectTree(wx.Panel):
         self.tree.SetPyData(node, {'path':os.path.join(parentpath,name)})
         self.tree.SetItemImage(node, self.icons['folder'], wx.TreeItemIcon_Normal)
         self.tree.SetItemImage(node, self.icons['folder-open'], wx.TreeItemIcon_Expanded)
-        #self.scStatus([node])
         return node
 
     def addFile(self, parent, name):
@@ -812,7 +817,6 @@ class ProjectTree(wx.Panel):
         node = self.tree.AppendItem(parent, name)
         self.tree.SetPyData(node, {'path':os.path.join(parentpath,name)})
         self.tree.SetItemImage(node, self.icons['file'], wx.TreeItemIcon_Normal)
-        #self.scStatus([node])
         return node
 
     def OnItemCollapsed(self, event):
@@ -871,6 +875,7 @@ class ProjectTree(wx.Panel):
             self.popupIDSCAdd = wx.NewId()
             self.popupIDDelete = wx.NewId()
             self.popupIDRename = wx.NewId()
+            self.popupIDExecuteCommand = wx.NewId()
 
             self.Bind(wx.EVT_MENU, self.onPopupEdit, id=self.popupIDEdit)
             self.Bind(wx.EVT_MENU, self.onPopupOpen, id=self.popupIDOpen)
@@ -888,6 +893,7 @@ class ProjectTree(wx.Panel):
             self.Bind(wx.EVT_MENU, self.onPopupSCAdd, id=self.popupIDSCAdd)
             self.Bind(wx.EVT_MENU, self.onPopupDelete, id=self.popupIDDelete)
             self.Bind(wx.EVT_MENU, self.onPopupRename, id=self.popupIDRename)
+            self.Bind(wx.EVT_MENU, self.onPopupExecuteCommand, id=self.popupIDExecuteCommand)
 
         paths = self.getSelectedPaths()
 
@@ -908,11 +914,13 @@ class ProjectTree(wx.Panel):
         items = [
             (self.popupIDEdit, _('Edit'), None, True),
             (self.popupIDOpen, _('Open'), None, True),
-            (self.popupIDReveal, _("Reveal in %s" % FILEMAN), None, True),
+            (self.popupIDReveal, _('Open enclosing folder'), None, True),
             (None, None, None, None),
             (self.popupIDCut, _('Cut'), 'cut', True),
             (self.popupIDCopy, _('Copy'), 'copy', True),
             (self.popupIDPaste, _('Paste'), 'paste', pastable),
+            (None, None, None, None),
+            (self.popupIDExecuteCommand, _('Execute command...'), None, True),            
             (None, None, None, None),
             #(self.popupIDRename, _('Rename'), None, True),
             #(None, None, None, None),
@@ -925,7 +933,7 @@ class ProjectTree(wx.Panel):
             (self.popupIDSCRevert, _("Revert to repository version"), 'sc-revert', scenabled),
             (self.popupIDSCAdd, _("Add to repository"), 'sc-add', scenabled),
             (None, None, None, None),
-            (self.popupIDDelete, _("Delete"), 'delete', True),
+            (self.popupIDDelete, _("Move to Trash"), 'delete', True),
         ]
         for id, title, icon, enabled in items:
             if id is None:
@@ -947,6 +955,29 @@ class ProjectTree(wx.Panel):
     def onPopupEdit(self, event):
         """ Open the current file in the editor """
         return self.OnActivate(event)
+        
+    def onPopupExecuteCommand(self, event):
+        ted = wx.TextEntryDialog(self, 
+              _('The following command will be executed on all selected\n' \
+                'files and files contained in selected directories.'),
+              _('Enter command to execute on all files'))
+
+        if ted.ShowModal() != wx.ID_OK:
+            return
+
+        command = ted.GetValue().strip()
+        if not command:
+            return
+
+        for item in self.getSelectedPaths():
+            if os.path.isdir(item):
+                for root, dirs, files in os.walk(item):
+                    for f in files:
+                        #print command, os.path.join(root,f)
+                        os.system('%s "%s"' % (command, os.path.join(root,f))) 
+            else:
+                #print command, item
+                os.system('%s "%s"' % (command, item)) 
 
     def onPopupOpen(self, event):
         """ Open the current file using Finder """
@@ -1072,7 +1103,7 @@ class ProjectTree(wx.Panel):
                     except (OSError, IOError), msg: pass
                 # If node is a project, remove it
                 if node in projects:
-                    self.tree.CollapseAllChildren(node)
+                    self.tree.Collapse(node)
                     self.tree.Delete(node)
                     self.saveProjects()
 
