@@ -9,6 +9,11 @@ This plugin should act as a terminal emulator and provide to the user/system's s
 
 This is a beginning of a list of desired features for this plugin.
 
-  * Integrated with Editra's docking windows and perspectives system
-  * Shells opened as notebook pages to allow for multiple shells to be open at once
-
+  * Interaction with system shell should be able to be killed in the event of an infinite loop in a shell command, as to not bring the editor down with it.
+  * Most input should simply be sent to the shell with results echoed back to the plugins ui, however some commands such as 'clear' will likely need to be handled by the ui.
+  * Modeled after the Shelf Plugin Interface and allow multiple instances.
+  * Customizable appearance, font, colors, ect...
+  * Configurable to use different shells where appropriate (i.e Bash might be default but if user has and wants to use Korn Shell instead it should be allowable.)
+  * Prompt in UI should match what is expected in the actual system shell
+  * Configurable line buffering for ui display
+  * Applications launched from the shell should be killable without killing the plugin or Editra.
