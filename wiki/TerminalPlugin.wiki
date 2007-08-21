@@ -10,7 +10,7 @@ This plugin should act as a terminal emulator and provide to the user/system's s
 This is a beginning of a list of desired features for this plugin.
 
   * Interaction with system shell should be able to be killed in the event of an infinite loop in a shell command, as to not bring the editor down with it.
-  * Most input should simply be sent to the shell with results echoed back to the plugins ui, however some commands such as 'clear' will likely need to be handled by the ui.
+  * Most input should simply be sent to the shell with results echoed back to the plugins ui, however some commands such as 'clear' will likely need to be handled by the ui. Besides the few special cases the ui and the code used to communicate with the shell should if at all possible not need to know anything about the shell or how to handle commands. This will make it easily portable to use what ever system shell may be lying underneath.
   * Modeled after the Shelf Plugin Interface and allow multiple instances.
   * Customizable appearance, font, colors, ect...
   * Configurable to use different shells where appropriate (i.e Bash might be default but if user has and wants to use Korn Shell instead it should be allowable.)
