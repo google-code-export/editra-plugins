@@ -9,6 +9,9 @@ class CVS(SourceControl):
     
     def isControlled(self, path):
         """ Is the path controlled by CVS? """
+        if os.path.isdir(path):
+            if os.path.isfile(os.path.join(path,'CVS','Entries')):
+                return True
         path, basename = os.path.split(path)
         cvsdir = os.path.join(path,'CVS')
         if os.path.isdir(cvsdir):
