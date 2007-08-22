@@ -25,7 +25,7 @@ if platform.system().lower() == 'windows':
     import Recycle
     env = os.environ
     recycleexe = os.path.join(env.get('TEMP', env.get('TMP', env.get('windir','.'))),'recycle.exe')
-    exe = open(recycleexe)
+    exe = open(recycleexe,'w')
     exe.write(Recycle.recycle)
     exe.close()
     
