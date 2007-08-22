@@ -12,6 +12,7 @@ import FileIcons
 import tempfile
 import subprocess
 import shutil
+import Trash
 import wx.lib.delayedresult 
 try: 
     import util         # from Editra.src
@@ -29,14 +30,17 @@ if wx.Platform != '__WXMAC__':
 if wx.Platform == '__WXMAC__': # MAC
     FILEMAN = 'Finder'
     FILEMAN_CMD = 'open'
+    TRASH = 'Trash'
 elif wx.Platform == '__WXMSW__': # Windows
     FILEMAN = 'Explorer'
     FILEMAN_CMD = 'explorer'
+    TRASH = 'Recycle Bin'
 else: # Other/Linux
     # TODO how to check what desktop environment is in use
     # this will work for Gnome but not KDE
     FILEMAN = 'Nautilus'
     FILEMAN_CMD = 'nautilus'
+    TRASH = 'Trash'
     #FILEMAN = 'Konqueror'
     #FILEMAN_CMD = 'konqueror'
     
@@ -596,7 +600,12 @@ class ProjectTree(wx.Panel):
                                     
                 sc = self.getSCSystem(data['path'])
                 if sc is None:
-                    continue
+                    if os.path.isdir(data['path']):
+                        sc = self.getSCSystem(os.path.dirname(data['path']))
+                        if sc is None:
+                            continue
+                    else:
+                        continue
                 
                 # Lock node while command is running    
                 data['sclock'] = True 
@@ -930,9 +939,9 @@ class ProjectTree(wx.Panel):
             (self.popupIDSCCommit, _("Commit changes"), 'sc-commit', scenabled),
             (self.popupIDSCRemove, _("Remove from repository"), 'sc-remove', scenabled),
             (self.popupIDSCRevert, _("Revert to repository version"), 'sc-revert', scenabled),
-            (self.popupIDSCAdd, _("Add to repository"), 'sc-add', scenabled),
+            (self.popupIDSCAdd, _("Add to repository"), 'sc-add', not(scenabled)),
             (None, None, None, None),
-            (self.popupIDDelete, _("Move to Trash"), 'delete', True),
+            (self.popupIDDelete, _("Move to "+TRASH), 'delete', True),
         ]
         for id, title, icon, enabled in items:
             if id is None:
@@ -1083,15 +1092,7 @@ class ProjectTree(wx.Panel):
         self.scAdd(self.getSelectedNodes())
 
     def onPopupDelete(self, event):
-        """ Delete selected files/directories """
-        rc = wx.MessageDialog(self, 
-                              _('This operation will permanently delete selected ' \
-                              'files and directories.  Are you sure you want to continue?'), 
-                              _('Permanently delete files and directories?'), 
-                              style=wx.YES_NO|wx.NO_DEFAULT|wx.ICON_EXCLAMATION).ShowModal()
-        if rc not in [wx.ID_OK, wx.ID_YES]:
-            return 
-            
+        """ Delete selected files/directories """            
         projects = self.getChildren(self.root)
         selections = [(x, self.tree.GetPyData(x)['path']) 
                       for x in self.getSelectedNodes()]
@@ -1099,11 +1100,11 @@ class ProjectTree(wx.Panel):
         def delete():
             # Delete previously cut files
             for node, path in selections:
-                if os.path.isdir(path):
-                    shutil.rmtree(path, ignore_errors=True)
-                else:
-                    try: os.remove(path)
-                    except (OSError, IOError), msg: pass
+                try: 
+                    Trash.moveToTrash(path)
+                except Exception, msg:
+                    print msg
+                    continue
                 # If node is a project, remove it
                 if node in projects:
                     self.tree.Collapse(node)
