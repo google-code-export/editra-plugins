@@ -21,6 +21,14 @@ OSX = WIN = False
 # Determine platform, if it's not one of these assume UNIX/Linux
 if platform.system().lower() == 'windows':
     WIN = True
+    # Install recycle.exe binary
+    import Recycle
+    env = os.environ
+    recycleexe = os.path.join(env.get('TEMP', env.get('TMP', env.get('windir','.'))),'recycle.exe')
+    exe = open(recycleexe)
+    exe.write(Recycle.recycle)
+    exe.close()
+    
 elif platform.mac_ver()[0]:
     OSX = True
 
@@ -72,9 +80,6 @@ def _ensurePermissions(path):
 def _winTrash(paths):
     # See if we can even do this
     _ensurePermissions(path)
-
-    from util import ResolvConfigDir
-    recycleexe = os.path.join(ResolvConfigDir('', sys_only=True), 'recycle.exe')
 
     for path in paths:
         try:
