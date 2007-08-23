@@ -128,11 +128,11 @@ class ProjectTree(wx.Panel):
             for type in ['file','folder','folder-open']:
                 icon = wx.MemoryDC()
                 if type == 'file':
-                    icon = icon.SelectObject(FileIcons.getFileBitmap())
+                    icon.SelectObject(FileIcons.getFileBitmap())
                 elif type == 'folder':
-                    icon = icon.SelectObject(folder)
+                    icon.SelectObject(folder)
                 else:
-                    icon = icon.SelectObject(folderopen)
+                    icon.SelectObject(folderopen)
                 icon.SetBrush(wx.TRANSPARENT_BRUSH)
                 icon.DrawBitmap(wx.BitmapFromImage(badgeicon), 5, 5, True)
                 tbmp = icon.GetAsBitmap()
