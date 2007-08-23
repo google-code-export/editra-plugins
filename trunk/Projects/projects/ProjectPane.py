@@ -134,8 +134,9 @@ class ProjectTree(wx.Panel):
                     icon = wx.MemoryDC(folderopen)
                 icon.SetBrush(wx.TRANSPARENT_BRUSH)
                 icon.DrawBitmap(wx.BitmapFromImage(badgeicon), 5, 5, True)
-                icons[type+'-'+badge] = il.Add(icon.GetAsBitmap())
+                tbmp = icon.GetAsBitmap()
                 icon.SelectObject(wx.NullBitmap)
+                icons[type+'-'+badge] = il.Add(tbmp)
                 
         icons['project-add'] = il.Add(FileIcons.getProjectAddBitmap())
         icons['project-delete'] = il.Add(FileIcons.getProjectDeleteBitmap())
