@@ -59,7 +59,8 @@ def moveToTrash(paths):
        paths = [paths] 
        
     # Get absolute paths and make sure files exist
-    paths = [os.path.abspath(x) for x in paths if os.path.exists(x)]
+    paths = [os.path.abspath(x) for x in paths 
+                                if os.path.exists(os.path.abspath(x))]
     
     # Run the correct trash function
     if OSX:
@@ -84,7 +85,8 @@ def _winTrash(paths):
         # See if we can even do this
         _ensurePermissions(path)
         try:
-            if not os.spawnv(os.P_WAIT, recycleexe, [os.path.basename(recycleexe)]+[path]):
+            rc = os.spawnv(os.P_WAIT, recycleexe, [os.path.basename(recycleexe)]+['"%s"'%path])
+            if rc:
                 raise TrashMoveError, ('Could not move path', path, '%s' % rc)
         except (IOError, OSError), msg:
             raise TrashMoveError, ('Could not move path', path, msg)
@@ -164,3 +166,9 @@ def _unixTrash(paths):
             shutil.move(path, newpath)
         except (OSError, IOError), msg:
             raise TrashMoveError, ('Could not move path', path, msg)
+            
+if __name__ == '__main__':
+    import sys
+    args = sys.argv[1:]
+    if args:
+        moveToTrash(args)
