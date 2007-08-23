@@ -431,14 +431,14 @@ class ProjectTree(wx.Panel):
         evt.Skip()
         
     def OnPageChanged(self, evt):
+        evt.Skip()
+
+        if not self.syncWithNotebook:
+            return
+
         # Don't sync when a tab was just closed
         if self.isClosing:
             self.isClosing = False
-            evt.Skip()
-            return
-            
-        if not self.syncWithNotebook:
-            evt.Skip()
             return
         
         notebook = evt.GetEventObject()
@@ -475,9 +475,6 @@ class ProjectTree(wx.Panel):
                 self.tree.SelectItem(folder)
                 break
 
-        # Very important this must be called in the handler at some point
-        evt.Skip()
-    
     def OnRightDown(self, event):
         pt = event.GetPosition()
         item, flags = self.tree.HitTest(pt)
