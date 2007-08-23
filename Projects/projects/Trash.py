@@ -28,6 +28,8 @@ if platform.system().lower() == 'windows':
     exe = open(recycleexe,'wb')
     exe.write(Recycle.recycle)
     exe.close()
+    del exe
+    del Recycle
     
 elif platform.mac_ver()[0]:
     OSX = True
@@ -78,12 +80,11 @@ def _ensurePermissions(path):
         raise TrashPermissionsError, ('You do not have permissions to remove this path', path)
 
 def _winTrash(paths):
-    # See if we can even do this
-    _ensurePermissions(path)
-
     for path in paths:
+       # See if we can even do this
+       _ensurePermissions(path)
         try:
-            if not os.spawnv(os.P_WAIT, recycleexe, [recycleexe]+[path]):
+            if not os.spawnv(os.P_WAIT, recycleexe, [os.path.basename(recycleexe)]+[path]):
                 raise TrashMoveError, ('Could not move path', path, '%s' % rc)
         except (IOError, OSError), msg:
             raise TrashMoveError, ('Could not move path', path, msg)
