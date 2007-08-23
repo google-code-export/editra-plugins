@@ -81,8 +81,8 @@ def _ensurePermissions(path):
 
 def _winTrash(paths):
     for path in paths:
-       # See if we can even do this
-       _ensurePermissions(path)
+        # See if we can even do this
+        _ensurePermissions(path)
         try:
             if not os.spawnv(os.P_WAIT, recycleexe, [os.path.basename(recycleexe)]+[path]):
                 raise TrashMoveError, ('Could not move path', path, '%s' % rc)
