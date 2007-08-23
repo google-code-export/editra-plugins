@@ -1390,6 +1390,8 @@ class CommitDialog(wx.Dialog):
         self._commit.SetDefault()
         self._cancel = wx.Button(self, wx.ID_CANCEL)
         self._entry = wx.TextCtrl(self, style=wx.TE_MULTILINE|wx.NO_BORDER)
+        if wx.Platform == '__WXMAC__':
+            self._entry.MacCheckSpelling(True)
         self._entry.SetValue(default)
         self._entry.SetFocus()
         
