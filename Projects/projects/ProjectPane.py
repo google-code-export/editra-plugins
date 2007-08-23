@@ -134,9 +134,8 @@ class ProjectTree(wx.Panel):
                     icon = wx.MemoryDC(folderopen)
                 icon.SetBrush(wx.TRANSPARENT_BRUSH)
                 icon.DrawBitmap(wx.BitmapFromImage(badgeicon), 5, 5, True)
-                tbmp = icon.GetAsBitmap()
+                icons[type+'-'+badge] = il.Add(icon.GetAsBitmap())
                 icon.SelectObject(wx.NullBitmap)
-                icons[type+'-'+badge] = il.Add(tbmp)
                 
         icons['project-add'] = il.Add(FileIcons.getProjectAddBitmap())
         icons['project-delete'] = il.Add(FileIcons.getProjectDeleteBitmap())
@@ -433,15 +432,13 @@ class ProjectTree(wx.Panel):
         
     def OnPageChanged(self, evt):
         # Don't sync when a tab was just closed
-
-        # make sure event makes it to actual handler in notebook
-        evt.Skip()
-
         if self.isClosing:
             self.isClosing = False
+            evt.Skip()
             return
             
         if not self.syncWithNotebook:
+            evt.Skip()
             return
         
         notebook = evt.GetEventObject()
@@ -477,6 +474,9 @@ class ProjectTree(wx.Panel):
                 self.tree.UnselectAll()
                 self.tree.SelectItem(folder)
                 break
+
+        # Very important this must be called in the handler at some point
+        evt.Skip()
     
     def OnRightDown(self, event):
         pt = event.GetPosition()
@@ -1104,7 +1104,13 @@ class ProjectTree(wx.Panel):
                 try: 
                     Trash.moveToTrash(path)
                 except Exception, msg:
-                    print msg
+                    rc = wx.MessageDialog(self, 
+                      _('An error occurred when attempting to remove ') + msg[1] + 
+                      _('. Do you wish to continue?'), 
+                      _('Error occurred when removing files'), 
+                      style=wx.YES_NO|wx.YES_DEFAULT|wx.ICON_ERROR).ShowModal()
+                    if rc == wx.ID_NO:
+                        break 
                     continue
                 # If node is a project, remove it
                 if node in projects:
