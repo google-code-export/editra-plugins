@@ -8,11 +8,23 @@ class SVN(SourceControl):
     command = 'svn'
     
     def isControlled(self, path):
-        """ Is the directory controlled by SVN? """
-        if not os.path.isdir(path):
-            path = os.path.dirname(path)
-        return os.path.isdir(os.path.join(path,'.svn'))
-
+        """ Is the path controlled by CVS? """
+        if os.path.isdir(path):
+            if os.path.isfile(os.path.join(path,'.svn','all-wcprops')):
+                return True
+        path, basename = os.path.split(path)
+        svndir = os.path.join(path,'.svn')
+        if os.path.isdir(svndir):
+            try:
+                for line in open(os.path.join(svndir,'all-wcprops')):
+                    if line.startswith('/'):
+                        filename = line.split('/')[-1].strip()
+                        if filename == basename:
+                            return True
+            except (IOError, OSError):
+                pass
+        return False
+        
     def add(self, paths):
         """ Add paths to the repository """
         for path in paths:
