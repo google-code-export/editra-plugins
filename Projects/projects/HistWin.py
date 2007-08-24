@@ -1,3 +1,4 @@
+#!/usr/bin/env python
 ############################################################################
 #    Copyright (C) 2007 Cody Precord                                       #
 #    cprecord@editra.org                                                   #
@@ -40,17 +41,18 @@ __revision__ = "$Revision$"
 #--------------------------------------------------------------------------#
 # Dependancies
 import wx
+import sys
 import wx.lib.mixins.listctrl as listmix
 
 _ = wx.GetTranslation
 #--------------------------------------------------------------------------#
 class HistoryWindow(wx.Frame):
     """Window for displaying the Revision History of a file"""
-    def __init__(self, parent, title):
+    def __init__(self, parent, title, data):
         wx.Frame.__init__(self, parent, title=title, style=wx.DEFAULT_DIALOG_STYLE)
         
         # Attributes
-        self._ctrls = HistoryPane(self)
+        self._ctrls = HistoryPane(self, data)
 
         # Layout
         self._DoLayout()
@@ -72,13 +74,13 @@ class HistoryPane(wx.Panel):
     """Panel for housing the the history window controls"""
     BTN_LBL1 = _("Compare to Previous")
     BTN_LBL2 = _("Compare Selected Versions")
-    def __init__(self, parent):
+    def __init__(self, parent, data):
         wx.Panel.__init__(self, parent)
         
         # Attributes
         self._search = LogSearch(self)
         self._split = wx.SplitterWindow(self, style=wx.SP_3DSASH | wx.SP_LIVE_UPDATE)
-        self._list = HistList(self._split)
+        self._list = HistList(self._split, data)
         self._txt = wx.TextCtrl(self._split, style=wx.TE_MULTILINE | wx.TE_READONLY)
         self._btn = wx.Button(self, label=_(self.BTN_LBL1))
 
@@ -127,7 +129,7 @@ class HistList(wx.ListCtrl,
     DATE_COL = 1
     AUTH_COL = 2
     COM_COL = 3
-    def __init__(self, parent):
+    def __init__(self, parent, data):
         wx.ListCtrl.__init__(self, parent,
                              style=wx.LC_REPORT | wx.LC_SORT_ASCENDING | \
                                    wx.LC_VRULES)
@@ -137,12 +139,19 @@ class HistList(wx.ListCtrl,
         self.InsertColumn(self.DATE_COL, _("Date"))
         self.InsertColumn(self.AUTH_COL, _("Author"))
         self.InsertColumn(self.COM_COL, _("Log Message"))
+        self.populate(data)
 #         self.SetColumnWidth(self.REV_COL, wx.LIST_AUTOSIZE)
 #         self.SetColumnWidth(self.AUTH_COL, wx.LIST_AUTOSIZE)
 #         self.SetColumnWidth(self.DATE_COL, wx.LIST_AUTOSIZE)
 #         self.SetColumnWidth(self.COM_COL, wx.LIST_AUTOSIZE)
         self.SendSizeEvent()
 
+    def populate(self, data):
+        for item in data:
+            index = self.InsertStringItem(sys.maxint, item['revision'])
+            self.SetStringItem(index, 1, item['date'])
+            self.SetStringItem(index, 2, item['author'])
+            self.SetStringItem(index, 3, item['log'])
 
 #-----------------------------------------------------------------------------#
 
@@ -186,8 +195,11 @@ class LogSearch(wx.SearchCtrl):
 #-----------------------------------------------------------------------------#
 
 if __name__ == '__main__':
+    data = [
+        {'revision':'a', 'date':'2007/17/01', 'author':'Kevin Smith', 'log':'Just Testing'},
+    ]
     app = wx.PySimpleApp(False)
-    win = HistoryWindow(None, "History Window Test")
+    win = HistoryWindow(None, "History Window Test", data)
     win.Show()
     app.MainLoop()
 

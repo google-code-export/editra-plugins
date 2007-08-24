@@ -51,12 +51,30 @@ class SVN(SourceControl):
             out = self.run(root, ['diff'] + files)
             self.closeProcess(out)
         
-    def history(self, paths):
-        history = []
+    def history(self, paths, history=[]):
         for path in paths:
             root, files = self.splitFiles(path)
-            out = self.run(root, ['log'] + files)
-            self.logOutput(out)
+            for file in files:
+                out = self.run(root, ['log', file])
+                if out:
+                    for line in out.stdout:
+                        self.log(line)
+                        if line.strip().startswith('-----------'):
+                            current = {'path':file}
+                            history.append(current)
+                            for data in out.stdout:
+                                self.log(data)
+                                rev, author, date, lines = data.split(' | ')
+                                current['revision'] = rev
+                                current['author'] = author
+                                current['date'] = date
+                                current['log'] = ''
+                                self.log(out.stdout.next())
+                                break
+                        else:
+                            current['log'] += line
+                self.logOutput(out)
+                history.pop()
         return history
         
     def remove(self, paths):

@@ -546,22 +546,35 @@ class ProjectTree(wx.Panel):
                 return value            
 
     def scAdd(self, nodes):
-        self.scCommand(nodes, 'add') 
+        self.scCommand(nodes, 'add')
 
     def scRemove(self, nodes):
-        self.scCommand(nodes, 'remove') 
+        self.scCommand(nodes, 'remove')
 
     def scUpdate(self, nodes):
         self.scCommand(nodes, 'update')
 
     def scRevert(self, nodes):
-        self.scCommand(nodes, 'revert') 
+        self.scCommand(nodes, 'revert')
 
     def scCheckout(self, nodes):
         self.scCommand(nodes, 'checkout') 
 
     def scStatus(self, nodes):
         self.scCommand(nodes, 'status') 
+        
+    def scHistory(self, nodes):
+        if not nodes:
+            return
+        self.scCommand([nodes[0]], 'history', callback=self.displayHistory)
+        
+    def displayHistory(self, data):
+        if not data:
+            return
+        print data
+        from HistWin import HistoryWindow
+        win = HistoryWindow(self, data[0]['path'], data)
+        win.Show()
         
     def scCommit(self, nodes, **options): 
         while True:      
@@ -574,7 +587,7 @@ class ProjectTree(wx.Panel):
                 break
         self.scCommand(nodes, 'commit', message=message)
 
-    def scCommand(self, nodes, command, **options):
+    def scCommand(self, nodes, command, callback=None, **options):
         """
         Run a source control command 
         
@@ -586,7 +599,7 @@ class ProjectTree(wx.Panel):
         try: self.GetParent().StartBusy()
         except: pass
         
-        def run(nodes, command, **options):
+        def run(callback, nodes, command, **options):
             updates = []
             for node in nodes:
                 #print command
@@ -616,10 +629,10 @@ class ProjectTree(wx.Panel):
                     # Run command (only if it isn't the status command)
                     rc = True
                     if command != 'status':
-                        rc = self._timeoutCommand(method, [data['path']], **options)
+                        rc = self._timeoutCommand(callback, method, [data['path']], **options)
                         
                     # Only update status if last command didn't time out
-                    if rc:
+                    if command != 'history' and rc:
                         self._updateStatus(node, data, sc, updates=updates)
                     
                 # Unlock
@@ -628,19 +641,34 @@ class ProjectTree(wx.Panel):
             return updates
         
         wx.lib.delayedresult.startWorker(self.endSCCommand, run, 
-                                         wargs=(nodes, command), 
+                                         wargs=(callback, nodes, command), 
                                          wkwargs=options)
                                          
-    def _timeoutCommand(self, method, *args, **kwargs):
+    def _timeoutCommand(self, callback, *args, **kwargs):
         """ Run command, but kill it if it takes longer than `timeout` secs """
-        t = threading.Thread(target=method, args=args, kwargs=kwargs)
+        result = []
+        def resultWrapper(result, *args, **kwargs):
+            """ Function to catch output of threaded method """
+            args = list(args)
+            method = args.pop(0)
+            result.append(method(*args, **kwargs))
+
+        # Insert result object to catch output
+        args = list(args)
+        args.insert(0, result)    
+
+        # Start thread
+        t = threading.Thread(target=resultWrapper, args=args, kwargs=kwargs)
         t.start()
         t.join(self.scTimeout)
+        
         if t.isAlive():
             t._Thread__stop()
             #print 'COMMAND TIMED OUT'
             return False
         #print 'COMMAND SUCCEEDED'
+        if callback is not None:
+            callback(result[0])
         return True
         
     def _updateStatus(self, node, data, sc, updates=[]):
@@ -651,7 +679,7 @@ class ProjectTree(wx.Panel):
         # Update status of nodes
         try:
             status = {}
-            rc = self._timeoutCommand(sc.status, [data['path']], status=status)
+            rc = self._timeoutCommand(None, sc.status, [data['path']], status=status)
             if not rc:
                 return updates
             # Update the icons for the file nodes
@@ -935,7 +963,7 @@ class ProjectTree(wx.Panel):
             (self.popupIDSCRefresh, _("Refresh status"), 'sc-status', scenabled),
             (self.popupIDSCUpdate, _("Update"), 'sc-update', scenabled),
             (self.popupIDSCDiff, _("Compare to previous version"), 'sc-diff', scenabled),
-            (self.popupIDSCHistory, _("Show revision history"), 'sc-history', False),
+            (self.popupIDSCHistory, _("Show revision history"), 'sc-history', scenabled),
             (self.popupIDSCCommit, _("Commit changes"), 'sc-commit', scenabled),
             (self.popupIDSCRemove, _("Remove from repository"), 'sc-remove', scenabled),
             (self.popupIDSCRevert, _("Revert to repository version"), 'sc-revert', scenabled),
