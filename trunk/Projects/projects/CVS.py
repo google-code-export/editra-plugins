@@ -59,25 +59,40 @@ class CVS(SourceControl):
             out = self.run(root, ['diff'] + files)
             self.logOutput(out)
             
-    def history(self, paths):
-        history = []
+    def history(self, paths, history=[]):
         for path in paths:
             root, files = self.splitFiles(path)           
-            out = self.run(root, ['rlog'] + files)
-            if out:
-                revision_re = re.compile(r'^revision\s+(\S+)')
-                dasl_re = re.compile(r'^date:\s+(\S+\s+\S+);\s+author:\s+(\S+);\s+state:\s+(\S+);')
-                for line in out.stdout:
-                    self.log(line)
-                    if line.startswith('----------'):
-                        current = history.append({})
-                        current['revision'] = revision_re.match(out.next()).group(1)
-                        m = dasl_re.match(out.next())
-                        current['date'] = m.group(1)
-                        current['author'] = m.group(2)
-                        current['state'] = m.group(3)
-                        current['comment'] = out.next().strip()
-                self.logOutput(out)
+            for i, file in enumerate(files):
+                rep = open(os.path.join(root, 'CVS', 'Repository')).read().strip()
+                files[i] = os.path.join(rep, file)
+            for file in files:
+                out = self.run(root, ['rlog', file])
+                if out:
+                    revision_re = re.compile(r'^revision\s+(\S+)')
+                    dasl_re = re.compile(r'^date:\s+(\S+\s+\S+);\s+author:\s+(\S+);\s+state:\s+(\S+);')
+                    current = None
+                    for line in out.stdout:
+                        self.log(line)
+                        if line.startswith('----------'):
+                            current = {'path':file}
+                            history.append(current)
+                            line = out.stdout.next()
+                            self.log(line)
+                            current['revision'] = revision_re.match(line).group(1)
+                            line = out.stdout.next()
+                            self.log(line)
+                            m = dasl_re.match(line)
+                            current['date'] = m.group(1)
+                            current['author'] = m.group(2)
+                            current['state'] = m.group(3)
+                            line = out.stdout.next()
+                            self.log(line)
+                            current['log'] = line
+                        elif line.startswith('========'):
+                            current = None
+                        elif current is not None:
+                            current['log'] += line
+                    self.logOutput(out)
         return history
         
     def remove(self, paths):
