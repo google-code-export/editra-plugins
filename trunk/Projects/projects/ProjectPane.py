@@ -600,7 +600,7 @@ class ProjectTree(wx.Panel):
                                     
                 sc = self.getSCSystem(data['path'])
                 if sc is None:
-                    if os.path.isdir(data['path']):
+                    if os.path.isdir(data['path']) or command == 'add':
                         sc = self.getSCSystem(os.path.dirname(data['path']))
                         if sc is None:
                             continue
