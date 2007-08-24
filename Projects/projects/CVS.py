@@ -29,8 +29,16 @@ class CVS(SourceControl):
     def add(self, paths):
         for path in paths:
             root, files = self.splitFiles(path, forcefiles=True)
-            out = self.run(root, ['add'] + files)
-            self.logOutput(out)
+            dirs = sorted([x for x in files if os.path.isdir(x)])
+            files = sorted([x for x in files if not os.path.isdir(x)])
+            # Add all directories individually first
+            for d in dirs:
+                out = self.run(root, ['add', d])
+                self.logOutput(out)
+            # Add all files
+            if files:
+                out = self.run(root, ['add'] + files)
+                self.logOutput(out)                
         
     def checkout(self, paths):
         for path in paths:
@@ -39,6 +47,7 @@ class CVS(SourceControl):
             self.logOutput(out)
             
     def commit(self, paths, message=''):
+        """ Commit all files with message """
         for path in paths:
             root, files = self.splitFiles(path)
             out = self.run(root, ['commit', '-R', '-m', message] + files)
