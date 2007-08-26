@@ -139,19 +139,24 @@ class HistList(wx.ListCtrl,
         self.InsertColumn(self.DATE_COL, _("Date"))
         self.InsertColumn(self.AUTH_COL, _("Author"))
         self.InsertColumn(self.COM_COL, _("Log Message"))
-        self.populate(data)
+        self.Populate(data)
 #         self.SetColumnWidth(self.REV_COL, wx.LIST_AUTOSIZE)
 #         self.SetColumnWidth(self.AUTH_COL, wx.LIST_AUTOSIZE)
 #         self.SetColumnWidth(self.DATE_COL, wx.LIST_AUTOSIZE)
-#         self.SetColumnWidth(self.COM_COL, wx.LIST_AUTOSIZE)
+        self.SetColumnWidth(self.COM_COL, wx.LIST_AUTOSIZE)
         self.SendSizeEvent()
 
-    def populate(self, data):
+    def Populate(self, data):
+        """Populate the list with the history data"""
         for item in data:
             index = self.InsertStringItem(sys.maxint, item['revision'])
             self.SetStringItem(index, 1, item['date'])
             self.SetStringItem(index, 2, item['author'])
-            self.SetStringItem(index, 3, item['log'])
+            self.SetStringItem(index, 3, item['log'].strip())
+            if not index % 2:
+                syscolor = wx.SystemSettings_GetColour(wx.SYS_COLOUR_3DLIGHT)
+#                 color = util.AdjustColour(syscolor, 75)
+                self.SetItemBackgroundColour(index, syscolor)
 
 #-----------------------------------------------------------------------------#
 
