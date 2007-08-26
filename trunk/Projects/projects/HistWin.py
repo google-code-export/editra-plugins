@@ -48,11 +48,11 @@ _ = wx.GetTranslation
 #--------------------------------------------------------------------------#
 class HistoryWindow(wx.Frame):
     """Window for displaying the Revision History of a file"""
-    def __init__(self, parent, title, data):
+    def __init__(self, parent, title, projects):
         wx.Frame.__init__(self, parent, title=title, style=wx.DEFAULT_DIALOG_STYLE)
         
         # Attributes
-        self._ctrls = HistoryPane(self, data)
+        self._ctrls = HistoryPane(self, projects)
 
         # Layout
         self._DoLayout()
@@ -73,7 +73,7 @@ class HistoryPane(wx.Panel):
     """Panel for housing the the history window controls"""
     BTN_LBL1 = _("Compare to Previous")
     BTN_LBL2 = _("Compare Selected Versions")
-    def __init__(self, parent, data):
+    def __init__(self, parent, projects):
         wx.Panel.__init__(self, parent)
         
         # Attributes
@@ -83,7 +83,7 @@ class HistoryPane(wx.Panel):
         self.boxsz = wx.StaticBoxSizer(sbox, wx.VERTICAL)
         self._search = LogSearch(self, size=(150, -1))
         self._split = wx.SplitterWindow(self, style=wx.SP_3DSASH | wx.SP_LIVE_UPDATE)
-        self._list = HistList(self._split, data)
+        self._list = HistList(self._split, projects)
         self._txt = wx.TextCtrl(self._split, style=wx.TE_MULTILINE | wx.TE_READONLY)
         self._btn = wx.Button(self, label=_(self.BTN_LBL1))
 
@@ -145,22 +145,20 @@ class HistList(wx.ListCtrl,
     DATE_COL = 1
     AUTH_COL = 2
     COM_COL = 3
-    def __init__(self, parent, data):
+    def __init__(self, parent, projects):
         wx.ListCtrl.__init__(self, parent,
                              style=wx.LC_REPORT | wx.LC_SORT_ASCENDING | \
                                    wx.LC_VRULES)
 
         listmix.ListCtrlAutoWidthMixin.__init__(self)
 
-        # Attributes
-        self._data = data
-
         # Setup columns
         self.InsertColumn(self.REV_COL, _("Rev #"))
         self.InsertColumn(self.DATE_COL, _("Date"))
         self.InsertColumn(self.AUTH_COL, _("Author"))
         self.InsertColumn(self.COM_COL, _("Log Message"))
-        self.Populate(self._data)
+        projects.scCommand([projects.getSelectedNodes()[0]], 'history', 
+                                    callback=self.Populate)
         self.SetColumnWidth(self.COM_COL, wx.LIST_AUTOSIZE)
         self.SendSizeEvent()
 
@@ -174,6 +172,7 @@ class HistList(wx.ListCtrl,
 
     def Populate(self, data):
         """Populate the list with the history data"""
+        self._data = data
         for item in data:
             index = self.InsertStringItem(sys.maxint, item['revision'])
             self.SetStringItem(index, 1, item['date'])
