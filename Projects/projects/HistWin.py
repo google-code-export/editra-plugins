@@ -51,13 +51,13 @@ SB_INFO = 0
 SB_PROG = 1
 class HistoryWindow(wx.Frame):
     """Window for displaying the Revision History of a file"""
-    def __init__(self, parent, title, projects):
+    def __init__(self, parent, title, projects, node, path):
         wx.Frame.__init__(self, parent, title=title, style=wx.DEFAULT_DIALOG_STYLE)
         
         # Attributes
         self._sb = HistoryStatusBar(self)
         self.SetStatusBar(self._sb)
-        self._ctrls = HistoryPane(self, projects)
+        self._ctrls = HistoryPane(self, projects, node, path)
 
         # Layout
         self._DoLayout()
@@ -157,9 +157,10 @@ class HistoryStatusBar(wx.StatusBar):
 
 class HistoryPane(wx.Panel):
     """Panel for housing the the history window controls"""
-    BTN_LBL1 = _("Compare to Previous")
-    BTN_LBL2 = _("Compare Selected Versions")
-    def __init__(self, parent, projects):
+    BTN_LBL1 = _("    Compare to Previous    ")
+    BTN_LBL2 = _("Compare to Selected Version")
+    BTN_LBL3 = _(" Compare Selected Versions ")
+    def __init__(self, parent, projects, node, path):
         wx.Panel.__init__(self, parent)
         
         # Attributes
@@ -169,9 +170,11 @@ class HistoryPane(wx.Panel):
         self.boxsz = wx.StaticBoxSizer(sbox, wx.VERTICAL)
         self._search = LogSearch(self, size=(150, -1))
         self._split = wx.SplitterWindow(self, style=wx.SP_3DSASH | wx.SP_LIVE_UPDATE)
-        self._list = HistList(self._split, projects)
+        self._list = HistList(self._split, projects, node, path)
         self._txt = wx.TextCtrl(self._split, style=wx.TE_MULTILINE | wx.TE_READONLY)
         self._btn = wx.Button(self, label=_(self.BTN_LBL1))
+        self.projects = projects
+        self.path = path
 
         # Layout
         self._DoLayout()
@@ -180,6 +183,7 @@ class HistoryPane(wx.Panel):
         # Event Handlers
         self.Bind(wx.EVT_BUTTON, self.OnButton, self._btn)
         self.Bind(wx.EVT_LIST_ITEM_SELECTED, self.OnItemSelected)
+        self.Bind(wx.EVT_LIST_ITEM_DESELECTED, self.OnItemDeselected)
 
     def _DoLayout(self):
         """Layout the controls on the panel"""
@@ -204,14 +208,30 @@ class HistoryPane(wx.Panel):
 
     def OnButton(self, evt):
         """Handle button events"""
-        e_obj = evt.GetEventObject()
-        lbl = e_obj.GetLabel()
-        
-        if lbl == self.BTN_LBL1:
-            print "Diff to previous"
+        selected = self.getSelectedItems()
+        if not selected:
+            #print "Diff to previous"
+            self.projects.compareRevisions(self.path)
+        elif len(selected) == 1:
+            #print "Diff to selected"
+            rev = self._list.GetItem(selected[0], self._list.REV_COL).GetText().strip()
+            self.projects.compareRevisions(self.path, rev1=rev)
         else:
-            print "Diff selected"
-
+            #print "Diff selected"
+            rev1 = self._list.GetItem(selected[0], self._list.REV_COL).GetText().strip()
+            rev2 = self._list.GetItem(selected[-1], self._list.REV_COL).GetText().strip()
+            self.projects.compareRevisions(self.path, rev1=rev1, rev2=rev2)
+            
+    def getSelectedItems(self):
+        item = -1
+        selected = []
+        while True:
+            item = self._list.GetNextItem(item, wx.LIST_NEXT_ALL, wx.LIST_STATE_SELECTED)
+            if item == -1:
+                break
+            selected.append(item)
+        return selected
+        
     def OnItemSelected(self, evt):
         """Update text control when an item is selected in the
         list control.
@@ -221,7 +241,32 @@ class HistoryPane(wx.Panel):
         rev = self._list.GetItem(index, self._list.REV_COL).GetText()
         date = self._list.GetItem(index, self._list.DATE_COL).GetText()
         self._txt.SetValue(self._list.GetFullLog(rev, date))
+        self.updateButton()
+
+        # Only allow two selections at the most
+        selected = self.getSelectedItems()
+        if len(selected) > 2:
+            for i in selected[1:]:
+                if i == index:
+                    continue
+                self._list.SetItemState(i, 0, 0)
+
+    def OnItemDeselected(self, evt):
+        """Update text control when an item is selected in the
+        list control.
+
+        """
+        self.updateButton()
         
+    def updateButton(self):
+        selected = self.getSelectedItems()
+        if not selected:
+            self._btn.SetLabel(self.BTN_LBL1)
+        elif len(selected) == 1:
+            self._btn.SetLabel(self.BTN_LBL2)
+        else:
+            self._btn.SetLabel(self.BTN_LBL3)
+               
     def Filter(self, query):
         self._list.Populate(None, query)
 
@@ -234,7 +279,7 @@ class HistList(wx.ListCtrl,
     DATE_COL = 1
     AUTH_COL = 2
     COM_COL = 3
-    def __init__(self, parent, projects):
+    def __init__(self, parent, projects, node, path):
         wx.ListCtrl.__init__(self, parent,
                              style=wx.LC_REPORT | wx.LC_SORT_ASCENDING | \
                                    wx.LC_VRULES)
@@ -251,8 +296,7 @@ class HistList(wx.ListCtrl,
         self.InsertColumn(self.AUTH_COL, _("Author"))
         self.InsertColumn(self.COM_COL, _("Log Message"))
         wx.CallAfter(self._frame.StartBusy)
-        projects.scCommand([projects.getSelectedNodes()[0]], 'history', 
-                                    callback=self.Populate)
+        projects.scCommand([node], 'history', callback=self.Populate)
         self.SetColumnWidth(self.COM_COL, wx.LIST_AUTOSIZE)
         self.SendSizeEvent()
 

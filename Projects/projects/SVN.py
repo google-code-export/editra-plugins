@@ -119,14 +119,25 @@ class SVN(SourceControl):
             out = self.run(root, ['revert','-R'] + files)
             self.logOutput(out)
             
-    def fetch(self, paths):
+    def fetch(self, paths, rev=None, date=None):
         """ Fetch a copy of the paths' contents """
         output = []
         for path in paths:
             if os.path.isdir(path):
                 continue
             root, files = self.splitFiles(path)
-            out = self.run(root, ['cat'] + files)
+            
+            options = []
+            if rev:
+                options.append('-r')
+                if rev[0] == 'r':
+                    rev = rev[1:]
+                options.append(rev)
+            if date:
+                options.append('-r')
+                options.append('{%s}' % date)
+            
+            out = self.run(root, ['cat'] + options+ files)
             if out:
                 output.append(out.stdout.read())
                 self.logOutput(out)
