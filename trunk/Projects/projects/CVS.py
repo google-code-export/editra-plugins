@@ -187,7 +187,7 @@ class CVS(SourceControl):
                 if out is not None:
                     open(os.path.join(root,file), 'w').write(out)
     
-    def fetch(self, paths):
+    def fetch(self, paths, rev=None, date=None):
         """ Fetch a copy of the paths from the repository """
         output = []
         for path in paths:
@@ -197,8 +197,16 @@ class CVS(SourceControl):
             for i, file in enumerate(files):
                 rep = open(os.path.join(root, 'CVS', 'Repository')).read().strip()
                 files[i] = os.path.join(rep, file)
+                
+            options = []
+            if rev:
+                options.append('-r')
+                options.append(rev)
+            if date:
+                options.append('-D')
+                options.append(date)            
             
-            out = self.run(root, ['checkout', '-p'] + files)
+            out = self.run(root, ['checkout', '-p'] + options + files)
             if out:
                 content = out.stdout.read() 
                 self.logOutput(out)

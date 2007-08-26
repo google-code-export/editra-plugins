@@ -567,8 +567,10 @@ class ProjectTree(wx.Panel):
         if not nodes:
             return
         from HistWin import HistoryWindow
-        win = HistoryWindow(self, 'Revision History', self)
-        win.Show()
+        for node in self.getSelectedNodes():
+            win = HistoryWindow(self, 'Revision History', self, node, 
+                                self.tree.GetPyData(node)['path'])
+            win.Show()
         
     def scCommit(self, nodes, **options): 
         while True:
@@ -735,37 +737,106 @@ class ProjectTree(wx.Panel):
         
     def endPaste(self, delayedresult):
         self.GetParent().StopBusy()
-
-    def diffToPrevious(self, node):
-        """ Use opendiff to compare playpen version to repository version """
+        
+    def compareRevisions(self, path, rev1=None, date1=None, rev2=None, date2=None):
         def diff():
-            path = self.tree.GetPyData(node)['path']
             # Only do files
             if os.path.isdir(path):
-                for child in self.getChildren(node):
-                    self.diffToPrevious(child)
+                for file in os.listdir(path):
+                    self.compareRevisions(file, rev1=rev1, date1=date1,
+                                                rev2=rev2, date2=date2)
                 return
 
             sc = self.getSCSystem(path)
             if sc is None:
                 return
+                
+            content1 = content2 = ext1 = ext2 = None
 
-            content = sc.fetch([path])
-            if content and content[0] is None:
-                return wx.MessageDialog(self, 
-                                        'The requested file could not be ' +
-                                        'retrieved from the source control system.', 
-                                        'Could not retrieve file', 
-                                        style=wx.OK|wx.ICON_ERROR).ShowModal()
-                                        
-            open('%s.previous' % path, 'w').write(content[0])
-            subprocess.call([self.commands['diff'], '%s.previous' % path, path]) 
-            time.sleep(3)
-            os.remove('%s.previous' % path)
+            # Grab the first specified revision
+            if rev1 or date1:
+                content1 = sc.fetch([path], rev=rev1, date=date1)
+                if content1 and content1[0] is None:
+                    return wx.MessageDialog(self, 
+                                            'The requested file could not be ' +
+                                            'retrieved from the source control system.', 
+                                            'Could not retrieve file', 
+                                            style=wx.OK|wx.ICON_ERROR).ShowModal()
+                content1 = content1[0]
+                if rev1:
+                    ext1 = rev1
+                elif date1:
+                    ext1 = date1
+        
+            # Grab the second specified revision
+            if rev2 or date2:
+                content2 = sc.fetch([path], rev=rev2, date=date2)
+                if content2 and content2[0] is None:
+                    return wx.MessageDialog(self, 
+                                            'The requested file could not be ' +
+                                            'retrieved from the source control system.', 
+                                            'Could not retrieve file', 
+                                            style=wx.OK|wx.ICON_ERROR).ShowModal()
+                content2 = content2[0]
+                if rev2:
+                    ext2 = rev2
+                elif date2:
+                    ext2 = date2
+
+            if not(rev1 or date1 or rev2 or date2):
+                content1 = sc.fetch([path])
+                if content1 and content1[0] is None:
+                    return wx.MessageDialog(self, 
+                                            'The requested file could not be ' +
+                                            'retrieved from the source control system.', 
+                                            'Could not retrieve file', 
+                                            style=wx.OK|wx.ICON_ERROR).ShowModal()
+                content1 = content1[0]
+                ext1 = 'previous'
+
+            # Write temporary files
+            delete = []
+            path1 = path2 = None
+            if content1 and content2:
+                path1 = '%s.%s' % (path, ext1)
+                path2 = '%s.%s' % (path, ext2)
+                open(path1, 'w').write(content1)
+                open(path2, 'w').write(content2)
+                delete.append(path1)
+                delete.append(path2)
+            elif content1:
+                path1 = path
+                path2 = '%s.%s' % (path, ext1)
+                open(path2, 'w').write(content1)
+                delete.append(path2)
+            elif content2:
+                path1 = path
+                path2 = '%s.%s' % (path, ext2)
+                open(path2, 'w').write(content2)
+                delete.append(path2)
+            
+            # Run comparison program
+            print path1, path2
+            subprocess.call([self.commands['diff'], path2, path1]) 
+
+            # Clean up
+            time.sleep(3)            
+            for item in delete:
+                os.remove(item)
             
         t = threading.Thread(target=diff)
         t.setDaemon(True)
-        t.start()
+        t.start()        
+
+    def compareToPrevious(self, node):
+        """ Use opendiff to compare playpen version to repository version """
+        path = self.tree.GetPyData(node)['path']
+        # Only do files
+        if os.path.isdir(path):
+            for child in self.getChildren(node):
+                self.compareToPrevious(child)
+            return
+        self.compareRevisions(path)
 
     def addDirectoryWatcher(self, node):                
         """
@@ -1042,7 +1113,7 @@ class ProjectTree(wx.Panel):
     def onPopupSCDiff(self, event):
         """ Diff the file to the file in the repository """
         for node in self.getSelectedNodes():
-            self.diffToPrevious(node)
+            self.compareToPrevious(node)
             
     def onPopupCut(self, event):
         """ Cut the files to the clipboard """
