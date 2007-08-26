@@ -568,14 +568,11 @@ class ProjectTree(wx.Panel):
             return
         self.scCommand([nodes[0]], 'history', callback=self.displayHistory)
 
-    # TODO should keep reference to window so it can be properly
-    # destroyed when closed to prevent potential memory leaks
     def displayHistory(self, data):
         if not data:
             return
         print data
         from HistWin import HistoryWindow
-        print wx.Thread_IsMain(), "On MAIN THREAD"
         win = HistoryWindow(self, data[0]['path'], data)
         win.Show()
         
