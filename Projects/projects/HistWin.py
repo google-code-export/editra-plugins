@@ -158,8 +158,8 @@ class HistoryStatusBar(wx.StatusBar):
 class HistoryPane(wx.Panel):
     """Panel for housing the the history window controls"""
     BTN_LBL1 = _("    Compare to Previous    ")
-    BTN_LBL2 = _("Compare to Selected Version")
-    BTN_LBL3 = _(" Compare Selected Versions ")
+    BTN_LBL2 = _("Compare to Selected Revision")
+    BTN_LBL3 = _(" Compare Selected Revisions ")
     def __init__(self, parent, projects, node, path):
         wx.Panel.__init__(self, parent)
         
