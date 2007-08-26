@@ -41,6 +41,7 @@ __revision__ = "$Revision$"
 #--------------------------------------------------------------------------#
 # Dependancies
 import wx
+import re
 import sys
 import wx.lib.mixins.listctrl as listmix
 
@@ -220,6 +221,9 @@ class HistoryPane(wx.Panel):
         rev = self._list.GetItem(index, self._list.REV_COL).GetText()
         date = self._list.GetItem(index, self._list.DATE_COL).GetText()
         self._txt.SetValue(self._list.GetFullLog(rev, date))
+        
+    def Filter(self, query):
+        self._list.Populate(None, query)
 
 #-----------------------------------------------------------------------------#
 
@@ -239,6 +243,7 @@ class HistList(wx.ListCtrl,
 
         # Attributes
         self._frame = parent.GetGrandParent()
+        self._data = {}
 
         # Setup columns
         self.InsertColumn(self.REV_COL, _("Rev #"))
@@ -259,22 +264,47 @@ class HistList(wx.ListCtrl,
         else:
             return wx.EmptyString
 
-    def Populate(self, data):
+    def Populate(self, data, query=''):
         """Populate the list with the history data"""
-        self._data = data
+        query = [x for x in query.strip().lower().split() if x]
+        if query:
+            newdata = []
+            for item in self._data:
+                for word in query:
+                    if word in item['key']:
+                        newdata.append(item)
+                        break
+            data = newdata
+            self.DeleteAllItems()
+        elif data:
+            self._data = data
+        else:
+            data = self._data
+        
         for item in data:
             index = self.InsertStringItem(sys.maxint, item['revision'])
             self.SetStringItem(index, 1, item['date'])
             self.SetStringItem(index, 2, item['author'])
 
-            log = item['log'].strip()
-            if len(log) > 45:
-                log = log[:45] + u'...'
-            self.SetStringItem(index, 3, log)
+            if 'shortlog' not in item:
+                item['shortlog'] = log = item['log'].strip()
+                if len(log) > 45:
+                    log = log[:45] + u'...'
+                    item['shortlog'] = log
+                    
+            self.SetStringItem(index, 3, item['shortlog'])
+
             if index % 2:
                 syscolor = wx.SystemSettings_GetColour(wx.SYS_COLOUR_3DLIGHT)
                 color = AdjustColour(syscolor, 75)
                 self.SetItemBackgroundColour(index, color)
+
+            if 'key' not in item:
+                item['key'] = ('%s %s %s %s' % (item['revision'],
+                                               item['date'],
+                                               item['author'],
+                                               re.sub(r'\s+', ' ', item['log']))).lower()
+                
         wx.CallAfter(self._frame.StopBusy)
 
 #-----------------------------------------------------------------------------#
@@ -314,7 +344,7 @@ class LogSearch(wx.SearchCtrl):
 
     def OnSearch(self, evt):
         """Search logs and filter"""
-        print "searching..."
+        self.GetParent().Filter(self.GetValue())
 
 #-----------------------------------------------------------------------------#
 # Helper functions
