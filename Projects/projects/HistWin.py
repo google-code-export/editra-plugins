@@ -46,12 +46,16 @@ import wx.lib.mixins.listctrl as listmix
 
 _ = wx.GetTranslation
 #--------------------------------------------------------------------------#
+SB_INFO = 0
+SB_PROG = 1
 class HistoryWindow(wx.Frame):
     """Window for displaying the Revision History of a file"""
     def __init__(self, parent, title, projects):
         wx.Frame.__init__(self, parent, title=title, style=wx.DEFAULT_DIALOG_STYLE)
         
         # Attributes
+        self._sb = HistoryStatusBar(self)
+        self.SetStatusBar(self._sb)
         self._ctrls = HistoryPane(self, projects)
 
         # Layout
@@ -59,13 +63,94 @@ class HistoryWindow(wx.Frame):
         self.SetInitialSize()
 
         # Event Handlers
-
+        self.Bind(wx.EVT_CLOSE, self.OnClose)
 
     def _DoLayout(self):
         """Layout the controls"""
         sizer = wx.BoxSizer(wx.HORIZONTAL)
         sizer.Add(self._ctrls, 1, wx.EXPAND)
         self.SetSizer(sizer)
+
+    def OnClose(self, evt):
+        """Cleanup on exit"""
+        self._sb.Destroy()
+        self.Destroy()
+
+    def StartBusy(self):
+        """Start the window as busy"""
+        self.SetStatusText(_("Retrieving File History") + u"...", SB_INFO)
+        self._sb.StartBusy()
+
+    def StopBusy(self):
+        """Start the window as busy"""
+        self.SetStatusText(u"", SB_INFO)
+        self._sb.StopBusy()
+
+#-----------------------------------------------------------------------------#
+
+class HistoryStatusBar(wx.StatusBar):
+    """Custom status bar for history window to show when its busy"""
+    def __init__(self, parent):
+        wx.StatusBar.__init__(self, parent)
+  
+        # Attributes
+        self._changed = False
+        self.timer = wx.Timer(self)
+        self.prog = wx.Gauge(self, style=wx.GA_HORIZONTAL)
+        self.prog.Hide()
+
+        # Layout
+        self.SetFieldsCount(2)
+        self.SetStatusWidths([-1, 125])
+
+        # Event Handlers
+        self.Bind(wx.EVT_TIMER, self.OnTick)
+        self.Bind(wx.EVT_SIZE, self.OnSize)
+        self.Bind(wx.EVT_IDLE, self.OnIdle)
+
+    def __del__(self):
+        """Make sure the timer is stopped"""
+        if self.timer.IsRunning():
+            self.timer.Stop()
+
+    def Destroy(self):
+        """Cleanup timer"""
+        if self.timer.IsRunning():
+            self.timer.Stop()
+        del self.timer
+        wx.StatusBar.Destroy(self)
+
+    def OnIdle(self, evt):
+        """Reposition progress bar as necessary on moves, ect..."""
+        if self._changed:
+            self.Reposition()
+        evt.Skip()
+
+    def OnSize(self, evt):
+        """Reposition progress bar on resize"""
+        self.Reposition()
+        self._changed = True
+        evt.Skip()
+
+    def OnTick(self, evt):
+        """Update progress bar"""
+        self.prog.Pulse()
+
+    def Reposition(self):
+        rect = self.GetFieldRect(1)
+        self.prog.SetPosition((rect.x+2, rect.y+2))
+        self.prog.SetSize((rect.width-4, rect.height-4))
+        self._changed = False
+
+    def StartBusy(self):
+        """Start the timer"""
+        self.prog.Show()
+        self.timer.Start(100)
+
+    def StopBusy(self):
+        """Stop the timer"""
+        self.prog.Hide()
+        self.timer.Stop()
 
 #-----------------------------------------------------------------------------#
 
@@ -152,11 +237,15 @@ class HistList(wx.ListCtrl,
 
         listmix.ListCtrlAutoWidthMixin.__init__(self)
 
+        # Attributes
+        self._frame = parent.GetGrandParent()
+
         # Setup columns
         self.InsertColumn(self.REV_COL, _("Rev #"))
         self.InsertColumn(self.DATE_COL, _("Date"))
         self.InsertColumn(self.AUTH_COL, _("Author"))
         self.InsertColumn(self.COM_COL, _("Log Message"))
+        wx.CallAfter(self._frame.StartBusy)
         projects.scCommand([projects.getSelectedNodes()[0]], 'history', 
                                     callback=self.Populate)
         self.SetColumnWidth(self.COM_COL, wx.LIST_AUTOSIZE)
@@ -186,6 +275,7 @@ class HistList(wx.ListCtrl,
                 syscolor = wx.SystemSettings_GetColour(wx.SYS_COLOUR_3DLIGHT)
                 color = AdjustColour(syscolor, 75)
                 self.SetItemBackgroundColour(index, color)
+        wx.CallAfter(self._frame.StopBusy)
 
 #-----------------------------------------------------------------------------#
 
