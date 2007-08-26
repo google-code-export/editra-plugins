@@ -567,19 +567,33 @@ class ProjectTree(wx.Panel):
         if not nodes:
             return
         self.scCommand([nodes[0]], 'history', callback=self.displayHistory)
-        
+
+    # TODO should keep reference to window so it can be properly
+    # destroyed when closed to prevent potential memory leaks
     def displayHistory(self, data):
         if not data:
             return
         print data
         from HistWin import HistoryWindow
+        print wx.Thread_IsMain(), "On MAIN THREAD"
         win = HistoryWindow(self, data[0]['path'], data)
         win.Show()
         
     def scCommit(self, nodes, **options): 
-        while True:      
+        while True:
+            paths = list()
+            for node in nodes:
+                try: data = self.tree.GetPyData(node)
+                except: data = {}
+                if data.get('sclock', None):
+                    continue
+                if 'path' not in data:
+                    continue
+                else:
+                    paths.append(data['path'])
+
             ted = CommitDialog(self, _("Commit Dialog"), 
-                               _("Enter your commit message:"))
+                               _("Enter your commit message:"), paths)
             if ted.ShowModal() != wx.ID_OK:
                 return
             message = ted.GetValue().strip().replace('"', '\\"')
@@ -1411,7 +1425,11 @@ class ProjectPane(wx.Panel):
 #-----------------------------------------------------------------------------#
 class CommitDialog(wx.Dialog):
     """Dialog for entering commit messages"""
-    def __init__(self, parent, title=u'', caption=u'', default=u''):
+    def __init__(self, parent, title=u'', caption=u'', default=list()):
+        """Create the Commit Dialog
+        @keyword default: list of file names that are being commited
+
+        """
         wx.Dialog.__init__(self, parent, title=title)
         
         # Attributes
@@ -1422,29 +1440,52 @@ class CommitDialog(wx.Dialog):
         self._entry = wx.TextCtrl(self, style=wx.TE_MULTILINE|wx.NO_BORDER)
         if wx.Platform == '__WXMAC__':
             self._entry.MacCheckSpelling(True)
-        self._entry.SetValue(default)
+        self._DefaultMessage(default)
         self._entry.SetFocus()
         
         # Layout
         self._DoLayout()
         self.CenterOnParent()
 
+    def _DefaultMessage(self, files):
+        """Put the default message in the dialog and the
+        given list of files
+
+        """
+        msg = list()
+        msg.append(u':' + (u'-' * 35))
+        msg.append(u": Lines beginning with `:' are removed automatically")
+        msg.append(u": Modified Files:")
+        for path in files:
+            tmp = ":\t%s" % path
+            msg.append(tmp)
+        msg.append(u': ' + (u'-' * 30))
+        msg.extend([u'', u''])
+        msg = os.linesep.join(msg)
+        self._entry.SetValue(msg)
+        self._entry.SetInsertionPoint(len(msg))
+
     def _DoLayout(self):
         sizer = wx.GridBagSizer(5, 5)
 
         sizer.Add((5, 5), (0, 0))
         sizer.AddMany([(self._caption, (1, 1), (1, 4)),
-                       (self._entry, (2, 1), (10, 6), wx.EXPAND),
-                       (self._cancel, (12, 5)), (self._commit, (12, 6)),
-                       ((5, 5), (13, 0)), ((5, 5), (13, 7))])
+                       (self._entry, (2, 1), (10, 8), wx.EXPAND),
+                       (self._cancel, (12, 7)), (self._commit, (12, 8)),
+                       ((5, 5), (13, 0)), ((5, 5), (13, 9))])
         self.SetSizer(sizer)
         self.SetInitialSize()
 
     def GetValue(self):
         """Return the value of the commit message"""
-        return self._entry.GetValue()
-        
-        
+        msg = list()
+        for line in xrange(self._entry.GetNumberOfLines()):
+            tmp = self._entry.GetLineText(line)
+            if tmp.strip().startswith(u':'):
+                continue
+            msg.append(tmp)
+        return os.linesep.join(msg).strip()
+
 class ExecuteCommandDialog(wx.Dialog):
 
     def __init__(self, parent, id):
