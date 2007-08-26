@@ -566,14 +566,8 @@ class ProjectTree(wx.Panel):
     def scHistory(self, nodes):
         if not nodes:
             return
-        self.scCommand([nodes[0]], 'history', callback=self.displayHistory)
-
-    def displayHistory(self, data):
-        if not data:
-            return
-        print data
         from HistWin import HistoryWindow
-        win = HistoryWindow(self, data[0]['path'], data)
+        win = HistoryWindow(self, 'Revision History', self)
         win.Show()
         
     def scCommit(self, nodes, **options): 
@@ -648,7 +642,7 @@ class ProjectTree(wx.Panel):
                     
                 # Unlock
                 del data['sclock']
-                
+                    
             return updates
         
         wx.lib.delayedresult.startWorker(self.endSCCommand, run, 
