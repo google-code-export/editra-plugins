@@ -50,10 +50,7 @@ _ = wx.GetTranslation
 ID_PROJECTPANE = wx.NewId()
 ID_PROJECTTREE = wx.NewId()
 
-
-edEVT_SYNC_NODES = wx.NewEventType()
-EVT_SYNC_NODES = wx.PyEventBinder(edEVT_SYNC_NODES, 1)
-class SyncNodesEvent(wx.PyCommandEvent):
+class SimpleEvent(wx.PyCommandEvent):
     """Event to signal that nodes need updating"""
     def __init__(self, etype, eid, value=[]):
         wx.PyCommandEvent.__init__(self, etype, eid)
@@ -70,6 +67,15 @@ class SyncNodesEvent(wx.PyCommandEvent):
     def GetValue(self):
         return self._value
 
+ppEVT_SYNC_NODES = wx.NewEventType()
+EVT_SYNC_NODES = wx.PyEventBinder(ppEVT_SYNC_NODES, 1)
+class SyncNodesEvent(SimpleEvent):
+    pass
+
+ppEVT_UPDATE_STATUS = wx.NewEventType()
+EVT_UPDATE_STATUS = wx.PyEventBinder(ppEVT_UPDATE_STATUS, 1)
+class UpdateStatusEvent(SimpleEvent):
+    pass
 
 class MyTreeCtrl(wx.TreeCtrl):
 
@@ -202,6 +208,7 @@ class ProjectTree(wx.Panel):
         self.Bind(wx.EVT_TREE_ITEM_ACTIVATED, self.OnActivate, self.tree)
         self.Bind(wx.EVT_CONTEXT_MENU, self.OnContextMenu)
         self.Bind(EVT_SYNC_NODES, self.OnSyncNode)
+        self.Bind(EVT_UPDATE_STATUS, self.OnUpdateStatus)
         
         try:
             import extern.flatnotebook as fnb
@@ -632,7 +639,6 @@ class ProjectTree(wx.Panel):
         except: pass
         
         def run(callback, nodes, command, **options):
-            updates = []
             for node in nodes:
                 #print command
                 try: data = self.tree.GetPyData(node)
@@ -665,13 +671,11 @@ class ProjectTree(wx.Panel):
                         
                     # Only update status if last command didn't time out
                     if command != 'history' and rc:
-                        self._updateStatus(node, data, sc, updates=updates)
+                        self._updateStatus(node, data, sc)
                     
                 # Unlock
                 del data['sclock']
-                    
-            return updates
-        
+                            
         wx.lib.delayedresult.startWorker(self.endSCCommand, run, 
                                          wargs=(callback, nodes, command), 
                                          wkwargs=options)
@@ -703,12 +707,13 @@ class ProjectTree(wx.Panel):
             callback(result[0])
         return True
         
-    def _updateStatus(self, node, data, sc, updates=[]):
+    def _updateStatus(self, node, data, sc):
         """
         Update the icons in the tree view to show the status of the files
                 
         """
         # Update status of nodes
+        updates = []
         try:
             status = {}
             rc = self._timeoutCommand(None, sc.status, [data['path']], status=status)
@@ -748,16 +753,19 @@ class ProjectTree(wx.Panel):
                     #    updates.append((self.tree.SetToolTip, wx.ToolTip('Tag: %s' % status[text]['tag'])))
         except (OSError, IOError):
             pass
-        return updates
-            
-    def endSCCommand(self, delayedresult):
+
+        wx.PostEvent(self, UpdateStatusEvent(ppEVT_UPDATE_STATUS, self.GetId(), updates))
+
+    def OnUpdateStatus(self, evt):
         # Apply updates to tree view
-        for update in delayedresult.get():
+        for update in evt.GetValue():
             update = list(update)
             method = update.pop(0)
             try: method(*update)
             except: pass
-        # Update progress indicator
+        evt.Skip()
+            
+    def endSCCommand(self, delayedresult):
         self.GetParent().StopBusy()
         
     def endPaste(self, delayedresult):
@@ -1322,7 +1330,7 @@ class ProjectTree(wx.Panel):
             
             # Do callback if something changed
             if added or modified or deleted:
-                evt = SyncNodesEvent(edEVT_SYNC_NODES, self.GetId(), 
+                evt = SyncNodesEvent(ppEVT_SYNC_NODES, self.GetId(), 
                                        (added, modified, deleted, data))
                 wx.PostEvent(self, evt)
             
