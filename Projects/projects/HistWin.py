@@ -47,6 +47,27 @@ import wx.lib.mixins.listctrl as listmix
 
 _ = wx.GetTranslation
 #--------------------------------------------------------------------------#
+
+edEVT_UPDATE_ITEMS = wx.NewEventType()
+EVT_UPDATE_ITEMS = wx.PyEventBinder(edEVT_UPDATE_ITEMS, 1)
+class UpdateItemsEvent(wx.PyCommandEvent):
+    """Event to signal that items need updating"""
+    def __init__(self, etype, eid, value=[]):
+        wx.PyCommandEvent.__init__(self, etype, eid)
+        self._etype = etype
+        self._id = eid
+        self._value = value
+
+    def GetEvtType(self):
+        return self._etype
+
+    def GetId(self):
+        return self._id
+
+    def GetValue(self):
+        return self._value
+
+
 SB_INFO = 0
 SB_PROG = 1
 class HistoryWindow(wx.Frame):
@@ -294,42 +315,22 @@ class HistList(wx.ListCtrl,
         self._frame = parent.GetGrandParent()
         self._data = {}
 
+        self.Bind(EVT_UPDATE_ITEMS, self.OnUpdateItems)
+
         # Setup columns
         self.InsertColumn(self.REV_COL, _("Rev #"))
         self.InsertColumn(self.DATE_COL, _("Date"))
         self.InsertColumn(self.AUTH_COL, _("Author"))
         self.InsertColumn(self.COM_COL, _("Log Message"))
         wx.CallAfter(self._frame.StartBusy)
+        self.DeleteAllItems()
         projects.scCommand([node], 'history', callback=self.Populate)
         self.SetColumnWidth(self.COM_COL, wx.LIST_AUTOSIZE)
         self.SendSizeEvent()
 
-    def GetFullLog(self, rev, timestamp):
-        """Get the full log entry for the given revision"""
-        for item in self._data:
-            if item['revision'] == rev and item['date'] == timestamp:
-                return item['log']
-        else:
-            return wx.EmptyString
-
-    def Populate(self, data, query=''):
-        """Populate the list with the history data"""
-        query = [x for x in query.strip().lower().split() if x]
-        if query:
-            newdata = []
-            for item in self._data:
-                for word in query:
-                    if word in item['key']:
-                        newdata.append(item)
-                        break
-            data = newdata
-            self.DeleteAllItems()
-        elif data:
-            self._data = data
-        else:
-            data = self._data
-        
-        for item in data:
+    def OnUpdateItems(self, evt):
+        self.DeleteAllItems()
+        for item in evt.GetValue():
             index = self.InsertStringItem(sys.maxint, item['revision'])
             self.SetStringItem(index, 1, item['date'])
             self.SetStringItem(index, 2, item['author'])
@@ -352,7 +353,35 @@ class HistList(wx.ListCtrl,
                                                item['date'],
                                                item['author'],
                                                re.sub(r'\s+', ' ', item['log']))).lower()
+        evt.Skip()
                 
+    def GetFullLog(self, rev, timestamp):
+        """Get the full log entry for the given revision"""
+        for item in self._data:
+            if item['revision'] == rev and item['date'] == timestamp:
+                return item['log']
+        else:
+            return wx.EmptyString
+
+    def Populate(self, data, query=''):
+        """Populate the list with the history data"""
+        query = [x for x in query.strip().lower().split() if x]
+        if query:
+            newdata = []
+            for item in self._data:
+                for word in query:
+                    if word in item['key']:
+                        newdata.append(item)
+                        break
+            data = newdata
+        elif data:
+            self._data = data
+        else:
+            data = self._data
+        
+        evt = UpdateItemsEvent(edEVT_UPDATE_ITEMS, self.GetId(), data)
+        wx.PostEvent(self, evt)
+                                
         wx.CallAfter(self._frame.StopBusy)
 
 #-----------------------------------------------------------------------------#
