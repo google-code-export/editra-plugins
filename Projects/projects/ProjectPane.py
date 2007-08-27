@@ -47,6 +47,8 @@ else: # Other/Linux
     #FILEMAN = 'Konqueror'
     #FILEMAN_CMD = 'konqueror'
     
+ALT_BACKGROUND_COLOR = wx.Colour(240,252,255)
+    
 # i18n support
 _ = wx.GetTranslation
 
@@ -361,6 +363,8 @@ class ProjectTree(wx.Panel):
         self.tree.SetItemImage(node, self.icons['folder-open'], wx.TreeItemIcon_Expanded)
         if save:
             self.saveProjects()
+        if not(self.tree.GetChildrenCount(self.root, False) % 2):
+            self.tree.SetItemBackgroundColour(node, ALT_BACKGROUND_COLOR)
         return node
 
     def removeSelectedProject(self):
@@ -934,9 +938,11 @@ class ProjectTree(wx.Panel):
         parentpath = data['path']
         itempath = os.path.join(parentpath,name)
         if os.path.isfile(itempath):
-            return self.addFile(parent, name)
+            node = self.addFile(parent, name)
         elif os.path.isdir(itempath):
-            return self.addFolder(parent, name)
+            node = self.addFolder(parent, name)
+        self.tree.SetItemBackgroundColour(node, self.tree.GetItemBackgroundColour(parent))
+        return node
 
     def addFolder(self, parent, name):
         """
