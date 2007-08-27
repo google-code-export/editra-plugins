@@ -51,7 +51,9 @@ class SVN(SourceControl):
             out = self.run(root, ['diff'] + files)
             self.closeProcess(out)
         
-    def history(self, paths, history=[]):
+    def history(self, paths, history=None):
+        if history is None:
+            history = []
         for path in paths:
             root, files = self.splitFiles(path)
             for file in files:
