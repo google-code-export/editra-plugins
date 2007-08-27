@@ -59,7 +59,9 @@ class CVS(SourceControl):
             out = self.run(root, ['diff'] + files)
             self.logOutput(out)
             
-    def history(self, paths, history=[]):
+    def history(self, paths, history=None):
+        if history is None:
+            history = []
         for path in paths:
             root, files = self.splitFiles(path)           
             for i, file in enumerate(files):
@@ -79,6 +81,7 @@ class CVS(SourceControl):
                             line = out.stdout.next()
                             self.log(line)
                             current['revision'] = revision_re.match(line).group(1)
+                            current['sortkey'] = [int(x) for x in current['revision'].split('.')]
                             line = out.stdout.next()
                             self.log(line)
                             m = dasl_re.match(line)
@@ -93,6 +96,8 @@ class CVS(SourceControl):
                         elif current is not None:
                             current['log'] += line
                     self.logOutput(out)
+        history.sort(key=lambda x:x['sortkey'])
+        history.reverse()
         return history
         
     def remove(self, paths):
