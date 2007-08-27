@@ -2,6 +2,12 @@
 
 import os, fnmatch, subprocess, sys
 
+if sys.platform.lower().startswith('win'):            
+    STARTUPINFO = subprocess.STARTUPINFO()
+    STARTUPINFO.dwFlags |= subprocess.STARTF_USESHOWWINDOW
+else:
+    STARTUPINFO = None
+
 class SourceControl(object):
 
     TYPE_FILE = 1
@@ -68,7 +74,8 @@ class SourceControl(object):
                                     stdin=subprocess.PIPE,
                                     stdout=subprocess.PIPE,
                                     stderr=stderr,
-                                    env=environ)
+                                    env=environ,
+                                    startupinfo=STARTUPINFO)
         except OSError: 
             pass
         
