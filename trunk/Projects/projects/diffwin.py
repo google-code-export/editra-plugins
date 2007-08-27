@@ -56,15 +56,17 @@ from profiler import Profile_Get
 
 class DiffWindow(wx.Frame):
     """Creates a window for displaying file diffs"""
-    def __init__(self, parent, id, title):
+    def __init__(self, parent, id, title, files):
         """Initialize the Window"""
-        wx.Frame.__init__(self, parent, id, title, size=(300, 300))
+        wx.Frame.__init__(self, parent, id, title, size=(600, 400))
         
+        self.CreateStatusBar()
+
         sizer = wx.BoxSizer(wx.VERTICAL)
-        self._book = DiffBook(self)
+        self._book = DiffBook(self, files)
         sizer.Add(self._book, 1, wx.EXPAND)
         self.SetSizer(sizer)
-        self.SetInitialSize()
+#         self.SetInitialSize()
 
     def OpenDiffs(self, flist):
         """Open a list of diffed files
@@ -78,16 +80,19 @@ class DiffWindow(wx.Frame):
 
 class DiffBook(FNB.FlatNotebook):
     """Notebook for holding multiple diff panels"""
-    def __init__(self, parent):
+    def __init__(self, parent, files=list()):
         """Initialize the book"""
         FNB.FlatNotebook.__init__(self, parent,
                                   style=FNB.FNB_FF2 | \
                                         FNB.FNB_HIDE_ON_SINGLE_TAB | \
                                         FNB.FNB_X_ON_TAB)
-        FNB.FlatNotebook.AddPage(self, wx.Panel(self, size=(200, 200)), "tmp")
+
+        # ?wxBug? must open files during init to avoid errors
+        self.OpenFiles(files)
+
         # Attributes
         self.log = wx.GetApp().GetLog()
-
+        
     def OpenFiles(self, flist):
         """Open a list of files is separate pages
         @param flist: list of tuples containing file paths
@@ -125,7 +130,10 @@ class DisplayPanel(wx.Panel):
         self._PopulateCtrls()
 
         # Event Handlers
-        self._right[1].Bind(wx.EVT_SCROLLWIN, self.OnScroll)
+#         self._left[1].Bind(wx.EVT_MOUSEWHEEL, self.OnScrollLeft)
+        self._right[1].Bind(wx.EVT_MOUSEWHEEL, self.OnScrollRight)
+        self._right[1].Bind(wx.EVT_SCROLLBAR, self.OnScrollRight)
+        self._right[1].Bind(wx.EVT_SCROLLWIN, self.OnScrollRight)
 
     def _DoLayout(self):
         """Layout the window"""
@@ -145,6 +153,11 @@ class DisplayPanel(wx.Panel):
         if rtxt != -1:
             for line in rtxt:
                 self._right[1].AppendLine(line)
+        diffs = 0
+        for item in self._difftxt:
+            if item.startswith(u'+') or item.startswith(u'-'):
+                diffs = diffs + 1
+        self.GetTopLevelParent().SetStatusText("%d Differences" % diffs, 0)
         self._left[1].SetReadOnly(True)
         self._right[1].SetReadOnly(True)
 
@@ -161,16 +174,20 @@ class DisplayPanel(wx.Panel):
                 fname = self._right[0]
             self._log("[diffwin][err] Failed to open %s" % fname)
         else:
-            self._difftext = diff
+            return diff
 
-    def OnScroll(self, evt):
-        """Make both windows have matching scroll position"""
-        pos = self._right[1].GetScrollPos(wx.VERTICAL)
-        self._left[1].SetScrollPos(wx.VERTICAL, pos)
-#         self._left[1].ScrollWindow(0, pos)
-        self._left[1].Refresh()
-        self._left[1].Update()
+#     def OnScrollLeft(self, evt):
+#         """Make both windows have matching scroll position"""
+#         self._fromleft = True
+#         if not self._fromRight:
+#             wx.PostEvent(self._right[1], evt)
 #         evt.Skip()
+
+    def OnScrollRight(self, evt):
+        """Make both windows have matching scroll position"""
+        wx.PostEvent(self._left[1], evt)
+        evt.Skip()
+
 #--------------------------------------------------------------------------#
 class DiffCtrl(ed_stc.EDSTC):
     """Custom text control for displaying diff files in"""
@@ -226,7 +243,7 @@ def GenerateDiff(left, right, tabwidth=8, html=False):
         tmp.close()
         webbrowser.open_new_tab(name)
     else:
-        return list(difflib.Differ().compare(lfile, rfile))
+        return difflib.Differ().compare(lfile, rfile)
 
 def CleanupTempFiles():
     """Cleanup all temporary diff files"""
