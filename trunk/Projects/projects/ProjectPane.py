@@ -47,8 +47,16 @@ else: # Other/Linux
     #FILEMAN = 'Konqueror'
     #FILEMAN_CMD = 'konqueror'
 
-ALT_PROJECT_COLOR = wx.Colour(205,220,243)    
-ALT_BACKGROUND_COLOR = wx.Colour(232,239,250)
+#ALT_PROJECT_COLOR = wx.Colour(205,220,243)    
+#ALT_BACKGROUND_COLOR = wx.Colour(232,239,250)
+#ALT_PROJECT_COLOR = wx.Colour(232,239,250)    
+#ALT_BACKGROUND_COLOR = wx.Colour(250,250,255)
+#ALT_PROJECT_COLOR = wx.Colour(255,255,255)    
+#ALT_BACKGROUND_COLOR = wx.Colour(255,255,255)
+ODD_PROJECT_COLOR = wx.Colour(232,239,250)
+EVEN_PROJECT_COLOR = wx.Colour(232,239,250)
+ODD_BACKGROUND_COLOR = wx.Colour(255,255,255)
+EVEN_BACKGROUND_COLOR = wx.Colour(255,255,255)
     
 # i18n support
 _ = wx.GetTranslation
@@ -364,8 +372,11 @@ class ProjectTree(wx.Panel):
         self.tree.SetItemImage(node, self.icons['folder-open'], wx.TreeItemIcon_Expanded)
         if save:
             self.saveProjects()
+        self.tree.SetItemBold(node)
         if not(self.tree.GetChildrenCount(self.root, False) % 2):
-            self.tree.SetItemBackgroundColour(node, ALT_PROJECT_COLOR)
+            self.tree.SetItemBackgroundColour(node, ODD_PROJECT_COLOR)
+        else:
+            self.tree.SetItemBackgroundColour(node, EVEN_PROJECT_COLOR)
         return node
 
     def removeSelectedProject(self):
@@ -943,8 +954,10 @@ class ProjectTree(wx.Panel):
         elif os.path.isdir(itempath):
             node = self.addFolder(parent, name)
         if self.tree.GetItemParent(parent) == self.root:
-            if self.tree.GetItemBackgroundColour(parent) == ALT_PROJECT_COLOR:
-                self.tree.SetItemBackgroundColour(node, ALT_BACKGROUND_COLOR)
+            if self.tree.GetItemBackgroundColour(parent) == ODD_PROJECT_COLOR:
+                self.tree.SetItemBackgroundColour(node, ODD_BACKGROUND_COLOR)
+            else:
+                self.tree.SetItemBackgroundColour(node, EVEN_BACKGROUND_COLOR)
         else:
             self.tree.SetItemBackgroundColour(node, self.tree.GetItemBackgroundColour(parent))
         return node
