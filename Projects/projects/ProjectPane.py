@@ -853,7 +853,17 @@ class ProjectTree(wx.Panel):
                 open(path2, 'w').write(content2)
             
             # Run comparison program
-            subprocess.call([self.commands['diff'], path2, path1]) 
+            if self.useBuiltinDiff:
+                from difflib import HtmlDiff
+                hd = HtmlDiff()
+                html = hd.make_file(open(path2).readlines(), open(path1).readlines(),
+                                    fromdesc=os.path.basename(path2),
+                                    todesc=os.path.basename(path1))
+                difffile = os.path.join(self.tempdir, os.path.basename(path)+'.html')
+                open(difffile, 'w').write(html)
+                subprocess.call([FILEMAN_CMD, difffile]) 
+            else:
+                subprocess.call([self.commands['diff'], path2, path1]) 
             
         t = threading.Thread(target=diff, args=(path, rev1, date1, rev2, date2))
         t.setDaemon(True)
