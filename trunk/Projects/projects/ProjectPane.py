@@ -600,8 +600,8 @@ class ProjectTree(wx.Panel):
             return
         from HistWin import HistoryWindow
         for node in self.getSelectedNodes():
-            win = HistoryWindow(self, 'Revision History', self, node, 
-                                self.tree.GetPyData(node)['path'])
+            path = self.tree.GetPyData(node)['path']
+            win = HistoryWindow(self, path, self, node, path)
             win.Show()
         
     def scCommit(self, nodes, **options): 
