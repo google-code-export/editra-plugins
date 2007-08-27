@@ -46,8 +46,9 @@ else: # Other/Linux
     DIFF_CMD = None
     #FILEMAN = 'Konqueror'
     #FILEMAN_CMD = 'konqueror'
-    
-ALT_BACKGROUND_COLOR = wx.Colour(240,252,255)
+
+ALT_PROJECT_COLOR = wx.Colour(205,220,243)    
+ALT_BACKGROUND_COLOR = wx.Colour(232,239,250)
     
 # i18n support
 _ = wx.GetTranslation
@@ -364,7 +365,7 @@ class ProjectTree(wx.Panel):
         if save:
             self.saveProjects()
         if not(self.tree.GetChildrenCount(self.root, False) % 2):
-            self.tree.SetItemBackgroundColour(node, ALT_BACKGROUND_COLOR)
+            self.tree.SetItemBackgroundColour(node, ALT_PROJECT_COLOR)
         return node
 
     def removeSelectedProject(self):
@@ -941,7 +942,11 @@ class ProjectTree(wx.Panel):
             node = self.addFile(parent, name)
         elif os.path.isdir(itempath):
             node = self.addFolder(parent, name)
-        self.tree.SetItemBackgroundColour(node, self.tree.GetItemBackgroundColour(parent))
+        if self.tree.GetItemParent(parent) == self.root:
+            if self.tree.GetItemBackgroundColour(parent) == ALT_PROJECT_COLOR:
+                self.tree.SetItemBackgroundColour(node, ALT_BACKGROUND_COLOR)
+        else:
+            self.tree.SetItemBackgroundColour(node, self.tree.GetItemBackgroundColour(parent))
         return node
 
     def addFolder(self, parent, name):
