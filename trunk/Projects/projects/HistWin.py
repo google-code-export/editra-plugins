@@ -77,6 +77,11 @@ class HistoryWindow(wx.Frame):
         self._sb.Destroy()
         self.Destroy()
 
+    def Show(self, show=True):
+        """Show and center the dialog"""
+        self.CenterOnScreen()
+        wx.Frame.Show(self, show)
+
     def StartBusy(self):
         """Start the window as busy"""
         self.SetStatusText(_("Retrieving File History") + u"...", SB_INFO)
@@ -210,18 +215,15 @@ class HistoryPane(wx.Panel):
         """Handle button events"""
         selected = self.getSelectedItems()
         if not selected:
-            #print "Diff to previous"
             self.projects.compareRevisions(self.path)
         elif len(selected) == 1:
-            #print "Diff to selected"
             rev = self._list.GetItem(selected[0], self._list.REV_COL).GetText().strip()
             self.projects.compareRevisions(self.path, rev1=rev)
         else:
-            #print "Diff selected"
             rev1 = self._list.GetItem(selected[0], self._list.REV_COL).GetText().strip()
             rev2 = self._list.GetItem(selected[-1], self._list.REV_COL).GetText().strip()
             self.projects.compareRevisions(self.path, rev1=rev1, rev2=rev2)
-            
+
     def getSelectedItems(self):
         item = -1
         selected = []
@@ -249,7 +251,9 @@ class HistoryPane(wx.Panel):
             for i in selected[1:]:
                 if i == index:
                     continue
-                self._list.SetItemState(i, 0, 0)
+                else:
+                    break
+            self._list.SetItemState(i, 0, wx.LIST_STATE_SELECTED)
 
     def OnItemDeselected(self, evt):
         """Update text control when an item is selected in the
