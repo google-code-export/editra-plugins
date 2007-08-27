@@ -201,6 +201,7 @@ class HistoryPane(wx.Panel):
         self._btn = wx.Button(self, label=_(self.BTN_LBL1))
         self.projects = projects
         self.path = path
+        self.selected = -1
 
         # Layout
         self._DoLayout()
@@ -255,6 +256,16 @@ class HistoryPane(wx.Panel):
             selected.append(item)
         return selected
         
+    def selectOnly(self, indices):
+        """ Select only the given indices """
+        item = -1
+        while True:
+            item = self._list.GetNextItem(item, wx.LIST_NEXT_ALL, wx.LIST_STATE_SELECTED)
+            if item == -1:
+                break
+            if item not in indices:
+                self._list.SetItemState(item, 0, wx.LIST_STATE_SELECTED)
+                    
     def OnItemSelected(self, evt):
         """Update text control when an item is selected in the
         list control.
@@ -265,22 +276,19 @@ class HistoryPane(wx.Panel):
         date = self._list.GetItem(index, self._list.DATE_COL).GetText()
         self._txt.SetValue(self._list.GetFullLog(rev, date))
         self.updateButton()
-
-        # Only allow two selections at the most
-        selected = self.getSelectedItems()
-        if len(selected) > 2:
-            for i in selected[1:]:
-                if i == index:
-                    continue
-                else:
-                    break
-            self._list.SetItemState(i, 0, wx.LIST_STATE_SELECTED)
+        self.selectOnly((index,self.selected))
+        self.selected = index
 
     def OnItemDeselected(self, evt):
         """Update text control when an item is selected in the
         list control.
 
         """
+        selected = self.getSelectedItems()
+        if not(selected):
+            self.selected = -1
+        elif len(selected) == 1:
+            self.selected = selected[0]
         self.updateButton()
         
     def updateButton(self):
