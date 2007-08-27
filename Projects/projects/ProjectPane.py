@@ -186,6 +186,7 @@ class ProjectTree(wx.Panel):
             value.filters = self.filters
                         
         self.watchers = {}
+        self.tempdir = None
         self.clipboard = {'files':[], 'delete':False}
         self.isClosing = False
         
@@ -772,7 +773,7 @@ class ProjectTree(wx.Panel):
         self.GetParent().StopBusy()
         
     def compareRevisions(self, path, rev1=None, date1=None, rev2=None, date2=None):
-        def diff():
+        def diff(path, rev1, date1, rev2, date2):
             # Only do files
             if os.path.isdir(path):
                 for file in os.listdir(path):
@@ -826,38 +827,35 @@ class ProjectTree(wx.Panel):
                                             style=wx.OK|wx.ICON_ERROR).ShowModal()
                 content1 = content1[0]
                 ext1 = 'previous'
+                
+            if not self.tempdir:
+                import tempfile
+                self.tempdir = tempfile.mkdtemp()
 
             # Write temporary files
             delete = []
             path1 = path2 = None
             if content1 and content2:
+                path = os.path.join(self.tempdir, os.path.basename(path))
                 path1 = '%s.%s' % (path, ext1)
                 path2 = '%s.%s' % (path, ext2)
                 open(path1, 'w').write(content1)
                 open(path2, 'w').write(content2)
-                delete.append(path1)
-                delete.append(path2)
             elif content1:
                 path1 = path
+                path = os.path.join(self.tempdir, os.path.basename(path))
                 path2 = '%s.%s' % (path, ext1)
                 open(path2, 'w').write(content1)
-                delete.append(path2)
             elif content2:
                 path1 = path
+                path = os.path.join(self.tempdir, os.path.basename(path))
                 path2 = '%s.%s' % (path, ext2)
                 open(path2, 'w').write(content2)
-                delete.append(path2)
             
             # Run comparison program
-            print path1, path2
             subprocess.call([self.commands['diff'], path2, path1]) 
-
-            # Clean up
-            time.sleep(3)            
-            for item in delete:
-                os.remove(item)
             
-        t = threading.Thread(target=diff)
+        t = threading.Thread(target=diff, args=(path, rev1, date1, rev2, date2))
         t.setDaemon(True)
         t.start()        
 
@@ -1344,6 +1342,9 @@ class ProjectTree(wx.Panel):
         # Kill all watcher threads
         for value in self.watchers.values():
             value.pop()
+        # Clean up tempdir
+        if self.tempdir:
+            shutil.rmtree(self.tempdir, ignore_errors=True)
     
             
 class ProjectPane(wx.Panel):
