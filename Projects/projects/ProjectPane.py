@@ -50,6 +50,27 @@ _ = wx.GetTranslation
 ID_PROJECTPANE = wx.NewId()
 ID_PROJECTTREE = wx.NewId()
 
+
+edEVT_SYNC_NODES = wx.NewEventType()
+EVT_SYNC_NODES = wx.PyEventBinder(edEVT_SYNC_NODES, 1)
+class SyncNodesEvent(wx.PyCommandEvent):
+    """Event to signal that nodes need updating"""
+    def __init__(self, etype, eid, value=[]):
+        wx.PyCommandEvent.__init__(self, etype, eid)
+        self._etype = etype
+        self._id = eid
+        self._value = value
+
+    def GetEvtType(self):
+        return self._etype
+
+    def GetId(self):
+        return self._id
+
+    def GetValue(self):
+        return self._value
+
+
 class MyTreeCtrl(wx.TreeCtrl):
 
     def __init__(self, parent, id, pos, size, style, log):
@@ -180,6 +201,7 @@ class ProjectTree(wx.Panel):
         self.Bind(wx.EVT_TREE_END_LABEL_EDIT, self.OnEndEdit, self.tree)
         self.Bind(wx.EVT_TREE_ITEM_ACTIVATED, self.OnActivate, self.tree)
         self.Bind(wx.EVT_CONTEXT_MENU, self.OnContextMenu)
+        self.Bind(EVT_SYNC_NODES, self.OnSyncNode)
         
         try:
             import extern.flatnotebook as fnb
@@ -365,7 +387,7 @@ class ProjectTree(wx.Panel):
                 children.append(child)
         return children
 
-    def syncNode(self, added, modified, deleted, parent):
+    def OnSyncNode(self, evt):
         """
         Synchronize the tree nodes with the file system changes
         
@@ -376,6 +398,7 @@ class ProjectTree(wx.Panel):
         parent -- tree node corresponding to the directory
         
         """            
+        added, modified, deleted, parent = evt.GetValue()
         children = {}
         for child in self.getChildren(parent):
             children[self.tree.GetItemText(child)] = child
@@ -417,6 +440,8 @@ class ProjectTree(wx.Panel):
             self.scStatus(items)
         
         self.tree.SortChildren(parent)
+        
+        evt.Skip()
 
     def getSelectedNodes(self):
         return self.tree.GetSelections()
@@ -854,7 +879,7 @@ class ProjectTree(wx.Panel):
         # is emptied, the thread stops.
         flag = [1]
         data['watcher'] = w = threading.Thread(target=self.watchDirectory, 
-                                               args=(path, self.syncNode), 
+                                               args=(path,), 
                                                kwargs={'flag':flag, 'data':node})
         w.flag = flag
         w.start()
@@ -1252,7 +1277,7 @@ class ProjectTree(wx.Panel):
             else:
                 nb.OnDrop([item])
 
-    def watchDirectory(self, path, func, data=None, flag=True, delay=2):
+    def watchDirectory(self, path, data=None, flag=True, delay=2):
         """
         Watch a directory for changes
     
@@ -1297,7 +1322,9 @@ class ProjectTree(wx.Panel):
             
             # Do callback if something changed
             if added or modified or deleted:
-                func(added, modified, deleted, data)
+                evt = SyncNodesEvent(edEVT_SYNC_NODES, self.GetId(), 
+                                       (added, modified, deleted, data))
+                wx.PostEvent(self, evt)
             
             # Check for the kill signal every second until the delay is finished
             for i in range(delay):
