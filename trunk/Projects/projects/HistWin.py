@@ -298,10 +298,7 @@ class HistoryPane(wx.Panel):
         elif len(selected) == 1:
             self._btn.SetLabel(self.BTN_LBL2)
         else:
-            self._btn.SetLabel(self.BTN_LBL3)
-               
-    def Filter(self, query):
-        self._list.Populate(None, query)
+            self._btn.SetLabel(self.BTN_LBL3)               
 
 #-----------------------------------------------------------------------------#
 
@@ -331,37 +328,54 @@ class HistList(wx.ListCtrl,
         self.InsertColumn(self.AUTH_COL, _("Author"))
         self.InsertColumn(self.COM_COL, _("Log Message"))
         wx.CallAfter(self._frame.StartBusy)
-        self.DeleteAllItems()
         projects.scCommand([node], 'history', callback=self.Populate)
         self.SetColumnWidth(self.COM_COL, wx.LIST_AUTOSIZE)
         self.SendSizeEvent()
 
     def OnUpdateItems(self, evt):
-        self.DeleteAllItems()
+        index = -1
+        append = False
+        self.Freeze()
         for item in evt.GetValue():
-            index = self.InsertStringItem(sys.maxint, item['revision'])
-            self.SetStringItem(index, 1, item['date'])
-            self.SetStringItem(index, 2, item['author'])
-
+            # Shorten log message for list item
             if 'shortlog' not in item:
                 item['shortlog'] = log = item['log'].strip()
                 if len(log) > 45:
                     log = log[:45] + u'...'
                     item['shortlog'] = log
-                    
-            self.SetStringItem(index, 3, item['shortlog'])
+
+            # Create a key for searching all fields
+            if 'key' not in item:
+                item['key'] = ('%s %s %s %s' % (item['revision'],
+                                               item['date'],
+                                               item['author'],
+                                               re.sub(r'\s+', ' ', item['log']))).lower()
+
+            if append:
+                index = self.InsertStringItem(sys.maxint, '')
+            else:
+                index = self.GetNextItem(index)
+                if index == -1:
+                    append = True
+                    index = self.InsertStringItem(sys.maxint, '')
+            
+            if self.GetItemText(index).strip() != item['revision']:
+                self.SetStringItem(index, 0, item['revision'])
+                self.SetStringItem(index, 1, item['date'])
+                self.SetStringItem(index, 2, item['author'])
+                self.SetStringItem(index, 3, item['shortlog'])
 
             if index % 2:
                 syscolor = wx.SystemSettings_GetColour(wx.SYS_COLOUR_3DLIGHT)
                 color = AdjustColour(syscolor, 75)
                 self.SetItemBackgroundColour(index, color)
 
-            if 'key' not in item:
-                item['key'] = ('%s %s %s %s' % (item['revision'],
-                                               item['date'],
-                                               item['author'],
-                                               re.sub(r'\s+', ' ', item['log']))).lower()
-        evt.Skip()
+        # We never got to append mode, delete the extras
+        if not append:
+            for i in range(self.GetItemCount()-1, index, -1):
+                self.DeleteItem(i)
+
+        self.Thaw()
                 
     def GetFullLog(self, rev, timestamp):
         """Get the full log entry for the given revision"""
@@ -371,26 +385,28 @@ class HistList(wx.ListCtrl,
         else:
             return wx.EmptyString
 
-    def Populate(self, data, query=''):
+    def Populate(self, data):
         """Populate the list with the history data"""
+        self._data = data
+        evt = UpdateItemsEvent(edEVT_UPDATE_ITEMS, self.GetId(), data)
+        wx.PostEvent(self, evt)                                
+        wx.CallAfter(self._frame.StopBusy)
+
+    def Filter(self, query):
         query = [x for x in query.strip().lower().split() if x]
         if query:
             newdata = []
             for item in self._data:
+                i = 0
                 for word in query:
                     if word in item['key']:
-                        newdata.append(item)
-                        break
-            data = newdata
-        elif data:
-            self._data = data
+                        i += 1
+                if i == len(query):
+                    newdata.append(item)
         else:
-            data = self._data
-        
-        evt = UpdateItemsEvent(edEVT_UPDATE_ITEMS, self.GetId(), data)
-        wx.PostEvent(self, evt)
-                                
-        wx.CallAfter(self._frame.StopBusy)
+            newdata = self._data
+        evt = UpdateItemsEvent(edEVT_UPDATE_ITEMS, self.GetId(), newdata)
+        wx.PostEvent(self, evt)                                
 
 #-----------------------------------------------------------------------------#
 
@@ -429,7 +445,7 @@ class LogSearch(wx.SearchCtrl):
 
     def OnSearch(self, evt):
         """Search logs and filter"""
-        self.GetParent().Filter(self.GetValue())
+        self.GetParent()._list.Filter(self.GetValue())
 
 #-----------------------------------------------------------------------------#
 # Helper functions
