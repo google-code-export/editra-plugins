@@ -1594,6 +1594,7 @@ _file_template = """
 </html>"""
 
 _styles = """
+        body {font-size:small}
         table.diff {font-family:Courier; border:medium;}
         .diff_header {background-color:#e0e0e0}
         td.diff_header {text-align:right}
