@@ -31,16 +31,19 @@ if wx.Platform == '__WXMAC__': # MAC
     FILEMAN = 'Finder'
     FILEMAN_CMD = 'open'
     TRASH = 'Trash'
+    DIFF_CMD = 'opendiff'
 elif wx.Platform == '__WXMSW__': # Windows
     FILEMAN = 'Explorer'
     FILEMAN_CMD = 'explorer'
     TRASH = 'Recycle Bin'
+    DIFF_CMD = None
 else: # Other/Linux
     # TODO how to check what desktop environment is in use
     # this will work for Gnome but not KDE
     FILEMAN = 'Nautilus'
     FILEMAN_CMD = 'nautilus'
     TRASH = 'Trash'
+    DIFF_CMD = None
     #FILEMAN = 'Konqueror'
     #FILEMAN_CMD = 'konqueror'
     
@@ -176,11 +179,13 @@ class ProjectTree(wx.Panel):
                         '*.a','*.o','.poem','.dll','._*','.localized',
                         '.svn','*.pyc','*.bak','#*','*.pyo','*%*',
                         '*.previous','*.swp','.#*'])
-        self.commands = {
-            'diff': 'opendiff',
-        }                
+        self.commands = {}
+        if DIFF_CMD:
+            self.commands['diff'] = DIFF_CMD
+            self.useBuiltinDiff = False
+        else:
+            self.useBuiltinDiff = True
         self.syncWithNotebook = True
-        self.useBuiltinDiff = False
         self.sourceControl = {'cvs': CVS(), 'svn': SVN()}
         for key, value in self.sourceControl.items():
             value.filters = self.filters
@@ -853,7 +858,7 @@ class ProjectTree(wx.Panel):
                 open(path2, 'w').write(content2)
             
             # Run comparison program
-            if self.useBuiltinDiff:
+            if self.useBuiltinDiff or 'diff' not in self.commands:
                 from difflib import HtmlDiff
                 hd = HtmlDiff()
                 html = hd.make_file(open(path2).readlines(), open(path1).readlines(),
