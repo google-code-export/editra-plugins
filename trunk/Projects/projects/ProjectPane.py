@@ -129,6 +129,7 @@ class ProjectTree(wx.Panel):
                                | wx.TR_HIDE_ROOT
                                , self.log)
 
+        # Load icons for use later
         icons = self.icons = {}
         menuicons = self.menuicons = {}
 
@@ -192,37 +193,59 @@ class ProjectTree(wx.Panel):
         self.tree.SetImageList(il)
         self.il = il
         
+        #
+        # Setup default configuration
+        #
+        
+        # Names of files to filter out of tree
         self.filters = sorted(['CVS','dntnd','.DS_Store','.dpp','.newpp','*~',
                         '*.a','*.o','.poem','.dll','._*','.localized',
                         '.svn','*.pyc','*.bak','#*','*.pyo','*%*',
                         '*.previous','*.swp','.#*'])
+        
+        # Commands for external programs
         self.commands = {}
+        
+        # Setup builtin or external diff program
+        self.useBuiltinDiff = True
         if DIFF_CMD:
             self.commands['diff'] = DIFF_CMD
             self.useBuiltinDiff = False
-        else:
-            self.useBuiltinDiff = True
+
+        # Keep tree view synchronized with notebook
         self.syncWithNotebook = True
+        
+        # Create source control objects
         self.sourceControl = {'cvs': CVS(), 'svn': SVN()}
         for key, value in self.sourceControl.items():
             value.filters = self.filters
-                        
+        
+        # Threads that watch directories corresponding to open folders
         self.watchers = {}
+        
+        # Temporary directory for all working files
         self.tempdir = None
+        
+        # Information for copy/cut/paste of files
         self.clipboard = {'files':[], 'delete':False}
+        
+        # Notebook tab is opening because another was closed
         self.isClosing = False
         
         # Number of seconds to allow a source control command to run
         # before timing out
         self.scTimeout = 60
         
+        # Create root of tree
         self.root = self.tree.AddRoot('Projects')
         self.tree.SetPyData(self.root, None)
         self.tree.SetItemImage(self.root, self.icons['folder'], wx.TreeItemIcon_Normal)
         self.tree.SetItemImage(self.root, self.icons['folder-open'], wx.TreeItemIcon_Expanded)
 
+        # Load configuration settings
         self.loadSettings()
 
+        # Bind events
         self.Bind(wx.EVT_TREE_ITEM_EXPANDED, self.OnItemExpanded, self.tree)
         self.Bind(wx.EVT_TREE_ITEM_COLLAPSED, self.OnItemCollapsed, self.tree)
         #self.Bind(wx.EVT_TREE_SEL_CHANGED, self.OnSelChanged, self.tree)
@@ -327,6 +350,7 @@ class ProjectTree(wx.Panel):
         self.saveCommands()
         self.saveSourceControl()
         self.saveSyncWithNotebook()
+        self.saveUseBuiltinDiff()
 
     def saveProjects(self):
         """ Save projects to config file """
