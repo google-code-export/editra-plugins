@@ -22,6 +22,7 @@ This plugin is still in early development, but is quite useful in its current im
   * Multiple file/directory selections
   * Progress indicator for long operations
   * Automatically display file from currently selected editor tab in project view (if file exists in a project)
+  * Utilize system's Trash / Recycle Bin
 
 The following are the currently implemented source control (CVS and Subversion) features and can be executed on either files or directories.  The status features are automatic.  Other features are accessed using the right-click menu.
 
@@ -34,6 +35,7 @@ The following are the currently implemented source control (CVS and Subversion) 
   * Configurable commands for CVS and Subversion
   * Add to repository
   * Remove from repository
+  * Revision history window with ability to compare playpen version to any previous version, as well being able to compare any two repository versions
 
 
 = Planned Features =
@@ -41,14 +43,11 @@ The following are the currently implemented source control (CVS and Subversion) 
 The following source control features are planned for the future.  All source control features will work with individual files or on directories (recursively).
 
   * Configurable environment variables based on file/directory path
-  * Revision history window with ability to compare playpen version to any previous version, as well being able to compare any two repository versions
-  * Synchronizing drag-and-drop and general file management functions with source control functions (e.g., renames, deletes, etc.)
 
 Other source control commands will also be added as appropriate.
 
 The following list of features are planned for general file management and editing.
 
-  * Utilize system's Trash / Recycle Bin
   * Drag-and-drop moves, additions, and deletions
   * File type appropriate icons
   * Interactive filtering of tree (like in wxPython demo app)
