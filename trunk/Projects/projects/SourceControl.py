@@ -173,3 +173,177 @@ class SourceControl(object):
         except: pass
         try: p.stdin.close()
         except: pass
+
+# Methods that need to be overridden in subclasses        
+        
+    def isControlled(self, path):
+        """ 
+        Is the path controlled by source control? 
+        
+        Required Arguments:
+        path -- absolute path to file or directory
+        
+        Returns: boolean indicating whether or not the file or 
+            directory is under source control
+        
+        """
+        raise NotImplementedError
+        
+    def add(self, paths):
+        """ 
+        Add paths to the repository 
+        
+        Required Arguments:
+        paths -- list of paths to add to the repository
+        
+        Returns: nothing
+        
+        """
+        raise NotImplementedError
+        
+    def checkout(self, paths):
+        """ 
+        Checks out paths from repository
+        
+        Required Arguments:
+        paths -- list of paths to check out from repository
+        
+        Returns: nothing
+        
+        """
+        raise NotImplementedError
+        
+    def commit(self, paths, message=''):
+        """ 
+        Commit paths to the repository 
+        
+        Required Arguments:
+        paths -- list of paths to commit
+        
+        Keyword Arguments:
+        message -- text for log message
+        
+        Returns: nothing
+        
+        """
+        raise NotImplementedError
+                                   
+    def diff(self, paths):
+        """
+        Diff paths to repository revisions
+        
+        Required Arguments:
+        paths -- list of paths to diff
+        
+        Returns: nothing
+        
+        """
+        raise NotImplementedError
+        
+    def history(self, paths, history=None):
+        """
+        Retrieve history of specified paths
+        
+        Required Arguments:
+        paths -- list of paths to retrive the history of
+        
+        Keyword Arguments:
+        history -- list to store the history elements in
+        
+        Returns: list of dictionaries.  Each dictionary should have at least
+            five keys: path (absolute path of the file), revision
+            (revision name/number), author (name of person to commit),
+            date (string containing date of commit), and log
+            (log message of commit).  Other keys may be present, but 
+            are not used.
+        
+        """
+        raise NotImplementedError
+        
+    def remove(self, paths):
+        """ 
+        Recursively remove paths from repository 
+        
+        Required Arguments:
+        paths -- list of paths to remove.  These can be files or directories.
+            If a directory is specified, it is removed recursively.
+            
+        Returns: nothing
+        
+        """
+        raise NotImplementedError
+        
+    def status(self, paths, recursive=False, status=None):
+        """ 
+        Get SVN status information from given paths
+        
+        Required Arguments:
+        paths -- list of paths to get status of.
+        
+        Keyword Arguments:
+        recursive -- by default, only files/directories in the current
+            directory are queried.  If recursive is set to True, then
+            the directory status should be recursive.
+         status -- dictionary to use to hold status information.  
+         
+         Returns: dictionary containing status information.  The keys
+             in the status dictionary are the names of the files/directories
+             withinin the given path.  If the given path is a directory, the keys
+             will be the names of the files/directories in that directory.
+             If the path is a file, the key is the name of that file.  These
+             are just filenames, not absolute paths.
+        
+             Each value in the status dictionary is also a dictionary.
+             Only one key is required: 'status'.  The value in the 'status'
+             key is one of: 'uptodate', 'added', 'conflict', 'deleted', or 
+             'modified'.
+             
+             Other keys may be used in the future for added information.
+        
+        """
+        raise NotImplementedError
+
+    def update(self, paths):
+        """ 
+        Recursively update paths 
+        
+        Required Arguments:
+        paths -- list of paths to update to the repository revision.  
+           This update should always be recursive.
+        
+        Returns: nothing
+        
+        """
+        raise NotImplementedError
+            
+    def revert(self, paths):
+        """ 
+        Recursively revert paths to repository version 
+        
+        Required Arguments:
+        paths -- list of paths to revert.  This reversion should be done
+            recursively.
+            
+        Returns: nothing
+        
+        """
+        raise NotImplementedError
+            
+    def fetch(self, paths, rev=None, date=None):
+        """ 
+        Fetch a copy of the paths' contents 
+        
+        Required Arguments:
+        paths -- list of paths to fetch the contents of
+        
+        Keyword Arguments:
+        rev -- name/number of revision to fetch rather than current
+            repository revision
+        date -- date of revision to fetch
+        
+        Returns: list of strings where each string contains the contents
+           of a given path.  If the path could not be retrieved, the value
+           of that list item should be None.
+        
+        """
+        raise NotImplementedError
