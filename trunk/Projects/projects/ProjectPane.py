@@ -220,6 +220,8 @@ class ProjectTree(wx.Panel):
         self.sourceControl = {'cvs': CVS(), 'svn': SVN()}
         for key, value in self.sourceControl.items():
             value.filters = self.filters
+
+        # End configuration
         
         # Threads that watch directories corresponding to open folders
         self.watchers = {}
@@ -346,6 +348,7 @@ class ProjectTree(wx.Panel):
                 self.useBuiltinDiff = False
 
     def saveSettings(self):
+        """ Save all settings """
         self.saveProjects()
         self.saveFilters()
         self.saveCommands()
@@ -514,10 +517,12 @@ class ProjectTree(wx.Panel):
         return paths
         
     def OnPageClosing(self, evt):
+        """ Notebook tab was closed """
         self.isClosing = True
         evt.Skip()
         
     def OnPageChanged(self, evt):
+        """ Notebook tab was changed """
         evt.Skip()
 
         if not self.syncWithNotebook:
@@ -582,6 +587,7 @@ class ProjectTree(wx.Panel):
         self.log.WriteText("OnBeginEdit\n")
  
     def OnEndEdit(self, event):
+        """ Finish editing tree node label """
         if event.IsEditCancelled():
             return
         node = event.GetItem()
@@ -624,7 +630,7 @@ class ProjectTree(wx.Panel):
         self.scStatus([parent])
         
     def getSCSystem(self, path):
-        # Make sure that the directory is under source control
+        """ Determine source control system being used on path if any """
         sc = None
         for key, value in self.sourceControl.items():
             if value.isControlled(path):
@@ -649,6 +655,7 @@ class ProjectTree(wx.Panel):
         self.scCommand(nodes, 'status') 
         
     def scHistory(self, nodes):
+        """ Open source control history window """
         if not nodes:
             return
         from HistWin import HistoryWindow
@@ -658,6 +665,7 @@ class ProjectTree(wx.Panel):
             win.Show()
         
     def scCommit(self, nodes, **options): 
+        """ Commit files to source control """
         while True:
             paths = list()
             for node in nodes:
@@ -810,7 +818,7 @@ class ProjectTree(wx.Panel):
         wx.PostEvent(self, UpdateStatusEvent(ppEVT_UPDATE_STATUS, self.GetId(), updates))
 
     def OnUpdateStatus(self, evt):
-        # Apply updates to tree view
+        """ Apply status updates to tree view """
         for update in evt.GetValue():
             update = list(update)
             method = update.pop(0)
@@ -825,6 +833,17 @@ class ProjectTree(wx.Panel):
         self.GetParent().StopBusy()
         
     def compareRevisions(self, path, rev1=None, date1=None, rev2=None, date2=None):
+        """
+        Compare the playpen path to a specific revision, or compare two revisions
+        
+        Required Arguments:
+        path -- absolute path of file to compare
+        
+        Keyword Arguments:
+        rev1/date1 -- first file revision/date to compare against
+        rev2/date2 -- second file revision/date to campare against
+        
+        """
         def diff(path, rev1, date1, rev2, date2):
             # Only do files
             if os.path.isdir(path):
@@ -906,15 +925,7 @@ class ProjectTree(wx.Panel):
             
             # Run comparison program
             if self.useBuiltinDiff or 'diff' not in self.commands:
-#                 from difflib import HtmlDiff
-#                 hd = HtmlDiff()
-#                 html = hd.make_file(open(path2).readlines(), open(path1).readlines(),
-#                                     fromdesc=os.path.basename(path2),
-#                                     todesc=os.path.basename(path1))
-#                 difffile = os.path.join(self.tempdir, os.path.basename(path)+'.html')
-#                 open(difffile, 'w').write(html)
-#                 subprocess.call([FILEMAN_CMD, difffile]) 
-                  diffwin.GenerateDiff(path2, path1, html=True)
+                diffwin.GenerateDiff(path2, path1, html=True)
             else:
                 subprocess.call([self.commands['diff'], path2, path1]) 
             
@@ -1190,6 +1201,7 @@ class ProjectTree(wx.Panel):
         menu.Destroy()
         
     def onPopupNewFolder(self, event):
+        """ Create a new folder """
         node = self.getSelectedNodes()[0]
         path = self.tree.GetPyData(node)['path']
         if not os.path.isdir(path):
@@ -1205,6 +1217,7 @@ class ProjectTree(wx.Panel):
         os.makedirs(newpath)
 
     def onPopupNewFile(self, event):
+        """ Create a new file """
         node = self.getSelectedNodes()[0]
         path = self.tree.GetPyData(node)['path']
         if not os.path.isdir(path):
@@ -1241,9 +1254,7 @@ class ProjectTree(wx.Panel):
         return self.OnActivate(event)
         
     def onPopupExecuteCommand(self, event):
-#       ecd = ExecuteCommandDialog(self, wx.NewId())
-#       rc = ecd.ShowModal()
-#       return rc
+        """ Execute commands on file system tree """
     
         ted = wx.TextEntryDialog(self, 
               _('The following command will be executed on all selected\n' \
@@ -1480,6 +1491,7 @@ class ProjectTree(wx.Panel):
                 time.sleep(1)
         
     def __del__(self):
+        """ Clean up resources """
         # Kill all watcher threads
         for value in self.watchers.values():
             value.pop()
@@ -1687,8 +1699,8 @@ class CommitDialog(wx.Dialog):
         self.CenterOnParent()
 
     def _DefaultMessage(self, files):
-        """Put the default message in the dialog and the
-        given list of files
+        """
+        Put the default message in the dialog and the given list of files
 
         """
         msg = list()
