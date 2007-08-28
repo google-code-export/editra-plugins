@@ -1,0 +1,295 @@
+#!/usr/bin/env python
+############################################################################
+#    Copyright (C) 2007 Cody Precord                                       #
+#    cprecord@editra.org                                                   #
+#                                                                          #
+#    Editra is free software; you can redistribute it and#or modify        #
+#    it under the terms of the GNU General Public License as published by  #
+#    the Free Software Foundation; either version 2 of the License, or     #
+#    (at your option) any later version.                                   #
+#                                                                          #
+#    Editra is distributed in the hope that it will be useful,             #
+#    but WITHOUT ANY WARRANTY; without even the implied warranty of        #
+#    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the         #
+#    GNU General Public License for more details.                          #
+#                                                                          #
+#    You should have received a copy of the GNU General Public License     #
+#    along with this program; if not, write to the                         #
+#    Free Software Foundation, Inc.,                                       #
+#    59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             #
+############################################################################
+
+__author__ = "Cody Precord <cprecord@editra.org>"
+__svnid__ = "$Id$"
+__revision__ = "$Revision$"
+
+import os
+import sys
+import re
+from SourceControl import SourceControl
+
+#-----------------------------------------------------------------------------#
+class GIT(SourceControl):
+    """Source control implementation to add GIT support to the 
+    Projects Plugin.
+
+    """
+    command = 'git'
+    
+    def isControlled(self, path):
+        """ Is the path controlled by GIT? 
+        The repository directory is only kept in the root of the
+        project so must check recursively from given path to root
+        to make sure if it is controlled or not
+
+        """
+        def checkDirectory(directory):
+            if os.path.isdir(directory):
+                if os.path.exists(os.path.join(directory, '.git', 'HEAD')):
+                    return True
+            else:
+                return False
+
+        root = self.findRoot(path)
+        untracked = [ root + x for x in self.untrackedFiles(path)]
+
+        if path in untracked:
+            return False
+
+        tmp = path.split(os.path.sep)
+        # TODO test this on windows
+        if not sys.platform.startswith('win'):
+            tmp.insert(0, '/')
+        plen = len(tmp)
+        for piece in xrange(plen):
+            if checkDirectory(os.path.join(*tmp[:plen - piece])):
+                return True
+        return False
+
+    def add(self, paths):
+        """Add paths to repository"""
+        for path in paths:
+            root, files = self.splitFiles(path, forcefiles=True)
+            dirs = sorted([x for x in files if os.path.isdir(x)])
+            files = sorted([x for x in files if not os.path.isdir(x)])
+            # Add all directories individually first
+            for d in dirs:
+                out = self.run(root, ['add', d])
+                self.logOutput(out)
+            # Add all files
+            if files:
+                out = self.run(root, ['add'] + files)
+                self.logOutput(out)                
+        
+    def checkout(self, paths):
+        """Checkout the given paths"""
+        for path in paths:
+            root, files = self.splitFiles(path, forcefiles=True)
+            out = self.run(root, ['clone'] + files)
+            self.logOutput(out)
+            
+    def commit(self, paths, message=''):
+        """ Commit all files with message """
+        for path in paths:
+            root, files = self.splitFiles(path)
+            out = self.run(root, ['commit', '-m', message] + files)
+            self.logOutput(out)
+            
+    def diff(self, paths):
+        for path in paths:
+            root, files = self.splitFiles(path)
+            out = self.run(root, ['diff'] + files)
+            self.logOutput(out)
+
+    def history(self, paths, history=None):
+        """ Get history of the given paths """
+        if history is None:
+            history = list()
+        for path in paths:
+            root, files = self.splitFiles(path)
+            for file in files:
+                out = self.run(root, ['log', file])
+                if out:
+                    for line in out.stdout:
+                        self.log(line)
+                        if re.match(re.compile('commit [a-z0-9]{40}'), line.strip()):
+                            current = {'path':file}
+                            history.append(current)
+                            current['revision'] = line.split()[-1].strip()
+                            current['log'] = ''
+                        elif line.startswith('Author: '):
+                            current['author'] = line.split(' ', 1)[-1]
+                        elif line.startswith('Date: '):
+                            current['date'] = line.split(' ', 1)[-1].strip()
+                        else:
+                            current['log'] += line
+        return history
+
+    def remove(self, paths):
+        """ Recursively remove paths from source control """
+        # Reverse paths so that files get deleted first
+        for path in reversed(sorted(paths)):
+            root, files = self.splitFiles(path)           
+            out = self.run(root, ['rm', '-R', '-f'] + files)
+            self.logOutput(out)
+
+    def findRoot(self, path):
+        """Find the repository root for given path"""
+        tmp = path.split(os.path.sep)
+        # TODO test this on windows
+        if not sys.platform.startswith("win"):
+            tmp.insert(0, '/')
+        plen = len(tmp)
+        for piece in xrange(plen):
+            root = os.path.join(*tmp[:plen - piece])
+            if os.path.exists(os.path.join(root, '.git', 'HEAD')):
+                return root + os.path.sep
+        return None
+
+    def status(self, paths, recursive=False, status=None):
+        """Get the status of all given paths """
+        # GIT status shows all status recursivly so need
+        #     to parse output and eliminate items that are not part of the
+        #     request.
+        newpat = re.compile('#[ \t]+new file:') # added
+        rname = re.compile('#[ \t]+renamed:') # this is odd need more research
+        modpat = re.compile('#[ \t]+modified:') # modified
+        delpat = re.compile('#[ \t]+deleted:')  # deleted
+        conpat = re.compile('#[ \t]+conflict:') # conflict ??? Couldnt find ref
+        unkpat = re.compile('#[ \t]+[a-zA-Z0-9]+') # hmmm
+        # NOTE: uptodate files are not listed in output of status
+
+        root = self.splitFiles(paths[0])[0]
+        repo = self.findRoot(root)
+        out = self.run(root, ['status'], mergeerr=True)
+        if out:
+            # Collect all file names and status { name : status }
+            # NOTE: file names are returned as a relative path to repository
+            #       root
+            collect = dict()
+            unknown = list()
+            start_unknown = False
+            for line in out.stdout:
+                if start_unknown:
+                    if re.search(unkpat, line):
+                        tmp = line.strip().split()
+                        unknown.append(tmp[-1])
+                    continue
+                if re.search(newpat, line):
+                    tmp = re.sub(newpat, u'', line, 1).strip()
+                    if len(tmp):
+                        collect[tmp] = 'added'
+                elif re.search(rname, line):
+                    tmp = re.sub(rname, u'', line, 1).strip()
+                    if len(tmp):
+                        tmp = tmp.split('->')[-1].strip()
+                        collect[tmp] = 'added'
+                elif re.search(modpat, line):
+                    tmp = re.sub(modpat, u'', line, 1).strip()
+                    if len(tmp):
+                        collect[tmp] = 'modified'
+                elif re.search(delpat, line):
+                    tmp = re.sub(delpat, u'', line, 1).strip()
+                    if len(tmp):
+                        collect[tmp] = 'deleted'
+                elif re.search(conpat, line):
+                    tmp = re.sub(conpat, u'', line, 1).strip()
+                    if len(tmp):
+                        collect[tmp] = 'conflict'
+                elif line.startswith('# Untracked files:'):
+                    start_unknown = True
+                else:
+                    continue
+
+            # Find applicable status information based on given paths
+            for path in paths:
+                tmp = path.lstrip(repo)
+                if tmp.startswith(os.path.sep):
+                    tmp = tmp.replace(os.path.sep, u'', 1)
+                for name, stat in collect.iteritems():
+                    if len(tmp) and name.startswith(tmp):
+                        status[os.path.sep.split(name.lstrip(tmp))[0]] = {'status' : stat}
+                    elif not len(tmp): # base of repo
+                        if os.path.sep not in name:
+                            status[name] = {'status' : stat}
+                    else:
+                        pass
+
+                # Mark all update date files
+                if not os.path.isdir(path):
+                    path = os.path.dirname(path)
+                files = os.listdir(path)
+                for fname in files:
+                    if fname not in status and fname not in unknown:
+                        status[fname] = {'status' : 'uptodate'}
+        return status
+
+    def untrackedFiles(self, path):
+        """ Find the untracked files under the given path """
+        unkpat = re.compile('#[ \t]+[a-zA-Z0-9]+') # hmmm
+        root = self.splitFiles(path)[0]
+        repo = self.findRoot(root)
+        out = self.run(root, ['status'], mergeerr=True)
+        unknown = list()
+        if out:
+            start_unknown = False
+            for line in out.stdout:
+                if start_unknown:
+                    if re.search(unkpat, line):
+                        tmp = line.strip().split()
+                        unknown.append(tmp[-1])
+                    continue
+                elif line.startswith('# Untracked files:'):
+                    start_unknown = True
+                else:
+                    pass
+        return unknown
+
+    def update(self, paths):
+        """ Recursively update paths """
+        for path in paths:
+            root, files = self.splitFiles(path)
+            out = self.run(root, ['pull'] + files)
+            self.logOutput(out)
+            
+    def revert(self, paths): 
+        """ Revert paths to repository versions """
+        for path in paths:
+            root, files = self.splitFiles(path, forcefiles=True, type=self.TYPE_FILE)
+            for file in files:
+                out = self.run(root, ['checkout'] + files)
+                self.logOutput(out)
+
+    def fetch(self, paths, rev=None, date=None):
+        """ Fetch a copy of the paths from the repository """
+        output = []
+        for path in paths:
+            if os.path.isdir(path):
+                continue
+            root, files = self.splitFiles(path)
+
+            options = []
+            if rev:
+                options.append(rev + u':')
+            else:
+                options.append('HEAD:')
+            if date:
+                self.logOutput("[git] date not currently supported")
+
+            for f in files:
+                out = self.run(root, ['show'] + options + file)
+                if out:
+                    content = out.stdout.read() 
+                    self.logOutput(out)
+                    if content.strip():
+                        output.append(content)
+                    else:
+                        output.append(None)
+                else:
+                    output.append(None)
+        return output
+                        
+if __name__ == '__main__':
+    git = GIT()
+    print git.status(['.'], recursive=True)
+    print git.history(['setup.py'])
