@@ -61,6 +61,13 @@ EVEN_BACKGROUND_COLOR = wx.Colour(255,255,255)
 # i18n support
 _ = wx.GetTranslation
 
+FILE_TYPES = {
+    _('Text File'): {'ext':'.txt'},
+    _('C File'): {'ext':'.c'},
+    _('HTML File'): {'ext':'.html', 'template':'<html>\n<head><title></title></head>\n<body>\n\n</body>\n</html>'},
+    _('Python File'): {'ext':'.py', 'template':'#!/usr/bin/env python\n\n'},
+}
+    
 ID_PROJECTPANE = wx.NewId()
 ID_PROJECTTREE = wx.NewId()
 
@@ -1058,6 +1065,9 @@ class ProjectTree(wx.Panel):
             self.popupIDDelete = wx.NewId()
             self.popupIDRename = wx.NewId()
             self.popupIDExecuteCommand = wx.NewId()
+            self.popupIDNewFolder = wx.NewId()
+            self.popupIDNewFile = wx.NewId()
+            self.popupIDNewMenu = wx.NewId()
 
             self.Bind(wx.EVT_MENU, self.onPopupEdit, id=self.popupIDEdit)
             self.Bind(wx.EVT_MENU, self.onPopupOpen, id=self.popupIDOpen)
@@ -1076,6 +1086,7 @@ class ProjectTree(wx.Panel):
             self.Bind(wx.EVT_MENU, self.onPopupDelete, id=self.popupIDDelete)
             self.Bind(wx.EVT_MENU, self.onPopupRename, id=self.popupIDRename)
             self.Bind(wx.EVT_MENU, self.onPopupExecuteCommand, id=self.popupIDExecuteCommand)
+            self.Bind(wx.EVT_MENU, self.onPopupNewFolder, id=self.popupIDNewFolder)
 
         paths = self.getSelectedPaths()
 
@@ -1091,12 +1102,28 @@ class ProjectTree(wx.Panel):
                 scenabled = True
                 break
 
+        # Add or remove
+        if scenabled:
+            addremove = (self.popupIDSCRemove, _("Remove from repository"), 'sc-remove', True)
+        else:
+            addremove = (self.popupIDSCAdd, _("Add to repository"), 'sc-add', True)
+            
+        # New file / folder submenu
+        newmenu = wx.Menu()
+        newmenu.AppendItem(wx.MenuItem(newmenu, self.popupIDNewFolder, _('Folder')))
+        newmenu.AppendSeparator()
+        for type in FILE_TYPES:
+            id = wx.NewId()
+            newmenu.AppendItem(wx.MenuItem(newmenu, id, type))
+            self.Bind(wx.EVT_MENU, self.onPopupNewFile, id=id)
+
         # make a menu
         menu = wx.Menu()
         items = [
             (self.popupIDEdit, _('Edit'), None, True),
             (self.popupIDOpen, _('Open'), None, True),
             (self.popupIDReveal, _('Open enclosing folder'), None, True),
+            (self.popupIDNewMenu, _('New...'), newmenu, True),
             (None, None, None, None),
             (self.popupIDCut, _('Cut'), 'cut', True),
             (self.popupIDCopy, _('Copy'), 'copy', True),
@@ -1111,15 +1138,18 @@ class ProjectTree(wx.Panel):
             (self.popupIDSCDiff, _("Compare to previous version"), 'sc-diff', scenabled),
             (self.popupIDSCHistory, _("Show revision history"), 'sc-history', scenabled),
             (self.popupIDSCCommit, _("Commit changes"), 'sc-commit', scenabled),
-            (self.popupIDSCRemove, _("Remove from repository"), 'sc-remove', scenabled),
             (self.popupIDSCRevert, _("Revert to repository version"), 'sc-revert', scenabled),
-            (self.popupIDSCAdd, _("Add to repository"), 'sc-add', not(scenabled)),
+            addremove,
             (None, None, None, None),
             (self.popupIDDelete, _("Move to "+TRASH), 'delete', True),
         ]
         for id, title, icon, enabled in items:
             if id is None:
                 menu.AppendSeparator()
+                continue
+            elif icon is not None and not isinstance(icon, basestring):
+                item = menu.AppendMenu(id, title, icon)
+                item.SetBitmap(self.menuicons['blank'])
                 continue
             item = wx.MenuItem(menu, id, _(title))
             if icon: 
@@ -1133,6 +1163,53 @@ class ProjectTree(wx.Panel):
         # will be called before PopupMenu returns.
         self.PopupMenu(menu)
         menu.Destroy()
+        
+    def onPopupNewFolder(self, event):
+        node = self.getSelectedNodes()[0]
+        path = self.tree.GetPyData(node)['path']
+        if not os.path.isdir(path):
+            path = os.path.dirname(path)
+        newpath = os.path.join(path, 'untitled folder')
+        i = 1
+        while os.path.exists(newpath):
+            newpath = re.sub(r'-\d+$', r'', newpath)
+            newpath += '-%d' % i
+            i += 1
+            print newpath
+        print newpath
+        os.makedirs(newpath)
+
+    def onPopupNewFile(self, event):
+        node = self.getSelectedNodes()[0]
+        path = self.tree.GetPyData(node)['path']
+        if not os.path.isdir(path):
+            path = os.path.dirname(path)
+        print path
+        # Determine file type
+        id = event.GetId()
+        menu = event.GetEventObject()
+        key = None
+        for item in menu.GetMenuItems():
+            if item.GetId() == id:
+                key = item.GetLabel()
+                break
+        if not key or key not in FILE_TYPES:
+            return
+            
+        # Get informatio about file type
+        info = FILE_TYPES[key]
+        
+        # Create unique name
+        newpath = os.path.join(path, 'untitled file'+info['ext'])
+        i = 1
+        while os.path.exists(newpath):
+            newpath = os.path.splitext()[0]
+            newpath = re.sub(r'-\d+$', r'', newpath)
+            newpath += '-%d%s' % (i, info['ext'])
+            i += 1
+        
+        # Write template info
+        open(newpath, 'w').write(info.get('template',''))
 
     def onPopupEdit(self, event):
         """ Open the current file in the editor """
