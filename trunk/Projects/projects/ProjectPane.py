@@ -13,6 +13,7 @@ import tempfile
 import subprocess
 import shutil
 import Trash
+import diffwin
 import wx.lib.delayedresult 
 try: 
     import util         # from Editra.src
@@ -905,14 +906,15 @@ class ProjectTree(wx.Panel):
             
             # Run comparison program
             if self.useBuiltinDiff or 'diff' not in self.commands:
-                from difflib import HtmlDiff
-                hd = HtmlDiff()
-                html = hd.make_file(open(path2).readlines(), open(path1).readlines(),
-                                    fromdesc=os.path.basename(path2),
-                                    todesc=os.path.basename(path1))
-                difffile = os.path.join(self.tempdir, os.path.basename(path)+'.html')
-                open(difffile, 'w').write(html)
-                subprocess.call([FILEMAN_CMD, difffile]) 
+#                 from difflib import HtmlDiff
+#                 hd = HtmlDiff()
+#                 html = hd.make_file(open(path2).readlines(), open(path1).readlines(),
+#                                     fromdesc=os.path.basename(path2),
+#                                     todesc=os.path.basename(path1))
+#                 difffile = os.path.join(self.tempdir, os.path.basename(path)+'.html')
+#                 open(difffile, 'w').write(html)
+#                 subprocess.call([FILEMAN_CMD, difffile]) 
+                  diffwin.GenerateDiff(path2, path1, html=True)
             else:
                 subprocess.call([self.commands['diff'], path2, path1]) 
             
@@ -1484,7 +1486,7 @@ class ProjectTree(wx.Panel):
         # Clean up tempdir
         if self.tempdir:
             shutil.rmtree(self.tempdir, ignore_errors=True)
-    
+        diffwin.CleanupTempFiles()
             
 class ProjectPane(wx.Panel):
     """Creates a project pane"""
