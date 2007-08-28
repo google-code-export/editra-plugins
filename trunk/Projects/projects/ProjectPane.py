@@ -21,6 +21,7 @@ except ImportError:
     util = None
 import cfgdlg
 from CVS import CVS
+from GIT import GIT
 from SVN import SVN
 from HistWin import AdjustColour
 
@@ -201,7 +202,7 @@ class ProjectTree(wx.Panel):
         # Names of files to filter out of tree
         self.filters = sorted(['CVS','dntnd','.DS_Store','.dpp','.newpp','*~',
                         '*.a','*.o','.poem','.dll','._*','.localized',
-                        '.svn','*.pyc','*.bak','#*','*.pyo','*%*',
+                        '.svn','*.pyc','*.bak','#*','*.pyo','*%*', '.git',
                         '*.previous','*.swp','.#*'])
         
         # Commands for external programs
@@ -217,7 +218,7 @@ class ProjectTree(wx.Panel):
         self.syncWithNotebook = True
         
         # Create source control objects
-        self.sourceControl = {'cvs': CVS(), 'svn': SVN()}
+        self.sourceControl = {'cvs': CVS(), 'git' : GIT(), 'svn': SVN()}
         for key, value in self.sourceControl.items():
             value.filters = self.filters
 
