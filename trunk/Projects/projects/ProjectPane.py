@@ -21,6 +21,7 @@ except ImportError:
 import cfgdlg
 from CVS import CVS
 from SVN import SVN
+from HistWin import AdjustColour
 
 # Make sure that all processes use a standard shell
 if wx.Platform != '__WXMAC__':
@@ -47,17 +48,11 @@ else: # Other/Linux
     #FILEMAN = 'Konqueror'
     #FILEMAN_CMD = 'konqueror'
 
-#ALT_PROJECT_COLOR = wx.Colour(205,220,243)    
-#ALT_BACKGROUND_COLOR = wx.Colour(232,239,250)
-#ALT_PROJECT_COLOR = wx.Colour(232,239,250)    
-#ALT_BACKGROUND_COLOR = wx.Colour(250,250,255)
-#ALT_PROJECT_COLOR = wx.Colour(255,255,255)    
-#ALT_BACKGROUND_COLOR = wx.Colour(255,255,255)
 ODD_PROJECT_COLOR = wx.Colour(232,239,250)
 EVEN_PROJECT_COLOR = wx.Colour(232,239,250)
 ODD_BACKGROUND_COLOR = wx.Colour(255,255,255)
 EVEN_BACKGROUND_COLOR = wx.Colour(255,255,255)
-    
+
 # i18n support
 _ = wx.GetTranslation
 
@@ -121,6 +116,10 @@ class ProjectTree(wx.Panel):
         self.Bind(wx.EVT_SIZE, self.OnSize)
         self.log = log
         tID = wx.NewId()
+
+        global ODD_PROJECT_COLOR
+        global EVEN_PROJECT_COLOR
+        ODD_PROJECT_COLOR = EVEN_PROJECT_COLOR = AdjustColour(wx.SystemSettings_GetColour(wx.SYS_COLOUR_3DLIGHT), 75)
 
         self.tree = MyTreeCtrl(self, tID, wx.DefaultPosition, wx.DefaultSize,
                                wx.TR_DEFAULT_STYLE
