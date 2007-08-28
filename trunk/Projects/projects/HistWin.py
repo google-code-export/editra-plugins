@@ -394,7 +394,7 @@ class HistList(wx.ListCtrl,
                  'not be retrieved.  Please make sure that you have network access.'), 
                _('History information could not be retrieved'), 
                style=wx.OK|wx.ICON_ERROR).ShowModal()
-            wx.CallAfter(self._frame.StopBusy)
+            self.GetGrandParent().GetParent().Destroy()
             return
         evt = UpdateItemsEvent(edEVT_UPDATE_ITEMS, self.GetId(), data)
         wx.PostEvent(self, evt)                                
