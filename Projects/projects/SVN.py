@@ -10,17 +10,16 @@ class SVN(SourceControl):
     def isControlled(self, path):
         """ Is the path controlled by CVS? """
         if os.path.isdir(path):
-            if os.path.isfile(os.path.join(path,'.svn','all-wcprops')):
+            if os.path.isfile(os.path.join(path,'.svn','entries')):
                 return True
         path, basename = os.path.split(path)
         svndir = os.path.join(path,'.svn')
         if os.path.isdir(svndir):
             try:
-                for line in open(os.path.join(svndir,'all-wcprops')):
-                    if line.startswith('/'):
-                        filename = line.split('/')[-1].strip()
-                        if filename == basename:
-                            return True
+                entries = open(os.path.join(svndir,'entries')).read()
+                entries = [x.strip().split('\n')[0] for x in entries.split('\x0c') 
+                                                    if x.strip()][1:]
+                return basename in entries
             except (IOError, OSError):
                 pass
         return False
@@ -83,7 +82,7 @@ class SVN(SourceControl):
         """ Recursively remove paths from repository """
         for path in paths:
             root, files = self.splitFiles(path)
-            out = self.run(root, ['remove'] + files)
+            out = self.run(root, ['remove','--force'] + files)
             self.logOutput(out)
         
     def status(self, paths, recursive=False, status={}):
@@ -99,8 +98,15 @@ class SVN(SourceControl):
             if out:
                 for line in out.stdout:
                     self.log(line)
-                    name = line.strip().split()[-1]
-                    try: status[name] = {'status':codes[line[0]]}
+                    code = line[0]
+                    if code == '?':
+                        continue
+                    workrev, line = line[8:].strip().split(' ', 1)
+                    rev, line = line.strip().split(' ', 1)
+                    author, line = line.strip().split(' ', 1)
+                    name = line.strip()
+                    current = status[name] = {}
+                    try: current['status'] = codes[code]
                     except KeyError: pass
                 self.logOutput(out)
         return status
