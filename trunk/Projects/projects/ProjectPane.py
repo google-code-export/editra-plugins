@@ -13,12 +13,12 @@ import tempfile
 import subprocess
 import shutil
 import Trash
-import diffwin
 import wx.lib.delayedresult 
 try: 
     import util         # from Editra.src
+    import diffwin
 except ImportError: 
-    util = None
+    diffwin = util = None
 import cfgdlg
 from CVS import CVS
 from GIT import GIT
@@ -1242,7 +1242,7 @@ class ProjectTree(wx.Panel):
         newpath = os.path.join(path, 'untitled file'+info['ext'])
         i = 1
         while os.path.exists(newpath):
-            newpath = os.path.splitext()[0]
+            newpath = os.path.splitext(newpath)[0]
             newpath = re.sub(r'-\d+$', r'', newpath)
             newpath += '-%d%s' % (i, info['ext'])
             i += 1
