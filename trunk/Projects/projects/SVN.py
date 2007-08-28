@@ -57,10 +57,12 @@ class SVN(SourceControl):
             root, files = self.splitFiles(path)
             for file in files:
                 out = self.run(root, ['log', file])
+                pophistory = False
                 if out:
                     for line in out.stdout:
                         self.log(line)
                         if line.strip().startswith('-----------'):
+                            pophistory = True
                             current = {'path':file}
                             history.append(current)
                             for data in out.stdout:
@@ -75,7 +77,8 @@ class SVN(SourceControl):
                         else:
                             current['log'] += line
                 self.logOutput(out)
-                history.pop()
+                if pophistory:
+                    history.pop()
         return history
         
     def remove(self, paths):
