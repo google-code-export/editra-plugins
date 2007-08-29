@@ -117,6 +117,7 @@ class ConfigPanel(wx.Panel):
     ID_DEFAULT_DIFF = wx.NewId()
     ID_DIFF_PATH = wx.NewId()
     ID_FILTERS = wx.NewId()
+    ID_GIT_PATH = wx.NewId()
     ID_SVN_PATH = wx.NewId()
     ID_SYNC_NB = wx.NewId()
     def __init__(self, parent, data):
@@ -145,13 +146,19 @@ class ConfigPanel(wx.Panel):
                                     message=_("Select CVS Executable"))
         cvssz.AddMany([(cvs, 0, wx.ALIGN_CENTER_VERTICAL),
                        ((5, 5)), (cpicker, 1, wx.EXPAND)])
+        gitsz = wx.BoxSizer(wx.HORIZONTAL)
+        git = wx.StaticText(self, label="GIT: ")
+        gpicker = wx.FilePickerCtrl(self, self.ID_GIT_PATH, self._data.GetGitPath(),
+                                    message=_("Select GIT Executable"))
+        gitsz.AddMany([(git, 0, wx.ALIGN_CENTER_VERTICAL),
+                       ((6, 5)), (gpicker, 1, wx.EXPAND)])
         svnsz = wx.BoxSizer(wx.HORIZONTAL)
         svn = wx.StaticText(self, label="SVN: ")
         spicker = wx.FilePickerCtrl(self, self.ID_SVN_PATH, self._data.GetSvnPath(),
                                     message=_("Select SVN Executable"))
         svnsz.AddMany([(svn, 0, wx.ALIGN_CENTER_VERTICAL),
                        ((5, 5)), (spicker, 1, wx.EXPAND)])
-        sbxsizer.AddMany([(cvssz, 1, wx.EXPAND), (svnsz, 1, wx.EXPAND)])
+        sbxsizer.AddMany([(cvssz, 1, wx.EXPAND), (gitsz, 1, wx.EXPAND), (svnsz, 1, wx.EXPAND)])
         sizer.Add(sbxsizer, (1, 1), (2, 7), wx.EXPAND)
 
         # File Diff Controls
@@ -174,6 +181,8 @@ class ConfigPanel(wx.Panel):
         filters = wx.TextCtrl(self, self.ID_FILTERS, 
                               value=self._data.GetFilters().replace(u':', u' '),
                               style=wx.TE_MULTILINE)
+        if wx.Platform == '__WXMAC__':
+            filters.MacCheckSpelling(False)
         tt = wx.ToolTip(_("Space separated list of files patterns to exclude from view"
                           "\nThe use of wildcards (*) are permitted."))
         filters.SetToolTip(tt)
@@ -197,6 +206,8 @@ class ConfigPanel(wx.Panel):
             id = child.GetId()
             if id == self.ID_CVS_PATH:
                 self._data.SetCvsPath(child.GetTextCtrl().GetValue())
+            elif id == self.ID_GIT_PATH:
+                self._data.SetGitPath(child.GetTextCtrl().GetValue())
             elif id == self.ID_SVN_PATH:
                 self._data.SetSvnPath(child.GetTextCtrl().GetValue())
             elif id == self.ID_DEFAULT_DIFF:
@@ -232,6 +243,8 @@ class ConfigPanel(wx.Panel):
         path = evt.GetPath()
         if e_id == self.ID_CVS_PATH:
             self._data.SetCvsPath(path)
+        elif e_id == self.ID_GIT_PATH:
+            self._data.SetGitPath(path)
         elif e_id == self.ID_DIFF_PATH:
             self._data.SetDiffPath(path)
         elif e_id == self.ID_SVN_PATH:
@@ -244,6 +257,7 @@ class ConfigPanel(wx.Panel):
 class ConfigData(dict):
     """Class for holding configuration data for the configdlg"""
     CVS = 'cvs'
+    GIT = 'git'
     DIFF = 'diff'
     BUILTIN_DIFF = 'use_default_diff'
     FILTERS = 'filters'
@@ -258,6 +272,10 @@ class ConfigData(dict):
     def GetCvsPath(self):
         """Get the path to cvs from the data"""
         return self.get(self.CVS, wx.EmptyString)
+
+    def GetGitPath(self):
+        """Get the path to git from the data"""
+        return self.get(self.GIT, wx.EmptyString)
 
     def GetDiffPath(self):
         """Get the path to diff program"""
@@ -295,6 +313,10 @@ class ConfigData(dict):
         """
         self.__setitem__(self.FILTERS, filters)
 
+    def SetGitPath(self, path):
+        """Set the path to the git executable"""
+        self.__setitem__(self.GIT, path)
+
     def SetSvnPath(self, path):
         """Set the path to svn executable"""
         self.__setitem__(self.SVN, path)
@@ -305,8 +327,9 @@ class ConfigData(dict):
     def SetUseBuiltinDiff(self, builtin):
         self.__setitem__(self.BUILTIN_DIFF, builtin)
 
-#--------------------------------------------------------------------------#
+#-----------------------------------------------------------------------------#
 # For testing
+#-----------------------------------------------------------------------------#
 
 if __name__ == '__main__':
     app = wx.PySimpleApp(False)
