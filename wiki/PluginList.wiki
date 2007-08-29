@@ -12,6 +12,7 @@ This page contains a list of links to pages about individual plugins and their r
 ||ProjectsPlugin || _Project management plugin with integrated source control_ ||
 
 
+
 = Plugins Wanted =
 ||Plugin Name       || Short Description ||
 ||ClassBrowser      || Window for quick browsing of classes and objects in a file||
