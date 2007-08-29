@@ -23,8 +23,9 @@ This plugin is still in early development, but is quite useful in its current im
   * Progress indicator for long operations
   * Automatically display file from currently selected editor tab in project view (if file exists in a project)
   * Utilize system's Trash / Recycle Bin
+  * Seamless source control integration (CVS, GIT, Subversion)
 
-The following are the currently implemented source control (CVS and Subversion) features and can be executed on either files or directories.  The status features are automatic.  Other features are accessed using the right-click menu.
+The following are the currently implemented source control features that are available for each of the supported systems that can be executed on either files or directories.  The status features are automatic.  Other features are accessed using the right-click menu.
 
   * Automatically displays status of files and directories in icons when folder is opened
   * Refresh status
