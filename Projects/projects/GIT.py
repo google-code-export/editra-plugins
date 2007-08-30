@@ -50,12 +50,7 @@ class GIT(SourceControl):
             else:
                 return False
 
-        root = self.findRoot(path)
-        untracked = [ root + x for x in self.untrackedFiles(path)]
-
-        if path in untracked:
-            return False
-
+        # First make sure path is under a directory controlled by git
         tmp = path.split(os.path.sep)
         # TODO test this on windows
         if not sys.platform.startswith('win'):
@@ -63,8 +58,16 @@ class GIT(SourceControl):
         plen = len(tmp)
         for piece in xrange(plen):
             if checkDirectory(os.path.join(*tmp[:plen - piece])):
-                return True
-        return False
+                break
+        else:
+            return False
+
+        # Path is in repo path so now check if it is tracked or not
+        for item in self.untrackedFiles(path):
+            if path.startswith(item):
+                return False
+        else:
+            return True
 
     def add(self, paths):
         """Add paths to repository"""
@@ -236,7 +239,8 @@ class GIT(SourceControl):
                 if start_unknown:
                     if re.search(unkpat, line):
                         tmp = line.strip().split()
-                        unknown.append(tmp[-1])
+                        unknown.append(os.path.normpath(os.path.join(repo, tmp[-1])))
+#                         unknown.append(tmp[-1])
                     continue
                 elif line.startswith('# Untracked files:'):
                     start_unknown = True
