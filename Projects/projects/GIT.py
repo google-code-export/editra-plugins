@@ -173,55 +173,54 @@ class GIT(SourceControl):
                 if start_unknown:
                     if re.search(unkpat, line):
                         tmp = line.strip().split()
-                        unknown.append(tmp[-1])
+#                         unknown.append(tmp[-1].strip(os.path.sep))
+                        unknown.append(os.path.normpath(os.path.join(repo, tmp[-1])))
                     continue
                 if re.search(newpat, line):
                     tmp = re.sub(newpat, u'', line, 1).strip()
                     if len(tmp):
-                        collect[tmp] = 'added'
+                        collect[os.path.normpath(os.path.join(repo, tmp))] = 'added'
                 elif re.search(rname, line):
                     tmp = re.sub(rname, u'', line, 1).strip()
                     if len(tmp):
                         tmp = tmp.split('->')[-1].strip()
-                        collect[tmp] = 'added'
+                        collect[os.path.normpath(os.path.join(repo, tmp))] = 'added'
                 elif re.search(modpat, line):
                     tmp = re.sub(modpat, u'', line, 1).strip()
                     if len(tmp):
-                        collect[tmp] = 'modified'
+                        collect[os.path.normpath(os.path.join(repo, tmp))] = 'modified'
                 elif re.search(delpat, line):
                     tmp = re.sub(delpat, u'', line, 1).strip()
                     if len(tmp):
-                        collect[tmp] = 'deleted'
+                        collect[os.path.normpath(os.path.join(repo, tmp))] = 'deleted'
                 elif re.search(conpat, line):
                     tmp = re.sub(conpat, u'', line, 1).strip()
                     if len(tmp):
-                        collect[tmp] = 'conflict'
+                        collect[os.path.normpath(os.path.join(repo, tmp))] = 'conflict'
                 elif line.startswith('# Untracked files:'):
                     start_unknown = True
                 else:
                     continue
+            start_unknown = False
 
             # Find applicable status information based on given paths
             for path in paths:
-                tmp = path.lstrip(repo)
-                if tmp.startswith(os.path.sep):
-                    tmp = tmp.replace(os.path.sep, u'', 1)
                 for name, stat in collect.iteritems():
-                    if len(tmp) and name.startswith(tmp):
-                        status[os.path.sep.split(name.lstrip(tmp))[0]] = {'status' : stat}
-                    elif not len(tmp): # base of repo
-                        if os.path.sep not in name:
-                            status[name] = {'status' : stat}
-                    else:
-                        pass
+                    status[name.replace(path, u'').strip(os.path.sep)] = {'status' : stat}
 
                 # Mark all update date files
                 if not os.path.isdir(path):
                     path = os.path.dirname(path)
                 files = os.listdir(path)
+                files = [os.path.join(path, x) for x in files]
                 for fname in files:
-                    if fname not in status and fname not in unknown:
-                        status[fname] = {'status' : 'uptodate'}
+                    if fname not in collect and fname not in unknown:
+                        # Make sure name is not under an unknown as well
+                        for x in unknown:
+                            if fname.startswith(x):
+                                break
+                        else:
+                            status[fname.replace(path, u'').strip(os.path.sep)] = {'status' : 'uptodate'}
         return status
 
     def untrackedFiles(self, path):
