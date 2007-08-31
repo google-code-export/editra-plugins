@@ -36,6 +36,7 @@ MODPAT = re.compile('#[ \t]+modified:') # modified
 DELPAT = re.compile('#[ \t]+deleted:')  # deleted
 CONPAT = re.compile('#[ \t]+conflict:') # conflict ??? Couldnt find ref
 UNKPAT = re.compile('#[ \t]+[a-zA-Z0-9]+') # hmmm
+COMPAT = re.compile('commit [a-z0-9]{40}') # Commit line in log
 
 class GIT(SourceControl):
     """Source control implementation to add GIT support to the 
@@ -136,6 +137,12 @@ class GIT(SourceControl):
                             current['date'] = line.split(' ', 1)[-1].strip()
                         else:
                             current['log'] += line
+
+        # Cleanup log formatting
+        for item in history:
+            if item.has_key('log'):
+                item['log'] = item['log'].strip()
+
         return history
 
     def remove(self, paths):
