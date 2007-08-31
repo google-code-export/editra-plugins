@@ -236,7 +236,7 @@ def GenerateDiff(left, right, tabwidth=8, html=False):
     if html:
         gen = difflib.HtmlDiff(tabwidth)
         diff = gen.make_file(lfile, rfile, left, right)
-        tmp, name = tempfile.mkstemp('editra_projects_diff')
+        tmp, name = tempfile.mkstemp('editra_projects_diff.html')
         _tmpfiles.append(name)
         tmp = file(name, 'wb')
         tmp.write(diff)
