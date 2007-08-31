@@ -73,11 +73,11 @@ class GIT(SourceControl):
         """Add paths to repository"""
         for path in paths:
             root, files = self.splitFiles(path, forcefiles=True)
-            dirs = sorted([x for x in files if os.path.isdir(x)])
-            files = sorted([x for x in files if not os.path.isdir(x)])
+            dirs = sorted([x for x in files if os.path.isdir(os.path.join(root, x))])
+            files = sorted([x for x in files if not os.path.isdir(os.path.join(root, x))])
             # Add all directories individually first
             for d in dirs:
-                out = self.run(root, ['add', d])
+                out = self.run(root, ['add', '-n', d])
                 self.logOutput(out)
             # Add all files
             if files:
@@ -156,6 +156,7 @@ class GIT(SourceControl):
         #     request.
         newpat = re.compile('#[ \t]+new file:') # added
         rname = re.compile('#[ \t]+renamed:') # this is odd need more research
+        coppat = rname = re.compile('#[ \t]+copied:')
         modpat = re.compile('#[ \t]+modified:') # modified
         delpat = re.compile('#[ \t]+deleted:')  # deleted
         conpat = re.compile('#[ \t]+conflict:') # conflict ??? Couldnt find ref
@@ -185,6 +186,11 @@ class GIT(SourceControl):
                         collect[os.path.normpath(os.path.join(repo, tmp))] = 'added'
                 elif re.search(rname, line):
                     tmp = re.sub(rname, u'', line, 1).strip()
+                    if len(tmp):
+                        tmp = tmp.split('->')[-1].strip()
+                        collect[os.path.normpath(os.path.join(repo, tmp))] = 'added'
+                elif re.search(coppat, line):
+                    tmp = re.sub(coppat, u'', line, 1).strip()
                     if len(tmp):
                         tmp = tmp.split('->')[-1].strip()
                         collect[os.path.normpath(os.path.join(repo, tmp))] = 'added'
@@ -270,17 +276,19 @@ class GIT(SourceControl):
             if os.path.isdir(path):
                 continue
             root, files = self.splitFiles(path)
+            repo = self.findRoot(path)
 
-            options = []
+            # Adjust file names
+            files = [ os.path.join(root, f).replace(repo, u'', 1).strip(os.path.sep) for f in files ]
             if rev:
-                options.append(rev + u':')
+                options = rev + u':%s'
             else:
-                options.append('HEAD:')
+                options = 'HEAD:%s'
             if date:
                 self.logOutput("[git] date not currently supported")
 
             for f in files:
-                out = self.run(root, ['show'] + options + file)
+                out = self.run(root, ['show'] + [options % f])
                 if out:
                     content = out.stdout.read() 
                     self.logOutput(out)
