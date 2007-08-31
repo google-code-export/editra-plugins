@@ -45,6 +45,12 @@ import re
 import sys
 import wx.lib.mixins.listctrl as listmix
 
+# Editra Library Imports
+try:
+    import util
+except ImportError:
+    util = None
+
 _ = wx.GetTranslation
 #--------------------------------------------------------------------------#
 
@@ -67,6 +73,7 @@ class UpdateItemsEvent(wx.PyCommandEvent):
     def GetValue(self):
         return self._value
 
+#--------------------------------------------------------------------------#
 
 SB_INFO = 0
 SB_PROG = 1
@@ -75,6 +82,10 @@ class HistoryWindow(wx.Frame):
     def __init__(self, parent, title, projects, node, path):
         wx.Frame.__init__(self, parent, title=title, style=wx.DEFAULT_DIALOG_STYLE)
         
+        # Set Frame Icon
+        if util is not None:
+            util.SetWindowIcon(self)
+
         # Attributes
         self._sb = HistoryStatusBar(self)
         self.SetStatusBar(self._sb)
