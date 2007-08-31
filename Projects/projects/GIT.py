@@ -29,6 +29,14 @@ import re
 from SourceControl import SourceControl
 
 #-----------------------------------------------------------------------------#
+NEWPAT = re.compile('#[ \t]+new file:') # added
+RNAME = re.compile('#[ \t]+renamed:') # this is odd need more research
+COPPAT = rname = re.compile('#[ \t]+copied:') # this is odd need more research
+MODPAT = re.compile('#[ \t]+modified:') # modified
+DELPAT = re.compile('#[ \t]+deleted:')  # deleted
+CONPAT = re.compile('#[ \t]+conflict:') # conflict ??? Couldnt find ref
+UNKPAT = re.compile('#[ \t]+[a-zA-Z0-9]+') # hmmm
+
 class GIT(SourceControl):
     """Source control implementation to add GIT support to the 
     Projects Plugin.
@@ -71,10 +79,12 @@ class GIT(SourceControl):
 
     def add(self, paths):
         """Add paths to repository"""
+        pjoin = os.path.join
+        isdir = os.path.isdir
         for path in paths:
             root, files = self.splitFiles(path, forcefiles=True)
-            dirs = sorted([x for x in files if os.path.isdir(os.path.join(root, x))])
-            files = sorted([x for x in files if not os.path.isdir(os.path.join(root, x))])
+            dirs = sorted([x for x in files if isdir(pjoin(root, x))])
+            files = sorted([x for x in files if not isdir(pjoin(root, x))])
             # Add all directories individually first
             for d in dirs:
                 out = self.run(root, ['add', '-n', d])
@@ -115,7 +125,7 @@ class GIT(SourceControl):
                 if out:
                     for line in out.stdout:
                         self.log(line)
-                        if re.match(re.compile('commit [a-z0-9]{40}'), line.strip()):
+                        if re.match(COMPAT, line.strip()):
                             current = {'path':file}
                             history.append(current)
                             current['revision'] = line.split()[-1].strip()
@@ -154,13 +164,6 @@ class GIT(SourceControl):
         # GIT status shows all status recursivly so need
         #     to parse output and eliminate items that are not part of the
         #     request.
-        newpat = re.compile('#[ \t]+new file:') # added
-        rname = re.compile('#[ \t]+renamed:') # this is odd need more research
-        coppat = rname = re.compile('#[ \t]+copied:')
-        modpat = re.compile('#[ \t]+modified:') # modified
-        delpat = re.compile('#[ \t]+deleted:')  # deleted
-        conpat = re.compile('#[ \t]+conflict:') # conflict ??? Couldnt find ref
-        unkpat = re.compile('#[ \t]+[a-zA-Z0-9]+') # hmmm
         # NOTE: uptodate files are not listed in output of status
 
         root = self.splitFiles(paths[0])[0]
@@ -172,40 +175,40 @@ class GIT(SourceControl):
             #       root
             collect = dict()
             unknown = list()
+            pjoin = os.path.join
             start_unknown = False
             for line in out.stdout:
                 if start_unknown:
-                    if re.search(unkpat, line):
+                    if re.search(UNKPAT, line):
                         tmp = line.strip().split()
-#                         unknown.append(tmp[-1].strip(os.path.sep))
-                        unknown.append(os.path.normpath(os.path.join(repo, tmp[-1])))
+                        unknown.append(os.path.normpath(pjoin(repo, tmp[-1])))
                     continue
-                if re.search(newpat, line):
-                    tmp = re.sub(newpat, u'', line, 1).strip()
+                if re.search(NEWPAT, line):
+                    tmp = re.sub(NEWPAT, u'', line, 1).strip()
                     if len(tmp):
-                        collect[os.path.normpath(os.path.join(repo, tmp))] = 'added'
+                        collect[os.path.normpath(pjoin(repo, tmp))] = 'added'
                 elif re.search(rname, line):
                     tmp = re.sub(rname, u'', line, 1).strip()
                     if len(tmp):
                         tmp = tmp.split('->')[-1].strip()
-                        collect[os.path.normpath(os.path.join(repo, tmp))] = 'added'
-                elif re.search(coppat, line):
-                    tmp = re.sub(coppat, u'', line, 1).strip()
+                        collect[os.path.normpath(pjoin(repo, tmp))] = 'added'
+                elif re.search(COPPAT, line):
+                    tmp = re.sub(COPPAT, u'', line, 1).strip()
                     if len(tmp):
                         tmp = tmp.split('->')[-1].strip()
-                        collect[os.path.normpath(os.path.join(repo, tmp))] = 'added'
-                elif re.search(modpat, line):
-                    tmp = re.sub(modpat, u'', line, 1).strip()
+                        collect[os.path.normpath(pjoin(repo, tmp))] = 'added'
+                elif re.search(MODPAT, line):
+                    tmp = re.sub(MODPAT, u'', line, 1).strip()
                     if len(tmp):
-                        collect[os.path.normpath(os.path.join(repo, tmp))] = 'modified'
-                elif re.search(delpat, line):
-                    tmp = re.sub(delpat, u'', line, 1).strip()
+                        collect[os.path.normpath(pjoin(repo, tmp))] = 'modified'
+                elif re.search(DELPAT, line):
+                    tmp = re.sub(DELPAT, u'', line, 1).strip()
                     if len(tmp):
-                        collect[os.path.normpath(os.path.join(repo, tmp))] = 'deleted'
-                elif re.search(conpat, line):
-                    tmp = re.sub(conpat, u'', line, 1).strip()
+                        collect[os.path.normpath(pjoin(repo, tmp))] = 'deleted'
+                elif re.search(CONPAT, line):
+                    tmp = re.sub(CONPAT, u'', line, 1).strip()
                     if len(tmp):
-                        collect[os.path.normpath(os.path.join(repo, tmp))] = 'conflict'
+                        collect[os.path.normpath(pjoin(repo, tmp))] = 'conflict'
                 elif line.startswith('# Untracked files:'):
                     start_unknown = True
                 else:
@@ -215,13 +218,14 @@ class GIT(SourceControl):
             # Find applicable status information based on given paths
             for path in paths:
                 for name, stat in collect.iteritems():
-                    status[name.replace(path, u'').strip(os.path.sep)] = {'status' : stat}
+                    name = name.replace(path, u'').strip(os.path.sep)
+                    status[name] = {'status' : stat}
 
                 # Mark all update date files
                 if not os.path.isdir(path):
                     path = os.path.dirname(path)
                 files = os.listdir(path)
-                files = [os.path.join(path, x) for x in files]
+                files = [pjoin(path, x) for x in files]
                 for fname in files:
                     if fname not in collect and fname not in unknown:
                         # Make sure name is not under an unknown as well
@@ -229,12 +233,12 @@ class GIT(SourceControl):
                             if fname.startswith(x):
                                 break
                         else:
-                            status[fname.replace(path, u'').strip(os.path.sep)] = {'status' : 'uptodate'}
+                            fname = fname.replace(path, u'').strip(os.path.sep)
+                            status[fname] = {'status' : 'uptodate'}
         return status
 
     def untrackedFiles(self, path):
         """ Find the untracked files under the given path """
-        unkpat = re.compile('#[ \t]+[a-zA-Z0-9]+') # hmmm
         root = self.splitFiles(path)[0]
         repo = self.findRoot(root)
         out = self.run(root, ['status'], mergeerr=True)
@@ -243,10 +247,10 @@ class GIT(SourceControl):
             start_unknown = False
             for line in out.stdout:
                 if start_unknown:
-                    if re.search(unkpat, line):
+                    if re.search(UNKPAT, line):
                         tmp = line.strip().split()
-                        unknown.append(os.path.normpath(os.path.join(repo, tmp[-1])))
-#                         unknown.append(tmp[-1])
+                        tmp = os.path.normpath(os.path.join(repo, tmp[-1]))
+                        unknown.append(tmp)
                     continue
                 elif line.startswith('# Untracked files:'):
                     start_unknown = True
@@ -264,7 +268,8 @@ class GIT(SourceControl):
     def revert(self, paths): 
         """ Revert paths to repository versions """
         for path in paths:
-            root, files = self.splitFiles(path, forcefiles=True, type=self.TYPE_FILE)
+            root, files = self.splitFiles(path, forcefiles=True, 
+                                          type=self.TYPE_FILE)
             for file in files:
                 out = self.run(root, ['checkout'] + files)
                 self.logOutput(out)
