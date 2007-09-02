@@ -1,0 +1,4 @@
+Author=Kevin D. Smith
+Version=0.1
+Name=Projects
+Description=Project Manager
