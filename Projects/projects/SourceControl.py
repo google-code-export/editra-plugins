@@ -47,7 +47,7 @@ class SourceControl(object):
             root, files = os.path.split(path)
             files = self.filterPaths([files])
         elif forcefiles:
-            files = self.getPathList(path, type, topdown)
+            files = self.getPathList([path], type, topdown)
         return root, files
 
     def addRootOption(self, directory, options):
