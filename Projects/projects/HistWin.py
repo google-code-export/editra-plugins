@@ -247,6 +247,7 @@ class HistoryPane(wx.Panel):
     def OnButton(self, evt):
         """Handle button events"""
         self.GetParent().StartBusy()
+        self._btn.Enable(False)
         selected = self.getSelectedItems()
         if not selected:
             self.projects.compareRevisions(self.path, callback=self.endCompare)
@@ -259,6 +260,7 @@ class HistoryPane(wx.Panel):
             self.projects.compareRevisions(self.path, rev1=rev1, rev2=rev2, callback=self.endCompare)
 
     def endCompare(self):
+        self._btn.Enable(True)
         self.GetParent().StopBusy()
 
     def getSelectedItems(self):
