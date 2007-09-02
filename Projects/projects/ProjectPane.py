@@ -833,7 +833,7 @@ class ProjectTree(wx.Panel):
     def endPaste(self, delayedresult):
         self.GetParent().StopBusy()
         
-    def compareRevisions(self, path, rev1=None, date1=None, rev2=None, date2=None):
+    def compareRevisions(self, path, rev1=None, date1=None, rev2=None, date2=None, callback=None):
         """
         Compare the playpen path to a specific revision, or compare two revisions
         
@@ -845,7 +845,7 @@ class ProjectTree(wx.Panel):
         rev2/date2 -- second file revision/date to campare against
         
         """
-        def diff(path, rev1, date1, rev2, date2):
+        def diff(path, rev1, date1, rev2, date2, callback):
             # Only do files
             if os.path.isdir(path):
                 for file in os.listdir(path):
@@ -855,6 +855,8 @@ class ProjectTree(wx.Panel):
 
             sc = self.getSCSystem(path)
             if sc is None:
+                if callback is not None:
+                    callback()
                 return
                 
             content1 = content2 = ext1 = ext2 = None
@@ -863,6 +865,8 @@ class ProjectTree(wx.Panel):
             if rev1 or date1:
                 content1 = sc.fetch([path], rev=rev1, date=date1)
                 if content1 and content1[0] is None:
+                    if callback is not None:
+                        callback()
                     return wx.MessageDialog(self, 
                                             'The requested file could not be ' +
                                             'retrieved from the source control system.', 
@@ -878,6 +882,8 @@ class ProjectTree(wx.Panel):
             if rev2 or date2:
                 content2 = sc.fetch([path], rev=rev2, date=date2)
                 if content2 and content2[0] is None:
+                    if callback is not None:
+                        callback()
                     return wx.MessageDialog(self, 
                                             'The requested file could not be ' +
                                             'retrieved from the source control system.', 
@@ -892,6 +898,8 @@ class ProjectTree(wx.Panel):
             if not(rev1 or date1 or rev2 or date2):
                 content1 = sc.fetch([path])
                 if content1 and content1[0] is None:
+                    if callback is not None:
+                        callback()
                     return wx.MessageDialog(self, 
                                             'The requested file could not be ' +
                                             'retrieved from the source control system.', 
@@ -930,7 +938,10 @@ class ProjectTree(wx.Panel):
             else:
                 subprocess.call([self.commands['diff'], path2, path1]) 
             
-        t = threading.Thread(target=diff, args=(path, rev1, date1, rev2, date2))
+            if callback is not None:
+                callback()
+            
+        t = threading.Thread(target=diff, args=(path, rev1, date1, rev2, date2, callback))
         t.setDaemon(True)
         t.start()        
 
