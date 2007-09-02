@@ -246,16 +246,20 @@ class HistoryPane(wx.Panel):
 
     def OnButton(self, evt):
         """Handle button events"""
+        self.GetParent().StartBusy()
         selected = self.getSelectedItems()
         if not selected:
-            self.projects.compareRevisions(self.path)
+            self.projects.compareRevisions(self.path, callback=self.endCompare)
         elif len(selected) == 1:
             rev = self._list.GetItem(selected[0], self._list.REV_COL).GetText().strip()
-            self.projects.compareRevisions(self.path, rev1=rev)
+            self.projects.compareRevisions(self.path, rev1=rev, callback=self.endCompare)
         else:
             rev1 = self._list.GetItem(selected[0], self._list.REV_COL).GetText().strip()
             rev2 = self._list.GetItem(selected[-1], self._list.REV_COL).GetText().strip()
-            self.projects.compareRevisions(self.path, rev1=rev1, rev2=rev2)
+            self.projects.compareRevisions(self.path, rev1=rev1, rev2=rev2, callback=self.endCompare)
+
+    def endCompare(self):
+        self.GetParent().StopBusy()
 
     def getSelectedItems(self):
         item = -1
