@@ -66,8 +66,8 @@ _ = wx.GetTranslation
 FILE_TYPES = {
     _('Text File'): {'ext':'.txt'},
     _('C File'): {'ext':'.c'},
-    _('HTML File'): {'ext':'.html', 'template':'<html>\n<head><title></title></head>\n<body>\n\n</body>\n</html>'.replace('\n',eol)},
-    _('Python File'): {'ext':'.py', 'template':'#!/usr/bin/env python\n\n'.replace('\n',eol)},
+    _('HTML File'): {'ext':'.html', 'template':'<html>\n<head><title></title></head>\n<body>\n\n</body>\n</html>'},
+    _('Python File'): {'ext':'.py', 'template':'#!/usr/bin/env python\n\n'},
 }
     
 ID_PROJECTPANE = wx.NewId()
@@ -924,18 +924,26 @@ class ProjectTree(wx.Panel):
                 path = os.path.join(self.tempdir, os.path.basename(path))
                 path1 = '%s.%s' % (path, ext1)
                 path2 = '%s.%s' % (path, ext2)
-                open(path1, 'w').write(content1)
-                open(path2, 'w').write(content2)
+                f = open(path1, 'w')
+                f.write(content1)
+                f.close()
+                f = open(path2, 'w')
+                f.write(content2)
+                f.close()
             elif content1:
                 path1 = path
                 path = os.path.join(self.tempdir, os.path.basename(path))
                 path2 = '%s.%s' % (path, ext1)
-                open(path2, 'w').write(content1)
+                f = open(path2, 'w')
+                f.write(content1)
+                f.close()
             elif content2:
                 path1 = path
                 path = os.path.join(self.tempdir, os.path.basename(path))
                 path2 = '%s.%s' % (path, ext2)
-                open(path2, 'w').write(content2)
+                f = open(path2, 'w')
+                f.write(content2)
+                f.close()
             
             # Run comparison program
             if self.useBuiltinDiff or 'diff' not in self.commands:
@@ -1264,7 +1272,9 @@ class ProjectTree(wx.Panel):
             i += 1
         
         # Write template info
-        open(newpath, 'w').write(info.get('template',''))
+        f = open(newpath, 'w')
+        f.write(info.get('template','').replace('\n',eol))
+        f.close()
 
     def onPopupEdit(self, event):
         """ Open the current file in the editor """
