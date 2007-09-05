@@ -245,6 +245,9 @@ class ProjectTree(wx.Panel):
         # before timing out
         self.scTimeout = 60
         
+        # Storage for currently running source control threads
+        self.scThreads = {}
+        
         # Create root of tree
         self.root = self.tree.AddRoot('Projects')
         self.tree.SetPyData(self.root, None)
@@ -266,11 +269,13 @@ class ProjectTree(wx.Panel):
         self.Bind(EVT_UPDATE_STATUS, self.OnUpdateStatus)
         
         try:
+            import ed_event
             import extern.flatnotebook as fnb
             #self.Bind(fnb.EVT_FLATNOTEBOOK_PAGE_CHANGING,
             mw = self.GetGrandParent()
             mw.nb.Bind(fnb.EVT_FLATNOTEBOOK_PAGE_CHANGED, self.OnPageChanged)
             mw.nb.Bind(fnb.EVT_FLATNOTEBOOK_PAGE_CLOSING, self.OnPageClosing)
+            mw.Bind(ed_event.EVT_MAINWINDOW_EXIT, self.OnMainWindowExit)
         except ImportError: pass
 
         #self.tree.Bind(wx.EVT_LEFT_DCLICK, self.OnLeftDClick)
@@ -522,6 +527,10 @@ class ProjectTree(wx.Panel):
             paths.append(self.tree.GetPyData(item)['path'])
         return paths
         
+    def OnMainWindowExit(self, evt):
+        """ Shutdown threads when main window closes """
+        evt.Skip()
+    
     def OnPageClosing(self, evt):
         """ Notebook tab was closed """
         self.isClosing = True
@@ -763,7 +772,9 @@ class ProjectTree(wx.Panel):
         # Start thread
         t = threading.Thread(target=resultWrapper, args=args, kwargs=kwargs)
         t.start()
+        self.scThreads[t] = True
         t.join(self.scTimeout)
+        del self.scThreads[t]
         
         if t.isAlive():
             t._Thread__stop()
@@ -1522,6 +1533,11 @@ class ProjectTree(wx.Panel):
         # Kill all watcher threads
         for value in self.watchers.values():
             value.pop()
+            
+        # Stop any currently running source control threads
+        for t in self.scThreads:
+            t._Thread__stop()
+        
         # Clean up tempdir
         if self.tempdir:
             shutil.rmtree(self.tempdir, ignore_errors=True)
