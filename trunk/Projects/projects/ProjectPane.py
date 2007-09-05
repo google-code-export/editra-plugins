@@ -636,6 +636,7 @@ class ProjectTree(wx.Panel):
         parent = event.GetItem()
         if not parent: return
         path = self.tree.GetPyData(parent)['path']
+        print 'EXPAND', path
         for item in os.listdir(path):
             self.addPath(parent, item)
         # Delete dummy node from self.addFolder
@@ -724,7 +725,7 @@ class ProjectTree(wx.Panel):
 
                 if 'path' not in data:
                     continue
-                                    
+
                 sc = self.getSCSystem(data['path'])
                 if sc is None:
                     if os.path.isdir(data['path']) or command == 'add':
@@ -733,24 +734,26 @@ class ProjectTree(wx.Panel):
                             continue
                     else:
                         continue
-                
+
                 # Lock node while command is running    
                 data['sclock'] = True 
                 
-                # Find correct method
-                method = getattr(sc, command, None)
-                if method:
-                    # Run command (only if it isn't the status command)
-                    rc = True
-                    if command != 'status':
-                        rc = self._timeoutCommand(callback, method, [data['path']], **options)
-                        
-                    # Only update status if last command didn't time out
-                    if command != 'history' and rc:
-                        self._updateStatus(node, data, sc)
-                    
-                # Unlock
-                del data['sclock']
+                try:
+                    # Find correct method
+                    method = getattr(sc, command, None)
+                    if method:
+                        # Run command (only if it isn't the status command)
+                        rc = True
+                        if command != 'status':
+                            rc = self._timeoutCommand(callback, method, [data['path']], **options)
+
+                        # Only update status if last command didn't time out
+                        if command != 'history' and rc:
+                            self._updateStatus(node, data, sc)
+
+                finally:
+                    # Unlock
+                    del data['sclock']
                             
         wx.lib.delayedresult.startWorker(self.endSCCommand, run, 
                                          wargs=(callback, nodes, command), 
@@ -814,7 +817,7 @@ class ProjectTree(wx.Panel):
                             updates.append((self.tree.SetItemImage, child, icon, wx.TreeItemIcon_Expanded))
                         # Update children status if opened
                         if self.tree.IsExpanded(child):
-                            self._updateStatus(child, self.tree.GetPyData(child), sc, updates)
+                            self._updateStatus(child, self.tree.GetPyData(child), sc)
                     else:
                         icon = self.icons.get('file-'+status[text].get('status',''))
                         if icon:
