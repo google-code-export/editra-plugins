@@ -24,6 +24,11 @@ from CVS import CVS
 from GIT import GIT
 from SVN import SVN
 from HistWin import AdjustColour
+try:
+    import profiler
+    eol = profiler.Profile_Get('EOL')
+except ImportError:
+    eol = '\n'
 
 # Make sure that all processes use a standard shell
 if wx.Platform != '__WXMAC__':
@@ -61,8 +66,8 @@ _ = wx.GetTranslation
 FILE_TYPES = {
     _('Text File'): {'ext':'.txt'},
     _('C File'): {'ext':'.c'},
-    _('HTML File'): {'ext':'.html', 'template':'<html>\n<head><title></title></head>\n<body>\n\n</body>\n</html>'},
-    _('Python File'): {'ext':'.py', 'template':'#!/usr/bin/env python\n\n'},
+    _('HTML File'): {'ext':'.html', 'template':'<html>\n<head><title></title></head>\n<body>\n\n</body>\n</html>'.replace('\n',eol)},
+    _('Python File'): {'ext':'.py', 'template':'#!/usr/bin/env python\n\n'.replace('\n',eol)},
 }
     
 ID_PROJECTPANE = wx.NewId()
