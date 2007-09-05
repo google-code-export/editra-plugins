@@ -1651,12 +1651,12 @@ class ProjectPane(wx.Panel):
         elif e_id == self.ID_CONFIG:
             data = {}
             for key, value in self.projects.sourceControl.items():
-                data[key] = value.command
+                data[str(key)] = value.command
             data['filters'] = ' '.join(self.projects.filters)
             data['syncwithnotebook'] = self.projects.syncWithNotebook
             data['use_default_diff'] = self.projects.useBuiltinDiff
             for key, value in self.projects.commands.items():
-                data[key] = value
+                data[str(key)] = value
             if not self.FindWindowById(self.ID_CFGDLG):
                 cfg = cfgdlg.ConfigDlg(self, self.ID_CFGDLG, 
                              cfgdlg.ConfigData(**data))
