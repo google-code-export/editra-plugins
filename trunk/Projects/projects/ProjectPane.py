@@ -715,6 +715,7 @@ class ProjectTree(wx.Panel):
         except: pass
         
         def run(callback, nodes, command, **options):
+            concurrentcmds = ['status','history']
             NODE, DATA, SC = 0, 1, 2
             nodeinfo = []
             for node in nodes:                
@@ -722,7 +723,7 @@ class ProjectTree(wx.Panel):
                 try: data = self.tree.GetPyData(node)
                 except: data = {}
                 
-                # node, data, sc, locked
+                # node, data, sc
                 info = [node, data, None]
                 
                 # See if the node already has an operation running
@@ -754,8 +755,9 @@ class ProjectTree(wx.Panel):
                 nodeinfo.append(info)
                 
             # Lock node while command is running
-            for node, data, sc in nodeinfo:
-                data['sclock'] = True 
+            if command not in concurrentcmds:
+                for node, data, sc in nodeinfo:
+                    data['sclock'] = command
 
             rc = True            
             try:
@@ -769,13 +771,14 @@ class ProjectTree(wx.Panel):
 
             finally:
                 # Only update status if last command didn't time out
-                if command != 'history' and rc:
+                if command not in ['history','revert','update'] and rc:
                     for node, data, sc in nodeinfo:
                         self._updateStatus(node, data, sc)
 
                 # Unlock
-                for node, data, sc in nodeinfo:
-                    del data['sclock'] 
+                if command not in concurrentcmds:
+                    for node, data, sc in nodeinfo:
+                        del data['sclock'] 
                             
         wx.lib.delayedresult.startWorker(self.endSCCommand, run, 
                                          wargs=(callback, nodes, command), 

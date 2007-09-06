@@ -22,13 +22,51 @@ class SourceControl(object):
             self.console = sys.stdout
         else:
             self.console = console
+    
+    def getRelativePaths(self, paths):
+        """
+        Find the common root to the given list of paths
+        
+        Required Arguments:
+        paths -- list of paths to find the root of
+        
+        Returns: two element tuple.  The first element is a string containing
+            the common root directory.  The second element is a list of 
+            relative paths to the files in the original path list
+        
+        """
+        if not paths:
+            return '', []
+            
+        if len(paths) == 1:
+            if os.path.isdir(paths[0]):
+                return paths[0], ['.']
+            else:
+                return os.path.dirname(paths[0]), [os.path.basename(paths[0])]
+        
+        root = os.path.commonprefix(paths)
+        
+        # If root is one of the paths, move up one directory
+        #if root in paths:
+        #    root = os.path.dirname(root)
+        
+        if not root.endswith(os.sep):
+            root += os.sep
+        
+        # Make paths relative
+        for i, path in enumerate(paths):
+            paths[i] = paths[i][len(root):]
+            if not paths[i]:
+                paths[i] = '.'
+                
+        return root, paths
 
-    def splitFiles(self, path, forcefiles=False, type=None, topdown=True):
+    def splitFiles(self, paths, forcefiles=False, type=None, topdown=True):
         """ 
         Split path into a working directory and list of files 
         
         Required Arguments:
-        path -- path to split
+        paths -- path or list of paths to split
         forcefiles -- boolean indicating if the list of recursive files
             should be returned explicitly
         type -- type of files/directories to return
@@ -42,7 +80,21 @@ class SourceControl(object):
             directory.
         
         """
-        root, files = path, []
+        # Multiple paths were passed in
+        if isinstance(paths, (list,tuple)):
+            newpaths = []
+            for path in paths:
+                root, files = self.splitFiles(path, forcefiles=forcefiles,
+                                              type=type, topdown=topdown)
+                if files:
+                    for f in files:
+                        newpaths.append(os.path.join(root,f))
+                else:
+                    newpaths.append(root)
+            return self.getRelativePaths(newpaths)
+        
+        # Single path was passed in
+        path, root, files = paths, paths, []
         if not os.path.isdir(path):
             root, files = os.path.split(path)
             files = self.filterPaths([files])
@@ -347,3 +399,10 @@ class SourceControl(object):
         
         """
         raise NotImplementedError
+
+if __name__ == '__main__':
+    sc = SourceControl()
+    print sc.getRelativePaths(['/u/foo/a', '/u/foo/a/b/c.html'])
+    print sc.getRelativePaths(['/u/foo/a/c/d.c', '/u/foo/a/b/c.html'])
+    print sc.getRelativePaths([])
+    print sc.getRelativePaths(['/u/foo/a/b'])
