@@ -636,7 +636,6 @@ class ProjectTree(wx.Panel):
         parent = event.GetItem()
         if not parent: return
         path = self.tree.GetPyData(parent)['path']
-        print 'EXPAND', path
         for item in os.listdir(path):
             self.addPath(parent, item)
         # Delete dummy node from self.addFolder
@@ -716,16 +715,32 @@ class ProjectTree(wx.Panel):
         except: pass
         
         def run(callback, nodes, command, **options):
-            for node in nodes:
-                #print command
+            NODE, DATA, SC = 0, 1, 2
+            nodeinfo = []
+            for node in nodes:                
+                # Get node data
                 try: data = self.tree.GetPyData(node)
                 except: data = {}
+                
+                # node, data, sc, locked
+                info = [node, data, None]
+                
+                # See if the node already has an operation running
                 if data.get('sclock', None):
-                    continue
+                    return wx.MessageDialog(self, 
+                                            _('There is already a source control ' \
+                                              'command executing on this path.  ' \
+                                              'Please wait for it to finish before ' \
+                                              'attempting more operations.'),
+                                            _('Source control directory is busy'), 
+                                            style=wx.OK|wx.ICON_ERROR).ShowModal()
 
+                # See if the node has a path associated
+                # Technically, all nodes should (except the root node)
                 if 'path' not in data:
                     continue
 
+                # Determine source control system
                 sc = self.getSCSystem(data['path'])
                 if sc is None:
                     if os.path.isdir(data['path']) or command == 'add':
@@ -734,26 +749,33 @@ class ProjectTree(wx.Panel):
                             continue
                     else:
                         continue
-
-                # Lock node while command is running    
-                data['sclock'] = True 
+                info[SC] = sc
                 
-                try:
-                    # Find correct method
-                    method = getattr(sc, command, None)
-                    if method:
-                        # Run command (only if it isn't the status command)
-                        rc = True
-                        if command != 'status':
-                            rc = self._timeoutCommand(callback, method, [data['path']], **options)
+                nodeinfo.append(info)
+                
+            # Lock node while command is running
+            for node, data, sc in nodeinfo:
+                data['sclock'] = True 
 
-                        # Only update status if last command didn't time out
-                        if command != 'history' and rc:
-                            self._updateStatus(node, data, sc)
+            rc = True            
+            try:
+                # Find correct method
+                method = getattr(sc, command, None)
+                if method:
+                    # Run command (only if it isn't the status command)
+                    if command != 'status':
+                        rc = self._timeoutCommand(callback, method, 
+                             [x[DATA]['path'] for x in nodeinfo], **options)
 
-                finally:
-                    # Unlock
-                    del data['sclock']
+            finally:
+                # Only update status if last command didn't time out
+                if command != 'history' and rc:
+                    for node, data, sc in nodeinfo:
+                        self._updateStatus(node, data, sc)
+
+                # Unlock
+                for node, data, sc in nodeinfo:
+                    del data['sclock'] 
                             
         wx.lib.delayedresult.startWorker(self.endSCCommand, run, 
                                          wargs=(callback, nodes, command), 
@@ -887,9 +909,9 @@ class ProjectTree(wx.Panel):
                     if callback is not None:
                         callback()
                     return wx.MessageDialog(self, 
-                                            'The requested file could not be ' +
-                                            'retrieved from the source control system.', 
-                                            'Could not retrieve file', 
+                                            _('The requested file could not be ' \
+                                            'retrieved from the source control system.'), 
+                                            _('Could not retrieve file'), 
                                             style=wx.OK|wx.ICON_ERROR).ShowModal()
                 content1 = content1[0]
                 if rev1:
