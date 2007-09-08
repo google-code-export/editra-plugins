@@ -97,23 +97,20 @@ class GIT(SourceControl):
         
     def checkout(self, paths):
         """Checkout the given paths"""
-        for path in paths:
-            root, files = self.splitFiles(path, forcefiles=True)
-            out = self.run(root, ['clone'] + files)
-            self.logOutput(out)
+        root, files = self.splitFiles(paths, forcefiles=True)
+        out = self.run(root, ['clone'] + files)
+        self.logOutput(out)
             
     def commit(self, paths, message=''):
         """ Commit all files with message """
-        for path in paths:
-            root, files = self.splitFiles(path)
-            out = self.run(root, ['commit', '-m', message] + files)
-            self.logOutput(out)
+        root, files = self.splitFiles(paths)
+        out = self.run(root, ['commit', '-m', message] + files)
+        self.logOutput(out)
             
     def diff(self, paths):
-        for path in paths:
-            root, files = self.splitFiles(path)
-            out = self.run(root, ['diff'] + files)
-            self.logOutput(out)
+        root, files = self.splitFiles(paths)
+        out = self.run(root, ['diff'] + files)
+        self.logOutput(out)
 
     def history(self, paths, history=None):
         """ Get history of the given paths """
