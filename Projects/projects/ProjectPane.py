@@ -1760,6 +1760,9 @@ class CommitDialog(wx.Dialog):
         self._commit.SetDefault()
         self._cancel = wx.Button(self, wx.ID_CANCEL)
         self._entry = wx.TextCtrl(self, style=wx.TE_MULTILINE|wx.NO_BORDER)
+        font = self._entry.GetFont()
+        font.SetPointSize(12)
+        self._entry.SetFont(font)
         if wx.Platform == '__WXMAC__':
             self._entry.MacCheckSpelling(True)
         self._DefaultMessage(default)
@@ -1781,7 +1784,7 @@ class CommitDialog(wx.Dialog):
         for path in files:
             tmp = ":\t%s" % path
             msg.append(tmp)
-        msg.append(u': ' + (u'-' * 30))
+        msg.append(u': ' + (u'-' * 35))
         msg.extend([u'', u''])
         msg = os.linesep.join(msg)
         self._entry.SetValue(msg)
