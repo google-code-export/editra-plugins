@@ -45,6 +45,8 @@ class SourceControl(object):
                 return os.path.dirname(paths[0]), [os.path.basename(paths[0])]
         
         root = os.path.commonprefix(paths)
+        if not os.path.isdir(root):
+            root = os.path.dirname(root)
         
         # If root is one of the paths, move up one directory
         #if root in paths:
