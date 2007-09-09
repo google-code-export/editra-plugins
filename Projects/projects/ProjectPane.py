@@ -27,6 +27,12 @@ from HistWin import AdjustColour
 try:
     import profiler
     eol = profiler.Profile_Get('EOL')
+    if 'Unix' in eol:
+        eol = '\n'
+    elif 'Windows' in eol:
+        eol = '\r\n'
+    else:
+        eol = '\r'
 except ImportError:
     eol = '\n'
 
@@ -67,6 +73,7 @@ FILE_TYPES = {
     _('Text File'): {'ext':'.txt'},
     _('C File'): {'ext':'.c'},
     _('HTML File'): {'ext':'.html', 'template':'<html>\n<head><title></title></head>\n<body>\n\n</body>\n</html>'},
+    _('Php File'): {'ext':'.php', 'template':'<?php\n\n?>'},
     _('Python File'): {'ext':'.py', 'template':'#!/usr/bin/env python\n\n'},
 }
     
