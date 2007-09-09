@@ -1813,7 +1813,8 @@ class CommitDialog(wx.Dialog):
         msg = list()
         for line in xrange(self._entry.GetNumberOfLines()):
             tmp = self._entry.GetLineText(line)
-            if tmp.strip().startswith(u':'):
+            if tmp.strip().startswith(u':') or \
+               self._entry.GetLineText(line + 1).startswith(u':'):
                 continue
             msg.append(tmp)
         return os.linesep.join(msg).strip()
