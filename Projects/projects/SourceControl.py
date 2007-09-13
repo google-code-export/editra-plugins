@@ -139,10 +139,13 @@ class SourceControl(object):
         for path in paths:
             if path.endswith('\r'):
                 continue
+            bailout = False
             for pattern in self.filters:
                 if fnmatch.fnmatchcase(path, pattern):
-                    continue
-            newpaths.append(path)
+                    bailout = True
+                    break
+            if not bailout:
+                newpaths.append(path)
         return newpaths
 
     def getPathList(self, paths, type=None, topdown=True):
