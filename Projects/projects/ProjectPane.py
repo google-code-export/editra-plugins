@@ -34,6 +34,7 @@ try:
     else:
         eol = '\r'
 except ImportError:
+    profiler = None
     eol = '\n'
 
 # Make sure that all processes use a standard shell
@@ -1495,7 +1496,7 @@ class ProjectTree(wx.Panel):
                     files.append(fname)
             except (IOError, OSError): pass
 
-        nb = wx.GetApp().GetMainWindow().nb
+        nb = self.GetTopLevelParent().nb
 
         for item in files:
             if nb.HasFileOpen(item):
@@ -1584,12 +1585,26 @@ class ProjectPane(wx.Panel):
     ID_ADD_PROJECT = wx.NewId()
     ID_CONFIG = wx.NewId()
     ID_CFGDLG = wx.NewId()
+    ID_PROJECTS = wx.NewId()
+    PANE_NAME = u'Projects'
 
     def __init__(self, parent, id=ID_PROJECTPANE, pos=wx.DefaultPosition,
                  size=wx.DefaultSize, style=wx.NO_BORDER):
         wx.Panel.__init__(self, parent, id, pos, size, style)
         
         # Attributes
+        try:
+            import ed_glob
+            mb = self.GetTopLevelParent().GetMenuBar()
+            vm = mb.GetMenuByName("view")
+            self._mi = vm.InsertAlpha(self.ID_PROJECTS, _("Projects"), 
+                                      _("Open Projects Sidepanel"),
+                                      wx.ITEM_CHECK,
+                                      after=ed_glob.ID_PRE_MARK)
+            vm.Bind(wx.EVT_MENU_OPEN, self.UpdateMenuItem)
+        except ImportError:
+            ed_glob = None
+
         sizer = wx.BoxSizer(wx.VERTICAL)
         self.timer = wx.Timer(self)
         self.isBusy = 0
@@ -1606,10 +1621,9 @@ class ProjectPane(wx.Panel):
                                        self.projects.il.GetBitmap(self.projects.icons['project-delete']), 
                                        size=(16,16), style=wx.NO_BORDER)
         removebutton.SetToolTip(wx.ToolTip(_("Remove Project")))
-        try:
-            import ed_glob
+        if ed_glob:
             cfgbmp = wx.ArtProvider.GetBitmap(str(ed_glob.ID_PREF), wx.ART_MENU)
-        except ImportError:
+        else:
             cfgbmp = wx.ArtProvider.GetBitmap(wx.ART_EXECUTABLE_FILE, wx.ART_MENU)
         configbutton = wx.BitmapButton(self, self.ID_CONFIG, cfgbmp,
                                        size=(16,16), style=wx.NO_BORDER)
@@ -1716,6 +1730,31 @@ class ProjectPane(wx.Panel):
                 pass
         else:
             evt.Skip()
+
+    def OnShowProjects(self, evt):
+        """ Shows the projects """
+        if evt.GetId() == self.ID_PROJECTS and profiler:
+            mw = self.GetTopLevelParent().GetFrameManager()
+            pane = mw.GetPane(self.PANE_NAME)
+            if pane.IsShown():
+                pane.Hide()
+                profiler.Profile_Set('Projects.Show', False)
+            else:
+                pane.Show()
+                profiler.Profile_Set('Projects.Show', True)
+            mw.Update()
+        else:
+            evt.Skip()
+
+    def UpdateMenuItem(self, evt):
+        """Update the check mark for the menu item"""
+        mgr = self.GetTopLevelParent().GetFrameManager()
+        pane = mgr.GetPane(self.PANE_NAME)
+        if pane.IsShown():
+            self._mi.Check(True)
+        else:
+            self._mi.Check(False)
+        evt.Skip()
 
     def OnTick(self, evt):
         """Pulse the indicator on every tick of the clock"""
