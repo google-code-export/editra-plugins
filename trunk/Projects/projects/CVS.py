@@ -32,7 +32,12 @@ class CVS(SourceControl):
         files = sorted([x for x in files if not os.path.isdir(x)])
         # Add all directories individually first
         for d in dirs:
-            out = self.run(root, ['add', d])
+            droot = root
+            if d == '.':
+                droot, d = os.path.split(droot)
+                if not d:
+                    droot, d = os.path.split(droot)                
+            out = self.run(droot, ['add', d])
             self.logOutput(out)
         # Add all files
         if files:
