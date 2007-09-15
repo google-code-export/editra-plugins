@@ -27,6 +27,12 @@ class SVN(SourceControl):
     def add(self, paths):
         """ Add paths to the repository """
         root, files = self.splitFiles(paths)
+        if '.' in files:
+            root, parent = os.path.split(root)
+            if not parent:
+                root, parent = os.path.split(root)
+            for i, f in enumerate(files):
+                files[i] = os.path.join(parent, f)
         out = self.run(root, ['add'] + files)
         self.logOutput(out)
         
