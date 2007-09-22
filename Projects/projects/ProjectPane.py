@@ -1496,7 +1496,7 @@ class ProjectTree(wx.Panel):
                     files.append(fname)
             except (IOError, OSError): pass
 
-        nb = self.GetTopLevelParent().nb
+        nb = self.GetParent().GetOwnerWindow().nb
 
         for item in files:
             if nb.HasFileOpen(item):
@@ -1593,9 +1593,10 @@ class ProjectPane(wx.Panel):
         wx.Panel.__init__(self, parent, id, pos, size, style)
         
         # Attributes
+        self._mw = parent       # Save ref to owner window
         try:
             import ed_glob
-            mb = self.GetTopLevelParent().GetMenuBar()
+            mb = self._mw.GetMenuBar()
             vm = mb.GetMenuByName("view")
             self._mi = vm.InsertAlpha(self.ID_PROJECTS, _("Projects"), 
                                       _("Open Projects Sidepanel"),
@@ -1654,6 +1655,10 @@ class ProjectPane(wx.Panel):
         """Make sure the timer is stopped"""
         if self.timer.IsRunning():
             self.timer.Stop()
+
+    def GetOwnerWindow(self):
+        """Return reference to mainwindow that created this panel"""
+        return self._mw
 
     def OnCfgClose(self, evt):
         """Recieve configuration data when dialog is closed"""
@@ -1734,21 +1739,21 @@ class ProjectPane(wx.Panel):
     def OnShowProjects(self, evt):
         """ Shows the projects """
         if evt.GetId() == self.ID_PROJECTS and profiler:
-            mw = self.GetTopLevelParent().GetFrameManager()
-            pane = mw.GetPane(self.PANE_NAME)
+            mgr = self._mw.GetFrameManager()
+            pane = mgr.GetPane(self.PANE_NAME)
             if pane.IsShown():
                 pane.Hide()
                 profiler.Profile_Set('Projects.Show', False)
             else:
                 pane.Show()
                 profiler.Profile_Set('Projects.Show', True)
-            mw.Update()
+            mgr.Update()
         else:
             evt.Skip()
 
     def UpdateMenuItem(self, evt):
         """Update the check mark for the menu item"""
-        mgr = self.GetTopLevelParent().GetFrameManager()
+        mgr = self._mw.GetFrameManager()
         pane = mgr.GetPane(self.PANE_NAME)
         if pane.IsShown():
             self._mi.Check(True)
