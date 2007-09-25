@@ -88,13 +88,19 @@ class GeneralConfigTab(wx.Panel):
         hsizer = wx.BoxSizer(wx.HORIZONTAL)
         hsizer.AddF(wx.RadioButton(self, -1, ''), wx.SizerFlags().Left().Border(wx.TOP|wx.BOTTOM|wx.LEFT, 6))
         hsizer.AddF(wx.FilePickerCtrl(self, -1, data['general'].get('diff-program',''),
-                                      message=_("Select diff program")), wx.SizerFlags().Left().Expand())
+                                      message=_("Select diff program")), wx.SizerFlags(1).Left().Expand())
         sizer.AddF(hsizer, wx.SizerFlags().Left().Expand())
         
         # Extra space at bottom of panel
         sizer.AddF(wx.Panel(self, -1), wx.SizerFlags().Border(wx.TOP, 10))
 
-        self.SetSizer(sizer)
+        # Add space around the sides
+        outsizer = wx.BoxSizer(wx.HORIZONTAL)
+        outsizer.AddF(wx.Panel(self, -1, size=(10,5)), wx.SizerFlags(0))
+        outsizer.AddF(sizer, wx.SizerFlags(1).Expand())
+        outsizer.AddF(wx.Panel(self, -1, size=(10,5)), wx.SizerFlags(0))
+        
+        self.SetSizer(outsizer)
         self.SetInitialSize()
         
 class SourceControlConfigTab(wx.Panel):
@@ -104,26 +110,27 @@ class SourceControlConfigTab(wx.Panel):
         
         # Layout
         sizer = wx.BoxSizer(wx.VERTICAL)
-        flags = wx.SizerFlags().Left().Expand().Border(wx.ALL, 6)
+        flags = wx.SizerFlags().Left().Border(wx.ALL, 6)
 
         hsizer = wx.BoxSizer(wx.HORIZONTAL)
-        hsizer.AddF(wx.Choice(self, -1, choices=['CVS','Git','Subversion']), wx.SizerFlags().Left().Expand().Border(wx.ALL,5))
-        hsizer.AddF(wx.FilePickerCtrl(self, -1), wx.SizerFlags().Left().Expand())        
-        sizer.Add(hsizer)
+        hsizer.AddF(wx.Choice(self, -1, choices=['CVS','Git','Subversion']), flags.Border(wx.ALL,5))
+        hsizer.AddF(wx.FilePickerCtrl(self, -1), wx.SizerFlags(1))        
+        sizer.AddF(hsizer, wx.SizerFlags(1).Expand())
         
         # Repository configuration box
         repsizer = wx.StaticBoxSizer(wx.StaticBox(self, -1, _('Repository Configuration')), wx.VERTICAL)
 
         # Repository selector
-        repsizer.AddF(wx.Choice(self, -1, choices=['Default','','Add Repository...','Remove Repository...']), flags)
+        repsizer.AddF(wx.Choice(self, -1, choices=['Default','','Add Repository...','Remove Repository...']), flags.Expand())
         
         # Username and password
-        userpass = wx.GridSizer(2,2)
+        userpass = wx.FlexGridSizer(2,2)
+        userpass.AddGrowableCol(1,1)
         userpass.AddF(wx.StaticText(self, -1, _('Username')), flags)
         userpass.AddF(wx.TextCtrl(self, -1), flags)
         userpass.AddF(wx.StaticText(self, -1, _('Password')), flags)
         userpass.AddF(wx.TextCtrl(self, -1), flags)
-        repsizer.Add(userpass)
+        repsizer.AddF(userpass, wx.SizerFlags(1).Expand())
         repsizer.AddF(wx.StaticBox(self, -1, size=(-1, 1)), wx.SizerFlags().Center().Expand().Border(wx.TOP|wx.BOTTOM, 10))
 
         # Environment variables
@@ -134,11 +141,20 @@ class SourceControlConfigTab(wx.Panel):
         index = env.InsertStringItem(sys.maxint, '')
         env.SetStringItem(index, 0, 'NEW_VAR')
         env.SetStringItem(index, 1, 'NEW VAR VALUE')
-        repsizer.AddF(env, flags)
+        repsizer.AddF(env, flags.Expand())
 
         sizer.AddF(repsizer, flags)
 
-        self.SetSizer(sizer)
+        # Extra space at bottom of panel
+        sizer.AddF(wx.Panel(self, -1), wx.SizerFlags().Border(wx.TOP, 10))
+
+        # Add space around the sides
+        outsizer = wx.BoxSizer(wx.HORIZONTAL)
+        outsizer.AddF(wx.Panel(self, -1, size=(10,5)), wx.SizerFlags(0))
+        outsizer.AddF(sizer, wx.SizerFlags(1).Expand())
+        outsizer.AddF(wx.Panel(self, -1, size=(10,5)), wx.SizerFlags(0))
+
+        self.SetSizer(outsizer)
         self.SetInitialSize()
         
 class AutoWidthListCtrl(wx.ListCtrl, listmix.ListCtrlAutoWidthMixin):
