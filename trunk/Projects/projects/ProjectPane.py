@@ -185,20 +185,25 @@ class ProjectTree(wx.Panel):
         icons['file'] = il.Add(FileIcons.getFileBitmap())
         
         # Create badged icons
-        for badge in ['uptodate','modified','conflict','added']:
+        for badge in ['uptodate', 'modified', 'conflict', 'added']:
             badgeicon = getattr(FileIcons, 'getBadge'+badge.title()+'Bitmap')().ConvertToImage()
             badgeicon.Rescale(11, 11, wx.IMAGE_QUALITY_HIGH)
-            for type in ['file','folder','folder-open']:
+            for type in ['file', 'folder', 'folder-open']:
                 icon = wx.MemoryDC()
                 if type == 'file':
-                    icon.SelectObject(FileIcons.getFileBitmap())
+                    tbmp = FileIcons.getFileBitmap()
                 elif type == 'folder':
-                    icon.SelectObject(folder)
+                    tbmp = folder
                 else:
-                    icon.SelectObject(folderopen)
+                    tbmp = folderopen
+
+                icon.SelectObject(tbmp)
                 icon.SetBrush(wx.TRANSPARENT_BRUSH)
-                icon.DrawBitmap(wx.BitmapFromImage(badgeicon), 5, 5, True)
-                tbmp = icon.GetAsBitmap()
+                if wx.Platform == '__WXGTK__':
+                    x, y = 3, 4
+                else:
+                    x, y = 5, 5
+                icon.DrawBitmap(wx.BitmapFromImage(badgeicon), x, y, False)
                 icon.SelectObject(wx.NullBitmap)
                 icons[type+'-'+badge] = il.Add(tbmp)
 
@@ -1616,18 +1621,17 @@ class ProjectPane(wx.Panel):
         self.buttonbox = wx.BoxSizer(wx.HORIZONTAL)
         addbutton = wx.BitmapButton(self, self.ID_ADD_PROJECT, 
                                     self.projects.il.GetBitmap(self.projects.icons['project-add']), 
-                                    size=(16,16), style=wx.NO_BORDER)
+                                    style=wx.NO_BORDER)
         addbutton.SetToolTip(wx.ToolTip(_("Add Project")))
         removebutton = wx.BitmapButton(self, self.ID_REMOVE_PROJECT, 
                                        self.projects.il.GetBitmap(self.projects.icons['project-delete']), 
-                                       size=(16,16), style=wx.NO_BORDER)
+                                       style=wx.NO_BORDER)
         removebutton.SetToolTip(wx.ToolTip(_("Remove Project")))
         if ed_glob:
             cfgbmp = wx.ArtProvider.GetBitmap(str(ed_glob.ID_PREF), wx.ART_MENU)
         else:
             cfgbmp = wx.ArtProvider.GetBitmap(wx.ART_EXECUTABLE_FILE, wx.ART_MENU)
-        configbutton = wx.BitmapButton(self, self.ID_CONFIG, cfgbmp,
-                                       size=(16,16), style=wx.NO_BORDER)
+        configbutton = wx.BitmapButton(self, self.ID_CONFIG, cfgbmp, style=wx.NO_BORDER)
         configbutton.SetToolTip(wx.ToolTip(_("Configure")))
         self.busy = wx.Gauge(self, size=(50, 16), style=wx.GA_HORIZONTAL)
         self.busy.Hide()
