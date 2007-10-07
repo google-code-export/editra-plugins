@@ -1,0 +1,4 @@
+
+        [Editra.plugins]
+        Humility = humility:HumilityTheme
+        
