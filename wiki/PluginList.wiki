@@ -7,9 +7,14 @@ This page contains a list of links to pages about individual plugins and their r
 
 
 = Plugins Projects =
-
 ||Plugin Name    || Short Description ||
 ||ProjectsPlugin || _Project management plugin with integrated source control_ ||
+
+
+
+= Theme Plugins =
+||Theme Name || Short Description ||
+||[Humility Humility]  || Icon theme for Editra based on the Humility Icon Set||
 
 
 
