@@ -1,7 +1,0 @@
-setup.py
-Humility.egg-info/PKG-INFO
-Humility.egg-info/SOURCES.txt
-Humility.egg-info/dependency_links.txt
-Humility.egg-info/entry_points.txt
-Humility.egg-info/top_level.txt
-humility/__init__.py
