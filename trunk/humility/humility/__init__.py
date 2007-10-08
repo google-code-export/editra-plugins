@@ -16,6 +16,7 @@ import ed_glob
 import plugin
 import ed_theme
 import syntax.synglob as synglob
+import syntax.syntax as syntax
 
 #-----------------------------------------------------------------------------#
 
@@ -58,17 +59,19 @@ class HumilityTheme(plugin.Plugin):
         return wx.NullBitmap
 
     def GetFileBitmap(self, bmp_id):
+        bmp = None
         if ed_theme.MIME_ART.has_key(bmp_id):
             path = MIME_PATH + ed_theme.MIME_ART[bmp_id]
-            bkup = MIME_PATH + ed_theme.MIME_ART[synglob.ID_LANG_TXT]
             bmp = self.__LoadBitmapData(path)
             if bmp is not None:
                 return bmp
-            else:
-                # Fail back to plain text bitmap
-                bmp = self.__LoadBitmapData(bkup)
-                if bmp is not None:
-                    return bmp
+        
+        if bmp is None and bmp_id in syntax.SyntaxIds():
+            # Fail back to plain text bitmap
+            bkup = MIME_PATH + ed_theme.MIME_ART[synglob.ID_LANG_TXT]
+            bmp = self.__LoadBitmapData(bkup)
+            if bmp is not None:
+                return bmp
 
         return wx.NullBitmap
 
