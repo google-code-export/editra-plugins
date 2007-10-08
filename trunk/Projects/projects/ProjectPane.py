@@ -185,7 +185,7 @@ class ProjectTree(wx.Panel):
         icons['file'] = il.Add(FileIcons.getFileBitmap())
         
         # Create badged icons
-        for badge in ['uptodate', 'modified', 'conflict', 'added']:
+        for badge in ['uptodate', 'modified', 'conflict', 'added', 'merge']:
             badgeicon = getattr(FileIcons, 'getBadge'+badge.title()+'Bitmap')().ConvertToImage()
             badgeicon.Rescale(11, 11, wx.IMAGE_QUALITY_HIGH)
             for type in ['file', 'folder', 'folder-open']:
