@@ -15,8 +15,6 @@ except ImportError:
     setup = None
 
 if setup != None:
-    sys.argv.append("bdist_egg")
-    sys.argv.append("--dist-dir=../.")
     setup(
         name='Humility',
         version='0.1',
