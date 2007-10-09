@@ -43,7 +43,15 @@ class GIT(SourceControl):
     Projects Plugin.
 
     """
+    name = 'GIT'
     command = 'git'
+
+    def __repr__(self):
+        return 'GIT.GIT()'
+    
+    def getRepository(self, path):
+        # Needs to return the repository path
+        return
     
     def isControlled(self, path):
         """ Is the path controlled by GIT? 

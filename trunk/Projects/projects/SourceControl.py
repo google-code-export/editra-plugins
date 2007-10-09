@@ -15,7 +15,8 @@ class SourceControl(object):
     TYPE_ANY = 3   
 
     filters = []
-    command = ''
+    command = ''  # Default command 
+    name = ''     # Name to use in config panel
     
     def __init__(self, console=None):
         if console is None:
@@ -233,6 +234,19 @@ class SourceControl(object):
 
 # Methods that need to be overridden in subclasses        
         
+    def getRepository(self, path):
+        """
+        Return the repository for the given path
+        
+        Required Arguments:
+        path -- absolute path to the file or directory
+        
+        Returns: string containing the repository for the given file
+            or directory
+        
+        """    
+        raise NotImplementedError
+    
     def isControlled(self, path):
         """ 
         Is the path controlled by source control? 
