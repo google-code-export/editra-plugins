@@ -5,7 +5,27 @@ from SourceControl import SourceControl
 
 class SVN(SourceControl):
 
+    name = 'Subversion'
     command = 'svn'
+
+    def __repr__(self):
+        return 'SVN.SVN()'
+    
+    def getRepository(self, path):
+        if not self.isControlled(path):
+            return
+        if not os.path.isdir(path):
+            path = os.path.dirname(path)
+        repfile = os.path.join(path, '.svn', 'entries')
+        if not os.path.isfile(repfile):
+            return
+        f = open(repfile, 'r')
+        for line in f:
+            line = line.strip()
+            if line == 'dir':
+                for i, line in enumerate(f):
+                    if i == 2:
+                        return line.strip()  
     
     def isControlled(self, path):
         """ Is the path controlled by CVS? """

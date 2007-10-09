@@ -19,10 +19,7 @@ try:
     import diffwin
 except ImportError: 
     diffwin = util = None
-import cfgdlg
-from CVS import CVS
-from GIT import GIT
-from SVN import SVN
+import ConfigDialog
 from HistWin import AdjustColour
 try:
     import profiler
@@ -213,35 +210,9 @@ class ProjectTree(wx.Panel):
         self.tree.SetImageList(il)
         self.il = il
         
-        #
-        # Setup default configuration
-        #
-        
-        # Names of files to filter out of tree
-        self.filters = sorted(['CVS','dntnd','.DS_Store','.dpp','.newpp','*~',
-                        '*.a','*.o','.poem','.dll','._*','.localized',
-                        '.svn','*.pyc','*.bak','#*','*.pyo','*%*', '.git',
-                        '*.previous','*.swp','.#*'])
-        
-        # Commands for external programs
-        self.commands = {}
-        
-        # Setup builtin or external diff program
-        self.useBuiltinDiff = True
-        if DIFF_CMD:
-            self.commands['diff'] = DIFF_CMD
-            self.useBuiltinDiff = False
+        # Read configuration
+        self.config = ConfigDialog.ConfigData()
 
-        # Keep tree view synchronized with notebook
-        self.syncWithNotebook = True
-        
-        # Create source control objects
-        self.sourceControl = {'cvs': CVS(), 'git' : GIT(), 'svn': SVN()}
-        for key, value in self.sourceControl.items():
-            value.filters = self.filters
-
-        # End configuration
-        
         # Threads that watch directories corresponding to open folders
         self.watchers = {}
         
@@ -267,9 +238,6 @@ class ProjectTree(wx.Panel):
         self.tree.SetItemImage(self.root, self.icons['folder'], wx.TreeItemIcon_Normal)
         self.tree.SetItemImage(self.root, self.icons['folder-open'], wx.TreeItemIcon_Expanded)
 
-        # Load configuration settings
-        self.loadSettings()
-
         # Bind events
         self.Bind(wx.EVT_TREE_ITEM_EXPANDED, self.OnItemExpanded, self.tree)
         self.Bind(wx.EVT_TREE_ITEM_COLLAPSED, self.OnItemCollapsed, self.tree)
@@ -291,125 +259,23 @@ class ProjectTree(wx.Panel):
             mw.Bind(ed_event.EVT_MAINWINDOW_EXIT, self.OnMainWindowExit)
         except ImportError: pass
 
+        self.loadProjects()
+
         #self.tree.Bind(wx.EVT_LEFT_DCLICK, self.OnLeftDClick)
         #self.tree.Bind(wx.EVT_RIGHT_DOWN, self.OnRightDown)
         #self.tree.Bind(wx.EVT_RIGHT_UP, self.OnRightUp)
 
-    def readConfig(self):
-        """ Read config settings into a dictionary """
-        config = {}
-        try:
-            import ed_glob, util
-            f = util.GetFileReader(ed_glob.CONFIG['CACHE_DIR'] + 'Projects.config')
-            if f != -1:
-                current = []
-                for line in f:
-                    line = line.strip()
-                    if not line:
-                        continue
-                    elif line.startswith('[') and line.endswith(']'):
-                        current = config[line[1:-1].strip()] = []
-                    else:
-                        current.append(line) 
-                f.close()
-        except (ImportError, OSError):
-            pass
-        return config
-
-    def writeConfig(self, **kwargs):
-        """
-        Write keyword arguments into config dictionary
-       
-        Each keyword argument is written into its own section in the 
-        configuration.  When being read back out, the resulting dictionary
-        will have a key for each keyword argument and the value will 
-        always be a list of the given values.
-
-        """
-        try:
-            import ed_glob, util
-            config = self.readConfig()
-            config.update(kwargs)
-            f = util.GetFileWriter(ed_glob.CONFIG['CACHE_DIR'] + 'Projects.config')
-            if f != -1:
-                for key, value in config.items():
-                    f.write('[%s]\n' % key)
-                    if isinstance(value, (list,tuple)):
-                        for v in value:
-                            f.write('%s\n' % v)
-                    else:
-                        f.write('%s\n' % value)
-                f.close()
-        except (ImportError, OSError):
-            pass
-
-    def loadSettings(self):
-        """ Load projects from config file """
-        config = self.readConfig()
-        for p in config.get('projects',[]):
-            self.addProject(p, save=False)
-
-        self.filters = sorted(config.get('filters', self.filters))
-
-        for c in config.get('commands',[]):
-            key, value = c.split(' ', 1)
-            self.commands[key] = value
-
-        for c in config.get('sourcecontrol',[]):
-            key, value = c.split(' ', 1)
-            self.sourceControl[key].command = value
-        
-        for c in config.get('syncwithnotebook',[]):
-            if 'yes' in c:
-                self.syncWithNotebook = True
-            else:
-                self.syncWithNotebook = False
-
-        for c in config.get('usebuiltindiff',[]):
-            if 'yes' in c:
-                self.useBuiltinDiff = True
-            else:
-                self.useBuiltinDiff = False
-
-    def saveSettings(self):
-        """ Save all settings """
-        self.saveProjects()
-        self.saveFilters()
-        self.saveCommands()
-        self.saveSourceControl()
-        self.saveSyncWithNotebook()
-        self.saveUseBuiltinDiff()
-
     def saveProjects(self):
         """ Save projects to config file """
-        self.writeConfig(projects=self.getProjectPaths())
-
-    def saveFilters(self):
-        self.writeConfig(filters=sorted(self.filters))
-
-    def saveSyncWithNotebook(self):
-        if self.syncWithNotebook:
-            self.writeConfig(syncwithnotebook=['yes'])
-        else:
-            self.writeConfig(syncwithnotebook=['no'])
-        
-    def saveUseBuiltinDiff(self):
-        if self.useBuiltinDiff:
-            self.writeConfig(usebuiltindiff=['yes'])
-        else:
-            self.writeConfig(usebuiltindiff=['no'])
-        
-    def saveCommands(self):
-        commands = []
-        for key, value in self.commands.items():
-            commands.append('%s %s' % (key, value))
-        self.writeConfig(commands=commands)
-
-    def saveSourceControl(self):
-        commands = []
-        for key, value in self.sourceControl.items():
-            commands.append('%s %s' % (key, value.command))
-        self.writeConfig(sourcecontrol=commands)
+        projects = self.config.getProjects()
+        for item in self.getProjectPaths():
+            if item not in projects:
+                self.config.addProject(item)
+        self.config.save()
+    
+    def loadProjects(self):
+       for item in sorted(self.config.getProjects().keys()):
+           self.addProject(item, save=False) 
 
     def addProject(self, path, save=True):
         """
@@ -553,7 +419,7 @@ class ProjectTree(wx.Panel):
         """ Notebook tab was changed """
         evt.Skip()
 
-        if not self.syncWithNotebook:
+        if not self.config.getSyncWithNotebook():
             return
 
         # Don't sync when a tab was just closed
@@ -660,8 +526,8 @@ class ProjectTree(wx.Panel):
     def getSCSystem(self, path):
         """ Determine source control system being used on path if any """
         sc = None
-        for key, value in self.sourceControl.items():
-            if value.isControlled(path):
+        for key, value in self.config.getSCSystems().items():
+            if value['instance'].isControlled(path):
                 return value            
 
     def scAdd(self, nodes):
@@ -775,7 +641,7 @@ class ProjectTree(wx.Panel):
             rc = True            
             try:
                 # Find correct method
-                method = getattr(sc, command, None)
+                method = getattr(sc['instance'], command, None)
                 if method:
                     # Run command (only if it isn't the status command)
                     if command != 'status':
@@ -835,7 +701,7 @@ class ProjectTree(wx.Panel):
         updates = []
         try:
             status = {}
-            rc = self._timeoutCommand(None, sc.status, [data['path']], status=status)
+            rc = self._timeoutCommand(None, sc['instance'].status, [data['path']], status=status)
             if not rc:
                 return updates
             # Update the icons for the file nodes
@@ -920,7 +786,7 @@ class ProjectTree(wx.Panel):
 
             # Grab the first specified revision
             if rev1 or date1:
-                content1 = sc.fetch([path], rev=rev1, date=date1)
+                content1 = sc['instance'].fetch([path], rev=rev1, date=date1)
                 if content1 and content1[0] is None:
                     if callback is not None:
                         callback()
@@ -937,7 +803,7 @@ class ProjectTree(wx.Panel):
         
             # Grab the second specified revision
             if rev2 or date2:
-                content2 = sc.fetch([path], rev=rev2, date=date2)
+                content2 = sc['instance'].fetch([path], rev=rev2, date=date2)
                 if content2 and content2[0] is None:
                     if callback is not None:
                         callback()
@@ -953,7 +819,7 @@ class ProjectTree(wx.Panel):
                     ext2 = date2
 
             if not(rev1 or date1 or rev2 or date2):
-                content1 = sc.fetch([path])
+                content1 = sc['instance'].fetch([path])
                 if content1 and content1[0] is None:
                     if callback is not None:
                         callback()
@@ -998,10 +864,10 @@ class ProjectTree(wx.Panel):
                 f.close()
             
             # Run comparison program
-            if self.useBuiltinDiff or 'diff' not in self.commands:
+            if self.config.getBuiltinDiff() or not(self.config.getDiffProgram()):
                 diffwin.GenerateDiff(path2, path1, html=True)
             else:
-                subprocess.call([self.commands['diff'], path2, path1]) 
+                subprocess.call([self.config.getDiffProgram(), path2, path1]) 
             
             if callback is not None:
                 callback()
@@ -1061,7 +927,7 @@ class ProjectTree(wx.Panel):
         """
         if name.endswith('\r'):
             return
-        for pattern in self.filters:
+        for pattern in self.config.getFilters():
             if fnmatch.fnmatchcase(name, pattern):
                 return
         data = self.tree.GetPyData(parent)
@@ -1653,7 +1519,7 @@ class ProjectPane(wx.Panel):
         self.Bind(wx.EVT_PAINT, self.OnPaint)
         self.Bind(wx.EVT_BUTTON, self.OnPress)
         self.Bind(wx.EVT_TIMER, self.OnTick)
-        self.Bind(cfgdlg.EVT_CFG_EXIT, self.OnCfgClose)
+        self.Bind(ConfigDialog.EVT_CONFIG_EXIT, self.OnCfgClose)
 
     def __del__(self):
         """Make sure the timer is stopped"""
@@ -1668,21 +1534,7 @@ class ProjectPane(wx.Panel):
         """Recieve configuration data when dialog is closed"""
         e_id = evt.GetId()
         if e_id == self.ID_CFGDLG:
-            val = evt.GetValue()
-            if 'filters' in val:
-                self.projects.filters = sorted(re.split(r'\s+', val['filters']))
-            if 'diff' in val:
-                self.projects.commands['diff'] = val['diff']
-            if 'use_default_diff' in val:
-                self.projects.useBuiltinDiff = val['use_default_diff']
-            if 'syncwithnotebook' in val:
-                self.projects.syncWithNotebook = val['syncwithnotebook']
-            for key, value in self.projects.sourceControl.items():
-                if key in val:
-                    self.projects.sourceControl[key].command = val[key]
-                    self.projects.sourceControl[key].filters = self.projects.filters
-            self.projects.saveSettings()
-            print "CONFIG DATA = ", val
+            self.projects.config.save()
         else:
             evt.Skip()
 
@@ -1723,17 +1575,8 @@ class ProjectPane(wx.Panel):
         elif e_id == self.ID_REMOVE_PROJECT:
             self.projects.removeSelectedProject()
         elif e_id == self.ID_CONFIG:
-            data = {}
-            for key, value in self.projects.sourceControl.items():
-                data[str(key)] = value.command
-            data['filters'] = ' '.join(self.projects.filters)
-            data['syncwithnotebook'] = self.projects.syncWithNotebook
-            data['use_default_diff'] = self.projects.useBuiltinDiff
-            for key, value in self.projects.commands.items():
-                data[str(key)] = value
             if not self.FindWindowById(self.ID_CFGDLG):
-                cfg = cfgdlg.ConfigDlg(self, self.ID_CFGDLG, 
-                             cfgdlg.ConfigData(**data))
+                cfg = ConfigDialog.ConfigDialog(self, self.ID_CFGDLG, self.projects.config) 
                 cfg.Show()
             else:
                 pass

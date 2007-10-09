@@ -1,14 +1,15 @@
 #!/usr/bin/env python
 
-import wx, sys
+import wx, sys, os
 import wx.lib.mixins.listctrl as listmix
 import FileIcons
+import SVN, CVS, GIT
 
 _ = wx.GetTranslation
 
 # ConfigDialogg Events
 cfgEVT_CONFIG_EXIT = wx.NewEventType()
-EVT_CONFIGG_EXIT = wx.PyEventBinder(cfgEVT_CONFIG_EXIT, 1)
+EVT_CONFIG_EXIT = wx.PyEventBinder(cfgEVT_CONFIG_EXIT, 1)
 
 class ConfigDialogEvent(wx.PyCommandEvent):
     """ Config dialog closer event """
@@ -85,7 +86,7 @@ class GeneralConfigTab(wx.Panel):
         sizer = wx.BoxSizer(wx.VERTICAL)
         flags = wx.SizerFlags().Left().Expand().Border(wx.ALL, 6)
         sizer.AddF(wx.StaticText(self, -1, _('File Filters')), flags)
-        filters = wx.TextCtrl(self, self.ID_FILE_FILTERS, data['general'].get('file-filters',''), size=(-1, 100), style=wx.TE_MULTILINE)
+        filters = wx.TextCtrl(self, self.ID_FILE_FILTERS, ' '.join(data.getFilters()), size=(-1, 100), style=wx.TE_MULTILINE)
         sizer.AddF(filters, flags)
         if wx.Platform == '__WXMAC__':
             filters.MacCheckSpelling(False)
@@ -94,20 +95,20 @@ class GeneralConfigTab(wx.Panel):
         filters.SetToolTip(tt)
         sizer.AddF(wx.StaticBox(self, -1, size=(-1, 1)), wx.SizerFlags().Center().Expand().Border(wx.TOP|wx.BOTTOM, 10))
         sync = wx.CheckBox(self, self.ID_SYNC_WITH_NOTEBOOK, _('Keep project tree synchronized with editor notebook'))
-        sync.SetValue(data['general'].get('sync-with-notebook',True))
+        sync.SetValue(data.getSyncWithNotebook())
         sizer.AddF(sync, flags)
         sizer.AddF(wx.StaticBox(self, -1, size=(-1, 1)), wx.SizerFlags().Center().Expand().Border(wx.TOP|wx.BOTTOM, 10))
         sizer.AddF(wx.StaticText(self, -1, _('Diff Program')), flags)
         builtin = wx.RadioButton(self, self.ID_BUILTIN_DIFF, _('Built-in'))
-        builtin.SetValue(data['general'].get('built-in-diff',True))
+        builtin.SetValue(data.getBuiltinDiff())
         sizer.AddF(builtin, flags.Border(wx.TOP|wx.LEFT, 6))
         
         # Radio button with file selector
         hsizer = wx.BoxSizer(wx.HORIZONTAL)
         external = wx.RadioButton(self, self.ID_EXTERNAL_DIFF, '')
-        external.SetValue(not data['general'].get('bultin-in-diff',True))
+        external.SetValue(not data.getBuiltinDiff())
         hsizer.AddF(external, wx.SizerFlags().Left().Border(wx.TOP|wx.BOTTOM|wx.LEFT, 6))
-        hsizer.AddF(wx.FilePickerCtrl(self, self.ID_DIFF_PROGRAM, data['general'].get('diff-program',''),
+        hsizer.AddF(wx.FilePickerCtrl(self, self.ID_DIFF_PROGRAM, data.getDiffProgram(),
                                       message=_("Select diff program")), wx.SizerFlags(1).Left().Expand())
         sizer.AddF(hsizer, wx.SizerFlags().Left().Expand())
         
@@ -134,7 +135,7 @@ class GeneralConfigTab(wx.Panel):
         if id == self.ID_DIFF_PROGRAM:
             path = obj.GetPath()
             if path:
-                self._data['general']['diff-program'] = path
+                self._data.setDiffProgram(path)
             self.FindWindowById(self.ID_EXTERNAL_DIFF).SetValue(not(not(path)))
             self.FindWindowById(self.ID_BUILTIN_DIFF).SetValue(not(path))
         else:
@@ -143,24 +144,24 @@ class GeneralConfigTab(wx.Panel):
     def OnTextChange(self, evt):
         obj, id = evt.GetEventObject(), evt.GetId()
         if id == self.ID_FILE_FILTERS:
-            self._data['general']['file-filters'] = obj.GetValue()        
+            self._data.setFilters([x.strip() for x in obj.GetValue().split() if x.strip()])        
         else:
             evt.Skip()
 
     def OnCheck(self, evt):
         obj, id = evt.GetEventObject(), evt.GetId()
         if id == self.ID_SYNC_WITH_NOTEBOOK:
-            self._data['general']['sync-with-notebook'] = obj.GetValue()
+            self._data.setSyncWithNotebook(obj.GetValue())
         else:
             evt.Skip()
 
     def OnSelect(self, evt):
         obj, id = evt.GetEventObject(), evt.GetId()
         if id == self.ID_BUILTIN_DIFF:
-            self._data['general']['built-in-diff'] = True
+            self._data.setBuiltinDiff(True)
             self.FindWindowById(self.ID_EXTERNAL_DIFF).SetValue(False)
         elif id == self.ID_EXTERNAL_DIFF:
-            self._data['general']['built-in-diff'] = False
+            self._data.setBuiltinDiff(False)
             self.FindWindowById(self.ID_BUILTIN_DIFF).SetValue(False)
         else:
             evt.Skip()
@@ -413,20 +414,69 @@ class AutoWidthListCtrl(wx.ListCtrl, listmix.ListCtrlAutoWidthMixin, listmix.Tex
 
 class ConfigData(dict):
     def __init__(self, data={}):
-        self['general'] = {
-            'file-filters': '*.pyc *.bak ~*', 
-            'built-in-diff': True, 
-            'diff-program': 'opendiff', 
-            'sync-with-notebook': True
-        }
         self['source-control'] = {}
-        self.addSCSystem('CVS', 'cvs')
-        self.addSCSystem('Subversion', 'svn')
-        self.addSCSystem('GIT', 'git')
+        self.addSCSystem(CVS.CVS())
+        self.addSCSystem(SVN.SVN())
+        self.addSCSystem(GIT.GIT())
 
-    def addSCSystem(self, name, command, repositories=None):
-        self['source-control'][name] = self.newSCSystem(command, repositories)
-        return self['source-control'][name]
+        self['general'] = {}
+        self.setFilters(sorted(['CVS','dntnd','.DS_Store','.dpp','.newpp','*~',
+                        '*.a','*.o','.poem','.dll','._*','.localized',
+                        '.svn','*.pyc','*.bak','#*','*.pyo','*%*', '.git',
+                        '*.previous','*.swp','.#*']))
+        self.setBuiltinDiff(True)
+        self.setDiffProgram('opendiff')
+        self.setSyncWithNotebook(True)
+        
+        self['projects'] = {}
+        
+        self.load()
+    
+    def addProject(self, path, options={}):
+        self['projects'][path] = options
+        
+    def removeProject(self, path):
+        try: del self['projects'][path]
+        except KeyError: pass
+    
+    def getProjects(self):
+        return self['projects']
+        
+    def getProject(self, path):
+        return self['projects'][path]
+        
+    def setFilters(self, filters):
+        self['general']['filters'] = filters
+        self.setSCFilters(filters)
+        
+    def getFilters(self):
+        return self['general']['filters']
+        
+    def setBuiltinDiff(self, bool=True):
+        self['general']['built-in-diff'] = bool
+        
+    def getBuiltinDiff(self):
+        return self['general']['built-in-diff']
+        
+    def setDiffProgram(self, command):
+        self['general']['diff-program'] = command
+        
+    def getDiffProgram(self):
+        return self['general']['diff-program']
+        
+    def setSyncWithNotebook(self, bool=True):
+        self['general']['sync-with-notebook'] = bool
+    
+    def getSyncWithNotebook(self):
+        return self['general']['sync-with-notebook']
+    
+    def setSCFilters(self, filters):
+        for sc in self['source-control'].values():
+            sc['instance'].filters[:] = filters
+
+    def addSCSystem(self, instance, repositories=None):
+        self['source-control'][instance.name] = self.newSCSystem(instance, repositories)
+        return self['source-control'][instance.name]
     
     def getSCSystems(self):
         return self['source-control']
@@ -441,8 +491,8 @@ class ConfigData(dict):
     def removeSCSystem(self, name):
         del self['source-control'][name]
     
-    def newSCSystem(self, command, repositories=None):
-        system = {'command':command, 'repositories': {'Default':self.newSCRepository()}}
+    def newSCSystem(self, instance, repositories=None):
+        system = {'command':instance.command, 'instance': instance, 'repositories': {'Default':self.newSCRepository()}}
         if repositories is not None:
             system['repositories'].update(repositories)
         return system
@@ -501,6 +551,47 @@ class ConfigData(dict):
 
     def getSCEnvVar(self, sc, rep, name):
         return self.getSCEnvVars(sc, rep)[name]
+        
+    def load(self):
+        data = {}
+        print 'load settings'
+        try:
+            import ed_glob, util
+            f = util.GetFileReader(ed_glob.CONFIG['CACHE_DIR'] + 'Projects.config')
+            if f != -1:
+                try: 
+                    data = eval(f.read())
+                    f.close()
+                except:
+                    f.close()
+                    os.remove(ed_glob.CONFIG['CACHE_DIR'] + 'Projects.config')
+        except (ImportError, OSError):
+            pass
+        print data
+        recursiveupdate(self, data)
+
+    def save(self):
+        print repr(self)
+        try:
+            import ed_glob, util
+            f = util.GetFileWriter(ed_glob.CONFIG['CACHE_DIR'] + 'Projects.config')
+            if f != -1:
+                f.write(repr(self))
+                f.close()
+        except (ImportError, OSError):
+            pass
+
+def recursiveupdate(dest, src):
+    """ Recursively update dst from src """
+    for key, value in src.items():
+        if key in dest:
+            if isinstance(value, dict):
+                recursiveupdate(dest[key], value)
+            else:
+                dest[key] = value
+        else:
+            dest[key] = value
+    return dest
 
 if __name__ == '__main__':
     app = wx.PySimpleApp(False)

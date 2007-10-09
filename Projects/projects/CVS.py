@@ -5,7 +5,21 @@ from SourceControl import SourceControl
 
 class CVS(SourceControl):
 
+    name = 'CVS'
     command = 'cvs'
+    
+    def __repr__(self):
+        return 'CVS.CVS()'
+    
+    def getRepository(self, path):
+        if not self.isControlled(path):
+            return
+        if not os.path.isdir(path):
+            path = os.path.dirname(path)
+        repfile = os.path.join(path, 'CVS', 'Root')
+        if not os.path.isfile(repfile):
+            return
+        return open(repfile, 'r').read().strip()
     
     def isControlled(self, path):
         """ Is the path controlled by CVS? """
