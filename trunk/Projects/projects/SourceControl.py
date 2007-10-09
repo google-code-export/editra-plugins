@@ -15,8 +15,15 @@ class SourceControl(object):
     TYPE_ANY = 3   
 
     filters = []
-    command = ''  # Default command 
-    name = ''     # Name to use in config panel
+
+    # Default command
+    command = ''
+
+    # Name to use in config panel
+    name = ''  
+
+    # Username, password, and environments for given repositories
+    repositories = {}
     
     def __init__(self, console=None):
         if console is None:
@@ -118,6 +125,19 @@ class SourceControl(object):
         self.console.write('%s %s %s\n' % (directory, self.command, ' '.join(options)))
         #return
         environ = os.environ.copy()
+        # Load default environment
+        if 'Default' in self.repositories:
+            environ.update(self.repositories['Default'].get('env', {}))
+        # Load environment for repository
+        repository = self.getRepository(directory)
+        print directory, repository, self.repositories 
+        if repository:
+            for key, value in sorted(self.repositories.items()):
+                if key == 'Default':
+                    continue
+                if repository.startswith(key):
+                    environ.update(value.get('env', {}))
+        # Load passed in environment
         environ.update(env)
         try:
             stderr = subprocess.PIPE
