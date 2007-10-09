@@ -416,11 +416,9 @@ class AutoWidthListCtrl(wx.ListCtrl, listmix.ListCtrlAutoWidthMixin, listmix.Tex
 class ConfigData(dict):
     def __init__(self, data={}):
         self['source-control'] = {}
-        self.addSCSystem(CVS.CVS())
-        self.addSCSystem(SVN.SVN())
-        self.addSCSystem(GIT.GIT())
-
         self['general'] = {}
+        self['projects'] = {}
+
         self.setFilters(sorted(['CVS','dntnd','.DS_Store','.dpp','.newpp','*~',
                         '*.a','*.o','.poem','.dll','._*','.localized',
                         '.svn','*.pyc','*.bak','#*','*.pyo','*%*', '.git',
@@ -429,7 +427,9 @@ class ConfigData(dict):
         self.setDiffProgram('opendiff')
         self.setSyncWithNotebook(True)
         
-        self['projects'] = {}
+        self.addSCSystem(CVS.CVS())
+        self.addSCSystem(SVN.SVN())
+        self.addSCSystem(GIT.GIT())
         
         self.load()
     
@@ -448,7 +448,7 @@ class ConfigData(dict):
         
     def setFilters(self, filters):
         self['general']['filters'] = filters
-        self.setSCFilters(filters)
+        self.updateSCSystems()
         
     def getFilters(self):
         return self['general']['filters']
@@ -471,13 +471,15 @@ class ConfigData(dict):
     def getSyncWithNotebook(self):
         return self['general']['sync-with-notebook']
     
-    def setSCFilters(self, filters):
-        for sc in self['source-control'].values():
-            sc['instance'].filters[:] = filters
-
     def addSCSystem(self, instance, repositories=None):
         self['source-control'][instance.name] = self.newSCSystem(instance, repositories)
+        self.updateSCSystems()
         return self['source-control'][instance.name]
+    
+    def updateSCSystems(self):
+        for key, value in self.getSCSystems().items():
+            value['instance'].filters = self.getFilters()
+            value['instance'].repositories = self.getSCRepositories(key)
     
     def getSCSystems(self):
         return self['source-control']
@@ -568,8 +570,9 @@ class ConfigData(dict):
                     os.remove(ed_glob.CONFIG['CACHE_DIR'] + 'Projects.config')
         except (ImportError, OSError):
             pass
-        print data
         recursiveupdate(self, data)
+        self.updateSCSystems()
+        print self
 
     def save(self):
         print repr(self)

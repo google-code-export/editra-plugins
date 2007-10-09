@@ -274,8 +274,9 @@ class ProjectTree(wx.Panel):
         self.config.save()
     
     def loadProjects(self):
-       for item in sorted(self.config.getProjects().keys()):
-           self.addProject(item, save=False) 
+       items = sorted([(os.path.basename(x), x) for x in self.config.getProjects().keys()])
+       for item in items:
+           self.addProject(item[1], save=False) 
 
     def addProject(self, path, save=True):
         """
