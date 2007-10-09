@@ -31,10 +31,11 @@ try:
         import select
         USE_PTY   = True
 except ImportError, msg:
-    print "Error importing required libs: %s" % str(msg)
+    print "[terminal] Error importing required libs: %s" % str(msg)
 
 #-----------------------------------------------------------------------------#
 # Globals
+DEBUG = True
 
 SHELL = os.environ['SHELL']
 if SHELL == '':
@@ -43,7 +44,8 @@ if SHELL == '':
     else:
         SHELL = '/bin/sh'
 
-DEBUG = True
+# ANSI color code support
+ANSI = { }
 
 #-----------------------------------------------------------------------------#
 class Xterm(wx.stc.StyledTextCtrl):
@@ -55,6 +57,10 @@ class Xterm(wx.stc.StyledTextCtrl):
         wx.stc.StyledTextCtrl.__init__(self, parent, ID)
 
         # Attributes
+        ##  The lower this number is the more responsive some commands
+        ##  may be ( printing prompt, ls ), but also the quicker others
+        ##  may timeout reading their output ( ping, ftp )
+        self.delay = 0.1
         self._fpos = 0          # First allowed cursor position
         self._exited = False    # Is shell still running
         # Setup
@@ -68,6 +74,7 @@ class Xterm(wx.stc.StyledTextCtrl):
         self.Bind(wx.EVT_KEY_DOWN, self.OnKeyDown)
         self.Bind(wx.EVT_CHAR, self.OnChar)
         self.Bind(wx.EVT_KEY_UP, self.OnKeyUp)
+        self.Bind(wx.EVT_LEFT_UP, self.OnLeftUp)
 
     def __ConfigureKeyCmds(self):
         """Clear the builtin keybindings that we dont want"""
@@ -217,11 +224,6 @@ class Xterm(wx.stc.StyledTextCtrl):
     def _SetupPTY(self):
         """Setup the connection to the real terminal"""
         if USE_PTY:
-            ##  The lower this number is the more responsive some commands
-            ##  may be ( printing prompt, ls ), but also the quicker others
-            ##  may timeout reading their output ( ping, ftp )
-            self.delay = 0.1
-
             self.master, pty_name = pty.master_open()
             DebugLog("[terminal][info] Slave Pty name: " + pty_name)
 
@@ -234,8 +236,6 @@ class Xterm(wx.stc.StyledTextCtrl):
             signal.signal(signal.SIGCHLD, self._SigChildHandler)
 
             if self.pid == 0:
-                ##  In spawned shell process, NOTE: any 'print'ing done within
-                ##  here will corrupt vim.
                 attrs = tty.tcgetattr( 1 )
 
                 attrs[ 6 ][ tty.VMIN ]  = 1
@@ -303,18 +303,15 @@ class Xterm(wx.stc.StyledTextCtrl):
     def CheckForPassword(self):
         """Check if the shell is waiting for a password or not"""
         prev_line = self.GetLine(self.GetCurrentLine() - 1)
-        for regex in ['^\s*Password:',         ##  su, ssh, ftp
-                      'password:',             ##  ???, seen this somewhere
-                      'Password required' ]:    ##  other ftp clients:
+        for regex in ['^\s*Password:', 'password:', 'Password required']:
             if re.search(regex, prev_line):
                 try:
                     print "FIX ME"
-#                     vim.command( 'let password = inputsecret( "Password? " )' )
                 except KeyboardInterrupt:
                     return
 
-#                 password = vim.eval( "password" )
-#                 self.execute_cmd( [password] )       ##  recursive call here...
+                # send the password to the 
+#                 self.ExecuteCmd([password])
 
     def CheckStdErr(self):
         """Check for errors in the shell"""
@@ -398,6 +395,13 @@ class Xterm(wx.stc.StyledTextCtrl):
         elif key == wx.WXK_TAB:
             # TODO Tab Completion
             pass
+        elif key in [wx.WXK_UP, wx.WXK_NUMPAD_UP]:
+            # Cycle through command history
+            pass
+        elif key in [wx.WXK_LEFT, wx.WXK_NUMPAD_LEFT, 
+                     wx.WXK_BACK, wx.WXK_DELETE]:
+            if self.GetCurrentPos() > self._fpos:
+                evt.Skip()
         elif key == wx.WXK_HOME:
             # Go Prompt Start
             self.GotoPos(self._fpos)
@@ -406,11 +410,24 @@ class Xterm(wx.stc.StyledTextCtrl):
 
     def OnChar(self, evt):
         """Handle character enter events"""
+        # Dont allow editing of earlier portion of buffer
+        if self.GetCurrentPos() < self._fpos:
+            return
         evt.Skip()
 
     def OnKeyUp(self, evt):
         """Handle when the key comes up"""
         evt.Skip()
+
+    def OnLeftUp(self, evt):
+        """Check click position to ensure caret doesn't 
+        move to invalid position.
+
+        """
+        evt.Skip()
+        pos = evt.GetPosition()
+        if self._fpos > self.PositionFromPoint(pos):
+            wx.CallAfter(self.GotoPos, self._fpos)
 
     def PrintLines(self, lines):
         """Print lines to the terminal buffer
@@ -482,7 +499,7 @@ class Xterm(wx.stc.StyledTextCtrl):
             if USE_PTY:
                 r, w, e = select.select([self.outd], [], [], self.delay)
             else:
-                r = [1,]  # pipes, unused, fake it out so I don't have to special case
+                r = [1,]  # pipes, unused
 
             for file_iter in r:
                 lines = ''
@@ -492,7 +509,7 @@ class Xterm(wx.stc.StyledTextCtrl):
                     lines = self.PipeRead(self.outd, 2048)
 
                 if lines == '':
-                    DebugLog('[terminal][read] No more data on stdout pipe_read')
+                    DebugLog('[terminal][read] No more data on stdout Read')
                     r = []
                     break
 
