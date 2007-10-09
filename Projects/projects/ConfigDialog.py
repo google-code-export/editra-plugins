@@ -2,6 +2,7 @@
 
 import wx, sys
 import wx.lib.mixins.listctrl as listmix
+import FileIcons
 
 _ = wx.GetTranslation
 
@@ -173,6 +174,8 @@ class SourceControlConfigTab(wx.Panel):
     ID_SC_USERNAME = wx.NewId()
     ID_SC_PASSWORD = wx.NewId()
     ID_SC_ENVIRONMENT = wx.NewId()
+    ID_SC_ADD_ENV = wx.NewId()
+    ID_SC_REMOVE_ENV = wx.NewId()
 
     def __init__(self, parent, id, data):
         wx.Panel.__init__(self, parent, id)
@@ -207,16 +210,22 @@ class SourceControlConfigTab(wx.Panel):
 
         # Environment variables
         repsizer.AddF(wx.StaticText(self, -1, _('Environment Variables')), flags)
-        env = AutoWidthListCtrl(self, self.ID_SC_ENVIRONMENT, size=(-1,60), 
+        env = AutoWidthListCtrl(self, self.ID_SC_ENVIRONMENT, size=(-1,80), 
                                 style=wx.LC_REPORT|wx.LC_SORT_ASCENDING|wx.LC_VRULES|wx.LC_EDIT_LABELS)
         env.InsertColumn(0, _("Name"))
         env.InsertColumn(1, _("Value"))
         repsizer.AddF(env, flags.Expand())
 
+        # Add env variable buttons
+        envbtns = wx.BoxSizer(wx.HORIZONTAL)
+        envbtns.AddF(wx.BitmapButton(self, self.ID_SC_ADD_ENV, FileIcons.getPlusBitmap()), wx.SizerFlags(0))
+        envbtns.AddF(wx.BitmapButton(self, self.ID_SC_REMOVE_ENV, FileIcons.getMinusBitmap()), wx.SizerFlags(0))
+        repsizer.AddF(envbtns, flags.Expand())
+
         sizer.AddF(repsizer, flags)
 
         # Extra space at bottom of panel
-        sizer.AddF(wx.Panel(self, -1), wx.SizerFlags().Border(wx.TOP, 10))
+        #sizer.AddF(wx.Panel(self, -1), wx.SizerFlags().Border(wx.TOP, 5))
 
         # Add space around the sides
         outsizer = wx.BoxSizer(wx.HORIZONTAL)
@@ -234,6 +243,8 @@ class SourceControlConfigTab(wx.Panel):
         self.Bind(wx.EVT_CHOICE, self.OnChoiceSelected)
         self.Bind(wx.EVT_TEXT, self.OnTextChange)
         self.Bind(wx.EVT_FILEPICKER_CHANGED, self.OnFileChange)
+        self.Bind(wx.EVT_BUTTON, self.OnButtonPress)
+        self.Bind(wx.EVT_LIST_END_LABEL_EDIT, self.OnEndEdit)
 
     @property
     def currentSystem(self):
@@ -252,13 +263,14 @@ class SourceControlConfigTab(wx.Panel):
 
     def populateEnvironment(self):
         sc, rep = self.currentSystem, self.currentRepository
-        self.FindWindowById(self.ID_SC_ENVIRONMENT).DeleteAllItems()        
+        envlist = self.FindWindowById(self.ID_SC_ENVIRONMENT)
+        envlist.DeleteAllItems()        
         try: env = self._data.getSCEnvVars(sc, rep)
         except KeyError: env = {}
         for name, value in sorted(env.items()):
-            index = env.InsertStringItem(sys.maxint, '')
-            env.SetStringItem(index, 0, name)
-            env.SetStringItem(index, 1, value)
+            index = envlist.InsertStringItem(sys.maxint, '')
+            envlist.SetStringItem(index, 0, name)
+            envlist.SetStringItem(index, 1, value)
 
     def populateUserInfo(self):
         sc, rep = self.currentSystem, self.currentRepository
@@ -309,8 +321,50 @@ class SourceControlConfigTab(wx.Panel):
         else:
             evt.Skip()
     
+    def OnButtonPress(self, evt):
+        obj, id = evt.GetEventObject(), evt.GetId()
+        sc, rep = self.currentSystem, self.currentRepository
+        if id == self.ID_SC_ADD_ENV:
+            env = self.FindWindowById(self.ID_SC_ENVIRONMENT)
+            index = env.InsertStringItem(sys.maxint, '')
+            env.SetStringItem(index, 0, _('*NAME*'))
+            env.SetStringItem(index, 1, _('*VALUE*'))
+        elif id == self.ID_SC_REMOVE_ENV:
+            env = self.FindWindowById(self.ID_SC_ENVIRONMENT)
+            item = -1
+            items = []
+            while True:
+                item = env.GetNextItem(item, wx.LIST_NEXT_ALL, wx.LIST_STATE_SELECTED)
+                if item == -1:
+                    break
+                items.append(item)
+            for item in reversed(sorted(items)):
+                env.DeleteItem(item)
+            self.saveEnvironmentVariables()
+        else:
+            evt.Skip()
+            
+    def OnEndEdit(self, evt):
+        wx.CallAfter(self.saveEnvironmentVariables)
+
+    def saveEnvironmentVariables(self):
+        sc, rep = self.currentSystem, self.currentRepository
+        env = self.FindWindowById(self.ID_SC_ENVIRONMENT)
+        vars = self._data.getSCEnvVars(sc, rep)
+        vars.clear()
+        item = -1
+        save = True
+        while True:
+            item = env.GetNextItem(item)
+            if item == -1:
+                break
+            name = env.GetItem(item, 0).GetText().strip()
+            value = env.GetItem(item, 1).GetText().strip()
+            vars[name] = value
+    
     def OnChoiceSelected(self, evt):
         obj, id = evt.GetEventObject(), evt.GetId()
+        sc, rep = self.currentSystem, self.currentRepository
         if id == self.ID_SC_CHOICE:
             self.populateSystemOptions()
         elif id == self.ID_SC_REP_CHOICE:
@@ -320,14 +374,17 @@ class SourceControlConfigTab(wx.Panel):
                 
             # Remove repository
             elif obj.GetSelection() == (obj.GetCount() - 1):
-                obj.SetSelection(0)
+                choices = sorted([x for x in self._data.getSCRepositories(sc).keys() if x != 'Default'])
+                scd = wx.SingleChoiceDialog(self, _('Select the repository path to remove'),
+                    _('Remove repository'), choices, style=wx.OK|wx.CANCEL)
+                if scd.ShowModal() == wx.ID_OK:
+                    value = scd.GetStringSelection().strip()
+                    self._data.removeSCRepository(sc, value)
+                self.populateRepositoryList()
 
             # Add repository
             elif obj.GetSelection() == (obj.GetCount() - 2):
-                ted = wx.TextEntryDialog(self, _('Please enter a source control repository path.  ' +
-                     'This path can be complete or a substring of a repository path.  ' +
-                     'All repository paths in the list that match exactly or match the beginning ' + 
-                     'of the repository in use will be applied.'),
+                ted = wx.TextEntryDialog(self, _('Please enter a repository path.  Partial paths may also be entered.'),
                      _('Add a New Repository Path'), style=wx.OK|wx.CANCEL)
                 ted.SetSize((300,-1))
                 if ted.ShowModal() == wx.ID_OK:
@@ -340,7 +397,7 @@ class SourceControlConfigTab(wx.Panel):
                         self.populateRepositoryList()
                         obj.SetStringSelection(value)
                     else:
-                        evt.Skip()
+                        obj.SetSelection(0)
                         return
             self.populateUserInfo()
             self.populateEnvironment()
