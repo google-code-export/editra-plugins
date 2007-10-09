@@ -9,7 +9,7 @@ This page contains a list of links to pages about individual plugins and their r
 = Plugins Projects =
 ||Plugin Name    || Short Description ||
 ||ProjectsPlugin || _Project management plugin with integrated source control_ ||
-
+||TerminalPlugin    || Built in system shell window ||
 
 
 = Theme Plugins =
@@ -24,4 +24,3 @@ This page contains a list of links to pages about individual plugins and their r
 ||ClassBrowser      || Window for quick browsing of classes and objects in a file||
 ||FtpClient         || Plugin for remote editing and file transfer||
 ||RegExWorkShop     || Side pane for testing and developing regular expressions||
-||TerminalPlugin    || Built in system shell window ||
