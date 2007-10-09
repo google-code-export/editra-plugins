@@ -420,9 +420,9 @@ class ConfigData(dict):
             'sync-with-notebook': True
         }
         self['source-control'] = {}
-        self.addSCSystem('CVS', 'cvs', {'foocvs': self.newSCRepository()})
+        self.addSCSystem('CVS', 'cvs')
         self.addSCSystem('Subversion', 'svn')
-        self.addSCSystem('GIT', 'git', {'foogit': self.newSCRepository()})
+        self.addSCSystem('GIT', 'git')
 
     def addSCSystem(self, name, command, repositories=None):
         self['source-control'][name] = self.newSCSystem(command, repositories)
