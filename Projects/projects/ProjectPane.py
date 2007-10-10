@@ -752,10 +752,16 @@ class ProjectTree(wx.Panel):
         evt.Skip()
             
     def endSCCommand(self, delayedresult):
-        self.GetParent().StopBusy()
-        
+        try:
+            self.GetParent().StopBusy()
+        except wx.PyDeadObjectError:
+            pass
+
     def endPaste(self, delayedresult):
-        self.GetParent().StopBusy()
+        try:
+            self.GetParent().StopBusy()
+        except wx.PyDeadObjectError:
+            pass
         
     def compareRevisions(self, path, rev1=None, date1=None, rev2=None, date2=None, callback=None):
         """
