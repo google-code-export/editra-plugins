@@ -120,24 +120,31 @@ class SourceControl(object):
         """ Is the directory controlled by source control? """
         return False
 
-    def run(self, directory, options, env={}, mergeerr=False):
-        """ Run a CVS command in the given directory with given options """
-        self.console.write('%s %s %s\n' % (directory, self.command, ' '.join(options)))
-        #return
-        environ = os.environ.copy()
+    def getRepositorySettings(self, path):
+        """ Get the settings from all configured repository paths """
+        settings = {}
+    
         # Load default environment
         if 'Default' in self.repositories:
-            environ.update(self.repositories['Default'].get('env', {}))
+            recursiveupdate(settings, self.repositories['Default'])
+
         # Load environment for repository
-        repository = self.getRepository(directory)
-        print directory, repository, self.repositories 
+        repository = self.getRepository(path)
         if repository:
             for key, value in sorted(self.repositories.items()):
                 if key == 'Default':
                     continue
                 if repository.startswith(key):
-                    environ.update(value.get('env', {}))
-        # Load passed in environment
+                    recursiveupdate(settings, value)
+        return settings
+
+    def run(self, directory, options, env={}, mergeerr=False):
+        """ Run a CVS command in the given directory with given options """
+        self.console.write('%s %s %s\n' % (directory, self.command, ' '.join(options)))
+        environ = os.environ.copy()
+        # Add repository settings        
+        environ.update(self.getRepositorySettings(directory)['env'])
+        # Merge passed in environment
         environ.update(env)
         try:
             stderr = subprocess.PIPE
@@ -438,6 +445,18 @@ class SourceControl(object):
         
         """
         raise NotImplementedError
+
+def recursiveupdate(dest, src):
+    """ Recursively update dst from src """
+    for key, value in src.items():
+        if key in dest:
+            if isinstance(value, dict):
+                recursiveupdate(dest[key], value)
+            else:
+                dest[key] = value
+        else:
+            dest[key] = value
+    return dest
 
 if __name__ == '__main__':
     sc = SourceControl()
