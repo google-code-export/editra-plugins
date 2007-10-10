@@ -10,10 +10,10 @@ This plugin project has two parts:
 
 = Implemented Features =
   * Basic framework is in place and it can be used just like your system shell but still has a number of display and behavior issues to fix up before an official release.
+  * Support for ANSI color code escape sequences to allow for coloring of different file types.
 
 = Planned Features =
 
   * Interaction with system shell should be able to be killed in the event of an infinite loop in a shell command, as to not bring the editor down with it.
   * Customizable appearance, font, colors, ect...
   * Configurable line buffering for ui display
-  * In shells like bash that often have coloring of different file types this will be handled transparently and reflect the users preferences that are set in the system shell.
