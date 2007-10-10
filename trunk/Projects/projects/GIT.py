@@ -1,23 +1,12 @@
 #!/usr/bin/env python
-############################################################################
-#    Copyright (C) 2007 Cody Precord                                       #
-#    cprecord@editra.org                                                   #
-#                                                                          #
-#    Editra is free software; you can redistribute it and#or modify        #
-#    it under the terms of the GNU General Public License as published by  #
-#    the Free Software Foundation; either version 2 of the License, or     #
-#    (at your option) any later version.                                   #
-#                                                                          #
-#    Editra is distributed in the hope that it will be useful,             #
-#    but WITHOUT ANY WARRANTY; without even the implied warranty of        #
-#    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the         #
-#    GNU General Public License for more details.                          #
-#                                                                          #
-#    You should have received a copy of the GNU General Public License     #
-#    along with this program; if not, write to the                         #
-#    Free Software Foundation, Inc.,                                       #
-#    59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             #
-############################################################################
+###############################################################################
+# Name: GIT.py                                                                #
+# Purpose: Interface for the ProjectsPane to work with the GIT source control #
+#          system through.                                                    #
+# Author: Cody Precord <cprecord@editra.org>                                  #
+# Copyright: (c) 2007 Cody Precord <staff@editra.org>                         #
+# Licence: wxWindows Licence                                                  #
+###############################################################################
 
 __author__ = "Cody Precord <cprecord@editra.org>"
 __svnid__ = "$Id$"
@@ -49,10 +38,6 @@ class GIT(SourceControl):
     def __repr__(self):
         return 'GIT.GIT()'
     
-    def getRepository(self, path):
-        # Needs to return the repository path
-        return
-    
     def isControlled(self, path):
         """ Is the path controlled by GIT? 
         The repository directory is only kept in the root of the
@@ -60,13 +45,6 @@ class GIT(SourceControl):
         to make sure if it is controlled or not
 
         """
-        def checkDirectory(directory):
-            if os.path.isdir(directory):
-                if os.path.exists(os.path.join(directory, '.git', 'HEAD')):
-                    return True
-            else:
-                return False
-
         # First make sure path is under a directory controlled by git
         tmp = path.split(os.path.sep)
         # TODO test this on windows
@@ -119,6 +97,9 @@ class GIT(SourceControl):
         root, files = self.splitFiles(paths)
         out = self.run(root, ['diff'] + files)
         self.logOutput(out)
+
+    def getRepository(self, path):
+        return self.findRoot(path)
 
     def history(self, paths, history=None):
         """ Get history of the given paths """
@@ -316,6 +297,15 @@ class GIT(SourceControl):
                 else:
                     output.append(None)
         return output
+
+#-----------------------------------------------------------------------------#
+# Utility functions
+def checkDirectory(directory):
+    if os.path.isdir(directory):
+        if os.path.exists(os.path.join(directory, '.git', 'HEAD')):
+            return True
+    else:
+        return False
                         
 if __name__ == '__main__':
     git = GIT()
