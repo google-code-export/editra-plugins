@@ -1,8 +1,9 @@
 # -*- coding: utf-8 -*-
 ###############################################################################
 # Name: terminal.py                                                           #
-# Purpose: Provides a terminal widget that can be embedded in wxWindows       #
-# Author: Cody Precord <cprecord@editra.org                                   #
+# Purpose: Provides a terminal widget that can be embedded in any wxWidgets   #
+#          window or run alone as its own shell window.                       #
+# Author: Cody Precord <cprecord@editra.org>                                  #
 # Copyright: (c) 2007 Cody Precord <staff@editra.org>                         #
 # Licence: wxWindows Licence                                                  #
 ###############################################################################
@@ -17,6 +18,11 @@ It should run on all operating systems that support:
     - Psuedo TTY's or Pipes/popopen
 
 """
+
+__author__ = "Cody Precord <cprecord@editra.org>"
+__svnid__ = "$Id$"
+__revision__ = "$Revision$"
+
 #-----------------------------------------------------------------------------#
 # Imports
 
@@ -46,6 +52,7 @@ except ImportError, msg:
 #-----------------------------------------------------------------------------#
 # Globals
 DEBUG = True
+_ = wx.GetTranslation
 
 SHELL = os.environ['SHELL']
 if SHELL == '':
@@ -80,6 +87,11 @@ ANSI = {
 RE_COLOUR_START = re.compile('\[[34][0-9]m')
 RE_COLOUR_BLOCK = re.compile('\[[34][0-9]m*.*\[m')
 RE_COLOUR_END = '[m'
+
+# Font settings (TODO make configurable from interface)
+FONT = None
+FONT_FACE = None
+FONT_SIZE = None
 #-----------------------------------------------------------------------------#
 class Xterm(wx.stc.StyledTextCtrl):
     """Creates a graphical terminal that works like the system shell
@@ -106,11 +118,16 @@ class Xterm(wx.stc.StyledTextCtrl):
         self._SetupPTY()
         self.NewPrompt()
 
-        # Event Handlers
+        #---- Event Handlers ----#
+        # Key events
         self.Bind(wx.EVT_KEY_DOWN, self.OnKeyDown)
         self.Bind(wx.EVT_CHAR, self.OnChar)
         self.Bind(wx.EVT_KEY_UP, self.OnKeyUp)
+
+        # Mouse Events
         self.Bind(wx.EVT_LEFT_UP, self.OnLeftUp)
+        self.Bind(wx.EVT_CONTEXT_MENU, self.OnContextMenu)
+        self.Bind(wx.EVT_UPDATE_UI, self.OnUpdateUI)
 
     def __ConfigureKeyCmds(self):
         """Clear the builtin keybindings that we dont want"""
@@ -152,17 +169,21 @@ class Xterm(wx.stc.StyledTextCtrl):
         self.SetCaretForeground(wx.NamedColor("white"))
 
         # Configure text styles
-        font = wx.Font(11, wx.FONTFAMILY_MODERN, wx.FONTSTYLE_NORMAL, 
-                       wx.FONTWEIGHT_NORMAL)
-        face = font.GetFaceName()
-        size = font.GetPointSize()
+        # TODO make this configurable
         fore = "#FEFEFE"
         back = "#000000"
-        self.StyleSetSpec(0, "face:%s,size:%d,fore:%s,back:%s,bold" % (face, size, fore, back))
+        global FONT
+        global FONT_SIZE
+        global FONT_FACE
+        FONT = wx.Font(11, wx.FONTFAMILY_MODERN, wx.FONTSTYLE_NORMAL, 
+                               wx.FONTWEIGHT_NORMAL)
+        FONT_FACE = FONT.GetFaceName()
+        FONT_SIZE = FONT.GetPointSize()
+        self.StyleSetSpec(0, "face:%s,size:%d,fore:%s,back:%s,bold" % (FONT_FACE, FONT_SIZE, fore, back))
         self.StyleSetSpec(wx.stc.STC_STYLE_DEFAULT, \
-                          "face:%s,size:%d,fore:%s,back:%s,bold" % (face, size, fore, back))
+                          "face:%s,size:%d,fore:%s,back:%s,bold" % (FONT_FACE, FONT_SIZE, fore, back))
         self.StyleSetSpec(wx.stc.STC_STYLE_CONTROLCHAR, \
-                          "face:%s,size:%d,fore:%s,back:%s" % (face, size, fore, back))
+                          "face:%s,size:%d,fore:%s,back:%s" % (FONT_FACE, FONT_SIZE, fore, back))
         self.Colourise(0, -1)
 
     def __del__(self):
@@ -182,7 +203,7 @@ class Xterm(wx.stc.StyledTextCtrl):
             if spec not in self._setspecs:
                 DebugLog("[terminal][styles] Setting Spec: %d" % spec)
                 self._setspecs.append(spec)
-                self.StyleSetSpec(spec, "fore:%s,back:#000000" % ANSI[pos[1]][1])
+                self.StyleSetSpec(spec, "fore:%s,back:#000000,face:%s,size:%d" % (ANSI[pos[1]][1], FONT_FACE, FONT_SIZE))
             self.StartStyling(self._fpos + pos[0], 0xff)
             self.SetStyling(pos[2] - pos[0] + 1, spec)
 
@@ -350,6 +371,16 @@ class Xterm(wx.stc.StyledTextCtrl):
     #---- End Protected Members ----#
 
     #---- Public Members ----#
+    def CanCopy(self):
+        """Check if copy is possible"""
+        return self.GetSelectionStart() != self.GetSelectionEnd()
+
+    def CanCut(self):
+        """Check if selection is valid to allow for cutting"""
+        s_start = self.GetSelectionStart()
+        s_end = self.GetSelectionEnd()
+        return s_start != s_end and s_start >= self._fpos and s_end >= self._fpos
+
     def CheckForPassword(self):
         """Check if the shell is waiting for a password or not"""
         prev_line = self.GetLine(self.GetCurrentLine() - 1)
@@ -436,12 +467,33 @@ class Xterm(wx.stc.StyledTextCtrl):
         self.PrintLines(["[process complete]\n"])
         self.SetReadOnly(True)
 
+    def GetContextMenu(self):
+        """Create and return a context menu to override the builtin scintilla
+        one. To prevent it from allowing modifications to text that is to the
+        left of the prompt.
+
+        """
+        menu = wx.Menu()
+        menu.Append(wx.ID_UNDO, _("Undo"))
+        menu.Append(wx.ID_REDO, _("Redo"))
+        menu.AppendSeparator()
+        menu.Append(wx.ID_CUT, _("Cut"))
+        menu.Append(wx.ID_COPY, _("Copy"))
+        menu.Append(wx.ID_PASTE, _("Paste"))
+        menu.AppendSeparator()
+        menu.Append(wx.ID_SELECTALL, _("Select All"))
+        return menu
+
     def NewPrompt(self):
         """Put a new prompt on the screen and make all text from end of
         prompt to left read only.
 
         """
         self.ExecuteCmd("")
+
+    def OnContextMenu(self, evt):
+        """Display the context menu"""
+        self.PopupMenu(self.GetContextMenu())
 
     def OnKeyDown(self, evt):
         """Handle key down events"""
@@ -489,6 +541,18 @@ class Xterm(wx.stc.StyledTextCtrl):
         if self._fpos > self.PositionFromPoint(pos):
             wx.CallAfter(self.GotoPos, self._fpos)
 
+    def OnUpdateUI(self, evt):
+        """Enable or disable menu events"""
+        e_id = evt.GetId()
+        if e_id == wx.ID_CUT:
+            evt.Enable(self.CanCut())
+        elif e_id == wx.ID_COPY:
+            evt.Enable(self.CanCopy())
+        elif e_id == wx.ID_PASTE:
+            evt.Enable(self.CanPaste())
+        else:
+            evt.Skip()
+
     def PrintLines(self, lines):
         """Print lines to the terminal buffer
         @param lines: list of strings
@@ -515,7 +579,6 @@ class Xterm(wx.stc.StyledTextCtrl):
                 tmp = line
                 positions = list()
                 i = 0
-                print "C_ITEMS: ", c_items
                 for pat in c_items:
                     ind = tmp.find(pat)
                     color = re.findall(RE_COLOUR_START, pat)[0]
