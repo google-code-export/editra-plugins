@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-import wx, sys, os
+import wx, sys, os, crypto
 import wx.lib.mixins.listctrl as listmix
 import FileIcons
 import SVN, CVS, GIT
@@ -278,7 +278,10 @@ class SourceControlConfigTab(wx.Panel):
         try: username = self._data.getSCUsername(sc, rep)
         except KeyError: username = ''
         self.FindWindowById(self.ID_SC_USERNAME).SetValue(username)
-        try: password = self._data.getSCPassword(sc, rep)
+        try: 
+            password = self._data.getSCPassword(sc, rep)
+            if password:
+                password = crypto.Decrypt(password, self._data.salt)
         except KeyError: password = ''
         self.FindWindowById(self.ID_SC_PASSWORD).SetValue(password)
 
@@ -473,6 +476,10 @@ class ConfigData(dict):
         
         self.load()
     
+    @property
+    def salt(self):
+        return '"\x17\x9f/D\xcf'
+        
     def addProject(self, path, options={}):
         self['projects'][path] = options
         
@@ -567,7 +574,10 @@ class ConfigData(dict):
         return self.getSCRepository(sc, rep)['username']
         
     def setSCPassword(self, sc, rep, password):
-        self.getSCRepository(sc, rep)['password'] = password
+        if password.strip():
+            self.getSCRepository(sc, rep)['password'] = crypto.Encrypt(password, self.salt)
+        else:
+            self.getSCRepository(sc, rep)['password'] = ''            
 
     def getSCPassword(self, sc, rep):
         return self.getSCRepository(sc, rep)['password']
@@ -599,14 +609,15 @@ class ConfigData(dict):
         data = {}
         try:
             import ed_glob, util
-            f = util.GetFileReader(ed_glob.CONFIG['CACHE_DIR'] + 'Projects.config')
+            filename = ed_glob.CONFIG['CACHE_DIR'] + 'Projects.config'
+            f = util.GetFileReader(filename)
             if f != -1:
                 try: 
                     data = eval(f.read())
                     f.close()
                 except:
                     f.close()
-                    os.remove(ed_glob.CONFIG['CACHE_DIR'] + 'Projects.config')
+                    os.remove(filename)
         except (ImportError, OSError):
             pass
         recursiveupdate(self, data)
@@ -615,11 +626,13 @@ class ConfigData(dict):
     def save(self):
         print repr(self)
         try:
-            import ed_glob, util
-            f = util.GetFileWriter(ed_glob.CONFIG['CACHE_DIR'] + 'Projects.config')
+            import ed_glob, util, stat
+            filename = ed_glob.CONFIG['CACHE_DIR'] + 'Projects.config'
+            f = util.GetFileWriter(filename)
             if f != -1:
                 f.write(repr(self))
                 f.close()
+            os.chmod(filename, stat.S_IRUSR|stat.S_IWUSR)
         except (ImportError, OSError):
             pass
 

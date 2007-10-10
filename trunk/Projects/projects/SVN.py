@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-import re, os
+import re, os, crypto
 from SourceControl import SourceControl
 
 class SVN(SourceControl):
@@ -10,6 +10,17 @@ class SVN(SourceControl):
 
     def __repr__(self):
         return 'SVN.SVN()'
+        
+    def getAuthOptions(self, path):
+        output = []
+        options = self.getRepositorySettings(path)
+        if options.get('username', ''):
+            output.append('--username')
+            output.append(options['username'])
+        if options.get('password', ''):
+            output.append('--password')
+            output.append(crypto.Decrypt(options['password'], self.salt))
+        return output
     
     def getRepository(self, path):
         if not self.isControlled(path):
@@ -58,18 +69,18 @@ class SVN(SourceControl):
         
     def checkout(self, paths):
         root, files = self.splitFiles(paths)
-        out = self.run(root, ['checkout'] + files)
+        out = self.run(root, ['checkout','--non-interactive'] + self.getAuthOptions(root) + files)
         self.logOutput(out)
         
     def commit(self, paths, message=''):
         """ Commit paths to the repository """
         root, files = self.splitFiles(paths)
-        out = self.run(root, ['commit', '-m', message] + files)
+        out = self.run(root, ['commit', '-m', message, '--non-interactive'] + self.getAuthOptions(root) + files)
         self.logOutput(out)
                                    
     def diff(self, paths):
         root, files = self.splitFiles(paths)
-        out = self.run(root, ['diff'] + files)
+        out = self.run(root, ['diff','--non-interactive'] + self.getAuthOptions(root) + files)
         self.closeProcess(out)
         
     def history(self, paths, history=None):
@@ -77,7 +88,7 @@ class SVN(SourceControl):
             history = []
         root, files = self.splitFiles(paths)
         for file in files:
-            out = self.run(root, ['log', file])
+            out = self.run(root, ['log','--non-interactive'] + self.getAuthOptions(root) + [file])
             pophistory = False
             if out:
                 for line in out.stdout:
@@ -105,18 +116,18 @@ class SVN(SourceControl):
     def remove(self, paths):
         """ Recursively remove paths from repository """
         root, files = self.splitFiles(paths)
-        out = self.run(root, ['remove','--force'] + files)
+        out = self.run(root, ['remove','--force'] + self.getAuthOptions(root) + files)
         self.logOutput(out)
         
     def status(self, paths, recursive=False, status={}):
         """ Get SVN status information from given file/directory """
         codes = {' ':'uptodate', 'A':'added', 'C':'conflict', 'D':'deleted',
                  'M':'modified'}
-        options = ['status', '-v']
+        options = ['status', '-v', '--non-interactive']
         if not recursive:
             options.append('-N')
         root, files = self.splitFiles(paths)
-        out = self.run(root, options + files)
+        out = self.run(root, options + self.getAuthOptions(root) + files)
         if out:
             for line in out.stdout:
                 self.log(line)
@@ -136,7 +147,7 @@ class SVN(SourceControl):
     def update(self, paths):
         """ Recursively update paths """
         root, files = self.splitFiles(paths)
-        out = self.run(root, ['update'] + files)
+        out = self.run(root, ['update','--non-interactive'] + self.getAuthOptions(root) + files)
         self.logOutput(out)
             
     def revert(self, paths):
@@ -165,13 +176,17 @@ class SVN(SourceControl):
                 options.append('-r')
                 options.append('{%s}' % date)
             
-            out = self.run(root, ['cat'] + options+ files)
+            out = self.run(root, ['cat','--non-interactive'] + options + self.getAuthOptions(root) + files)
             if out:
                 output.append(out.stdout.read())
                 self.logOutput(out)
             else:
                 output.append(None)
         return output
+        
+    @property
+    def salt(self):
+        return '"\x17\x9f/D\xcf'
                
 if __name__ == '__main__':
     svn = SVN()
