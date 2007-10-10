@@ -1,12 +1,22 @@
 # -*- coding: utf-8 -*-
 ###############################################################################
 # Name: terminal.py                                                           #
-# Purpose: Cody Precord                                                       #
+# Purpose: Provides a terminal widget that can be embedded in wxWindows       #
 # Author: Cody Precord <cprecord@editra.org                                   #
 # Copyright: (c) 2007 Cody Precord <staff@editra.org>                         #
 # Licence: wxWindows Licence                                                  #
 ###############################################################################
 
+"""
+This script is an adaptation of the vim plugin vimsh by 
+brian m sturk <bsturk@adelphia.net> to the wxWdigets platform utilizing a 
+StyledTextCtrl for the interface.
+
+It should run on all operating systems that support:
+    - wxPython
+    - Psuedo TTY's or Pipes/popopen
+
+"""
 #-----------------------------------------------------------------------------#
 # Imports
 
@@ -45,16 +55,40 @@ if SHELL == '':
         SHELL = '/bin/sh'
 
 # ANSI color code support
-ANSI = { }
+ANSI = {
+        ## Forground colours ##
+        '[30m' : (1, '#000000'),
+        '[31m' : (2, '#FF0000'),
+        '[32m' : (3, '#00FF00'),
+        '[34m' : (4, '#0000FF'),
+        '[35m' : (5, '#FF00FF'),
+        '[36m' : (6, '#00FFFF'),
+        '[37m' : (7, '#FFFFFF'),
+        #'[39m' : default
 
+        ## Background colour ##
+        '[40m' : (1, '#000000'),
+        '[41m' : (2, '#FF0000'),
+        '[42m' : (3, '#00FF00'),
+        '[44m' : (4, '#0000FF'),
+        '[45m' : (5, '#FF00FF'),
+        '[46m' : (6, '#00FFFF'),
+        '[47m' : (7, '#FFFFFF'),
+        #'[49m' : default
+        }
+
+RE_COLOUR_START = re.compile('\[[34][0-9]m')
+RE_COLOUR_BLOCK = re.compile('\[[34][0-9]m*.*\[m')
+RE_COLOUR_END = '[m'
 #-----------------------------------------------------------------------------#
 class Xterm(wx.stc.StyledTextCtrl):
-    """Creates a graphical console that works like the system shell
+    """Creates a graphical terminal that works like the system shell
     that it is running on (bash, command, ect...).
 
     """
-    def __init__(self, parent, ID):
-        wx.stc.StyledTextCtrl.__init__(self, parent, ID)
+    def __init__(self, parent, ID=wx.ID_ANY, pos=wx.DefaultPosition, 
+                 size=wx.DefaultSize, style=0):
+        wx.stc.StyledTextCtrl.__init__(self, parent, ID, pos, size, style)
 
         # Attributes
         ##  The lower this number is the more responsive some commands
@@ -63,6 +97,8 @@ class Xterm(wx.stc.StyledTextCtrl):
         self.delay = 0.1
         self._fpos = 0          # First allowed cursor position
         self._exited = False    # Is shell still running
+        self._setspecs = list()
+
         # Setup
         self.__Configure()
         self.__ConfigureStyles()
@@ -94,7 +130,6 @@ class Xterm(wx.stc.StyledTextCtrl):
 
     def __Configure(self):
         """Configure the base settings of the control"""
-        self.SetLexer(wx.stc.STC_LEX_NULL)
         self.SetEOLMode(wx.stc.STC_EOL_LF)
         self.SetViewWhiteSpace(False)
         self.SetTabWidth(0)
@@ -128,7 +163,6 @@ class Xterm(wx.stc.StyledTextCtrl):
                           "face:%s,size:%d,fore:%s,back:%s,bold" % (face, size, fore, back))
         self.StyleSetSpec(wx.stc.STC_STYLE_CONTROLCHAR, \
                           "face:%s,size:%d,fore:%s,back:%s" % (face, size, fore, back))
-
         self.Colourise(0, -1)
 
     def __del__(self):
@@ -136,6 +170,22 @@ class Xterm(wx.stc.StyledTextCtrl):
         self._CleanUp()
 
     #---- Protected Members ----#
+    def _ApplyStyles(self, data):
+        """Apply style bytes to regions of text that require them, starting
+        at self._fpos and using the postional data as on offset from that point.
+
+        @param data: list of tuples [ (style_start, colour, style_end) ]
+
+        """
+        for pos in data:
+            spec = ANSI[pos[1]][0]
+            if spec not in self._setspecs:
+                DebugLog("[terminal][styles] Setting Spec: %d" % spec)
+                self._setspecs.append(spec)
+                self.StyleSetSpec(spec, "fore:%s,back:#000000" % ANSI[pos[1]][1])
+            self.StartStyling(self._fpos + pos[0], 0xff)
+            self.SetStyling(pos[2] - pos[0] + 1, spec)
+
     def _CheckAfterExe(self):
         """Check std out for anything left after an execution"""
         DebugLog("[terminal][info] Checking after cmd execution")
@@ -216,7 +266,7 @@ class Xterm(wx.stc.StyledTextCtrl):
 
         errors = self.CheckStdErr()
         if errors:
-            DebugLog("[terminal][err] Process Read Prepending stderr --> ")
+            DebugLog("[terminal][err] Process Read Prepending stderr --> ", errors)
             lines_to_print = errors + lines_to_print
 
         return lines_to_print
@@ -333,9 +383,14 @@ class Xterm(wx.stc.StyledTextCtrl):
         view and a new prompt is shown on the top of the screen.
 
         """
+        txt = "\n" * self.LinesOnScreen()
+        self.AppendText(txt)
         self.Write("\n")
         self._CheckAfterExe()
-        self.ScrollLines(self.LinesOnScreen())
+        self.Freeze()
+        wx.PostEvent(self, wx.ScrollEvent(wx.wxEVT_SCROLLWIN_PAGEDOWN, 
+                                          self.GetId(), orient=wx.VERTICAL))
+        wx.CallAfter(self.Thaw)
 
     def ExecuteCmd(self, cmd=None, null=1):
         """Run the command entered in the buffer"""
@@ -346,6 +401,10 @@ class Xterm(wx.stc.StyledTextCtrl):
             if cmd is None:
                 cmd = self.GetTextRange(self._fpos, self.GetLength())
 
+            # Move output position past input command
+            self._fpos = self.GetLength()
+
+            # Process command
             cmd = cmd.strip()
             if re.search( r'^\s*\bclear\b', cmd) or re.search( r'^\s*\bcls\b', cmd):
                 DebugLog('[terminal][exec] Clear Screen')
@@ -354,6 +413,7 @@ class Xterm(wx.stc.StyledTextCtrl):
             elif re.search( r'^\s*\exit\b', cmd):
                 DebugLog('[terminal][exec] Exit terminal session')
                 self._HandleExit(cmd)
+                self.SetCaretForeground(wx.BLACK)
 
             else:
                 if null:
@@ -440,11 +500,42 @@ class Xterm(wx.stc.StyledTextCtrl):
             m = None
             while re.search( '\r$', line):
                 DebugLog('[terminal][print] removing trailing ^M' )
-                line = line[ :-1 ]
+                line = line[:-1]
                 m = True
 
             # Put the line
+            need_style = False
+            if r'' in line:
+                DebugLog('[terminal][print] found ascii escape sequence(s)')
+                c_items = re.findall(RE_COLOUR_BLOCK, line)
+                colors = re.findall(RE_COLOUR_START, line)
+
+                # construct a list of [ (style_start, colour, style_end) ]
+                # where the start end positions are offsets of the curent _fpos
+                tmp = line
+                positions = list()
+                i = 0
+                print "C_ITEMS: ", c_items
+                for pat in c_items:
+                    ind = tmp.find(pat)
+                    color = re.findall(RE_COLOUR_START, pat)[0]
+                    tpat = pat.replace(color, '').replace(RE_COLOUR_END, '')
+                    tmp = tmp.replace(pat, tpat, 1)
+                    positions.append((ind, color, ind + len(tpat)))
+                    i = i + 1
+
+                # Trim and trailing escape sequences that may still be present.
+                line = tmp.replace(RE_COLOUR_END, '')
+                line = re.sub(RE_COLOUR_START, '', line)
+                
+                need_style = True
+
             self.AppendText(line)
+
+            # Apply any colouring that was found
+            if need_style:
+                DebugLog('[terminal][print] applying styles to output string')
+                self._ApplyStyles(positions)
 
             # Move cursor to end of buffer
             self._fpos = self.GetLength()
@@ -495,6 +586,7 @@ class Xterm(wx.stc.StyledTextCtrl):
         num_iterations       = 0      ##  counter for periodic redraw
         any_lines_read       = 0      ##  sentinel for reading anything at all
 
+        lines = ''
         while 1:
             if USE_PTY:
                 r, w, e = select.select([self.outd], [], [], self.delay)
@@ -502,11 +594,10 @@ class Xterm(wx.stc.StyledTextCtrl):
                 r = [1,]  # pipes, unused
 
             for file_iter in r:
-                lines = ''
                 if USE_PTY:
-                    lines = os.read(self.outd, 32)
+                    lines += os.read(self.outd, 32)
                 else:
-                    lines = self.PipeRead(self.outd, 2048)
+                    lines += self.PipeRead(self.outd, 2048)
 
                 if lines == '':
                     DebugLog('[terminal][read] No more data on stdout Read')
@@ -516,11 +607,11 @@ class Xterm(wx.stc.StyledTextCtrl):
                 any_lines_read  = 1 
                 num_iterations += 1
 
-                lines = self._ProcessRead(lines)
-                self.PrintLines(lines)
 
             if not len(r):
-                DebugLog('[terminal][info] End of Read' )
+                DebugLog('[terminal][read] End of Read, starting processing and printing' )
+                lines = self._ProcessRead(lines)
+                self.PrintLines(lines)
                 self._EndRead(any_lines_read)
                 break
 
