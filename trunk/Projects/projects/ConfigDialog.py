@@ -28,11 +28,11 @@ class ConfigDialogEvent(wx.PyCommandEvent):
         return self._value
         
 
-class ConfigDialog(wx.MiniFrame):
+class ConfigDialog(wx.Frame):
     """Dialog for configuring the Projects plugin settings"""
     def __init__(self, parent, id, data, size=wx.DefaultSize):
-        wx.MiniFrame.__init__(self, parent, id, _("Projects Configuration"), 
-                              size=size, style=wx.DEFAULT_DIALOG_STYLE)
+        wx.Frame.__init__(self, parent, id, _("Projects Configuration"), 
+                              size=size, style=wx.CLOSE_BOX)
 
         # Attributes
         self._notebook = ConfigNotebook(self, -1, data)
@@ -376,18 +376,22 @@ class SourceControlConfigTab(wx.Panel):
                 
             # Remove repository
             elif obj.GetSelection() == (obj.GetCount() - 1):
-                choices = sorted([x for x in self._data.getSCRepositories(sc).keys() if x != 'Default'])
-                scd = wx.SingleChoiceDialog(self, _('Select the repository path to remove'),
-                    _('Remove repository'), choices, style=wx.OK|wx.CANCEL)
-                if scd.ShowModal() == wx.ID_OK:
-                    value = scd.GetStringSelection().strip()
-                    self._data.removeSCRepository(sc, value)
-                self.populateRepositoryList()
+                # Default - Blank - Add - Remove: if only 4, there's nothing to remove
+                if obj.GetCount() == 4:
+                    obj.SetSelection(0)
+                else:
+                    choices = sorted([x for x in self._data.getSCRepositories(sc).keys() if x != 'Default'])
+                    scd = wx.SingleChoiceDialog(self, _('Select the repository path to remove'),
+                        _('Remove repository'), choices, style=wx.DEFAULT_DIALOG_STYLE|wx.OK|wx.CANCEL|wx.CENTER)
+                    if scd.ShowModal() == wx.ID_OK:
+                        value = scd.GetStringSelection().strip()
+                        self._data.removeSCRepository(sc, value)
+                    self.populateRepositoryList()
 
             # Add repository
             elif obj.GetSelection() == (obj.GetCount() - 2):
                 ted = wx.TextEntryDialog(self, _('Please enter a repository path.  Partial paths may also be entered.'),
-                     _('Add a New Repository Path'), style=wx.OK|wx.CANCEL)
+                     _('Add a New Repository Path'), style=wx.OK|wx.CANCEL|wx.CENTER)
                 ted.SetSize((300,-1))
                 if ted.ShowModal() == wx.ID_OK:
                     value = ted.GetValue().strip()
@@ -400,18 +404,54 @@ class SourceControlConfigTab(wx.Panel):
                         obj.SetStringSelection(value)
                     else:
                         obj.SetSelection(0)
-                        return
+                else:
+                        obj.SetSelection(0)
             self.populateUserInfo()
             self.populateEnvironment()
         else:
             evt.Skip()
 
         
-class AutoWidthListCtrl(wx.ListCtrl, listmix.ListCtrlAutoWidthMixin, listmix.TextEditMixin):
+class AutoWidthListCtrl(listmix.TextEditMixin, listmix.ListCtrlAutoWidthMixin, wx.ListCtrl):
     def __init__(self, *args, **kwargs):
         wx.ListCtrl.__init__(self, *args, **kwargs)
         listmix.ListCtrlAutoWidthMixin.__init__(self)
         listmix.TextEditMixin.__init__(self)
+                
+    def OnLeftDown(self, evt):
+        ''' Examine the click and double
+        click events to see if a row has been click on twice. If so,
+        determine the current row and columnn and open the editor.'''
+        from bisect import bisect        
+
+        if self.editor.IsShown():
+            self.CloseEditor()
+            
+        x,y = evt.GetPosition()
+        row,flags = self.HitTest((x,y))
+        if row != self.curRow: # self.curRow keeps track of the current row
+            evt.Skip()
+            return
+            
+        # >>> Make sure that an item is selected first
+        if not self.GetSelectedItemCount():
+            evt.Skip()
+            return
+        # <<<
+        
+        # the following should really be done in the mixin's init but
+        # the wx.ListCtrl demo creates the columns after creating the
+        # ListCtrl (generally not a good idea) on the other hand,
+        # doing this here handles adjustable column widths
+        
+        self.col_locs = [0]
+        loc = 0
+        for n in range(self.GetColumnCount()):
+            loc = loc + self.GetColumnWidth(n)
+            self.col_locs.append(loc)
+
+        col = bisect(self.col_locs, x+self.GetScrollPos(wx.HORIZONTAL)) - 1
+        self.OpenEditor(col, row)
 
 class ConfigData(dict):
     def __init__(self, data={}):
@@ -557,7 +597,6 @@ class ConfigData(dict):
         
     def load(self):
         data = {}
-        print 'load settings'
         try:
             import ed_glob, util
             f = util.GetFileReader(ed_glob.CONFIG['CACHE_DIR'] + 'Projects.config')
@@ -572,7 +611,6 @@ class ConfigData(dict):
             pass
         recursiveupdate(self, data)
         self.updateSCSystems()
-        print self
 
     def save(self):
         print repr(self)
