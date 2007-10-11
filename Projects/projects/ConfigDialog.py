@@ -486,6 +486,9 @@ class ConfigData(dict):
     def removeProject(self, path):
         try: del self['projects'][path]
         except KeyError: pass
+        
+    def clearProjects(self):
+        self['projects'].clear()
     
     def getProjects(self):
         return self['projects']
