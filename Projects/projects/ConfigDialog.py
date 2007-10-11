@@ -190,7 +190,7 @@ class SourceControlConfigTab(wx.Panel):
         hsizer.AddF(wx.Choice(self, self.ID_SC_CHOICE, 
                               choices=sorted([x for x in data.getSCSystems()])), 
                               flags.Border(wx.ALL,5))
-        hsizer.AddF(wx.FilePickerCtrl(self, self.ID_SC_COMMAND), wx.SizerFlags(1))        
+        hsizer.AddF(wx.FilePickerCtrl(self, self.ID_SC_COMMAND, style=wx.FLP_OPEN|wx.FLP_USE_TEXTCTRL), wx.SizerFlags(1))        
         sizer.AddF(hsizer, wx.SizerFlags(1).Expand())
         
         # Repository configuration box
