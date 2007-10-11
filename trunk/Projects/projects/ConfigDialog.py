@@ -590,7 +590,8 @@ class ConfigData(dict):
         except KeyError: pass
         
     def setSCCommand(self, sc, command):
-        self.getSCSystem(sc)['command'] = command
+        system = self.getSCSystem(sc)
+        system['instance'].command = system['command'] = command
     
     def getSCCommand(self, sc):
         return self.getSCSystem(sc)['command']
