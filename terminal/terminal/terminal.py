@@ -11,11 +11,13 @@
 """
 This script is an adaptation of the vim plugin vimsh by 
 brian m sturk <bsturk@adelphia.net> to the wxWdigets platform utilizing a 
-StyledTextCtrl for the interface.
+StyledTextCtrl for the interface. It also makes a number of improvements
+upon that original script that provide for better output display for long and
+continuous running commands due to being able to process in idle time.
 
 It should run on all operating systems that support:
     - wxPython
-    - Psuedo TTY's or Pipes/popopen
+    - Psuedo TTY's or Pipes/Popen
 
 """
 
@@ -51,7 +53,7 @@ except ImportError, msg:
 
 #-----------------------------------------------------------------------------#
 # Globals
-DEBUG = True
+DEBUG = False
 _ = wx.GetTranslation
 
 SHELL = os.environ['SHELL']
@@ -87,6 +89,7 @@ ANSI = {
 RE_COLOUR_START = re.compile('\[[34][0-9]m')
 RE_COLOUR_BLOCK = re.compile('\[[34][0-9]m*.*\[m')
 RE_COLOUR_END = '[m'
+RE_CLEAR_ESC = re.compile('\[[0-9]+m')
 
 # Font settings (TODO make configurable from interface)
 FONT = None
@@ -106,7 +109,7 @@ class Xterm(wx.stc.StyledTextCtrl):
         ##  The lower this number is the more responsive some commands
         ##  may be ( printing prompt, ls ), but also the quicker others
         ##  may timeout reading their output ( ping, ftp )
-        self.delay = 0.1
+        self.delay = 0.02
         self._fpos = 0          # First allowed cursor position
         self._exited = False    # Is shell still running
         self._setspecs = list()
@@ -116,18 +119,31 @@ class Xterm(wx.stc.StyledTextCtrl):
         self.__ConfigureStyles()
         self.__ConfigureKeyCmds()
         self._SetupPTY()
-        self.NewPrompt()
 
         #---- Event Handlers ----#
+        # General Events
+        self.Bind(wx.EVT_IDLE, self.OnIdle)
+
         # Key events
         self.Bind(wx.EVT_KEY_DOWN, self.OnKeyDown)
         self.Bind(wx.EVT_CHAR, self.OnChar)
         self.Bind(wx.EVT_KEY_UP, self.OnKeyUp)
 
+        # Menu Events
+        self.Bind(wx.EVT_MENU, lambda evt: self.Cut(), id=wx.ID_CUT)
+        self.Bind(wx.EVT_MENU, lambda evt: self.Copy(), id=wx.ID_COPY)
+        self.Bind(wx.EVT_MENU, lambda evt: self.Paste(), id=wx.ID_PASTE)
+        self.Bind(wx.EVT_MENU, lambda evt: self.SelectAll(), id=wx.ID_SELECTALL)
+
         # Mouse Events
         self.Bind(wx.EVT_LEFT_UP, self.OnLeftUp)
+#         self.Bind(wx.EVT_LEFT_DOWN, self.OnLeftDown)
         self.Bind(wx.EVT_CONTEXT_MENU, self.OnContextMenu)
         self.Bind(wx.EVT_UPDATE_UI, self.OnUpdateUI)
+
+    def __del__(self):
+        DebugLog("[terminal][info] Terminal instance is being deleted")
+        self._CleanUp()
 
     def __ConfigureKeyCmds(self):
         """Clear the builtin keybindings that we dont want"""
@@ -153,6 +169,7 @@ class Xterm(wx.stc.StyledTextCtrl):
         self.SetUseTabs(False)
         self.SetWrapMode(True)
         self.SetEndAtLastLine(False)
+        self.SetVisiblePolicy(1, wx.stc.STC_VISIBLE_STRICT)
 
     def __ConfigureStyles(self):
         """Configure the text coloring of the terminal"""
@@ -185,10 +202,6 @@ class Xterm(wx.stc.StyledTextCtrl):
         self.StyleSetSpec(wx.stc.STC_STYLE_CONTROLCHAR, \
                           "face:%s,size:%d,fore:%s,back:%s" % (FONT_FACE, FONT_SIZE, fore, back))
         self.Colourise(0, -1)
-
-    def __del__(self):
-        DebugLog("[terminal][info] Terminal instance is being deleted")
-        self._CleanUp()
 
     #---- Protected Members ----#
     def _ApplyStyles(self, data):
@@ -414,8 +427,7 @@ class Xterm(wx.stc.StyledTextCtrl):
         view and a new prompt is shown on the top of the screen.
 
         """
-        txt = "\n" * self.LinesOnScreen()
-        self.AppendText(txt)
+        self.AppendText("\n" * 5)
         self.Write("\n")
         self._CheckAfterExe()
         self.Freeze()
@@ -436,7 +448,9 @@ class Xterm(wx.stc.StyledTextCtrl):
             self._fpos = self.GetLength()
 
             # Process command
-            cmd = cmd.strip()
+            if len(cmd) and cmd[-1] != '\t':
+                cmd = cmd.strip()
+
             if re.search( r'^\s*\bclear\b', cmd) or re.search( r'^\s*\bcls\b', cmd):
                 DebugLog('[terminal][exec] Clear Screen')
                 self.ClearScreen()
@@ -474,14 +488,14 @@ class Xterm(wx.stc.StyledTextCtrl):
 
         """
         menu = wx.Menu()
-        menu.Append(wx.ID_UNDO, _("Undo"))
-        menu.Append(wx.ID_REDO, _("Redo"))
-        menu.AppendSeparator()
         menu.Append(wx.ID_CUT, _("Cut"))
         menu.Append(wx.ID_COPY, _("Copy"))
         menu.Append(wx.ID_PASTE, _("Paste"))
         menu.AppendSeparator()
         menu.Append(wx.ID_SELECTALL, _("Select All"))
+        menu.AppendSeparator()
+        menu.Append(wx.ID_SETUP, _("Preferences"))
+
         return menu
 
     def NewPrompt(self):
@@ -495,6 +509,11 @@ class Xterm(wx.stc.StyledTextCtrl):
         """Display the context menu"""
         self.PopupMenu(self.GetContextMenu())
 
+    def OnIdle(self, evt):
+        """While idle check for more output"""
+        if not self._exited:
+            self.Read()
+
     def OnKeyDown(self, evt):
         """Handle key down events"""
         if self._exited:
@@ -506,6 +525,7 @@ class Xterm(wx.stc.StyledTextCtrl):
             self.ExecuteCmd()
         elif key == wx.WXK_TAB:
             # TODO Tab Completion
+#             self.ExecuteCmd(self.GetTextRange(self._fpos, self.GetCurrentPos()) + '\t', 0)
             pass
         elif key in [wx.WXK_UP, wx.WXK_NUMPAD_UP]:
             # Cycle through command history
@@ -531,6 +551,11 @@ class Xterm(wx.stc.StyledTextCtrl):
         """Handle when the key comes up"""
         evt.Skip()
 
+    def OnLeftDown(self, evt):
+        """Set selection anchor"""
+        pos = evt.GetPosition()
+        self.SetSelectionStart(self.PositionFromPoint(pos))
+
     def OnLeftUp(self, evt):
         """Check click position to ensure caret doesn't 
         move to invalid position.
@@ -538,6 +563,7 @@ class Xterm(wx.stc.StyledTextCtrl):
         """
         evt.Skip()
         pos = evt.GetPosition()
+#         self.SetSelectionEnd(self.PositionFromPoint(pos))
         if self._fpos > self.PositionFromPoint(pos):
             wx.CallAfter(self.GotoPos, self._fpos)
 
@@ -587,9 +613,10 @@ class Xterm(wx.stc.StyledTextCtrl):
                     positions.append((ind, color, ind + len(tpat)))
                     i = i + 1
 
-                # Trim and trailing escape sequences that may still be present.
+                # Try to remove any trailing escape sequences that may still be present.
                 line = tmp.replace(RE_COLOUR_END, '')
                 line = re.sub(RE_COLOUR_START, '', line)
+                line = re.sub(RE_CLEAR_ESC, '', line)
                 
                 need_style = True
 
@@ -610,19 +637,17 @@ class Xterm(wx.stc.StyledTextCtrl):
                 self.AppendText("\n")
 
     def PipeRead(self, pipe, minimum_to_read):
-        """Read from pipe used on Windows due to lack of support for select
-        to be used with anything outside of sockets.
+        """Read from pipe, used on Windows. This is needed because select
+        can only be used with sockets on Windows and not with any other type
+        of file descriptor.
 
         """
         DebugLog("[terminal][pipe] minimum to read is " + str(minimum_to_read))
-        DebugLog("[terminal][pipe] sleeping for %s seconds" % str(self.delay))
 
         time.sleep(self.delay)
-
-        count = 0
         count = os.fstat(pipe)[stat.ST_SIZE]
         data = ''
-        DebugLog("[terminal][pipe]: initial count via fstat is " + str(count))
+        DebugLog("[terminal][pipe] initial count via fstat is " + str(count))
 
         while (count > 0):
             tmp = os.read(pipe, 1)
@@ -646,8 +671,8 @@ class Xterm(wx.stc.StyledTextCtrl):
 
     def Read(self):
         """Read output from stdin"""
-        num_iterations       = 0      ##  counter for periodic redraw
-        any_lines_read       = 0      ##  sentinel for reading anything at all
+        num_iterations = 0  #  counter for periodic redraw
+        any_lines_read = 0  #  sentinel for reading anything at all
 
         lines = ''
         while 1:
@@ -658,11 +683,12 @@ class Xterm(wx.stc.StyledTextCtrl):
 
             for file_iter in r:
                 if USE_PTY:
-                    lines += os.read(self.outd, 32)
+                    tmp = os.read(self.outd, 32)
                 else:
-                    lines += self.PipeRead(self.outd, 2048)
+                    tmp = self.PipeRead(self.outd, 2048)
 
-                if lines == '':
+                lines += tmp
+                if tmp == '':
                     DebugLog('[terminal][read] No more data on stdout Read')
                     r = []
                     break
@@ -670,13 +696,16 @@ class Xterm(wx.stc.StyledTextCtrl):
                 any_lines_read  = 1 
                 num_iterations += 1
 
-
-            if not len(r):
+            if not len(r) and len(lines):
                 DebugLog('[terminal][read] End of Read, starting processing and printing' )
                 lines = self._ProcessRead(lines)
                 self.PrintLines(lines)
                 self._EndRead(any_lines_read)
                 break
+            elif not any_lines_read and not num_iterations:
+                break
+            else:
+                pass
 
     def Write(self, cmd):
         """Write out command to shell process"""
