@@ -268,6 +268,7 @@ class ProjectTree(wx.Panel):
     def saveProjects(self):
         """ Save projects to config file """
         projects = self.config.getProjects()
+        self.config.clearProjects()
         for item in self.getProjectPaths():
             if item not in projects:
                 self.config.addProject(item)
