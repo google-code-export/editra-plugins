@@ -9,7 +9,7 @@
 ###############################################################################
 
 """
-This script is an adaptation of the vim plugin vimsh by 
+This script was adapted from the vim plugin 'vimsh' by 
 brian m sturk <bsturk@adelphia.net> to the wxWdigets platform utilizing a 
 StyledTextCtrl for the interface. It also makes a number of improvements
 upon that original script that provide for better output display for long and
@@ -53,13 +53,16 @@ except ImportError, msg:
 
 #-----------------------------------------------------------------------------#
 # Globals
-DEBUG = False
+DEBUG = True
 _ = wx.GetTranslation
 
-SHELL = os.environ['SHELL']
-if SHELL == '':
-    if sys.platform == 'win32':
-        SHELL = 'cmd.exe'
+if sys.platform == 'win32':
+    SHELL = 'cmd.exe'
+else:
+    if os.environ.has_key('SHELL'):
+        SHELL = os.environ['SHELL']
+    elif os.environ.has_key('TERM'):
+        SHELL = os.environ['TERM']
     else:
         SHELL = '/bin/sh'
 
@@ -308,8 +311,8 @@ class Xterm(wx.stc.StyledTextCtrl):
     def _SetupPTY(self):
         """Setup the connection to the real terminal"""
         if USE_PTY:
-            self.master, pty_name = pty.master_open()
-            DebugLog("[terminal][info] Slave Pty name: " + pty_name)
+            self.master, pty_name = pty.openpty()
+            DebugLog("[terminal][info] Slave Pty name: " + str(pty_name))
 
             self.pid, self.fd = pty.fork()
 
@@ -348,15 +351,15 @@ class Xterm(wx.stc.StyledTextCtrl):
                 self.susp_key  = termios_keys[ tty.VSUSP ]
         else:
             ##  Use pipes on Win32. not as reliable/nice. works OK but with limitations.
-            self.delay = 0.2
+            self.delay = 0.1
 
             try:
                 import win32pipe
                 DebugLog('[terminal][info] using windows extensions')
-                self.stdin, self.stdout, self.stderr = win32pipe.popen3( self.sh + " " + self.arg )
+                self.stdin, self.stdout, self.stderr = win32pipe.popen3(SHELL)
             except ImportError:
                 DebugLog('[terminal][info] not using windows extensions')
-                self.stdout, self.stdin, self.stderr = popen2.popen3( self.sh + " " + self.arg, -1, 'b' )
+                self.stdout, self.stdin, self.stderr = popen2.popen3(SHELL, -1, 'b')
 
             self.outd = self.stdout.fileno()
             self.ind  = self.stdin.fileno()
@@ -462,7 +465,7 @@ class Xterm(wx.stc.StyledTextCtrl):
 
             else:
                 if null:
-                    self.Write(cmd + '\n')
+                    self.Write(cmd + os.linesep)
                 else:
                     self.Write(cmd)
 
