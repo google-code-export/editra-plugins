@@ -530,6 +530,7 @@ class ConfigData(dict):
         for key, value in self.getSCSystems().items():
             value['instance'].filters = self.getFilters()
             value['instance'].repositories = self.getSCRepositories(key)
+            value['instance'].command = self.getSCCommand(key)
     
     def getSCSystems(self):
         return self['source-control']
