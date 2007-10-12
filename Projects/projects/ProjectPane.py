@@ -34,10 +34,6 @@ except ImportError:
     profiler = None
     eol = '\n'
 
-# Make sure that all processes use a standard shell
-if wx.Platform != '__WXMAC__':
-    os.environ['SHELL'] = '/bin/sh'
-
 # Configure Platform specific commands
 if wx.Platform == '__WXMAC__': # MAC
     FILEMAN = 'Finder'
