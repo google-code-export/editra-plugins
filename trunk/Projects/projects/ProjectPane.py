@@ -429,8 +429,9 @@ class ProjectTree(wx.Panel):
         pg_num = evt.GetSelection()
         txt_ctrl = notebook.GetPage(pg_num)
 
-        # With the text control (ed_stc.EDSTC) this will return the full path of the file or 
-        # a wx.EmptyString if the buffer does not contain an on disk file
+        # With the text control (ed_stc.EditraStc) this will return the full 
+        # path of the file or a wx.EmptyString if the buffer does not contain 
+        # an on disk file
         filename = txt_ctrl.GetFileName()
         
         if filename in self.getSelectedPaths():
@@ -1377,7 +1378,7 @@ class ProjectTree(wx.Panel):
             if nb.HasFileOpen(item):
                 for page in xrange(nb.GetPageCount()):
                   ctrl = nb.GetPage(page)
-                  if item == os.path.join(ctrl.dirname, ctrl.filename):
+                  if item == ctrl.GetFileName():
                       nb.SetSelection(page)
                       nb.ChangePage(page)
                       break
