@@ -115,6 +115,7 @@ class Xterm(wx.stc.StyledTextCtrl):
         self.delay = 0.02
         self._fpos = 0          # First allowed cursor position
         self._exited = False    # Is shell still running
+        self.last_cmd_executed = ''
         self._setspecs = list()
 
         # Setup
@@ -469,6 +470,7 @@ class Xterm(wx.stc.StyledTextCtrl):
                 else:
                     self.Write(cmd)
 
+                self.last_cmd_executed = cmd
                 self._CheckAfterExe()
 
             self.last_cmd_executed = cmd
@@ -587,6 +589,9 @@ class Xterm(wx.stc.StyledTextCtrl):
         @param lines: list of strings
 
         """
+        if len(lines) and lines[0].strip() == self.last_cmd_executed.strip():
+            lines.pop(0)
+
         num_lines = len(lines)
         for line in lines:
             DebugLog("[terminal][print] Current line is --> %s" % line)
@@ -599,7 +604,7 @@ class Xterm(wx.stc.StyledTextCtrl):
             # Put the line
             need_style = False
             if r'' in line:
-                DebugLog('[terminal][print] found ascii escape sequence(s)')
+                DebugLog('[terminal][print] found ansi escape sequence(s)')
                 c_items = re.findall(RE_COLOUR_BLOCK, line)
                 colors = re.findall(RE_COLOUR_START, line)
 
