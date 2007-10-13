@@ -189,10 +189,10 @@ class DisplayPanel(wx.Panel):
         evt.Skip()
 
 #--------------------------------------------------------------------------#
-class DiffCtrl(ed_stc.EDSTC):
+class DiffCtrl(ed_stc.EditraStc):
     """Custom text control for displaying diff files in"""
     def __init__(self, parent):
-        ed_stc.EDSTC.__init__(self, parent, wx.ID_ANY, use_dt=False)
+        ed_stc.EditraStc.__init__(self, parent, wx.ID_ANY, use_dt=False)
         
         # Configure the control
         self.FoldingOnOff(False)
