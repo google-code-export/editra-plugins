@@ -11,6 +11,7 @@ This plugin project has two parts:
 = Implemented Features =
   * Basic framework is in place and it can be used just like your system shell but still has a number of display and behavior issues to fix up before an official release.
   * Support for ANSI color code escape sequences to allow for coloring of different file types.
+  * Command history recall with Up and Down keys.
 
 = Planned Features =
 
