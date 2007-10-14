@@ -573,11 +573,16 @@ class ProjectTree(wx.Panel):
 
             ted = CommitDialog(self, _("Commit Dialog"), 
                                _("Enter your commit message:"), paths)
+
             if ted.ShowModal() != wx.ID_OK:
+                ted.Destroy()
                 return
+
             message = ted.GetValue().strip().replace('"', '\\"')
+            ted.Destroy()
             if message:
                 break
+
         self.scCommand(nodes, 'commit', message=message)
 
     def scCommand(self, nodes, command, callback=None, **options):
@@ -1662,12 +1667,16 @@ class CommitDialog(wx.Dialog):
         self._commit = wx.Button(self, wx.ID_OK, _("Commit"))
         self._commit.SetDefault()
         self._cancel = wx.Button(self, wx.ID_CANCEL)
-        self._entry = wx.TextCtrl(self, style=wx.TE_MULTILINE|wx.NO_BORDER)
+
+        self._entry = wx.TextCtrl(self, size=(400, 250), style=wx.TE_MULTILINE)
         font = self._entry.GetFont()
-        font.SetPointSize(12)
-        self._entry.SetFont(font)
         if wx.Platform == '__WXMAC__':
+            font.SetPointSize(12)
             self._entry.MacCheckSpelling(True)
+        else:
+            font.SetPointSize(10)
+        self._entry.SetFont(font)
+
         self._DefaultMessage(default)
         self._entry.SetFocus()
         
@@ -1681,39 +1690,49 @@ class CommitDialog(wx.Dialog):
 
         """
         msg = list()
-        msg.append(u':' + (u'-' * 35))
+        msg.append(u': ' + (u'-' * 40))
         msg.append(u": Lines beginning with `:' are removed automatically")
         msg.append(u": Modified Files:")
         for path in files:
             tmp = ":\t%s" % path
             msg.append(tmp)
-        msg.append(u': ' + (u'-' * 35))
+        msg.append(u': ' + (u'-' * 40))
         msg.extend([u'', u''])
         msg = os.linesep.join(msg)
         self._entry.SetValue(msg)
-        self._entry.SetInsertionPoint(len(msg))
+        self._entry.SetInsertionPoint(self._entry.GetLastPosition())
 
     def _DoLayout(self):
-        sizer = wx.GridBagSizer(5, 5)
+        sizer = wx.BoxSizer(wx.VERTICAL)
+        csizer = wx.BoxSizer(wx.HORIZONTAL)
+        bsizer = wx.BoxSizer(wx.HORIZONTAL)
+        esizer = wx.BoxSizer(wx.HORIZONTAL)
 
-        sizer.Add((5, 5), (0, 0))
-        sizer.AddMany([(self._caption, (1, 1), (1, 4)),
-                       (self._entry, (2, 1), (10, 8), wx.EXPAND),
-                       (self._cancel, (12, 7)), (self._commit, (12, 8)),
-                       ((5, 5), (13, 0)), ((5, 5), (13, 9))])
+        sizer.Add((10, 10), 0)
+        csizer.Add((10, 10), 0)
+        csizer.Add(self._caption, 0, wx.ALIGN_LEFT, 5)
+        sizer.Add(csizer, 0)
+        sizer.Add((10, 10), 0)
+        esizer.AddMany([((10, 10), 0), (self._entry, 1, wx.EXPAND), ((10, 10), 0)])
+        sizer.Add(esizer, 0, wx.EXPAND)
+        bsizer.AddStretchSpacer()
+        bsizer.AddMany([(self._cancel, 0, wx.ALIGN_RIGHT, 5), ((5, 5)),
+                       (self._commit, 0, wx.ALIGN_RIGHT, 5), ((5, 5))])
+        sizer.Add((10, 10))
+        sizer.Add(bsizer, 0, wx.ALIGN_RIGHT)
+        sizer.Add((10, 10))
         self.SetSizer(sizer)
         self.SetInitialSize()
 
     def GetValue(self):
         """Return the value of the commit message"""
-        msg = list()
-        for line in xrange(self._entry.GetNumberOfLines()):
-            tmp = self._entry.GetLineText(line)
-            if tmp.strip().startswith(u':') or \
-               self._entry.GetLineText(line + 1).startswith(u':'):
-                continue
-            msg.append(tmp)
-        return os.linesep.join(msg).strip()
+        cmt = re.compile(r':*.*', re.MULTILINE)
+        txt = self._entry.GetString(0, self._entry.GetLastPosition()).strip()
+        txt = txt.replace('\r\n', '\n')
+        return os.linesep.join([ x for x in txt.split('\n') 
+                                 if not x.lstrip().startswith(':') ])
+
+#-----------------------------------------------------------------------------#
 
 class ExecuteCommandDialog(wx.Dialog):
 
