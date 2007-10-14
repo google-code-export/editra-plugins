@@ -51,10 +51,11 @@ try:
 except ImportError, msg:
     print "[terminal] Error importing required libs: %s" % str(msg)
 
+_ = wx.GetTranslation
 #-----------------------------------------------------------------------------#
 # Globals
 DEBUG = True
-_ = wx.GetTranslation
+MAX_HIST = 50       # Max previous commands to save
 
 if sys.platform == 'win32':
     SHELL = 'cmd.exe'
@@ -66,7 +67,7 @@ else:
     else:
         SHELL = '/bin/sh'
 
-# ANSI color code support
+#---- ANSI color code support ----#
 ANSI = {
         ## Forground colours ##
         '[30m' : (1, '#000000'),
@@ -93,6 +94,7 @@ RE_COLOUR_START = re.compile('\[[34][0-9]m')
 RE_COLOUR_BLOCK = re.compile('\[[34][0-9]m*.*\[m')
 RE_COLOUR_END = '[m'
 RE_CLEAR_ESC = re.compile('\[[0-9]+m')
+#---- End ANSI Colour Support ----#
 
 # Font settings (TODO make configurable from interface)
 FONT = None
@@ -117,6 +119,7 @@ class Xterm(wx.stc.StyledTextCtrl):
         self._exited = False    # Is shell still running
         self.last_cmd_executed = ''
         self._setspecs = list()
+        self._history = dict(cmds=[''], index=-1)  # Command history
 
         # Setup
         self.__Configure()
@@ -200,11 +203,14 @@ class Xterm(wx.stc.StyledTextCtrl):
                                wx.FONTWEIGHT_NORMAL)
         FONT_FACE = FONT.GetFaceName()
         FONT_SIZE = FONT.GetPointSize()
-        self.StyleSetSpec(0, "face:%s,size:%d,fore:%s,back:%s,bold" % (FONT_FACE, FONT_SIZE, fore, back))
+        self.StyleSetSpec(0, "face:%s,size:%d,fore:%s,back:%s,bold" % \
+                             (FONT_FACE, FONT_SIZE, fore, back))
         self.StyleSetSpec(wx.stc.STC_STYLE_DEFAULT, \
-                          "face:%s,size:%d,fore:%s,back:%s,bold" % (FONT_FACE, FONT_SIZE, fore, back))
+                          "face:%s,size:%d,fore:%s,back:%s,bold" % \
+                          (FONT_FACE, FONT_SIZE, fore, back))
         self.StyleSetSpec(wx.stc.STC_STYLE_CONTROLCHAR, \
-                          "face:%s,size:%d,fore:%s,back:%s" % (FONT_FACE, FONT_SIZE, fore, back))
+                          "face:%s,size:%d,fore:%s,back:%s" % \
+                          (FONT_FACE, FONT_SIZE, fore, back))
         self.Colourise(0, -1)
 
     #---- Protected Members ----#
@@ -220,7 +226,8 @@ class Xterm(wx.stc.StyledTextCtrl):
             if spec not in self._setspecs:
                 DebugLog("[terminal][styles] Setting Spec: %d" % spec)
                 self._setspecs.append(spec)
-                self.StyleSetSpec(spec, "fore:%s,back:#000000,face:%s,size:%d" % (ANSI[pos[1]][1], FONT_FACE, FONT_SIZE))
+                self.StyleSetSpec(spec, "fore:%s,back:#000000,face:%s,size:%d" % \
+                                  (ANSI[pos[1]][1], FONT_FACE, FONT_SIZE))
             self.StartStyling(self._fpos + pos[0], 0xff)
             self.SetStyling(pos[2] - pos[0] + 1, spec)
 
@@ -324,16 +331,16 @@ class Xterm(wx.stc.StyledTextCtrl):
             signal.signal(signal.SIGCHLD, self._SigChildHandler)
 
             if self.pid == 0:
-                attrs = tty.tcgetattr( 1 )
+                attrs = tty.tcgetattr(1)
 
-                attrs[ 6 ][ tty.VMIN ]  = 1
-                attrs[ 6 ][ tty.VTIME ] = 0
-                attrs[ 0 ] = attrs[ 0 ] | tty.BRKINT
-                attrs[ 0 ] = attrs[ 0 ] & tty.IGNBRK
-                attrs[ 3 ] = attrs[ 3 ] & ~tty.ICANON & ~tty.ECHO
+                attrs[6][tty.VMIN]  = 1
+                attrs[6][tty.VTIME] = 0
+                attrs[0] = attrs[0] | tty.BRKINT
+                attrs[0] = attrs[0] & tty.IGNBRK
+                attrs[3] = attrs[3] & ~tty.ICANON & ~tty.ECHO
 
                 tty.tcsetattr(1, tty.TCSANOW, attrs)
-                os.execv(SHELL, [ SHELL, ])
+                os.execv(SHELL, [SHELL,])
 
             else:
                 try:
@@ -344,12 +351,12 @@ class Xterm(wx.stc.StyledTextCtrl):
                     return
 
                 #  Get *real* key-sequence for standard input keys, i.e. EOF
-                self.eof_key   = termios_keys[ tty.VEOF ]
-                self.eol_key   = termios_keys[ tty.VEOL ]
-                self.erase_key = termios_keys[ tty.VERASE ]
-                self.intr_key  = termios_keys[ tty.VINTR ]
-                self.kill_key  = termios_keys[ tty.VKILL ]
-                self.susp_key  = termios_keys[ tty.VSUSP ]
+                self.eof_key   = termios_keys[tty.VEOF]
+                self.eol_key   = termios_keys[tty.VEOL]
+                self.erase_key = termios_keys[tty.VERASE]
+                self.intr_key  = termios_keys[tty.VINTR]
+                self.kill_key  = termios_keys[tty.VKILL]
+                self.susp_key  = termios_keys[tty.VSUSP]
         else:
             ##  Use pipes on Win32. not as reliable/nice. works OK but with limitations.
             self.delay = 0.1
@@ -388,6 +395,16 @@ class Xterm(wx.stc.StyledTextCtrl):
     #---- End Protected Members ----#
 
     #---- Public Members ----#
+    def AddCmdHistory(self, cmd):
+        """Add a command to the history index so it can be quickly
+        recalled by using the up/down keys.
+
+        """
+        if len(self._history['cmds']) > MAX_HIST:
+            self._history['cmds'].pop()
+        self._history['cmds'].insert(0, cmd)
+        self._history['index'] = -1
+
     def CanCopy(self):
         """Check if copy is possible"""
         return self.GetSelectionStart() != self.GetSelectionEnd()
@@ -455,11 +472,11 @@ class Xterm(wx.stc.StyledTextCtrl):
             if len(cmd) and cmd[-1] != '\t':
                 cmd = cmd.strip()
 
-            if re.search( r'^\s*\bclear\b', cmd) or re.search( r'^\s*\bcls\b', cmd):
+            if re.search(r'^\s*\bclear\b', cmd) or re.search(r'^\s*\bcls\b', cmd):
                 DebugLog('[terminal][exec] Clear Screen')
                 self.ClearScreen()
 
-            elif re.search( r'^\s*\exit\b', cmd):
+            elif re.search(r'^\s*\exit\b', cmd):
                 DebugLog('[terminal][exec] Exit terminal session')
                 self._HandleExit(cmd)
                 self.SetCaretForeground(wx.BLACK)
@@ -473,6 +490,7 @@ class Xterm(wx.stc.StyledTextCtrl):
                 self.last_cmd_executed = cmd
                 self._CheckAfterExe()
 
+            self.AddCmdHistory(cmd)
             self.last_cmd_executed = cmd
 
         except KeyboardInterrupt:
@@ -502,6 +520,38 @@ class Xterm(wx.stc.StyledTextCtrl):
         menu.Append(wx.ID_SETUP, _("Preferences"))
 
         return menu
+
+    def GetNextCommand(self):
+        """Get the next command from history based on the current
+        position in the history list. If the list is already at the
+        begining then the command at the most recent command will be
+        returned.
+
+        @postcondition: current history postion is decremented towards 0
+        @return: string
+
+        """
+        if self._history['index']:
+            self._history['index'] -= 1
+
+        index = self._history['index']
+        return self._history['cmds'][index]
+
+    def GetPrevCommand(self):
+        """Get the previous command from history based on the current
+        position in the history list. If the list is already at the
+        end then the oldest command will be returned.
+
+        @postcondition: current history postion is decremented towards 0
+        @return: string
+
+        """
+        if self._history['index'] < len(self._history['cmds']) - 1\
+           and self._history['index'] < MAX_HIST:
+            self._history['index'] += 1
+
+        index = self._history['index']
+        return self._history['cmds'][index]
 
     def NewPrompt(self):
         """Put a new prompt on the screen and make all text from end of
@@ -533,8 +583,13 @@ class Xterm(wx.stc.StyledTextCtrl):
 #             self.ExecuteCmd(self.GetTextRange(self._fpos, self.GetCurrentPos()) + '\t', 0)
             pass
         elif key in [wx.WXK_UP, wx.WXK_NUMPAD_UP]:
-            # Cycle through command history
-            pass
+            # Cycle through previous command history
+            cmd = self.GetPrevCommand()
+            self.SetCommand(cmd)
+        elif key in [wx.WXK_DOWN, wx.WXK_NUMPAD_DOWN]:
+            # Cycle towards most recent commands in history
+            cmd = self.GetNextCommand()
+            self.SetCommand(cmd)
         elif key in [wx.WXK_LEFT, wx.WXK_NUMPAD_LEFT, 
                      wx.WXK_BACK, wx.WXK_DELETE]:
             if self.GetCurrentPos() > self._fpos:
@@ -714,6 +769,13 @@ class Xterm(wx.stc.StyledTextCtrl):
                 break
             else:
                 pass
+
+    def SetCommand(self, cmd):
+        """Set the command that is shown at the current prompt"""
+        self.SetTargetStart(self._fpos)
+        self.SetTargetEnd(self.GetLength())
+        self.ReplaceTarget(cmd)
+        self.GotoPos(self.GetLength())
 
     def Write(self, cmd):
         """Write out command to shell process"""
