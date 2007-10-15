@@ -290,7 +290,7 @@ class SourceControlConfigTab(wx.Panel):
         rep = self.FindWindowById(self.ID_SC_REP_CHOICE)
         rep.Clear()
         items = ['Default'] + \
-                sorted([x for x in self._data.getSCRepositories(sc).keys() if x != 'Default']) + \
+                sorted([x.strip() for x in self._data.getSCRepositories(sc).keys() if x != 'Default'] and x.strip()) + \
                 ['','Add Repository...','Remove Repository...']
         for item in items:
             rep.Append(item)
