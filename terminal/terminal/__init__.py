@@ -38,8 +38,7 @@ class Terminal(plugin.Plugin):
         """Returns a Terminal Panel"""
         self._log = wx.GetApp().GetLog()
         self._log("[term][info] Creating Terminal instance for Shelf")
-        shell = terminal.Xterm(parent, wx.ID_ANY)
-        return shell
+        return terminal.Xterm(parent, wx.ID_ANY)
 
     def GetId(self):
         return self.ID_TERM

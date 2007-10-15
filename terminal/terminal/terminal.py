@@ -42,18 +42,19 @@ try:
     if sys.platform == 'win32':
         import popen2
         import stat
-        USE_PTY   = False
+        USE_PTY = False
     else:
         import pty
         import tty
         import select
-        USE_PTY   = True
+        USE_PTY = True
 except ImportError, msg:
     print "[terminal] Error importing required libs: %s" % str(msg)
 
-_ = wx.GetTranslation
 #-----------------------------------------------------------------------------#
 # Globals
+
+#---- Variables ----#
 DEBUG = True
 MAX_HIST = 50       # Max previous commands to save
 
@@ -66,6 +67,11 @@ else:
         SHELL = os.environ['TERM']
     else:
         SHELL = '/bin/sh'
+#---- End Variables ----#
+
+#---- Callables ----#
+_ = wx.GetTranslation
+#---- End Callables ----#
 
 #---- ANSI color code support ----#
 ANSI = {
@@ -96,11 +102,15 @@ RE_COLOUR_END = '[m'
 RE_CLEAR_ESC = re.compile('\[[0-9]+m')
 #---- End ANSI Colour Support ----#
 
-# Font settings (TODO make configurable from interface)
+#---- Font Settings ----#
+# TODO make configurable from interface
 FONT = None
 FONT_FACE = None
 FONT_SIZE = None
+#----- End Font Settings ----#
+
 #-----------------------------------------------------------------------------#
+
 class Xterm(wx.stc.StyledTextCtrl):
     """Creates a graphical terminal that works like the system shell
     that it is running on (bash, command, ect...).
@@ -117,9 +127,8 @@ class Xterm(wx.stc.StyledTextCtrl):
         self.delay = 0.02
         self._fpos = 0          # First allowed cursor position
         self._exited = False    # Is shell still running
-        self.last_cmd_executed = ''
         self._setspecs = list()
-        self._history = dict(cmds=[''], index=-1)  # Command history
+        self._history = dict(cmds=[''], index=-1, lastexe='')  # Command history
 
         # Setup
         self.__Configure()
@@ -297,7 +306,7 @@ class Xterm(wx.stc.StyledTextCtrl):
 
         #  Filter out invalid blank lines from begining/end input
         if sys.platform == 'win32':
-            m = re.search(re.escape(self.last_cmd_executed.strip()), lines_to_print[0])
+            m = re.search(re.escape(self._history['lastexe'].strip()), lines_to_print[0])
             if m != None or lines_to_print[0] == "":
                 DebugLog('[terminal][info] Win32, removing leading blank line')
                 lines_to_print = lines_to_print[ 1: ]
@@ -340,7 +349,10 @@ class Xterm(wx.stc.StyledTextCtrl):
                 attrs[3] = attrs[3] & ~tty.ICANON & ~tty.ECHO
 
                 tty.tcsetattr(1, tty.TCSANOW, attrs)
-                os.execv(SHELL, [SHELL,])
+                cwd = os.path.curdir
+                os.chdir(wx.GetHomeDir())
+                os.execv(SHELL, [SHELL, '-l'])
+                os.chdir(cwd)
 
             else:
                 try:
@@ -475,23 +487,22 @@ class Xterm(wx.stc.StyledTextCtrl):
             if re.search(r'^\s*\bclear\b', cmd) or re.search(r'^\s*\bcls\b', cmd):
                 DebugLog('[terminal][exec] Clear Screen')
                 self.ClearScreen()
-
             elif re.search(r'^\s*\exit\b', cmd):
                 DebugLog('[terminal][exec] Exit terminal session')
                 self._HandleExit(cmd)
                 self.SetCaretForeground(wx.BLACK)
-
             else:
                 if null:
                     self.Write(cmd + os.linesep)
                 else:
                     self.Write(cmd)
 
-                self.last_cmd_executed = cmd
+                self._history['lastexe'] = cmd
                 self._CheckAfterExe()
 
-            self.AddCmdHistory(cmd)
-            self.last_cmd_executed = cmd
+            if len(cmd) and cmd != self._history['cmds'][0]:
+                self.AddCmdHistory(cmd)
+            self._history['lastexe'] = cmd
 
         except KeyboardInterrupt:
             pass
@@ -524,18 +535,20 @@ class Xterm(wx.stc.StyledTextCtrl):
     def GetNextCommand(self):
         """Get the next command from history based on the current
         position in the history list. If the list is already at the
-        begining then the command at the most recent command will be
-        returned.
+        begining then an empty command will be returned.
 
         @postcondition: current history postion is decremented towards 0
         @return: string
 
         """
-        if self._history['index']:
+        if self._history['index'] > -1:
             self._history['index'] -= 1
 
         index = self._history['index']
-        return self._history['cmds'][index]
+        if index == -1:
+            return ''
+        else:
+            return self._history['cmds'][index]
 
     def GetPrevCommand(self):
         """Get the previous command from history based on the current
@@ -644,7 +657,7 @@ class Xterm(wx.stc.StyledTextCtrl):
         @param lines: list of strings
 
         """
-        if len(lines) and lines[0].strip() == self.last_cmd_executed.strip():
+        if len(lines) and lines[0].strip() == self._history['lastexe'] .strip():
             lines.pop(0)
 
         num_lines = len(lines)
