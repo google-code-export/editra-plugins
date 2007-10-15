@@ -642,14 +642,12 @@ class ProjectTree(wx.Panel):
                 info = [node, data, None]
                 
                 # See if the node already has an operation running
-                if data.get('sclock', None):
-                    return wx.MessageDialog(self, 
-                                            _('There is already a source control ' \
-                                              'command executing on this path.  ' \
-                                              'Please wait for it to finish before ' \
-                                              'attempting more operations.'),
-                                            _('Source control directory is busy'), 
-                                            style=wx.OK|wx.ICON_ERROR).ShowModal()
+                i = 0
+                while data.get('sclock', None):
+                    time.sleep(1)
+                    i += 1
+                    if i > self.scTimeout:
+                        return
 
                 # See if the node has a path associated
                 # Technically, all nodes should (except the root node)
