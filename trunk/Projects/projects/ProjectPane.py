@@ -559,6 +559,9 @@ class ProjectTree(wx.Panel):
         
     def scCommit(self, nodes, **options): 
         """ Commit files to source control """
+        if not self.isSingleRepository(nodes):
+            return
+            
         while True:
             paths = list()
             for node in nodes:
@@ -585,6 +588,32 @@ class ProjectTree(wx.Panel):
 
         self.scCommand(nodes, 'commit', message=message)
 
+    def isSingleRepository(self, nodes):
+        """ 
+        Are all selected files from the same repository ?
+        
+        Required Arguments:
+        nodes -- list of nodes to test
+        
+        Returns: boolean indicating if all nodes are in the same repository
+            (True), or if they are not (False).
+        
+        """
+        previous = ''
+        for node in nodes:                
+            # Get node data
+            try: data = self.tree.GetPyData(node)
+            except: data = {}
+            if not previous:
+                previous = data.get('path', '')
+            elif previous != data.get('path', ''):
+                wx.MessageDialog(self, 
+                   _('You can not execute source control commands across multiple repositories.'),
+                   _('Selected files are from multiple repositories'), 
+                   style=wx.OK|wx.ICON_ERROR).ShowModal()
+                return False
+        return True
+
     def scCommand(self, nodes, command, callback=None, **options):
         """
         Run a source control command 
@@ -594,6 +623,9 @@ class ProjectTree(wx.Panel):
         command -- name of command type to run
         
         """
+        if not self.isSingleRepository(nodes):
+            return
+            
         try: self.GetParent().StartBusy()
         except: pass
         
