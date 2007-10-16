@@ -32,16 +32,28 @@ class ConfigDialog(wx.Frame):
     """Dialog for configuring the Projects plugin settings"""
     def __init__(self, parent, id, data, size=wx.DefaultSize):
         wx.Frame.__init__(self, parent, id, _("Projects Configuration"), 
-                              size=size, style=wx.CLOSE_BOX)
+                              size=size, style=wx.DEFAULT_DIALOG_STYLE|wx.CLOSE_BOX)
+
+        # Set title bar icon win/gtk
+        try:
+            import util
+            util.SetWindowIcon(self)
+        except ImportError:
+            pass
 
         # Attributes
-        self._notebook = ConfigNotebook(self, -1, data)
+        panel = wx.Panel(self, wx.ID_ANY, size=(1,5))
+        self._notebook = ConfigNotebook(panel, wx.ID_ANY, data)
         self._data = data
 
         # Layout
+        psizer = wx.BoxSizer(wx.HORIZONTAL)
+        psizer.AddMany([((10, 10)), (self._notebook, 1, wx.EXPAND), ((10, 10))])
+        pvsizer = wx.BoxSizer(wx.VERTICAL)
+        pvsizer.AddMany([((10, 10)), (psizer, 1, wx.EXPAND), ((10, 10))])
+        panel.SetSizer(pvsizer)
         sizer = wx.BoxSizer(wx.VERTICAL)
-        sizer.Add(wx.Panel(self, -1, size=(1,5)))
-        sizer.AddF(self._notebook, wx.SizerFlags().Expand().Border(wx.LEFT|wx.RIGHT|wx.BOTTOM, 20))
+        sizer.Add(panel, 1, wx.EXPAND)
 
         self.SetSizer(sizer)
         self.SetInitialSize()
@@ -84,6 +96,7 @@ class GeneralConfigTab(wx.Panel):
         
         # Layout
         sizer = wx.BoxSizer(wx.VERTICAL)
+        sizer.Add((10, 10))
         flags = wx.SizerFlags().Left().Expand().Border(wx.ALL, 6)
         sizer.AddF(wx.StaticText(self, -1, _('File Filters')), flags)
         filters = wx.TextCtrl(self, self.ID_FILE_FILTERS, ' '.join(data.getFilters()), size=(-1, 100), style=wx.TE_MULTILINE)
@@ -93,23 +106,28 @@ class GeneralConfigTab(wx.Panel):
         tt = wx.ToolTip(_("Space separated list of files patterns to exclude from view"
                           "\nThe use of wildcards (*) are permitted."))
         filters.SetToolTip(tt)
-        sizer.AddF(wx.StaticBox(self, -1, size=(-1, 1)), wx.SizerFlags().Center().Expand().Border(wx.TOP|wx.BOTTOM, 10))
+        sizer.AddF(wx.StaticLine(self, -1, size=(-1, 1)), wx.SizerFlags().Center().Expand().Border(wx.TOP|wx.BOTTOM, 10))
         sync = wx.CheckBox(self, self.ID_SYNC_WITH_NOTEBOOK, _('Keep project tree synchronized with editor notebook'))
         sync.SetValue(data.getSyncWithNotebook())
         sizer.AddF(sync, flags)
-        sizer.AddF(wx.StaticBox(self, -1, size=(-1, 1)), wx.SizerFlags().Center().Expand().Border(wx.TOP|wx.BOTTOM, 10))
+        sizer.AddF(wx.StaticLine(self, -1, size=(-1, 1)), wx.SizerFlags().Center().Expand().Border(wx.TOP|wx.BOTTOM, 10))
         sizer.AddF(wx.StaticText(self, -1, _('Diff Program')), flags)
         builtin = wx.RadioButton(self, self.ID_BUILTIN_DIFF, _('Built-in'))
         builtin.SetValue(data.getBuiltinDiff())
         sizer.AddF(builtin, flags.Border(wx.TOP|wx.LEFT, 6))
+        sizer.Add((3, 3))
+
         
         # Radio button with file selector
         hsizer = wx.BoxSizer(wx.HORIZONTAL)
         external = wx.RadioButton(self, self.ID_EXTERNAL_DIFF, '')
         external.SetValue(not data.getBuiltinDiff())
         hsizer.AddF(external, wx.SizerFlags().Left().Border(wx.TOP|wx.BOTTOM|wx.LEFT, 6))
+        if wx.Platform == '__WXMSW__':
+            hsizer.Add((3, 3))
         hsizer.AddF(wx.FilePickerCtrl(self, self.ID_DIFF_PROGRAM, data.getDiffProgram(),
-                                      message=_("Select diff program")), wx.SizerFlags(1).Left().Expand())
+                                      message=_("Select diff program"), style=wx.FLP_USE_TEXTCTRL), 
+                                      wx.SizerFlags(1).Left().Expand())
         sizer.AddF(hsizer, wx.SizerFlags().Left().Expand())
         
         # Extra space at bottom of panel
@@ -184,33 +202,34 @@ class SourceControlConfigTab(wx.Panel):
         
         # Layout
         sizer = wx.BoxSizer(wx.VERTICAL)
+        sizer.Add((10, 10))
         flags = wx.SizerFlags().Left().Border(wx.ALL, 6)
 
         hsizer = wx.BoxSizer(wx.HORIZONTAL)
-        hsizer.AddF(wx.Choice(self, self.ID_SC_CHOICE, 
-                              choices=sorted([x for x in data.getSCSystems()])), 
-                              flags.Border(wx.ALL,5))
-        hsizer.AddF(wx.FilePickerCtrl(self, self.ID_SC_COMMAND, style=wx.FLP_OPEN|wx.FLP_USE_TEXTCTRL), wx.SizerFlags(1))        
-        sizer.AddF(hsizer, wx.SizerFlags(1).Expand())
+        sc_choice = wx.Choice(self, self.ID_SC_CHOICE, choices=sorted([x for x in data.getSCSystems()]))
+        sc_choice.SetSelection(0)
+        hsizer.AddF(sc_choice, flags.Border(wx.ALL,5))
+        hsizer.Add(wx.FilePickerCtrl(self, self.ID_SC_COMMAND, style=wx.FLP_USE_TEXTCTRL), 1, wx.EXPAND|wx.ALIGN_CENTER_VERTICAL)        
+        sizer.Add(hsizer, 0, wx.EXPAND)
         
         # Repository configuration box
-        repsizer = wx.StaticBoxSizer(wx.StaticBox(self, -1, _('Repository Configuration')), wx.VERTICAL)
+        repsizer = wx.StaticBoxSizer(wx.StaticBox(self, wx.ID_ANY, _('Repository Configuration')), wx.VERTICAL)
 
         # Repository selector
         repsizer.AddF(wx.Choice(self, self.ID_SC_REP_CHOICE), flags.Expand())
         
         # Username and password
-        userpass = wx.FlexGridSizer(2,2)
+        userpass = wx.FlexGridSizer(3, 2)
         userpass.AddGrowableCol(1,1)
-        userpass.AddF(wx.StaticText(self, -1, _('Username')), flags)
-        userpass.AddF(wx.TextCtrl(self, self.ID_SC_USERNAME), flags)
-        userpass.AddF(wx.StaticText(self, -1, _('Password')), flags)
+        userpass.AddF(wx.StaticText(self, wx.ID_ANY, _('Username') + u':'), flags)
+        userpass.AddF(wx.TextCtrl(self, self.ID_SC_USERNAME), flags.Center())
+        userpass.AddF(wx.StaticText(self, wx.ID_ANY, _('Password') + u':'), flags)
         userpass.AddF(wx.TextCtrl(self, self.ID_SC_PASSWORD, style=wx.TE_PASSWORD), flags)
         repsizer.AddF(userpass, wx.SizerFlags(1).Expand())
-        repsizer.AddF(wx.StaticBox(self, -1, size=(-1, 1)), wx.SizerFlags().Center().Expand().Border(wx.TOP|wx.BOTTOM, 10))
+        repsizer.AddF(wx.StaticLine(self, wx.ID_ANY, size=(-1, 1)), wx.SizerFlags().Center().Expand().Border(wx.TOP|wx.BOTTOM, 10))
 
         # Environment variables
-        repsizer.AddF(wx.StaticText(self, -1, _('Environment Variables')), flags)
+        repsizer.AddF(wx.StaticText(self, wx.ID_ANY, _('Environment Variables')), flags)
         env = AutoWidthListCtrl(self, self.ID_SC_ENVIRONMENT, size=(-1,80), 
                                 style=wx.LC_REPORT|wx.LC_SORT_ASCENDING|wx.LC_VRULES|wx.LC_EDIT_LABELS)
         env.InsertColumn(0, _("Name"))
@@ -230,9 +249,9 @@ class SourceControlConfigTab(wx.Panel):
 
         # Add space around the sides
         outsizer = wx.BoxSizer(wx.HORIZONTAL)
-        outsizer.AddF(wx.Panel(self, -1, size=(10,5)), wx.SizerFlags(0))
+        outsizer.AddF(wx.Panel(self, wx.ID_ANY, size=(10,5)), wx.SizerFlags(0))
         outsizer.AddF(sizer, wx.SizerFlags(1).Expand())
-        outsizer.AddF(wx.Panel(self, -1, size=(10,5)), wx.SizerFlags(0))
+        outsizer.AddF(wx.Panel(self, wx.ID_ANY, size=(10,5)), wx.SizerFlags(0))
 
         self.SetSizer(outsizer)
         self.SetInitialSize()
@@ -290,10 +309,9 @@ class SourceControlConfigTab(wx.Panel):
         rep = self.FindWindowById(self.ID_SC_REP_CHOICE)
         rep.Clear()
         items = ['Default'] + \
-                sorted([x.strip() for x in self._data.getSCRepositories(sc).keys() if x != 'Default'] and x.strip()) + \
+                sorted([x.strip() for x in self._data.getSCRepositories(sc).keys() if x != 'Default']) + \
                 ['','Add Repository...','Remove Repository...']
-        for item in items:
-            rep.Append(item)
+        rep.AppendItems(items)
         rep.SetSelection(0)
         self.populateEnvironment()
         self.populateUserInfo()
