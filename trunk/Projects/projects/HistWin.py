@@ -1,36 +1,23 @@
-#!/usr/bin/env python
-############################################################################
-#    Copyright (C) 2007 Cody Precord                                       #
-#    cprecord@editra.org                                                   #
-#                                                                          #
-#    Editra is free software; you can redistribute it and#or modify        #
-#    it under the terms of the GNU General Public License as published by  #
-#    the Free Software Foundation; either version 2 of the License, or     #
-#    (at your option) any later version.                                   #
-#                                                                          #
-#    Editra is distributed in the hope that it will be useful,             #
-#    but WITHOUT ANY WARRANTY; without even the implied warranty of        #
-#    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the         #
-#    GNU General Public License for more details.                          #
-#                                                                          #
-#    You should have received a copy of the GNU General Public License     #
-#    along with this program; if not, write to the                         #
-#    Free Software Foundation, Inc.,                                       #
-#    59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             #
-############################################################################
+###############################################################################
+# Name: HistWin.py                                                            #
+# Purpose: Window for showing and searching the revision history of a file    #
+#          that is under source control.                                      #
+# Author: Cody Precord <cprecord@editra.org>                                  #
+# Copyright: (c) 2007 Cody Precord <staff@editra.org>                         #
+# Licence: wxWindows Licence                                                  #
+###############################################################################
 
 """
 #--------------------------------------------------------------------------#
-# FILE: HistWin.py
-# AUTHOR: Cody Precord
-# LANGUAGE: Python
-# SUMMARY:
-#
-#
-# METHODS:
-#
-#
-#
+# FILE: HistWin.py                                                         #
+# AUTHOR: Cody Precord                                                     #
+# LANGUAGE: Python                                                         #
+# SUMMARY:                                                                 #
+#   Provides a revision history window that shows the list of revisions    #
+# for a specific file and its related log entries. The window also         #
+# provides interactive searching/filtering of revision entries by searching#
+# the log entries.                                                         #
+#                                                                          #
 #--------------------------------------------------------------------------#
 """
 
@@ -60,15 +47,7 @@ class UpdateItemsEvent(wx.PyCommandEvent):
     """Event to signal that items need updating"""
     def __init__(self, etype, eid, value=[]):
         wx.PyCommandEvent.__init__(self, etype, eid)
-        self._etype = etype
-        self._id = eid
         self._value = value
-
-    def GetEvtType(self):
-        return self._etype
-
-    def GetId(self):
-        return self._id
 
     def GetValue(self):
         return self._value
@@ -94,9 +73,11 @@ class HistoryWindow(wx.Frame):
         # Layout
         self._DoLayout()
         self.SetInitialSize()
+        self.SetAutoLayout(True)
 
         # Event Handlers
         self.Bind(wx.EVT_CLOSE, self.OnClose)
+        self.Bind(wx.EVT_CONTEXT_MENU, self.OnContextMenu)
 
     def _DoLayout(self):
         """Layout the controls"""
@@ -108,6 +89,16 @@ class HistoryWindow(wx.Frame):
         """Cleanup on exit"""
         self._sb.Destroy()
         self.Destroy()
+
+    def OnContextMenu(self, evt):
+        """For some reason the context menu from the projects pane gets shown
+        on this window when a right click is sent. Not sure if this is a bug
+        in the handling of the events in this code or in wx. This is just a
+        handler to trap the event before it propagates to the project pane when
+        the click is originated here.
+        
+        """
+        evt.StopPropagation()
 
     def Show(self, show=True):
         """Show and center the dialog"""
@@ -194,22 +185,22 @@ class HistoryStatusBar(wx.StatusBar):
 
 class HistoryPane(wx.Panel):
     """Panel for housing the the history window controls"""
-    BTN_LBL1 = _("Compare to Previous Revision")
+    BTN_LBL1 = _("Compare Revisions")
     BTN_LBL2 = _("Compare to Selected Revision")
-    BTN_LBL3 = _(" Compare Selected Revisions ")
+    BTN_LBL3 = _("Compare Selected Revisions")
     def __init__(self, parent, projects, node, path):
         wx.Panel.__init__(self, parent)
         
         # Attributes
         sbox = wx.StaticBox(self, label=_("Revision History"))
-        # ?wxBug? If the box/sizer is created after the controls the controls
-        #         that are added to the box cannot get focus from mouse clicks
+        # Note box sizer must be created before its siblings
         self.boxsz = wx.StaticBoxSizer(sbox, wx.VERTICAL)
         self._search = LogSearch(self, size=(150, -1))
         self._split = wx.SplitterWindow(self, style=wx.SP_3DSASH | wx.SP_LIVE_UPDATE)
         self._list = HistList(self._split, projects, node, path)
         self._txt = wx.TextCtrl(self._split, style=wx.TE_MULTILINE | wx.TE_READONLY)
         self._btn = wx.Button(self, label=_(self.BTN_LBL1))
+        self._btn.Disable()
         self.projects = projects
         self.path = path
         self.selected = -1
@@ -225,24 +216,28 @@ class HistoryPane(wx.Panel):
 
     def _DoLayout(self):
         """Layout the controls on the panel"""
-        sizer = wx.GridBagSizer(5, 2)
+        self.SetMinSize((550, -1))
 
         # Split Window
-        self._split.SetMinimumPaneSize(50)
-        self._split.SetMinSize((400, 300))
+        self._split.SetMinimumPaneSize(150)
+        self._split.SetMinSize((400, 350))
         self._split.SetSashSize(8)
         self._split.SplitHorizontally(self._list, self._txt, 250)
         self.boxsz.Add(self._search, 0, wx.ALIGN_RIGHT)
         self.boxsz.Add((10, 10))
         self.boxsz.Add(self._split, 1, wx.EXPAND)
 
-        sizer.AddMany([((5, 5), (0, 0)), # Spacer
-                       (self.boxsz, (1, 1), (10, 10), wx.EXPAND), # Split Window
-                       ((5, 5), (10, 11)), # Spacer
-                       (self._btn, (11, 10), (1, 1)), # Button
-                       ((2, 2), (12, 0))]) # Spacer
+        # Button sizer
+        vsizer = wx.BoxSizer(wx.VERTICAL)
+        btn_sz = wx.BoxSizer(wx.HORIZONTAL)
+        btn_sz.AddStretchSpacer()
+        btn_sz.Add(self._btn, 0, wx.ALIGN_RIGHT)
+        vsizer.AddMany([((12, 12)), (self.boxsz, 1, wx.EXPAND), ((8, 8)),
+                        (btn_sz, 0, wx.ALIGN_RIGHT), ((12, 12))])
+
+        sizer = wx.BoxSizer(wx.HORIZONTAL)
+        sizer.AddMany([((8, 8)), (vsizer, 1, wx.EXPAND), ((8, 8))])
         self.SetSizer(sizer)
-        self.SetAutoLayout(True)
 
     def OnButton(self, evt):
         """Handle button events"""
@@ -288,12 +283,13 @@ class HistoryPane(wx.Panel):
         list control.
 
         """
+        self._btn.Enable()
         index = evt.GetIndex()
         rev = self._list.GetItem(index, self._list.REV_COL).GetText()
         date = self._list.GetItem(index, self._list.DATE_COL).GetText()
         self._txt.SetValue(self._list.GetFullLog(rev, date))
         self.updateButton()
-        self.selectOnly((index,self.selected))
+        self.selectOnly((index, self.selected))
         self.selected = index
 
     def OnItemDeselected(self, evt):
@@ -315,7 +311,11 @@ class HistoryPane(wx.Panel):
         elif len(selected) == 1:
             self._btn.SetLabel(self.BTN_LBL2)
         else:
-            self._btn.SetLabel(self.BTN_LBL3)               
+            self._btn.SetLabel(self.BTN_LBL3)
+
+        self.Layout()
+        self.GetParent().SendSizeEvent()
+        self.GetParent().Layout()
 
 #-----------------------------------------------------------------------------#
 
