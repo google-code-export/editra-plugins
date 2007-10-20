@@ -66,8 +66,7 @@ class HistoryWindow(wx.Frame):
             util.SetWindowIcon(self)
 
         # Attributes
-        self._sb = HistoryStatusBar(self)
-        self.SetStatusBar(self._sb)
+        self.SetStatusBar(HistoryStatusBar(self))
         self._ctrls = HistoryPane(self, projects, node, path)
 
         # Layout
@@ -87,7 +86,6 @@ class HistoryWindow(wx.Frame):
 
     def OnClose(self, evt):
         """Cleanup on exit"""
-        self._sb.Destroy()
         self.Destroy()
 
     def OnContextMenu(self, evt):
@@ -108,12 +106,12 @@ class HistoryWindow(wx.Frame):
     def StartBusy(self):
         """Start the window as busy"""
         self.SetStatusText(_("Retrieving File History") + u"...", SB_INFO)
-        self._sb.StartBusy()
+        wx.CallAfter(self.GetStatusBar().StartBusy)
 
     def StopBusy(self):
         """Start the window as busy"""
         self.SetStatusText(u"", SB_INFO)
-        self._sb.StopBusy()
+        wx.CallAfter(self.GetStatusBar().StopBusy)
 
 #-----------------------------------------------------------------------------#
 
@@ -255,8 +253,8 @@ class HistoryPane(wx.Panel):
             self.projects.compareRevisions(self.path, rev1=rev1, rev2=rev2, callback=self.endCompare)
 
     def endCompare(self):
-        self._btn.Enable(True)
-        self.GetParent().StopBusy()
+        wx.CallAfter(self._btn.Enable, True)
+        wx.CallAfter(self.GetParent().StopBusy)
 
     def getSelectedItems(self):
         item = -1
