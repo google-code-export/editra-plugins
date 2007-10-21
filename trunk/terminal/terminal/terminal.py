@@ -30,8 +30,8 @@ __revision__ = "$Revision$"
 
 import sys
 import os
-import string
 import signal
+#import threading
 import re
 import time
 import wx
@@ -63,8 +63,6 @@ if sys.platform == 'win32':
 else:
     if os.environ.has_key('SHELL'):
         SHELL = os.environ['SHELL']
-    elif os.environ.has_key('TERM'):
-        SHELL = os.environ['TERM']
     else:
         SHELL = '/bin/sh'
 #---- End Variables ----#
@@ -751,6 +749,7 @@ class Xterm(wx.stc.StyledTextCtrl):
         any_lines_read = 0  #  sentinel for reading anything at all
 
         lines = ''
+
         while 1:
             if USE_PTY:
                 r, w, e = select.select([self.outd], [], [], self.delay)
