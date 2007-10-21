@@ -298,6 +298,7 @@ class HistoryPane(wx.Panel):
         selected = self.getSelectedItems()
         if not(selected):
             self.selected = -1
+            self._btn.Disable()
         elif len(selected) == 1:
             self.selected = selected[0]
         self.updateButton()
