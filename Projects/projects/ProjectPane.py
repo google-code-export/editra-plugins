@@ -250,8 +250,9 @@ class ProjectTree(wx.Panel):
             import extern.flatnotebook as fnb
             #self.Bind(fnb.EVT_FLATNOTEBOOK_PAGE_CHANGING,
             mw = self.GetGrandParent()
-            mw.nb.Bind(fnb.EVT_FLATNOTEBOOK_PAGE_CHANGED, self.OnPageChanged)
-            mw.nb.Bind(fnb.EVT_FLATNOTEBOOK_PAGE_CLOSING, self.OnPageClosing)
+            nb = mw.GetNotebook()
+            nb.Bind(fnb.EVT_FLATNOTEBOOK_PAGE_CHANGED, self.OnPageChanged)
+            nb.Bind(fnb.EVT_FLATNOTEBOOK_PAGE_CLOSING, self.OnPageClosing)
             mw.Bind(ed_event.EVT_MAINWINDOW_EXIT, self.OnMainWindowExit)
         except ImportError: pass
 
@@ -1407,7 +1408,7 @@ class ProjectTree(wx.Panel):
                     files.append(fname)
             except (IOError, OSError): pass
 
-        nb = self.GetParent().GetOwnerWindow().nb
+        nb = self.GetParent().GetOwnerWindow().GetNotebook()
 
         for item in files:
             if nb.HasFileOpen(item):
