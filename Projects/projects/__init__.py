@@ -12,7 +12,7 @@ import threading
 import plugin 
 import string
 import ed_glob
-import ed_main
+import iface
 import ed_menu
 from profiler import Profile_Get, Profile_Set
 from ProjectPane import ProjectPane
@@ -26,7 +26,7 @@ class Logger(object):
 
 class Projects(plugin.Plugin):
     """Adds a projects pane to the view menu"""
-    plugin.Implements(ed_main.MainWindowI)
+    plugin.Implements(iface.MainWindowI)
     def PlugIt(self, parent):
         """Adds the view menu entry and registers the event handler"""
         mw = parent
