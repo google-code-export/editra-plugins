@@ -8,6 +8,8 @@ This page contains a list of links to pages about individual plugins and their r
 
 = Plugins Projects =
 ||Plugin Name    || Short Description ||
+||Calculator     || Simple calculator with Oct/Hex/Decimal modes of operation ||
+||CssOptimizer   || Generate CSS files that are optimized for size ||
 ||ProjectsPlugin || _Project management plugin with integrated source control_ ||
 ||TerminalPlugin    || Built in system shell window ||
 
