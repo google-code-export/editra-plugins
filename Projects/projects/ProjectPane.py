@@ -601,13 +601,19 @@ class ProjectTree(wx.Panel):
         
         """
         previous = ''
-        for node in nodes:                
+        for node in nodes:             
             # Get node data
-            try: data = self.tree.GetPyData(node)
-            except: data = {}
+            try: 
+                path = self.tree.GetPyData(node)['path']
+            except: 
+                continue
+            try:
+                reppath = self.getSCSystem(path)['instance'].getRepository(path)
+            except:
+                continue
             if not previous:
-                previous = data.get('path', '')
-            elif previous != data.get('path', ''):
+                previous = reppath
+            elif previous != reppath:
                 wx.MessageDialog(self, 
                    _('You can not execute source control commands across multiple repositories.'),
                    _('Selected files are from multiple repositories'), 
