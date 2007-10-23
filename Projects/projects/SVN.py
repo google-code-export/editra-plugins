@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-import re, os, crypto
+import re, os, crypto, datetime
 from SourceControl import SourceControl
 
 class SVN(SourceControl):
@@ -102,7 +102,7 @@ class SVN(SourceControl):
                             rev, author, date, lines = data.split(' | ')
                             current['revision'] = rev
                             current['author'] = author
-                            current['date'] = date
+                            current['date'] = self.str2datetime(date)
                             current['log'] = ''
                             self.log(out.stdout.next())
                             break
@@ -112,6 +112,9 @@ class SVN(SourceControl):
             if pophistory:
                 history.pop()
         return history
+    
+    def str2datetime(self, s):
+        return datetime.datetime(*[int(y) for y in [x for x in re.split(r'[\s+/:-]', s.strip()) if x][:6]])
         
     def remove(self, paths):
         """ Recursively remove paths from repository """

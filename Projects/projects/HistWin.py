@@ -41,6 +41,8 @@ except ImportError:
 _ = wx.GetTranslation
 #--------------------------------------------------------------------------#
 
+DATE_FORMAT = '%Y-%m-%d %I:%M %p'
+
 edEVT_UPDATE_ITEMS = wx.NewEventType()
 EVT_UPDATE_ITEMS = wx.PyEventBinder(edEVT_UPDATE_ITEMS, 1)
 class UpdateItemsEvent(wx.PyCommandEvent):
@@ -363,7 +365,7 @@ class HistList(wx.ListCtrl,
             # Create a key for searching all fields
             if 'key' not in item:
                 item['key'] = ('%s %s %s %s' % (item['revision'],
-                                               item['date'],
+                                               item['date'].strftime(DATE_FORMAT),
                                                item['author'],
                                                re.sub(r'\s+', ' ', item['log']))).lower()
 
@@ -377,7 +379,7 @@ class HistList(wx.ListCtrl,
             
             if self.GetItemText(index).strip() != item['revision']:
                 self.SetStringItem(index, 0, item['revision'])
-                self.SetStringItem(index, 1, item['date'])
+                self.SetStringItem(index, 1, item['date'].strftime(DATE_FORMAT))
                 self.SetStringItem(index, 2, item['author'])
                 self.SetStringItem(index, 3, item['shortlog'])
 
@@ -497,11 +499,12 @@ def AdjustColour(color, percent, alpha=wx.ALPHA_OPAQUE):
 #-----------------------------------------------------------------------------#
 
 if __name__ == '__main__':
+    from datetime import datetime
     data = [
-        {'revision':'a', 'date':'2007/17/01', 'author':'Kevin Smith', 'log':'Just Testing'},
-        {'revision':'b', 'date':'2007/17/02', 'author':'Kevin Smith', 'log':'Test again with some longer text'},
-        {'revision':'c', 'date':'2007/17/03', 'author':'Kevin Smith', 'log':'Just Testing'},
-        {'revision':'d', 'date':'2007/17/04', 'author':'Kevin Smith', 'log':'Log message with lots of text to test the truncation of long messages and their display in the text control.'}
+        {'revision':'a', 'date':datetime([int(x) for x in '2007/17/01'.split('/')]), 'author':'Kevin Smith', 'log':'Just Testing'},
+        {'revision':'b', 'date':datetime([int(x) for x in '2007/17/02'.split('/')]), 'author':'Kevin Smith', 'log':'Test again with some longer text'},
+        {'revision':'c', 'date':datetime([int(x) for x in '2007/17/03'.split('/')]), 'author':'Kevin Smith', 'log':'Just Testing'},
+        {'revision':'d', 'date':datetime([int(x) for x in '2007/17/04'.split('/')]), 'author':'Kevin Smith', 'log':'Log message with lots of text to test the truncation of long messages and their display in the text control.'}
     ]
     app = wx.PySimpleApp(False)
     win = HistoryWindow(None, "History Window Test", data)
