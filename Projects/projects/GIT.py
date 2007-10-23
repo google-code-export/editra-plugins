@@ -14,6 +14,7 @@ __revision__ = "$Revision$"
 
 import os
 import sys
+import datetime
 import re
 from SourceControl import SourceControl
 
@@ -120,7 +121,7 @@ class GIT(SourceControl):
                         elif line.startswith('Author: '):
                             current['author'] = line.split(' ', 1)[-1]
                         elif line.startswith('Date: '):
-                            current['date'] = line.split(' ', 1)[-1].strip()
+                            current['date'] = self.str2datetime(line.split(' ', 1)[-1].strip())
                         else:
                             current['log'] += line
 
@@ -138,6 +139,17 @@ class GIT(SourceControl):
             root, files = self.splitFiles(path)           
             out = self.run(root, ['rm', '-R', '-f'] + files)
             self.logOutput(out)
+
+    def str2datetime(self, datestr):
+        """Convert a date string to a datetime object"""
+        parts = datestr.split()[1:]
+        months =  ['jan', 'feb', 'mar', 'apr', 'may', 'jun', 
+                   'jul', 'aug', 'sep', 'oct', 'nov', 'dec']
+        month = months.index(parts[0].lower()) + 1
+        day = int(parts[1])
+        hms = [int(x) for x in parts[2].split(":")]
+        year = int(parts[3])
+        return datetime.datetime(year, month, day, *hms)
 
     def findRoot(self, path):
         """Find the repository root for given path"""
