@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-import re, os
+import re, os, datetime
 from SourceControl import SourceControl
 
 class CVS(SourceControl):
@@ -99,7 +99,7 @@ class CVS(SourceControl):
                         line = out.stdout.next()
                         self.log(line)
                         m = dasl_re.match(line)
-                        current['date'] = m.group(1)
+                        current['date'] = self.str2datetime(m.group(1))
                         current['author'] = m.group(2)
                         current['state'] = m.group(3)
                         line = out.stdout.next()
@@ -190,6 +190,9 @@ class CVS(SourceControl):
                         del current['options']
             self.logOutput(out)
         return status
+    
+    def str2datetime(self, s):
+        return datetime.datetime(*[int(x) for x in re.split(r'[\s+/:]', s.strip()) if x])
 
     def update(self, paths):
         """ Recursively update paths """
