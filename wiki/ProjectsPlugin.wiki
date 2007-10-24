@@ -56,6 +56,10 @@ Then you run the following commands to create and install the Egg file (Windows 
 
 The Projects plugin should now be available in the Plugin Manager under the Tools menu.  Simply enable it, restart Editra, and then choose Projects from the View menu.
 
+= Configuration =
+
+There aren't that many configuration settings for the Projects plugin.  It is meant to be non-invasive, and to "just do the right thing at the right time."  There are some settings that may be needed to get source control commands to work in Editra.  The source control configuration and other settings are described in ProjectsConfiguration.
+
 = Planned Features =
 
 The following list of features are planned for general file management and editing.
