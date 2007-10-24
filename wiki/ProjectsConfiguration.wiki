@@ -2,4 +2,10 @@
 
 = Introduction =
 
-There are two major groupings of settings: general settings for the behavior of the Projects plugin and settings for source control commands.
+There are two major groupings of settings: general settings for the behavior of the Projects plugin and settings for source control commands.  Then, of course, there are the projects themselves.  These major areas are discussed below.
+
+= Adding and Removing Projects =
+
+= General Settings =
+
+= Source Control Settings = 
