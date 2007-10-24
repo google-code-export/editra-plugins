@@ -1,0 +1,5 @@
+#Configuration Settings for the Projects Plugin
+
+= Introduction =
+
+There are two major groupings of settings: general settings for the behavior of the Projects plugin and settings for source control commands.
