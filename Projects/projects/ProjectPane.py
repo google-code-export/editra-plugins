@@ -1,5 +1,59 @@
 #!/usr/bin/env python
 
+"""
+ProjectPane
+
+The ProjectPane module creates a wx frame that handles file management
+as well as source control.  The file management operations are similar
+to those found in Windows Explorer and Apple's Finder.  You can cut, copy,
+and paste files.  Create new files and directories.  And it even deletes
+files to the Recycle Bin or Trash.
+
+While the file management utilities are useful, the source control functions
+are where the majority of the functionality of the ProjectPane lies.
+Currently, the ProjectPane has support for CVS, GIT, and Subversion.  It 
+is possible to create objects to handle other source control systems
+as well (see SourceControl.py).  The ProjectPane uses a non-invasive approach
+to handling source control.  It doesn't check files out or browse repositories,
+it simply detects directories and files that are under source control and 
+gives you access to the operations available to that system.  When properly
+configured, files and folders under source control will display the status
+of the file/folder as a badge on the icon.  The right-click menu gives you 
+access to source control operations such as status updates, committing, 
+removing, and reverting to the repository revision.
+
+But it doesn't end there.  Probably the most powerful feature of the ProjectPane
+is its diffing utitility and history window.  You can compare your copy
+of a file to any previous revision using the history window.  You can also
+compare any two repository revisions.  Locating revisions is easy using the
+interactive search that filters the visible revisions based on the commit log
+messages.
+
+There are several configuration options that allow you to suit the ProjectPane
+to your needs.  The general options are listed below:
+
+    File Filters -- this is a space separated list of file globbing patterns
+        that you can use to remove files from the tree view.  This is useful
+        for eliminating backup files and intermediate build files that you
+        won't be using in the editor.
+
+    Editor Notebook Synchronization -- when a file in opened in the editor
+        notebook, you can have the ProjectPane automatically show this file
+        in the current projects by enabling this feature.
+
+    Diff Program -- you can choose to use an internal visuall diffing program
+        or specify an external command.
+
+The source control options are even more extensive.  Each source control 
+repository has its own set of options.  You can set authentication information
+and environment variables for each repository.  It is also possible to use
+partial repository paths.  All settings from partial or full repository path
+matches will be applied.  The longer the match string, the higher the precedence.
+All settings in the Default section have the lowest priority, but are applied
+to all repositories.
+
+"""
+
 import wx 
 import os 
 import time 
@@ -1202,8 +1256,8 @@ class ProjectTree(wx.Panel):
             newpath = re.sub(r'-\d+$', r'', newpath)
             newpath += '-%d' % i
             i += 1
-            print newpath
-        print newpath
+            #print newpath
+        #print newpath
         os.makedirs(newpath)
 
     def onPopupNewFile(self, event):
@@ -1212,7 +1266,7 @@ class ProjectTree(wx.Panel):
         path = self.tree.GetPyData(node)['path']
         if not os.path.isdir(path):
             path = os.path.dirname(path)
-        print path
+        #print path
         # Determine file type
         id = event.GetId()
         menu = event.GetEventObject()

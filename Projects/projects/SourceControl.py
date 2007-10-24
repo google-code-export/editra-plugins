@@ -1,6 +1,34 @@
 #!/usr/bin/env python
+ 
+"""
+Generic Source Control Object
 
-import os, fnmatch, subprocess, sys
+The SourceControl object creates an API to invoke source control commands
+from Python rather than the command-line.  All of the sub-process commands
+are handled by the SourceControl object so that logging and sub-process
+settings are centralized.  This is an abstract class.  Subclasses must
+implement all of the methods at the end of this class definition that simply
+raise a NotImplementedError.  Each of the methods to be overridden have
+a docstring at the top describing what it needs to do.
+
+The concrete subclasses of SourceControl also need to define two variables
+in the class: command and name.  Command is the default command line utility
+that is used for all source control operations (i.e., cvs, svn, etc.).  
+This can also be overridden by the user in the config dialog.  The name
+attribute is simply a string that is displayed in the config dialog when
+changing settings.  For example, 'Subversion' would be for the subversion
+system, 'CVS' for the CVS system, etc.
+
+If you have created a new source control system subclass, it can be added
+to the Projects pane in the ConfigDialog package.  Simply import the 
+new subclass and add it in the ConfigData's __init__ method using 
+the addSCSystem method.
+
+See Also: CVS.py, GIT.py, and SVN.py
+
+"""
+
+import os, fnmatch, subprocess, sys, wx
 
 if sys.platform.lower().startswith('win'):            
     STARTUPINFO = subprocess.STARTUPINFO()
@@ -24,12 +52,6 @@ class SourceControl(object):
 
     # Username, password, and environments for given repositories
     repositories = {}
-    
-    def __init__(self, console=None):
-        if console is None:
-            self.console = sys.stdout
-        else:
-            self.console = console
     
     def getRelativePaths(self, paths):
         """
@@ -140,7 +162,7 @@ class SourceControl(object):
 
     def run(self, directory, options, env={}, mergeerr=False):
         """ Run a CVS command in the given directory with given options """
-        self.console.write('%s %s %s\n' % (directory, self.command, ' '.join(options)))
+        self.log('%s %s %s\n' % (directory, self.command, ' '.join(options)))
         environ = os.environ.copy()
         # Add repository settings        
         environ.update(self.getRepositorySettings(directory)['env'])
@@ -216,22 +238,19 @@ class SourceControl(object):
         return self.filterPaths(newpaths)
 
     def log(self, s):
-        if hasattr(self.console, 'write'):
-            self.console.write(s)
-        elif hasattr(self.console, 'WriteText'):
-            self.console.WriteText(s)
+        try: console = wx.GetApp().GetLog()(s)
+        except AttributeError: sys.stdout.write(s)
 
     def logOutput(self, p, close=True):
         """ Read and print stdout/stderr """
         if not p:
             return
         flush = write = None
-        if hasattr(self.console, 'write'):
-            write = self.console.write
-        elif hasattr(self.console, 'WriteText'):
-            write = self.console.WriteText
-        if hasattr(self.console, 'flush'):
-            flush = self.console.flush
+        try: 
+            write = wx.GetApp().GetLog()
+        except AttributeError: 
+            write = sys.stdout.write
+            flush = sys.stdout.flush
         while write:
             err = out = None
             if p.stderr:
@@ -259,7 +278,9 @@ class SourceControl(object):
         try: p.stdin.close()
         except: pass
 
+#
 # Methods that need to be overridden in subclasses        
+#
         
     def getRepository(self, path):
         """

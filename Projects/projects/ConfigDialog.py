@@ -647,7 +647,7 @@ class ConfigData(dict):
         self.updateSCSystems()
 
     def save(self):
-        print repr(self)
+        #print repr(self)
         try:
             import ed_glob, util, stat
             filename = ed_glob.CONFIG['CACHE_DIR'] + 'Projects.config'
