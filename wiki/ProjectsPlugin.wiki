@@ -39,6 +39,23 @@ The following are the currently implemented source control features that are ava
   * Revision history window with ability to compare playpen version to any previous version, as well being able to compare any two repository versions
   * Configurable environment variables based on file/directory path
 
+= Installation =
+
+Installation is done just as it is for any other Editra plugin.  You can either download the released Python Egg file and install it into your ~/.Editra/plugins/ directory, or install from the source.  The source can be obtained from the following Subversion repository:
+
+{{{
+    svn checkout http://editra-plugins.googlecode.com/svn/trunk/Projects
+}}}
+
+Then you run the following commands to create and install the Egg file (Windows users would use 'move' instead of 'mv'):
+
+{{{
+    python setup.py bdist_egg
+    mv dist/*.egg ~/.Editra/plugins/.
+}}}
+
+The Projects plugin should now be available in the Plugin Manager under the Tools menu.  Simply enable it, restart Editra, and then choose Projects from the View menu.
+
 = Planned Features =
 
 The following list of features are planned for general file management and editing.
