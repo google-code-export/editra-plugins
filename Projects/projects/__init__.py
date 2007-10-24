@@ -1,6 +1,10 @@
 # -*- coding: utf-8 -*-
-"""Adds a Projects sidepanel"""
-__author__ = "Kevin D. Smith"
+
+""" Adds a Projects sidepanel """
+
+__author__ = "Kevin D. Smith <Kevin.Smith@sixquickrun.com>"
+__revision__ = "$Revision$"
+__scid__ = "$Id$"
 __version__ = "0.1"
 
 import wx 

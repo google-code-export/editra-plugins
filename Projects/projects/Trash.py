@@ -12,6 +12,10 @@ Any errors while moving files results in some form of TrashException.
 
 """
 
+__author__ = "Kevin D. Smith <Kevin.Smith@sixquickrun.com>"
+__revision__ = "$Revision$"
+__scid__ = "$Id$"
+
 __all__ = ['moveToTrash']
 
 import os, time, platform, shutil, stat
