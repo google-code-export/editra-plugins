@@ -1,4 +1,4 @@
-#Configuration Settings for the Projects Plugin
+#summary Configuration Settings for the Projects Plugin
 
 = Introduction =
 
