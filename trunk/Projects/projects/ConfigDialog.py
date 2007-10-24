@@ -1,5 +1,9 @@
 #!/usr/bin/env python
 
+__author__ = "Kevin D. Smith <Kevin.Smith@sixquickrun.com>"
+__revision__ = "$Revision$"
+__scid__ = "$Id$"
+
 import wx, sys, os, crypto
 import wx.lib.mixins.listctrl as listmix
 import FileIcons

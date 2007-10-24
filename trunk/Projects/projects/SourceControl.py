@@ -28,6 +28,10 @@ See Also: CVS.py, GIT.py, and SVN.py
 
 """
 
+__author__ = "Kevin D. Smith <Kevin.Smith@sixquickrun.com>"
+__revision__ = "$Revision$"
+__scid__ = "$Id$"
+
 import os, fnmatch, subprocess, sys, wx
 
 if sys.platform.lower().startswith('win'):            

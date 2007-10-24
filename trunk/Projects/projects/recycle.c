@@ -5,6 +5,11 @@
 // That argument must be a full path to the file.
 //
 
+// Author: Kevin D. Smith <Kevin.Smith@sixquickrun.com>
+// $Revision$
+// $Id$
+
+
 #include <windows.h>
 #include <string.h>
 

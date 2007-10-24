@@ -54,6 +54,10 @@ to all repositories.
 
 """
 
+__author__ = "Kevin D. Smith <Kevin.Smith@sixquickrun.com>"
+__revision__ = "$Revision$"
+__scid__ = "$Id$"
+
 import wx 
 import os 
 import time 

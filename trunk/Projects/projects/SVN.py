@@ -1,5 +1,9 @@
 #!/usr/bin/env python
 
+__author__ = "Kevin D. Smith <Kevin.Smith@sixquickrun.com>"
+__revision__ = "$Revision$"
+__scid__ = "$Id$"
+
 import re, os, crypto, datetime
 from SourceControl import SourceControl
 
