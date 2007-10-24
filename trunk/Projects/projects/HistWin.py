@@ -398,7 +398,8 @@ class HistList(wx.ListCtrl,
     def GetFullLog(self, rev, timestamp):
         """Get the full log entry for the given revision"""
         for item in self._data:
-            if item['revision'] == rev and item['date'] == timestamp:
+            if item['revision'] == rev and \
+               item['date'].strftime(DATE_FORMAT) == timestamp:
                 return item['log']
         else:
             return wx.EmptyString
