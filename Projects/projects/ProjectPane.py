@@ -1598,12 +1598,14 @@ class ProjectPane(wx.Panel):
                                        self.projects.il.GetBitmap(self.projects.icons['project-delete']), 
                                        style=wx.NO_BORDER)
         removebutton.SetToolTip(wx.ToolTip(_("Remove Project")))
+
         if ed_glob:
             cfgbmp = wx.ArtProvider.GetBitmap(str(ed_glob.ID_PREF), wx.ART_MENU)
         else:
             cfgbmp = wx.ArtProvider.GetBitmap(wx.ART_EXECUTABLE_FILE, wx.ART_MENU)
         configbutton = wx.BitmapButton(self, self.ID_CONFIG, cfgbmp, style=wx.NO_BORDER)
         configbutton.SetToolTip(wx.ToolTip(_("Configure")))
+
         self.busy = wx.Gauge(self, size=(50, 16), style=wx.GA_HORIZONTAL)
         self.busy.Hide()
         self.buttonbox.Add((10,24))
@@ -1707,10 +1709,7 @@ class ProjectPane(wx.Panel):
         """Update the check mark for the menu item"""
         mgr = self._mw.GetFrameManager()
         pane = mgr.GetPane(self.PANE_NAME)
-        if pane.IsShown():
-            self._mi.Check(True)
-        else:
-            self._mi.Check(False)
+        self._mi.Check(pane.IsShown())
         evt.Skip()
 
     def OnTick(self, evt):
@@ -1722,14 +1721,16 @@ class ProjectPane(wx.Panel):
         self.isBusy += 1
         if self.isBusy > 1:
             return
+
         running = False
         for item in self.buttonbox.GetChildren():
             win = item.GetWindow()
             if isinstance(win, wx.Gauge):
                 running = True
                 break
+
         if not running:
-            self.buttonbox.Add(self.busy, 1, 
+            self.buttonbox.Add(self.busy, 0, 
                                wx.ALIGN_CENTER_VERTICAL | wx.ALIGN_RIGHT)
             self.buttonbox.Add((10, 24), 0, wx.ALIGN_RIGHT)
 
