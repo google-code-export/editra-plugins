@@ -1608,11 +1608,18 @@ class ProjectPane(wx.Panel):
 
         self.busy = wx.Gauge(self, size=(50, 16), style=wx.GA_HORIZONTAL)
         self.busy.Hide()
-        self.buttonbox.Add((10,24))
+
+        if wx.Platform == '__WXGTK__':
+            spacer = (3, 3)
+            self.buttonbox.Add((5, 24))
+        else:
+            spacer = (10, 10)
+            self.buttonbox.Add((10, 24))
+
         self.buttonbox.Add(addbutton, 0, wx.ALIGN_CENTER_VERTICAL)
-        self.buttonbox.Add((12,1))
+        self.buttonbox.Add(spacer)
         self.buttonbox.Add(removebutton, 0, wx.ALIGN_CENTER_VERTICAL)
-        self.buttonbox.Add((12, 1))
+        self.buttonbox.Add(spacer)
         self.buttonbox.Add(configbutton, 0, wx.ALIGN_CENTER_VERTICAL)
         self.buttonbox.AddStretchSpacer()
         sizer.Add(self.buttonbox, 0, wx.EXPAND)
@@ -1732,7 +1739,7 @@ class ProjectPane(wx.Panel):
         if not running:
             self.buttonbox.Add(self.busy, 0, 
                                wx.ALIGN_CENTER_VERTICAL | wx.ALIGN_RIGHT)
-            self.buttonbox.Add((10, 24), 0, wx.ALIGN_RIGHT)
+            self.buttonbox.Add((10, 10), 0, wx.ALIGN_RIGHT)
 
         self.busy.Show()
         self.buttonbox.Layout()
