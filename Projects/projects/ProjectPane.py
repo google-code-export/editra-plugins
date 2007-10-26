@@ -852,8 +852,11 @@ class ProjectTree(wx.Panel):
         for update in evt.GetValue():
             update = list(update)
             method = update.pop(0)
-            try: method(*update)
-            except: pass
+            try:
+                if update[0].IsOk(): 
+                    method(*update)
+            except: 
+                pass
         evt.Skip()
             
     def endSCCommand(self, delayedresult):
