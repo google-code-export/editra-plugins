@@ -378,7 +378,7 @@ class ProjectTree(wx.Panel):
 
     def getChildren(self, parent):
         """
-        Return a list of children for the given node
+        Return a generator to loop over all children of given node
                 
         Required Arguments:
         parent -- node to search
@@ -386,16 +386,19 @@ class ProjectTree(wx.Panel):
         Returns: list of child nodes
         
         """
-        children = []
+        if not parent.IsOk():
+            return
         child, cookie = self.tree.GetFirstChild(parent)
-        if child:
-            children.append(child)
-            while True:
-                child, cookie = self.tree.GetNextChild(parent, cookie)
-                if not child:
-                    break
-                children.append(child)
-        return children
+        if not child or not child.IsOk():
+            return
+        yield child    
+        while True:
+            if not parent.IsOk():
+                return
+            child, cookie = self.tree.GetNextChild(parent, cookie)
+            if not child or not child.IsOk():
+                return
+            yield child
 
     def OnSyncNode(self, evt):
         """
@@ -425,9 +428,10 @@ class ProjectTree(wx.Panel):
             for item in deleted:
                 if item in children:
                     node = children[item]
-                    if os.path.isdir(self.tree.GetPyData(node)['path']):
+                    if node.IsOk() and os.path.isdir(self.tree.GetPyData(node)['path']):
                         self.tree.Collapse(node)
-                    self.tree.Delete(node)                    
+                    if node.IsOk():
+                        self.tree.Delete(node)                    
 
             # Update status on modified files
             for item in modified:
@@ -698,7 +702,10 @@ class ProjectTree(wx.Panel):
             concurrentcmds = ['status','history']
             NODE, DATA, SC = 0, 1, 2
             nodeinfo = []
-            for node in nodes:                
+            for node in nodes: 
+                if not node.IsOk():
+                    return 
+                                   
                 # Get node data
                 try: data = self.tree.GetPyData(node)
                 except: data = {}
@@ -804,7 +811,7 @@ class ProjectTree(wx.Panel):
             if not rc:
                 return updates
             # Update the icons for the file nodes
-            if os.path.isdir(data['path']):
+            if os.path.isdir(data['path']) and node.IsOk():
                 for child in self.getChildren(node):
                     text = self.tree.GetItemText(child)
                     if text not in status:
@@ -812,26 +819,26 @@ class ProjectTree(wx.Panel):
                     if os.path.isdir(os.path.join(data['path'],text)):
                         # Closed folder icon
                         icon = self.icons.get('folder-'+status[text].get('status',''))
-                        if icon:                    
+                        if icon and child.IsOk():
                             updates.append((self.tree.SetItemImage, child, icon, wx.TreeItemIcon_Normal))
                         # Open folder icon
                         icon = self.icons.get('folder-open-'+status[text].get('status',''))
-                        if icon:                    
+                        if icon and child.IsOk():   
                             updates.append((self.tree.SetItemImage, child, icon, wx.TreeItemIcon_Expanded))
                         # Update children status if opened
-                        if self.tree.IsExpanded(child):
+                        if child.IsOk() and self.tree.IsExpanded(child):
                             self._updateStatus(child, self.tree.GetPyData(child), sc)
                     else:
                         icon = self.icons.get('file-'+status[text].get('status',''))
-                        if icon:
+                        if icon and child.IsOk():
                             updates.append((self.tree.SetItemImage, child, icon, wx.TreeItemIcon_Normal))
                         #if 'tag' in status[text]:
                         #    updates.append((self.tree.SetToolTip, wx.ToolTip('Tag: %s' % status[text]['tag'])))
-            else:
+            elif node.IsOk():
                 text = self.tree.GetItemText(node)
                 if text in status:
                     icon = self.icons.get('file-'+status[text].get('status',''))
-                    if icon:
+                    if icon and node.IsOk():
                         updates.append((self.tree.SetItemImage, node, icon, wx.TreeItemIcon_Normal))
                     #if 'tag' in status[text]:
                     #    updates.append((self.tree.SetToolTip, wx.ToolTip('Tag: %s' % status[text]['tag'])))
