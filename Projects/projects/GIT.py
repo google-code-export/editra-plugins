@@ -185,7 +185,7 @@ class GIT(SourceControl):
             for line in out.stdout:
                 if start_unknown:
                     if re.search(UNKPAT, line):
-                        tmp = line.strip().split()
+                        tmp = line.strip().split(None, 1)
                         unknown.append(os.path.normpath(pjoin(repo, tmp[-1])))
                     continue
                 if re.search(NEWPAT, line):
