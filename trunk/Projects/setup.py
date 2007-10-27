@@ -13,7 +13,7 @@ setup(
       description = __doc__,
       author = "Kevin D. Smith",
       author_email = "Kevin.Smith@theMorgue.org",
-      license = "GPLv2",
+      license = "wxWindows",
       packages = ['projects'],
       entry_points = '''
       [Editra.plugins]
