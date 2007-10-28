@@ -1,4 +1,5 @@
 #summary Nuovo Icon Theme for Editra
+#labels Theme
 
 = Introduction =
 
