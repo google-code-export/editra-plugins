@@ -1,4 +1,5 @@
 #summary Humility Icon Theme for Editra
+#labels Theme
 
 = Introduction =
 
