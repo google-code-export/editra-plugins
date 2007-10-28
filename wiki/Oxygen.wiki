@@ -1,0 +1,10 @@
+#summary Oxygen Icon Theme for Editra
+
+= Introduction =
+
+Oxygen is an icon theme for Editra that is based on the Oxygen Icon Set for KDE4.
+
+= Preview =
+
+
+= Details =
