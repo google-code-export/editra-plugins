@@ -18,3 +18,4 @@ This plugin project has two parts:
   * Interaction with system shell should be able to be killed in the event of an infinite loop in a shell command, as to not bring the editor down with it.
   * Customizable appearance, font, colors, ect...
   * Configurable line buffering for ui display
+  * Search output by linking into Editra's quick find bar
