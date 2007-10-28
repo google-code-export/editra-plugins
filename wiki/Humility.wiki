@@ -11,6 +11,9 @@ This icon uses the new theme interface that is available in versions of Editra >
 
 This icon theme plugin is distributed under the GPL for more information about the Gnome Humility Icon theme see http://art.gnome.org/themes/icon/1136
 
+= Preview =
+
+http://editra.org/images/plugins/Macintosh/humility.png
 
 = Installation =
 
