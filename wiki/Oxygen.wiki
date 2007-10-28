@@ -1,10 +1,23 @@
 #summary Oxygen Icon Theme for Editra
 
-= Introduction =
+= Details =
 
-Oxygen is an icon theme for Editra that is based on the Oxygen Icon Set for KDE4.
+Oxygen is an icon theme for Editra that is based on the Oxygen Icon Set for KDE4. This icon theme is distributed under the same term as the icons it uses Creative Commons Attribution Share Alike 3.0 or LGPL.
 
 = Preview =
 
+Coming Soon
 
-= Details =
+= Installation =
+
+Download the _egg_ file and drag and drop it on to the Installation page of PluginManager.
+
+
+= Build Guide =
+
+To build the plugin into an egg from source do the following:
+
+ # cd oxygen
+ # python setup.py bdist_egg
+
+This will build and put the egg in a directory called _dist_ that is the same directory as the setup.py file.
