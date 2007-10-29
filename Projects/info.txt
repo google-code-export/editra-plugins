@@ -1,4 +1,4 @@
 Author=Kevin D. Smith
 Version=0.1
 Name=Projects
-Description=Project Manager
+Description=A sidepanel that incorporates file management and source control
