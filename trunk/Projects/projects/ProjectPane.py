@@ -1235,7 +1235,7 @@ class ProjectTree(wx.Panel):
             (self.popupIDSCRevert, _("Revert to repository version"), 'sc-revert', scenabled),
             addremove,
             (None, None, None, None),
-            (self.popupIDDelete, _("Move to "+TRASH), 'delete', True),
+            (self.popupIDDelete, _("Move to "+TRASH), 'delete', False),
         ]
         for id, title, icon, enabled in items:
             if id is None:
