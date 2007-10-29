@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-""" Adds a Projects sidepanel """
+""" Adds a sidepanel that incorporates file management and source control """
 
 __author__ = "Kevin D. Smith <Kevin.Smith@sixquickrun.com>"
 __revision__ = "$Revision$"
