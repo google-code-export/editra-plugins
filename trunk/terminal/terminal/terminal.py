@@ -9,15 +9,18 @@
 ###############################################################################
 
 """
-This script was adapted from the vim plugin 'vimsh' by 
-brian m sturk <bsturk@adelphia.net> to the wxWdigets platform utilizing a 
-StyledTextCtrl for the interface. It also makes a number of improvements
-upon that original script that provide for better output display for long and
-continuous running commands due to being able to process in idle time.
+This script started as an adaption of the vim plugin 'vimsh' by 
+brian m sturk <bsturk@adelphia.net> for use with a StyledTextCtrl. It has been
+extended and improved upon mostly in the areas of updating during long running
+commands because it does not have to work within the limitations of vim when
+doing this.
 
-It should run on all operating systems that support:
+It currently should run on any unix like operating system that supports:
     - wxPython
-    - Psuedo TTY's or Pipes/Popen
+    - Psuedo TTY's
+
+There is some code for trying to get it to run on Windows but it is still under
+development.
 
 """
 
@@ -56,7 +59,7 @@ except ImportError, msg:
 
 #---- Variables ----#
 DEBUG = True
-MAX_HIST = 50       # Max previous commands to save
+MAX_HIST = 50       # Max command history to save
 
 if sys.platform == 'win32':
     SHELL = 'cmd.exe'
@@ -72,30 +75,51 @@ _ = wx.GetTranslation
 #---- End Callables ----#
 
 #---- ANSI color code support ----#
+# ANSI_FORE_BLACK   = 1
+# ANSI_FORE_RED     = 2
+# ANSI_FORE_GREEN   = 3
+# ANSI_FORE_YELLOW  = 4
+# ANSI_FORE_BLUE    = 5
+# ANSI_FORE_MAGENTA = 6
+# ANSI_FORE_CYAN    = 7
+# ANSI_FORE_WHITE   = 8
+
+# ANSI_BACK_BLACK
+# ANSI_BACK_RED
+# ANSI_BACK_GREEN
+# ANSI_BACK_YELLOW
+# ANSI_BACK_BLUE
+# ANSI_BACK_MAGENTA
+# ANSI_BACK_CYAN
+# ANSI_BACK_WHITE
+
 ANSI = {
         ## Forground colours ##
         '[30m' : (1, '#000000'),
         '[31m' : (2, '#FF0000'),
         '[32m' : (3, '#00FF00'),
-        '[34m' : (4, '#0000FF'),
-        '[35m' : (5, '#FF00FF'),
-        '[36m' : (6, '#00FFFF'),
-        '[37m' : (7, '#FFFFFF'),
+        '[33m' : (4, '#FFFF00'),  # Yellow
+        '[34m' : (5, '#0000FF'),
+        '[35m' : (6, '#FF00FF'),
+        '[36m' : (7, '#00FFFF'),
+        '[37m' : (8, '#FFFFFF'),
         #'[39m' : default
 
         ## Background colour ##
-        '[40m' : (1, '#000000'),
-        '[41m' : (2, '#FF0000'),
-        '[42m' : (3, '#00FF00'),
-        '[44m' : (4, '#0000FF'),
-        '[45m' : (5, '#FF00FF'),
-        '[46m' : (6, '#00FFFF'),
-        '[47m' : (7, '#FFFFFF'),
+        '[40m' : (011, '#000000'),  # Black
+        '[41m' : (012, '#FF0000'),  # Red
+        '[42m' : (013, '#00FF00'),  # Green
+        '[43m' : (014, '#FFFF00'),  # Yellow
+        '[44m' : (015, '#0000FF'),  # Blue
+        '[45m' : (016, '#FF00FF'),  # Magenta
+        '[46m' : (017, '#00FFFF'),  # Cyan
+        '[47m' : (020, '#FFFFFF'),  # White
         #'[49m' : default
         }
 
 RE_COLOUR_START = re.compile('\[[34][0-9]m')
-RE_COLOUR_BLOCK = re.compile('\[[34][0-9]m*.*\[m')
+RE_COLOUR_FORE = re.compile('\[3[0-9]m')
+RE_COLOUR_BLOCK = re.compile('\[[34][0-9]m*.*?\[m')
 RE_COLOUR_END = '[m'
 RE_CLEAR_ESC = re.compile('\[[0-9]+m')
 #---- End ANSI Colour Support ----#
@@ -122,10 +146,10 @@ class Xterm(wx.stc.StyledTextCtrl):
         ##  The lower this number is the more responsive some commands
         ##  may be ( printing prompt, ls ), but also the quicker others
         ##  may timeout reading their output ( ping, ftp )
-        self.delay = 0.02
+        self.delay = 0.03
         self._fpos = 0          # First allowed cursor position
         self._exited = False    # Is shell still running
-        self._setspecs = list()
+        self._setspecs = [0]
         self._history = dict(cmds=[''], index=-1, lastexe='')  # Command history
 
         # Setup
@@ -228,14 +252,39 @@ class Xterm(wx.stc.StyledTextCtrl):
         @param data: list of tuples [ (style_start, colour, style_end) ]
 
         """
+        spec = 0
         for pos in data:
-            spec = ANSI[pos[1]][0]
+            if len(pos[1]) > 1:
+                spec = ANSI[pos[1][1]][0] | ANSI[pos[1][0]][0]
+            elif len(pos[1]):
+                spec = ANSI[pos[1][0]][0]
+            else:
+                pass
+
             if spec not in self._setspecs:
                 DebugLog("[terminal][styles] Setting Spec: %d" % spec)
                 self._setspecs.append(spec)
-                self.StyleSetSpec(spec, "fore:%s,back:#000000,face:%s,size:%d" % \
-                                  (ANSI[pos[1]][1], FONT_FACE, FONT_SIZE))
-            self.StartStyling(self._fpos + pos[0], 0xff)
+                if len(pos[1]) > 1:
+                    if RE_COLOUR_FORE.match(pos[1][0]):
+                        fore = ANSI[pos[1][0]][1]
+                        back = ANSI[pos[1][1]][1]
+                    else:
+                        fore = ANSI[pos[1][1]][1]
+                        back = ANSI[pos[1][0]][1]
+
+                    self.StyleSetSpec(spec, "fore:%s,back:%s,face:%s,size:%d" % \
+                                  (fore, back, FONT_FACE, FONT_SIZE))
+                else:
+                    self.StyleSetSpec(spec, "fore:%s,back:#000000,face:%s,size:%d" % \
+                                     (ANSI[pos[1][0]][1], FONT_FACE, FONT_SIZE))
+
+            # Adjust styling start position if necessary
+            spos = self._fpos + pos[0]
+            if unichr(self.GetCharAt(spos)).isspace():
+                spos += 1
+
+            # Set style bytes for a given region
+            self.StartStyling(spos, 0xff)
             self.SetStyling(pos[2] - pos[0] + 1, spec)
 
     def _CheckAfterExe(self):
@@ -347,10 +396,11 @@ class Xterm(wx.stc.StyledTextCtrl):
                 attrs[3] = attrs[3] & ~tty.ICANON & ~tty.ECHO
 
                 tty.tcsetattr(1, tty.TCSANOW, attrs)
-                cwd = os.path.curdir
+#                 cwd = os.path.curdir
                 os.chdir(wx.GetHomeDir())
+#                 pty.spawn([SHELL, "-l"])
                 os.execv(SHELL, [SHELL, '-l'])
-                os.chdir(cwd)
+#                 os.chdir(cwd)
 
             else:
                 try:
@@ -667,25 +717,24 @@ class Xterm(wx.stc.StyledTextCtrl):
                 line = line[:-1]
                 m = True
 
-            # Put the line
+            # Parse ANSI escape sequences
             need_style = False
             if r'' in line:
                 DebugLog('[terminal][print] found ansi escape sequence(s)')
-                c_items = re.findall(RE_COLOUR_BLOCK, line)
-                colors = re.findall(RE_COLOUR_START, line)
-
-                # construct a list of [ (style_start, colour, style_end) ]
+                # Construct a list of [ (style_start, (colours), style_end) ]
                 # where the start end positions are offsets of the curent _fpos
+                c_items = re.findall(RE_COLOUR_BLOCK, line)
                 tmp = line
                 positions = list()
-                i = 0
                 for pat in c_items:
                     ind = tmp.find(pat)
-                    color = re.findall(RE_COLOUR_START, pat)[0]
-                    tpat = pat.replace(color, '').replace(RE_COLOUR_END, '')
-                    tmp = tmp.replace(pat, tpat, 1)
-                    positions.append((ind, color, ind + len(tpat)))
-                    i = i + 1
+                    colors = re.findall(RE_COLOUR_START, pat)
+                    tpat = pat
+                    for color in colors:
+                        tpat = tpat.replace(color, '')
+                    tpat = tpat.replace(RE_COLOUR_END, '')
+                    tmp = tmp.replace(pat, tpat, 1).replace(RE_COLOUR_END, '', 1)
+                    positions.append((ind, colors, (ind + len(tpat) - 1)))
 
                 # Try to remove any trailing escape sequences that may still be present.
                 line = tmp.replace(RE_COLOUR_END, '')
@@ -694,9 +743,10 @@ class Xterm(wx.stc.StyledTextCtrl):
                 
                 need_style = True
 
+            # Put text in buffer
             self.AppendText(line)
 
-            # Apply any colouring that was found
+            # Apply any colouring that is needed
             if need_style:
                 DebugLog('[terminal][print] applying styles to output string')
                 self._ApplyStyles(positions)
@@ -714,6 +764,8 @@ class Xterm(wx.stc.StyledTextCtrl):
         """Read from pipe, used on Windows. This is needed because select
         can only be used with sockets on Windows and not with any other type
         of file descriptor.
+        @param pipe: Pipe to read from
+        @param minimum_to_read: minimum bytes to read at one time
 
         """
         DebugLog("[terminal][pipe] minimum to read is " + str(minimum_to_read))
@@ -745,14 +797,20 @@ class Xterm(wx.stc.StyledTextCtrl):
 
     def Read(self):
         """Read output from stdin"""
+        if self._exited:
+            return
+
         num_iterations = 0  #  counter for periodic redraw
         any_lines_read = 0  #  sentinel for reading anything at all
 
         lines = ''
-
         while 1:
             if USE_PTY:
-                r, w, e = select.select([self.outd], [], [], self.delay)
+                try:
+                    r, w, e = select.select([self.outd], [], [], self.delay)
+                except select.error, msg:
+                    DebugLog("[terminal][err] Select failed: %s" % str(msg))
+                    r = [1,]
             else:
                 r = [1,]  # pipes, unused
 
@@ -783,14 +841,20 @@ class Xterm(wx.stc.StyledTextCtrl):
                 pass
 
     def SetCommand(self, cmd):
-        """Set the command that is shown at the current prompt"""
+        """Set the command that is shown at the current prompt
+        @param cmd: command string to put on the prompt
+
+        """
         self.SetTargetStart(self._fpos)
         self.SetTargetEnd(self.GetLength())
         self.ReplaceTarget(cmd)
         self.GotoPos(self.GetLength())
 
     def Write(self, cmd):
-        """Write out command to shell process"""
+        """Write out command to shell process
+        @param cmd: command string to write out to the shell proccess to run
+
+        """
         DebugLog("[terminal][info] Writting out command: " + cmd)
         os.write(self.ind, cmd)
 
