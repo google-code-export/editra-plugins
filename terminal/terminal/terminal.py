@@ -187,8 +187,10 @@ class Xterm(wx.stc.StyledTextCtrl):
         """Clear the builtin keybindings that we dont want"""
         self.CmdKeyClear(ord('U'), wx.stc.STC_SCMOD_CTRL)
         self.CmdKeyClear(ord('Z'), wx.stc.STC_SCMOD_CTRL)
-        self.CmdKeyClear(wx.WXK_BACK, wx.stc.STC_SCMOD_CTRL | wx.stc.STC_SCMOD_SHIFT)
-        self.CmdKeyClear(wx.WXK_DELETE, wx.stc.STC_SCMOD_CTRL | wx.stc.STC_SCMOD_SHIFT)
+        self.CmdKeyClear(wx.WXK_BACK, wx.stc.STC_SCMOD_CTRL | \
+                                      wx.stc.STC_SCMOD_SHIFT)
+        self.CmdKeyClear(wx.WXK_DELETE, wx.stc.STC_SCMOD_CTRL | \
+                                        wx.stc.STC_SCMOD_SHIFT)
         self.CmdKeyClear(ord('['), wx.stc.STC_SCMOD_CTRL)
         self.CmdKeyClear(ord(']'), wx.stc.STC_SCMOD_CTRL)
         self.CmdKeyClear(ord('\\'), wx.stc.STC_SCMOD_CTRL)
@@ -272,10 +274,12 @@ class Xterm(wx.stc.StyledTextCtrl):
                         fore = ANSI[pos[1][1]][1]
                         back = ANSI[pos[1][0]][1]
 
-                    self.StyleSetSpec(spec, "fore:%s,back:%s,face:%s,size:%d" % \
-                                  (fore, back, FONT_FACE, FONT_SIZE))
+                    self.StyleSetSpec(spec, 
+                                      "fore:%s,back:%s,face:%s,size:%d" % \
+                                      (fore, back, FONT_FACE, FONT_SIZE))
                 else:
-                    self.StyleSetSpec(spec, "fore:%s,back:#000000,face:%s,size:%d" % \
+                    self.StyleSetSpec(spec, 
+                                      "fore:%s,back:#000000,face:%s,size:%d" % \
                                      (ANSI[pos[1][0]][1], FONT_FACE, FONT_SIZE))
 
             # Adjust styling start position if necessary
@@ -335,7 +339,7 @@ class Xterm(wx.stc.StyledTextCtrl):
         DebugLog("[terminal][exit] Exiting process")
         if not self._exited:
             try:
-                DebugLog("[terminal][exit] Shell still around so trying to close")
+                DebugLog("[terminal][exit] Shell still around, trying to close")
                 self.Write(cmd + '\n')
                 self._CheckAfterExe()
             except Exception, msg:            
@@ -353,7 +357,8 @@ class Xterm(wx.stc.StyledTextCtrl):
 
         #  Filter out invalid blank lines from begining/end input
         if sys.platform == 'win32':
-            m = re.search(re.escape(self._history['lastexe'].strip()), lines_to_print[0])
+            m = re.search(re.escape(self._history['lastexe'].strip()), 
+                                    lines_to_print[0])
             if m != None or lines_to_print[0] == "":
                 DebugLog('[terminal][info] Win32, removing leading blank line')
                 lines_to_print = lines_to_print[ 1: ]
@@ -367,7 +372,7 @@ class Xterm(wx.stc.StyledTextCtrl):
 
         errors = self.CheckStdErr()
         if errors:
-            DebugLog("[terminal][err] Process Read Prepending stderr --> ", errors)
+            DebugLog("[terminal][err] Process Read stderr --> " + errors)
             lines_to_print = errors + lines_to_print
 
         return lines_to_print
@@ -418,7 +423,8 @@ class Xterm(wx.stc.StyledTextCtrl):
                 self.kill_key  = termios_keys[tty.VKILL]
                 self.susp_key  = termios_keys[tty.VSUSP]
         else:
-            ##  Use pipes on Win32. not as reliable/nice. works OK but with limitations.
+            ##  Use pipes on Win32. not as reliable/nice but 
+            ##  works with limitations.
             self.delay = 0.1
 
             try:
@@ -516,8 +522,12 @@ class Xterm(wx.stc.StyledTextCtrl):
                                           self.GetId(), orient=wx.VERTICAL))
         wx.CallAfter(self.Thaw)
 
-    def ExecuteCmd(self, cmd=None, null=1):
-        """Run the command entered in the buffer"""
+    def ExecuteCmd(self, cmd=None, null=True):
+        """Run the command entered in the buffer
+        @keyword cmd: send a specified command
+        @keyword null: should the command be null terminated
+
+        """
         DebugLog("terminal][exec] Running command: %s" % str(cmd))
 
         try:
@@ -641,7 +651,8 @@ class Xterm(wx.stc.StyledTextCtrl):
             self.ExecuteCmd()
         elif key == wx.WXK_TAB:
             # TODO Tab Completion
-#             self.ExecuteCmd(self.GetTextRange(self._fpos, self.GetCurrentPos()) + '\t', 0)
+#             self.ExecuteCmd(self.GetTextRange(self._fpos, 
+#                              self.GetCurrentPos()) + '\t', 0)
             pass
         elif key in [wx.WXK_UP, wx.WXK_NUMPAD_UP]:
             # Cycle through previous command history
@@ -708,7 +719,6 @@ class Xterm(wx.stc.StyledTextCtrl):
         if len(lines) and lines[0].strip() == self._history['lastexe'] .strip():
             lines.pop(0)
 
-        num_lines = len(lines)
         for line in lines:
             DebugLog("[terminal][print] Current line is --> %s" % line)
             m = None
@@ -736,7 +746,7 @@ class Xterm(wx.stc.StyledTextCtrl):
                     tmp = tmp.replace(pat, tpat, 1).replace(RE_COLOUR_END, '', 1)
                     positions.append((ind, colors, (ind + len(tpat) - 1)))
 
-                # Try to remove any trailing escape sequences that may still be present.
+                # Try to remove any remaining escape sequences
                 line = tmp.replace(RE_COLOUR_END, '')
                 line = re.sub(RE_COLOUR_START, '', line)
                 line = re.sub(RE_CLEAR_ESC, '', line)
@@ -791,7 +801,7 @@ class Xterm(wx.stc.StyledTextCtrl):
                     DebugLog("[terminal][pipe] read minimum and found termination")
                     break
                 else:
-                    dbg_print("[terminal][pipe] more data to read: count is " + str(count))
+                    DebugLog("[terminal][pipe] more data to read: count is " + str(count))
 
         return data
 
@@ -807,12 +817,12 @@ class Xterm(wx.stc.StyledTextCtrl):
         while 1:
             if USE_PTY:
                 try:
-                    r, w, e = select.select([self.outd], [], [], self.delay)
+                    r = select.select([self.outd], [], [], self.delay)[0]
                 except select.error, msg:
                     DebugLog("[terminal][err] Select failed: %s" % str(msg))
-                    r = [1,]
+                    r = [1, ]
             else:
-                r = [1,]  # pipes, unused
+                r = [1, ]  # pipes, unused
 
             for file_iter in r:
                 if USE_PTY:
@@ -860,23 +870,23 @@ class Xterm(wx.stc.StyledTextCtrl):
 
 #-----------------------------------------------------------------------------#
 # Utility Functions
-def DebugLog(msg):
+def DebugLog(errmsg):
     """Print debug messages"""
     if DEBUG:
-        print msg
+        print errmsg
 
 #-----------------------------------------------------------------------------#
 # For Testing
 
 if __name__ == '__main__':
-    app = wx.PySimpleApp(False)
-    frame = wx.Frame(None, wx.ID_ANY, "Terminal Test")
-    term = Xterm(frame, wx.ID_ANY)
+    APP = wx.PySimpleApp(False)
+    FRAME = wx.Frame(None, wx.ID_ANY, "Terminal Test")
+    TERM = Xterm(FRAME, wx.ID_ANY)
     
-    fsizer = wx.BoxSizer(wx.VERTICAL)
-    fsizer.Add(term, 1, wx.EXPAND)
-    frame.SetSizer(fsizer)
+    FSIZER = wx.BoxSizer(wx.VERTICAL)
+    FSIZER.Add(TERM, 1, wx.EXPAND)
+    FRAME.SetSizer(FSIZER)
     
-    frame.SetSize((600, 400))
-    frame.Show()
-    app.MainLoop()
+    FRAME.SetSize((600, 400))
+    FRAME.Show()
+    APP.MainLoop()
