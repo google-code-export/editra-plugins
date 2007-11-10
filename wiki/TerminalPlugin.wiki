@@ -4,9 +4,13 @@
 
 This plugin project has two parts:
 
-1) This plugin creates a terminal widget that emulates the system shell such as /bin/bash or cmd.exe on Windows. This widget is being developed in part with plans to make it a usable component/program even outside of Editra's plugin framework
+This plugin creates a terminal widget that emulates the system shell such as /bin/bash or cmd.exe on Windows.
 
-2) It creates a plugin that implements the Shelf Interface, meaning that it allows for multiple instances to be open in the tabbed Shelf window that can be either docked or dragged into a separate floating window from Editra's main window.
+== Status ==
+
+Currently it works well on Unix like systems (Macintosh OSX, Linux). There are still some outstanding issues with running it as a plugin inside of Editra however so currently it is suggested to only use it as a standalone program by running terminal.py.
+
+There is also code in place to get it running on Windows that is mostly untested. Windows doesn't have support for pty's though so it requires its own set of commands using pipes instead.
 
 = Implemented Features =
   * Basic framework is in place and it can be used just like your system shell but still has a number of display and behavior issues to fix up before an official release.
@@ -15,7 +19,7 @@ This plugin project has two parts:
 
 = Planned Features =
 
-  * Interaction with system shell should be able to be killed in the event of an infinite loop in a shell command, as to not bring the editor down with it.
+  * Key interupts
   * Customizable appearance, font, colors, ect...
   * Configurable line buffering for ui display
   * Search output by linking into Editra's quick find bar
