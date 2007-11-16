@@ -52,6 +52,7 @@ class UpdateItemsEvent(wx.PyCommandEvent):
         self._value = value
 
     def GetValue(self):
+        """Get event value"""
         return self._value
 
 #--------------------------------------------------------------------------#
@@ -61,7 +62,8 @@ SB_PROG = 1
 class HistoryWindow(wx.Frame):
     """Window for displaying the Revision History of a file"""
     def __init__(self, parent, title, projects, node, path):
-        wx.Frame.__init__(self, parent, title=title, style=wx.DEFAULT_DIALOG_STYLE)
+        wx.Frame.__init__(self, parent, title=title,
+                          style=wx.DEFAULT_DIALOG_STYLE)
         
         # Set Frame Icon
         if util is not None:
@@ -252,17 +254,21 @@ class HistoryPane(wx.Panel):
         else:
             rev1 = self._list.GetItem(selected[0], self._list.REV_COL).GetText().strip()
             rev2 = self._list.GetItem(selected[-1], self._list.REV_COL).GetText().strip()
-            self.projects.compareRevisions(self.path, rev1=rev1, rev2=rev2, callback=self.endCompare)
+            self.projects.compareRevisions(self.path, rev1=rev1, rev2=rev2, 
+                                           callback=self.endCompare)
 
     def endCompare(self):
+        """ Re-enable button and stop progress bar """
         wx.CallAfter(self._btn.Enable, True)
         wx.CallAfter(self.GetParent().StopBusy)
 
     def getSelectedItems(self):
+        """ Get the selected items """
         item = -1
         selected = []
         while True:
-            item = self._list.GetNextItem(item, wx.LIST_NEXT_ALL, wx.LIST_STATE_SELECTED)
+            item = self._list.GetNextItem(item, wx.LIST_NEXT_ALL,
+                                          wx.LIST_STATE_SELECTED)
             if item == -1:
                 break
             selected.append(item)
@@ -272,7 +278,8 @@ class HistoryPane(wx.Panel):
         """ Select only the given indices """
         item = -1
         while True:
-            item = self._list.GetNextItem(item, wx.LIST_NEXT_ALL, wx.LIST_STATE_SELECTED)
+            item = self._list.GetNextItem(item, wx.LIST_NEXT_ALL,
+                                          wx.LIST_STATE_SELECTED)
             if item == -1:
                 break
             if item not in indices:
@@ -306,6 +313,7 @@ class HistoryPane(wx.Panel):
         self.updateButton()
         
     def updateButton(self):
+        """ Change button text based on selection state """
         selected = self.getSelectedItems()
         if not selected:
             self._btn.SetLabel(self.BTN_LBL1)
@@ -328,6 +336,7 @@ class HistList(wx.ListCtrl,
     AUTH_COL = 2
     COM_COL = 3
     def __init__(self, parent, projects, node, path):
+        """ Create the list control """
         wx.ListCtrl.__init__(self, parent,
                              style=wx.LC_REPORT | wx.LC_SORT_ASCENDING | \
                                    wx.LC_VRULES)
@@ -351,6 +360,7 @@ class HistList(wx.ListCtrl,
         self.SendSizeEvent()
 
     def OnUpdateItems(self, evt):
+        """ Update and add items to the list """
         index = -1
         append = False
         self.Freeze()
@@ -420,6 +430,7 @@ class HistList(wx.ListCtrl,
         wx.CallAfter(self._frame.StopBusy)
 
     def Filter(self, query):
+        """ Filter list entries based on search query """
         query = [x for x in query.strip().lower().split() if x]
         if query:
             newdata = []
@@ -497,6 +508,7 @@ def AdjustColour(color, percent, alpha=wx.ALPHA_OPAQUE):
     green = color.Green() + ((percent * gdif * 100) / high) / 100
     blue = color.Blue() + ((percent * bdif * 100) / high) / 100
     return wx.Colour(red, green, blue, alpha)
+
 #-----------------------------------------------------------------------------#
 
 if __name__ == '__main__':
