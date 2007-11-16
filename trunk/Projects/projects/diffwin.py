@@ -224,7 +224,7 @@ def GenerateDiff(left, right, tabwidth=8, html=False):
         tmp = file(name, 'wb')
         tmp.write(diff)
         tmp.close()
-        webbrowser.open_new_tab(name)
+        webbrowser.open(name)
     else:
         return difflib.Differ().compare(lfile, rfile)
 
