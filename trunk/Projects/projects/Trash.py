@@ -60,7 +60,7 @@ def moveToTrash(paths):
     """
     # Make sure that we are always dealing with a list
     if isinstance(paths, basestring):
-       paths = [paths] 
+        paths = [paths] 
        
     # Get absolute paths and make sure files exist
     paths = [os.path.abspath(x) for x in paths 
@@ -85,11 +85,13 @@ def _ensurePermissions(path):
         raise TrashPermissionsError, ('You do not have permissions to remove this path', path)
 
 def _winTrash(paths):
+    """ Move to windows recycle bin if possible """
     for path in paths:
         # See if we can even do this
         _ensurePermissions(path)
         try:
-            rc = os.spawnv(os.P_WAIT, recycleexe, [os.path.basename(recycleexe)]+['"%s"'%path])
+            rc = os.spawnv(os.P_WAIT, recycleexe, 
+                          [os.path.basename(recycleexe)] + ['"%s"'%path])
             if rc:
                 raise TrashMoveError, ('Could not move path', path, '%s' % rc)
         except (IOError, OSError), msg:
@@ -129,10 +131,15 @@ def _unixTrash(paths):
                             os.path.join(os.path.expanduser('~'),'.local','share')), 'Trash')
 
     # Create trash directories as needed
-    try: os.makedirs(os.path.join(trashdir, 'files'))
-    except (IOError, OSError): pass    
-    try: os.makedirs(os.path.join(trashdir, 'info'))
-    except (IOError, OSError): pass
+    try:
+        os.makedirs(os.path.join(trashdir, 'files'))
+    except (IOError, OSError):
+        pass    
+
+    try:
+        os.makedirs(os.path.join(trashdir, 'info'))
+    except (IOError, OSError):
+        pass
     
     # Make sure that directories got created
     if not os.path.isdir(os.path.join(trashdir, 'files')):
@@ -145,7 +152,8 @@ def _unixTrash(paths):
         _ensurePermissions(path)
         
         # Create unique filename
-        origpath = newpath = os.path.join(trashdir, 'files', os.path.basename(path))
+        origpath = newpath = os.path.join(trashdir, 'files', 
+                                          os.path.basename(path))
         while os.path.exists(newpath):
             newpath = origpath
             base, ext = os.path.splitext(newpath)
@@ -154,15 +162,18 @@ def _unixTrash(paths):
         # Write info file
         try:
             root, base = os.path.split(newpath)
-            infopath = os.path.join(os.path.dirname(root), 'info', base+'.trashinfo')
+            infopath = os.path.join(os.path.dirname(root), 
+                                    'info', base + '.trashinfo')
             info = open(infopath,'w')
             info.write('[Trash Info]\n')
             info.write('Path=%s\n' % path)
             info.write(time.strftime('DeletionDate=%Y%m%dT%H:%M:%S\n'))
             info.close()
         except (OSError, IOError), msg:
-            try: os.remove(infopath)
-            except: pass
+            try:
+                os.remove(infopath)
+            except:
+                pass
             raise TrashMoveError, ('Could not move path', path, msg)
 
         # Move file
@@ -170,7 +181,9 @@ def _unixTrash(paths):
             shutil.move(path, newpath)
         except (OSError, IOError), msg:
             raise TrashMoveError, ('Could not move path', path, msg)
-            
+
+#-----------------------------------------------------------------------------#
+
 if __name__ == '__main__':
     import sys
     args = sys.argv[1:]
