@@ -41,7 +41,7 @@ else:
     STARTUPINFO = None
 
 class SourceControl(object):
-
+    """Source control representation base class"""
     TYPE_FILE = 1
     TYPE_DIRECTORY = 2
     TYPE_ANY = 3   
@@ -117,14 +117,14 @@ class SourceControl(object):
         
         """
         # Multiple paths were passed in
-        if isinstance(paths, (list,tuple)):
+        if isinstance(paths, (list, tuple)):
             newpaths = []
             for path in paths:
                 root, files = self.splitFiles(path, forcefiles=forcefiles,
                                               type=type, topdown=topdown)
                 if files:
                     for f in files:
-                        newpaths.append(os.path.join(root,f))
+                        newpaths.append(os.path.join(root, f))
                 else:
                     newpaths.append(root)
             return self.getRelativePaths(newpaths)
@@ -225,7 +225,7 @@ class SourceControl(object):
                 if not path.endswith(os.path.sep):
                     path += os.path.sep
                 # Add current directory if parent directory is CVS controlled
-                if self.isControlled(os.path.join(path,'..')):
+                if self.isControlled(os.path.join(path, '..')):
                     if type != self.TYPE_FILE:
                         newpaths.append(os.path.basename(path))
                 # Add all files/directories recursively
@@ -233,17 +233,20 @@ class SourceControl(object):
                     root = root[len(path):]
                     if type != self.TYPE_FILE:
                         for dir in dirs:
-                            newpaths.append(os.path.join(root,dir))
+                            newpaths.append(os.path.join(root, dir))
                     if type != self.TYPE_DIRECTORY:
                         for file in files:
-                            newpaths.append(os.path.join(root,file))
+                            newpaths.append(os.path.join(root, file))
             elif type != self.TYPE_DIRECTORY:
                 newpaths.append(os.path.basename(path))
         return self.filterPaths(newpaths)
 
     def log(self, s):
-        try: console = wx.GetApp().GetLog()(s)
-        except AttributeError: sys.stdout.write(s)
+        """Log output either to Editra's log or stdout"""
+        try:
+            console = wx.GetApp().GetLog()(s)
+        except AttributeError:
+            sys.stdout.write(s)
 
     def logOutput(self, p, close=True):
         """ Read and print stdout/stderr """
@@ -275,6 +278,7 @@ class SourceControl(object):
             self.closeProcess(p)
 
     def closeProcess(self, p):
+        """Close a processes pipes"""
         try: p.stdout.close()
         except: pass
         try: p.stderr.close()
