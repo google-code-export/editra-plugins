@@ -34,7 +34,6 @@ import difflib
 import ed_stc
 import util
 from extern import flatnotebook as FNB
-from profiler import Profile_Get
 #--------------------------------------------------------------------------#
 
 class DiffWindow(wx.Frame):
