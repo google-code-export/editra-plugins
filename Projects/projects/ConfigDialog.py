@@ -36,7 +36,7 @@ class ConfigDialog(wx.Frame):
     """Dialog for configuring the Projects plugin settings"""
     def __init__(self, parent, id, data, size=wx.DefaultSize):
         wx.Frame.__init__(self, parent, id, _("Projects Configuration"), 
-                              size=size, style=wx.DEFAULT_DIALOG_STYLE|wx.CLOSE_BOX)
+                          size=size, style=wx.DEFAULT_DIALOG_STYLE|wx.CLOSE_BOX)
 
         # Set title bar icon win/gtk
         try:
@@ -46,7 +46,7 @@ class ConfigDialog(wx.Frame):
             pass
 
         # Attributes
-        panel = wx.Panel(self, wx.ID_ANY, size=(1,5))
+        panel = wx.Panel(self, wx.ID_ANY, size=(1, 5))
         self._notebook = ConfigNotebook(panel, wx.ID_ANY, data)
         self._data = data
 
@@ -69,25 +69,21 @@ class ConfigDialog(wx.Frame):
     def OnClose(self, evt):
         """ Notify watchers that the config data has changed """
         wx.PostEvent(self.GetParent(), 
-                     ConfigDialogEvent(cfgEVT_CONFIG_EXIT, self.GetId(), self._data))
+                     ConfigDialogEvent(cfgEVT_CONFIG_EXIT,
+                                       self.GetId(), self._data))
         evt.Skip()
 
 class ConfigNotebook(wx.Notebook):
+    """Main configuration dialog notebook"""
     def __init__(self, parent, id, data):
-        wx.Notebook.__init__(self, parent, id, size=(450,-1), style=
-                             wx.BK_DEFAULT
-                             #wx.BK_TOP 
-                             #wx.BK_BOTTOM
-                             #wx.BK_LEFT
-                             #wx.BK_RIGHT
-                             # | wx.NB_MULTILINE
-                             )
-
+        """Create the notebook and initialize the two pages"""
+        wx.Notebook.__init__(self, parent, id, 
+                             size=(450, -1), style=wx.BK_DEFAULT )
         self.AddPage(GeneralConfigTab(self, -1, data), _("General"))
         self.AddPage(SourceControlConfigTab(self, -1, data), _("Source Control"))
 
 class GeneralConfigTab(wx.Panel):
-
+    """General configuration page"""
     ID_FILE_FILTERS = wx.NewId()
     ID_SYNC_WITH_NOTEBOOK = wx.NewId()
     ID_DIFF_PROGRAM = wx.NewId()
@@ -103,7 +99,9 @@ class GeneralConfigTab(wx.Panel):
         sizer.Add((10, 10))
         flags = wx.SizerFlags().Left().Expand().Border(wx.ALL, 6)
         sizer.AddF(wx.StaticText(self, -1, _('File Filters')), flags)
-        filters = wx.TextCtrl(self, self.ID_FILE_FILTERS, ' '.join(data.getFilters()), size=(-1, 100), style=wx.TE_MULTILINE)
+        filters = wx.TextCtrl(self, self.ID_FILE_FILTERS, 
+                              ' '.join(data.getFilters()),
+                              size=(-1, 100), style=wx.TE_MULTILINE)
         sizer.AddF(filters, flags)
         if wx.Platform == '__WXMAC__':
             filters.MacCheckSpelling(False)
@@ -129,8 +127,10 @@ class GeneralConfigTab(wx.Panel):
         hsizer.AddF(external, wx.SizerFlags().Left().Border(wx.TOP|wx.BOTTOM|wx.LEFT, 6))
         if wx.Platform == '__WXMSW__':
             hsizer.Add((3, 3))
-        hsizer.AddF(wx.FilePickerCtrl(self, self.ID_DIFF_PROGRAM, data.getDiffProgram(),
-                                      message=_("Select diff program"), style=wx.FLP_USE_TEXTCTRL), 
+        hsizer.AddF(wx.FilePickerCtrl(self, self.ID_DIFF_PROGRAM,
+                                      data.getDiffProgram(),
+                                      message=_("Select diff program"),
+                                      style=wx.FLP_USE_TEXTCTRL), 
                                       wx.SizerFlags(1).Left().Expand())
         sizer.AddF(hsizer, wx.SizerFlags().Left().Expand())
         
@@ -139,9 +139,9 @@ class GeneralConfigTab(wx.Panel):
 
         # Add space around the sides
         outsizer = wx.BoxSizer(wx.HORIZONTAL)
-        outsizer.AddF(wx.Panel(self, -1, size=(10,5)), wx.SizerFlags(0))
+        outsizer.AddF(wx.Panel(self, -1, size=(10, 5)), wx.SizerFlags(0))
         outsizer.AddF(sizer, wx.SizerFlags(1).Expand())
-        outsizer.AddF(wx.Panel(self, -1, size=(10,5)), wx.SizerFlags(0))
+        outsizer.AddF(wx.Panel(self, -1, size=(10, 5)), wx.SizerFlags(0))
         
         self.SetSizer(outsizer)
         self.SetInitialSize()
@@ -164,13 +164,16 @@ class GeneralConfigTab(wx.Panel):
             evt.Skip()
             
     def OnTextChange(self, evt):
+        """ Oupdate file filters value """
         obj, id = evt.GetEventObject(), evt.GetId()
         if id == self.ID_FILE_FILTERS:
-            self._data.setFilters([x.strip() for x in obj.GetValue().split() if x.strip()])        
+            self._data.setFilters([x.strip() for x in obj.GetValue().split()
+                                   if x.strip()])        
         else:
             evt.Skip()
 
     def OnCheck(self, evt):
+        """ Handle checkbox events """
         obj, id = evt.GetEventObject(), evt.GetId()
         if id == self.ID_SYNC_WITH_NOTEBOOK:
             self._data.setSyncWithNotebook(obj.GetValue())
@@ -190,7 +193,7 @@ class GeneralConfigTab(wx.Panel):
       
 
 class SourceControlConfigTab(wx.Panel):
-
+    """ Configuration page for configuring source control options """
     ID_SC_CHOICE = wx.NewId()
     ID_SC_COMMAND = wx.NewId()
     ID_SC_REP_CHOICE = wx.NewId()
@@ -210,10 +213,13 @@ class SourceControlConfigTab(wx.Panel):
         flags = wx.SizerFlags().Left().Border(wx.ALL, 6)
 
         hsizer = wx.BoxSizer(wx.HORIZONTAL)
-        sc_choice = wx.Choice(self, self.ID_SC_CHOICE, choices=sorted([x for x in data.getSCSystems()]))
+        sc_choice = wx.Choice(self, self.ID_SC_CHOICE,
+                              choices=sorted([x for x in data.getSCSystems()]))
         sc_choice.SetSelection(0)
-        hsizer.AddF(sc_choice, flags.Border(wx.ALL,5))
-        hsizer.Add(wx.FilePickerCtrl(self, self.ID_SC_COMMAND, style=wx.FLP_USE_TEXTCTRL), 1, wx.EXPAND|wx.ALIGN_CENTER_VERTICAL)        
+        hsizer.AddF(sc_choice, flags.Border(wx.ALL, 5))
+        hsizer.Add(wx.FilePickerCtrl(self, self.ID_SC_COMMAND,
+                                     style=wx.FLP_USE_TEXTCTRL), 1,
+                                     wx.EXPAND|wx.ALIGN_CENTER_VERTICAL)        
         sizer.Add(hsizer, 0, wx.EXPAND)
         
         # Repository configuration box
@@ -224,17 +230,18 @@ class SourceControlConfigTab(wx.Panel):
         
         # Username and password
         userpass = wx.FlexGridSizer(3, 2)
-        userpass.AddGrowableCol(1,1)
+        userpass.AddGrowableCol(1, 1)
         userpass.AddF(wx.StaticText(self, wx.ID_ANY, _('Username') + u':'), flags)
         userpass.AddF(wx.TextCtrl(self, self.ID_SC_USERNAME), flags.Center())
         userpass.AddF(wx.StaticText(self, wx.ID_ANY, _('Password') + u':'), flags)
         userpass.AddF(wx.TextCtrl(self, self.ID_SC_PASSWORD, style=wx.TE_PASSWORD), flags)
         repsizer.AddF(userpass, wx.SizerFlags(1).Expand())
-        repsizer.AddF(wx.StaticLine(self, wx.ID_ANY, size=(-1, 1)), wx.SizerFlags().Center().Expand().Border(wx.TOP|wx.BOTTOM, 10))
+        repsizer.AddF(wx.StaticLine(self, wx.ID_ANY, size=(-1, 1)),
+                                    wx.SizerFlags().Center().Expand().Border(wx.TOP|wx.BOTTOM, 10))
 
         # Environment variables
         repsizer.AddF(wx.StaticText(self, wx.ID_ANY, _('Environment Variables')), flags)
-        env = AutoWidthListCtrl(self, self.ID_SC_ENVIRONMENT, size=(-1,80), 
+        env = AutoWidthListCtrl(self, self.ID_SC_ENVIRONMENT, size=(-1, 80), 
                                 style=wx.LC_REPORT|wx.LC_SORT_ASCENDING|wx.LC_VRULES|wx.LC_EDIT_LABELS)
         env.InsertColumn(0, _("Name"))
         env.InsertColumn(1, _("Value"))
@@ -253,9 +260,9 @@ class SourceControlConfigTab(wx.Panel):
 
         # Add space around the sides
         outsizer = wx.BoxSizer(wx.HORIZONTAL)
-        outsizer.AddF(wx.Panel(self, wx.ID_ANY, size=(10,5)), wx.SizerFlags(0))
+        outsizer.AddF(wx.Panel(self, wx.ID_ANY, size=(10, 5)), wx.SizerFlags(0))
         outsizer.AddF(sizer, wx.SizerFlags(1).Expand())
-        outsizer.AddF(wx.Panel(self, wx.ID_ANY, size=(10,5)), wx.SizerFlags(0))
+        outsizer.AddF(wx.Panel(self, wx.ID_ANY, size=(10, 5)), wx.SizerFlags(0))
 
         self.SetSizer(outsizer)
         self.SetInitialSize()
@@ -289,8 +296,11 @@ class SourceControlConfigTab(wx.Panel):
         sc, rep = self.currentSystem, self.currentRepository
         envlist = self.FindWindowById(self.ID_SC_ENVIRONMENT)
         envlist.DeleteAllItems()        
-        try: env = self._data.getSCEnvVars(sc, rep)
-        except KeyError: env = {}
+        try:
+            env = self._data.getSCEnvVars(sc, rep)
+        except KeyError:
+            env = {}
+
         for name, value in sorted(env.items()):
             index = envlist.InsertStringItem(sys.maxint, '')
             envlist.SetStringItem(index, 0, name)
@@ -298,14 +308,18 @@ class SourceControlConfigTab(wx.Panel):
 
     def populateUserInfo(self):
         sc, rep = self.currentSystem, self.currentRepository
-        try: username = self._data.getSCUsername(sc, rep)
-        except KeyError: username = ''
+        try:
+            username = self._data.getSCUsername(sc, rep)
+        except KeyError:
+            username = ''
+
         self.FindWindowById(self.ID_SC_USERNAME).SetValue(username)
         try: 
             password = self._data.getSCPassword(sc, rep)
             if password:
                 password = crypto.Decrypt(password, self._data.salt)
-        except KeyError: password = ''
+        except KeyError:
+            password = ''
         self.FindWindowById(self.ID_SC_PASSWORD).SetValue(password)
 
     def populateRepositoryList(self):
@@ -361,7 +375,8 @@ class SourceControlConfigTab(wx.Panel):
             item = -1
             items = []
             while True:
-                item = env.GetNextItem(item, wx.LIST_NEXT_ALL, wx.LIST_STATE_SELECTED)
+                item = env.GetNextItem(item, wx.LIST_NEXT_ALL,
+                                       wx.LIST_STATE_SELECTED)
                 if item == -1:
                     break
                 items.append(item)
@@ -372,6 +387,7 @@ class SourceControlConfigTab(wx.Panel):
             evt.Skip()
             
     def OnEndEdit(self, evt):
+        """ Save settings when edit finishes """
         wx.CallAfter(self.saveEnvironmentVariables)
 
     def saveEnvironmentVariables(self):
@@ -417,7 +433,7 @@ class SourceControlConfigTab(wx.Panel):
             elif obj.GetSelection() == (obj.GetCount() - 2):
                 ted = wx.TextEntryDialog(self, _('Please enter a repository path.  Partial paths may also be entered.'),
                      _('Add a New Repository Path'), style=wx.OK|wx.CANCEL|wx.CENTER)
-                ted.SetSize((300,-1))
+                ted.SetSize((300, -1))
                 if ted.ShowModal() == wx.ID_OK:
                     value = ted.GetValue().strip()
                     if value:
@@ -430,13 +446,14 @@ class SourceControlConfigTab(wx.Panel):
                     else:
                         obj.SetSelection(0)
                 else:
-                        obj.SetSelection(0)
+                    obj.SetSelection(0)
             self.populateUserInfo()
             self.populateEnvironment()
         else:
             evt.Skip()
 
-        
+#-----------------------------------------------------------------------------#
+
 class AutoWidthListCtrl(listmix.TextEditMixin, listmix.ListCtrlAutoWidthMixin, wx.ListCtrl):
     def __init__(self, *args, **kwargs):
         wx.ListCtrl.__init__(self, *args, **kwargs)
@@ -452,8 +469,8 @@ class AutoWidthListCtrl(listmix.TextEditMixin, listmix.ListCtrlAutoWidthMixin, w
         if self.editor.IsShown():
             self.CloseEditor()
             
-        x,y = evt.GetPosition()
-        row,flags = self.HitTest((x,y))
+        x, y = evt.GetPosition()
+        row, flags = self.HitTest((x, y))
         if row != self.curRow: # self.curRow keeps track of the current row
             evt.Skip()
             return
@@ -478,16 +495,20 @@ class AutoWidthListCtrl(listmix.TextEditMixin, listmix.ListCtrlAutoWidthMixin, w
         col = bisect(self.col_locs, x+self.GetScrollPos(wx.HORIZONTAL)) - 1
         self.OpenEditor(col, row)
 
+#-----------------------------------------------------------------------------#
+
 class ConfigData(dict):
+    """ Configuration data storage class """
     def __init__(self, data={}):
         self['source-control'] = {}
         self['general'] = {}
         self['projects'] = {}
 
-        self.setFilters(sorted(['CVS','dntnd','.DS_Store','.dpp','.newpp','*~',
-                        '*.a','*.o','.poem','.dll','._*','.localized',
-                        '.svn','*.pyc','*.bak','#*','*.pyo','*%*', '.git',
-                        '*.previous','*.swp','.#*']))
+        self.setFilters(sorted(['CVS', 'dntnd', '.DS_Store', '.dpp', '.newpp',
+                                '*~', '*.a', '*.o', '.poem', '.dll', '._*',
+                                '.localized', '.svn', '*.pyc', '*.bak', '#*',
+                                '*.pyo','*%*', '.git', '*.previous', '*.swp',
+                                '.#*']))
         self.setBuiltinDiff(True)
         self.setDiffProgram('opendiff')
         self.setSyncWithNotebook(True)
@@ -561,14 +582,17 @@ class ConfigData(dict):
         return self['source-control'][name]
 
     def removeSCSystem(self, name):
-        try: del self['source-control'][name]
-        except: pass
+        try:
+            del self['source-control'][name]
+        except:
+            pass
     
     def removeSCSystem(self, name):
         del self['source-control'][name]
     
     def newSCSystem(self, instance, repositories=None):
-        system = {'command':instance.command, 'instance': instance, 'repositories': {'Default':self.newSCRepository()}}
+        system = {'command':instance.command, 'instance': instance, 
+                  'repositories': {'Default':self.newSCRepository()}}
         if repositories is not None:
             system['repositories'].update(repositories)
         return system
@@ -623,8 +647,10 @@ class ConfigData(dict):
         self.getSCEnvVars(sc, rep)[name] = value
         
     def removeSCEnvVar(self, sc, rep, name):
-        try: del self.getSCEnvVars(sc, rep)[name]
-        except KeyError: pass
+        try:
+            del self.getSCEnvVars(sc, rep)[name]
+        except KeyError:
+            pass
         
     def getSCEnvVars(self, sc, rep):
         return self.getSCRepository(sc, rep)['env']
@@ -663,6 +689,8 @@ class ConfigData(dict):
         except (ImportError, OSError):
             pass
 
+#-----------------------------------------------------------------------------#
+
 def recursiveupdate(dest, src):
     """ Recursively update dst from src """
     for key, value in src.items():
@@ -674,6 +702,8 @@ def recursiveupdate(dest, src):
         else:
             dest[key] = value
     return dest
+
+#-----------------------------------------------------------------------------#
 
 if __name__ == '__main__':
     app = wx.PySimpleApp(False)
