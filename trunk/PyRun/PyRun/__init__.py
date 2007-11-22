@@ -130,18 +130,19 @@ class OutputWindow(wx.TextCtrl):
 
 #-----------------------------------------------------------------------------#
 
-
-
 def RunCmd(outwin, filename, execcmd="python -u"):
     if filename == "":
         return ""
 
-    cwd = os.path.abspath(os.getcwd())
-    filedir = "/".join(filename.split("/")[:-1])
+    filedir = os.path.dirname(filename)
     command = "%s %s" % (execcmd, filename)
-    p = Popen(command, shell=True, stdout=PIPE, stderr=STDOUT, cwd=filedir)
+    proc_env = dict()
+    proc_env['PATH'] = os.environ.get('PATH', '.')
+    
+    p = Popen(command, shell=True, stdout=PIPE, 
+              stderr=STDOUT, cwd=filedir, env=proc_env)
 
-    evt = UpdateTextEvent(edEVT_UPDATE_TEXT, -1, "> %s\n" % command)
+    evt = UpdateTextEvent(edEVT_UPDATE_TEXT, -1, "> %s" % command + os.linesep)
     wx.CallAfter(wx.PostEvent, outwin, evt)
 
     while True:
@@ -150,7 +151,7 @@ def RunCmd(outwin, filename, execcmd="python -u"):
        evt = UpdateTextEvent(edEVT_UPDATE_TEXT, -1, result)
        wx.CallAfter(wx.PostEvent, outwin, evt)
 
-    evt = UpdateTextEvent(edEVT_UPDATE_TEXT, -1, "> Exit code: %d\n" % p.wait())
+    evt = UpdateTextEvent(edEVT_UPDATE_TEXT, -1, "> Exit code: %d%s" % (p.wait(), os.linesep))
     wx.CallAfter(wx.PostEvent, outwin, evt)
     return outwin.GetValue()
 
