@@ -13,10 +13,15 @@ __revision__ = "$Revision$"
 #-----------------------------------------------------------------------------#
 # Imports
 import os
+import sys
 import wx
 import threading
 import signal
 from subprocess import Popen, PIPE, STDOUT
+
+# Needed for killing processes on windows
+if sys.platform.startswith('win'):
+    import ctypes
 
 # Editra Imports
 import util
@@ -95,14 +100,14 @@ class OutputWindow(wx.Panel):
 
     def __del__(self):
         """Cleanup any running processes on exit"""
+        self._log("[PyRun][info] Output window deleted: %d" % self.GetId())
         self._abort = True
 
     def __DoLayout(self):
         """Layout/Create the windows controls"""
         msizer = wx.BoxSizer(wx.HORIZONTAL)
         vsizer = wx.BoxSizer(wx.VERTICAL)
-
-        vsizer.AddMany([(self._ctrl, 0, wx.EXPAND), 
+        vsizer.AddMany([(self._ctrl, 0, wx.EXPAND, 2), 
                         (self._buffer, 1, wx.EXPAND)])
         msizer.Add(vsizer, 1, wx.EXPAND)
         self.SetSizer(msizer)
@@ -122,6 +127,17 @@ class OutputWindow(wx.Panel):
         wx.CallAfter(wx.PostEvent, self._buffer, evt)
         return True
 
+    def __KillPid(self, pid):
+        """Kill a process by process id"""
+        if wx.Platform in ['__WXMAC__', '__WXGTK__']:
+            os.kill(pid, signal.SIGABRT)
+            os.waitpid(pid, os.WNOHANG)
+        else:
+            PROCESS_TERMINATE = 1
+            handle = ctypes.windll.kernel32.OpenProcess(PROCESS_TERMINATE, False, pid)
+            ctypes.windll.kernel32.TerminateProcess(handle, -1)
+            ctypes.windll.kernel32.CloseHandle(handle)
+
     def _DoRunCmd(self, filename, execmd="python"):
         """This is a worker function that runs a python script on
         on a separate thread and posts the output back to the output
@@ -134,10 +150,10 @@ class OutputWindow(wx.Panel):
         if filename == "":
             return ""
 
-        filedir = os.path.dirname(filename)
+        filedir, filename = os.path.split(filename)
+        filename = '"%s"' % filename
         command = "%s %s" % (execmd, filename)
-        proc_env = dict()
-        proc_env['PATH'] = os.environ.get('PATH', '.')
+        proc_env = os.environ.copy()
         proc_env['PYTHONUNBUFFERED'] = '1'
         
         p = Popen(command, stdout=PIPE, stderr=STDOUT, 
@@ -149,8 +165,7 @@ class OutputWindow(wx.Panel):
         # Read from stdout while there is output from process
         while True:
             if self._abort:
-                os.kill(p.pid, signal.SIGABRT)
-                os.waitpid(p.pid, os.WNOHANG)
+                self.__KillPid(p.pid)
                 self.__DoOneRead(p)
                 break
             else:
@@ -158,8 +173,7 @@ class OutputWindow(wx.Panel):
                     more = self.__DoOneRead(p)
                 except wx.PyDeadObjectError:
                     # We are dead so kill process and return
-                    os.kill(p.pid, signal.SIGABRT)
-                    os.waitpid(p.pid, os.WNOHANG)
+                    self.__KillPid(p.pid)
                     return
                 else:
                     if not more:
@@ -249,8 +263,8 @@ class OutputBuffer(wx.TextCtrl):
 
     def __del__(self):
         """Ensure timer is cleaned up when we are deleted"""
-        self._log("[PyRun][info] Stopping timer for %d" % self.GetId())
         if self._timer.IsRunning():
+            self._log("[PyRun][info] Stopping timer for %d" % self.GetId())
             self._timer.Stop()
 
     def OnTimer(self, evt):
@@ -307,8 +321,9 @@ class ConfigBar(wx.Panel):
         self._cfile = wx.StaticText(self, label='')     # Current File Display
         self._run = wx.Button(self, label=_("Run Script"))
         if wx.Platform == '__WXMAC__':
-            self._run.SetWindowVariant(wx.WINDOW_VARIANT_SMALL)
             self._pbuff.SetFont(wx.SMALL_FONT)
+            self._pbuff.SetWindowVariant(wx.WINDOW_VARIANT_SMALL)
+            self._run.SetWindowVariant(wx.WINDOW_VARIANT_SMALL)
 
         # Layout
         self.__DoLayout()
