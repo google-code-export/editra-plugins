@@ -15,6 +15,7 @@ __revision__ = "$Revision$"
 import os
 import wx
 import threading
+import signal
 from subprocess import Popen, PIPE, STDOUT
 
 # Editra Imports
@@ -48,6 +49,12 @@ class UpdateTextEvent(wx.PyCommandEvent):
         """
         return self._value
 
+edEVT_PROCESS_ABORT = wx.NewEventType()
+EVT_PROCESS_ABORT = wx.PyEventBinder(edEVT_PROCESS_ABORT, 1)
+class ProcessAbortEvent(wx.PyCommandEvent):
+    """Event for notifying that the script should be aborted"""
+    pass
+
 edEVT_PROCESS_START = wx.NewEventType()
 EVT_PROCESS_START = wx.PyEventBinder(edEVT_PROCESS_START, 1)
 class ProcessStartEvent(UpdateTextEvent):
@@ -75,13 +82,20 @@ class OutputWindow(wx.Panel):
         self._log = wx.GetApp().GetLog()
         self._ctrl = ConfigBar(self)
         self._buffer = OutputBuffer(self)
+        self._worker = None
+        self._abort = False                 # Flag to abort script
 
         # Layout
         self.__DoLayout()
 
         # Event Handlers
+        self.Bind(EVT_PROCESS_ABORT, self.OnAbortScript)
         self.Bind(EVT_PROCESS_START, self.OnRunScript)
         self.Bind(EVT_PROCESS_EXIT, self.OnEndScript)
+
+    def __del__(self):
+        """Cleanup any running processes on exit"""
+        self._abort = True
 
     def __DoLayout(self):
         """Layout/Create the windows controls"""
@@ -93,6 +107,20 @@ class OutputWindow(wx.Panel):
         msizer.Add(vsizer, 1, wx.EXPAND)
         self.SetSizer(msizer)
         self.SetAutoLayout(True)
+
+    def __DoOneRead(self, proc):
+        """Read one line of output and post results. Returns True
+        if there is more to read and False if there is not. This is
+        a private function called by the worker thread to retrieve
+        output.
+
+        """
+        result = proc.stdout.readline()
+        if result == "" or result == None:
+            return False
+        evt = UpdateTextEvent(edEVT_UPDATE_TEXT, -1, result)
+        wx.CallAfter(wx.PostEvent, self._buffer, evt)
+        return True
 
     def _DoRunCmd(self, filename, execmd="python"):
         """This is a worker function that runs a python script on
@@ -112,17 +140,30 @@ class OutputWindow(wx.Panel):
         proc_env['PATH'] = os.environ.get('PATH', '.')
         proc_env['PYTHONUNBUFFERED'] = '1'
         
-        p = Popen(command, shell=True, stdout=PIPE, 
-                  stderr=STDOUT, cwd=filedir, env=proc_env)
+        p = Popen(command, stdout=PIPE, stderr=STDOUT, 
+                  shell=True, cwd=filedir, env=proc_env)
 
         evt = UpdateTextEvent(edEVT_UPDATE_TEXT, -1, "> %s" % command + os.linesep)
         wx.CallAfter(wx.PostEvent, self._buffer, evt)
 
+        # Read from stdout while there is output from process
         while True:
-           result = p.stdout.readline()
-           if result == "" or result == None: break
-           evt = UpdateTextEvent(edEVT_UPDATE_TEXT, -1, result)
-           wx.CallAfter(wx.PostEvent, self._buffer, evt)
+            if self._abort:
+                os.kill(p.pid, signal.SIGABRT)
+                os.waitpid(p.pid, os.WNOHANG)
+                self.__DoOneRead(p)
+                break
+            else:
+                try:
+                    more = self.__DoOneRead(p)
+                except wx.PyDeadObjectError:
+                    # We are dead so kill process and return
+                    os.kill(p.pid, signal.SIGABRT)
+                    os.waitpid(p.pid, os.WNOHANG)
+                    return
+                else:
+                    if not more:
+                        break
 
         evt = UpdateTextEvent(edEVT_UPDATE_TEXT, -1, "> Exit code: %d%s" % (p.wait(), os.linesep))
         wx.CallAfter(wx.PostEvent, self._buffer, evt)
@@ -130,6 +171,29 @@ class OutputWindow(wx.Panel):
         # Notify that proccess has exited
         evt = ProcessExitEvent(edEVT_PROCESS_EXIT, -1)
         wx.CallAfter(wx.PostEvent, self, evt)
+
+    def Abort(self):
+        """Abort the current process if one is running"""
+        if self._worker is None:
+            return
+
+        # Flag desire to abort for worker thread to notice
+        self._abort = True
+
+        # Wait for it to die
+        self._worker.join(1)
+        if self._worker.isAlive():
+            self._log("[PyRun][info] Force stopping thread")
+            self._worker._Thread__stop()
+        self._worker = None
+
+        self._buffer.Stop()
+        self._ctrl.Enable()
+
+    def OnAbortScript(self, evt):
+        """Handle request to abort the current running script"""
+        self._log("[PyRun][info] Aborting current script...")
+        self.Abort()
 
     def OnEndScript(self, evt):
         """Handle when the process exits"""
@@ -139,18 +203,19 @@ class OutputWindow(wx.Panel):
 
     def OnRunScript(self, evt):
         """Handle events posted by control bar to re-run the script"""
-        self._log("[PyRun][info] Starting Script: %s..." % script)
         script = evt.GetValue()
+        self._log("[PyRun][info] Starting Script: %s..." % script)
         self.RunScript(script)
 
     def RunScript(self, fname):
         """Start the worker thread that runs the python script"""
+        self._abort = False
         self._buffer.Clear()
         self._ctrl.Disable()
         self._ctrl.SetCurrentFile(fname)
         pyexe = self._ctrl.GetPythonCommand()
-        worker = threading.Thread(target=self._DoRunCmd, args=[fname, pyexe])
-        worker.start()
+        self._worker = threading.Thread(target=self._DoRunCmd, args=[fname, pyexe])
+        self._worker.start()
         self.Layout()
         wx.CallLater(150, self._buffer.Start, 150)
 
@@ -159,7 +224,7 @@ class OutputWindow(wx.Panel):
 class OutputBuffer(wx.TextCtrl):
     """Output buffer to display results of running a script"""
     def __init__(self, parent):
-        wx.TextCtrl.__init__(self, parent, style=wx.TE_MULTILINE)
+        wx.TextCtrl.__init__(self, parent, style=wx.TE_MULTILINE|wx.TE_READONLY)
 
         # Attributes
         self._log = wx.GetApp().GetLog()
@@ -226,7 +291,7 @@ class ConfigBar(wx.Panel):
 
     """
     def __init__(self, parent):
-        wx.Panel.__init__(self, parent, size=(-1, 24))
+        wx.Panel.__init__(self, parent, size=(-1, 28))
 
         # Attributes
         pyexe = Profile_Get(PYRUN_EXE, 'str', 'python')
@@ -240,6 +305,7 @@ class ConfigBar(wx.Panel):
         self._run = wx.Button(self, label=_("Run Script"))
         if wx.Platform == '__WXMAC__':
             self._run.SetWindowVariant(wx.WINDOW_VARIANT_SMALL)
+            self._pbuff.SetFont(wx.SMALL_FONT)
 
         # Layout
         self.__DoLayout()
@@ -258,13 +324,35 @@ class ConfigBar(wx.Panel):
             lbl.SetFont(wx.SMALL_FONT)
             self._cfile.SetFont(wx.SMALL_FONT)
 
-        hsizer.AddMany([((20, 24)), (lbl, 0, wx.ALIGN_CENTER_VERTICAL),
+        hsizer.AddMany([((20, 28)), (lbl, 0, wx.ALIGN_CENTER_VERTICAL),
                         ((5, 5)), (self._pbuff, 0, wx.ALIGN_CENTER_VERTICAL),
                         ((20, 15)), (self._cfile, 0, wx.ALIGN_CENTER_VERTICAL),
                         ((5, 5), 1, wx.EXPAND), (self._run, 0, wx.ALIGN_RIGHT | wx.ALIGN_CENTER_VERTICAL),
                         ((8, 8))])
         self.SetSizer(hsizer)
         self.SetAutoLayout(True)
+
+    def Disable(self):
+        """Disable the panel except for the button which is
+        changed to an abort button.
+
+        """
+        for child in self.GetChildren():
+            if isinstance(child, wx.Button):
+                child.SetLabel(_("Abort"))
+            else:
+                child.Disable()
+
+    def Enable(self, enable=True):
+        """Enable all items in the bar and change the button back
+        to Run Script.
+
+        """
+        for child in self.GetChildren():
+            if isinstance(child, wx.Button):
+                child.SetLabel(_("Run Script"))
+            else:
+                child.Enable(enable)
 
     def GetCurrentFile(self):
         """Get the current file that is shown in the display
@@ -286,8 +374,14 @@ class ConfigBar(wx.Panel):
             return cmd
 
     def OnButton(self, evt):
-        """Post an event to request the script be run again"""
-        sevt = ProcessStartEvent(edEVT_PROCESS_START, self.GetId(), self._fname)
+        """Post an event to request the script be run again or aborted"""
+        lbl = evt.GetEventObject().GetLabel()
+        if lbl == _("Run Script"):
+            sevt = ProcessStartEvent(edEVT_PROCESS_START, 
+                                     self.GetId(), self._fname)
+        else:
+            sevt = ProcessAbortEvent(edEVT_PROCESS_ABORT, self.GetId())
+
         wx.PostEvent(self.GetParent(), sevt)
 
     def OnPaint(self, evt):
