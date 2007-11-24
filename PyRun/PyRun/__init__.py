@@ -14,7 +14,6 @@ __version__ = "0.1"
 
 #-----------------------------------------------------------------------------#
 # Imports
-import os
 import wx
 
 # Local modules
@@ -65,30 +64,3 @@ class PyRun(plugin.Plugin):
         return self.__name__
 
 #-----------------------------------------------------------------------------#
-
-# def RunCmd(outwin, filename, execcmd="python -u"):
-#     if filename == "":
-#         return ""
-
-#     filedir = os.path.dirname(filename)
-#     command = "%s %s" % (execcmd, filename)
-#     proc_env = dict()
-#     proc_env['PATH'] = os.environ.get('PATH', '.')
-#     proc_env['PYTHONUNBUFFERED'] = 1
-    
-#     p = Popen(command, shell=True, stdout=PIPE, 
-#               stderr=STDOUT, cwd=filedir, env=proc_env)
-
-#     evt = UpdateTextEvent(edEVT_UPDATE_TEXT, -1, "> %s" % command + os.linesep)
-#     wx.CallAfter(wx.PostEvent, outwin, evt)
-
-#     while True:
-#        result = p.stdout.readline()
-#        if result == "" or result == None: break
-#        evt = UpdateTextEvent(edEVT_UPDATE_TEXT, -1, result)
-#        wx.CallAfter(wx.PostEvent, outwin, evt)
-
-#     evt = UpdateTextEvent(edEVT_UPDATE_TEXT, -1, "> Exit code: %d%s" % (p.wait(), os.linesep))
-#     wx.CallAfter(wx.PostEvent, outwin, evt)
-#     return outwin.GetValue()
-
