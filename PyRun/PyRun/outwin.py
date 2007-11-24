@@ -214,6 +214,9 @@ class OutputWindow(wx.Panel):
         self._ctrl.Disable()
         self._ctrl.SetCurrentFile(fname)
         pyexe = self._ctrl.GetPythonCommand()
+        if len(pyexe):
+            Profile_Set(PYRUN_EXE, pyexe)
+        self._log("[PyRun][info] Running script with command: %s" % pyexe)
         self._worker = threading.Thread(target=self._DoRunCmd, args=[fname, pyexe])
         self._worker.start()
         self.Layout()
