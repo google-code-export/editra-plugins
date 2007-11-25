@@ -221,7 +221,7 @@ class HistoryPane(wx.Panel):
         self.SetMinSize((550, -1))
 
         # Split Window
-        self._split.SetMinimumPaneSize(150)
+        self._split.SetMinimumPaneSize(80)
         self._split.SetMinSize((400, 350))
         self._split.SetSashSize(8)
         self._split.SplitHorizontally(self._list, self._txt, 250)
