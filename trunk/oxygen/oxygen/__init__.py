@@ -7,7 +7,7 @@
 ###############################################################################
 """Oxygen icon theme for Editra"""
 __author__ = "Cody Precord"
-__version__ = "0.1"
+__version__ = "0.2"
 
 import wx
 import os
@@ -24,12 +24,6 @@ import syntax.syntax as syntax
 MENU_PATH = os.path.join('pixmaps', 'menu') + os.sep
 MIME_PATH = os.path.join('pixmaps', 'mime') + os.sep
 TOOL_PATH = os.path.join('pixmaps', 'toolbar') + os.sep
-
-# Art Extensions
-ed_theme.ART[ed_glob.ID_SAVEALL] = u'saveall.png'
-ed_theme.ART[ed_glob.ID_INDENT] = u'indent.png'
-ed_theme.ART[ed_glob.ID_UNINDENT] = u'outdent.png'
-ed_theme.ART[ed_glob.ID_DOCUMENTATION] = u'docs.png'
 
 #-----------------------------------------------------------------------------#
 
