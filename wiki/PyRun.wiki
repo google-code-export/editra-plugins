@@ -1,0 +1,20 @@
+#summary PyRun is a python script launching and output display plugin
+
+= Introduction =
+
+PyRun is a Shelf plugin that can run the script that is in the current buffer and display its output in a text buffer in the Shelf. The scripts can be launched using the hotkey that PyRun is assigned by the shelf (Cmd+Alt+_Number Key_), after a PyRun instance is open in the Shelf the script can be rerun by using the "Run Script" button.
+
+
+= Current Features =
+
+* All output from running script shown in a builtin output buffer in Editra's Shelf.
+* Run multiple scripts simultaneously without blocking usage of any other parts of Editra
+* Abort a running script at any time
+* Configure which python executable to use for running script(s)
+
+
+= Planned Features =
+
+* Save and configuration for multiple versions of python and allow easy switching at runtime
+* Allow PyRun instance to automatically associate with current buffer without needing to open new instance of PyRun
+
