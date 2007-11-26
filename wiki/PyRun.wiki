@@ -1,4 +1,4 @@
-#summary PyRun is a python script launching and output display plugin
+#summary PyRun is a utility for launching python scripts and displaying their output
 
 = Introduction =
 
