@@ -153,8 +153,7 @@ class OutputWindow(wx.Panel):
         filedir, filename = os.path.split(filename)
         filename = '"%s"' % filename
         command = "%s %s" % (execmd, filename)
-        proc_env = os.environ.copy()
-        proc_env['PYTHONUNBUFFERED'] = '1'
+        proc_env = self._PrepEnv()
         
         p = Popen(command, stdout=PIPE, stderr=STDOUT, 
                   shell=True, cwd=filedir, env=proc_env)
@@ -186,6 +185,16 @@ class OutputWindow(wx.Panel):
         evt = ProcessExitEvent(edEVT_PROCESS_EXIT, -1)
         wx.CallAfter(wx.PostEvent, self, evt)
 
+    def _PrepEnv(self):
+        """Create an environment for the process to run in"""
+        if not hasattr(sys, 'frozen') or wx.Platform == '__WXMSW__':
+            proc_env = os.environ.copy()
+        else:
+            proc_env = dict()
+
+        proc_env['PYTHONUNBUFFERED'] = '1'
+        return proc_env
+
     def Abort(self):
         """Abort the current process if one is running"""
         if self._worker is None:
@@ -197,7 +206,7 @@ class OutputWindow(wx.Panel):
         # Wait for it to die
         self._worker.join(1)
         if self._worker.isAlive():
-            self._log("[PyRun][info] Force stopping thread")
+            self._log("[PyRun][info] Forcing thread to stop")
             self._worker._Thread__stop()
         self._worker = None
 
@@ -224,7 +233,7 @@ class OutputWindow(wx.Panel):
     def RunScript(self, fname):
         """Start the worker thread that runs the python script"""
         self._abort = False
-        self._buffer.Clear()
+        self._buffer.SetValue('')
         self._ctrl.Disable()
         self._ctrl.SetCurrentFile(fname)
         pyexe = self._ctrl.GetPythonCommand()
@@ -317,6 +326,7 @@ class ConfigBar(wx.Panel):
         self._pbuff = wx.TextCtrl(self, value=pyexe)
         self._pbuff.SetMinSize((150, -1))
         self._pbuff.SetMaxSize((-1, 20))
+        self._pbuff.SetToolTipString(_("Path to Python executable or name of executable to use"))
         self._fname = ''                                # Current File
         self._cfile = wx.StaticText(self, label='')     # Current File Display
         self._run = wx.Button(self, label=_("Run Script"))

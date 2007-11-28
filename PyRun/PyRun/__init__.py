@@ -58,7 +58,7 @@ class PyRun(plugin.Plugin):
 
     def GetMenuEntry(self, menu):
         return wx.MenuItem(menu, self.ID_PYRUN, self.__name__, 
-                                        _("Executes python script"))
+                           _("Executes a python script"))
 
     def GetName(self):
         return self.__name__
