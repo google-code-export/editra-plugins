@@ -60,6 +60,12 @@ class ProcessAbortEvent(wx.PyCommandEvent):
     """Event for notifying that the script should be aborted"""
     pass
 
+edEVT_PROCESS_CLEAR = wx.NewEventType()
+EVT_PROCESS_CLEAR = wx.PyEventBinder(edEVT_PROCESS_CLEAR, 1)
+class ProcessClearEvent(wx.PyCommandEvent):
+    """Event for clearing output window"""
+    pass
+
 edEVT_PROCESS_START = wx.NewEventType()
 EVT_PROCESS_START = wx.PyEventBinder(edEVT_PROCESS_START, 1)
 class ProcessStartEvent(UpdateTextEvent):
@@ -95,6 +101,7 @@ class OutputWindow(wx.Panel):
 
         # Event Handlers
         self.Bind(EVT_PROCESS_ABORT, self.OnAbortScript)
+        self.Bind(EVT_PROCESS_CLEAR, self.OnClear)
         self.Bind(EVT_PROCESS_START, self.OnRunScript)
         self.Bind(EVT_PROCESS_EXIT, self.OnEndScript)
 
@@ -161,6 +168,7 @@ class OutputWindow(wx.Panel):
         evt = UpdateTextEvent(edEVT_UPDATE_TEXT, -1, "> %s" % command + os.linesep)
         wx.CallAfter(wx.PostEvent, self._buffer, evt)
 
+
         # Read from stdout while there is output from process
         while True:
             if self._abort:
@@ -213,6 +221,14 @@ class OutputWindow(wx.Panel):
         self._buffer.Stop()
         self._ctrl.Enable()
 
+    def Clear(self):
+        self._buffer.Clear()
+ 
+    def OnClear(self, evt):
+        """Handle request to clear output window"""
+        self._log("[PyRun][info] Clearing output...")
+        self.Clear()
+
     def OnAbortScript(self, evt):
         """Handle request to abort the current running script"""
         self._log("[PyRun][info] Aborting current script...")
@@ -250,7 +266,7 @@ class OutputWindow(wx.Panel):
 class OutputBuffer(wx.TextCtrl):
     """Output buffer to display results of running a script"""
     def __init__(self, parent):
-        wx.TextCtrl.__init__(self, parent, style=wx.TE_MULTILINE|wx.TE_READONLY)
+        wx.TextCtrl.__init__(self, parent, style=wx.TE_MULTILINE|wx.TE_READONLY|wx.TE_RICH2)
 
         # Attributes
         self._log = wx.GetApp().GetLog()
@@ -280,8 +296,14 @@ class OutputBuffer(wx.TextCtrl):
         """Process and display text from the update buffer"""
         out = self._updates[:]
         if len(out):
-            self.AppendText(''.join(out))
-            self.SetInsertionPoint(self.GetLastPosition())
+            for txt in out:
+                start = self.GetLastPosition()
+                self.AppendText(txt)
+                self.SetInsertionPoint(self.GetLastPosition())
+                if len(txt) > 0 and txt[0] == ">":
+                    self.SetStyle(start, self.GetLastPosition(),wx.TextAttr("BLUE", wx.NullColour))
+                else:
+                    self.SetStyle(start, self.GetLastPosition(),wx.TextAttr("BLACK", wx.NullColour))
             self.Refresh()
             self.Update()
             self._updates = self._updates[len(out):]
@@ -330,16 +352,19 @@ class ConfigBar(wx.Panel):
         self._fname = ''                                # Current File
         self._cfile = wx.StaticText(self, label='')     # Current File Display
         self._run = wx.Button(self, label=_("Run Script"))
+        self._clear = wx.Button(self, label=_("Clear"))
         if wx.Platform == '__WXMAC__':
             self._pbuff.SetFont(wx.SMALL_FONT)
             self._pbuff.SetWindowVariant(wx.WINDOW_VARIANT_SMALL)
             self._run.SetWindowVariant(wx.WINDOW_VARIANT_SMALL)
+            self._clear.SetWindowVariant(wx.WINDOW_VARIANT_SMALL)
 
         # Layout
         self.__DoLayout()
 
         # Event Handlers
         self.Bind(wx.EVT_BUTTON, self.OnButton, self._run)
+        self.Bind(wx.EVT_BUTTON, self.OnButton, self._clear)
         self.Bind(wx.EVT_PAINT, self.OnPaint)
 
     def __DoLayout(self):
@@ -356,6 +381,7 @@ class ConfigBar(wx.Panel):
                         ((5, 5)), (self._pbuff, 0, wx.ALIGN_CENTER_VERTICAL),
                         ((20, 15)), (self._cfile, 0, wx.ALIGN_CENTER_VERTICAL),
                         ((5, 5), 1, wx.EXPAND), (self._run, 0, wx.ALIGN_RIGHT | wx.ALIGN_CENTER_VERTICAL),
+                        (self._clear, 0, wx.ALIGN_RIGHT | wx.ALIGN_CENTER_VERTICAL),
                         ((8, 8))])
         self.SetSizer(hsizer)
         self.SetAutoLayout(True)
@@ -366,7 +392,7 @@ class ConfigBar(wx.Panel):
 
         """
         for child in self.GetChildren():
-            if isinstance(child, wx.Button):
+            if isinstance(child, wx.Button) and child.GetLabel() == _("Run Script"):
                 child.SetLabel(_("Abort"))
             else:
                 child.Disable()
@@ -377,7 +403,7 @@ class ConfigBar(wx.Panel):
 
         """
         for child in self.GetChildren():
-            if isinstance(child, wx.Button):
+            if isinstance(child, wx.Button) and child.GetLabel() == _("Abort"):
                 child.SetLabel(_("Run Script"))
             else:
                 child.Enable(enable)
@@ -407,6 +433,8 @@ class ConfigBar(wx.Panel):
         if lbl == _("Run Script"):
             sevt = ProcessStartEvent(edEVT_PROCESS_START, 
                                      self.GetId(), self._fname)
+        elif lbl == _("Clear"):
+            sevt = ProcessClearEvent(edEVT_PROCESS_CLEAR, self.GetId())
         else:
             sevt = ProcessAbortEvent(edEVT_PROCESS_ABORT, self.GetId())
 
