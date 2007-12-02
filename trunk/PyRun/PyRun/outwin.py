@@ -381,7 +381,7 @@ class ConfigBar(wx.Panel):
                         ((5, 5)), (self._pbuff, 0, wx.ALIGN_CENTER_VERTICAL),
                         ((20, 15)), (self._cfile, 0, wx.ALIGN_CENTER_VERTICAL),
                         ((5, 5), 1, wx.EXPAND), (self._run, 0, wx.ALIGN_RIGHT | wx.ALIGN_CENTER_VERTICAL),
-                        (self._clear, 0, wx.ALIGN_RIGHT | wx.ALIGN_CENTER_VERTICAL),
+                        ((5,5)), (self._clear, 0, wx.ALIGN_RIGHT | wx.ALIGN_CENTER_VERTICAL),
                         ((8, 8))])
         self.SetSizer(hsizer)
         self.SetAutoLayout(True)
@@ -392,7 +392,10 @@ class ConfigBar(wx.Panel):
 
         """
         for child in self.GetChildren():
-            if isinstance(child, wx.Button) and child.GetLabel() == _("Run Script"):
+            if isinstance(child, wx.Button) and child.GetLabel() == _("Clear"):
+                continue
+
+            if isinstance(child, wx.Button):
                 child.SetLabel(_("Abort"))
             else:
                 child.Disable()
@@ -403,7 +406,10 @@ class ConfigBar(wx.Panel):
 
         """
         for child in self.GetChildren():
-            if isinstance(child, wx.Button) and child.GetLabel() == _("Abort"):
+            if isinstance(child, wx.Button) and child.GetLabel() == _("Clear"):
+                continue
+
+            if isinstance(child, wx.Button):
                 child.SetLabel(_("Run Script"))
             else:
                 child.Enable(enable)
