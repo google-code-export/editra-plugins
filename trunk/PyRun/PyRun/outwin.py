@@ -14,6 +14,7 @@ __revision__ = "$Revision$"
 # Imports
 import os
 import sys
+import re
 import wx
 import threading
 import signal
@@ -26,6 +27,9 @@ if sys.platform.startswith('win'):
 # Editra Imports
 import util
 from profiler import Profile_Get, Profile_Set
+
+#pre build error regular expression
+error_re = re.compile('.*File "(.+)", line ([0-9]+)')
 
 # Function Aliases
 _ = wx.GetTranslation
@@ -294,16 +298,23 @@ class OutputBuffer(wx.TextCtrl):
 
     def OnTimer(self, evt):
         """Process and display text from the update buffer"""
+        
         out = self._updates[:]
         if len(out):
             for txt in out:
                 start = self.GetLastPosition()
                 self.AppendText(txt)
+               
                 self.SetInsertionPoint(self.GetLastPosition())
-                if len(txt) > 0 and txt[0] == ">":
-                    self.SetStyle(start, self.GetLastPosition(),wx.TextAttr("BLUE", wx.NullColour))
+                end = self.GetLastPosition()
+                m = error_re.match(txt)
+                if m:
+                    # TODO: Save m.groups() to be used by mouse event
+                    self.SetStyle(start, end, wx.TextAttr("RED", wx.NullColour))
+                elif len(txt) > 0 and txt[0] == ">":
+                    self.SetStyle(start, end, wx.TextAttr("BLUE", wx.NullColour))
                 else:
-                    self.SetStyle(start, self.GetLastPosition(),wx.TextAttr("BLACK", wx.NullColour))
+                    self.SetStyle(start, end, wx.TextAttr("BLACK", wx.NullColour))
             self.Refresh()
             self.Update()
             self._updates = self._updates[len(out):]
