@@ -78,21 +78,42 @@ class SourceControl(object):
             else:
                 return os.path.dirname(paths[0]), [os.path.basename(paths[0])]
         
-        root = os.path.commonprefix(paths)
-        if not os.path.isdir(root):
-            root = os.path.dirname(root)
-        
-        # If root is one of the paths, move up one directory
-        #if root in paths:
-        #    root = os.path.dirname(root)
-        
-        if not root.endswith(os.sep):
-            root += os.sep
-        
-        # Make paths relative
+        paths = list(reversed(sorted([x.split(os.sep) for x in paths])))
+        # Remove empty strings caused by trailing '/'
+        for path in paths:
+            while path and not path[-1]:
+                path.pop()
+
+        # Find the common prefix
+        exit = False
+        root = []                
+        while paths[0]:
+            segment = paths[0][0]
+            for path in paths:
+                if not path:
+                    exit = True
+                    break
+                elif path[0] != segment:
+                    exit = True
+                    break
+            if exit:
+                break
+            root.append(segment)
+            for path in paths:
+                path.pop(0)
+                
+        # Create paths from lists
+        addRoot = False
+        if not root[0]:
+            addRoot = True
+        root = os.path.join(*root)
+        if addRoot:
+            root = os.path.sep + root
+            
         for i, path in enumerate(paths):
-            paths[i] = paths[i][len(root):]
-            if not paths[i]:
+            if path:
+                paths[i] = os.path.join(*path)
+            else:
                 paths[i] = '.'
                 
         return root, paths
