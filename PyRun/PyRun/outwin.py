@@ -30,6 +30,7 @@ from profiler import Profile_Get, Profile_Set
 
 #pre build error regular expression
 error_re = re.compile('.*File "(.+)", line ([0-9]+)')
+info_re = re.compile('[>]{3,3}.*' + os.linesep)
 
 # Function Aliases
 _ = wx.GetTranslation
@@ -169,7 +170,7 @@ class OutputWindow(wx.Panel):
         p = Popen(command, stdout=PIPE, stderr=STDOUT, 
                   shell=True, cwd=filedir, env=proc_env)
 
-        evt = UpdateTextEvent(edEVT_UPDATE_TEXT, -1, "> %s" % command + os.linesep)
+        evt = UpdateTextEvent(edEVT_UPDATE_TEXT, -1, ">>> %s" % command + os.linesep)
         wx.CallAfter(wx.PostEvent, self._buffer, evt)
 
 
@@ -190,7 +191,7 @@ class OutputWindow(wx.Panel):
                     if not more:
                         break
 
-        evt = UpdateTextEvent(edEVT_UPDATE_TEXT, -1, "> Exit code: %d%s" % (p.wait(), os.linesep))
+        evt = UpdateTextEvent(edEVT_UPDATE_TEXT, -1, ">>> Exit code: %d%s" % (p.wait(), os.linesep))
         wx.CallAfter(wx.PostEvent, self._buffer, evt)
 
         # Notify that proccess has exited
@@ -226,6 +227,7 @@ class OutputWindow(wx.Panel):
         self._ctrl.Enable()
 
     def Clear(self):
+        """Clears the contents of the buffer"""
         self._buffer.Clear()
  
     def OnClear(self, evt):
@@ -263,7 +265,7 @@ class OutputWindow(wx.Panel):
         self._worker = threading.Thread(target=self._DoRunCmd, args=[fname, pyexe])
         self._worker.start()
         self.Layout()
-        wx.CallLater(150, self._buffer.Start, 150)
+        wx.CallLater(150, self._buffer.Start, 175)
 
 #-----------------------------------------------------------------------------#
 
@@ -296,28 +298,39 @@ class OutputBuffer(wx.TextCtrl):
             self._log("[PyRun][info] Stopping timer for %d" % self.GetId())
             self._timer.Stop()
 
+    def ApplyStyles(self, start, txt):
+        """Apply coloring to text starting at start position
+        @param start: start position in buffer
+        @param txt: text to locate styling point in
+
+        """
+        for group in error_re.finditer(txt):
+            self.SetStyle(start + group.start(), start + group.end(), 
+                          wx.TextAttr("RED", wx.NullColour))
+        else:
+            for info in info_re.finditer(txt):
+                end = start + info.end()
+                self.SetStyle(start + info.start(), end,
+                              wx.TextAttr("BLUE", wx.NullColour))
+
+                self.SetStyle(end, end, wx.TextAttr("BLACK", wx.NullColour))
+
     def OnTimer(self, evt):
-        """Process and display text from the update buffer"""
-        
+        """Process and display text from the update buffer
+        @note: this gets called many times while running thus needs to
+               return quickly to avoid blocking the ui.
+
+        """
         out = self._updates[:]
         if len(out):
-            for txt in out:
-                start = self.GetLastPosition()
-                self.AppendText(txt)
-               
-                self.SetInsertionPoint(self.GetLastPosition())
-                end = self.GetLastPosition()
-                m = error_re.match(txt)
-                if m:
-                    # TODO: Save m.groups() to be used by mouse event
-                    self.SetStyle(start, end, wx.TextAttr("RED", wx.NullColour))
-                elif len(txt) > 0 and txt[0] == ">":
-                    self.SetStyle(start, end, wx.TextAttr("BLUE", wx.NullColour))
-                else:
-                    self.SetStyle(start, end, wx.TextAttr("BLACK", wx.NullColour))
+            txt = ''.join(out)
+            start = self.GetInsertionPoint()
+            self.AppendText(txt)
+            self.SetInsertionPoint(self.GetLastPosition())
             self.Refresh()
             self.Update()
             self._updates = self._updates[len(out):]
+            wx.CallAfter(self.ApplyStyles, start, txt)
         else:
             pass
 
@@ -342,7 +355,8 @@ class OutputBuffer(wx.TextCtrl):
         self._timer.Stop()
 
 #-----------------------------------------------------------------------------#
-
+ID_RUN_BTN = wx.NewId()
+ID_CLEAR_BTN = wx.NewId()
 class ConfigBar(wx.Panel):
     """Small configuration bar for showing what python is being
     used to run the script, as well as allowing it to be changed,
@@ -362,8 +376,8 @@ class ConfigBar(wx.Panel):
         self._pbuff.SetToolTipString(_("Path to Python executable or name of executable to use"))
         self._fname = ''                                # Current File
         self._cfile = wx.StaticText(self, label='')     # Current File Display
-        self._run = wx.Button(self, label=_("Run Script"))
-        self._clear = wx.Button(self, label=_("Clear"))
+        self._run = wx.Button(self, ID_RUN_BTN, _("Run Script"))
+        self._clear = wx.Button(self, ID_CLEAR_BTN, label=_("Clear"))
         if wx.Platform == '__WXMAC__':
             self._pbuff.SetFont(wx.SMALL_FONT)
             self._pbuff.SetWindowVariant(wx.WINDOW_VARIANT_SMALL)
@@ -374,8 +388,8 @@ class ConfigBar(wx.Panel):
         self.__DoLayout()
 
         # Event Handlers
-        self.Bind(wx.EVT_BUTTON, self.OnButton, self._run)
-        self.Bind(wx.EVT_BUTTON, self.OnButton, self._clear)
+        self.Bind(wx.EVT_BUTTON, self.OnButton, id=ID_RUN_BTN)
+        self.Bind(wx.EVT_BUTTON, self.OnButton, id=ID_CLEAR_BTN)
         self.Bind(wx.EVT_PAINT, self.OnPaint)
 
     def __DoLayout(self):
@@ -403,10 +417,10 @@ class ConfigBar(wx.Panel):
 
         """
         for child in self.GetChildren():
-            if isinstance(child, wx.Button) and child.GetLabel() == _("Clear"):
+            c_id = child.GetId()
+            if c_id == ID_CLEAR_BTN:
                 continue
-
-            if isinstance(child, wx.Button):
+            elif c_id == ID_RUN_BTN:
                 child.SetLabel(_("Abort"))
             else:
                 child.Disable()
@@ -417,10 +431,7 @@ class ConfigBar(wx.Panel):
 
         """
         for child in self.GetChildren():
-            if isinstance(child, wx.Button) and child.GetLabel() == _("Clear"):
-                continue
-
-            if isinstance(child, wx.Button):
+            if child.GetId() == ID_RUN_BTN:
                 child.SetLabel(_("Run Script"))
             else:
                 child.Enable(enable)
@@ -446,14 +457,19 @@ class ConfigBar(wx.Panel):
 
     def OnButton(self, evt):
         """Post an event to request the script be run again or aborted"""
+        e_id = evt.GetId()
         lbl = evt.GetEventObject().GetLabel()
-        if lbl == _("Run Script"):
-            sevt = ProcessStartEvent(edEVT_PROCESS_START, 
-                                     self.GetId(), self._fname)
-        elif lbl == _("Clear"):
+        if e_id == ID_RUN_BTN:
+            if lbl == _("Run Script"):
+                sevt = ProcessStartEvent(edEVT_PROCESS_START, 
+                                         self.GetId(), self._fname)
+            else:
+                sevt = ProcessAbortEvent(edEVT_PROCESS_ABORT, self.GetId())
+        elif e_id == ID_CLEAR_BTN:
             sevt = ProcessClearEvent(edEVT_PROCESS_CLEAR, self.GetId())
         else:
-            sevt = ProcessAbortEvent(edEVT_PROCESS_ABORT, self.GetId())
+            evt.Skip()
+            return
 
         wx.PostEvent(self.GetParent(), sevt)
 
