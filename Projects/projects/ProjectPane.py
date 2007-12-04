@@ -609,6 +609,8 @@ class ProjectTree(wx.Panel):
             return
 
         path = self.tree.GetPyData(parent)['path']
+        if not os.path.isdir(path):
+            return
         for item in os.listdir(path):
             self.addPath(parent, item)
 
