@@ -68,13 +68,27 @@ PYRUN_EXE = 'PyRun.PyExe'   # Profile key for saving prefered python command
 
 #-----------------------------------------------------------------------------#
 
+# Event for passing output data to buffer
 edEVT_UPDATE_TEXT = wx.NewEventType()
 EVT_UPDATE_TEXT = wx.PyEventBinder(edEVT_UPDATE_TEXT, 1)
-class UpdateTextEvent(wx.PyCommandEvent):
-    """Event for passing update messages and signaling the
-    output window that there are messages to process.
 
-    """
+# Event for notifying that the script should be aborted
+edEVT_PROCESS_ABORT = wx.NewEventType()
+EVT_PROCESS_ABORT = wx.PyEventBinder(edEVT_PROCESS_ABORT, 1)
+
+# Event for clearing output window
+edEVT_PROCESS_CLEAR = wx.NewEventType()
+EVT_PROCESS_CLEAR = wx.PyEventBinder(edEVT_PROCESS_CLEAR, 1)
+
+# Message that process should be started
+edEVT_PROCESS_START = wx.NewEventType()
+EVT_PROCESS_START = wx.PyEventBinder(edEVT_PROCESS_START, 1)
+
+# Event for notifying that the script has finished executing
+edEVT_PROCESS_EXIT = wx.NewEventType()
+EVT_PROCESS_EXIT = wx.PyEventBinder(edEVT_PROCESS_EXIT, 1)
+class OutputWinEvent(wx.PyCommandEvent):
+    """Event for data transfer and signaling actions in the L{OutputWin}"""
     def __init__(self, etype, eid, value=''):
         """Creates the event object"""
         wx.PyCommandEvent.__init__(self, etype, eid)
@@ -86,30 +100,6 @@ class UpdateTextEvent(wx.PyCommandEvent):
 
         """
         return self._value
-
-edEVT_PROCESS_ABORT = wx.NewEventType()
-EVT_PROCESS_ABORT = wx.PyEventBinder(edEVT_PROCESS_ABORT, 1)
-class ProcessAbortEvent(wx.PyCommandEvent):
-    """Event for notifying that the script should be aborted"""
-    pass
-
-edEVT_PROCESS_CLEAR = wx.NewEventType()
-EVT_PROCESS_CLEAR = wx.PyEventBinder(edEVT_PROCESS_CLEAR, 1)
-class ProcessClearEvent(wx.PyCommandEvent):
-    """Event for clearing output window"""
-    pass
-
-edEVT_PROCESS_START = wx.NewEventType()
-EVT_PROCESS_START = wx.PyEventBinder(edEVT_PROCESS_START, 1)
-class ProcessStartEvent(UpdateTextEvent):
-    """Message that process should be started"""
-    pass
-
-edEVT_PROCESS_EXIT = wx.NewEventType()
-EVT_PROCESS_EXIT = wx.PyEventBinder(edEVT_PROCESS_EXIT, 1)
-class ProcessExitEvent(wx.PyCommandEvent):
-    """Event for notifying that the script has finished executing"""
-    pass
 
 #-----------------------------------------------------------------------------#
 
@@ -137,8 +127,8 @@ class OutputWindow(wx.Panel):
         if self._mw:
             self._mw.GetNotebook().Bind(flatnotebook.EVT_FLATNOTEBOOK_PAGE_CHANGED, 
                                         self.OnBufferChange)
-        self.Bind(EVT_PROCESS_ABORT, self.OnAbortScript)
-        self.Bind(EVT_PROCESS_CLEAR, self.OnClear)
+        self.Bind(EVT_PROCESS_ABORT, lambda evt: self.Abort())
+        self.Bind(EVT_PROCESS_CLEAR, lambda evt: self.Clear())
         self.Bind(EVT_PROCESS_START, self.OnRunScript)
         self.Bind(EVT_PROCESS_EXIT, self.OnEndScript)
 
@@ -179,7 +169,7 @@ class OutputWindow(wx.Panel):
 
         if result == "" or result == None:
             return False
-        evt = UpdateTextEvent(edEVT_UPDATE_TEXT, -1, result)
+        evt = OutputWinEvent(edEVT_UPDATE_TEXT, -1, result)
         wx.CallAfter(wx.PostEvent, self._buffer, evt)
         return True
 
@@ -235,7 +225,7 @@ class OutputWindow(wx.Panel):
         p = Popen(command, stdout=PIPE, stderr=STDOUT, 
                   shell=True, cwd=filedir, env=proc_env)
 
-        evt = UpdateTextEvent(edEVT_UPDATE_TEXT, -1, ">>> %s" % command + os.linesep)
+        evt = OutputWinEvent(edEVT_UPDATE_TEXT, -1, ">>> %s" % command + os.linesep)
         wx.CallAfter(wx.PostEvent, self._buffer, evt)
 
 
@@ -261,11 +251,11 @@ class OutputWindow(wx.Panel):
         except OSError:
             result = -1
 
-        evt = UpdateTextEvent(edEVT_UPDATE_TEXT, -1, ">>> Exit code: %d%s" % (result, os.linesep))
+        evt = OutputWinEvent(edEVT_UPDATE_TEXT, -1, ">>> Exit code: %d%s" % (result, os.linesep))
         wx.CallAfter(wx.PostEvent, self._buffer, evt)
 
         # Notify that proccess has exited
-        evt = ProcessExitEvent(edEVT_PROCESS_EXIT, -1)
+        evt = OutputWinEvent(edEVT_PROCESS_EXIT, -1)
         wx.CallAfter(wx.PostEvent, self, evt)
 
     def _PrepEnv(self):
@@ -280,6 +270,7 @@ class OutputWindow(wx.Panel):
 
     def Abort(self):
         """Abort the current process if one is running"""
+        self._log("[PyRun][info] Aborting current script...")
         if self._worker is None:
             return
 
@@ -314,16 +305,6 @@ class OutputWindow(wx.Panel):
             fname = cpage.GetFileName()
             if len(fname):
                 self._ctrl.SetCurrentFile(fname)
-
-    def OnClear(self, evt):
-        """Handle request to clear output window"""
-        self._log("[PyRun][info] Clearing output...")
-        self.Clear()
-
-    def OnAbortScript(self, evt):
-        """Handle request to abort the current running script"""
-        self._log("[PyRun][info] Aborting current script...")
-        self.Abort()
 
     def OnEndScript(self, evt):
         """Handle when the process exits"""
@@ -643,12 +624,11 @@ class ConfigBar(wx.Panel):
         lbl = evt.GetEventObject().GetLabel()
         if e_id == ID_RUN_BTN:
             if lbl == _("Run Script"):
-                sevt = ProcessStartEvent(edEVT_PROCESS_START, 
-                                         self.GetId(), self._fname)
+                sevt = OutputWinEvent(edEVT_PROCESS_START, self.GetId(), self._fname)
             else:
-                sevt = ProcessAbortEvent(edEVT_PROCESS_ABORT, self.GetId())
+                sevt = OutputWinEvent(edEVT_PROCESS_ABORT, self.GetId())
         elif e_id == ID_CLEAR_BTN:
-            sevt = ProcessClearEvent(edEVT_PROCESS_CLEAR, self.GetId())
+            sevt = OutputWinEvent(edEVT_PROCESS_CLEAR, self.GetId())
         else:
             evt.Skip()
             return
