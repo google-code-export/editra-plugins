@@ -1,11 +1,36 @@
 ###############################################################################
 # Name: outwin.py                                                             #
-# Purpose: Result output window and related controls                          #
+# Purpose: Multithreaded/Asynchronous result output window and related        #
+#          controls                                                           #
 # Author: Cody Precord <cprecord@editra.org>                                  #
 # Copyright: (c) 2007 Cody Precord <staff@editra.org>                         #
 # Licence: wxWindows Licence                                                  #
 ###############################################################################
 
+"""
+  The L{OutputWin} is a panel composed of two main control, a control/status bar
+on the top and a readonly output buffer on the bottom. The control bar is
+created by the L{ConfigBar} class and controls all the data and initiation of
+actions in the output buffer by communicating through events. The output buffer
+is created by the L{OutputBuffer} class which is a simple text buffer that
+offers some color contexting for information and error messages in the output
+from the running script.
+
+  The L{OutputWin} uses these two controls to execute and run a python script
+from the currently selected buffer in Editra's MainWindow and display the
+results. The script is run on a separate thread with subproccess to keep it
+from blocking the rest of the ui.
+
+  A running script can be Aborted at anytime by clicking on the Abort button,
+the script is then aborted by sending a signal to the process running on the
+worker thread.
+
+  The Python executable and command is configurable through the buffer on the
+L{ConfigBar}. This command is checked when a run script is action is requested.
+If you have pylint installed you can also use this option to run pylint on the
+current buffer by changing the command to 'pylint' or '/path/to/pylint'.
+
+"""
 __author__ = "Cody Precord <cprecord@editra.org>"
 __svnid__ = "$Id$"
 __revision__ = "$Revision$"
@@ -16,6 +41,7 @@ import os
 import sys
 import re
 import wx
+import wx.stc
 import threading
 import signal
 from subprocess import Popen, PIPE, STDOUT
@@ -27,6 +53,7 @@ if sys.platform.startswith('win'):
 # Editra Imports
 import util
 from profiler import Profile_Get, Profile_Set
+import extern.flatnotebook as flatnotebook
 
 #pre build error regular expression
 error_re = re.compile('.*File "(.+)", line ([0-9]+)')
@@ -35,6 +62,7 @@ info_re = re.compile('[>]{3,3}.*' + os.linesep)
 # Function Aliases
 _ = wx.GetTranslation
 
+#-----------------------------------------------------------------------------#
 # Globals
 PYRUN_EXE = 'PyRun.PyExe'   # Profile key for saving prefered python command
 
@@ -96,15 +124,19 @@ class OutputWindow(wx.Panel):
 
         # Attributes
         self._log = wx.GetApp().GetLog()
-        self._ctrl = ConfigBar(self)
-        self._buffer = OutputBuffer(self)
-        self._worker = None
+        self._ctrl = ConfigBar(self)        # Buffer Ctrl Bar
+        self._buffer = OutputBuffer(self)   # Script output
+        self._worker = None                 # Reference to worker thread
         self._abort = False                 # Flag to abort script
 
         # Layout
         self.__DoLayout()
 
         # Event Handlers
+        self._mw = self.__FindMainWindow()
+        if self._mw:
+            self._mw.GetNotebook().Bind(flatnotebook.EVT_FLATNOTEBOOK_PAGE_CHANGED, 
+                                        self.OnBufferChange)
         self.Bind(EVT_PROCESS_ABORT, self.OnAbortScript)
         self.Bind(EVT_PROCESS_CLEAR, self.OnClear)
         self.Bind(EVT_PROCESS_START, self.OnRunScript)
@@ -113,7 +145,15 @@ class OutputWindow(wx.Panel):
     def __del__(self):
         """Cleanup any running processes on exit"""
         self._log("[PyRun][info] Output window deleted: %d" % self.GetId())
+
+        # Alert any running thread(s) that they need to bail
         self._abort = True
+
+        # Remove our event handler from chain of handlers in Editra's notebook
+        # Necessary to prevent it from being called after we have been deleted
+        # and raise all kinds of PyDeadObjectError's
+        if self._mw:
+            self._mw.GetNotebook().Unbind(flatnotebook.EVT_FLATNOTEBOOK_PAGE_CHANGED)
 
     def __DoLayout(self):
         """Layout/Create the windows controls"""
@@ -132,12 +172,37 @@ class OutputWindow(wx.Panel):
         output.
 
         """
-        result = proc.stdout.readline()
+        try:
+            result = proc.stdout.readline()
+        except (IOError, OSError):
+            return False
+
         if result == "" or result == None:
             return False
         evt = UpdateTextEvent(edEVT_UPDATE_TEXT, -1, result)
         wx.CallAfter(wx.PostEvent, self._buffer, evt)
         return True
+
+    def __FindMainWindow(self):
+        """Find the mainwindow of this control
+        @return: MainWindow or None
+
+        """
+        def IsMainWin(win):
+            if getattr(tlw, '__name__', '') == 'MainWindow':
+                return True
+            else:
+                return False
+
+        tlw = self.GetTopLevelParent()
+        if IsMainWin(tlw):
+            return tlw
+        elif hasattr(tlw, 'GetParent'):
+            tlw = tlw.GetParent()
+            if IsMainWin(tlw):
+                return tlw
+
+        return None
 
     def __KillPid(self, pid):
         """Kill a process by process id"""
@@ -187,11 +252,16 @@ class OutputWindow(wx.Panel):
                     # We are dead so kill process and return
                     self.__KillPid(p.pid)
                     return
-                else:
-                    if not more:
-                        break
 
-        evt = UpdateTextEvent(edEVT_UPDATE_TEXT, -1, ">>> Exit code: %d%s" % (p.wait(), os.linesep))
+                if not more:
+                    break
+
+        try:
+            result = p.wait()
+        except OSError:
+            result = -1
+
+        evt = UpdateTextEvent(edEVT_UPDATE_TEXT, -1, ">>> Exit code: %d%s" % (result, os.linesep))
         wx.CallAfter(wx.PostEvent, self._buffer, evt)
 
         # Notify that proccess has exited
@@ -229,7 +299,22 @@ class OutputWindow(wx.Panel):
     def Clear(self):
         """Clears the contents of the buffer"""
         self._buffer.Clear()
- 
+
+    def OnBufferChange(self, evt):
+        """Update which script is associated with this output window
+        @param evt: flatnotebook.EVT_FLATNOTEBOOK_PAGE_CHANGED
+        @note: need to skip the event early as to not hold up any other
+               listeners.
+
+        """
+        e_obj = evt.GetEventObject()
+        cpage = e_obj.GetPage(evt.GetSelection())
+        evt.Skip()
+        if cpage and hasattr(cpage, 'GetFileName'):
+            fname = cpage.GetFileName()
+            if len(fname):
+                self._ctrl.SetCurrentFile(fname)
+
     def OnClear(self, evt):
         """Handle request to clear output window"""
         self._log("[PyRun][info] Clearing output...")
@@ -255,24 +340,33 @@ class OutputWindow(wx.Panel):
     def RunScript(self, fname):
         """Start the worker thread that runs the python script"""
         self._abort = False
-        self._buffer.SetValue('')
-        self._ctrl.Disable()
+        self._buffer.Clear()
         self._ctrl.SetCurrentFile(fname)
+        self._ctrl.Disable()
         pyexe = self._ctrl.GetPythonCommand()
         if len(pyexe):
             Profile_Set(PYRUN_EXE, pyexe)
+        else:
+            pyexe = Profile_Get(PYRUN_EXE, 'str', 'python')
+
         self._log("[PyRun][info] Running script with command: %s" % pyexe)
         self._worker = threading.Thread(target=self._DoRunCmd, args=[fname, pyexe])
         self._worker.start()
         self.Layout()
-        wx.CallLater(150, self._buffer.Start, 175)
+        wx.CallLater(150, self._buffer.Start, 300)
 
 #-----------------------------------------------------------------------------#
 
-class OutputBuffer(wx.TextCtrl):
+class OutputBuffer(wx.stc.StyledTextCtrl): #wx.TextCtrl):
     """Output buffer to display results of running a script"""
+
+    # OutputBuffer Style Specs
+    STYLE_DEFAULT = 0
+    STYLE_INFO    = 1
+    STYLE_ERROR   = 2
+
     def __init__(self, parent):
-        wx.TextCtrl.__init__(self, parent, style=wx.TE_MULTILINE|wx.TE_READONLY|wx.TE_RICH2)
+        wx.stc.StyledTextCtrl.__init__(self, parent)
 
         # Attributes
         self._log = wx.GetApp().GetLog()
@@ -283,12 +377,13 @@ class OutputBuffer(wx.TextCtrl):
         font = self.GetFont()
         if wx.Platform == '__WXMAC__':
             font.SetPointSize(12)
-            self.MacCheckSpelling(False)
         else:
             font.SetPointSize(10)
         self.SetFont(font)
+        self.__ConfigureSTC()
 
         # Event Handlers
+        self.Bind(wx.stc.EVT_STC_HOTSPOT_CLICK, self.OnHotSpot)
         self.Bind(EVT_UPDATE_TEXT, self.OnUpdate)
         self.Bind(wx.EVT_TIMER, self.OnTimer)
 
@@ -298,6 +393,52 @@ class OutputBuffer(wx.TextCtrl):
             self._log("[PyRun][info] Stopping timer for %d" % self.GetId())
             self._timer.Stop()
 
+    def __ConfigureSTC(self):
+        """Setup the stc to behave/appear as we want it to 
+        and define all styles used for giving the output context.
+
+        """
+        self.SetMargins(3, 3)
+        self.SetMarginWidth(0, 0)
+        self.SetMarginWidth(1, 0)
+
+        self.SetLayoutCache(wx.stc.STC_CACHE_DOCUMENT)
+        self.SetReadOnly(True)
+        self.SetEndAtLastLine(False)
+        self.SetVisiblePolicy(1, wx.stc.STC_VISIBLE_STRICT)
+
+        # Define Styles
+        font = wx.Font(11, wx.FONTFAMILY_MODERN, wx.FONTSTYLE_NORMAL, wx.FONTWEIGHT_NORMAL)
+        face = font.GetFaceName()
+        size = font.GetPointSize()
+        back = "#FFFFFF"
+        self.StyleSetSpec(self.STYLE_DEFAULT, 
+                          "face:%s,size:%d,fore:#000000,back:%s" % (face, size, back))
+        self.StyleSetSpec(self.STYLE_INFO,
+                          "face:%s,size:%d,fore:#0000FF,back:%s" % (face, size, back))
+        self.StyleSetSpec(self.STYLE_ERROR, 
+                          "face:%s,size:%d,fore:#FF0000,back:%s" % (face, size, back))
+        self.StyleSetHotSpot(self.STYLE_ERROR, True)
+        self.StyleSetSpec(wx.stc.STC_STYLE_DEFAULT, \
+                          "face:%s,size:%d,fore:#000000,back:%s" % (face, size, back))
+        self.StyleSetSpec(wx.stc.STC_STYLE_CONTROLCHAR, \
+                          "face:%s,size:%d,fore:#000000,back:%s" % (face, size, back))
+        self.Colourise(0, -1)
+
+    def __PutText(self, txt, ind):
+        """Needed for doing a callafter to reduce CGContext warnings on mac
+        @param txt: String to append
+        @param ind: index in update buffer
+
+        """
+        self.SetReadOnly(False)
+        start = self.GetCurrentPos()
+        self.AppendText(txt)
+        self.GotoPos(self.GetLength())
+        self._updates = self._updates[ind:]
+        self.ApplyStyles(start, txt)
+        self.SetReadOnly(True)
+
     def ApplyStyles(self, start, txt):
         """Apply coloring to text starting at start position
         @param start: start position in buffer
@@ -305,15 +446,34 @@ class OutputBuffer(wx.TextCtrl):
 
         """
         for group in error_re.finditer(txt):
-            self.SetStyle(start + group.start(), start + group.end(), 
-                          wx.TextAttr("RED", wx.NullColour))
+            sty_s = start + group.start()
+            sty_e = start + group.end()
+            self.StartStyling(sty_s, 0xff)
+            self.SetStyling(sty_e - sty_s, self.STYLE_ERROR)
         else:
             for info in info_re.finditer(txt):
-                end = start + info.end()
-                self.SetStyle(start + info.start(), end,
-                              wx.TextAttr("BLUE", wx.NullColour))
+                sty_s = start + info.start()
+                sty_e = start + info.end()
+                self.StartStyling(sty_s, 0xff)
+                self.SetStyling(sty_e - sty_s, self.STYLE_INFO)
 
-                self.SetStyle(end, end, wx.TextAttr("BLACK", wx.NullColour))
+    def Clear(self):
+        """Clear the Buffer"""
+        self.SetReadOnly(False)
+        self.SetText('')
+        self.SetReadOnly(False)
+
+    def OnHotSpot(self, evt):
+        """Handle clicks events on hotspots and excute the proper action
+        @param evt: wx.stc.EVT_STC_HOTSPOT_CLICK
+
+        """
+        line = self.LineFromPosition(evt.GetPosition())
+        txt = self.GetLine(line)
+        match = error_re.match(txt)
+        if match:
+            fname = match.group(1)
+            line = match.group(2)
 
     def OnTimer(self, evt):
         """Process and display text from the update buffer
@@ -321,16 +481,10 @@ class OutputBuffer(wx.TextCtrl):
                return quickly to avoid blocking the ui.
 
         """
-        out = self._updates[:]
-        if len(out):
-            txt = ''.join(out)
-            start = self.GetInsertionPoint()
-            self.AppendText(txt)
-            self.SetInsertionPoint(self.GetLastPosition())
-            self.Refresh()
-            self.Update()
-            self._updates = self._updates[len(out):]
-            wx.CallAfter(self.ApplyStyles, start, txt)
+        ind = len(self._updates)
+        if ind:
+            # CallAfter is mostly for Mac to avoid CG errors
+            wx.CallAfter(self.__PutText, ''.join(self._updates), ind)
         else:
             pass
 
@@ -353,6 +507,7 @@ class OutputBuffer(wx.TextCtrl):
         # Dump any output still left in tmp buffer before stopping
         self.OnTimer(None)
         self._timer.Stop()
+        self.SetReadOnly(True)
 
 #-----------------------------------------------------------------------------#
 ID_RUN_BTN = wx.NewId()
@@ -375,6 +530,7 @@ class ConfigBar(wx.Panel):
         self._pbuff.SetMaxSize((-1, 20))
         self._pbuff.SetToolTipString(_("Path to Python executable or name of executable to use"))
         self._fname = ''                                # Current File
+        self._needs_update = False
         self._cfile = wx.StaticText(self, label='')     # Current File Display
         self._run = wx.Button(self, ID_RUN_BTN, _("Run Script"))
         self._clear = wx.Button(self, ID_CLEAR_BTN, label=_("Clear"))
@@ -411,6 +567,20 @@ class ConfigBar(wx.Panel):
         self.SetSizer(hsizer)
         self.SetAutoLayout(True)
 
+    def _UpdateFileDisplay(self):
+        """Update the file name displayed in bar
+        @note: update only takes place if bar enabled otherwise a flag is
+               set to tell the bar to update when it is next enabled.
+
+        """
+        if self.IsEnabled():
+            script = os.path.split(self._fname)[1]
+            self._cfile.SetLabel(_("Current Script: %s") % script)
+            self.GetParent().Layout()
+            self.Layout()
+        else:
+            self._needs_update = True
+
     def Disable(self):
         """Disable the panel except for the button which is
         changed to an abort button.
@@ -436,6 +606,10 @@ class ConfigBar(wx.Panel):
             else:
                 child.Enable(enable)
 
+        if self._needs_update:
+            self._needs_update = False
+            self._UpdateFileDisplay()
+
     def GetCurrentFile(self):
         """Get the current file that is shown in the display
         @return: string
@@ -454,6 +628,14 @@ class ConfigBar(wx.Panel):
             return Profile_Get(PYRUN_EXE, 'str', 'python')
         else:
             return cmd
+
+    def IsEnabled(self):
+        """Check whether the control is active and ready to recieve input"""
+        for state in [ child.IsEnabled() for child in self.GetChildren() ]:
+            if not state:
+                return False
+
+        return True
 
     def OnButton(self, evt):
         """Post an event to request the script be run again or aborted"""
@@ -495,11 +677,13 @@ class ConfigBar(wx.Panel):
         evt.Skip()
 
     def SetCurrentFile(self, fname):
-        """Set the name of the current file for the display"""
+        """Set the name of the current file for the display
+        @param fname: name of script to change to
+        @note: the update of the display is delayed if a script is currently
+               running, the display will update once the script has halted.
+
+        """
         self._fname = fname
-        script = os.path.split(fname)[1]
-        self._cfile.SetLabel(_("Current Script: %s") % script)
-        self.GetParent().Layout()
-        self.Layout()
+        self._UpdateFileDisplay()
         
 #-----------------------------------------------------------------------------#
