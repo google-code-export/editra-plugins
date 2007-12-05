@@ -40,6 +40,7 @@ __revision__ = "$Revision$"
 import os
 import sys
 import re
+import tempfile
 import wx
 import wx.stc
 import threading
@@ -120,6 +121,7 @@ class OutputWindow(wx.Panel):
         self._buffer = OutputBuffer(self)   # Script output
         self._worker = None                 # Reference to worker thread
         self._abort = False                 # Flag to abort script
+        self._temps = list()                # Temporary files
 
         # Layout
         self.__DoLayout()
@@ -147,6 +149,13 @@ class OutputWindow(wx.Panel):
         # and raise all kinds of PyDeadObjectError's
         if self._mw:
             self._mw.GetNotebook().Unbind(flatnotebook.EVT_FLATNOTEBOOK_PAGE_CHANGED)
+
+        # cleanup any tempfiles that may have been created
+        for fname in self._temps:
+            try:
+                os.remove(fname)
+            except:
+                continue
 
     def __DoLayout(self):
         """Layout/Create the windows controls"""
@@ -308,6 +317,19 @@ class OutputWindow(wx.Panel):
             fname = cpage.GetFileName()
             if len(fname):
                 self._ctrl.SetCurrentFile(fname)
+            else:
+                txt = cpage.GetText()
+                if not len(txt):
+                    return
+
+                try:
+                    tfile = tempfile.mkstemp(suffix='.py')
+                    os.write(tfile[0], txt)
+                    os.close(tfile[0])
+                    self._ctrl.SetCurrentFile(tfile[1])
+                    self._temps.append(tfile[1])
+                except:
+                    pass
 
     def OnEndScript(self, evt):
         """Handle when the process exits"""
