@@ -67,6 +67,7 @@ _ = wx.GetTranslation
 PYRUN_EXE = 'PyRun.PyExe'   # Profile key for saving prefered python command
 
 #-----------------------------------------------------------------------------#
+# Custom Events
 
 # Event for passing output data to buffer
 edEVT_UPDATE_TEXT = wx.NewEventType()
@@ -87,6 +88,7 @@ EVT_PROCESS_START = wx.PyEventBinder(edEVT_PROCESS_START, 1)
 # Event for notifying that the script has finished executing
 edEVT_PROCESS_EXIT = wx.NewEventType()
 EVT_PROCESS_EXIT = wx.PyEventBinder(edEVT_PROCESS_EXIT, 1)
+
 class OutputWinEvent(wx.PyCommandEvent):
     """Event for data transfer and signaling actions in the L{OutputWin}"""
     def __init__(self, etype, eid, value=''):
@@ -131,6 +133,7 @@ class OutputWindow(wx.Panel):
         self.Bind(EVT_PROCESS_CLEAR, lambda evt: self.Clear())
         self.Bind(EVT_PROCESS_START, self.OnRunScript)
         self.Bind(EVT_PROCESS_EXIT, self.OnEndScript)
+        self._buffer.Bind(wx.stc.EVT_STC_HOTSPOT_CLICK, self.OnHotSpot)
 
     def __del__(self):
         """Cleanup any running processes on exit"""
@@ -312,11 +315,44 @@ class OutputWindow(wx.Panel):
         self._buffer.Stop()
         self._ctrl.Enable()
 
+    def OnHotSpot(self, evt):
+        """Handle clicks events on hotspots and excute the proper action
+        @param evt: wx.stc.EVT_STC_HOTSPOT_CLICK
+
+        """
+        if self._mw is None:
+            return
+
+        line = self._buffer.LineFromPosition(evt.GetPosition())
+        txt = self._buffer.GetLine(line)
+        match = error_re.match(txt)
+        if match:
+            fname = match.group(1)
+            try:
+                line = max(int(match.group(2)) - 1, 0)
+            except:
+                line = 0
+
+            if not os.path.isabs(fname):
+                dname = os.path.split(self._ctrl.GetLastRun())[0]
+                fname = os.path.join(dname, fname)
+
+            nb = self._mw.GetNotebook()
+            buffers = [ page.GetFileName() for page in nb.GetTextControls() ]
+            if fname in buffers:
+                page = buffers.index(fname)
+                nb.SetSelection(page)
+                nb.GetPage(page).GotoLine(line)
+            else:
+                nb.OnDrop([fname])
+                nb.GetPage(nb.GetSelection()).GotoLine(line)
+
     def OnRunScript(self, evt):
         """Handle events posted by control bar to re-run the script"""
         script = evt.GetValue()
         self._log("[PyRun][info] Starting Script: %s..." % script)
         self.RunScript(script)
+        self._ctrl.SetLastRun(script)
 
     def RunScript(self, fname):
         """Start the worker thread that runs the python script"""
@@ -330,9 +366,12 @@ class OutputWindow(wx.Panel):
         else:
             pyexe = Profile_Get(PYRUN_EXE, 'str', 'python')
 
+        # Start the worker thread
         self._log("[PyRun][info] Running script with command: %s" % pyexe)
         self._worker = threading.Thread(target=self._DoRunCmd, args=[fname, pyexe])
         self._worker.start()
+
+        self._ctrl.SetLastRun(fname)
         self.Layout()
         wx.CallLater(150, self._buffer.Start, 300)
 
@@ -364,7 +403,6 @@ class OutputBuffer(wx.stc.StyledTextCtrl): #wx.TextCtrl):
         self.__ConfigureSTC()
 
         # Event Handlers
-        self.Bind(wx.stc.EVT_STC_HOTSPOT_CLICK, self.OnHotSpot)
         self.Bind(EVT_UPDATE_TEXT, self.OnUpdate)
         self.Bind(wx.EVT_TIMER, self.OnTimer)
 
@@ -444,18 +482,6 @@ class OutputBuffer(wx.stc.StyledTextCtrl): #wx.TextCtrl):
         self.SetText('')
         self.SetReadOnly(False)
 
-    def OnHotSpot(self, evt):
-        """Handle clicks events on hotspots and excute the proper action
-        @param evt: wx.stc.EVT_STC_HOTSPOT_CLICK
-
-        """
-        line = self.LineFromPosition(evt.GetPosition())
-        txt = self.GetLine(line)
-        match = error_re.match(txt)
-        if match:
-            fname = match.group(1)
-            line = match.group(2)
-
     def OnTimer(self, evt):
         """Process and display text from the update buffer
         @note: this gets called many times while running thus needs to
@@ -511,7 +537,8 @@ class ConfigBar(wx.Panel):
         self._pbuff.SetMaxSize((-1, 20))
         self._pbuff.SetToolTipString(_("Path to Python executable or name of executable to use"))
         self._fname = ''                                # Current File
-        self._needs_update = False
+        self._lastexec = ''                             # Last Run File
+        self._needs_update = False                      # Label needs update?
         self._cfile = wx.StaticText(self, label='')     # Current File Display
         self._run = wx.Button(self, ID_RUN_BTN, _("Run Script"))
         self._clear = wx.Button(self, ID_CLEAR_BTN, label=_("Clear"))
@@ -598,6 +625,14 @@ class ConfigBar(wx.Panel):
         """
         return self._fname
 
+    def GetLastRun(self):
+        """Get the path to the file of the last script that was run
+        or set by L{SetLastRun}.
+        @return: string of path to file
+
+        """
+        return self._lastexec
+
     def GetPythonCommand(self):
         """Get the command that is set in the text control or
         the default value if nothing is set.
@@ -665,5 +700,12 @@ class ConfigBar(wx.Panel):
         """
         self._fname = fname
         self._UpdateFileDisplay()
-        
+
+    def SetLastRun(self, fname):
+        """Set the value of the last run script
+        @param fname: name of script that was last run
+
+        """
+        self._lastexec = fname
+
 #-----------------------------------------------------------------------------#
