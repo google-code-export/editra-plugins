@@ -11,10 +11,11 @@ PyRun is a Shelf plugin that can run the script that is in the current buffer an
   * Run multiple scripts simultaneously without blocking usage of any other parts of Editra
   * Abort a running script at any time
   * Configure which python executable to use for running script(s)
+  * Synchronizes with the currently selected buffer in Editra
+  * Colorize error messages in Red
 
 
 = Planned Features =
 
   * Save and configuration for multiple versions of python and allow easy switching at runtime
-  * Allow PyRun instance to automatically associate with current buffer without needing to open new instance of PyRun
   * When a user clicks on an error in the shelf, go directly to that line in the code.
