@@ -19,3 +19,25 @@ PyRun is a Shelf plugin that can run the script that is in the current buffer an
 = Planned Features =
 
   * Save and configuration for multiple versions of python and allow easy switching at runtime
+
+
+= Installation =
+
+ Soon to be officially released and available to Editra's builtin plugin downloader, to check out an prerelease copy of it do the following.
+
+  * Check out from svn
+  {{{svn checkout http://editra-plugins.googlecode.com/svn/trunk/PyRun PyRun}}}
+
+  * Build the plugin
+  {{{python setup.py bdist_egg}}}
+
+  * Open Editra=>Tools=>PluginManager=>Install, then Drag and Drop the egg file on the window and click 'Install'
+
+
+= Usage and Configuration=
+
+This plugin requires little to no configuration for usage. Simply open an instance of it from *View=>Shelf=>PyRun* and it will open and automatically run the script thats in the current buffer. If it fails to run, Python might not be on the PATH. In this case simply enter the path to the desired Python executable into the text entry labeled "Python Executable" to tell PyRun which python to use.
+
+When an instance of PyRun is open in the Shelf it will automatically sync with what buffer is the currently selected one in Editra's main notebook. The script can then be run by clicking on the "Run Script" button.
+
+
