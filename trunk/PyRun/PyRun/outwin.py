@@ -369,6 +369,12 @@ class OutputWindow(wx.Panel):
         e_obj = evt.GetEventObject()
         cpage = e_obj.GetPage(evt.GetSelection())
         evt.Skip() # Skip early to prevent holding up the chain
+
+        # Only do syncronize when this instance is the current selection
+        # in the Shelf
+        if self.GetParent().GetCurrentPage() != self:
+            return
+
         if cpage and hasattr(cpage, 'GetFileName'):
             fname = cpage.GetFileName()
             if len(fname):
