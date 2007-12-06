@@ -56,7 +56,7 @@ import util
 from profiler import Profile_Get, Profile_Set
 import extern.flatnotebook as flatnotebook
 
-#pre build error regular expression
+# Highlight Match Patters
 error_re = re.compile('.*File "(.+)", line ([0-9]+)')
 info_re = re.compile('[>]{3,3}.*' + os.linesep)
 
@@ -108,15 +108,17 @@ class OutputWinEvent(wx.PyCommandEvent):
 
 class OutputWindow(wx.Panel):
     """Output window that contains the configuration controls and
-    output buffer for the running instance of PyRun. This is the main
-    ui component returned by the plugin object.
+    output buffer. This is the main object of this module. Its
+    constructor returns a ui component that consists of a Panel
+    with two subpanels, the top subpanel being a control/status bar
+    and the buttom subpanel being an output display buffer.
 
     """
     def __init__(self, parent):
         wx.Panel.__init__(self, parent)
 
         # Attributes
-        self._log = wx.GetApp().GetLog()
+        self._log = wx.GetApp().GetLog()    # Log
         self._ctrl = ConfigBar(self)        # Buffer Ctrl Bar
         self._buffer = OutputBuffer(self)   # Script output
         self._worker = None                 # Reference to worker thread
@@ -144,18 +146,14 @@ class OutputWindow(wx.Panel):
         # Alert any running thread(s) that they need to bail
         self._abort = True
 
+        # Cleanup tempfiles
+        self.__CleanupTemp()
+
         # Remove our event handler from chain of handlers in Editra's notebook
         # Necessary to prevent it from being called after we have been deleted
         # and raise all kinds of PyDeadObjectError's
         if self._mw:
             self._mw.GetNotebook().Unbind(flatnotebook.EVT_FLATNOTEBOOK_PAGE_CHANGED)
-
-        # cleanup any tempfiles that may have been created
-        for fname in self._temps:
-            try:
-                os.remove(fname)
-            except:
-                continue
 
     def __DoLayout(self):
         """Layout/Create the windows controls"""
@@ -167,11 +165,20 @@ class OutputWindow(wx.Panel):
         self.SetSizer(msizer)
         self.SetAutoLayout(True)
 
+    def __CleanupTemp(self):
+        """Cleanup any temporary files made by this control"""
+        for fname in self._temps:
+            try:
+                os.remove(fname)
+            except:
+                continue
+
     def __DoOneRead(self, proc):
         """Read one line of output and post results. Returns True
         if there is more to read and False if there is not. This is
         a private function called by the worker thread to retrieve
         output.
+        @param proc: process to read from
 
         """
         try:
@@ -184,6 +191,33 @@ class OutputWindow(wx.Panel):
         evt = OutputWinEvent(edEVT_UPDATE_TEXT, -1, result)
         wx.CallAfter(wx.PostEvent, self._buffer, evt)
         return True
+
+    def __DoTempFile(self, txt):
+        """Make or update a temporary file with the given text
+        @param txt: text to write to tempfile
+        @return: name of the tempfile to use
+
+        """
+        try:
+            # Try to reuse an existing tempfile if possible
+            if len(self._temps):
+                rname = self._temps[0]
+                tfile = open(rname, 'wb')
+                tfile.write(txt)
+                tfile.close()
+            else:
+                tfile = tempfile.mkstemp(suffix='.py')
+                self._temps.append(tfile[1])
+                rname = tfile[1]
+                os.write(tfile[0], txt)
+                os.close(tfile[0])
+
+            self._ctrl.SetCurrentFile(rname)
+        except Exception, msg:
+            self._log("[PyRun][err] Tempfile create/open failed: %s" % str(msg))
+            return ''
+        else:
+            return rname
 
     def __FindMainWindow(self):
         """Find the mainwindow of this control
@@ -207,7 +241,10 @@ class OutputWindow(wx.Panel):
         return None
 
     def __KillPid(self, pid):
-        """Kill a process by process id"""
+        """Kill a process by process id
+        @param pid: Id of process to kill
+
+        """
         if wx.Platform in ['__WXMAC__', '__WXGTK__']:
             os.kill(pid, signal.SIGABRT)
             os.waitpid(pid, os.WNOHANG)
@@ -270,8 +307,21 @@ class OutputWindow(wx.Panel):
         evt = OutputWinEvent(edEVT_PROCESS_EXIT, -1)
         wx.CallAfter(wx.PostEvent, self, evt)
 
+    def _GetEditraBuffTxt(self):
+        """Try to get the contents of the currently selected buffer in Editra
+        @return: string
+
+        """
+        if self._mw:
+            return self._mw.GetNotebook().GetCurrentCtrl().GetText()
+        else:
+            return u''
+
     def _PrepEnv(self):
-        """Create an environment for the process to run in"""
+        """Create an environment for the process to run in
+        @return: dict
+
+        """
         if not hasattr(sys, 'frozen') or wx.Platform == '__WXMSW__':
             proc_env = os.environ.copy()
         else:
@@ -300,36 +350,31 @@ class OutputWindow(wx.Panel):
         self._ctrl.Enable()
 
     def Clear(self):
-        """Clears the contents of the buffer"""
+        """Clears the current contents of the buffer"""
         self._buffer.Clear()
+
+    def IsTempFile(self, fname):
+        """Check whether a file is a temporary one or not
+        @param fname: name of file to check
+        @return: bool
+
+        """
+        return fname in self._temps
 
     def OnBufferChange(self, evt):
         """Update which script is associated with this output window
         @param evt: flatnotebook.EVT_FLATNOTEBOOK_PAGE_CHANGED
-        @note: need to skip the event early as to not hold up any other
-               listeners.
 
         """
         e_obj = evt.GetEventObject()
         cpage = e_obj.GetPage(evt.GetSelection())
-        evt.Skip()
+        evt.Skip() # Skip early to prevent holding up the chain
         if cpage and hasattr(cpage, 'GetFileName'):
             fname = cpage.GetFileName()
             if len(fname):
                 self._ctrl.SetCurrentFile(fname)
             else:
-                txt = cpage.GetText()
-                if not len(txt):
-                    return
-
-                try:
-                    tfile = tempfile.mkstemp(suffix='.py')
-                    os.write(tfile[0], txt)
-                    os.close(tfile[0])
-                    self._ctrl.SetCurrentFile(tfile[1])
-                    self._temps.append(tfile[1])
-                except:
-                    pass
+                self.__DoTempFile(cpage.GetText())
 
     def OnEndScript(self, evt):
         """Handle when the process exits"""
@@ -372,6 +417,8 @@ class OutputWindow(wx.Panel):
     def OnRunScript(self, evt):
         """Handle events posted by control bar to re-run the script"""
         script = evt.GetValue()
+        if not len(script) or self.IsTempFile(script):
+            script = self.__DoTempFile(self._GetEditraBuffTxt())
         self._log("[PyRun][info] Starting Script: %s..." % script)
         self.RunScript(script)
         self._ctrl.SetLastRun(script)
@@ -399,7 +446,7 @@ class OutputWindow(wx.Panel):
 
 #-----------------------------------------------------------------------------#
 
-class OutputBuffer(wx.stc.StyledTextCtrl): #wx.TextCtrl):
+class OutputBuffer(wx.stc.StyledTextCtrl):
     """Output buffer to display results of running a script"""
 
     # OutputBuffer Style Specs
@@ -408,7 +455,7 @@ class OutputBuffer(wx.stc.StyledTextCtrl): #wx.TextCtrl):
     STYLE_ERROR   = 2
 
     def __init__(self, parent):
-        wx.stc.StyledTextCtrl.__init__(self, parent)
+        wx.stc.StyledTextCtrl.__init__(self, parent, style=wx.BORDER_SUNKEN)
 
         # Attributes
         self._log = wx.GetApp().GetLog()
@@ -416,12 +463,6 @@ class OutputBuffer(wx.stc.StyledTextCtrl): #wx.TextCtrl):
         self._timer = wx.Timer(self)
 
         # Setup
-        font = self.GetFont()
-        if wx.Platform == '__WXMAC__':
-            font.SetPointSize(12)
-        else:
-            font.SetPointSize(10)
-        self.SetFont(font)
         self.__ConfigureSTC()
 
         # Event Handlers
@@ -445,14 +486,18 @@ class OutputBuffer(wx.stc.StyledTextCtrl): #wx.TextCtrl):
 
         self.SetLayoutCache(wx.stc.STC_CACHE_DOCUMENT)
         self.SetReadOnly(True)
-        self.SetEndAtLastLine(False)
+        
+        #self.SetEndAtLastLine(False)
         self.SetVisiblePolicy(1, wx.stc.STC_VISIBLE_STRICT)
 
         # Define Styles
-        font = wx.Font(11, wx.FONTFAMILY_MODERN, wx.FONTSTYLE_NORMAL, wx.FONTWEIGHT_NORMAL)
+        font = wx.Font(11, wx.FONTFAMILY_MODERN, 
+                       wx.FONTSTYLE_NORMAL, wx.FONTWEIGHT_NORMAL)
         face = font.GetFaceName()
         size = font.GetPointSize()
         back = "#FFFFFF"
+        
+        # Custom Styles
         self.StyleSetSpec(self.STYLE_DEFAULT, 
                           "face:%s,size:%d,fore:#000000,back:%s" % (face, size, back))
         self.StyleSetSpec(self.STYLE_INFO,
@@ -460,6 +505,8 @@ class OutputBuffer(wx.stc.StyledTextCtrl): #wx.TextCtrl):
         self.StyleSetSpec(self.STYLE_ERROR, 
                           "face:%s,size:%d,fore:#FF0000,back:%s" % (face, size, back))
         self.StyleSetHotSpot(self.STYLE_ERROR, True)
+
+        # Default Styles
         self.StyleSetSpec(wx.stc.STC_STYLE_DEFAULT, \
                           "face:%s,size:%d,fore:#000000,back:%s" % (face, size, back))
         self.StyleSetSpec(wx.stc.STC_STYLE_CONTROLCHAR, \
