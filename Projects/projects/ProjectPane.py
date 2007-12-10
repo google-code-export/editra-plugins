@@ -608,7 +608,11 @@ class ProjectTree(wx.Panel):
         if not parent:
             return
 
-        path = self.tree.GetPyData(parent)['path']
+        vars = self.tree.GetPyData(parent)
+        if not vars:
+            return
+
+        path = vars['path']
         if not os.path.isdir(path):
             return
         for item in os.listdir(path):
