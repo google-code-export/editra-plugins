@@ -26,9 +26,23 @@ __revision__ = "$Revision$"
 import wx
 import util
 
+#--------------------------------------------------------------------------#
 ID_CALC = wx.NewId()
 _ = wx.GetTranslation
+
+DISP_COLOR = wx.Colour(243, 248, 205) # Yellowish
+KEY_MAP = { wx.WXK_NUMPAD0 : '0', wx.WXK_NUMPAD1 : '1', wx.WXK_NUMPAD2 : '2', 
+            wx.WXK_NUMPAD3 : '3', wx.WXK_NUMPAD4 : '4', wx.WXK_NUMPAD5 : '5', 
+            wx.WXK_NUMPAD6 : '6', wx.WXK_NUMPAD1 : '7', wx.WXK_NUMPAD0 : '8', 
+            wx.WXK_NUMPAD1 : '9', wx.WXK_NUMPAD_ADD : '+',
+            wx.WXK_NUMPAD_DECIMAL : '.', wx.WXK_NUMPAD_DIVIDE : '/',
+            wx.WXK_NUMPAD_EQUAL : '=', wx.WXK_NUMPAD_MULTIPLY : '*',
+            wx.WXK_NUMPAD_SUBTRACT : '-', wx.WXK_SUBTRACT : '-',
+            wx.WXK_ADD : '+', wx.WXK_DECIMAL : '.', wx.WXK_DIVIDE : '/',
+            wx.WXK_MULTIPLY : '*'} 
+
 #--------------------------------------------------------------------------#
+
 def ShowCalculator(evt):
     """Shows the calculator"""
     if evt.GetId() == ID_CALC:
@@ -50,6 +64,8 @@ def UpdateMenu(val):
         mitem = menub.GetMenuByName("view").FindItemById(ID_CALC)
         if mitem:
             mitem.Check(val)
+
+#-----------------------------------------------------------------------------#
 
 class CalcFrame(wx.MiniFrame):
     """Create the calculator. Only a single instance can exist at
@@ -89,7 +105,9 @@ class CalcFrame(wx.MiniFrame):
         UpdateMenu(False)
         evt.Skip()
 
-class CalcPanel(wx.Panel):
+#-----------------------------------------------------------------------------#
+
+class CalcPanel(wx.PyPanel):
     """Creates the calculators interface
     @todo: Dissable << and >> when floating values are present
     @todo: When integer values overflow display convert to scientific notation
@@ -98,7 +116,7 @@ class CalcPanel(wx.Panel):
     """
     def __init__(self, parent, id_):
         """Initialiases the calculators main interface"""
-        wx.Panel.__init__(self, parent, id_)
+        wx.PyPanel.__init__(self, parent, id_)
 
         # Attributes
         self._log = wx.GetApp().GetLog()
@@ -151,6 +169,10 @@ class CalcPanel(wx.Panel):
         sizer.Add((3, 3), (11, 0))
         self.SetSizer(sizer)
         self.SetInitialSize()
+
+    def AcceptsFocus(self):
+        """Allow this window to accept keyboard focus"""
+        return True
 
     def Compute(self):
         """Compute the result of the calculators entries"""
@@ -319,17 +341,6 @@ class CalcPanel(wx.Panel):
 
 #-----------------------------------------------------------------------------#
 
-DISP_COLOR = wx.Colour(243, 248, 205) # Yellowish
-KEY_MAP = { wx.WXK_NUMPAD0 : '0', wx.WXK_NUMPAD1 : '1', wx.WXK_NUMPAD2 : '2', 
-            wx.WXK_NUMPAD3 : '3', wx.WXK_NUMPAD4 : '4', wx.WXK_NUMPAD5 : '5', 
-            wx.WXK_NUMPAD6 : '6', wx.WXK_NUMPAD1 : '7', wx.WXK_NUMPAD0 : '8', 
-            wx.WXK_NUMPAD1 : '9', wx.WXK_NUMPAD_ADD : '+',
-            wx.WXK_NUMPAD_DECIMAL : '.', wx.WXK_NUMPAD_DIVIDE : '/',
-            wx.WXK_NUMPAD_EQUAL : '=', wx.WXK_NUMPAD_MULTIPLY : '*',
-            wx.WXK_NUMPAD_SUBTRACT : '-', wx.WXK_SUBTRACT : '-',
-            wx.WXK_ADD : '+', wx.WXK_DECIMAL : '.', wx.WXK_DIVIDE : '/',
-            wx.WXK_MULTIPLY : '*'} 
-
 class Display(wx.PyPanel):
     """Create the calculators display. The display is a custom drawn
     panel that is used to display the information that the calculator
@@ -363,7 +374,7 @@ class Display(wx.PyPanel):
         """Draws the text into the display"""
         # Draw the Value
         font.SetPointSize(16)
-        gc.SetFont(gc.CreateFont(font))
+        gc.SetFont(font)
         v_extent = gc.GetTextExtent(self._val)
         if v_extent[0] > rect.width:
             self._val = "ERROR: Display Overflow"
@@ -372,7 +383,7 @@ class Display(wx.PyPanel):
 
         # Draw the mode and operator
         font.SetPointSize(12)
-        gc.SetFont(gc.CreateFont(font))
+        gc.SetFont(font)
         mode = "%s        %s" % (self._op, self._mode)
         t_extent = gc.GetTextExtent(mode)
         gc.DrawText(mode, rect.width - (t_extent[0] + 10), 
@@ -443,7 +454,7 @@ class Display(wx.PyPanel):
     def OnPaint(self, evt):
         """Paint the display and its values"""
         dc = wx.PaintDC(self)
-        gc = wx.GraphicsContext.Create(dc)
+        gc = wx.GCDC(dc)
 
         rect = self.GetRect()
         w = rect.width
@@ -455,7 +466,7 @@ class Display(wx.PyPanel):
         
         gc.SetBrush(wx.TRANSPARENT_BRUSH)
         color = wx.SystemSettings_GetColour(wx.SYS_COLOUR_ACTIVEBORDER)
-        color = util.AdjustColour(color, -70)
+        color = util.AdjustColour(color, -30)
         gc.SetPen(wx.Pen(color, 2))
         gc.DrawRoundedRectangle(1, 1, w - 2, h - 2, 5)
 
