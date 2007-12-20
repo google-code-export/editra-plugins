@@ -507,7 +507,7 @@ def AdjustColour(color, percent, alpha=wx.ALPHA_OPAQUE):
     red = color.Red() + ((percent * rdif * 100) / high) / 100
     green = color.Green() + ((percent * gdif * 100) / high) / 100
     blue = color.Blue() + ((percent * bdif * 100) / high) / 100
-    return wx.Colour(red, green, blue, alpha)
+    return wx.Colour(min(red, 255), min(green, 255), min(blue, 255), alpha)
 
 #-----------------------------------------------------------------------------#
 
