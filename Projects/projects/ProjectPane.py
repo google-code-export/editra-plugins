@@ -70,11 +70,7 @@ import subprocess
 import shutil
 import Trash
 import wx.lib.delayedresult 
-try: 
-    import util         # from Editra.src
-    import diffwin
-except ImportError: 
-    diffwin = util = None
+import diffwin
 
 import ConfigDialog
 from HistWin import AdjustColour
@@ -200,6 +196,7 @@ class ProjectTree(wx.Panel):
                                | wx.TR_EDIT_LABELS
                                | wx.TR_MULTIPLE
                                | wx.TR_HIDE_ROOT
+                               | wx.TR_FULL_ROW_HIGHLIGHT
                                , self.log)
 
         # Load icons for use later
@@ -1767,17 +1764,13 @@ class ProjectPane(wx.Panel):
 
     def OnPaint(self, evt):
         """Paint the button area of the panel with a gradient"""
-        if not util:
-            evt.Skip()
-            return
-            
         dc = wx.PaintDC(self)
         gc = wx.GraphicsContext.Create(dc)
 
         # Get some system colors
         col1 = wx.SystemSettings_GetColour(wx.SYS_COLOUR_3DFACE)
-        col2 = util.AdjustColour(col1, 50)
-        col1 = util.AdjustColour(col1, -50)
+        col2 = AdjustColour(col1, 50)
+        col1 = AdjustColour(col1, -50)
 
         rect = self.GetRect()
         grad = gc.CreateLinearGradientBrush(0, 1, 0, 
@@ -1789,7 +1782,7 @@ class ProjectPane(wx.Panel):
         path = gc.CreatePath()
         path.AddRectangle(0, 0, rect.width - 0.5, rect.height - 0.5)
 
-        gc.SetPen(wx.Pen(util.AdjustColour(col1, -60), 1))
+        gc.SetPen(wx.Pen(AdjustColour(col1, -60), 1))
         gc.DrawPath(path)
 
         evt.Skip()
