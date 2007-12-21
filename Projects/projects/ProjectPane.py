@@ -693,7 +693,7 @@ class ProjectTree(wx.Panel):
                 ted.Destroy()
                 return
 
-            message = ted.GetValue().strip().replace('"', '\\"')
+            message = ted.GetValue().strip()
             ted.Destroy()
             if message:
                 break
