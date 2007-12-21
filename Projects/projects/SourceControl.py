@@ -163,10 +163,6 @@ class SourceControl(object):
         """ Add the repository root option to the command """
         return options
 
-    def isControlled(self, directory):
-        """ Is the directory controlled by source control? """
-        return False
-
     def getRepositorySettings(self, path):
         """ Get the settings from all configured repository paths """
         settings = {}

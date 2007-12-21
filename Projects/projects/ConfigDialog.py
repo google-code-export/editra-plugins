@@ -587,9 +587,6 @@ class ConfigData(dict):
         except:
             pass
     
-    def removeSCSystem(self, name):
-        del self['source-control'][name]
-    
     def newSCSystem(self, instance, repositories=None):
         system = {'command':instance.command, 'instance': instance, 
                   'repositories': {'Default':self.newSCRepository()}}
