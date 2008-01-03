@@ -20,13 +20,15 @@ __revision__ = '$Revision$'
 
 #-----------------------------------------------------------------------------#
 #Imports
-import sys
+import os.path
 import wx
-import wx.lib.mixins.listctrl as listmix
 
 #Editra Library Modules
 import ed_glob
 #import ed_menu
+
+#Local
+from cbrowserlistctrl import TestListCtrl
 
 #--------------------------------------------------------------------------#
 #Globals
@@ -38,6 +40,18 @@ ID_CBROWSERPANE = wx.NewId()
 ID_COMMENTBROWSE = wx.NewId()
 
 #--------------------------------------------------------------------------#
+#TODO: todos list for all opened files 
+    #TODO: update if gets focus?
+    #TODO: update every second?
+    #TODO: update when tab changes (should every tab have its own todo list??)
+    
+#TODO: two tabs, one for current file, one for all opened files??
+
+#columns: (priority, tasktype, comment, file, linenr)
+
+#TODO: better comments
+#TODO: code clean up (self._log()!!!)
+
 
 
 class CBrowserPane(wx.Panel):
@@ -63,39 +77,103 @@ class CBrowserPane(wx.Panel):
             style,
             )
 
+        #---- private attr ----#
         self._mainwin = parent
         self.__log = wx.GetApp().GetLog()
+        #TODO: datastructure for todos caching
+        # {key:(page, fullname, (prio, task, desr, file, line)), filename2:{key:(),...},...}
+#         self._entryDict = dict()
 
         #---- Add Menu Items ----#
         viewm = self._mainwin.GetMenuBar().GetMenuByName('view')
         self._mi = viewm.InsertAlpha(ID_COMMENTBROWSE, CAPTION,
                 _('Open Comment Browser Sidepanel'), wx.ITEM_CHECK,
                 after=ed_glob.ID_PRE_MARK)
-        self._mainwin.Bind(wx.aui.EVT_AUI_PANE_CLOSE, self.OnClose)
-        #TODO: update if gets focus?
-        #TODO: update every second?
-        #TODO: update when tab changes (should every tab have its own todo list??)
-        #TODO: two tabs, one for current file, one for all opened files??
-        #columns: (priority, comment, file, linenr)
 
-        #XXX: testing
-        ID_listctrl = wx.NewId()
-        self._listctrl = TestListCtrl(self, ID_listctrl)
+        #---- Gui ----#
+        self._listctrl = TestListCtrl(self)
         
+        self._taskChoices = ['ALL', 'TODO', 'HACK', 'XXX', 'FIXME']
+        self._taskFilter = wx.ComboBox(self, value=self._taskChoices[0],
+                choices=self._taskChoices,
+                style=wx.CB_DROPDOWN|wx.CB_READONLY,
+                name="comboBoxTaskFilter")
+        self._checkBoxAllFiles = wx.CheckBox(self)
         
+        hsizer = wx.BoxSizer(wx.HORIZONTAL)
+        hsizer.Add(wx.StaticText(self, -1, "Taskfilter: "))
+        hsizer.Add(self._taskFilter)
+        
+        hsizer.Add(wx.StaticText(self, -1, "        all opened files: "))
+        hsizer.Add(self._checkBoxAllFiles)
+        
+        #TODO: update button: remove or not?
+        btn = wx.Button(self, label="update")
+        hsizer.Add(btn)
 
         sizer = wx.BoxSizer(wx.VERTICAL)
+        sizer.Add(hsizer, 0, wx.EXPAND)
         sizer.Add(self._listctrl, 1, wx.EXPAND)
 
         self.SetSizer(sizer)
         self.SetAutoLayout(True)
         self.Layout()
+        
+        #---- Bind events ----#
+        self._mainwin.Bind(wx.aui.EVT_AUI_PANE_CLOSE, self.OnClose)
+        
+        btn.Bind(wx.EVT_BUTTON, self.OnBtnUpdate)
+#         self._log(help(self._mainwin.GetNotebook().GetCurrentCtrl()))
+        
 
     def _log(self, msg):
         """writes a log message to the app log"""
 
         self.__log('[commentbrowser] ' + str(msg))
 
+    #---- Methods ----#
+    
+    def UpdateCurrent(self, textctrl=None):
+        """
+        Updates the entries of the current page in the todo list.
+        If textctrl is None then it trys to use the current page,
+        otherwise it trys to 
+        """
+        if textctrl is None:
+            textctrl = self._mainwin.GetNotebook().GetCurrentCtrl()
+
+        if textctrl is not None:
+#             self._log(help(self._mainwin.GetNotebook()))
+            fullname = textctrl.GetFileName()
+            filename = os.path.split(fullname)[1]
+
+            textlines = textctrl.GetText().splitlines()
+            tasklist = []
+            filterVal = self._taskFilter.GetValue()
+            choice = self._taskChoices.index(filterVal)
+            for idx, line in enumerate(textlines):
+                prio = 1
+                descr = ''
+                #TODO: use regex to match anythin we are looking for
+                
+                # the TODO
+                for tasknr in range(1, len(self._taskChoices)):
+                    # tasknr: meaning is the order of the self._taskChoices list
+                    if (choice==0 or choice==tasknr) and line.find(self._taskChoices[tasknr]) != -1:
+                        descr = line
+                        prio += tasknr # prio is higher if further in the list
+                        tasklist.append( (prio,self._taskChoices[tasknr], descr, filename, idx+1))
+                    
+            # TODO: only clear the entries for the current page (cache it)
+            self._listctrl.Clear()
+            keys = self._listctrl.AddEntries(tasklist)
+            
+    #TODO: remove or not?
+    def OnBtnUpdate(self, event):
+        self._log("UpdateButton pressed!!")
+        self.UpdateCurrent()
+
+    #---- Eventhandler ----#
     def OnShow(self, evt):
         """Shows the Comment Browser"""
 
@@ -127,245 +205,3 @@ class CBrowserPane(wx.Panel):
 
 
 #---------------------------------------------------------------------------- #
-
-
-class TestListCtrl(wx.ListCtrl, listmix.ListCtrlAutoWidthMixin,
-            listmix.ColumnSorterMixin):
-
-    """The list ctrl used for the list"""
-
-    def __init__(
-        self,
-        parent,
-        ID,
-        pos=wx.DefaultPosition,
-        size=wx.DefaultSize,
-        style=wx.BORDER_NONE|wx.LC_REPORT|wx.LC_HRULES|wx.LC_VRULES|wx.LC_SINGLE_SEL):
-        """Init the list ctrl"""
-
-        self._log('TestListCtrl before init base classes')
-        wx.ListCtrl.__init__(
-            self,
-            parent,
-            ID,
-            pos,
-            size,
-            style,
-            )
-        listmix.ListCtrlAutoWidthMixin.__init__(self)
-        self._log('TestListCtrl after init base classes')
-
-
-        #---- Images used by the list ----#
-        isize = (8, 8)
-        self._img_list = wx.ImageList(*isize)
-        up = wx.ArtProvider_GetBitmap(str(ed_glob.ID_UP), wx.ART_MENU, isize)
-        if not up.IsOk():
-            up = wx.ArtProvider_GetBitmap(wx.ART_GO_UP, wx.ART_TOOLBAR, isize)
-        self.sm_up = self._img_list.Add(up)
-
-        down = wx.ArtProvider_GetBitmap(str(ed_glob.ID_DOWN), wx.ART_MENU, isize)
-        if not down.IsOk():
-            down = wx.ArtProvider_GetBitmap(wx.ART_GO_DOWN, wx.ART_TOOLBAR, isize)
-        self.sm_dn = self._img_list.Add(down)
-
-        self.SetImageList(self._img_list, wx.IMAGE_LIST_SMALL)
-
-        #this attribute ist required by listmix.ColumnSorterMixin
-        #{1:(col1, col2, col3), etc.}
-        self.itemDataMap = dict()
-        self.itemIndexMap = []
-
-        #---- Add Columns Headers ----#
-
-        self.InsertColumn(0, "!")
-        self.InsertColumn(1, "Description")
-        self.InsertColumn(2, "File")
-        self.InsertColumn(3, "Line")
-
-        self.SetColumnWidth(0, 38)
-        self.SetColumnWidth(1, 454)
-        self.SetColumnWidth(2, 149)
-        self.SetColumnWidth(3, 63)
-
-        self._log('after adding columns')
-        
-        #TODO: remove testentries
-        self.AddEntry(4, 'The Price Of Love', 'file', '23')
-        self.AddEntry('1', 'bla bla bla', 'file', '25')
-        self.AddEntry('5', 'Love python', 'file', '4')
-
-        self._log('after adding entries')
-        
-        # hast to be after self.itemDataMap has been initialized and the
-        # setup of the columns, but befor sorting
-        listmix.ColumnSorterMixin.__init__(self, 4)
-
-        #---- Events ----#
-        self.Bind(wx.EVT_LIST_ITEM_SELECTED, self.OnItemSelected, self)
-        self.Bind(wx.EVT_LIST_ITEM_DESELECTED, self.OnItemDeselected,
-                  self)
-        self.Bind(wx.EVT_LIST_ITEM_ACTIVATED, self.OnItemActivated,
-                  self)
-        self.Bind(wx.EVT_LIST_DELETE_ITEM, self.OnItemDelete, self)
-        self.Bind(wx.EVT_LIST_COL_CLICK, self.OnColClick, self)
-        self.Bind(wx.EVT_LIST_COL_RIGHT_CLICK, self.OnColRightClick,
-                  self)
-        self.Bind(wx.EVT_LIST_COL_BEGIN_DRAG, self.OnColBeginDrag, self)
-        self.Bind(wx.EVT_LIST_COL_DRAGGING, self.OnColDragging, self)
-        self.Bind(wx.EVT_LIST_COL_END_DRAG, self.OnColEndDrag, self)
-        self.Bind(wx.EVT_LIST_BEGIN_LABEL_EDIT, self.OnBeginEdit, self)
-
-        self.Bind(wx.EVT_LEFT_DCLICK, self.OnDoubleClick)
-        self.Bind(wx.EVT_RIGHT_DOWN, self.OnRightDown)
-
-        #for wxMSW
-        self.Bind(wx.EVT_COMMAND_RIGHT_CLICK, self.OnRightClick)
-
-        #for wxGTK
-        self.Bind(wx.EVT_RIGHT_UP, self.OnRightClick)
-
-        self._log('after binding events')
-
-
-        #sort by genre (column 0), A->Z ascending order (1)
-        self.SortListItems(0, 0)
-
-        self._log('__init__() finished')
-        
-    
-
-    def _log(self, msg):
-        wx.GetApp().GetLog()('>>>>>>>>>>>>>>[commentbrowser][listctr] '
-                              + str(msg))
-
-    def AddEntry(
-        self,
-        prio,
-        descr,
-        file,
-        line,
-        ):
-        # add to itemDataMap for sorting
-        prio = str(prio)
-        descr = str(descr)
-        file = str(file)
-        line = str(line)
-        key = len(self.itemDataMap)
-        self.itemDataMap[key] = (prio, descr, file, line)
-        self.itemIndexMap = list(self.itemDataMap.keys())
-        # add to actual list
-        index = self.InsertStringItem(sys.maxint, prio)
-        self.SetStringItem(index, 1, descr)
-        self.SetStringItem(index, 2, file)
-        self.SetStringItem(index, 3, line)
-        # this is really needed by the ColumnSorterMixin
-        self.SetItemData(index, key)
-        self._log("itemcount Add entry "+str(self.GetItemCount()))
-#         self.SetItemCount(self.GetItemCount())
-#         self.SetItemCount(key)
-        self.Refresh()
-        #FIXME: remove debug
-        self._log(self.itemDataMap)
-
-
-    # These methods are callbacks for implementing the
-    # "virtualness" of the list...
-
-    def OnGetItemText(self, item, col):
-        index=self.itemIndexMap[item]
-        s = self.itemDataMap[index][col]
-        return s
-
-    def OnGetItemImage(self, item):
-        return -1
-
-    def OnGetItemAttr(self, item):
-        return None
-
-
-
-
-    #Used by the ColumnSorterMixin, see wx/lib/mixins/listctrl.py
-    def GetListCtrl(self):
-        """ this method is required by listmix.ColumnSorterMixin"""
-
-        self._log('GetListCtrl')
-        return self
-
-    #---------------------------------------------------
-    #Matt C, 2006/02/22
-    #Here's a better SortItems() method --
-    #the ColumnSorterMixin.__ColumnSorter() method already handles the ascending/descending,
-    #and it knows to sort on another column if the chosen columns have the same value.
-    def SortItems(self, sorter=cmp):
-        self._log('SortItems')
-        items = list(self.itemDataMap.keys())
-        self._log(items)
-        items.sort(sorter)
-        self._log(items)
-        self.itemIndexMap = items
-
-        #redraw the list
-        self.Refresh()
-        
-    #Used by the ColumnSorterMixin, see wx/lib/mixins/listctrl.py
-    def GetSortImages(self):
-        self._log('GetSortImages')
-        return (self.sm_dn, self.sm_up)
-
-    #---- Eventhandler ----#
-
-    def OnItemSelected(self, event):
-        self._log('OnItemSelected')
-        self.currentItem = event.m_itemIndex
-        self._log("OnItemSelected: %s, %s, %s, %s, %s\n" %
-                           (self.currentItem,
-                            self.GetItem(self.currentItem, 0).GetText(),
-                            self.GetItem(self.currentItem, 1).GetText(),
-                            self.GetItem(self.currentItem, 2).GetText(),
-                            self.GetItem(self.currentItem, 3).GetText()))
-        event.Skip()
-
-    def OnItemDeselected(self, event):
-        self._log('OnItemDeselected')
-        item = event.GetItem()
-        self._log("OnItemDeselected: %d" % event.m_itemIndex)
-
-    def OnItemActivated(self, event):
-        self._log('OnItemActivated')
-
-    def OnItemDelete(self, event):
-        self._log('OnItemDelete')
-
-    def OnColClick(self, event):
-        self._log('OnColClick')
-        event.Skip()
-
-    def OnColRightClick(self, event):
-        self._log('OnColRightClick')
-
-    def OnColBeginDrag(self, event):
-        self._log('OnColBeginDrag')
-
-    def OnColDragging(self, event):
-        self._log('OnColDragging')
-
-    def OnColEndDrag(self, event):
-        self._log('OnColEndDrag')
-        for colnum in [0, 1, 2, 3]:
-            self._log(self.GetColumnWidth(colnum))
-
-    def OnBeginEdit(self, event):
-        self._log('OnBeginEdit')
-
-    def OnDoubleClick(self, event):
-        self._log('OnDoubleClick')
-
-    def OnRightDown(self, event):
-        self._log('OnRightDown')
-
-    def OnRightClick(self, event):
-        self._log('OnRightClick')
-
-
