@@ -44,8 +44,18 @@ ID_COMMENTBROWSE = wx.NewId()
     #TODO: update if gets focus?
     #TODO: update every second?
     #TODO: update when tab changes (should every tab have its own todo list??)
-    
-#TODO: two tabs, one for current file, one for all opened files??
+# [14:15]	cprecord: current_txt_ctrl.Bind(wx.EVT_CHAR, self.OnListenToKeys)
+# [14:15]	cprecord: def OnListenToKeys(self, evt):
+# [14:15]	cprecord:     e_key = event.GetKeyCode()
+# # [14:16]	cprecord:     charval = unichar(e_key)
+# [14:17]	DR0ID_: lets say 0.5 seconds after the last key hit -> update the todo's list
+# [14:19]	cprecord: you could make a timer and listen for wx.EVT_TIMER, when starting the timer object give it an agrument of 500 milliseconds
+# [14:19]	cprecord: wx.Timer(self)
+# [14:19]	DR0ID_: oh, that simple :-D
+# [14:19]	cprecord: yea pretty easy
+# [14:19]	cprecord: just make sure that you override __del__ and make sure the timer is stopped when the windows is deleted
+# [14:20]	DR0ID_: ok, thx, as you know, I have little experience with wxpython 
+# [14:20]	cprecord: or there will likely be PyDeadObjectErrors when closing the editor#TODO: two tabs, one for current file, one for all opened files??
 
 #columns: (priority, tasktype, comment, file, linenr)
 
@@ -95,6 +105,7 @@ class CBrowserPane(wx.Panel):
         
         self._taskChoices = ['ALL', 'TODO', 'HACK', 'XXX', 'FIXME']
         self._taskFilter = wx.Choice(self, choices=self._taskChoices)
+        self._taskFilter.SetStringSelection(self._taskChoices[0])
         self._checkBoxAllFiles = wx.CheckBox(self, label=_("All opened files"), style=wx.ALIGN_LEFT)
         
         hsizer = wx.BoxSizer(wx.HORIZONTAL)
@@ -156,16 +167,17 @@ class CBrowserPane(wx.Panel):
 
             textlines = textctrl.GetText().splitlines()
             tasklist = []
-            filterVal = self._taskFilter.GetValue()
+            filterVal = self._taskFilter.GetStringSelection()
             choice = self._taskChoices.index(filterVal)
             for idx, line in enumerate(textlines):
                 prio = 1
                 descr = ''
-                #TODO: use regex to match anythin we are looking for
+                #TODO: use regex to match anything we are looking for
                 
                 # the TODO
                 for tasknr in range(1, len(self._taskChoices)):
                     # tasknr: meaning is the order of the self._taskChoices list
+                    prio = 1
                     if (choice==0 or choice==tasknr) and line.find(self._taskChoices[tasknr]) != -1:
                         descr = line
                         prio += tasknr # prio is higher if further in the list
@@ -179,6 +191,8 @@ class CBrowserPane(wx.Panel):
     def OnBtnUpdate(self, event):
         self._log("UpdateButton pressed!!")
         self.UpdateCurrent()
+        self._listctrl.SortListItems(0, 0)
+        self._listctrl.Refresh()
 
     #---- Eventhandler ----#
     def OnShow(self, evt):
