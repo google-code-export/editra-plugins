@@ -1,0 +1,8 @@
+CommentBrowser Plugin for Editra
+Author: DR0ID
+Licence: wxWindows
+
+
+
+Version 0.1:
+    - Initial Release, just a prototype, list sorting not working, no parsing of files
