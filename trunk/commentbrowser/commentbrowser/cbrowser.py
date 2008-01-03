@@ -159,12 +159,16 @@ class TestListCtrl(wx.ListCtrl, listmix.ListCtrlAutoWidthMixin,
         #---- Images used by the list ----#
         isize = (8, 8)
         self._img_list = wx.ImageList(*isize)
-        self.sm_up = \
-            self._img_list.Add(wx.ArtProvider_GetBitmap(wx.ART_GO_UP,
-                               wx.ART_TOOLBAR, isize))
-        self.sm_dn = \
-            self._img_list.Add(wx.ArtProvider_GetBitmap(wx.ART_GO_DOWN,
-                               wx.ART_TOOLBAR, isize))
+        up = wx.ArtProvider_GetBitmap(str(ed_glob.ID_UP), wx.ART_MENU, isize)
+        if not up.IsOk():
+            up = wx.ArtProvider_GetBitmap(wx.ART_GO_UP, wx.ART_TOOLBAR, isize)
+        self.sm_up = self._img_list.Add(up)
+
+        down = wx.ArtProvider_GetBitmap(str(ed_glob.ID_DOWN), wx.ART_MENU, isize)
+        if not down.IsOk():
+            down = wx.ArtProvider_GetBitmap(wx.ART_GO_DOWN, wx.ART_TOOLBAR, isize)
+        self.sm_dn = self._img_list.Add(down)
+
         self.SetImageList(self._img_list, wx.IMAGE_LIST_SMALL)
 
         #this attribute ist required by listmix.ColumnSorterMixin
