@@ -94,22 +94,29 @@ class CBrowserPane(wx.Panel):
         self._listctrl = TestListCtrl(self)
         
         self._taskChoices = ['ALL', 'TODO', 'HACK', 'XXX', 'FIXME']
-        self._taskFilter = wx.ComboBox(self, value=self._taskChoices[0],
-                choices=self._taskChoices,
-                style=wx.CB_DROPDOWN|wx.CB_READONLY,
-                name="comboBoxTaskFilter")
-        self._checkBoxAllFiles = wx.CheckBox(self)
+        self._taskFilter = wx.Choice(self, choices=self._taskChoices)
+        self._checkBoxAllFiles = wx.CheckBox(self, label=_("All opened files"), style=wx.ALIGN_LEFT)
         
         hsizer = wx.BoxSizer(wx.HORIZONTAL)
-        hsizer.Add(wx.StaticText(self, -1, "Taskfilter: "))
-        hsizer.Add(self._taskFilter)
-        
-        hsizer.Add(wx.StaticText(self, -1, "        all opened files: "))
-        hsizer.Add(self._checkBoxAllFiles)
+        tasklbl = wx.StaticText(self, label=_("Taskfilter: "))
+        hsizer.Add((5, 5))
+        hsizer.Add(tasklbl, 0, wx.ALIGN_CENTER_VERTICAL)
+        hsizer.Add((5, 5))
+        hsizer.Add(self._taskFilter, 0, wx.ALIGN_CENTER_VERTICAL)
+        hsizer.Add((-1, 5), 1, wx.EXPAND)
+        hsizer.Add(self._checkBoxAllFiles, 0, wx.ALIGN_CENTER_VERTICAL | wx.ALIGN_RIGHT)
+        hsizer.Add((5, 5))
         
         #TODO: update button: remove or not?
-        btn = wx.Button(self, label="update")
-        hsizer.Add(btn)
+        btn = wx.Button(self, label=_("Update"))
+        hsizer.Add(btn, 0, wx.ALIGN_CENTER_VERTICAL | wx.ALIGN_RIGHT)
+        hsizer.Add((5, 5))
+
+        # Use small version of controls on osx as the are more suitable in this
+        # use case.
+        if wx.Platform == '__WXMAC__':
+            for win in [self._taskFilter, tasklbl, btn, self._checkBoxAllFiles]:
+                win.SetWindowVariant(wx.WINDOW_VARIANT_SMALL)
 
         sizer = wx.BoxSizer(wx.VERTICAL)
         sizer.Add(hsizer, 0, wx.EXPAND)
@@ -122,7 +129,7 @@ class CBrowserPane(wx.Panel):
         #---- Bind events ----#
         self._mainwin.Bind(wx.aui.EVT_AUI_PANE_CLOSE, self.OnClose)
         
-        btn.Bind(wx.EVT_BUTTON, self.OnBtnUpdate)
+        btn.Bind(wx.EVT_BUTTON, self.OnBtnUpdate, btn)
 #         self._log(help(self._mainwin.GetNotebook().GetCurrentCtrl()))
         
 
