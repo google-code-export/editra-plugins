@@ -1,0 +1,4 @@
+Name=CommentBrowser
+Author=DR0ID
+Description=Provides a comment browser side panel
+Version=0.1
