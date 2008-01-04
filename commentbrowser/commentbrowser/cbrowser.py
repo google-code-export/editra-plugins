@@ -156,9 +156,10 @@ class CBrowserPane(wx.Panel):
         btn.Bind(wx.EVT_BUTTON, self.OnListUpdate, btn)
         self._taskFilter.Bind(wx.EVT_CHOICE, self.OnListUpdate, self._taskFilter)
         
-# FIXME: if this are uncommented the list is not drawn proberly, I dont know why
-#        self._mainwin.GetNotebook().Bind(FNB.EVT_FLATNOTEBOOK_PAGE_CLOSED, self.OnPageClose, self._mainwin.GetNotebood())
-#        self._mainwin.GetNotebook().Bind(FNB.EVT_FLATNOTEBOOK_PAGE_CHANGED, self.OnPageChange, self._mainwin.GetNotebook())
+        self._mainwin.GetNotebook().Bind(FNB.EVT_FLATNOTEBOOK_PAGE_CLOSED, 
+                                         self.OnPageClose, self._mainwin.GetNotebook())
+        self._mainwin.GetNotebook().Bind(FNB.EVT_FLATNOTEBOOK_PAGE_CHANGED, 
+                                         self.OnPageChange, self._mainwin.GetNotebook())
         self._log("-----------------------binding page change event done<<<<<<<<<<<<")
 
     def _log(self, msg):
@@ -223,9 +224,13 @@ class CBrowserPane(wx.Panel):
         self.UpdateCurrent()
 
     def OnPageClose(self, event):
+        # Need to skip event right away to let notebook to finish processing
+        event.Skip()
         self._log("OnPaneClose")
         
     def OnPageChange(self, event):
+        # Need to skip event right away to let page change properly
+        event.Skip()
         self._log("OnPageChange")
 
     def OnActivate(self, event):
