@@ -124,17 +124,17 @@ class TestListCtrl(wx.ListCtrl, listmix.ListCtrlAutoWidthMixin,
 
         self._log('after binding events')
 
-        #TODO: remove testentries
-        self.AddEntry(4, 'TODO', 'The Price Of Love', 'file', '25')
-        self.AddEntry(4, 'TODO', 'The brice Of Love', 'file', '36')
-        self.AddEntry(4, 'TODO', 'The OOOH Of Love', 'file', '24')
-        self.AddEntry('1', 'FIXME', 'bla bla bla', 'file', '52')
-        self.AddEntry('2', 'FIXME', 'zla bla bla', 'file', '55')
-        self.AddEntry('3', 'FIXME', 'grr bla bla', 'file', '25')
-        self.AddEntry('5', 'XXX', 'Love python', 'file', '66')
-        self.AddEntry('2', 'XXX', 'Love love python', 'file', '404')
-        self.AddEntry('4', 'XXX', 'Love py', 'file', '44')
-        self._log('after adding entries')
+#         #TODO: remove testentries
+#         self.AddEntry(4, 'TODO', 'The Price Of Love', 'file', '25')
+#         self.AddEntry(4, 'TODO', 'The brice Of Love', 'file', '36')
+#         self.AddEntry(4, 'TODO', 'The OOOH Of Love', 'file', '24')
+#         self.AddEntry('1', 'FIXME', 'bla bla bla', 'file', '52')
+#         self.AddEntry('2', 'FIXME', 'zla bla bla', 'file', '55')
+#         self.AddEntry('3', 'FIXME', 'grr bla bla', 'file', '25')
+#         self.AddEntry('5', 'XXX', 'Love python', 'file', '66')
+#         self.AddEntry('2', 'XXX', 'Love love python', 'file', '404')
+#         self.AddEntry('4', 'XXX', 'Love py', 'file', '44')
+#         self._log('after adding entries')
 
         #sort by prio (column 0), descending order (0)
         self.SortListItems(0, 0)
@@ -155,15 +155,18 @@ class TestListCtrl(wx.ListCtrl, listmix.ListCtrlAutoWidthMixin,
         descr,
         file,
         line,
+        refresh = True
         ):
         """Add a entry to the list"""
         # add to itemDataMap for sorting
         val = (int(prio), str(tasktype), str(descr), str(file), int(line))
         key = hash(val)
         self.itemDataMap[key] = val
+        # TODO: perhaps add it in a sorted manner (if possible, dont know)
         self.itemIndexMap = list(self.itemDataMap.keys())
         self.SetItemCount(len(self.itemDataMap))
-        self.Refresh()
+        if refresh:
+            self.Refresh()
         
         #FIXME: remove debug
         self._log("itemcount Add entry "+str(self.GetItemCount())+" key:"+str(key))
@@ -175,7 +178,8 @@ class TestListCtrl(wx.ListCtrl, listmix.ListCtrlAutoWidthMixin,
         containing (prio, tasktype, description, file, line)"""
         keys = []
         for entry in entrylist:
-            keys.append(self.AddEntry(*entry))
+            prio, task, descr, file, line = entry
+            keys.append(self.AddEntry(prio, task, descr, file, line, refresh=False))
         self.SetItemCount(len(self.itemDataMap))
         self.Refresh()
         return keys
@@ -187,13 +191,14 @@ class TestListCtrl(wx.ListCtrl, listmix.ListCtrlAutoWidthMixin,
         self.SetItemCount(len(self.itemDataMap))
         self.Refresh()
         
-    def Clear(self, keys=None):
+    def Clear(self, keys=None, refresh=True):
         """Removes all entries from list"""
         if keys is None:
             self.itemDataMap.clear()
             self.itemIndexMap = list(self.itemDataMap.keys())
             self.SetItemCount(len(self.itemDataMap))
-            self.Refresh()
+            if refresh:
+                self.Refresh()
         else:
             for key in keys:
                 self.RemoveEntry(key)
