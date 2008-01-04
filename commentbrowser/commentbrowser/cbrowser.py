@@ -26,6 +26,7 @@ import wx
 #Editra Library Modules
 import ed_glob
 #import ed_menu
+from extern import flatnotebook as FNB
 
 #Local
 from cbrowserlistctrl import TestListCtrl
@@ -38,6 +39,7 @@ PANE_NAME = u'CommentBrowser'
 CAPTION = _(u'Comment Browser')
 ID_CBROWSERPANE = wx.NewId()
 ID_COMMENTBROWSE = wx.NewId()
+ID_TIMER = wx.NewId()
 
 #--------------------------------------------------------------------------#
 #TODO: todos list for all opened files 
@@ -55,7 +57,8 @@ ID_COMMENTBROWSE = wx.NewId()
 # [14:19]	cprecord: yea pretty easy
 # [14:19]	cprecord: just make sure that you override __del__ and make sure the timer is stopped when the windows is deleted
 # [14:20]	DR0ID_: ok, thx, as you know, I have little experience with wxpython 
-# [14:20]	cprecord: or there will likely be PyDeadObjectErrors when closing the editor#TODO: two tabs, one for current file, one for all opened files??
+# [14:20]	cprecord: or there will likely be PyDeadObjectErrors when closing the editor
+#TODO: two tabs, one for current file, one for all opened files??
 
 #columns: (priority, tasktype, comment, file, linenr)
 
@@ -90,6 +93,11 @@ class CBrowserPane(wx.Panel):
         #---- private attr ----#
         self._mainwin = parent
         self.__log = wx.GetApp().GetLog()
+        
+        self._timerenabled = False
+        self._timer = wx.Timer(self, ID_TIMER)
+        self._intervall = 3000; #  milli seconds
+        
         #TODO: datastructure for todos caching
         # {key:(page, fullname, (prio, task, desr, file, line)), filename2:{key:(),...},...}
 #         self._entryDict = dict()
@@ -123,7 +131,7 @@ class CBrowserPane(wx.Panel):
         hsizer.Add(btn, 0, wx.ALIGN_CENTER_VERTICAL | wx.ALIGN_RIGHT)
         hsizer.Add((5, 5))
 
-        # Use small version of controls on osx as the are more suitable in this
+        # Use small version of controls on osx as they are more suitable in this
         # use case.
         if wx.Platform == '__WXMAC__':
             for win in [self._taskFilter, tasklbl, btn, self._checkBoxAllFiles]:
@@ -138,16 +146,29 @@ class CBrowserPane(wx.Panel):
         self.Layout()
         
         #---- Bind events ----#
-        self._mainwin.Bind(wx.aui.EVT_AUI_PANE_CLOSE, self.OnClose)
         
-        btn.Bind(wx.EVT_BUTTON, self.OnBtnUpdate, btn)
-#         self._log(help(self._mainwin.GetNotebook().GetCurrentCtrl()))
+        self._mainwin.Bind(wx.EVT_ACTIVATE, self.OnActivate)
         
+        self.Bind(wx.EVT_TIMER, self.OnListUpdate, self._timer)
+        if self._timerenabled:
+            self._timer.Start(self._intervall)
+        
+        btn.Bind(wx.EVT_BUTTON, self.OnListUpdate, btn)
+        self._taskFilter.Bind(wx.EVT_CHOICE, self.OnListUpdate, self._taskFilter)
+        
+# FIXME: if this are uncommented the list is not drawn proberly, I dont know why
+#        self._mainwin.GetNotebook().Bind(FNB.EVT_FLATNOTEBOOK_PAGE_CLOSED, self.OnPageClose, self._mainwin.GetNotebood())
+#        self._mainwin.GetNotebook().Bind(FNB.EVT_FLATNOTEBOOK_PAGE_CHANGED, self.OnPageChange, self._mainwin.GetNotebook())
+        self._log("-----------------------binding page change event done<<<<<<<<<<<<")
 
     def _log(self, msg):
         """writes a log message to the app log"""
-
         self.__log('[commentbrowser] ' + str(msg))
+
+    def __del__(self):
+        self._log("__del__(): stopping timer")
+        self._timer.Stop()
+        super(CBrowserPane, self).__del__()
 
     #---- Methods ----#
     
@@ -162,10 +183,15 @@ class CBrowserPane(wx.Panel):
 
         if textctrl is not None:
 #             self._log(help(self._mainwin.GetNotebook()))
-            fullname = textctrl.GetFileName()
-            filename = os.path.split(fullname)[1]
+            try:
+                fullname = textctrl.GetFileName()
+                filename = os.path.split(fullname)[1]
 
-            textlines = textctrl.GetText().splitlines()
+                textlines = textctrl.GetText().splitlines()
+            except Exception, e:
+                self._log("[error]:" + str(e.message))
+                self._log(type(e))
+                return
             tasklist = []
             filterVal = self._taskFilter.GetStringSelection()
             choice = self._taskChoices.index(filterVal)
@@ -184,15 +210,37 @@ class CBrowserPane(wx.Panel):
                         tasklist.append( (prio,self._taskChoices[tasknr], descr, filename, idx+1))
                     
             # TODO: only clear the entries for the current page (cache it)
-            self._listctrl.Clear()
+            # TODO: prevent flickering of list redraw
+            self._listctrl.Clear(refresh=False)
             keys = self._listctrl.AddEntries(tasklist)
-            
-    #TODO: remove or not?
-    def OnBtnUpdate(self, event):
-        self._log("UpdateButton pressed!!")
+            self._listctrl.SortListItems(0, 0) # TODO: should be same sort order that the list is already sorted (if possible?)
+
+    def OnListUpdate(self, event):
+        self._log("OnListUpdate"+str(event))
+        if event.GetId() == ID_TIMER:
+            self._log("timer update")
+        self._log("timer running: "+str(self._timer.IsRunning()))
         self.UpdateCurrent()
-        self._listctrl.SortListItems(0, 0)
-        self._listctrl.Refresh()
+
+    def OnPageClose(self, event):
+        self._log("OnPaneClose")
+        
+    def OnPageChange(self, event):
+        self._log("OnPageChange")
+
+    def OnActivate(self, event):
+        self._log("OnActivate")
+        if event.GetActive():
+            # awake, reastart timer
+            if self._timerenabled:
+                self._timer.Start(self._intervall)
+            self.UpdateCurrent() # XXX: <-- really needed here? because during sleep the file cant be changed ;-)
+            self._log("[timer] OnActivate: restarting timer")
+        else:
+            # going to sleep, stop timer
+            self._timer.Stop()
+            self._log("[timer] OnActivate: stopoing timer")
+
 
     #---- Eventhandler ----#
     def OnShow(self, evt):
