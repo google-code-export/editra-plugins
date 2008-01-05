@@ -21,6 +21,7 @@ __revision__ = '$Revision$'
 #-----------------------------------------------------------------------------#
 #Imports
 import os.path
+import re
 import wx
 
 #Editra Library Modules
@@ -41,11 +42,16 @@ ID_CBROWSERPANE = wx.NewId()
 ID_COMMENTBROWSE = wx.NewId()
 ID_TIMER = wx.NewId()
 
+# [low priority, ..., high priority]
+TASK_CHOICES = ['ALL', 'TODO', 'HACK', 'XXX', 'FIXME']
+
+RE_TASK_CHOICES = []
+for task in TASK_CHOICES:
+    expr = '.*[@#][ ]*'+task+'[ ]*:*(.+)'
+    RE_TASK_CHOICES.append(re.compile(expr, re.IGNORECASE))
+
 #--------------------------------------------------------------------------#
-#TODO: todos list for all opened files 
-    #TODO: update if gets focus?
-    #TODO: update every second?
-    #TODO: update when tab changes (should every tab have its own todo list??)
+# TODO: update on keypress? (return, delete, :, backspace) ??
 # [14:15]	cprecord: current_txt_ctrl.Bind(wx.EVT_CHAR, self.OnListenToKeys)
 # [14:15]	cprecord: def OnListenToKeys(self, evt):
 # [14:15]	cprecord:     e_key = event.GetKeyCode()
@@ -58,7 +64,6 @@ ID_TIMER = wx.NewId()
 # [14:19]	cprecord: just make sure that you override __del__ and make sure the timer is stopped when the windows is deleted
 # [14:20]	DR0ID_: ok, thx, as you know, I have little experience with wxpython 
 # [14:20]	cprecord: or there will likely be PyDeadObjectErrors when closing the editor
-#TODO: two tabs, one for current file, one for all opened files??
 
 #columns: (priority, tasktype, comment, file, linenr)
 
@@ -98,6 +103,8 @@ class CBrowserPane(wx.Panel):
         self._timer = wx.Timer(self, ID_TIMER)
         self._intervall = 3000; #  milli seconds
         
+        self._allfiles = False
+        
         #TODO: datastructure for todos caching
         # {key:(page, fullname, (prio, task, desr, file, line)), filename2:{key:(),...},...}
 #         self._entryDict = dict()
@@ -111,7 +118,7 @@ class CBrowserPane(wx.Panel):
         #---- Gui ----#
         self._listctrl = TestListCtrl(self)
         
-        self._taskChoices = ['ALL', 'TODO', 'HACK', 'XXX', 'FIXME']
+        self._taskChoices = TASK_CHOICES
         self._taskFilter = wx.Choice(self, choices=self._taskChoices)
         self._taskFilter.SetStringSelection(self._taskChoices[0])
         self._checkBoxAllFiles = wx.CheckBox(self, label=_("All opened files"), style=wx.ALIGN_LEFT)
@@ -125,8 +132,7 @@ class CBrowserPane(wx.Panel):
         hsizer.Add((-1, 5), 1, wx.EXPAND)
         hsizer.Add(self._checkBoxAllFiles, 0, wx.ALIGN_CENTER_VERTICAL | wx.ALIGN_RIGHT)
         hsizer.Add((5, 5))
-        
-        #TODO: update button: remove or not?
+
         btn = wx.Button(self, label=_("Update"))
         hsizer.Add(btn, 0, wx.ALIGN_CENTER_VERTICAL | wx.ALIGN_RIGHT)
         hsizer.Add((5, 5))
@@ -160,8 +166,10 @@ class CBrowserPane(wx.Panel):
                                          self.OnPageClose, self._mainwin.GetNotebook())
         self._mainwin.GetNotebook().Bind(FNB.EVT_FLATNOTEBOOK_PAGE_CHANGED, 
                                          self.OnPageChange, self._mainwin.GetNotebook())
-        self._log("-----------------------binding page change event done<<<<<<<<<<<<")
+        
+        self._checkBoxAllFiles.Bind(wx.EVT_CHECKBOX, self.OnCheckAll, self._checkBoxAllFiles)
 
+    #---- Private Methods ----#
     def _log(self, msg):
         """writes a log message to the app log"""
         self.__log('[commentbrowser] ' + str(msg))
@@ -173,65 +181,85 @@ class CBrowserPane(wx.Panel):
 
     #---- Methods ----#
     
-    def UpdateCurrent(self, textctrl=None):
+    def UpdateCurrent(self, intextctrl=None):
         """
         Updates the entries of the current page in the todo list.
         If textctrl is None then it trys to use the current page,
         otherwise it trys to 
         """
-        if textctrl is None:
-            textctrl = self._mainwin.GetNotebook().GetCurrentCtrl()
+        controls = []
+        
+        if self._allfiles:
+            controls.extend(self._mainwin.GetNotebook().GetTextControls())
+        else:
+            if intextctrl is None:
+                controls = [self._mainwin.GetNotebook().GetCurrentCtrl()]
+            else:
+                controls = [intextctrl]
+        self._log("********************** controls:  "+str(controls))
+        tasklist = []
+        for textctrl in controls:
+            # make sure it is a text ctrl
+            if (textctrl is not None) and \
+                            (getattr(textctrl, '__name__', '') == 'EditraTextCtrl'):
+#                 self._log(help(self._mainwin.GetNotebook()))
+                try:
+                    fullname = textctrl.GetFileName()
+                    filename = os.path.split(fullname)[1]
 
-        if textctrl is not None:
-#             self._log(help(self._mainwin.GetNotebook()))
-            try:
-                fullname = textctrl.GetFileName()
-                filename = os.path.split(fullname)[1]
+                    textlines = textctrl.GetText().splitlines()
+                except Exception, e:
+                    self._log("[error]:" + str(e.message))
+                    self._log(type(e))
+                    return
+                filterVal = self._taskFilter.GetStringSelection()
+                choice = self._taskChoices.index(filterVal)
+                for idx, line in enumerate(textlines):
+                    # the match the tasks
+                    for tasknr in range(1, len(self._taskChoices)):
+                        # tasknr: meaning is the order of the self._taskChoices list
+                        todo_hit = RE_TASK_CHOICES[tasknr].match(line)
+                        if (choice==0 or choice==tasknr) and todo_hit:
+                            descr = todo_hit.group(1).strip()
+                            prio = descr.count('!')
+                            prio += tasknr # prio is higher if further in the list
+                            tasklist.append( (prio,self._taskChoices[tasknr], descr, filename, idx+1, fullname))
+                        
+        # TODO: only clear the entries for the current page (cache it)
+        # TODO: prevent flickering of list redraw
+        self._listctrl.Clear(refresh=False)
+        keys = self._listctrl.AddEntries(tasklist)
+        self._listctrl.SortListItems(0, 0) # TODO: should be same sort order that the list is already sorted (if possible?)
 
-                textlines = textctrl.GetText().splitlines()
-            except Exception, e:
-                self._log("[error]:" + str(e.message))
-                self._log(type(e))
-                return
-            tasklist = []
-            filterVal = self._taskFilter.GetStringSelection()
-            choice = self._taskChoices.index(filterVal)
-            for idx, line in enumerate(textlines):
-                prio = 1
-                descr = ''
-                #TODO: use regex to match anything we are looking for
-                
-                # the TODO
-                for tasknr in range(1, len(self._taskChoices)):
-                    # tasknr: meaning is the order of the self._taskChoices list
-                    prio = 1
-                    if (choice==0 or choice==tasknr) and line.find(self._taskChoices[tasknr]) != -1:
-                        descr = line
-                        prio += tasknr # prio is higher if further in the list
-                        tasklist.append( (prio,self._taskChoices[tasknr], descr, filename, idx+1))
-                    
-            # TODO: only clear the entries for the current page (cache it)
-            # TODO: prevent flickering of list redraw
-            self._listctrl.Clear(refresh=False)
-            keys = self._listctrl.AddEntries(tasklist)
-            self._listctrl.SortListItems(0, 0) # TODO: should be same sort order that the list is already sorted (if possible?)
+    #---- Eventhandler ----#
+    
+    def OnCheckAll(self, event):
+        self._allfiles = self._checkBoxAllFiles.GetValue()
+        self.UpdateCurrent()
+        self._log("OnCheckAll: "+str(self._allfiles))
 
     def OnListUpdate(self, event):
+        # called on: EVT_TIMER, EVT_BUTTON, EVT_CHOICE
         self._log("OnListUpdate"+str(event))
         if event.GetId() == ID_TIMER:
             self._log("timer update")
         self._log("timer running: "+str(self._timer.IsRunning()))
         self.UpdateCurrent()
 
+    def OnPageChange(self, event):
+        # Need to skip event right away to let page change properly
+        event.Skip()
+        self._log("OnPageChange")
+        # ed_pages updates the GetCurrentCtrl() after processing OnPageChanged
+        # that is why I have to grab the ctrl this way
+        ctrl = self._mainwin.GetNotebook().GetPage(event.GetSelection())
+        self.UpdateCurrent(ctrl)
+
     def OnPageClose(self, event):
         # Need to skip event right away to let notebook to finish processing
         event.Skip()
         self._log("OnPaneClose")
         
-    def OnPageChange(self, event):
-        # Need to skip event right away to let page change properly
-        event.Skip()
-        self._log("OnPageChange")
 
     def OnActivate(self, event):
         self._log("OnActivate")
@@ -245,9 +273,8 @@ class CBrowserPane(wx.Panel):
             # going to sleep, stop timer
             self._timer.Stop()
             self._log("[timer] OnActivate: stopoing timer")
+        event.Skip()
 
-
-    #---- Eventhandler ----#
     def OnShow(self, evt):
         """Shows the Comment Browser"""
 
