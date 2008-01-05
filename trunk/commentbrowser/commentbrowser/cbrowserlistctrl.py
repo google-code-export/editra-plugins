@@ -90,6 +90,7 @@ class TestListCtrl(wx.ListCtrl, listmix.ListCtrlAutoWidthMixin,
         self.itemDataMap = {} #{1:(prio, task, description, file, line), etc.}
         self.itemIndexMap = self.itemDataMap.keys()
         self.SetItemCount(len(self.itemDataMap))
+        self._currentItemIdx = -1
         
         #---- init base classes ----#
         # hast to be after self.itemDataMap has been initialized and the
@@ -102,6 +103,9 @@ class TestListCtrl(wx.ListCtrl, listmix.ListCtrlAutoWidthMixin,
         self.Bind(wx.EVT_LIST_ITEM_SELECTED, self.OnItemSelected, self)
         self.Bind(wx.EVT_LIST_ITEM_DESELECTED, self.OnItemDeselected,
                   self)
+        self.Bind(wx.EVT_LIST_ITEM_RIGHT_CLICK, self.OnItemRightClick,
+                  self)
+                  
         self.Bind(wx.EVT_LIST_ITEM_ACTIVATED, self.OnItemActivated,
                   self)
         self.Bind(wx.EVT_LIST_DELETE_ITEM, self.OnItemDelete, self)
@@ -113,14 +117,14 @@ class TestListCtrl(wx.ListCtrl, listmix.ListCtrlAutoWidthMixin,
         self.Bind(wx.EVT_LIST_COL_END_DRAG, self.OnColEndDrag, self)
         self.Bind(wx.EVT_LIST_BEGIN_LABEL_EDIT, self.OnBeginEdit, self)
 
-        self.Bind(wx.EVT_LEFT_DCLICK, self.OnDoubleClick)
-        self.Bind(wx.EVT_RIGHT_DOWN, self.OnRightDown)
+        self.Bind(wx.EVT_LEFT_DCLICK, self.OnDoubleClick, self)
+        self.Bind(wx.EVT_RIGHT_DOWN, self.OnRightDown, self)
 
         #for wxMSW
-        self.Bind(wx.EVT_COMMAND_RIGHT_CLICK, self.OnRightClick)
+        self.Bind(wx.EVT_COMMAND_RIGHT_CLICK, self.OnRightClick, self)
 
         #for wxGTK
-        self.Bind(wx.EVT_RIGHT_UP, self.OnRightClick)
+        self.Bind(wx.EVT_RIGHT_UP, self.OnRightClick, self)
 
         self._log('after binding events')
 
@@ -155,11 +159,12 @@ class TestListCtrl(wx.ListCtrl, listmix.ListCtrlAutoWidthMixin,
         descr,
         file,
         line,
+        fullname,
         refresh = True
         ):
         """Add a entry to the list"""
         # add to itemDataMap for sorting
-        val = (int(prio), str(tasktype), str(descr), str(file), int(line))
+        val = (int(prio), str(tasktype), str(descr), str(file), int(line), str(fullname))
         key = hash(val)
         self.itemDataMap[key] = val
         # TODO: perhaps add it in a sorted manner (if possible, dont know)
@@ -178,8 +183,8 @@ class TestListCtrl(wx.ListCtrl, listmix.ListCtrlAutoWidthMixin,
         containing (prio, tasktype, description, file, line)"""
         keys = []
         for entry in entrylist:
-            prio, task, descr, file, line = entry
-            keys.append(self.AddEntry(prio, task, descr, file, line, refresh=False))
+            prio, task, descr, file, line , fullname = entry
+            keys.append(self.AddEntry(prio, task, descr, file, line, fullname, refresh=False))
         self.SetItemCount(len(self.itemDataMap))
         self.Refresh()
         return keys
@@ -202,6 +207,27 @@ class TestListCtrl(wx.ListCtrl, listmix.ListCtrlAutoWidthMixin,
         else:
             for key in keys:
                 self.RemoveEntry(key)
+
+    def NavigateToTaskSource(self, itemIndex):
+    
+        if itemIndex < 0 or itemIndex > len(self.itemDataMap):
+            return
+        
+        key = self.itemIndexMap[itemIndex]
+        source = str(self.itemDataMap[key][-1])
+        line = self.itemDataMap[key][-2]
+        try:
+            nb = self.GetParent().GetParent().GetNotebook()
+            ctrls = nb.GetTextControls()
+            for ctrl in ctrls:
+                if source == ctrl.GetFileName() :
+                    nb.SetSelection(nb.GetPageIndex(ctrl))
+                    nb.GoCurrentPage()
+                    ctrl.GotoLine(line-1)
+                    break;
+        except Exception, e:
+            self._log("[error] "+e.msg)
+
 
     #---- special methods used by the mixinx classes ----#
     
@@ -260,7 +286,7 @@ class TestListCtrl(wx.ListCtrl, listmix.ListCtrlAutoWidthMixin,
         """
         return -1
 
-    def OnGetItemAttr(self, item):
+    def OnGetItemAttr(self, itemIdx):
         """
         Virtual ListCtrl have to define this method, should return item 
         attributes, but since we have none it always returns None.
@@ -273,13 +299,13 @@ class TestListCtrl(wx.ListCtrl, listmix.ListCtrlAutoWidthMixin,
 
     def OnItemSelected(self, event):
         self._log('OnItemSelected')
-        self.currentItem = event.m_itemIndex
+        self._currentItemIdx = event.m_itemIndex
         self._log("OnItemSelected: %s, %s, %s, %s, %s\n" %
-                           (self.currentItem,
-                            self.GetItem(self.currentItem, 0).GetText(),
-                            self.GetItem(self.currentItem, 1).GetText(),
-                            self.GetItem(self.currentItem, 2).GetText(),
-                            self.GetItem(self.currentItem, 3).GetText()))
+                           (self._currentItemIdx,
+                            self.GetItem(self._currentItemIdx, 0).GetText(),
+                            self.GetItem(self._currentItemIdx, 1).GetText(),
+                            self.GetItem(self._currentItemIdx, 2).GetText(),
+                            self.GetItem(self._currentItemIdx, 3).GetText()))
         event.Skip()
 
     def OnItemDeselected(self, event):
@@ -315,12 +341,22 @@ class TestListCtrl(wx.ListCtrl, listmix.ListCtrlAutoWidthMixin,
         self._log('OnBeginEdit')
 
     def OnDoubleClick(self, event):
-        self._log('OnDoubleClick')
+        self._log('OnDoubleClick'+str(event))
+        # OnItemSelected is called first, so self._currentItemIdx is already set
+        self.NavigateToTaskSource(self._currentItemIdx)
+        
 
     def OnRightDown(self, event):
         self._log('OnRightDown')
+        event.Skip()
 
     def OnRightClick(self, event):
         self._log('OnRightClick')
+        event.Skip()
 
+    def OnItemRightClick(self, event):
+        self.NavigateToTaskSource(event.m_itemIndex)
+        event.Skip()
+        
+    
 
