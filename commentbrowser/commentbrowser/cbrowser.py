@@ -39,7 +39,7 @@ _ = wx.GetTranslation
 PANE_NAME = u'CommentBrowser'
 CAPTION = _(u'Comment Browser')
 ID_CBROWSERPANE = wx.NewId()
-ID_COMMENTBROWSE = wx.NewId()
+ID_COMMENTBROWSE = wx.NewId() # menu item
 ID_TIMER = wx.NewId()
 
 # [low priority, ..., high priority]
@@ -114,6 +114,9 @@ class CBrowserPane(wx.Panel):
         self._mi = viewm.InsertAlpha(ID_COMMENTBROWSE, CAPTION,
                 _('Open Comment Browser Sidepanel'), wx.ITEM_CHECK,
                 after=ed_glob.ID_PRE_MARK)
+        self._mi.Check(False)
+        if self.IsShown():
+            self._mi.Check(True)
 
         #---- Gui ----#
         self._listctrl = TestListCtrl(self)
@@ -168,6 +171,7 @@ class CBrowserPane(wx.Panel):
                                          self.OnPageChange, self._mainwin.GetNotebook())
         
         self._checkBoxAllFiles.Bind(wx.EVT_CHECKBOX, self.OnCheckAll, self._checkBoxAllFiles)
+        self._mainwin.GetFrameManager().Bind(wx.aui.EVT_AUI_PANE_CLOSE, self.OnPaneClose)
 
     #---- Private Methods ----#
     def _log(self, msg):
@@ -294,12 +298,12 @@ class CBrowserPane(wx.Panel):
         else:
             evt.Skip()
 
-    def OnClose(self, evt):
-        """Clean up settings when Comment Browser is closed"""
+    def OnPaneClose(self, evt):
+        """Clean up settings when Comment Browser Pane is closed"""
 
-        evt_caption = evt.GetPane().caption
+        evt_caption = evt.GetPane().caption # TODO: can this be done better??
         if CAPTION == evt_caption:
-            self._log('OnClose ')
+            self._log('OnPaneClose ')
             self._mi.Check(False)
             evt.Skip()
 
