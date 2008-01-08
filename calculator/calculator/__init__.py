@@ -27,7 +27,7 @@ class Calculator(plugin.Plugin):
     plugin.Implements(iface.MainWindowI)
     def PlugIt(self, parent):
         """Hook the calculator into the menu and bind the event"""
-        util.Log("[calc] Installing calculator plugin")
+        util.Log("[calc][info] Installing calculator plugin")
 
         # Add Menu
         viewm = parent.GetMenuBar().GetMenuByName("view")
