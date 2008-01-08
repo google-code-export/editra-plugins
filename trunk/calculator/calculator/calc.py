@@ -194,7 +194,7 @@ class CalcPanel(wx.PyPanel):
                 if '.' not in rop:
                     rop = rop + '.0'
             compute = "%s %s %s" % (self._leftop, op, rop)
-            self._log("[calc] Calculating answer to %s" % compute)
+            self._log("[calc][info] Calculating answer to %s" % compute)
 
             # Ignore empty calculation
             if not compute.strip():
@@ -296,7 +296,7 @@ class CalcPanel(wx.PyPanel):
         e_obj = evt.GetEventObject()
         mode = e_obj.GetItemLabel(e_id)
         if mode in ['Hex', 'Oct', 'Dec']:
-            self._log("[calc] Changed to %s Mode" % mode)
+            self._log("[calc][evt] Changed to %s Mode" % mode)
             self._disp.SetMode(mode)
             if mode == "Hex":
                 self.SetHexMode()
