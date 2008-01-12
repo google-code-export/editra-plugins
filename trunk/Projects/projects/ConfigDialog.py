@@ -1,36 +1,42 @@
 #!/usr/bin/env python
 
+"""
+Configuration Dialog for the Projects Plugin
+
+"""
+
 __author__ = "Kevin D. Smith <Kevin.Smith@sixquickrun.com>"
 __revision__ = "$Revision$"
 __scid__ = "$Id$"
 
+#-----------------------------------------------------------------------------#
+# Imports
 import wx, sys, os, crypto
 import wx.lib.mixins.listctrl as listmix
 import FileIcons
 import SVN, CVS, GIT
 
+#-----------------------------------------------------------------------------#
+# Globals
+
 _ = wx.GetTranslation
+
+#-----------------------------------------------------------------------------#
 
 # ConfigDialogg Events
 cfgEVT_CONFIG_EXIT = wx.NewEventType()
 EVT_CONFIG_EXIT = wx.PyEventBinder(cfgEVT_CONFIG_EXIT, 1)
-
 class ConfigDialogEvent(wx.PyCommandEvent):
     """ Config dialog closer event """
     def __init__(self, etype, eid, value=None):
         wx.PyCommandEvent.__init__(self, etype, eid)
-        self._etype = etype
-        self._id = eid
         self._value = value
-
-    def GetId(self):
-        """ Returns the event id """
-        return self._id
 
     def GetValue(self):
         """ Returns the value from the event """
         return self._value
         
+#-----------------------------------------------------------------------------#
 
 class ConfigDialog(wx.Frame):
     """Dialog for configuring the Projects plugin settings"""
@@ -46,7 +52,7 @@ class ConfigDialog(wx.Frame):
             pass
 
         # Attributes
-        panel = wx.Panel(self, wx.ID_ANY, size=(1, 5))
+        panel = wx.Panel(self, size=(1, 5))
         self._notebook = ConfigNotebook(panel, wx.ID_ANY, data)
         self._data = data
 
@@ -73,6 +79,8 @@ class ConfigDialog(wx.Frame):
                                        self.GetId(), self._data))
         evt.Skip()
 
+#-----------------------------------------------------------------------------#
+
 class ConfigNotebook(wx.Notebook):
     """Main configuration dialog notebook"""
     def __init__(self, parent, id, data):
@@ -80,7 +88,10 @@ class ConfigNotebook(wx.Notebook):
         wx.Notebook.__init__(self, parent, id, 
                              size=(450, -1), style=wx.BK_DEFAULT )
         self.AddPage(GeneralConfigTab(self, -1, data), _("General"))
-        self.AddPage(SourceControlConfigTab(self, -1, data), _("Source Control"))
+        self.AddPage(SourceControlConfigTab(self, -1, data),
+                     _("Source Control"))
+
+#-----------------------------------------------------------------------------#
 
 class GeneralConfigTab(wx.Panel):
     """General configuration page"""
@@ -91,6 +102,7 @@ class GeneralConfigTab(wx.Panel):
     ID_EXTERNAL_DIFF = wx.NewId()
 
     def __init__(self, parent, id, data):
+        """Create the General configuration page"""
         wx.Panel.__init__(self, parent, id)
         self._data = data
         
@@ -98,6 +110,7 @@ class GeneralConfigTab(wx.Panel):
         sizer = wx.BoxSizer(wx.VERTICAL)
         sizer.Add((10, 10))
         flags = wx.SizerFlags().Left().Expand().Border(wx.ALL, 6)
+        ceflags = wx.SizerFlags().Center().Expand()
         sizer.AddF(wx.StaticText(self, -1, _('File Filters')), flags)
         filters = wx.TextCtrl(self, self.ID_FILE_FILTERS, 
                               ' '.join(data.getFilters()),
@@ -105,14 +118,17 @@ class GeneralConfigTab(wx.Panel):
         sizer.AddF(filters, flags)
         if wx.Platform == '__WXMAC__':
             filters.MacCheckSpelling(False)
-        tt = wx.ToolTip(_("Space separated list of files patterns to exclude from view"
-                          "\nThe use of wildcards (*) are permitted."))
-        filters.SetToolTip(tt)
-        sizer.AddF(wx.StaticLine(self, -1, size=(-1, 1)), wx.SizerFlags().Center().Expand().Border(wx.TOP|wx.BOTTOM, 10))
-        sync = wx.CheckBox(self, self.ID_SYNC_WITH_NOTEBOOK, _('Keep project tree synchronized with editor notebook'))
+        filters.SetToolTipString(_("Space separated list of files patterns to "
+                                   "exclude from view\nThe use of wildcards "
+                                   "(*) are permitted."))
+        sizer.AddF(wx.StaticLine(self, -1, size=(-1, 1)),
+                   ceflags.Border(wx.TOP|wx.BOTTOM, 10))
+        sync = wx.CheckBox(self, self.ID_SYNC_WITH_NOTEBOOK,
+                           _('Keep project tree synchronized with editor notebook'))
         sync.SetValue(data.getSyncWithNotebook())
         sizer.AddF(sync, flags)
-        sizer.AddF(wx.StaticLine(self, -1, size=(-1, 1)), wx.SizerFlags().Center().Expand().Border(wx.TOP|wx.BOTTOM, 10))
+        sizer.AddF(wx.StaticLine(self, -1, size=(-1, 1)),
+                   ceflags.Border(wx.TOP|wx.BOTTOM, 10))
         sizer.AddF(wx.StaticText(self, -1, _('Diff Program')), flags)
         builtin = wx.RadioButton(self, self.ID_BUILTIN_DIFF, _('Built-in'))
         builtin.SetValue(data.getBuiltinDiff())
@@ -153,9 +169,9 @@ class GeneralConfigTab(wx.Panel):
         self.Bind(wx.EVT_TEXT, self.OnTextChange)
         
     def OnFileChange(self, evt):
-        obj, id = evt.GetEventObject(), evt.GetId()
-        if id == self.ID_DIFF_PROGRAM:
-            path = obj.GetPath()
+        """Update value of the diff program"""
+        if evt.GetId() == self.ID_DIFF_PROGRAM:
+            path = evt.GetEventObject().GetPath()
             if path:
                 self._data.setDiffProgram(path)
             self.FindWindowById(self.ID_EXTERNAL_DIFF).SetValue(not(not(path)))
@@ -165,8 +181,8 @@ class GeneralConfigTab(wx.Panel):
             
     def OnTextChange(self, evt):
         """ Update file filters value """
-        obj, id = evt.GetEventObject(), evt.GetId()
-        if id == self.ID_FILE_FILTERS:
+        if evt.GetId() == self.ID_FILE_FILTERS:
+            obj = evt.GetEventObject()
             self._data.setFilters([x.strip() for x in obj.GetValue().split()
                                    if x.strip()])        
         else:
@@ -174,23 +190,25 @@ class GeneralConfigTab(wx.Panel):
 
     def OnCheck(self, evt):
         """ Handle checkbox events """
-        obj, id = evt.GetEventObject(), evt.GetId()
-        if id == self.ID_SYNC_WITH_NOTEBOOK:
+        if evt.GetId() == self.ID_SYNC_WITH_NOTEBOOK:
+            obj = evt.GetEventObject()
             self._data.setSyncWithNotebook(obj.GetValue())
         else:
             evt.Skip()
 
     def OnSelect(self, evt):
-        obj, id = evt.GetEventObject(), evt.GetId()
-        if id == self.ID_BUILTIN_DIFF:
+        """Toggle the radio buttons to only allow one selection at a time"""
+        e_id = evt.GetId()
+        if e_id == self.ID_BUILTIN_DIFF:
             self._data.setBuiltinDiff(True)
             self.FindWindowById(self.ID_EXTERNAL_DIFF).SetValue(False)
-        elif id == self.ID_EXTERNAL_DIFF:
+        elif e_id == self.ID_EXTERNAL_DIFF:
             self._data.setBuiltinDiff(False)
             self.FindWindowById(self.ID_BUILTIN_DIFF).SetValue(False)
         else:
             evt.Skip()
-      
+
+#-----------------------------------------------------------------------------#
 
 class SourceControlConfigTab(wx.Panel):
     """ Configuration page for configuring source control options """
@@ -204,6 +222,7 @@ class SourceControlConfigTab(wx.Panel):
     ID_SC_REMOVE_ENV = wx.NewId()
 
     def __init__(self, parent, id, data):
+        """Create the Source control configuration page"""
         wx.Panel.__init__(self, parent, id)
         self._data = data
         
@@ -223,7 +242,8 @@ class SourceControlConfigTab(wx.Panel):
         sizer.Add(hsizer, 0, wx.EXPAND)
         
         # Repository configuration box
-        repsizer = wx.StaticBoxSizer(wx.StaticBox(self, wx.ID_ANY, _('Repository Configuration')), wx.VERTICAL)
+        sbox = wx.StaticBox(self, label=_('Repository Configuration'))
+        repsizer = wx.StaticBoxSizer(sbox, wx.VERTICAL)
 
         # Repository selector
         repsizer.AddF(wx.Choice(self, self.ID_SC_REP_CHOICE), flags.Expand())
@@ -231,26 +251,30 @@ class SourceControlConfigTab(wx.Panel):
         # Username and password
         userpass = wx.FlexGridSizer(3, 2)
         userpass.AddGrowableCol(1, 1)
-        userpass.AddF(wx.StaticText(self, wx.ID_ANY, _('Username') + u':'), flags)
+        userpass.AddF(wx.StaticText(self, label=_('Username') + u':'), flags)
         userpass.AddF(wx.TextCtrl(self, self.ID_SC_USERNAME), flags.Center())
-        userpass.AddF(wx.StaticText(self, wx.ID_ANY, _('Password') + u':'), flags)
-        userpass.AddF(wx.TextCtrl(self, self.ID_SC_PASSWORD, style=wx.TE_PASSWORD), flags)
+        userpass.AddF(wx.StaticText(self, label=_('Password') + u':'), flags)
+        userpass.AddF(wx.TextCtrl(self, self.ID_SC_PASSWORD, 
+                                  style=wx.TE_PASSWORD), flags)
         repsizer.AddF(userpass, wx.SizerFlags(1).Expand())
         repsizer.AddF(wx.StaticLine(self, wx.ID_ANY, size=(-1, 1)),
                                     wx.SizerFlags().Center().Expand().Border(wx.TOP|wx.BOTTOM, 10))
 
         # Environment variables
-        repsizer.AddF(wx.StaticText(self, wx.ID_ANY, _('Environment Variables')), flags)
+        repsizer.AddF(wx.StaticText(self, label=_('Environment Variables')), flags)
         env = AutoWidthListCtrl(self, self.ID_SC_ENVIRONMENT, size=(-1, 80), 
-                                style=wx.LC_REPORT|wx.LC_SORT_ASCENDING|wx.LC_VRULES|wx.LC_EDIT_LABELS)
+                                style=wx.LC_REPORT|wx.LC_SORT_ASCENDING|\
+                                      wx.LC_VRULES|wx.LC_EDIT_LABELS)
         env.InsertColumn(0, _("Name"))
         env.InsertColumn(1, _("Value"))
         repsizer.AddF(env, flags.Expand())
 
         # Add env variable buttons
         envbtns = wx.BoxSizer(wx.HORIZONTAL)
-        envbtns.AddF(wx.BitmapButton(self, self.ID_SC_ADD_ENV, FileIcons.getPlusBitmap()), wx.SizerFlags(0))
-        envbtns.AddF(wx.BitmapButton(self, self.ID_SC_REMOVE_ENV, FileIcons.getMinusBitmap()), wx.SizerFlags(0))
+        envbtns.Add(wx.BitmapButton(self, self.ID_SC_ADD_ENV, 
+                                    FileIcons.getPlusBitmap()), 0)
+        envbtns.Add(wx.BitmapButton(self, self.ID_SC_REMOVE_ENV,
+                                    FileIcons.getMinusBitmap()), 0)
         repsizer.AddF(envbtns, flags.Expand())
 
         sizer.AddF(repsizer, flags)
@@ -279,20 +303,29 @@ class SourceControlConfigTab(wx.Panel):
 
     @property
     def currentSystem(self):
+        """Return the currently selected source control system"""
         return self.FindWindowById(self.ID_SC_CHOICE).GetStringSelection()
 
     @property
     def currentRepository(self):
+        """Return the currently selected repository"""
         return self.FindWindowById(self.ID_SC_REP_CHOICE).GetStringSelection()
     
     def populateSystemOptions(self):
-        sc, rep = self.currentSystem, self.currentRepository
+        """Populate the controls with the source control system option data"""
+        sc = self.currentSystem
         self.populateRepositoryList()
-        try: command = self._data.getSCCommand(sc)
-        except KeyError: command = ''
+        try:
+            command = self._data.getSCCommand(sc)
+        except KeyError:
+            command = ''
         self.FindWindowById(self.ID_SC_COMMAND).SetPath(command)
 
     def populateEnvironment(self):
+        """Populate the enviromental variable list with the values from
+        the current config data.
+
+        """
         sc, rep = self.currentSystem, self.currentRepository
         envlist = self.FindWindowById(self.ID_SC_ENVIRONMENT)
         envlist.DeleteAllItems()        
@@ -307,6 +340,7 @@ class SourceControlConfigTab(wx.Panel):
             envlist.SetStringItem(index, 1, value)
 
     def populateUserInfo(self):
+        """Populate the username and password information"""
         sc, rep = self.currentSystem, self.currentRepository
         try:
             username = self._data.getSCUsername(sc, rep)
@@ -323,11 +357,17 @@ class SourceControlConfigTab(wx.Panel):
         self.FindWindowById(self.ID_SC_PASSWORD).SetValue(password)
 
     def populateRepositoryList(self):
+        """ Populate the list of repositories that are under the currently
+        selected control system.
+
+        """
         sc = self.currentSystem
         rep = self.FindWindowById(self.ID_SC_REP_CHOICE)
         rep.Clear()
         items = ['Default'] + \
-                sorted([x.strip() for x in self._data.getSCRepositories(sc).keys() if x != 'Default']) + \
+                sorted([x.strip() 
+                        for x in self._data.getSCRepositories(sc).keys()
+                        if x != 'Default']) + \
                 ['','Add Repository...','Remove Repository...']
         rep.AppendItems(items)
         rep.SetSelection(0)
@@ -335,17 +375,18 @@ class SourceControlConfigTab(wx.Panel):
         self.populateUserInfo()
     
     def OnTextChange(self, evt):
-        obj, id = evt.GetEventObject(), evt.GetId()
+        """ Update username/password in config data """
+        obj, e_id = evt.GetEventObject(), evt.GetId()
         sc, rep = self.currentSystem, self.currentRepository
         # Change username
-        if id == self.ID_SC_USERNAME:
+        if e_id == self.ID_SC_USERNAME:
             value = obj.GetValue().strip()
             if not value:
                 self._data.removeSCUsername(sc, rep)
             else:
                 self._data.setSCUsername(sc, rep, value)
         # Change password
-        elif id == self.ID_SC_PASSWORD:
+        elif e_id == self.ID_SC_PASSWORD:
             value = obj.GetValue().strip()
             if not value:
                 self._data.removeSCPassword(sc, rep)
@@ -355,22 +396,23 @@ class SourceControlConfigTab(wx.Panel):
             evt.Skip()
         
     def OnFileChange(self, evt):
-        obj, id = evt.GetEventObject(), evt.GetId()
-        sc, rep = self.currentSystem, self.currentRepository
-        if id == self.ID_SC_COMMAND:
+        """ Update config data with the source control command value """
+        obj, e_id = evt.GetEventObject(), evt.GetId()
+        if e_id == self.ID_SC_COMMAND:
+            sc = self.currentSystem
             self._data.setSCCommand(sc, obj.GetPath().strip())
         else:
             evt.Skip()
     
     def OnButtonPress(self, evt):
-        obj, id = evt.GetEventObject(), evt.GetId()
-        sc, rep = self.currentSystem, self.currentRepository
-        if id == self.ID_SC_ADD_ENV:
+        """ Add and Remove environmental variables """
+        e_id = evt.GetId()
+        if e_id == self.ID_SC_ADD_ENV:
             env = self.FindWindowById(self.ID_SC_ENVIRONMENT)
             index = env.InsertStringItem(sys.maxint, '')
             env.SetStringItem(index, 0, _('*NAME*'))
             env.SetStringItem(index, 1, _('*VALUE*'))
-        elif id == self.ID_SC_REMOVE_ENV:
+        elif e_id == self.ID_SC_REMOVE_ENV:
             env = self.FindWindowById(self.ID_SC_ENVIRONMENT)
             item = -1
             items = []
@@ -391,10 +433,11 @@ class SourceControlConfigTab(wx.Panel):
         wx.CallAfter(self.saveEnvironmentVariables)
 
     def saveEnvironmentVariables(self):
+        """ Update config data with current values """
         sc, rep = self.currentSystem, self.currentRepository
         env = self.FindWindowById(self.ID_SC_ENVIRONMENT)
-        vars = self._data.getSCEnvVars(sc, rep)
-        vars.clear()
+        evars = self._data.getSCEnvVars(sc, rep)
+        evars.clear()
         item = -1
         save = True
         while True:
@@ -403,14 +446,14 @@ class SourceControlConfigTab(wx.Panel):
                 break
             name = env.GetItem(item, 0).GetText().strip()
             value = env.GetItem(item, 1).GetText().strip()
-            vars[name] = value
+            evars[name] = value
     
     def OnChoiceSelected(self, evt):
-        obj, id = evt.GetEventObject(), evt.GetId()
-        sc, rep = self.currentSystem, self.currentRepository
-        if id == self.ID_SC_CHOICE:
+        obj, e_id = evt.GetEventObject(), evt.GetId()
+        sc = self.currentSystem
+        if e_id == self.ID_SC_CHOICE:
             self.populateSystemOptions()
-        elif id == self.ID_SC_REP_CHOICE:
+        elif e_id == self.ID_SC_REP_CHOICE:
             # Empty selection
             if not obj.GetStringSelection().strip():
                 obj.SetSelection(0)
@@ -454,13 +497,19 @@ class SourceControlConfigTab(wx.Panel):
 
 #-----------------------------------------------------------------------------#
 
-class AutoWidthListCtrl(listmix.TextEditMixin, listmix.ListCtrlAutoWidthMixin, wx.ListCtrl):
+class AutoWidthListCtrl(listmix.TextEditMixin,
+                        listmix.ListCtrlAutoWidthMixin,
+                        wx.ListCtrl):
+    ''' List control for showing and editing environmental variables '''
     def __init__(self, *args, **kwargs):
         wx.ListCtrl.__init__(self, *args, **kwargs)
         listmix.ListCtrlAutoWidthMixin.__init__(self)
         listmix.TextEditMixin.__init__(self)
+
+        # Attributes
+        self.col_locs = [0]
                 
-    def OnLeftDown(self, evt):
+    def OnLeftDown(self, evt=None):
         ''' Examine the click and double
         click events to see if a row has been click on twice. If so,
         determine the current row and columnn and open the editor.'''
@@ -470,7 +519,7 @@ class AutoWidthListCtrl(listmix.TextEditMixin, listmix.ListCtrlAutoWidthMixin, w
             self.CloseEditor()
             
         x, y = evt.GetPosition()
-        row, flags = self.HitTest((x, y))
+        row = self.HitTest((x, y))[0]
         if row != self.curRow: # self.curRow keeps track of the current row
             evt.Skip()
             return
@@ -486,20 +535,20 @@ class AutoWidthListCtrl(listmix.TextEditMixin, listmix.ListCtrlAutoWidthMixin, w
         # ListCtrl (generally not a good idea) on the other hand,
         # doing this here handles adjustable column widths
         
-        self.col_locs = [0]
         loc = 0
         for n in range(self.GetColumnCount()):
             loc = loc + self.GetColumnWidth(n)
             self.col_locs.append(loc)
 
-        col = bisect(self.col_locs, x+self.GetScrollPos(wx.HORIZONTAL)) - 1
+        col = bisect(self.col_locs, x + self.GetScrollPos(wx.HORIZONTAL)) - 1
         self.OpenEditor(col, row)
 
 #-----------------------------------------------------------------------------#
 
 class ConfigData(dict):
     """ Configuration data storage class """
-    def __init__(self, data={}):
+    def __init__(self, data=dict()):
+        """ Create the config data object """
         self['source-control'] = {}
         self['general'] = {}
         self['projects'] = {}
@@ -524,70 +573,94 @@ class ConfigData(dict):
         return '"\x17\x9f/D\xcf'
         
     def addProject(self, path, options={}):
+        """ Add a project and its options to the data """
         self['projects'][path] = options
         
     def removeProject(self, path):
-        try: del self['projects'][path]
-        except KeyError: pass
+        """ Remove a project from the configuration """
+        try:
+            del self['projects'][path]
+        except KeyError:
+            pass
         
     def clearProjects(self):
+        """ Clear all project data """
         self['projects'].clear()
     
     def getProjects(self):
+        """ Get all project data """
         return self['projects']
         
     def getProject(self, path):
+        """ Get data for a specified project """
         return self['projects'][path]
         
     def setFilters(self, filters):
+        """ Set the filters to use in filtering tree display """
         self['general']['filters'] = filters
         self.updateSCSystems()
         
     def getFilters(self):
+        """ Get all filters """
         return self['general']['filters']
         
     def setBuiltinDiff(self, bool=True):
+        """ Set whether to use builtin diff or not """
         self['general']['built-in-diff'] = bool
         
     def getBuiltinDiff(self):
+        """ Use Projects builtin diff program """
         return self['general']['built-in-diff']
         
     def setDiffProgram(self, command):
+        """ Set the diff program to use for comparing revisions """
         self['general']['diff-program'] = command
         
     def getDiffProgram(self):
+        """ Get path/name of diff program to use """
         return self['general']['diff-program']
         
     def setSyncWithNotebook(self, bool=True):
+        """ Set whether to syncronize tree with notebook or not """
         self['general']['sync-with-notebook'] = bool
     
     def getSyncWithNotebook(self):
+        """ Is the tree syncronized with the notebook """
         return self['general']['sync-with-notebook']
     
     def addSCSystem(self, instance, repositories=None):
+        """ Add a source control system to the configuration """
         self['source-control'][instance.name] = self.newSCSystem(instance, repositories)
         self.updateSCSystems()
         return self['source-control'][instance.name]
     
     def updateSCSystems(self):
+        """ Update all source control systems settings with the current 
+        configuration data.
+        
+        """
         for key, value in self.getSCSystems().items():
             value['instance'].filters = self.getFilters()
             value['instance'].repositories = self.getSCRepositories(key)
             value['instance'].command = self.getSCCommand(key)
     
     def getSCSystems(self):
+        """ Get all source control systems """
         return self['source-control']
 
     def getSCSystem(self, name):
+        """ Get a specified source control system """
         return self['source-control'][name]
 
     def removeSCSystem(self, name):
+        """ Remove a specified source control system from the config """
         try:
             del self['source-control'][name]
         except:
             pass
     
     def newSCSystem(self, instance, repositories=None):
+        """ Create config object for a new source control system """
         system = {'command':instance.command, 'instance': instance, 
                   'repositories': {'Default':self.newSCRepository()}}
         if repositories is not None:
@@ -595,78 +668,103 @@ class ConfigData(dict):
         return system
     
     def newSCRepository(self):
+        """ New empty config for a source control repository """
         return {'username':'', 'password':'', 'env':{}}
     
     def getSCRepositories(self, sc):
+        """ Return all repositories for a given control system """
         return self.getSCSystem(sc)['repositories']
         
     def getSCRepository(self, sc, rep):
+        """ Get the repository of a given source control system """
         return self.getSCRepositories(sc)[rep]
         
     def addSCRepository(self, sc, name):
+        """ Add a new repository to a given systems data """
         self.getSCRepositories(sc)[name] = self.newSCRepository()
         
     def removeSCRepository(self, sc, name):
-        try: del self.getSCRepositories(sc)[name]
-        except KeyError: pass
+        """ Remove a repositories data from the given source control system """
+        try:
+            del self.getSCRepositories(sc)[name]
+        except KeyError:
+            pass
         
     def setSCUsername(self, sc, rep, name):
+        """ Set the username for the given system and repository """
         self.getSCRepository(sc, rep)['username'] = name
     
     def removeSCUsername(self, sc, rep):
-        try: del self.getSCRepository(sc, rep)['username']
-        except KeyError: pass
+        """ Remove a username from the data of a given systems repository """
+        try:
+            del self.getSCRepository(sc, rep)['username']
+        except KeyError:
+            pass
         
     def getSCUsername(self, sc, rep):
+        """ Get the username from the given system and repository """
         return self.getSCRepository(sc, rep)['username']
         
     def setSCPassword(self, sc, rep, password):
+        """ Set the password for a given system and repository """
         if password.strip():
-            self.getSCRepository(sc, rep)['password'] = crypto.Encrypt(password, self.salt)
+            enc_passwd = crypto.Encrypt(password, self.salt)
+            self.getSCRepository(sc, rep)['password'] = enc_passwd
         else:
             self.getSCRepository(sc, rep)['password'] = ''            
 
     def getSCPassword(self, sc, rep):
+        """ Get the password of the given systems repository """
         return self.getSCRepository(sc, rep)['password']
 
     def removeSCPassword(self, sc, rep):
-        try: del self.getSCRepository(sc, rep)['password']
-        except KeyError: pass
+        """ Remove the password data from a given systems repo """
+        try:
+            del self.getSCRepository(sc, rep)['password']
+        except KeyError:
+            pass
         
     def setSCCommand(self, sc, command):
+        """ Set the command used to run the given source control system """
         system = self.getSCSystem(sc)
         system['instance'].command = system['command'] = command
     
     def getSCCommand(self, sc):
+        """ Get the command used with the given system """
         return self.getSCSystem(sc)['command']
 
     def addSCEnvVar(self, sc, rep, name, value):
+        """ Add environmental variables to use with a given system """
         self.getSCEnvVars(sc, rep)[name] = value
         
     def removeSCEnvVar(self, sc, rep, name):
+        """ Remove the named environmental variable from the source system """
         try:
             del self.getSCEnvVars(sc, rep)[name]
         except KeyError:
             pass
         
     def getSCEnvVars(self, sc, rep):
+        """ Get all environmental variables for the given systems repository """
         return self.getSCRepository(sc, rep)['env']
 
     def getSCEnvVar(self, sc, rep, name):
+        """ Get a named environmental variable from the given system/repo """
         return self.getSCEnvVars(sc, rep)[name]
         
     def load(self):
+        """ Load the saved configuration data from on disk config file """
         data = {}
         try:
             import ed_glob, util
             filename = ed_glob.CONFIG['CACHE_DIR'] + 'Projects.config'
-            f = util.GetFileReader(filename)
-            if f != -1:
+            conf = util.GetFileReader(filename)
+            if conf != -1:
                 try: 
-                    data = eval(f.read())
-                    f.close()
+                    data = eval(conf.read())
+                    conf.close()
                 except:
-                    f.close()
+                    conf.close()
                     os.remove(filename)
         except (ImportError, OSError):
             pass
@@ -674,14 +772,15 @@ class ConfigData(dict):
         self.updateSCSystems()
 
     def save(self):
+        """ Write the data out to disk """
         #print repr(self)
         try:
             import ed_glob, util, stat
             filename = ed_glob.CONFIG['CACHE_DIR'] + 'Projects.config'
-            f = util.GetFileWriter(filename)
-            if f != -1:
-                f.write(repr(self))
-                f.close()
+            conf = util.GetFileWriter(filename)
+            if conf != -1:
+                conf.write(repr(self))
+                conf.close()
             os.chmod(filename, stat.S_IRUSR|stat.S_IWUSR)
         except (ImportError, OSError):
             pass
@@ -703,11 +802,11 @@ def recursiveupdate(dest, src):
 #-----------------------------------------------------------------------------#
 
 if __name__ == '__main__':
-    app = wx.PySimpleApp(False)
-    frame = wx.Frame(None, title="Config Dialog Parent Frame", size=(480, 335))
-    cfg = ConfigDialog(frame, wx.ID_ANY, ConfigData())
+    APP = wx.PySimpleApp(False)
+    FRAME = wx.Frame(None, title="Config Dialog Parent Frame", size=(480, 335))
+    CFG = ConfigDialog(FRAME, wx.ID_ANY, ConfigData())
     #cfg = GeneralConfigTab(frame, -1, ConfigData())
     #cfg = SourceControlConfigTab(frame, -1, ConfigData())
-    frame.Show()
-    cfg.Show()
-    app.MainLoop()
+    FRAME.Show()
+    CFG.Show()
+    APP.MainLoop()
