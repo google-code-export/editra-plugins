@@ -14,6 +14,7 @@ import plugin
 import ed_glob
 import iface
 import ed_menu
+import util
 from profiler import Profile_Get, Profile_Set
 from ProjectPane import ProjectPane
 
@@ -30,9 +31,8 @@ class Projects(plugin.Plugin):
     def PlugIt(self, parent):
         """Adds the view menu entry and registers the event handler"""
         mainw = parent
-        self._log = wx.GetApp().GetLog()
         if mainw != None:
-            self._log("[projects] Installing projects plugin")
+            util.Log("[projects][info] Installing projects plugin")
 
             self._projects = ProjectPane(mainw)
             mgr = mainw.GetFrameManager()
@@ -64,6 +64,7 @@ class Projects(plugin.Plugin):
         """ Handles when the pane is closed to update the profile """
         pane = evt.GetPane()
         if pane.name == PANE_NAME:
+            util.Log('[projects][info] Closed Projects pane')
             Profile_Set('Projects.Show', False)
         else:
             evt.Skip()
