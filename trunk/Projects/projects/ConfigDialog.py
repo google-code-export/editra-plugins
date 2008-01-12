@@ -164,7 +164,7 @@ class GeneralConfigTab(wx.Panel):
             evt.Skip()
             
     def OnTextChange(self, evt):
-        """ Oupdate file filters value """
+        """ Update file filters value """
         obj, id = evt.GetEventObject(), evt.GetId()
         if id == self.ID_FILE_FILTERS:
             self._data.setFilters([x.strip() for x in obj.GetValue().split()
