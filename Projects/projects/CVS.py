@@ -1,5 +1,7 @@
 #!/usr/bin/env python
 
+""" CVS impimentation of SourceControl object """
+
 __author__ = "Kevin D. Smith <Kevin.Smith@sixquickrun.com>"
 __revision__ = "$Revision$"
 __scid__ = "$Id$"
@@ -8,6 +10,10 @@ import re, os, datetime
 from SourceControl import SourceControl
 
 class CVS(SourceControl):
+    """ Concurent Versioning System implementation for the
+    Projects Plugin.
+
+    """
 
     name = 'CVS'
     command = 'cvs'
@@ -16,6 +22,7 @@ class CVS(SourceControl):
         return 'CVS.CVS()'
     
     def getRepository(self, path):
+        """ Get the repository of a given path """
         if not self.isControlled(path):
             return
         if not os.path.isdir(path):
@@ -28,7 +35,7 @@ class CVS(SourceControl):
     def isControlled(self, path):
         """ Is the path controlled by CVS? """
         if os.path.isdir(path):
-            if os.path.isfile(os.path.join(path,'CVS','Entries')):
+            if os.path.isfile(os.path.join(path, 'CVS', 'Entries')):
                 return True
         path, basename = os.path.split(path)
         cvsdir = os.path.join(path,'CVS')
@@ -37,7 +44,7 @@ class CVS(SourceControl):
                 for line in open(os.path.join(cvsdir,'Entries')):
                     if '/' not in line:
                         continue
-                    type, filename, therest = line.split('/', 2)
+                    filename = line.split('/', 2)[1]
                     if filename == basename:
                         return True
             except (IOError, OSError):
@@ -45,6 +52,7 @@ class CVS(SourceControl):
         return False
 
     def add(self, paths):
+        """ Add files to the repository """
         root, files = self.splitFiles(paths, forcefiles=True)
         dirs = sorted([x for x in files if os.path.isdir(x)])
         files = sorted([x for x in files if not os.path.isdir(x)])
@@ -63,6 +71,7 @@ class CVS(SourceControl):
             self.logOutput(out)                
         
     def checkout(self, paths):
+        """ Check out the files at the given paths """
         root, files = self.splitFiles(paths, forcefiles=True)
         out = self.run(root, ['checkout'] + files)
         self.logOutput(out)
@@ -74,19 +83,22 @@ class CVS(SourceControl):
         self.logOutput(out)
             
     def diff(self, paths):
+        """ Do a diff on two files in the repository """
         root, files = self.splitFiles(paths)
         out = self.run(root, ['diff'] + files)
         self.logOutput(out)
             
     def history(self, paths, history=None):
+        """ Get the revision history for the given files """
         if history is None:
             history = []
         root, files = self.splitFiles(paths)
-        for i, file in enumerate(files):
+        for i, fname in enumerate(files):
             rep = open(os.path.join(root, 'CVS', 'Repository')).read().strip()
-            files[i] = os.path.join(rep, file)
-        for file in files:
-            out = self.run(root, ['rlog', file])
+            files[i] = os.path.join(rep, fname)
+
+        for fname in files:
+            out = self.run(root, ['rlog', fname])
             if out:
                 revision_re = re.compile(r'^revision\s+(\S+)')
                 dasl_re = re.compile(r'^date:\s+(\S+\s+\S+);\s+author:\s+(\S+);\s+state:\s+(\S+);')
@@ -94,7 +106,7 @@ class CVS(SourceControl):
                 for line in out.stdout:
                     self.log(line)
                     if line.startswith('----------'):
-                        current = {'path':file}
+                        current = {'path':fname}
                         history.append(current)
                         line = out.stdout.next()
                         self.log(line)
@@ -126,7 +138,7 @@ class CVS(SourceControl):
             out = self.run(root, ['remove', '-R', '-f'] + files)
             self.logOutput(out)
             
-    def status(self, paths, recursive=False, status={}):
+    def status(self, paths, recursive=False, status=dict()):
         """
         Get the status of all given paths
         
@@ -196,22 +208,25 @@ class CVS(SourceControl):
         return status
     
     def str2datetime(self, s):
-        return datetime.datetime(*[int(x) for x in re.split(r'[\s+/:]', s.strip()) if x])
+        """ Convert a time stamp string to a datetime object """
+        return datetime.datetime(*[int(x)
+                                 for x in re.split(r'[\s+/:]', s.strip()) if x])
 
     def update(self, paths):
         """ Recursively update paths """
         root, files = self.splitFiles(paths)
-        out = self.run(root, ['update','-R'] + files)
+        out = self.run(root, ['update', '-R'] + files)
         self.logOutput(out)
             
     def revert(self, paths): 
         """ Revert paths to repository versions """
         for path in paths:
-            root, files = self.splitFiles(path, forcefiles=True, type=self.TYPE_FILE)
-            for file in files:
-                out = self.fetch([os.path.join(root,file)])[0]
+            root, files = self.splitFiles(path, forcefiles=True,
+                                          type=self.TYPE_FILE)
+            for fname in files:
+                out = self.fetch([os.path.join(root, fname)])[0]
                 if out is not None:
-                    open(os.path.join(root,file), 'w').write(out)
+                    open(os.path.join(root, fname), 'w').write(out)
     
     def fetch(self, paths, rev=None, date=None):
         """ Fetch a copy of the paths from the repository """
@@ -220,9 +235,9 @@ class CVS(SourceControl):
             if os.path.isdir(path):
                 continue
             root, files = self.splitFiles(path)
-            for i, file in enumerate(files):
+            for i, fname in enumerate(files):
                 rep = open(os.path.join(root, 'CVS', 'Repository')).read().strip()
-                files[i] = os.path.join(rep, file)
+                files[i] = os.path.join(rep, fname)
                 
             options = []
             if rev:
@@ -243,7 +258,8 @@ class CVS(SourceControl):
             else:
                 output.append(None)
         return output
-                        
+
+#-----------------------------------------------------------------------------#
 if __name__ == '__main__':
     cvs = CVS()
     print cvs.status(['.'], recursive=True)
