@@ -50,7 +50,7 @@ class PyRun(plugin.Plugin):
         if getattr(window, '__name__', ' ') == 'MainWindow':
             ctrl = window.GetNotebook().GetCurrentCtrl()
             if ctrl.GetLangId() == synglob.ID_LANG_PYTHON:
-                wx.CallLater(100, output.RunScript, ctrl.GetFileName())
+                wx.CallLater(100, output.SetScript, ctrl.GetFileName())
         return output
 
     def GetId(self):
