@@ -54,6 +54,7 @@ if sys.platform.startswith('win'):
 # Editra Imports
 import util
 from profiler import Profile_Get, Profile_Set
+import syntax.synglob as synglob
 import extern.flatnotebook as flatnotebook
 
 # Highlight Match Patters
@@ -330,6 +331,7 @@ class OutputWindow(wx.Panel):
         proc_env['PYTHONUNBUFFERED'] = '1'
         return proc_env
 
+    #---- OutputWin Public Member Functions ----#
     def Abort(self):
         """Abort the current process if one is running"""
         self._log("[PyRun][info] Aborting current script...")
@@ -371,8 +373,9 @@ class OutputWindow(wx.Panel):
         evt.Skip() # Skip early to prevent holding up the chain
 
         # Only do syncronize when this instance is the current selection
-        # in the Shelf
-        if self.GetParent().GetCurrentPage() != self:
+        # in the Shelf and that the buffer is recognized as python.
+        if self.GetParent().GetCurrentPage() != self or \
+           not _IsPython(cpage.GetLangId(), cpage.GetLine(0)):
             return
 
         if cpage and hasattr(cpage, 'GetFileName'):
@@ -449,6 +452,13 @@ class OutputWindow(wx.Panel):
         self._ctrl.SetLastRun(fname)
         self.Layout()
         wx.CallLater(150, self._buffer.Start, 300)
+
+    def SetScript(self, fname):
+        """Set the script that the window is currently associated with
+        @param fname: path to script
+
+        """
+        self._ctrl.SetCurrentFile(fname)
 
 #-----------------------------------------------------------------------------#
 
@@ -784,3 +794,14 @@ class ConfigBar(wx.Panel):
         self._lastexec = fname
 
 #-----------------------------------------------------------------------------#
+# Misc Utility Functions
+def _IsPython(lang, line):
+    """Try to determin if the passed in buffer is python or not
+    @param page: ref to a text buffer in Editra.
+
+    """
+    if lang == synglob.ID_LANG_PYTHON or \
+       line.startswith('#!') and 'python' in line.lower():
+        return True
+    else:
+        return False
