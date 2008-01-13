@@ -18,8 +18,11 @@ __scid__ = "$Id$"
 
 __all__ = ['moveToTrash']
 
+#-----------------------------------------------------------------------------#
+
 import os, time, platform, shutil, stat
 
+#-----------------------------------------------------------------------------#
 OSX = WIN = False
 
 # Determine platform, if it's not one of these assume UNIX/Linux
@@ -38,17 +41,25 @@ if platform.system().lower() == 'windows':
 elif platform.mac_ver()[0]:
     OSX = True
 
+#-----------------------------------------------------------------------------#
+
 class TrashError(Exception):
+    """ Trash base exception """
     pass
     
 class TrashDirectoryError(TrashError):
+    """ Error moving directory to trash """
     pass
     
 class TrashMoveError(TrashError):
+    """ Base move trash error """
     pass
     
 class TrashPermissionsError(TrashMoveError):
+    """ Don't have permissions to move file to trash """
     pass
+
+#-----------------------------------------------------------------------------#
 
 def moveToTrash(paths):
     """
@@ -128,7 +139,8 @@ def _unixTrash(paths):
     
     """
     trashdir = os.path.join(os.environ.get('XDG_DATA_HOME', 
-                            os.path.join(os.path.expanduser('~'),'.local','share')), 'Trash')
+                            os.path.join(os.path.expanduser('~'),
+                                         '.local','share')), 'Trash')
 
     # Create trash directories as needed
     try:
