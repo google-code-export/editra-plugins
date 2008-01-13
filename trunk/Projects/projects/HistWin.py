@@ -168,6 +168,7 @@ class HistoryStatusBar(wx.StatusBar):
         self.prog.Pulse()
 
     def Reposition(self):
+        """Move the progress bar to proper location"""
         rect = self.GetFieldRect(1)
         self.prog.SetPosition((rect.x+2, rect.y+2))
         self.prog.SetSize((rect.width-4, rect.height-4))
@@ -198,9 +199,11 @@ class HistoryPane(wx.Panel):
         # Note box sizer must be created before its siblings
         self.boxsz = wx.StaticBoxSizer(sbox, wx.VERTICAL)
         self._search = LogSearch(self, size=(150, -1))
-        self._split = wx.SplitterWindow(self, style=wx.SP_3DSASH | wx.SP_LIVE_UPDATE)
+        self._split = wx.SplitterWindow(self,
+                                        style=wx.SP_3DSASH | wx.SP_LIVE_UPDATE)
         self._list = HistList(self._split, projects, node, path)
-        self._txt = wx.TextCtrl(self._split, style=wx.TE_MULTILINE | wx.TE_READONLY)
+        self._txt = wx.TextCtrl(self._split,
+                                style=wx.TE_MULTILINE | wx.TE_READONLY)
         self._btn = wx.Button(self, label=_(self.BTN_LBL1))
         self._btn.Disable()
         self.projects = projects
@@ -241,6 +244,10 @@ class HistoryPane(wx.Panel):
         sizer.AddMany([((8, 8)), (vsizer, 1, wx.EXPAND), ((8, 8))])
         self.SetSizer(sizer)
 
+    def GetHistoryList(self):
+        """Get the ListCtrl used by this window"""
+        return self._list
+
     def OnButton(self, evt):
         """Handle button events"""
         self.GetParent().StartBusy()
@@ -249,8 +256,10 @@ class HistoryPane(wx.Panel):
         if not selected:
             self.projects.compareRevisions(self.path, callback=self.endCompare)
         elif len(selected) == 1:
-            rev = self._list.GetItem(selected[0], self._list.REV_COL).GetText().strip()
-            self.projects.compareRevisions(self.path, rev1=rev, callback=self.endCompare)
+            rev = self._list.GetItem(selected[0], self._list.REV_COL)
+            rev = rev.GetText().strip()
+            self.projects.compareRevisions(self.path, rev1=rev,
+                                           callback=self.endCompare)
         else:
             rev1 = self._list.GetItem(selected[0], self._list.REV_COL).GetText().strip()
             rev2 = self._list.GetItem(selected[-1], self._list.REV_COL).GetText().strip()
@@ -420,7 +429,8 @@ class HistList(wx.ListCtrl,
         if not data:
             wx.MessageDialog(self, 
                _('The history information for the requested file could ' \
-                 'not be retrieved.  Please make sure that you have network access.'), 
+                 'not be retrieved.  Please make sure that you have ' \
+                 'network access.'), 
                _('History information could not be retrieved'), 
                style=wx.OK|wx.ICON_ERROR).ShowModal()
             self.GetGrandParent().GetParent().Destroy()
@@ -483,7 +493,7 @@ class LogSearch(wx.SearchCtrl):
 
     def OnSearch(self, evt):
         """Search logs and filter"""
-        self.GetParent()._list.Filter(self.GetValue())
+        self.GetParent().GetHistoryList().Filter(self.GetValue())
 
 #-----------------------------------------------------------------------------#
 # Helper functions
@@ -513,14 +523,26 @@ def AdjustColour(color, percent, alpha=wx.ALPHA_OPAQUE):
 
 if __name__ == '__main__':
     from datetime import datetime
-    data = [
-        {'revision':'a', 'date':datetime([int(x) for x in '2007/17/01'.split('/')]), 'author':'Kevin Smith', 'log':'Just Testing'},
-        {'revision':'b', 'date':datetime([int(x) for x in '2007/17/02'.split('/')]), 'author':'Kevin Smith', 'log':'Test again with some longer text'},
-        {'revision':'c', 'date':datetime([int(x) for x in '2007/17/03'.split('/')]), 'author':'Kevin Smith', 'log':'Just Testing'},
-        {'revision':'d', 'date':datetime([int(x) for x in '2007/17/04'.split('/')]), 'author':'Kevin Smith', 'log':'Log message with lots of text to test the truncation of long messages and their display in the text control.'}
+    DATA = [
+        {'revision':'a',
+         'date':datetime([int(x) for x in '2007/17/01'.split('/')]),
+         'author':'Kevin Smith',
+         'log':'Just Testing'},
+        {'revision':'b',
+         'date':datetime([int(x) for x in '2007/17/02'.split('/')]),
+         'author':'Kevin Smith',
+         'log':'Test again with some longer text'},
+        {'revision':'c',
+         'date':datetime([int(x) for x in '2007/17/03'.split('/')]),
+         'author':'Kevin Smith',
+         'log':'Just Testing'},
+        {'revision':'d',
+         'date':datetime([int(x) for x in '2007/17/04'.split('/')]),
+         'author':'Kevin Smith',
+         'log':'Log message with lots of text to test the truncation of long messages and their display in the text control.'}
     ]
-    app = wx.PySimpleApp(False)
-    win = HistoryWindow(None, "History Window Test", data)
-    win.Show()
-    app.MainLoop()
+    APP = wx.PySimpleApp(False)
+    WIN = HistoryWindow(None, "History Window Test", DATA)
+    WIN.Show()
+    APP.MainLoop()
 
