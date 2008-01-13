@@ -1,0 +1,22 @@
+Name: Projects
+Author: Kevin D. Smith
+License: wxWindows
+
+Changelog:
+
+#-----------------------------------------------------------------------------#
+Version: 0.2
+Released:
+
+Minor bug fix update and compatibilty with latest Editra release version
+
+Bug Fixes:
++Error when removing a project that no longer exists
++Display issues in History Window
++Python 2.4 compatibility fix for diff windows builtin display
+
+#-----------------------------------------------------------------------------#
+Version: 0.1
+Released: 11/01/2007
+
++Initial Release
