@@ -32,13 +32,23 @@ __author__ = "Kevin D. Smith <Kevin.Smith@sixquickrun.com>"
 __revision__ = "$Revision$"
 __scid__ = "$Id$"
 
-import os, fnmatch, subprocess, sys, wx
+#-----------------------------------------------------------------------------#
+# Imports
+import os
+import fnmatch
+import subprocess
+import sys
+import wx
+
+#-----------------------------------------------------------------------------#
 
 if sys.platform.lower().startswith('win'):            
     STARTUPINFO = subprocess.STARTUPINFO()
     STARTUPINFO.dwFlags |= subprocess.STARTF_USESHOWWINDOW
 else:
     STARTUPINFO = None
+
+#-----------------------------------------------------------------------------#
 
 class SourceControl(object):
     """Source control representation base class"""
@@ -85,19 +95,20 @@ class SourceControl(object):
                 path.pop()
 
         # Find the common prefix
-        exit = False
+        end = False
         root = []                
         while paths[0]:
             segment = paths[0][0]
             for path in paths:
                 if not path:
-                    exit = True
+                    end = True
                     break
                 elif path[0] != segment:
-                    exit = True
+                    end = True
                     break
-            if exit:
+            if end:
                 break
+
             root.append(segment)
             for path in paths:
                 path.pop(0)
@@ -181,7 +192,7 @@ class SourceControl(object):
                     recursiveupdate(settings, value)
         return settings
 
-    def run(self, directory, options, env={}, mergeerr=False):
+    def run(self, directory, options, env=dict(), mergeerr=False):
         """ Run a CVS command in the given directory with given options """
         self.log('%s %s %s\n' % (directory, self.command, ' '.join(options)))
         environ = os.environ.copy()
@@ -237,6 +248,7 @@ class SourceControl(object):
         newpaths = []
         if type is None:
             type = self.TYPE_ANY
+
         for path in paths:
             if os.path.isdir(path):
                 if not path.endswith(os.path.sep):
@@ -249,11 +261,11 @@ class SourceControl(object):
                 for root, dirs, files in os.walk(path, topdown):
                     root = root[len(path):]
                     if type != self.TYPE_FILE:
-                        for dir in dirs:
-                            newpaths.append(os.path.join(root, dir))
+                        for dirname in dirs:
+                            newpaths.append(os.path.join(root, dirname))
                     if type != self.TYPE_DIRECTORY:
-                        for file in files:
-                            newpaths.append(os.path.join(root, file))
+                        for fname in files:
+                            newpaths.append(os.path.join(root, fname))
             elif type != self.TYPE_DIRECTORY:
                 newpaths.append(os.path.basename(path))
         return self.filterPaths(newpaths)
@@ -261,7 +273,7 @@ class SourceControl(object):
     def log(self, s):
         """Log output either to Editra's log or stdout"""
         try:
-            console = wx.GetApp().GetLog()(s)
+            wx.GetApp().GetLog()(s)
         except AttributeError:
             sys.stdout.write(s)
 
@@ -269,12 +281,14 @@ class SourceControl(object):
         """ Read and print stdout/stderr """
         if not p:
             return
+
         flush = write = None
         try: 
             write = wx.GetApp().GetLog()
         except AttributeError: 
             write = sys.stdout.write
             flush = sys.stdout.flush
+
         while write:
             err = out = None
             if p.stderr:
