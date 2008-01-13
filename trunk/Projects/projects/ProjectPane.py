@@ -58,6 +58,8 @@ __author__ = "Kevin D. Smith <Kevin.Smith@sixquickrun.com>"
 __revision__ = "$Revision$"
 __scid__ = "$Id$"
 
+#-----------------------------------------------------------------------------#
+# Imports
 import wx 
 import os 
 import time 
@@ -145,18 +147,21 @@ class SimpleEvent(wx.PyCommandEvent):
 ppEVT_SYNC_NODES = wx.NewEventType()
 EVT_SYNC_NODES = wx.PyEventBinder(ppEVT_SYNC_NODES, 1)
 class SyncNodesEvent(SimpleEvent):
+    """ Event to notify that nodes need updating """
     pass
 
 ppEVT_UPDATE_STATUS = wx.NewEventType()
 EVT_UPDATE_STATUS = wx.PyEventBinder(ppEVT_UPDATE_STATUS, 1)
 class UpdateStatusEvent(SimpleEvent):
+    """ Event to notify to do an update of the tree view """
     pass
 
 #-----------------------------------------------------------------------------#
 
 class MyTreeCtrl(wx.TreeCtrl):
-
+    """Base class used for displaying the project files"""
     def __init__(self, parent, id, pos, size, style, log):
+        """ Create the tree control for viewing the projects """
         wx.TreeCtrl.__init__(self, parent, id, pos, size, style)
         self.log = log
 
@@ -593,8 +598,8 @@ class ProjectTree(wx.Panel):
 
     def OnSize(self, event):
         """Reset Tree dimensions"""
-        w, h = self.GetClientSizeTuple()
-        self.tree.SetDimensions(0, 0, w, h)
+        width, height = self.GetClientSizeTuple()
+        self.tree.SetDimensions(0, 0, width, height)
 
     def OnItemExpanded(self, event):
         """
@@ -751,6 +756,7 @@ class ProjectTree(wx.Panel):
             pass
         
         def run(callback, nodes, command, **options):
+            """Does the running of the command"""
             concurrentcmds = ['status', 'history']
             NODE, DATA, SC = 0, 1, 2
             nodeinfo = []
@@ -895,7 +901,9 @@ class ProjectTree(wx.Panel):
                             updates.append((self.tree.SetItemImage, child, 
                                             icon, wx.TreeItemIcon_Normal))
                         #if 'tag' in status[text]:
-                        #    updates.append((self.tree.SetToolTip, wx.ToolTip('Tag: %s' % status[text]['tag'])))
+                        #    updates.append((self.tree.SetToolTip,
+                        #                   wx.ToolTip('Tag: %s' % \
+                        #                               status[text]['tag'])))
             elif node.IsOk():
                 text = self.tree.GetItemText(node)
                 if text in status:
@@ -904,11 +912,14 @@ class ProjectTree(wx.Panel):
                         updates.append((self.tree.SetItemImage, node, 
                                         icon, wx.TreeItemIcon_Normal))
                     #if 'tag' in status[text]:
-                    #    updates.append((self.tree.SetToolTip, wx.ToolTip('Tag: %s' % status[text]['tag'])))
+                    #    updates.append((self.tree.SetToolTip,
+                    #                   wx.ToolTip('Tag: %s' % \
+                    #                              status[text]['tag'])))
         except (OSError, IOError):
             pass
 
-        wx.PostEvent(self, UpdateStatusEvent(ppEVT_UPDATE_STATUS, self.GetId(), updates))
+        wx.PostEvent(self, UpdateStatusEvent(ppEVT_UPDATE_STATUS,
+                                             self.GetId(), updates))
 
     def OnUpdateStatus(self, evt):
         """ Apply status updates to tree view """
@@ -977,8 +988,9 @@ class ProjectTree(wx.Panel):
                     if callback is not None:
                         callback()
                     return wx.MessageDialog(self, 
-                                            _('The requested file could not be ' \
-                                            'retrieved from the source control system.'), 
+                                            _('The requested file could not '
+                                              'be retrieved from the source '
+                                              'control system.'), 
                                             _('Could not retrieve file'), 
                                             style=wx.OK|wx.ICON_ERROR).ShowModal()
                 content1 = content1[0]
@@ -994,9 +1006,10 @@ class ProjectTree(wx.Panel):
                     if callback is not None:
                         callback()
                     return wx.MessageDialog(self, 
-                                            'The requested file could not be ' +
-                                            'retrieved from the source control system.', 
-                                            'Could not retrieve file', 
+                                            _('The requested file could not '
+                                              'be retrieved from the source '
+                                              'control system.'),
+                                            _('Could not retrieve file'), 
                                             style=wx.OK|wx.ICON_ERROR).ShowModal()
                 content2 = content2[0]
                 if rev2:
@@ -1010,9 +1023,10 @@ class ProjectTree(wx.Panel):
                     if callback is not None:
                         callback()
                     return wx.MessageDialog(self, 
-                                            'The requested file could not be ' +
-                                            'retrieved from the source control system.', 
-                                            'Could not retrieve file', 
+                                            _('The requested file could not '
+                                              'be retrieved from the source '
+                                              'control system.'),
+                                            _('Could not retrieve file'),  
                                             style=wx.OK|wx.ICON_ERROR).ShowModal()
                 content1 = content1[0]
                 ext1 = 'previous'
@@ -1027,29 +1041,30 @@ class ProjectTree(wx.Panel):
                 path = os.path.join(self.tempdir, os.path.basename(path))
                 path1 = '%s.%s' % (path, ext1)
                 path2 = '%s.%s' % (path, ext2)
-                f = open(path1, 'w')
-                f.write(content1)
-                f.close()
-                f = open(path2, 'w')
-                f.write(content2)
-                f.close()
+                tfile = open(path1, 'w')
+                tfile.write(content1)
+                tfile.close()
+                tfile2 = open(path2, 'w')
+                tfile2.write(content2)
+                tfile2.close()
             elif content1:
                 path1 = path
                 path = os.path.join(self.tempdir, os.path.basename(path))
                 path2 = '%s.%s' % (path, ext1)
-                f = open(path2, 'w')
-                f.write(content1)
-                f.close()
+                tfile = open(path2, 'w')
+                tfile.write(content1)
+                tfile.close()
             elif content2:
                 path1 = path
                 path = os.path.join(self.tempdir, os.path.basename(path))
                 path2 = '%s.%s' % (path, ext2)
-                f = open(path2, 'w')
-                f.write(content2)
-                f.close()
+                tfile2 = open(path2, 'w')
+                tfile2.write(content2)
+                tfile2.close()
             
             # Run comparison program
-            if self.config.getBuiltinDiff() or not (self.config.getDiffProgram()):
+            if self.config.getBuiltinDiff() or \
+               not (self.config.getDiffProgram()):
                 diffwin.GenerateDiff(path2, path1, html=True)
             else:
                 subprocess.call([self.config.getDiffProgram(), path2, path1]) 
@@ -1057,7 +1072,8 @@ class ProjectTree(wx.Panel):
             if callback is not None:
                 callback()
             
-        t = threading.Thread(target=diff, args=(path, rev1, date1, rev2, date2, callback))
+        t = threading.Thread(target=diff,
+                             args=(path, rev1, date1, rev2, date2, callback))
         t.setDaemon(True)
         t.start()        
 
@@ -1084,8 +1100,8 @@ class ProjectTree(wx.Panel):
         """
         data = self.tree.GetPyData(node)
         path = data['path']
-        # Start a directory watcher to keep branch in sync.  When the flag variable 
-        # is emptied, the thread stops.
+        # Start a directory watcher to keep branch in sync.
+        # When the flag variable is emptied, the thread stops.
         flag = [1]
         data['watcher'] = w = threading.Thread(target=self.watchDirectory, 
                                                args=(path,), 
@@ -1156,8 +1172,10 @@ class ProjectTree(wx.Panel):
         self.tree.AppendItem(node, '')
         self.tree.SetItemHasChildren(node)
         self.tree.SetPyData(node, {'path' : os.path.join(parentpath, name)})
-        self.tree.SetItemImage(node, self.icons['folder'], wx.TreeItemIcon_Normal)
-        self.tree.SetItemImage(node, self.icons['folder-open'], wx.TreeItemIcon_Expanded)
+        self.tree.SetItemImage(node, self.icons['folder'],
+                               wx.TreeItemIcon_Normal)
+        self.tree.SetItemImage(node, self.icons['folder-open'],
+                               wx.TreeItemIcon_Expanded)
         return node
 
     def addFile(self, parent, name):
@@ -1243,23 +1261,55 @@ class ProjectTree(wx.Panel):
             self.popupIDNewMenu = wx.NewId()
 
             self.Bind(wx.EVT_MENU, self.onPopupEdit, id=self.popupIDEdit)
-            self.Bind(wx.EVT_MENU, self.onPopupOpen, id=self.popupIDOpen)
-            self.Bind(wx.EVT_MENU, self.onPopupReveal, id=self.popupIDReveal)
-            self.Bind(wx.EVT_MENU, self.onPopupCopy, id=self.popupIDCopy)
-            self.Bind(wx.EVT_MENU, self.onPopupCut, id=self.popupIDCut)
-            self.Bind(wx.EVT_MENU, self.onPopupPaste, id=self.popupIDPaste)
-            self.Bind(wx.EVT_MENU, self.onPopupSCRefresh, id=self.popupIDSCRefresh)
-            self.Bind(wx.EVT_MENU, self.onPopupSCDiff, id=self.popupIDSCDiff)
-            self.Bind(wx.EVT_MENU, self.onPopupSCUpdate, id=self.popupIDSCUpdate)
-            self.Bind(wx.EVT_MENU, self.onPopupSCHistory, id=self.popupIDSCHistory)
-            self.Bind(wx.EVT_MENU, self.onPopupSCCommit, id=self.popupIDSCCommit)
-            self.Bind(wx.EVT_MENU, self.onPopupSCRemove, id=self.popupIDSCRemove)
-            self.Bind(wx.EVT_MENU, self.onPopupSCRevert, id=self.popupIDSCRevert)
-            self.Bind(wx.EVT_MENU, self.onPopupSCAdd, id=self.popupIDSCAdd)
+            self.Bind(wx.EVT_MENU,
+                      lambda evt: self.onPopupOpen(),
+                      id=self.popupIDOpen)
+            self.Bind(wx.EVT_MENU,
+                      lambda evt: self.onPopupReveal(),
+                      id=self.popupIDReveal)
+            self.Bind(wx.EVT_MENU,
+                      lambda evt: self.onPopupCopy(),
+                      id=self.popupIDCopy)
+            self.Bind(wx.EVT_MENU,
+                      lambda evt: self.onPopupCut(),
+                      id=self.popupIDCut)
+            self.Bind(wx.EVT_MENU,
+                      lambda evt: self.onPopupPaste(),
+                      id=self.popupIDPaste)
+            self.Bind(wx.EVT_MENU,
+                      lambda evt: self.onPopupSCRefresh(),
+                      id=self.popupIDSCRefresh)
+            self.Bind(wx.EVT_MENU,
+                      lambda evt: self.onPopupSCDiff(),
+                      id=self.popupIDSCDiff)
+            self.Bind(wx.EVT_MENU,
+                      lambda evt: self.onPopupSCUpdate(),
+                      id=self.popupIDSCUpdate)
+            self.Bind(wx.EVT_MENU,
+                      lambda evt: self.onPopupSCHistory(),
+                      id=self.popupIDSCHistory)
+            self.Bind(wx.EVT_MENU,
+                      lambda evt: self.onPopupSCCommit(),
+                      id=self.popupIDSCCommit)
+            self.Bind(wx.EVT_MENU,
+                      lambda evt: self.onPopupSCRemove(),
+                      id=self.popupIDSCRemove)
+            self.Bind(wx.EVT_MENU,
+                      lambda evt: self.onPopupSCRevert(),
+                      id=self.popupIDSCRevert)
+            self.Bind(wx.EVT_MENU,
+                      lambda evt: self.onPopupSCAdd(),
+                      id=self.popupIDSCAdd)
             self.Bind(wx.EVT_MENU, self.onPopupDelete, id=self.popupIDDelete)
-            self.Bind(wx.EVT_MENU, self.onPopupRename, id=self.popupIDRename)
-            self.Bind(wx.EVT_MENU, self.onPopupExecuteCommand, id=self.popupIDExecuteCommand)
-            self.Bind(wx.EVT_MENU, self.onPopupNewFolder, id=self.popupIDNewFolder)
+            self.Bind(wx.EVT_MENU,
+                      lambda evt: self.onPopupRename(),
+                      id=self.popupIDRename)
+            self.Bind(wx.EVT_MENU,
+                      lambda evt: self.onPopupExecuteCommand(),
+                      id=self.popupIDExecuteCommand)
+            self.Bind(wx.EVT_MENU,
+                      lambda evt: self.onPopupNewFolder(),
+                      id=self.popupIDNewFolder)
 
         paths = self.getSelectedPaths()
 
@@ -1340,8 +1390,8 @@ class ProjectTree(wx.Panel):
         self.PopupMenu(menu)
         menu.Destroy()
         
-    def onPopupNewFolder(self, event):
-        """ Create a new folder """
+    def onPopupNewFolder(self):
+        """ Create a new folder from popup menu selection """
         node = self.getSelectedNodes()[0]
         path = self.tree.GetPyData(node)['path']
         if not os.path.isdir(path):
@@ -1396,7 +1446,7 @@ class ProjectTree(wx.Panel):
         """ Open the current file in the editor """
         return self.OnActivate(event)
         
-    def onPopupExecuteCommand(self, event):
+    def onPopupExecuteCommand(self):
         """ Execute commands on file system tree """
     
         ted = wx.TextEntryDialog(self, 
@@ -1414,46 +1464,47 @@ class ProjectTree(wx.Panel):
         for item in self.getSelectedPaths():
             if os.path.isdir(item):
                 for root, dirs, files in os.walk(item):
-                    for f in files:
+                    for fname in files:
                         #print command, os.path.join(root,f)
-                        os.system('%s "%s"' % (command, os.path.join(root, f))) 
+                        os.system('%s "%s"' % \
+                                  (command, os.path.join(root, fname))) 
             else:
                 #print command, item
                 os.system('%s "%s"' % (command, item)) 
 
-    def onPopupOpen(self, event):
+    def onPopupOpen(self):
         """ Open the current file using Finder """
         for fname in self.getSelectedPaths():
             subprocess.call([FILEMAN_CMD, fname])
 
-    def onPopupReveal(self, event):
+    def onPopupReveal(self):
         """ Open the Finder to the parent directory """
         for fname in self.getSelectedPaths():
             subprocess.call([FILEMAN_CMD, os.path.dirname(fname)])
 
-    def onPopupRename(self, event):
+    def onPopupRename(self):
         """ Rename the current selection """
         for node in self.getSelectedNodes():
             self.tree.EditLabel(node)
 
-    def onPopupSCDiff(self, event):
+    def onPopupSCDiff(self):
         """ Diff the file to the file in the repository """
         for node in self.getSelectedNodes():
             self.compareToPrevious(node)
             
-    def onPopupCut(self, event):
+    def onPopupCut(self):
         """ Cut the files to the clipboard """
         self.clipboard['files'] = self.getSelectedPaths()
         self.clipboard['delete'] = True
         for item in self.getSelectedNodes():
             self.tree.SetItemTextColour(item, wx.Colour(192, 192, 192))
 
-    def onPopupCopy(self, event):
+    def onPopupCopy(self):
         """ Copy the files to the clipboard """
         self.clipboard['files'] = self.getSelectedPaths()
         self.clipboard['delete'] = False
         
-    def onPopupPaste(self, event):
+    def onPopupPaste(self):
         """ Paste the files to the selected directory """
         try: 
             self.GetParent().StartBusy()
@@ -1487,7 +1538,7 @@ class ProjectTree(wx.Panel):
                         rc = wx.MessageDialog(self, 
                           _('The system returned the following message when ' \
                             'attempting to move/copy %s: %s. ' \
-                            'Do you wish to continue?' % (fname, msg)), 
+                            'Do you wish to continue?') % (fname, msg), 
                           _('Error occurred when copying/moving files'), 
                           style=wx.YES_NO|wx.YES_DEFAULT|wx.ICON_ERROR).ShowModal()
                         if rc == wx.ID_NO:
@@ -1495,38 +1546,38 @@ class ProjectTree(wx.Panel):
                     else:
                         rc = wx.MessageDialog(self, 
                           _('The system returned the following message when ' \
-                            'attempting to move/copy %s: %s.' % (fname, msg)), 
+                            'attempting to move/copy %s: %s.') % (fname, msg), 
                           _('Error occurred when copying/moving files'), 
                           style=wx.OK|wx.ICON_ERROR).ShowModal()
             self.clipboard['files'] = newclipboard
 
         wx.lib.delayedresult.startWorker(self.endPaste, run, wargs=(dest,))
 
-    def onPopupSCRefresh(self, event):
+    def onPopupSCRefresh(self):
         """ Handle context menu status update command """
         self.scStatus(self.getSelectedNodes())
 
-    def onPopupSCUpdate(self, event):
+    def onPopupSCUpdate(self):
         """ Handle context menu update repository command """
         self.scUpdate(self.getSelectedNodes())
 
-    def onPopupSCHistory(self, event):
+    def onPopupSCHistory(self):
         """ Handle context menu command to show History Window """
         self.scHistory(self.getSelectedNodes())
 
-    def onPopupSCCommit(self, event):
+    def onPopupSCCommit(self):
         """ Handle context menu command commit selected nodes """
         self.scCommit(self.getSelectedNodes())
 
-    def onPopupSCRemove(self, event):
+    def onPopupSCRemove(self):
         """ Handle context menu command to remove selected nodes """
         self.scRemove(self.getSelectedNodes())
 
-    def onPopupSCRevert(self, event):
+    def onPopupSCRevert(self):
         """ Handle context menu command to revert selected nodes """
         self.scRevert(self.getSelectedNodes())
 
-    def onPopupSCAdd(self, event):
+    def onPopupSCAdd(self):
         """ Handle context menu command add selected node to source control """
         self.scAdd(self.getSelectedNodes())
 
@@ -1537,6 +1588,7 @@ class ProjectTree(wx.Panel):
                       for x in self.getSelectedNodes()]
  
         def delete():
+            """Does the delete"""
             # Delete previously cut files
             for node, path in selections:
                 try: 
@@ -1711,7 +1763,8 @@ class ProjectPane(wx.Panel):
         if ed_glob:
             cfgbmp = wx.ArtProvider.GetBitmap(str(ed_glob.ID_PREF), wx.ART_MENU)
         else:
-            cfgbmp = wx.ArtProvider.GetBitmap(wx.ART_EXECUTABLE_FILE, wx.ART_MENU)
+            cfgbmp = wx.ArtProvider.GetBitmap(wx.ART_EXECUTABLE_FILE,
+                                              wx.ART_MENU)
         configbutton = wx.BitmapButton(self, self.ID_CONFIG, 
                                        cfgbmp, style=wx.NO_BORDER)
         configbutton.SetToolTip(wx.ToolTip(_("Configure")))
