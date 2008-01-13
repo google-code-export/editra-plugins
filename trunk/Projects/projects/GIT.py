@@ -8,10 +8,14 @@
 # Licence: wxWindows Licence                                                  #
 ###############################################################################
 
+""" GIT implimentation of the SourceControl object """
+
 __author__ = "Cody Precord <cprecord@editra.org>"
 __svnid__ = "$Id$"
 __revision__ = "$Revision$"
 
+#-----------------------------------------------------------------------------#
+# Imports
 import os
 import sys
 import datetime
@@ -19,6 +23,7 @@ import re
 from SourceControl import SourceControl
 
 #-----------------------------------------------------------------------------#
+# Globals
 NEWPAT = re.compile('#[ \t]+new file:') # added
 RNAME = re.compile('#[ \t]+renamed:') # this is odd need more research
 COPPAT = rname = re.compile('#[ \t]+copied:') # this is odd need more research
@@ -27,6 +32,8 @@ DELPAT = re.compile('#[ \t]+deleted:')  # deleted
 CONPAT = re.compile('#[ \t]+conflict:') # conflict ??? Couldnt find ref
 UNKPAT = re.compile('#[ \t]+[a-zA-Z0-9]+') # hmmm
 COMPAT = re.compile('commit [a-z0-9]{40}') # Commit line in log
+
+#-----------------------------------------------------------------------------#
 
 class GIT(SourceControl):
     """Source control implementation to add GIT support to the 
@@ -95,11 +102,13 @@ class GIT(SourceControl):
         self.logOutput(out)
             
     def diff(self, paths):
+        """ Perform a diff on the given files in the repository """
         root, files = self.splitFiles(paths)
         out = self.run(root, ['diff'] + files)
         self.logOutput(out)
 
     def getRepository(self, path):
+        """ Get the base of the repository """
         return self.findRoot(path)
 
     def history(self, paths, history=None):
@@ -108,13 +117,13 @@ class GIT(SourceControl):
             history = list()
         for path in paths:
             root, files = self.splitFiles(path)
-            for file in files:
-                out = self.run(root, ['log', file])
+            for fname in files:
+                out = self.run(root, ['log', fname])
                 if out:
                     for line in out.stdout:
                         self.log(line)
                         if re.match(COMPAT, line.strip()):
-                            current = {'path':file}
+                            current = {'path':fname}
                             history.append(current)
                             current['revision'] = line.split()[-1].strip()
                             current['log'] = ''
@@ -275,8 +284,8 @@ class GIT(SourceControl):
         for path in paths:
             root, files = self.splitFiles(path, forcefiles=True, 
                                           type=self.TYPE_FILE)
-            for file in files:
-                out = self.run(root, ['checkout'] + files)
+            for fname in files:
+                out = self.run(root, ['checkout'] + fname)
                 self.logOutput(out)
 
     def fetch(self, paths, rev=None, date=None):
@@ -294,6 +303,7 @@ class GIT(SourceControl):
                 options = rev + u':%s'
             else:
                 options = 'HEAD:%s'
+
             if date:
                 self.logOutput("[git] date not currently supported")
 
@@ -313,12 +323,15 @@ class GIT(SourceControl):
 #-----------------------------------------------------------------------------#
 # Utility functions
 def checkDirectory(directory):
+    """Checks if a given directory is the git head"""
     if os.path.isdir(directory):
         if os.path.exists(os.path.join(directory, '.git', 'HEAD')):
             return True
     else:
         return False
-                        
+
+#-----------------------------------------------------------------------------#
+
 if __name__ == '__main__':
     git = GIT()
     print git.status(['.'], recursive=True)
