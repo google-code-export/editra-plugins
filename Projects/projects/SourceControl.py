@@ -273,7 +273,7 @@ class SourceControl(object):
     def log(self, s):
         """Log output either to Editra's log or stdout"""
         try:
-            wx.GetApp().GetLog()(s)
+            wx.GetApp().GetLog()('[projects]' + s)
         except AttributeError:
             sys.stdout.write(s)
 
@@ -297,14 +297,17 @@ class SourceControl(object):
                     write(err)
                     if flush:
                         flush()
+
             if p.stdout:
                 out = p.stdout.readline()
                 if out:
                     write(out)
                     if flush:
                         flush()
+
                 if not err and not out:
                     return
+
         if close:
             self.closeProcess(p)
 
