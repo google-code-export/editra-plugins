@@ -294,14 +294,14 @@ class SourceControl(object):
             if p.stderr:
                 err = p.stderr.readline()
                 if err:
-                    write(err)
+                    write('[projects][err] ' + err)
                     if flush:
                         flush()
 
             if p.stdout:
                 out = p.stdout.readline()
                 if out:
-                    write(out)
+                    write('[projects][info] ' + out)
                     if flush:
                         flush()
 
