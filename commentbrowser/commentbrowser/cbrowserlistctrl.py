@@ -16,7 +16,6 @@ __revision__ = "$Revision$"
 
 #------------------------------------------------------------------------------#
 # Imports
-import sys
 import locale
 import wx
 import wx.lib.mixins.listctrl as listmix
@@ -45,7 +44,8 @@ class TestListCtrl(wx.ListCtrl, listmix.ListCtrlAutoWidthMixin,
         ID=-1,
         pos=wx.DefaultPosition,
         size=wx.DefaultSize,
-        style=wx.BORDER_NONE|wx.LC_REPORT|wx.LC_HRULES|wx.LC_VRULES|wx.LC_SINGLE_SEL|wx.LC_VIRTUAL|wx.LC_SORT_DESCENDING):
+        style=wx.BORDER_NONE|wx.LC_REPORT|wx.LC_HRULES|wx.LC_VRULES|
+                        wx.LC_SINGLE_SEL|wx.LC_VIRTUAL|wx.LC_SORT_DESCENDING):
         """Init the TestListCtrl"""
 
         wx.ListCtrl.__init__(
@@ -59,16 +59,18 @@ class TestListCtrl(wx.ListCtrl, listmix.ListCtrlAutoWidthMixin,
 
         #---- Images used by the list ----#
         isize = (8, 8)
-        self._img_list = wx.ImageList(*isize)
+        self._img_list = wx.ImageList(8, 8)
         
-        up = wx.ArtProvider_GetBitmap(str(ed_glob.ID_UP), wx.ART_MENU, isize)
-        if not up.IsOk():
-            up = wx.ArtProvider_GetBitmap(wx.ART_GO_UP, wx.ART_TOOLBAR, isize)
-        self.sm_up = self._img_list.Add(up)
+        ups = wx.ArtProvider_GetBitmap(str(ed_glob.ID_UP), wx.ART_MENU, isize)
+        if not ups.IsOk():
+            ups = wx.ArtProvider_GetBitmap(wx.ART_GO_UP, wx.ART_TOOLBAR, isize)
+        self.sm_up = self._img_list.Add(ups)
 
-        down = wx.ArtProvider_GetBitmap(str(ed_glob.ID_DOWN), wx.ART_MENU, isize)
+        down = wx.ArtProvider_GetBitmap(str(ed_glob.ID_DOWN), wx.ART_MENU,
+                                                                        isize)
         if not down.IsOk():
-            down = wx.ArtProvider_GetBitmap(wx.ART_GO_DOWN, wx.ART_TOOLBAR, isize)
+            down = wx.ArtProvider_GetBitmap(wx.ART_GO_DOWN, wx.ART_TOOLBAR,
+                                                                        isize)
         self.sm_dn = self._img_list.Add(down)
 
         self.SetImageList(self._img_list, wx.IMAGE_LIST_SMALL)
@@ -126,7 +128,8 @@ class TestListCtrl(wx.ListCtrl, listmix.ListCtrlAutoWidthMixin,
     def AddEntries(self, entrydict):
         """
         Adds all entries from the entrydict. The entries must be a tuple
-        containing entrytuple = (prio, tasktype, description, file, line, fullname)
+        containing 
+        entrytuple = (prio, tasktype, description, file, line, fullname)
         Refresh is not called.
         @param entrydict: a dictionary containing {key:entrytuple}
         """
@@ -134,7 +137,9 @@ class TestListCtrl(wx.ListCtrl, listmix.ListCtrlAutoWidthMixin,
         self.itemIndexMap = self.itemDataMap.keys()
         self.SetItemCount(len(self.itemDataMap))
         try:
-            self._max_prio = max( [item[0] for item in self.itemDataMap.values()])
+            self._max_prio = max( \
+                                [item[0] for item in self.itemDataMap.values()]\
+                                )
         except:
             pass
 
@@ -164,9 +169,9 @@ class TestListCtrl(wx.ListCtrl, listmix.ListCtrlAutoWidthMixin,
                     nb.SetSelection(nb.GetPageIndex(ctrl))
                     nb.GoCurrentPage()
                     ctrl.GotoLine(line-1)
-                    break;
-        except Exception, e:
-            self._log("[error] "+e.msg)
+                    break
+        except Exception, excp:
+            self._log("[error] "+excp.msg)
 
 
     #---- special methods used by the mixinx classes ----#
@@ -179,8 +184,9 @@ class TestListCtrl(wx.ListCtrl, listmix.ListCtrlAutoWidthMixin,
     #---------------------------------------------------
     #Matt C, 2006/02/22
     #Here's a better SortItems() method --
-    #the ColumnSorterMixin.__ColumnSorter() method already handles the ascending/descending,
-    #and it knows to sort on another column if the chosen columns have the same value.
+    #the ColumnSorterMixin.__ColumnSorter() method already handles the 
+    #ascending/descending, and it knows to sort on another column if the chosen 
+    #columns have the same value.
     def SortItems(self, sorter=cmp):
         """
         This method is required by the 
@@ -197,7 +203,8 @@ class TestListCtrl(wx.ListCtrl, listmix.ListCtrlAutoWidthMixin,
     def GetColumnSorter(self):
         """
         Overwrites the default GetColumnSorter of the mixin.
-        @returns: a compare function object that takes two arguments: func(key1, key2)
+        @returns: a compare function object that takes two arguments: 
+        func(key1, key2)
         """
         return self.SpecialSorter
 
@@ -210,7 +217,7 @@ class TestListCtrl(wx.ListCtrl, listmix.ListCtrlAutoWidthMixin,
         @param key2: second item index to compare
         @returns: a tuple of the keys either (key1, key2) or (key2, key1)
         """
-        cmpVal = SpecialSorter(key1, key2)
+        cmpVal = self.SpecialSorter(key1, key2)
         if 0 < cmpVal:
             return (key2, key1)
         return (key1, key2)
@@ -285,8 +292,8 @@ class TestListCtrl(wx.ListCtrl, listmix.ListCtrlAutoWidthMixin,
         @returns: text as a string for the item and column
         """
         index = self.itemIndexMap[itemIdx]
-        s = self.itemDataMap[index][col]
-        return s
+        text = self.itemDataMap[index][col]
+        return text
 
     def OnGetItemImage(self, item):
         """
@@ -302,15 +309,17 @@ class TestListCtrl(wx.ListCtrl, listmix.ListCtrlAutoWidthMixin,
         Virtual ListCtrl have to define this method, should return item 
         attributes, but since we have none it always returns None.
         @param itemIdx: index of an item for which we want the attributes
-        @returns: a wx.ListItemAttr if the prio of the item is high enough, None otherwise
+        @returns: a wx.ListItemAttr if the prio of the item is high enough, 
+        None otherwise
         """
         idx = self.itemIndexMap[itemIdx]
         prio = self.itemDataMap[idx][0]
         prionum = [self._max_prio-i for i in range(5)]
-        if prio in prionum:
+        if prio in prionum and prio>1:
             idx = prionum.index(prio)
             val = int( 255 - 255. / (2**idx) )
-            self._attr = wx.ListItemAttr(wx.NullColor, wx.Color(255, 255, val), wx.NullFont)
+            self._attr = wx.ListItemAttr(wx.NullColor, wx.Color(255, 255, val),\
+                                                                    wx.NullFont)
             return self._attr
         return None
 
@@ -318,14 +327,15 @@ class TestListCtrl(wx.ListCtrl, listmix.ListCtrlAutoWidthMixin,
 
     def OnItemActivated(self, event):
         """
-        Callback when an item of the list has been activated (by double clicking)
+        Callback when an item of the list has been activated (double click)
         @param event: wx.Event
         """
         self.NavigateToTaskSource(event.m_itemIndex)
 
     def OnItemRightClick(self, event):
         """
-        Callback when an item of the list has been clicked with the right mouse button
+        Callback when an item of the list has been clicked with the right 
+        mouse button.
         @param event: wx.Event
         """
         self.NavigateToTaskSource(event.m_itemIndex)
