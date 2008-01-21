@@ -26,8 +26,10 @@ import wx
 
 #Editra Library Modules
 import ed_glob
+import syntax
 #import ed_menu
 from extern import flatnotebook as FNB
+
 
 #Local
 from cbrowserlistctrl import TestListCtrl
@@ -47,8 +49,8 @@ TASK_CHOICES = ['ALL', 'TODO', 'HACK', 'XXX', 'FIXME']
 
 RE_TASK_CHOICES = []
 for task in TASK_CHOICES:
-    expr = '.*[@#][ ]*'+task+'[ ]*:*(.+)'
-    RE_TASK_CHOICES.append(re.compile(expr, re.IGNORECASE))
+    expr = r"""(?i)"""+task+r"""\s*:(.*$)"""
+    RE_TASK_CHOICES.append(re.compile(expr, re.UNICODE))
 
 #--------------------------------------------------------------------------#
 # TODO: update on keypress? (return, delete, :, backspace) ??
@@ -69,8 +71,9 @@ for task in TASK_CHOICES:
 
 #TODO: better comments
 #TODO: code clean up (self._log()!!!)
-
-
+#TODO:   partial updates!!!
+#        coloring priorities 
+#        one shot timer updates after keypresses (keep track of current textctrl)
 
 class CBrowserPane(wx.Panel):
 
@@ -103,8 +106,6 @@ class CBrowserPane(wx.Panel):
         self._timer = wx.Timer(self, ID_TIMER)
         self._intervall = 3000; #  milli seconds
         
-        self._allfiles = False
-        
         #TODO: datastructure for todos caching
         # {key:(page, fullname, (prio, task, desr, file, line)), filename2:{key:(),...},...}
 #         self._entryDict = dict()
@@ -124,7 +125,8 @@ class CBrowserPane(wx.Panel):
         self._taskChoices = TASK_CHOICES
         self._taskFilter = wx.Choice(self, choices=self._taskChoices)
         self._taskFilter.SetStringSelection(self._taskChoices[0])
-        self._checkBoxAllFiles = wx.CheckBox(self, label=_("All opened files"), style=wx.ALIGN_LEFT)
+        self._checkBoxAllFiles = wx.CheckBox(self, label=_("All opened files"),\
+                                                        style=wx.ALIGN_LEFT)
         
         hsizer = wx.BoxSizer(wx.HORIZONTAL)
         tasklbl = wx.StaticText(self, label=_("Taskfilter: "))
@@ -193,7 +195,7 @@ class CBrowserPane(wx.Panel):
         """
         controls = []
         
-        if self._allfiles:
+        if self._checkBoxAllFiles.GetValue():
             controls.extend(self._mainwin.GetNotebook().GetTextControls())
         else:
             if intextctrl is None:
@@ -206,41 +208,62 @@ class CBrowserPane(wx.Panel):
             # make sure it is a text ctrl
             if (textctrl is not None) and \
                             (getattr(textctrl, '__name__', '') == 'EditraTextCtrl'):
-#                 self._log(help(self._mainwin.GetNotebook()))
                 try:
                     fullname = textctrl.GetFileName()
                     filename = os.path.split(fullname)[1]
-
                     textlines = textctrl.GetText().splitlines()
                 except Exception, e:
                     self._log("[error]:" + str(e.message))
                     self._log(type(e))
                     return
+                
                 filterVal = self._taskFilter.GetStringSelection()
                 choice = self._taskChoices.index(filterVal)
+                
                 for idx, line in enumerate(textlines):
-                    # the match the tasks
+                    # search for the tasks
                     for tasknr in range(1, len(self._taskChoices)):
                         # tasknr: meaning is the order of the self._taskChoices list
-                        todo_hit = RE_TASK_CHOICES[tasknr].match(line)
-                        if (choice==0 or choice==tasknr) and todo_hit:
-                            descr = todo_hit.group(1).strip()
-                            prio = descr.count('!')
-                            prio += tasknr # prio is higher if further in the list
-                            tasklist.append( (prio,self._taskChoices[tasknr], descr, filename, idx+1, fullname))
+                        todo_hit = RE_TASK_CHOICES[tasknr].search(line)
+                        if todo_hit:
+                            if (choice==0 or choice==tasknr) and todo_hit and self.IsComment(textctrl, textctrl.PositionFromLine(idx)+todo_hit.start(1)):
+                                descr = todo_hit.group(1).strip()
+                                prio = descr.count('!')
+                                prio += tasknr # prio is higher if further in the list
+                                tasklist.append( (prio, self._taskChoices[tasknr], descr, filename, idx+1, fullname))
                         
         # TODO: only clear the entries for the current page (cache it)
         # TODO: prevent flickering of list redraw
+        
         self._listctrl.Clear(refresh=False)
         keys = self._listctrl.AddEntries(tasklist)
-        self._listctrl.SortListItems(0, 0) # TODO: should be same sort order that the list is already sorted (if possible?)
+        self._listctrl.SortItems()
+        self._listctrl.Refresh()
+
+    def IsComment(self, stc, bufferpos):
+        """Check whether the given point in the buffer is a comment
+        region or not.
+        @param stc: an EdStc object
+        @param bufferpos: Zero based index of position in the buffer to check
+
+        """
+        style_id = stc.GetStyleAt(bufferpos)
+        style_tag = stc.FindTagById(style_id)
+        if 'comment' in style_tag.lower():
+            return True
+        else:
+            # python is special: look if its is in a documentation string
+            if stc.GetLangId() == syntax.synglob.ID_LANG_PYTHON:
+                if wx.stc.STC_P_TRIPLEDOUBLE == style_id or \
+                                        wx.stc.STC_P_TRIPLE == style_id:
+                    return True
+            return False
 
     #---- Eventhandler ----#
     
     def OnCheckAll(self, event):
-        self._allfiles = self._checkBoxAllFiles.GetValue()
         self.UpdateCurrent()
-        self._log("OnCheckAll: "+str(self._allfiles))
+        self._log("OnCheckAll")
 
     def OnListUpdate(self, event):
         # called on: EVT_TIMER, EVT_BUTTON, EVT_CHOICE
@@ -258,11 +281,15 @@ class CBrowserPane(wx.Panel):
         # that is why I have to grab the ctrl this way
         ctrl = self._mainwin.GetNotebook().GetPage(event.GetSelection())
         self.UpdateCurrent(ctrl)
+        if not self._checkBoxAllFiles.GetValue():
+            self._listctrl.SortListItems(0, 0)
 
     def OnPageClose(self, event):
         # Need to skip event right away to let notebook to finish processing
         event.Skip()
         self._log("OnPaneClose")
+        ctrl = self._mainwin.GetNotebook().GetPage(event.GetSelection())
+        self.UpdateCurrent(ctrl)
         
 
     def OnActivate(self, event):
@@ -301,11 +328,12 @@ class CBrowserPane(wx.Panel):
     def OnPaneClose(self, evt):
         """Clean up settings when Comment Browser Pane is closed"""
 
-        evt_caption = evt.GetPane().caption # TODO: can this be done better??
-        if CAPTION == evt_caption:
-            self._log('OnPaneClose ')
+        paneName = evt.GetPane().name # TODO: can this be done better?? yes, use name 
+#        self._log('OnPaneClose pane name: %s'%(str(paneName)))
+        if PANE_NAME == paneName:
             self._mi.Check(False)
             evt.Skip()
+            # TODO: save pane position in config?
 
 
 
