@@ -227,8 +227,8 @@ class Xterm(wx.stc.StyledTextCtrl):
 
         # Configure text styles
         # TODO make this configurable
-        fore = "#FEFEFE"
-        back = "#000000"
+        fore = "#000000"
+        back = "#DBE0C4"
         global FONT
         global FONT_SIZE
         global FONT_FACE
