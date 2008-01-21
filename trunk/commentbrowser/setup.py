@@ -6,7 +6,6 @@
 
 __author__ = "DR0ID"
 
-import sys
 try:
     from setuptools import setup
 except ImportError:

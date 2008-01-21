@@ -176,7 +176,9 @@ class CBrowserPane(wx.Panel):
         self.__log('[commentbrowser] ' + str(msg))
 
     def __del__(self):
-        """ stops the timer when the object gets deleted if it is still running """
+        """
+        stops the timer when the object gets deleted if it is still running
+        """
         self._log('__del__(): stopping timer')
         self._timer.Stop()
         super(CBrowserPane, self).__del__()
@@ -210,9 +212,9 @@ class CBrowserPane(wx.Panel):
                     fullname = textctrl.GetFileName()
                     filename = os.path.split(fullname)[1]
                     textlines = textctrl.GetText().splitlines()
-                except Exception, e:
-                    self._log('[error]:' + str(e.message))
-                    self._log(type(e))
+                except Exception, excp:
+                    self._log('[error]:' + str(excp.message))
+                    self._log(type(excp))
                     return
 
                 filterVal = self._taskFilter.GetStringSelection()
@@ -224,7 +226,7 @@ class CBrowserPane(wx.Panel):
 
                     for tasknr in range(1, len(self._taskChoices)):
 
-                        #tasknr: meaning is the order of the self._taskChoices list
+                        #tasknr: meaning is the order of the self._taskChoices
 
                         todo_hit = RE_TASK_CHOICES[tasknr].search(line)
                         if todo_hit:
@@ -234,7 +236,8 @@ class CBrowserPane(wx.Panel):
                                      + todo_hit.start(1)):
                                 descr = todo_hit.group(1).strip()
                                 prio = descr.count('!')
-                                prio += tasknr  #prio is higher if further in the list
+                                #prio is higher if further in the list
+                                prio += tasknr
                                 taskentry = (
                                     int(prio),
                                     str(self._taskChoices[tasknr]),
@@ -323,7 +326,8 @@ class CBrowserPane(wx.Panel):
 
         ctrl = self._mainwin.GetNotebook().GetPage(event.GetSelection())
         self.UpdateCurrent(ctrl)
-        ctrl.Bind(wx.EVT_CHAR, self.OnKey)
+#        ctrl.Bind(wx.EVT_CHAR, self.OnKey)
+        ctrl.Bind(wx.EVT_KEY_DOWN, self.OnKey)
         # only sort if it lists the tasks only for one file
         if not self._checkBoxAllFiles.GetValue():
             self._listctrl.SortListItems(0, 0)
@@ -348,10 +352,9 @@ class CBrowserPane(wx.Panel):
         @param event: wxEvent
         """
         if event.GetActive():
-
+            pass
             #awake, reastart timer
-
-            self.UpdateCurrent()  #XXX: <-- really needed here? because during sleep the file cant be changed ;-)
+#            self.UpdateCurrent()
         else:
             pass
             #going to sleep

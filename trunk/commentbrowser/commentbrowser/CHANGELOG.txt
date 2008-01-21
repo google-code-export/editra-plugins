@@ -5,4 +5,10 @@ Licence: wxWindows
 
 
 Version 0.1:
-    - Initial Release, just a prototype, list sorting not working, no parsing of files
+    Initial release
+    Features:
+    - priority bases on '!' and type of task
+    - highlightening priority by color
+    - should work with any language (it pases for 'todo :' and it has to be in a comment)
+    - switch between one file and all open files
+    - filter task type
