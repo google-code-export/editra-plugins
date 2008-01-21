@@ -245,7 +245,7 @@ class ProjectTree(wx.Panel):
         icons['file'] = il.Add(FileIcons.getFileBitmap())
         
         # Create badged icons
-        for badge in ['uptodate', 'modified', 'conflict', 'added', 'merge']:
+        for badge in ['uptodate', 'modified', 'conflict', 'added', 'merge', 'inaccessible']:
             badgeicon = getattr(FileIcons, 'getBadge' + badge.title() + 'Bitmap')().ConvertToImage()
             badgeicon.Rescale(11, 11, wx.IMAGE_QUALITY_HIGH)
             for icotype in ['file', 'folder', 'folder-open']:
@@ -617,8 +617,16 @@ class ProjectTree(wx.Panel):
         path = vars['path']
         if not os.path.isdir(path):
             return
-        for item in os.listdir(path):
-            self.addPath(parent, item)
+        try:
+            for item in os.listdir(path):
+                self.addPath(parent, item)
+        except (OSError, IOError):
+            self.tree.SetItemImage(parent, self.icons['folder-inaccessible'], 
+                                   wx.TreeItemIcon_Normal)
+            self.tree.SetItemImage(parent, self.icons['folder-inaccessible'], 
+                                   wx.TreeItemIcon_Expanded)
+            self.tree.Delete(self.tree.GetFirstChild(parent)[0])
+            return
 
         # Delete dummy node from self.addFolder
         self.tree.Delete(self.tree.GetFirstChild(parent)[0])
@@ -1212,9 +1220,10 @@ class ProjectTree(wx.Panel):
         
         # Kill the watcher thread
         data = self.tree.GetPyData(item)
-        data['watcher'].flag.pop()
-        del self.watchers[data['watcher']]
-        del data['watcher']
+        if data and 'watcher' in data:
+            data['watcher'].flag.pop()
+            del self.watchers[data['watcher']]
+            del data['watcher']
 
     def OnSelChanged(self, event):
         """Update what item is currently selected"""
