@@ -48,7 +48,6 @@ class TestListCtrl(wx.ListCtrl, listmix.ListCtrlAutoWidthMixin,
         style=wx.BORDER_NONE|wx.LC_REPORT|wx.LC_HRULES|wx.LC_VRULES|wx.LC_SINGLE_SEL|wx.LC_VIRTUAL|wx.LC_SORT_DESCENDING):
         """Init the TestListCtrl"""
 
-        self._log('TestListCtrl before init base classes')
         wx.ListCtrl.__init__(
             self,
             parent,
@@ -96,13 +95,8 @@ class TestListCtrl(wx.ListCtrl, listmix.ListCtrlAutoWidthMixin,
 
         # needed to hold a reference (otherwise it would be 
         # garbagecollected too soon causing a crash)
-        self._attr = None 
-
-        # TODO: prio colors
-#        self._max_prio = 0 
-#        self._prio_colors = [] # min 2 colors!!
-#        # assume _max_prio = 10, len(prio_colors) = 4 -> 10//(4-1) = 10//3 = 3
-#        # coloridx for given prio: cidx = int(prio//3)
+        self._attr = None
+        self._max_prio = 0
 
         #---- init base classes ----#
         # hast to be after self.itemDataMap has been initialized and the
@@ -114,101 +108,47 @@ class TestListCtrl(wx.ListCtrl, listmix.ListCtrlAutoWidthMixin,
         self.Bind(wx.EVT_LIST_ITEM_RIGHT_CLICK, self.OnItemRightClick, self)
         self.Bind(wx.EVT_LIST_ITEM_ACTIVATED, self.OnItemActivated, self)
 
-#        self.Bind(wx.EVT_LIST_ITEM_SELECTED, self.OnItemSelected, self)
-#        self.Bind(wx.EVT_LIST_ITEM_DESELECTED, self.OnItemDeselected, self)
-#        self.Bind(wx.EVT_LIST_DELETE_ITEM, self.OnItemDelete, self)
-#        self.Bind(wx.EVT_LIST_COL_CLICK, self.OnColClick, self)
-#        self.Bind(wx.EVT_LIST_COL_RIGHT_CLICK, self.OnColRightClick, self)
-#        self.Bind(wx.EVT_LIST_COL_BEGIN_DRAG, self.OnColBeginDrag, self)
-#        self.Bind(wx.EVT_LIST_COL_DRAGGING, self.OnColDragging, self)
-#        self.Bind(wx.EVT_LIST_COL_END_DRAG, self.OnColEndDrag, self)
-#        self.Bind(wx.EVT_LIST_BEGIN_LABEL_EDIT, self.OnBeginEdit, self)
-#        self.Bind(wx.EVT_LEFT_DCLICK, self.OnDoubleClick, self)
-#        self.Bind(wx.EVT_RIGHT_DOWN, self.OnRightDown, self)
-        #for wxMSW
-#        self.Bind(wx.EVT_COMMAND_RIGHT_CLICK, self.OnRightClick, self)
-        #for wxGTK
-#        self.Bind(wx.EVT_RIGHT_UP, self.OnRightClick, self)
-
-
-        #sort by prio (column 0), descending order (0)
+        # set initial sort order
+        # sort by prio (column 0), descending order (0)
         self.SortListItems(0, 0)
 
         
     #---- methods ----#
 
     def _log(self, msg):
-        """Private log method of this class"""
+        """
+        Private log method of this class
+        @params msg: message to log
+        """
         wx.GetApp().GetLog()('>>>>>>>>>>>>>>[commentbrowser][listctr] '
                               + str(msg))
 
-    def AddEntry(
-        self,
-        prio,
-        tasktype,
-        descr,
-        file,
-        line,
-        fullname,
-        refresh = True
-        ):
-        """Add a entry to the list"""
-        # add to itemDataMap for sorting
-        val = (int(prio), str(tasktype), str(descr), str(file), int(line), str(fullname))
-        # XXX: how to do a better datastructure to save data (and only update partial data)
-        key = hash(val)
-        self.itemDataMap[key] = val
-        # TODO: perhaps add it in a sorted manner (if possible, dont know)
-        self.itemIndexMap = list(self.itemDataMap.keys())
+    def AddEntries(self, entrydict):
+        """
+        Adds all entries from the entrydict. The entries must be a tuple
+        containing entrytuple = (prio, tasktype, description, file, line, fullname)
+        Refresh is not called.
+        @param entrydict: a dictionary containing {key:entrytuple}
+        """
+        self.itemDataMap = dict(entrydict)
+        self.itemIndexMap = self.itemDataMap.keys()
         self.SetItemCount(len(self.itemDataMap))
-        if refresh:
-            self.Refresh()
-        
-        self._log("itemcount Add entry "+str(self.GetItemCount())+" key:"+str(key))
-        return key
-        
-    def AddEntries(self, entrylist):
-        """Adds all entries from the entrylist. The entries must be a tuple
-        containing (prio, tasktype, description, file, line, fullname)"""
-        keys = []
-        for entry in entrylist:
-            prio, task, descr, file, line , fullname = entry
-            keys.append(self.AddEntry(prio, task, descr, file, line, fullname, refresh=False))
-        self.SetItemCount(len(self.itemDataMap))
-#        self.Refresh()
-        return keys
-        
-    def RemoveEntry(self, key):
-        """Removes a entry identified by its key"""
-        self.itemDataMap.pop(key, None)
-        self.itemIndexMap = list(self.itemDataMap.keys())
-        self.SetItemCount(len(self.itemDataMap))
-#        self.Refresh()
-        
-    def Clear(self, keys=None, refresh=True):
-        """Removes all entries from list"""
-        if keys is None:
-            self.itemDataMap.clear()
-            self.itemIndexMap = list(self.itemDataMap.keys())
-            self.SetItemCount(len(self.itemDataMap))
-            if refresh:
-                self.Refresh()
-        else:
-            for key in keys:
-                self.RemoveEntry(key)
-    
-    # TODO: new "delta data" update method, once implemented 
-    #       delete AddEntry, AddEntries, RemoveEntry and Clear
-    # appendEntries = [(key, data), ... ]
-    # removeEntries = [key1, key2, ...]
-    def UpdateEntries(self, appendEntries=[], removeEntries=[]):
-        pass
-        
-    def GetEntriesKeys(self):
-        return self.itemDataMap.keys()
+        try:
+            self._max_prio = max( [item[0] for item in self.itemDataMap.values()])
+        except:
+            pass
+
+    def ClearEntries(self):
+        """Removes all entries from list ctrl, refresh is not called"""
+        self.itemDataMap.clear()
+        self.itemIndexMap = []
+        self.SetItemCount(0)
 
     def NavigateToTaskSource(self, itemIndex):
-    
+        """
+        Navigates to the file and position saved in this item
+        @param itemIndex: a int
+        """
         if itemIndex < 0 or itemIndex > len(self.itemDataMap):
             self._log('[error] itemIndex out of range!')
             return
@@ -246,31 +186,47 @@ class TestListCtrl(wx.ListCtrl, listmix.ListCtrlAutoWidthMixin,
         This method is required by the 
         wx.lib.mixins.listctrl.ColumnSorterMixin, for internal usage only
         """
-        sorter = self.__ColumnSorter
+        sorter = self.SpecialSorter # always use the special sorter
         items = list(self.itemDataMap.keys())
         items.sort(sorter)
         self.itemIndexMap = items
 
         #redraw the list
-#        self.Refresh()
+        self.Refresh()
         
     def GetColumnSorter(self):
-        self._log('GetColumnSorter')
-        return self.__ColumnSorter
+        """
+        Overwrites the default GetColumnSorter of the mixin.
+        @returns: a compare function object that takes two arguments: func(key1, key2)
+        """
+        return self.SpecialSorter
 
     def GetSecondarySortValues(self, col, key1, key2):
-        self._log('GetSecondarySortValues: col: %d  key1: %d   key2: %d'%(col, key1, key2))
-        cmpVal = __ColumnSorter(key1, key2)
+        """
+        Overwrites the default GetSecondarySortValues. It uses the SpecialSorter
+        to return a result.
+        @param col: column index
+        @param key1: first item index to compare
+        @param key2: second item index to compare
+        @returns: a tuple of the keys either (key1, key2) or (key2, key1)
+        """
+        cmpVal = SpecialSorter(key1, key2)
         if 0 < cmpVal:
             return (key2, key1)
         return (key1, key2)
         
         
-    def __ColumnSorter(self, key1, key2):
+    def SpecialSorter(self, key1, key2):
+        """
+        SpecialSorter sorts the list depending on which column should be sorted.
+        It sorts automatically also by other columns.
+        @param key1: first key to compare
+        @param key2: second key to compare
+        @returns: -1, 0 or 1 like the compare function
+        """
         col = self._col
         ascending = self._colSortFlag[col]
-        self._log('__ColumnSorter: col: %d  asc: %d'%(col, ascending))
-        #{1:(prio, task, description, file, line, fullname), etc.}
+        # (prio, task, description, file, line, fullname)
         if 0 == col: # prio -> sortorder: prio task file line
             _sortorder = [col, 1, 3, 4]
         elif 1 == col: # task -> sortorder: task prio, file , line
@@ -296,13 +252,11 @@ class TestListCtrl(wx.ListCtrl, listmix.ListCtrlAutoWidthMixin,
             _idx += 1
 
         # in certain cases always ascending/descending order is prefered
-        if 0 == _sortorder[_idx-1] and 0 != col:
+        if 0 == _sortorder[_idx-1] and 0 != col: # prio
             ascending = 0
-#        elif 0 == _sortorder[_idx-1] and 0 == col:
-#            ascending = ascending ^ 1
-        elif 4 == _sortorder[_idx-1] and 4 != col:
+        elif 4 == _sortorder[_idx-1] and 4 != col: # linenumber
             ascending = 1
-        elif 3 == _sortorder[_idx-1] and 4 == col:
+        elif 3 == _sortorder[_idx-1] and 4 == col: # filename
             ascending = 1
             
         if ascending:
@@ -325,7 +279,10 @@ class TestListCtrl(wx.ListCtrl, listmix.ListCtrlAutoWidthMixin,
     def OnGetItemText(self, itemIdx, col):
         """
         Virtual ListCtrl have to define this method, returns the text of the
-        requested item
+        requested item.
+        @param itemIdx: a int defining the item
+        @param col: column
+        @returns: text as a string for the item and column
         """
         index = self.itemIndexMap[itemIdx]
         s = self.itemDataMap[index][col]
@@ -335,6 +292,8 @@ class TestListCtrl(wx.ListCtrl, listmix.ListCtrlAutoWidthMixin,
         """
         Virtual ListCtrl have to define this method, should return an image
         for the item, but since we have no images it always returns -1.
+        @param item: itemindex (not used)
+        @returns: always -1 because we have no images for the items.
         """
         return -1
 
@@ -342,74 +301,32 @@ class TestListCtrl(wx.ListCtrl, listmix.ListCtrlAutoWidthMixin,
         """
         Virtual ListCtrl have to define this method, should return item 
         attributes, but since we have none it always returns None.
+        @param itemIdx: index of an item for which we want the attributes
+        @returns: a wx.ListItemAttr if the prio of the item is high enough, None otherwise
         """
-        # TODO: set some color depending on priority
-#        self._attr = wx.ListItemAttr(wx.NullColor, wx.Color(255, 255, 0), wx.NullFont)
-#        return self._attr
+        idx = self.itemIndexMap[itemIdx]
+        prio = self.itemDataMap[idx][0]
+        prionum = [self._max_prio-i for i in range(5)]
+        if prio in prionum:
+            idx = prionum.index(prio)
+            val = int( 255 - 255. / (2**idx) )
+            self._attr = wx.ListItemAttr(wx.NullColor, wx.Color(255, 255, val), wx.NullFont)
+            return self._attr
         return None
 
     #---- Eventhandler ----#
 
-    def OnItemDeselected(self, event):
-        self._log('OnItemDeselected')
-#        item = event.GetItem()
-        self._log("OnItemDeselected: %d" % event.m_itemIndex)
-
     def OnItemActivated(self, event):
-        self._log('OnItemActivated')
+        """
+        Callback when an item of the list has been activated (by double clicking)
+        @param event: wx.Event
+        """
         self.NavigateToTaskSource(event.m_itemIndex)
 
     def OnItemRightClick(self, event):
+        """
+        Callback when an item of the list has been clicked with the right mouse button
+        @param event: wx.Event
+        """
         self.NavigateToTaskSource(event.m_itemIndex)
         event.Skip()
-
-
-#    def OnItemSelected(self, event):
-#        self._log('OnItemSelected')
-#        event.Skip()
-
-#    def OnItemDelete(self, event):
-#        self._log('OnItemDelete')
-
-#    def OnColClick(self, event):
-#        self._log('OnColClick '+str(event.GetColumn()))
-#        event.Skip()
-
-#    def OnSortOrderChanged(self):
-#        self._log('OnSortOrderChanged')
-
-#    def OnColRightClick(self, event):
-#        self._log('OnColRightClick')
-
-#    def OnColBeginDrag(self, event):
-#        self._log('OnColBeginDrag')
-
-#    def OnColDragging(self, event):
-#        self._log('OnColDragging')
-
-#    def OnColEndDrag(self, event):
-#        self._log('OnColEndDrag')
-#        for colnum in [0, 1, 2, 3]:
-#            self._log(self.GetColumnWidth(colnum))
-
-#    def OnBeginEdit(self, event):
-#        self._log('OnBeginEdit')
-
-#    def OnDoubleClick(self, event):
-#        self._log('OnDoubleClick'+str(event))
-#        # OnItemSelected is called first, so self._currentItemIdx is already set
-#        self.NavigateToTaskSource(self._currentItemIdx)
-#        event.Skip()
-        
-
-#    def OnRightDown(self, event):
-#        self._log('OnRightDown')
-#        event.Skip()
-
-#    def OnRightClick(self, event):
-#        self._log('OnRightClick')
-#        event.Skip()
-
-        
-    
-
