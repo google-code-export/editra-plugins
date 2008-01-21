@@ -1141,10 +1141,10 @@ class ProjectTree(wx.Panel):
 
         parentpath = data['path']
         itempath = os.path.join(parentpath, name)
-        if os.path.isfile(itempath):
-            node = self.addFile(parent, name)
-        elif os.path.isdir(itempath):
+        if os.path.isdir(itempath):
             node = self.addFolder(parent, name)
+        else:
+            node = self.addFile(parent, name)
         if self.tree.GetItemParent(parent) == self.root:
             if self.tree.GetItemBackgroundColour(parent) == ODD_PROJECT_COLOR:
                 self.tree.SetItemBackgroundColour(node, ODD_BACKGROUND_COLOR)
