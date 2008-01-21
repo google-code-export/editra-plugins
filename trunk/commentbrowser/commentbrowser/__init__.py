@@ -58,7 +58,6 @@ class CommentBrowserPanel(plugin.Plugin):
             
     def GetMenuHandlers(self):
         """Pass event handler for menu item to main window for management"""
-        # TODO: implement
         return [(cbrowser.ID_COMMENTBROWSE, self._commentbrowser.OnShow)]
 
     def GetUIHandlers(self):
