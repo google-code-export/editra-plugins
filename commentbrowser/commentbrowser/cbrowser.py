@@ -29,11 +29,13 @@ import wx
 
 import ed_glob
 import syntax
+import ed_msg
 from extern import flatnotebook as FNB
+
 
 #Local
 
-from cbrowserlistctrl import TestListCtrl
+from cbrowserlistctrl import CustomListCtrl
 
 #--------------------------------------------------------------------------#
 #Globals
@@ -57,14 +59,22 @@ for task in TASK_CHOICES:
 
 #--------------------------------------------------------------------------#
 
-#TODO: better comments
-#TODO: change to use new message system instead of the events
 #TODO: remove selection of a listitem when sorting
 #TODO: save pane position in config?
 #TODO: how to do translations of plugins?
 #TODO: coloring of priorities: if all entries have same prio?
-#TODO: move it into the shelf?
 
+#---- examples ----#
+
+#TODO: example todo
+#Fixme: example fixme
+#XXX: is this really a good idea? ;-)
+#hack: all this code is hacked
+
+#tOdO: hight priority!!!!!!!
+#fixme: !important!
+
+#---- examples ----#
 
 
 class CBrowserPane(wx.Panel):
@@ -110,7 +120,7 @@ class CBrowserPane(wx.Panel):
 
         #---- Gui ----#
 
-        self._listctrl = TestListCtrl(self)
+        self._listctrl = CustomListCtrl(self)
 
         self._taskChoices = TASK_CHOICES
         self._taskFilter = wx.Choice(self, choices=self._taskChoices)
@@ -167,6 +177,9 @@ class CBrowserPane(wx.Panel):
                                     self._checkBoxAllFiles)
         self._mainwin.GetFrameManager().Bind(wx.aui.EVT_AUI_PANE_CLOSE,
                 self.OnPaneClose)
+                
+        ed_msg.Subscribe(self.OnListUpdate, ed_msg.EDMSG_FILE_SAVED)
+        ed_msg.Subscribe(self.OnListUpdate, ed_msg.EDMSG_FILE_OPENED)
 
     #---- Private Methods ----#
 
@@ -195,6 +208,9 @@ class CBrowserPane(wx.Panel):
         otherwise it trys to use the passed in textctrl.
         @param intextctrl: textctrl to update (should be of type ed_stc)
         """
+        # stop the timer if it is running
+        if self._timer.IsRunning():
+            self._timer.Stop()
 
         controls = []
         if self._checkBoxAllFiles.GetValue():
@@ -249,10 +265,11 @@ class CBrowserPane(wx.Panel):
                                     int(idx + 1),
                                     str(fullname),
                                     )
-#                                taskdict[hash(taskentry)] = taskentry
                                 taskdict[self.__getNewKey()] = taskentry
+        self._listctrl.Freeze()
         self._listctrl.ClearEntries()
         self._listctrl.AddEntries(taskdict)
+        self._listctrl.Thaw()
         self._listctrl.SortItems() # SortItems() calls Refresh()
         
     def __getNewKey(self):
@@ -302,6 +319,7 @@ class CBrowserPane(wx.Panel):
         Callback when keys are pressed in the current textctrl.
         @param event: wxEvent
         """
+#        self._log('OnKey')
         self._timer.Start(self._intervall, True)
         event.Skip()
 
@@ -311,8 +329,8 @@ class CBrowserPane(wx.Panel):
         @param event: wxEvent
         """
 
-        #called on: EVT_TIMER, EVT_BUTTON, EVT_CHOICE
-
+        #called on: EVT_TIMER, EVT_BUTTON, EVT_CHOICE, ed_msg.EDMSG_FILE_SAVED
+#        self._log('OnListUpdate')
         self.UpdateCurrent()
 
     def OnPageChange(self, event):
@@ -330,7 +348,7 @@ class CBrowserPane(wx.Panel):
         ctrl = self._mainwin.GetNotebook().GetPage(event.GetSelection())
         self.UpdateCurrent(ctrl)
 #        ctrl.Bind(wx.EVT_CHAR, self.OnKey)
-        ctrl.Bind(wx.EVT_KEY_DOWN, self.OnKey)
+        ctrl.Bind(wx.EVT_KEY_UP, self.OnKey)
         # only sort if it lists the tasks only for one file
         if not self._checkBoxAllFiles.GetValue():
             self._listctrl.SortListItems(0, 0)

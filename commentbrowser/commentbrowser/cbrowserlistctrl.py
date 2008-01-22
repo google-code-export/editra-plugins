@@ -33,7 +33,7 @@ _ = wx.GetTranslation
 
 
 
-class TestListCtrl(wx.ListCtrl, listmix.ListCtrlAutoWidthMixin,
+class CustomListCtrl(wx.ListCtrl, listmix.ListCtrlAutoWidthMixin,
             listmix.ColumnSorterMixin):
 
     """The list ctrl used for the list"""
@@ -46,7 +46,7 @@ class TestListCtrl(wx.ListCtrl, listmix.ListCtrlAutoWidthMixin,
         size=wx.DefaultSize,
         style=wx.BORDER_NONE|wx.LC_REPORT|wx.LC_HRULES|wx.LC_VRULES|
                         wx.LC_SINGLE_SEL|wx.LC_VIRTUAL|wx.LC_SORT_DESCENDING):
-        """Init the TestListCtrl"""
+        """Init the CustomListCtrl"""
 
         wx.ListCtrl.__init__(
             self,
