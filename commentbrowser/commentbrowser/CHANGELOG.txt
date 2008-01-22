@@ -5,10 +5,15 @@ Licence: wxWindows
 
 
 Version 0.1:
-    Initial release
+    Initial release.
+    CommentBrowser is a list that shows you what tasks are still open.
+    
     Features:
+    
     - priority bases on '!' and type of task
     - highlightening priority by color
-    - should work with any language (it pases for 'todo :' and it has to be in a comment)
+    - it looks for TODO, HACK, XXX, FIXME (you can change that through a translation file)
+    - should work with any language (it parses for example for 'todo :' and it has to be in a comment)
     - switch between one file and all open files
     - filter task type
+    - you can change sort order

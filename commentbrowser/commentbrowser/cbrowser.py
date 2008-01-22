@@ -61,6 +61,9 @@ for task in TASK_CHOICES:
 #TODO: change to use new message system instead of the events
 #TODO: remove selection of a listitem when sorting
 #TODO: save pane position in config?
+#TODO: how to do translations of plugins?
+#TODO: coloring of priorities: if all entries have same prio?
+#TODO: move it into the shelf?
 
 
 
