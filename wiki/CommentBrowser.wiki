@@ -1,5 +1,4 @@
 #summary List view of TODO/FIXME/XXX/HACK statements
-#labels Utility
 
 = Introduction =
 
