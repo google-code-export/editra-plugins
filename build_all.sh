@@ -57,7 +57,7 @@ clean_all () {
             echo "${GREEN}Cleaning${OFF} $plugin...";
             cd $plugin
             for dir in $(ls); do
-                RES=`echo $dir | grep 'dist\|build\|.*\.egg-info'`
+                RES=`echo $dir | grep 'dist\|build\|.*\.egg-info\|~'`
                 if ! [ -z "$RES" ]; then
                     echo "  ${RED}${DELCMD}${OFF} $plugin/$dir"
                     `$DELCMD $dir`
