@@ -13,9 +13,10 @@ http://editra-plugins.googlecode.com/svn/trunk/commentbrowser/cb_screenshot.PNG
 
 A comment has to stand in a comment region (exception: in python it can also stand in a documentation string) to be listed by the comment browser. It only will list one line comments.
 
-There is a natural priority order: FIXME has the highest priority, then follows XXX, HACK, TODO. You can set the priority of a task by the number of '!' (exclamation marks) a comment has (they have to stand on the same line as the TODO:, but where is not important, it could be like this: # TODO: !!!! bla).
+There is a natural priority order: FIXME has the highest priority, then follows XXX, HACK, TODO. You can set the priority of a task by the number of '!' (exclamation marks) in the line of a comment (they have to stand on the same line as the 'TODO:').
+For example: '# TODO: !!!! bla'  would have priority 5 (1 for TODO + 4 exclamations marks)
 
-If you double click or right click on the an entry in the comment browsers list it will navigate to the line of code in the corresponding file.
+If you double click or right click on an entry in the comment browsers list it will navigate to the line of code in the corresponding file.
 
 You can switch between seeing all comments for all currently opened files or just for the current file.
 
