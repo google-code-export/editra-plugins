@@ -5,6 +5,13 @@ License: wxWindows
 Changelog:
 
 #-----------------------------------------------------------------------------#
+Version: 0.3
+Released:
+
+Bug Fixes:
++Expanding directories that don't have permissions
+
+#-----------------------------------------------------------------------------#
 Version: 0.2
 Released: 01/19/2008
 
