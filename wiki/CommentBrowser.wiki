@@ -7,7 +7,7 @@ Commentbrowser allows to see all TODO/FIXME/XXX/HACK statements of the current f
 
 = Screenshot =
 
-http://editra-plugins.googlecode.com/svn/trunk/commentbrowser/cb_screenshot.PNG
+http://editra-plugins.googlecode.com/svn/wiki/images/commentbrowser/cb_screenshot.PNG
 
 = Usage =
 
