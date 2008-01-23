@@ -1,0 +1,188 @@
+#!/bin/bash
+#
+#
+#
+
+## Editable Variables ##
+APPLIST='app.fil'
+SCRIPTDIR='catalogs'
+LOCALEDIR='locale'
+
+## Non Editable Variables ##
+CWD=$(pwd)
+EXPATH=$(dirname $0)
+DOMAIN=$2
+
+# Make output pretty
+BLUE="[34;01m"
+CYAN="[36;01m"
+GREEN="[32;01m"
+RED="[31;01m"
+YELLOW="[33;01m"
+OFF="[0m"
+
+### Helper Functions ###
+
+###############################################################################
+# print_help
+# Print help message of available commands
+###############################################################################
+print_help () {
+    echo "Editra Plugins Localization Script"
+    echo "Type 'gen_lang [hmp] {Folder}' to run a build command"
+    echo ""
+    echo "Available Options:"
+    echo "  -h      Print This help message"
+    echo "  -m      Generate .mo files"
+    echo "  -p      Generage .po files"
+    echo ""
+}
+
+
+# FIXME the recursion in this sometimes causes the file paths to be wrong
+###############################################################################
+# generate_src_list:
+#   Parameter 1: Directory to search from
+#
+# Recrusivly searches for source files from the given top level directory and
+# appends all matches to the temporary app.fil file.
+###############################################################################
+generate_src_list () {
+    RELPATH=$1
+    for FNAME in $(ls $RELPATH); do
+        if ! [ -z `echo $FNAME | grep "^.*\.py$"` ]; then
+            if [ -a "$RELPATH/$FNAME" ]; then
+                echo "  ${GREEN}Found${OFF}: $RELPATH/$FNAME"
+                echo "$RELPATH/$FNAME" >> $APPLIST
+            fi
+        elif [ -d "$FNAME" ]; then
+            generate_src_list "$RELPATH/$FNAME"
+        else
+            continue
+        fi
+    done
+}
+
+
+###############################################################################
+# make_output_dirs:
+#    Parameter 1: Path to look for output direcotries under
+#    Postcondition: Any of the missing output directories are created
+#
+#
+###############################################################################
+make_output_dirs () {
+    RELPATH=$1
+    if ! [ -d "$RELPATH/$SCRIPTDIR" ]; then
+        echo "${CYAN}Making${OFF} $RELPATH/$SCRIPTDIR"
+        mkdir "$RELPATH/$SCRIPTDIR"
+    fi
+
+    if ! [ -d "$RELPATH/$LOCALEDIR" ]; then
+        echo "${CYAN}Making${OFF} $RELPATH/$LOCALEDIR"
+        mkdir "$RELPATH/$LOCALEDIR"
+    fi
+}
+
+
+###############################################################################
+# do_one_build:
+#    Parameter 1: Path of project to do build on
+#
+###############################################################################
+do_one_build () {
+    WORKPATH=$1
+
+    # Make sure output directories are available
+    echo "${CYAN}Checking${OFF} ouput directories for ${CYAN}$PROJECT${OFF}"
+    make_output_dirs "$WORKPATH"
+    PO="$WORKPATH/$SCRIPTDIR"
+    if [ "$BUILD_PO" -eq 1 ]; then
+        echo "${CYAN}Generating${OFF} file list for ${CYAN}$WORKPATH${OFF}"
+        generate_src_list "$WORKPATH"
+        $(python mki18n.py  -pv --domain=$WORKPATH --podir=$PO)
+    else
+        $(python mki18n.py  -mv --domain=$WORKPATH --podir=$PO --moTarget=$WORKPATH/$LOCALEDIR)
+    fi
+
+    # Cleanup temp files
+    if [ -a messages.pot ]; then
+        mv messages.pot $PO/$WORKPATH.pot
+    fi
+    if [ -a "$APPLIST" ]; then
+        rm "$APPLIST"
+    fi
+}
+
+
+###############################################################################
+# generate_files:
+#   Parameter 1: Relative Directory Path
+#                (Becomes the domain of the generated output file)
+#   Parameter 2: 1 = Generate .po files, 0 = Generate .mo files
+#   Postcondition: locale directories and po/mo files are generated/resynced
+#                  with all of the python source files found under the
+#                  given directory.
+#
+# This method uses the mk18n.py script to generate the necessary files for
+# localizing a project folder. It works by checking the contents of the given
+# directory and generating a temporary app.fil that contains a list of all the
+# relative paths of the python files in that folder. After generating the list
+# it runs the mk18n.py script to create/syncronize the DIRNAME.pot file with
+# the sources and then syncronizes any .po files found in the directory with
+# the new .pot file. These syncronized files will be created in a file called
+# LANGUAGE.po.new. 
+#
+# If this is the first time this script has been run on a given directory it
+# will also do the following.
+#
+# - po : It will create a directory called 'i18n'. This is where the .po/.pot
+#        files will be stored.
+# - mo : It will create a directory called 'locale' that will be used for
+#        storing the .mo files.
+###############################################################################
+generate_files () {
+    WORKPATH=$1
+    BUILD_PO=$2
+
+    # If WORKPATH is empty then generate and files for all project folders
+    # relative to this script
+    if [ -z "$WORKPATH" ]; then
+        for PROJECT in $(ls); do
+            if [ -d "$PROJECT" ]; then
+                do_one_build "$PROJECT"
+            fi
+        done
+    else
+        do_one_build "$WORKPATH"
+    fi
+
+}
+
+
+###############################################################################
+# Main
+#
+#
+###############################################################################
+# Parse command line args and set associated params
+while getopts "hpm" flag
+do
+    if [[ "$flag" == "h" ]]; then
+        print_help
+        exit
+    elif [[ "$flag" == "p" ]]; then
+        echo "${CYAN}Starting .po file generation${OFF}"
+        generate_files $DOMAIN 1
+        exit
+    elif [[ "$flag" == "m" ]]; then
+        echo "${CYAN}Starting .mo file generation${OFF}"
+        generate_files $DOMAIN 0
+        exit
+    else
+        continue
+    fi
+done
+
+# No known build options so print help and exit
+print_help 
