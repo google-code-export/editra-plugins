@@ -1,0 +1,341 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the PACKAGE package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: PACKAGE VERSION\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2008-01-24 01:01-0600\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=CHARSET\n"
+"Content-Transfer-Encoding: 8bit\n"
+
+#: Projects/projects/ConfigDialog.py:413
+msgid "*NAME*"
+msgstr ""
+
+#: Projects/projects/ConfigDialog.py:414
+msgid "*VALUE*"
+msgstr ""
+
+#: Projects/projects/ProjectPane.py:1608
+msgid ". Do you wish to continue?"
+msgstr ""
+
+#: Projects/projects/ProjectPane.py:1766
+msgid "Add Project"
+msgstr ""
+
+#: Projects/projects/ConfigDialog.py:478
+msgid "Add a New Repository Path"
+msgstr ""
+
+#: Projects/projects/ProjectPane.py:1342
+msgid "Add to repository"
+msgstr ""
+
+#: Projects/projects/ProjectPane.py:1607
+msgid "An error occurred when attempting to remove "
+msgstr ""
+
+#: Projects/projects/HistWin.py:364
+msgid "Author"
+msgstr ""
+
+#: Projects/projects/ConfigDialog.py:133
+msgid "Built-in"
+msgstr ""
+
+#: Projects/projects/ProjectPane.py:126
+msgid "C File"
+msgstr ""
+
+#: Projects/projects/ProjectPane.py:1856
+msgid "Choose a Project Directory"
+msgstr ""
+
+#: Projects/projects/ProjectPane.py:1941
+msgid "Commit"
+msgstr ""
+
+#: Projects/projects/ProjectPane.py:702
+msgid "Commit Dialog"
+msgstr ""
+
+#: Projects/projects/ProjectPane.py:1374
+msgid "Commit changes"
+msgstr ""
+
+#: Projects/projects/HistWin.py:191
+msgid "Compare Revisions"
+msgstr ""
+
+#: Projects/projects/HistWin.py:193
+msgid "Compare Selected Revisions"
+msgstr ""
+
+#: Projects/projects/HistWin.py:192
+msgid "Compare to Selected Revision"
+msgstr ""
+
+#: Projects/projects/ProjectPane.py:1372
+msgid "Compare to previous version"
+msgstr ""
+
+#: Projects/projects/ProjectPane.py:1779
+msgid "Configure"
+msgstr ""
+
+#: Projects/projects/ProjectPane.py:1363
+msgid "Copy"
+msgstr ""
+
+#: Projects/projects/ProjectPane.py:1002 Projects/projects/ProjectPane.py:1020
+#: Projects/projects/ProjectPane.py:1037
+msgid "Could not retrieve file"
+msgstr ""
+
+#: Projects/projects/ProjectPane.py:1362
+msgid "Cut"
+msgstr ""
+
+#: Projects/projects/HistWin.py:363
+msgid "Date"
+msgstr ""
+
+#: Projects/projects/ConfigDialog.py:132
+msgid "Diff Program"
+msgstr ""
+
+#: Projects/projects/ProjectPane.py:1357
+msgid "Edit"
+msgstr ""
+
+#: Projects/projects/ProjectPane.py:2022
+msgid "Enter a command to be executed on all selected files and files in selected directories."
+msgstr ""
+
+#: Projects/projects/ProjectPane.py:1464
+msgid "Enter command to execute on all files"
+msgstr ""
+
+#: Projects/projects/ProjectPane.py:703
+msgid "Enter your commit message:"
+msgstr ""
+
+#: Projects/projects/ConfigDialog.py:264
+msgid "Environment Variables"
+msgstr ""
+
+#: Projects/projects/ProjectPane.py:1551 Projects/projects/ProjectPane.py:1559
+msgid "Error occurred when copying/moving files"
+msgstr ""
+
+#: Projects/projects/ProjectPane.py:1609
+msgid "Error occurred when removing files"
+msgstr ""
+
+#: Projects/projects/ProjectPane.py:2016
+msgid "Execute command on files"
+msgstr ""
+
+#: Projects/projects/ProjectPane.py:1366
+msgid "Execute command..."
+msgstr ""
+
+#: Projects/projects/ConfigDialog.py:114
+msgid "File Filters"
+msgstr ""
+
+#: Projects/projects/ProjectPane.py:1347
+msgid "Folder"
+msgstr ""
+
+#: Projects/projects/ConfigDialog.py:90
+msgid "General"
+msgstr ""
+
+#: Projects/projects/ProjectPane.py:127
+msgid "HTML File"
+msgstr ""
+
+#: Projects/projects/HistWin.py:434
+msgid "History information could not be retrieved"
+msgstr ""
+
+#: Projects/projects/ConfigDialog.py:127
+msgid "Keep project tree synchronized with editor notebook"
+msgstr ""
+
+#: Projects/projects/HistWin.py:365
+msgid "Log Message"
+msgstr ""
+
+#: Projects/projects/ProjectPane.py:1378
+msgid "Move to "
+msgstr ""
+
+#: Projects/projects/ConfigDialog.py:268
+msgid "Name"
+msgstr ""
+
+#: Projects/projects/ProjectPane.py:1360
+msgid "New..."
+msgstr ""
+
+#: Projects/projects/ProjectPane.py:1358
+msgid "Open"
+msgstr ""
+
+#: Projects/projects/ProjectPane.py:1748
+msgid "Open Projects Sidepanel"
+msgstr ""
+
+#: Projects/projects/ProjectPane.py:1359
+msgid "Open enclosing folder"
+msgstr ""
+
+#: Projects/projects/ConfigDialog.py:256
+msgid "Password"
+msgstr ""
+
+#: Projects/projects/ProjectPane.py:1364
+msgid "Paste"
+msgstr ""
+
+#: Projects/projects/ProjectPane.py:128
+msgid "Php File"
+msgstr ""
+
+#: Projects/projects/ConfigDialog.py:477
+msgid "Please enter a repository path.  Partial paths may also be entered."
+msgstr ""
+
+#: Projects/projects/ProjectPane.py:1747
+msgid "Projects"
+msgstr ""
+
+#: Projects/projects/ConfigDialog.py:44
+msgid "Projects Configuration"
+msgstr ""
+
+#: Projects/projects/ProjectPane.py:129
+msgid "Python File"
+msgstr ""
+
+#: Projects/projects/ProjectPane.py:1370
+msgid "Refresh status"
+msgstr ""
+
+#: Projects/projects/ProjectPane.py:1770
+msgid "Remove Project"
+msgstr ""
+
+#: Projects/projects/ProjectPane.py:1340
+msgid "Remove from repository"
+msgstr ""
+
+#: Projects/projects/ConfigDialog.py:469
+msgid "Remove repository"
+msgstr ""
+
+#: Projects/projects/ConfigDialog.py:245
+msgid "Repository Configuration"
+msgstr ""
+
+#: Projects/projects/HistWin.py:112
+msgid "Retrieving File History"
+msgstr ""
+
+#: Projects/projects/HistWin.py:362
+msgid "Rev #"
+msgstr ""
+
+#: Projects/projects/ProjectPane.py:1375
+msgid "Revert to repository version"
+msgstr ""
+
+#: Projects/projects/HistWin.py:198
+msgid "Revision History"
+msgstr ""
+
+#: Projects/projects/HistWin.py:474
+msgid "Search Log"
+msgstr ""
+
+#: Projects/projects/ConfigDialog.py:148
+msgid "Select diff program"
+msgstr ""
+
+#: Projects/projects/ConfigDialog.py:468
+msgid "Select the repository path to remove"
+msgstr ""
+
+#: Projects/projects/ProjectPane.py:744
+msgid "Selected files are from multiple repositories"
+msgstr ""
+
+#: Projects/projects/ProjectPane.py:1373
+msgid "Show revision history"
+msgstr ""
+
+#: Projects/projects/ConfigDialog.py:92
+msgid "Source Control"
+msgstr ""
+
+#: Projects/projects/ConfigDialog.py:121
+msgid ""
+"Space separated list of files patterns to exclude from view\n"
+"The use of wildcards (*) are permitted."
+msgstr ""
+
+#: Projects/projects/ProjectPane.py:125
+msgid "Text File"
+msgstr ""
+
+#: Projects/projects/ProjectPane.py:1462
+msgid ""
+"The following command will be executed on all selected\n"
+"files and files contained in selected directories."
+msgstr ""
+
+#: Projects/projects/HistWin.py:431
+msgid "The history information for the requested file could not be retrieved.  Please make sure that you have network access."
+msgstr ""
+
+#: Projects/projects/ProjectPane.py:999 Projects/projects/ProjectPane.py:1017
+#: Projects/projects/ProjectPane.py:1034
+msgid "The requested file could not be retrieved from the source control system."
+msgstr ""
+
+#: Projects/projects/ProjectPane.py:1557
+#, python-format
+msgid "The system returned the following message when attempting to move/copy %s: %s."
+msgstr ""
+
+#: Projects/projects/ProjectPane.py:1548
+#, python-format
+msgid "The system returned the following message when attempting to move/copy %s: %s. Do you wish to continue?"
+msgstr ""
+
+#: Projects/projects/ProjectPane.py:1371
+msgid "Update"
+msgstr ""
+
+#: Projects/projects/ConfigDialog.py:254
+msgid "Username"
+msgstr ""
+
+#: Projects/projects/ConfigDialog.py:269
+msgid "Value"
+msgstr ""
+
+#: Projects/projects/ProjectPane.py:743
+msgid "You can not execute source control commands across multiple repositories."
+msgstr ""
