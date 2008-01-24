@@ -10,9 +10,11 @@
 #   File: ROUP2003N01::C:/dev/python/mki18n.py
 # 
 #   Update history:
-#   - File updated: Thursday, June 12, 2007 by Cody Precord
+#   - File updated: Thursday, January 22, 2008 by Cody Precord
 #   - File created: Saturday, June 7, 2003. by Pierre Rouleau
-#   - 07/12/07: Make it work with current wx code and clean up code CJP
+#   - 01/22/08 CJP : Allow specifying where the po files can be output to and
+#                    where to find them when compiling mo files.
+#   - 07/12/07 CJP : Make it work with current wx code and clean up code
 #   - 10/06/03 rcs : RCS Revision 1.1  2003/06/10 10:06:12  PRouleau
 #   - 10/06/03 rcs : RCS Initial revision
 #   - 23/08/03 rcs : RCS Revision 1.2  2003/06/10 10:54:27  PRouleau
@@ -258,7 +260,6 @@ def makeMO(applicationDirectoryPath, targetDir='./locale',
             pass
         else:
             langPOfileName = "%s/%s_%s.po" % (podir, applicationName, langCode)
-            print "LANGPO:", langPOfileName
             if os.path.exists(langPOfileName):
                 mo_targetDir = "%s/%s/LC_MESSAGES" % (targetDir, langCode) 
                 if not os.path.exists(mo_targetDir):
