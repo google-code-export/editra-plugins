@@ -1,0 +1,73 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the PACKAGE package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: PACKAGE VERSION\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2008-01-24 01:01-0600\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=CHARSET\n"
+"Content-Transfer-Encoding: 8bit\n"
+
+#: commentbrowser/commentbrowser/cbrowser.py:53
+msgid "ALL"
+msgstr ""
+
+#: commentbrowser/commentbrowser/cbrowser.py:128
+msgid "All opened files"
+msgstr ""
+
+#: commentbrowser/commentbrowser/cbrowser.py:46
+msgid "Comment Browser"
+msgstr ""
+
+#: commentbrowser/commentbrowser/cbrowserlistctrl.py:81
+msgid "Description"
+msgstr ""
+
+#: commentbrowser/commentbrowser/cbrowser.py:53
+msgid "FIXME"
+msgstr ""
+
+#: commentbrowser/commentbrowser/cbrowserlistctrl.py:82
+msgid "File"
+msgstr ""
+
+#: commentbrowser/commentbrowser/cbrowser.py:53
+msgid "HACK"
+msgstr ""
+
+#: commentbrowser/commentbrowser/cbrowserlistctrl.py:83
+msgid "Line"
+msgstr ""
+
+#: commentbrowser/commentbrowser/cbrowser.py:115
+msgid "Open Comment Browser Sidepanel"
+msgstr ""
+
+#: commentbrowser/commentbrowser/cbrowser.py:53
+msgid "TODO"
+msgstr ""
+
+#: commentbrowser/commentbrowser/cbrowser.py:132
+msgid "Taskfilter: "
+msgstr ""
+
+#: commentbrowser/commentbrowser/cbrowserlistctrl.py:80
+msgid "Type"
+msgstr ""
+
+#: commentbrowser/commentbrowser/cbrowser.py:142
+msgid "Update"
+msgstr ""
+
+#: commentbrowser/commentbrowser/cbrowser.py:53
+msgid "XXX"
+msgstr ""
