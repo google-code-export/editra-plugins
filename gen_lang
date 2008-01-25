@@ -55,6 +55,7 @@ LOCALEDIR='locale'
 ## Non Editable Variables ##
 CWD=$(pwd)
 EXPATH=$(dirname $0)
+DOMAIN=$2
 
 # Make output pretty
 BLUE="[34;01m"
