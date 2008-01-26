@@ -3,7 +3,7 @@
 # just run 'python setup.py' and an egg will be built and put into 
 # the plugin directory
 """
-
+Icon theme based on Humility Icon Set
 """
 __author__ = "Cody Precord"
 
@@ -17,7 +17,7 @@ except ImportError:
 if setup != None:
     setup(
         name='Humility',
-        version='0.1',
+        version='0.2',
         description=__doc__,
         author=__author__,
         author_email="cprecord@editra.org",
