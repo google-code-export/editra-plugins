@@ -1,4 +1,4 @@
-#summary Humility Icon Theme for Editra
+#summary Crystal Project Icon Theme for Editra
 #labels Theme
 
 = Introduction =
