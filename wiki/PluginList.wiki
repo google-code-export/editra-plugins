@@ -18,6 +18,7 @@ This page contains a list of links to pages about individual plugins and their r
 
 = Theme Plugins =
 ||Theme Name || Short Description ||
+||[Crystal Crystal] || Icon theme for Editra based on the Crystal Project Icons||
 ||[Humility Humility]  || Icon theme for Editra based on the Humility Icon Set||
 ||[Oxygen Oxygen] || Icon theme for Editra based on the Oxygen Icons for KDE4||
 ||[Nuovo Nuovo] || Icon theme for Editra based on the Nuovo Icon Set||
