@@ -11,6 +11,7 @@ This page contains a list of links to pages about individual plugins and their r
 ||[Calculator Calculator] || Simple calculator with Oct/Hex/Decimal modes of operation ||
 ||CommentBrowser || Listview and navigation of TODO/FIXME/ect.. statements in current document ||
 ||CssOptimizer   || Generate CSS files that are optimized for size ||
+||[Launch Launch] || Launch scripts and programs from within Editra ||
 ||ProjectsPlugin || _Project management plugin with integrated source control_ ||
 ||PyRun || Launch python scripts from Editra and see their output in shelf buffer ||
 ||TerminalPlugin    || Built in system shell window ||
