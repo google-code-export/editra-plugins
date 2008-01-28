@@ -1,0 +1,33 @@
+#summary Launch Scripts and Run Programs
+
+= Introduction =
+
+Launch is a plugin for running a program on the contents of the current buffer and being able to view the output in the Shelf. If the current buffer contains a script it can be used to run and test the script, or if configured as such it can be used to run lint programs such as pylint on the current buffer.
+
+*Note* This plugin is not hosted by this project but is included in Editra core (>0.2.50). See the project homepage for more details (http://editra.org)
+
+
+= Features =
+
+  * Save and configure multiple executables per file type
+  * Custom output styling and handling depending on file type
+  * Hotspots in errors allow for automatic navigation to the error in the affected file
+  * Automatic notebook synchronization
+  * Abort running processes at any time
+  * Support for multiple instances at one time open in the Shelf
+
+
+= Installation =
+
+*Status* Not yet released but will be available with the release of Editra after 0.2.50
+
+
+= Usage =
+
+Quick list of key points more details after its first release
+
+  * Open an instance (View=>Shelf=>Launch)
+  * Click on _Run_ to run the selected program on the current buffer
+  * To stop the process click on _Abort_ at any time
+  * The output can be cleared with the _Clear_ button
+  * Configuration can be done by clicking on the settings button found on the top left of the window
