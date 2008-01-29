@@ -50,7 +50,7 @@ ID_TIMER = wx.NewId()
 
 #[low priority, ..., high priority]
 
-TASK_CHOICES = ['ALL', 'TODO', 'HACK', 'XXX', 'FIXME']
+TASK_CHOICES = ['ALL', 'NOTE', 'TODO', 'HACK', 'XXX', 'FIXME']
 
 RE_TASK_CHOICES = []
 for task in TASK_CHOICES:
