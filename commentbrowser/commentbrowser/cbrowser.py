@@ -185,16 +185,18 @@ class CBrowserPane(wx.Panel):
 
     def _log(self, msg):
         """
-        writes a log message to the app log
+        Writes a log message to the app log
         @param msg: message to write to the log
-        """
 
+        """
         self.__log('[commentbrowser] ' + str(msg))
 
     def __del__(self):
         """
-        stops the timer when the object gets deleted if it is still running
+        Stops the timer when the object gets deleted if it is still running
+
         """
+        ed_msg.Unsubscribe(self.OnListUpdate)
         self._log('__del__(): stopping timer')
         self._timer.Stop()
         super(CBrowserPane, self).__del__()
