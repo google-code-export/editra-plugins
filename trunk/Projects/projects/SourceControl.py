@@ -400,7 +400,20 @@ class SourceControl(object):
         
         """
         raise NotImplementedError
+
+    def makePatch(self, path):
+        """
+        Make a patch of the given path against the working revision
         
+        Required Arguments:
+        path -- path of file to make patch of
+        
+        Return: list of tuples [(filename, patch text)]
+
+
+        """
+        raise NotImplementedError
+
     def history(self, paths, history=None):
         """
         Retrieve history of specified paths
@@ -520,6 +533,8 @@ def recursiveupdate(dest, src):
         else:
             dest[key] = value
     return dest
+
+#-----------------------------------------------------------------------------#
 
 if __name__ == '__main__':
     sc = SourceControl()
