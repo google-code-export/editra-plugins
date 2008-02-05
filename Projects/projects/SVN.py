@@ -93,7 +93,18 @@ class SVN(SourceControl):
         root, files = self.splitFiles(paths)
         out = self.run(root, ['diff', '--non-interactive'] + self.getAuthOptions(root) + files)
         self.closeProcess(out)
-        
+
+    def makePatch(self, paths):
+        """ Make a patch of the given paths """
+        root, files = self.splitFiles(paths)
+        patches = list()
+        for fname in files:
+            out = self.run(root, ['diff', '--non-interactive'] + self.getAuthOptions(root) + [fname])
+            lines = [ line for line in out.stdout ]
+            self.closeProcess(out)
+            patches.append((fname, ''.join(lines)))
+        return patches
+
     def history(self, paths, history=None):
         """ Get the revision history of the given paths """
         if history is None:

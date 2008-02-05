@@ -87,7 +87,18 @@ class CVS(SourceControl):
         root, files = self.splitFiles(paths)
         out = self.run(root, ['diff'] + files)
         self.logOutput(out)
-            
+
+    def makePatch(self, paths):
+        """ Make patches of the given paths """
+        root, files = self.splitFiles(paths)
+        patches = list()
+        for fname in files:
+            out = self.run(root, ['diff', '-u'] + [fname])
+            lines = [ line for line in out.stdout ]
+            self.closeProcess(out)
+            patches.append((fname, ''.join(lines)))
+        return patches
+
     def history(self, paths, history=None):
         """ Get the revision history for the given files """
         if history is None:

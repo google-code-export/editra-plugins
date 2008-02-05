@@ -156,6 +156,15 @@ class UpdateStatusEvent(SimpleEvent):
     """ Event to notify to do an update of the tree view """
     pass
 
+ppEVT_OPEN_BUFFER = wx.NewEventType()
+EVT_OPEN_BUFFER = wx.PyEventBinder(ppEVT_OPEN_BUFFER, 1)
+class OpenBufferEvent(SimpleEvent):
+    """ Used to communicate to main thread for opening new buffers
+    GetValue will return the text to put in the buffer
+
+    """
+    pass
+
 #-----------------------------------------------------------------------------#
 
 class MyTreeCtrl(wx.TreeCtrl):
@@ -234,6 +243,7 @@ class ProjectTree(wx.Panel):
 
         menuicons['blank'] = FileIcons.getBlankBitmap()
         menuicons['sc-commit'] = FileIcons.getScCommitBitmap()
+        menuicons['sc-patch'] = FileIcons.getScPatchBitmap()
         menuicons['sc-add'] = FileIcons.getScAddBitmap()
         menuicons['sc-diff'] = FileIcons.getScDiffBitmap()
         menuicons['sc-history'] = FileIcons.getScHistoryBitmap()
@@ -313,6 +323,7 @@ class ProjectTree(wx.Panel):
         self.Bind(wx.EVT_CONTEXT_MENU, self.OnContextMenu)
         self.Bind(EVT_SYNC_NODES, self.OnSyncNode)
         self.Bind(EVT_UPDATE_STATUS, self.OnUpdateStatus)
+        self.Bind(EVT_OPEN_BUFFER, self.OnOpenBuffer)
 
         # Notebook syncronization
         try:
@@ -713,6 +724,21 @@ class ProjectTree(wx.Panel):
 
         self.scCommand(nodes, 'commit', message=message)
 
+    def scPatch(self, nodes, **options):
+        """ Make patch files for the given nodes """
+        self.scCommand(nodes, 'makePatch', callback=self.openPatches)
+
+    def openPatches(self, results):
+        """Open the patches in Editra's notebook by posting EVT_OPEN_BUFFER to
+        the main thread as this may get called on a thread that is not the main
+        gui thread.
+        Parameter -- results list of tuples [(filename, patch text)]
+
+        """
+        for result in results:
+            evt = OpenBufferEvent(ppEVT_OPEN_BUFFER, -1, result[1])
+            wx.CallAfter(wx.PostEvent, self, evt)
+
     def isSingleRepository(self, nodes):
         """ 
         Are all selected files from the same repository ?
@@ -940,7 +966,21 @@ class ProjectTree(wx.Panel):
             except: 
                 pass
         evt.Skip()
-            
+
+    def OnOpenBuffer(self, evt):
+        """ Opening patch texts in a new buffer in Editra """
+        # The event value holds the text
+        txt = evt.GetValue()
+        mw = self.GetParent().GetOwnerWindow()
+        if hasattr(mw, 'GetNotebook'):
+            nb = mw.GetNotebook()
+            nb.NewPage()
+            ctrl = nb.GetCurrentCtrl()
+            ctrl.SetText(txt)
+            ctrl.FindLexer('diff')
+        else:
+            self.log
+
     def endSCCommand(self, delayedresult):
         """ Stops progress indicator when source control command is finished """
         try:
@@ -1259,6 +1299,7 @@ class ProjectTree(wx.Panel):
             self.popupIDSCUpdate = wx.NewId()
             self.popupIDSCHistory = wx.NewId()
             self.popupIDSCCommit = wx.NewId()
+            self.popupIDSCPatch = wx.NewId()
             self.popupIDSCRemove = wx.NewId()
             self.popupIDSCRevert = wx.NewId()
             self.popupIDSCAdd = wx.NewId()
@@ -1269,6 +1310,7 @@ class ProjectTree(wx.Panel):
             self.popupIDNewFile = wx.NewId()
             self.popupIDNewMenu = wx.NewId()
 
+            # Setup handlers
             self.Bind(wx.EVT_MENU, self.onPopupEdit, id=self.popupIDEdit)
             self.Bind(wx.EVT_MENU,
                       lambda evt: self.onPopupOpen(),
@@ -1300,6 +1342,9 @@ class ProjectTree(wx.Panel):
             self.Bind(wx.EVT_MENU,
                       lambda evt: self.onPopupSCCommit(),
                       id=self.popupIDSCCommit)
+            self.Bind(wx.EVT_MENU,
+                      lambda evt: self.onPopupSCPatch(),
+                      id=self.popupIDSCPatch)
             self.Bind(wx.EVT_MENU,
                       lambda evt: self.onPopupSCRemove(),
                       id=self.popupIDSCRemove)
@@ -1372,6 +1417,7 @@ class ProjectTree(wx.Panel):
             (self.popupIDSCDiff, _("Compare to previous version"), 'sc-diff', scenabled),
             (self.popupIDSCHistory, _("Show revision history"), 'sc-history', scenabled),
             (self.popupIDSCCommit, _("Commit changes"), 'sc-commit', scenabled),
+            (self.popupIDSCPatch, _("Make Patch"), 'sc-patch', scenabled),
             (self.popupIDSCRevert, _("Revert to repository version"), 'sc-revert', scenabled),
             addremove,
             (None, None, None, None),
@@ -1577,6 +1623,9 @@ class ProjectTree(wx.Panel):
     def onPopupSCCommit(self):
         """ Handle context menu command commit selected nodes """
         self.scCommit(self.getSelectedNodes())
+
+    def onPopupSCPatch(self):
+        self.scPatch(self.getSelectedNodes())
 
     def onPopupSCRemove(self):
         """ Handle context menu command to remove selected nodes """

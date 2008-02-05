@@ -8,6 +8,9 @@ Changelog:
 Version: 0.3
 Released:
 
+New:
++Make Patch command for making (unified) patchs
+
 Bug Fixes:
 +Expanding directories that don't have permissions
 
