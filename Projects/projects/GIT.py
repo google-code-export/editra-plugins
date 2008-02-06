@@ -4,8 +4,8 @@
 # Purpose: Interface for the ProjectsPane to work with the GIT source control #
 #          system through.                                                    #
 # Author: Cody Precord <cprecord@editra.org>                                  #
-# Copyright: (c) 2007 Cody Precord <staff@editra.org>                         #
-# Licence: wxWindows Licence                                                  #
+# Copyright: (c) 2008 Cody Precord <staff@editra.org>                         #
+# License: wxWindows License                                                  #
 ###############################################################################
 
 """ GIT implimentation of the SourceControl object """
