@@ -14,7 +14,7 @@ __scid__ = "$Id$"
 import wx, sys, os, crypto
 import wx.lib.mixins.listctrl as listmix
 import FileIcons
-import SVN, CVS, GIT
+import SVN, CVS, GIT, BZR
 
 #-----------------------------------------------------------------------------#
 # Globals
@@ -557,7 +557,7 @@ class ConfigData(dict):
                                 '*~', '*.a', '*.o', '.poem', '.dll', '._*',
                                 '.localized', '.svn', '*.pyc', '*.bak', '#*',
                                 '*.pyo','*%*', '.git', '*.previous', '*.swp',
-                                '.#*']))
+                                '.#*', '.bzr']))
         self.setBuiltinDiff(True)
         self.setDiffProgram('opendiff')
         self.setSyncWithNotebook(True)
@@ -565,6 +565,7 @@ class ConfigData(dict):
         self.addSCSystem(CVS.CVS())
         self.addSCSystem(SVN.SVN())
         self.addSCSystem(GIT.GIT())
+        self.addSCSystem(BZR.BZR())
         
         self.load()
     
