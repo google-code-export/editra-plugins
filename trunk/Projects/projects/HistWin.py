@@ -3,8 +3,8 @@
 # Purpose: Window for showing and searching the revision history of a file    #
 #          that is under source control.                                      #
 # Author: Cody Precord <cprecord@editra.org>                                  #
-# Copyright: (c) 2007 Cody Precord <staff@editra.org>                         #
-# Licence: wxWindows Licence                                                  #
+# Copyright: (c) 2008 Cody Precord <staff@editra.org>                         #
+# License: wxWindows License                                                  #
 ###############################################################################
 
 """
@@ -403,8 +403,8 @@ class HistList(wx.ListCtrl,
                 self.SetStringItem(index, 3, item['shortlog'])
 
             if index % 2:
-                syscolor = wx.SystemSettings_GetColour(wx.SYS_COLOUR_3DLIGHT)
-                color = AdjustColour(syscolor, 75)
+                syscolor = wx.SystemSettings_GetColour(wx.SYS_COLOUR_HIGHLIGHT)
+                color = AdjustColour(syscolor, 15)
                 self.SetItemBackgroundColour(index, color)
 
         # We never got to append mode, delete the extras
@@ -504,20 +504,21 @@ def AdjustColour(color, percent, alpha=wx.ALPHA_OPAQUE):
     @type color: wx.Color
     @param percent: percent to adjust +(brighten) or -(darken)
     @type percent: int
-    @keyword alpha: amount to adjust alpha channel
+    @keyword alpha: Value to adjust alpha channel to
 
-    """ 
-    end_color = wx.WHITE
-    rdif = end_color.Red() - color.Red()
-    gdif = end_color.Green() - color.Green()
-    bdif = end_color.Blue() - color.Blue()
-    high = 100
+    """
+    radj, gadj, badj = [ int(val * (abs(percent) / 100.))
+                         for val in color.Get() ]
 
-    # We take the percent way of the color from color -. white
-    red = color.Red() + ((percent * rdif * 100) / high) / 100
-    green = color.Green() + ((percent * gdif * 100) / high) / 100
-    blue = color.Blue() + ((percent * bdif * 100) / high) / 100
-    return wx.Colour(min(red, 255), min(green, 255), min(blue, 255), alpha)
+    if percent < 0:
+        radj, gadj, badj = [ val * -1 for val in [radj, gadj, badj] ]
+    else:
+        radj, gadj, badj = [ val or percent for val in [radj, gadj, badj] ]
+
+    red = min(color.Red() + radj, 255)
+    green = min(color.Green() + gadj, 255)
+    blue = min(color.Blue() + badj, 255)
+    return wx.Colour(red, green, blue, alpha)
 
 #-----------------------------------------------------------------------------#
 
