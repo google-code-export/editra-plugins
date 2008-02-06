@@ -202,7 +202,7 @@ class ProjectTree(wx.Panel):
 
         global ODD_PROJECT_COLOR
         global EVEN_PROJECT_COLOR
-        ODD_PROJECT_COLOR = EVEN_PROJECT_COLOR = AdjustColour(wx.SystemSettings_GetColour(wx.SYS_COLOUR_3DLIGHT), 75)
+        ODD_PROJECT_COLOR = EVEN_PROJECT_COLOR = AdjustColour(wx.SystemSettings_GetColour(wx.SYS_COLOUR_3DHIGHLIGHT), 15)
 
         self.tree = MyTreeCtrl(self, tID, wx.DefaultPosition, wx.DefaultSize,
                                wx.TR_DEFAULT_STYLE
@@ -1880,8 +1880,8 @@ class ProjectPane(wx.Panel):
 
         # Get some system colors
         col1 = wx.SystemSettings_GetColour(wx.SYS_COLOUR_3DFACE)
-        col2 = AdjustColour(col1, 50)
-        col1 = AdjustColour(col1, -50)
+        col2 = AdjustColour(col1, 20)
+        col1 = AdjustColour(col1, -20)
 
         rect = self.GetRect()
         grad = gc.CreateLinearGradientBrush(0, 1, 0, 
@@ -1893,7 +1893,7 @@ class ProjectPane(wx.Panel):
         path = gc.CreatePath()
         path.AddRectangle(0, 0, rect.width - 0.5, rect.height - 0.5)
 
-        gc.SetPen(wx.Pen(AdjustColour(col1, -60), 1))
+        gc.SetPen(wx.Pen(AdjustColour(col1, -10), 1))
         gc.DrawPath(path)
 
         evt.Skip()
