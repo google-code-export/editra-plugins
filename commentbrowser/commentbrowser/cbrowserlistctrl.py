@@ -3,7 +3,7 @@
 # Purpose: a simple to use listctrl for todo tasks                            #
 # Author: DR0ID <dr0iddr0id@googlemail.com>                                   #
 # Copyright: (c) 2007 DR0ID                                                   #
-# Licence: wxWindows Licence                                                  #
+# License: wxWindows License                                                  #
 ###############################################################################
 
 """
@@ -26,11 +26,9 @@ import ed_glob
 #------------------------------------------------------------------------------#
 # Globals
 
-
 _ = wx.GetTranslation
 
 #------------------------------------------------------------------------------#
-
 
 
 class CustomListCtrl(wx.ListCtrl, listmix.ListCtrlAutoWidthMixin,
@@ -122,8 +120,7 @@ class CustomListCtrl(wx.ListCtrl, listmix.ListCtrlAutoWidthMixin,
         Private log method of this class
         @params msg: message to log
         """
-        wx.GetApp().GetLog()('>>>>>>>>>>>>>>[commentbrowser][listctr] '
-                              + str(msg))
+        wx.GetApp().GetLog()('[commentbrowser][listctr] ' + str(msg))
 
     def AddEntries(self, entrydict):
         """
@@ -137,9 +134,8 @@ class CustomListCtrl(wx.ListCtrl, listmix.ListCtrlAutoWidthMixin,
         self.itemIndexMap = self.itemDataMap.keys()
         self.SetItemCount(len(self.itemDataMap))
         try:
-            self._max_prio = max( \
-                                [item[0] for item in self.itemDataMap.values()]\
-                                )
+            self._max_prio = max([item[0]
+                                  for item in self.itemDataMap.values()])
         except:
             pass
 
