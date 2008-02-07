@@ -5,7 +5,7 @@
 #Purpose: UI portion of the CommentBrowser Plugin                            #
 #Author: DR0ID <dr0iddr0id@googlemail.com>                                   #
 #Copyright: (c) 2008 DR0ID                                                   #
-#Licence: wxWindows Licence                                                  #
+#License: wxWindows License                                                  #
 ###############################################################################
 
 """
@@ -19,22 +19,20 @@ __svnid__ = '$Id: browser.py 50827 2007-12-19 08:48:03Z CJP $'
 __revision__ = '$Revision$'
 
 #-----------------------------------------------------------------------------#
-#Imports
-
+# Imports
 import os.path
 import re
 import wx
 
-#Editra Library Modules
-
+# Editra Library Modules
 import ed_glob
 import syntax
 import ed_msg
+import profiler
 from extern import flatnotebook as FNB
 
 
-#Local
-
+# Local
 from cbrowserlistctrl import CustomListCtrl
 
 #--------------------------------------------------------------------------#
@@ -42,10 +40,13 @@ from cbrowserlistctrl import CustomListCtrl
 
 _ = wx.GetTranslation
 
-PANE_NAME = u'CommentBrowser'
-CAPTION = _(u'Comment Browser')
+# Identifiers
+PANE_NAME = 'CommentBrowser'
+CAPTION = _('Comment Browser')
+CB_KEY = 'CommentBrowser.Show'
 ID_CBROWSERPANE = wx.NewId()
 ID_COMMENTBROWSE = wx.NewId()  #menu item
+ID_CB_SHELF = wx.NewId() # Shelf interface id
 ID_TIMER = wx.NewId()
 
 #[low priority, ..., high priority]
@@ -84,11 +85,11 @@ class CBrowserPane(wx.Panel):
     def __init__(
         self,
         parent,
-        id,
+        id=wx.ID_ANY,
         pos=wx.DefaultPosition,
         size=wx.DefaultSize,
         style=wx.NO_BORDER,
-        ):
+        menu=None):
         """ Initializes the CBrowserPane class"""
 
         wx.Panel.__init__(
@@ -102,21 +103,12 @@ class CBrowserPane(wx.Panel):
 
         #---- private attr ----#
 
-        self._mainwin = parent
+        self._mainwin = self.__FindMainWindow()
+        self._mi = menu
         self.__log = wx.GetApp().GetLog()
 
         self._timer = wx.Timer(self, ID_TIMER)
         self._intervall = 500  # milli seconds
-
-        #---- Add Menu Items ----#
-
-        viewm = self._mainwin.GetMenuBar().GetMenuByName('view')
-        self._mi = viewm.InsertAlpha(ID_COMMENTBROWSE, CAPTION,
-                                     _('Open Comment Browser Sidepanel'),
-                                     wx.ITEM_CHECK, after=ed_glob.ID_PRE_MARK)
-        self._mi.Check(False)
-        if self.IsShown():
-            self._mi.Check(True)
 
         #---- Gui ----#
 
@@ -130,21 +122,17 @@ class CBrowserPane(wx.Panel):
 
         hsizer = wx.BoxSizer(wx.HORIZONTAL)
         tasklbl = wx.StaticText(self, label=_('Taskfilter: '))
-        hsizer.Add((5, 5))
-        hsizer.Add(tasklbl, 0, wx.ALIGN_CENTER_VERTICAL)
-        hsizer.Add((5, 5))
-        hsizer.Add(self._taskFilter, 0, wx.ALIGN_CENTER_VERTICAL)
-        hsizer.Add((-1, 5), 1, wx.EXPAND)
-        hsizer.Add(self._checkBoxAllFiles, 0, wx.ALIGN_CENTER_VERTICAL
-                    | wx.ALIGN_RIGHT)
-        hsizer.Add((5, 5))
-
         btn = wx.Button(self, label=_('Update'))
-        hsizer.Add(btn, 0, wx.ALIGN_CENTER_VERTICAL | wx.ALIGN_RIGHT)
-        hsizer.Add((5, 5))
+        hsizer.AddMany([((5, 5)), (tasklbl, 0, wx.ALIGN_CENTER_VERTICAL),
+                        ((5, 5)), (self._taskFilter, 0, wx.ALIGN_CENTER_VERTICAL),
+                        ((-1, 5), 1, wx.EXPAND),
+                        (self._checkBoxAllFiles, 0, wx.ALIGN_CENTER_VERTICAL |\
+                                                    wx.ALIGN_RIGHT),
+                        ((5, 5)),
+                        (btn, 0, wx.ALIGN_CENTER_VERTICAL | wx.ALIGN_RIGHT),
+                        ((5, 5))])
 
-        #Use small version of controls on osx as they are more suitable in this
-        #use case.
+        # Use small version of controls on osx
         if wx.Platform == '__WXMAC__':
             for win in [self._taskFilter, tasklbl, btn,
                         self._checkBoxAllFiles]:
@@ -161,27 +149,46 @@ class CBrowserPane(wx.Panel):
         #---- Bind events ----#
 
         self._mainwin.Bind(wx.EVT_ACTIVATE, self.OnActivate)
+        self.Bind(wx.EVT_TIMER, lambda evt: self.UpdateCurrent(), self._timer)
+        self.Bind(wx.EVT_BUTTON, lambda evt: self.UpdateCurrent(), btn)
+        self.Bind(wx.EVT_CHOICE, lambda evt: self.UpdateCurrent(), self._taskFilter)
 
-        self.Bind(wx.EVT_TIMER, self.OnListUpdate, self._timer)
+        # Main notebook events
+        ed_msg.Subscribe(self.OnPageClose, ed_msg.EDMSG_UI_NB_CLOSED)
+        ed_msg.Subscribe(self.OnPageChange, ed_msg.EDMSG_UI_NB_CHANGED)
 
-        btn.Bind(wx.EVT_BUTTON, self.OnListUpdate, btn)
-        self._taskFilter.Bind(wx.EVT_CHOICE, self.OnListUpdate,
-                              self._taskFilter)
+        self.Bind(wx.EVT_CHECKBOX, lambda evt: self.UpdateCurrent(), self._checkBoxAllFiles)
 
-        self._mainwin.GetNotebook().Bind(FNB.EVT_FLATNOTEBOOK_PAGE_CLOSED,
-                self.OnPageClose, self._mainwin.GetNotebook())
-        self._mainwin.GetNotebook().Bind(FNB.EVT_FLATNOTEBOOK_PAGE_CHANGED,
-                self.OnPageChange, self._mainwin.GetNotebook())
+        # Only bind this event when the pane is using the mainwindow interface
+        if self.GetId() == ID_CBROWSERPANE:
+            self._mainwin.GetFrameManager().Bind(wx.aui.EVT_AUI_PANE_CLOSE,
+                                                 self.OnPaneClose)
 
-        self._checkBoxAllFiles.Bind(wx.EVT_CHECKBOX, self.OnCheckAll,
-                                    self._checkBoxAllFiles)
-        self._mainwin.GetFrameManager().Bind(wx.aui.EVT_AUI_PANE_CLOSE,
-                self.OnPaneClose)
-                
+        # File action messages
         ed_msg.Subscribe(self.OnListUpdate, ed_msg.EDMSG_FILE_SAVED)
         ed_msg.Subscribe(self.OnListUpdate, ed_msg.EDMSG_FILE_OPENED)
 
     #---- Private Methods ----#
+
+    def __FindMainWindow(self):
+        """Find the mainwindow of this control. The mainwindow will either be
+        the Top Level Window or if the panel is undocked it will be the parent
+        of the miniframe the panel is in.
+        @return: MainWindow or None
+
+        """
+        def IsMainWin(win):
+            return getattr(tlw, '__name__', '') == 'MainWindow'
+
+        tlw = self.GetTopLevelParent()
+        if IsMainWin(tlw):
+            return tlw
+        elif hasattr(tlw, 'GetParent'):
+            tlw = tlw.GetParent()
+            if IsMainWin(tlw):
+                return tlw
+
+        return None
 
     def _log(self, msg):
         """
@@ -196,6 +203,8 @@ class CBrowserPane(wx.Panel):
         Stops the timer when the object gets deleted if it is still running
 
         """
+        ed_msg.Unsubscribe(self.OnPageClose)
+        ed_msg.Unsubscribe(self.OnPageChange)
         ed_msg.Unsubscribe(self.OnListUpdate)
         self._log('__del__(): stopping timer')
         self._timer.Stop()
@@ -223,12 +232,13 @@ class CBrowserPane(wx.Panel):
             else:
                 controls = [intextctrl]
         taskdict = {}
+
         for textctrl in controls:
 
             #make sure it is a text ctrl
 
-            if textctrl is not None and getattr(textctrl, '__name__', '')\
-                 == 'EditraTextCtrl':
+            if textctrl is not None and \
+               getattr(textctrl, '__name__', '') == 'EditraTextCtrl':
                 try:
                     fullname = textctrl.GetFileName()
                     filename = os.path.split(fullname)[1]
@@ -309,20 +319,17 @@ class CBrowserPane(wx.Panel):
 
     #---- Eventhandler ----#
 
-    def OnCheckAll(self, event):
-        """
-        Callback if the checkbox is un-/checked.
-        @param event: wxEvent
-        """
-        self.UpdateCurrent()
-        
     def OnKey(self, event):
         """
         Callback when keys are pressed in the current textctrl.
         @param event: wxEvent
         """
 #        self._log('OnKey')
-        self._timer.Start(self._intervall, True)
+        # Don't update on meta key events
+        if event.GetKeyCode() not in [wx.WXK_SHIFT, wx.WXK_COMMAND,
+                                      wx.WXK_CONTROL, wx.WXK_ALT,
+                                      wx.WXK_TAB]:
+            self._timer.Start(self._intervall, True)
         event.Skip()
 
     def OnListUpdate(self, event):
@@ -330,44 +337,35 @@ class CBrowserPane(wx.Panel):
         Callback if EVT_TIMER, EVT_BUTTON or EVT_CHOICE is fired.
         @param event: wxEvent
         """
-
-        #called on: EVT_TIMER, EVT_BUTTON, EVT_CHOICE, ed_msg.EDMSG_FILE_SAVED
+        #called on: ed_msg.EDMSG_FILE_SAVED
 #        self._log('OnListUpdate')
         self.UpdateCurrent()
 
-    def OnPageChange(self, event):
+    def OnPageChange(self, msg):
         """
         Callback when a page is changed in the notebook
-        @param event: wxEvent
+        @param event: Message Object (notebook, current page)
         """
-        #Need to skip event right away to let page change properly
+        nb, page = msg.GetData()
+        ctrl = nb.GetPage(page)
 
-        event.Skip()
-
-        #ed_pages updates the GetCurrentCtrl() after processing OnPageChanged
-        #that is why I have to grab the ctrl this way
-
-        ctrl = self._mainwin.GetNotebook().GetPage(event.GetSelection())
         self.UpdateCurrent(ctrl)
-#        ctrl.Bind(wx.EVT_CHAR, self.OnKey)
         ctrl.Bind(wx.EVT_KEY_UP, self.OnKey)
+
         # only sort if it lists the tasks only for one file
         if not self._checkBoxAllFiles.GetValue():
             self._listctrl.SortListItems(0, 0)
 
-    def OnPageClose(self, event):
+    def OnPageClose(self, msg):
         """
         Callback when a page is closed.
-        @param event: wxEvent
+        @param event: Message Object (notebook, page index)
+
         """
-
-        #Need to skip event right away to let notebook to finish processing
-        #ed_pages updates the GetCurrentCtrl() after processing OnPageChanged
-        #that is why I have to grab the ctrl this way
-
-        event.Skip()
-        ctrl = self._mainwin.GetNotebook().GetPage(event.GetSelection())
-        self.UpdateCurrent(ctrl)
+        nb, page = msg.GetData()
+        if nb.GetPageCount() < page:
+            ctrl = nb.GetPage(page)
+            wx.CallAfter(self.UpdateCurrent, ctrl)
 
     def OnActivate(self, event):
         """
@@ -387,32 +385,40 @@ class CBrowserPane(wx.Panel):
         """
         Shows the Comment Browser
         @param event: wxEvent
-        """
 
+        """
         if evt.GetId() == ID_COMMENTBROWSE:
             mgr = self._mainwin.GetFrameManager()
             pane = mgr.GetPane(PANE_NAME)
             if pane.IsShown():
                 pane.Hide()
-                self._mi.Check(False)
+                profiler.Profile_Set(CB_KEY, False)
             else:
                 pane.Show()
-                self._mi.Check(True)
+                profiler.Profile_Set(CB_KEY, True)
             mgr.Update()
         else:
             evt.Skip()
+
+    def UpdateMenuItem(self, evt):
+        """Update the check mark for the menu item"""
+        mgr = self._mainwin.GetFrameManager()
+        pane = mgr.GetPane(self.PANE_NAME)
+        self._mi.Check(pane.IsShown())
+        evt.Skip()
 
     def OnPaneClose(self, evt):
         """
         Clean up settings when Comment Browser Pane is closed
         @param event: wxEvent
+
         """
-
-        paneName = evt.GetPane().name
-        if PANE_NAME == paneName:
+        pane = evt.GetPane()
+        paneName = pane.name
+        if PANE_NAME == paneName and pane.window.GetId() == ID_CBROWSERPANE:
             self._mi.Check(False)
-            evt.Skip()
+        evt.Skip()
 
-            #TODO: save pane position in config?
+        #TODO: save pane position in config?
 
 #---------------------------------------------------------------------------- #

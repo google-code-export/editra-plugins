@@ -5,7 +5,7 @@
 # Purpose: CommentBrowser Plugin                                              #
 # Author: DR0ID <dr0iddr0id@googlemail.com>                                   #
 # Copyright: (c) 2007 DR0ID                                                   #
-# Licence: wxWindows Licence                                                  #
+# License: wxWindows License                                                  #
 ###############################################################################
 # Plugin Meta
 """Adds a Comment Browser Sidepanel"""
@@ -17,8 +17,10 @@ __version__ = "0.1"
 import wx.aui
 
 # Libs from Editra
+import ed_glob
 import iface
 import plugin
+from profiler import Profile_Get, Profile_Set
 
 # Local imports
 import cbrowser
@@ -32,29 +34,69 @@ _ = wx.GetTranslation
 class CommentBrowserPanel(plugin.Plugin):
     """Adds a commentbrowser to the view menu"""
     
-    plugin.Implements(iface.MainWindowI)
-    
+    plugin.Implements(iface.MainWindowI, iface.ShelfI)
+
+    @property
+    def __name__(self):
+        return cbrowser.PANE_NAME
+
+    def AllowMultiple(self):
+        """Shelf interface"""
+        return False
+
+    def CreateItem(self, parent):
+        """Shelf Interface"""
+        return cbrowser.CBrowserPane(parent)
+
+    def GetId(self):
+        """Shelf Interface"""
+        return cbrowser.ID_CB_SHELF
+
+    def GetMenuEntry(self, menu):
+        """Shelf Interface"""
+        return wx.MenuItem(menu, cbrowser.ID_CB_SHELF, _("CommentBrowser"))
+
+    def GetName(self):
+        """Shelf Interface"""
+        return _("CommentBrowser")
+
+    def IsStockable(self):
+        """Shelf Interface"""
+        return True
+
     def PlugIt(self, parent):
         """ Adds the view menu entry and registers the event handler"""
         self._mainwin = parent
         self._log = wx.GetApp().GetLog()
         if self._mainwin != None:
             self._log("[commentbrowser] Installing commentbrowser plugin")
+
+            #---- Add Menu Items ----#
+            viewm = self._mainwin.GetMenuBar().GetMenuByName('view')
+            mi = viewm.InsertAlpha(cbrowser.ID_COMMENTBROWSE,
+                                   cbrowser.CAPTION,
+                                   _('Open Comment Browser Sidepanel'),
+                                   wx.ITEM_CHECK,
+                                   after=ed_glob.ID_PRE_MARK)
+
+            #---- Make the Panel ----#
             self._commentbrowser = cbrowser.CBrowserPane(self._mainwin, 
-                                                    cbrowser.ID_CBROWSERPANE)
+                                                         cbrowser.ID_CBROWSERPANE,
+                                                         menu=mi)
             mgr = self._mainwin.GetFrameManager()
             mgr.AddPane(self._commentbrowser, 
                         wx.aui.AuiPaneInfo().Name(cbrowser.PANE_NAME).\
                         Caption("Comment Browser").Bottom().Layer(1).\
                         CloseButton(True).MaximizeButton(True).\
                         BestSize(wx.Size(-1, 350)))
-            mgr.Update()
-            pane = mgr.GetPane(cbrowser.PANE_NAME)
-            if pane.IsShown():
-                pane.window._mi.Check(True)
+
+            # Get settings from profile
+            if Profile_Get(cbrowser.CB_KEY, 'bool', False):
+                mgr.GetPane(cbrowser.PANE_NAME).Show()
             else:
-                pane.window._mi.Check(False)
-            
+                mgr.GetPane(cbrowser.PANE_NAME).Hide()
+
+            mgr.Update()
             
     def GetMenuHandlers(self):
         """Pass event handler for menu item to main window for management"""
