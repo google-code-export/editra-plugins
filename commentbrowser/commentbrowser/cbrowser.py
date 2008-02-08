@@ -167,6 +167,7 @@ class CBrowserPane(wx.Panel):
         # File action messages
         ed_msg.Subscribe(self.OnListUpdate, ed_msg.EDMSG_FILE_SAVED)
         ed_msg.Subscribe(self.OnListUpdate, ed_msg.EDMSG_FILE_OPENED)
+        ed_msg.Subscribe(self.OnKey, ed_msg.EDMSG_UI_STC_KEYUP)
 
     #---- Private Methods ----#
 
@@ -203,9 +204,10 @@ class CBrowserPane(wx.Panel):
         Stops the timer when the object gets deleted if it is still running
 
         """
+        ed_msg.Unsubscribe(self.OnListUpdate)
+        ed_msg.Unsubscribe(self.OnKey)
         ed_msg.Unsubscribe(self.OnPageClose)
         ed_msg.Unsubscribe(self.OnPageChange)
-        ed_msg.Unsubscribe(self.OnListUpdate)
         self._log('__del__(): stopping timer')
         self._timer.Stop()
         super(CBrowserPane, self).__del__()
@@ -319,18 +321,18 @@ class CBrowserPane(wx.Panel):
 
     #---- Eventhandler ----#
 
-    def OnKey(self, event):
+    def OnKey(self, msg):
         """
         Callback when keys are pressed in the current textctrl.
-        @param event: wxEvent
+        @param event: Message Object ((x, y), keycode)
+
         """
 #        self._log('OnKey')
         # Don't update on meta key events
-        if event.GetKeyCode() not in [wx.WXK_SHIFT, wx.WXK_COMMAND,
-                                      wx.WXK_CONTROL, wx.WXK_ALT,
-                                      wx.WXK_TAB]:
+        data = msg.GetData()
+        if data[1] not in [wx.WXK_SHIFT, wx.WXK_COMMAND, wx.WXK_CONTROL,
+                            wx.WXK_ALT, wx.WXK_TAB]:
             self._timer.Start(self._intervall, True)
-        event.Skip()
 
     def OnListUpdate(self, event):
         """
@@ -345,12 +347,12 @@ class CBrowserPane(wx.Panel):
         """
         Callback when a page is changed in the notebook
         @param event: Message Object (notebook, current page)
+
         """
+        # Get the Current Control
         nb, page = msg.GetData()
         ctrl = nb.GetPage(page)
-
         self.UpdateCurrent(ctrl)
-        ctrl.Bind(wx.EVT_KEY_UP, self.OnKey)
 
         # only sort if it lists the tasks only for one file
         if not self._checkBoxAllFiles.GetValue():
