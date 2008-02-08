@@ -296,6 +296,12 @@ class CBrowserPane(wx.Panel):
             yield z
             z += 1
 
+    def GetMainWindow(self):
+        """
+        Get them main window that owns this instance
+        """
+        return self._mainwin
+
     def IsComment(self, stc, bufferpos):
         """
         Check whether the given point in the buffer is a comment
