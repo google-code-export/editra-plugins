@@ -158,16 +158,16 @@ class CustomListCtrl(wx.ListCtrl, listmix.ListCtrlAutoWidthMixin,
         source = str(self.itemDataMap[key][-1])
         line = self.itemDataMap[key][-2]
         try:
-            nb = self.GetParent().GetParent().GetNotebook()
+            nb = self.GetParent().GetMainWindow().GetNotebook()
             ctrls = nb.GetTextControls()
             for ctrl in ctrls:
-                if source == ctrl.GetFileName() :
+                if source == ctrl.GetFileName():
                     nb.SetSelection(nb.GetPageIndex(ctrl))
                     nb.GoCurrentPage()
                     ctrl.GotoLine(line-1)
                     break
         except Exception, excp:
-            self._log("[error] "+excp.msg)
+            self._log("[error] %s" % excp)
 
 
     #---- special methods used by the mixinx classes ----#
