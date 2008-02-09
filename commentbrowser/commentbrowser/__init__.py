@@ -4,7 +4,7 @@
 # Name: __init__.py                                                           #
 # Purpose: CommentBrowser Plugin                                              #
 # Author: DR0ID <dr0iddr0id@googlemail.com>                                   #
-# Copyright: (c) 2007 DR0ID                                                   #
+# Copyright: (c) 2008 DR0ID                                                   #
 # License: wxWindows License                                                  #
 ###############################################################################
 # Plugin Meta

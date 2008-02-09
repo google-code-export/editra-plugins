@@ -1,4 +1,4 @@
 Name=CommentBrowser
 Author=DR0ID
-Description=Provides a comment browser side panel
+Description=Browse and navigate TODO statements
 Version=0.1
