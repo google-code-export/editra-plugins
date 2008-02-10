@@ -41,7 +41,6 @@ class BZR(SourceControl):
     
     def getRepository(self, path):
         """ Get the repository of a given path """
-        print "GET REPOSITORY"
         if self.repocache.has_key(path):
             return self.repocache[path]
 
@@ -65,10 +64,9 @@ class BZR(SourceControl):
     
     def isControlled(self, path):
         """ Is the path controlled by BZR? """
-        print "IS CONTROLLED"
         t1 = time.time()
+        # Check for cached paths to speed up lookup
         if path in self.ccache:
-            print path, "CACHE TIME", time.time() - t1
             return True
 
         if not os.path.isdir(path):
@@ -86,11 +84,15 @@ class BZR(SourceControl):
                 out = self.run(root + os.sep, ['status', '-S', path])
                 if out:
                     lines = out.stdout.readline()
-                    retval = not lines.startswith('?')
+                    if lines.startswith('?'):
+                        fname = lines.split(None, 1)[1].strip()
+                        fname = fname.rstrip(os.sep)
+                        retval = not path.endswith(fname)
+                    else:
+                        retval = True
                     self.closeProcess(out)
-                print "TIME: ", time.time() - t1
+
                 if retval:
-                    print "CACHED:", path
                     self.ccache.append(path)
                 return retval
             elif last:
@@ -101,7 +103,7 @@ class BZR(SourceControl):
                 # so mark it as the last run
                 if not tail:
                     last = True
-        print "TIME: ", time.time() - t1
+
         return False
 
     def add(self, paths):
@@ -259,13 +261,10 @@ class BZR(SourceControl):
             options = []
             if rev:
                 options.append('-r')
-                if rev[0] == 'r':
-                    rev = rev[1:]
-                options.append(rev)
+                options.append(str(rev))
 
             if date:
                 # Date format YYYY-MM-DD,HH:MM:SS
-                print "DATE IN FETCH IS", date
                 options.append('-r')
                 options.append('date:%s' % date)
             
@@ -276,8 +275,3 @@ class BZR(SourceControl):
             else:
                 output.append(None)
         return output
-        
-#-----------------------------------------------------------------------------#
-if __name__ == '__main__':
-    bzr = BZR()
-    bzr.add(['/Users/kesmit/pp/editra-plugins/Projects/projects/Icons'])
