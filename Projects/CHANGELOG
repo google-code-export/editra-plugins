@@ -9,7 +9,8 @@ Version: 0.3
 Released:
 
 New:
-+Make Patch command for making (unified) patchs
++Support for Bazaar version control system
++Make Patch command for making (unified) patches
 
 Bug Fixes:
 +Expanding directories that don't have permissions
