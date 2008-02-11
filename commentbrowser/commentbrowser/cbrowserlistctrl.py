@@ -8,10 +8,11 @@
 
 """
 Provides a virtual ListCtrl for the CommentBrowser
+
 """
 
 __author__ = "DR0ID"
-__svnid__ = "$Id: Exp $"
+__svnid__ = "$Id$"
 __revision__ = "$Revision$"
 
 #------------------------------------------------------------------------------#
