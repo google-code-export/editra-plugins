@@ -24,12 +24,6 @@ from SourceControl import SourceControl
 
 #-----------------------------------------------------------------------------#
 # Globals
-NEWPAT = re.compile('#[ \t]+new file:') # added
-RNAME = re.compile('#[ \t]+renamed:') # this is odd need more research
-COPPAT = rname = re.compile('#[ \t]+copied:') # this is odd need more research
-MODPAT = re.compile('#[ \t]+modified:') # modified
-DELPAT = re.compile('#[ \t]+deleted:')  # deleted
-CONPAT = re.compile('#[ \t]+conflict:') # conflict ??? Couldnt find ref
 UNKPAT = re.compile('#[ \t]+[a-zA-Z0-9]+') # hmmm
 COMPAT = re.compile('commit [a-z0-9]{40}') # Commit line in log
 
@@ -186,80 +180,56 @@ class GIT(SourceControl):
 
     def status(self, paths, recursive=False, status=None):
         """Get the status of all given paths """
-        # GIT status shows all status recursivly so need
-        #     to parse output and eliminate items that are not part of the
-        #     request.
         # NOTE: uptodate files are not listed in output of status
+        codes = {' ':'uptodate', 'N':'added', 'C':'conflict', 'D':'deleted',
+                 'M':'modified'}
 
-        root = self.splitFiles(paths[0])[0]
+        def modpath(fname):
+            fname = fname.strip().rstrip(os.sep)
+            fname = fname.replace(relpath, '', 1).lstrip(os.sep)
+            return fname
+
+        root, files = self.splitFiles(paths)
+        out = self.run(root, ['status'] + files)
         repo = self.findRoot(root)
-        out = self.run(root, ['status'], mergeerr=True)
+        relpath = root.replace(repo, '', 1).lstrip(os.sep)
+        unknown = list()
         if out:
-            # Collect all file names and status { name : status }
-            # NOTE: file names are returned as a relative path to repository
-            #       root
-            collect = dict()
-            unknown = list()
-            pjoin = os.path.join
-            start_unknown = False
             for line in out.stdout:
-                if start_unknown:
-                    if re.search(UNKPAT, line):
-                        tmp = line.strip().split(None, 1)
-                        unknown.append(os.path.normpath(pjoin(repo, tmp[-1])))
-                    continue
-                if re.search(NEWPAT, line):
-                    tmp = re.sub(NEWPAT, u'', line, 1).strip()
-                    if len(tmp):
-                        collect[os.path.normpath(pjoin(repo, tmp))] = 'added'
-                elif re.search(rname, line):
-                    tmp = re.sub(rname, u'', line, 1).strip()
-                    if len(tmp):
-                        tmp = tmp.split('->')[-1].strip()
-                        collect[os.path.normpath(pjoin(repo, tmp))] = 'added'
-                elif re.search(COPPAT, line):
-                    tmp = re.sub(COPPAT, u'', line, 1).strip()
-                    if len(tmp):
-                        tmp = tmp.split('->')[-1].strip()
-                        collect[os.path.normpath(pjoin(repo, tmp))] = 'added'
-                elif re.search(MODPAT, line):
-                    tmp = re.sub(MODPAT, u'', line, 1).strip()
-                    if len(tmp):
-                        collect[os.path.normpath(pjoin(repo, tmp))] = 'modified'
-                elif re.search(DELPAT, line):
-                    tmp = re.sub(DELPAT, u'', line, 1).strip()
-                    if len(tmp):
-                        collect[os.path.normpath(pjoin(repo, tmp))] = 'deleted'
-                elif re.search(CONPAT, line):
-                    tmp = re.sub(CONPAT, u'', line, 1).strip()
-                    if len(tmp):
-                        collect[os.path.normpath(pjoin(repo, tmp))] = 'conflict'
-                elif line.startswith('# Untracked files:'):
-                    start_unknown = True
+                self.log(line)
+                current = dict()
+                line = line.lstrip('#').strip()
+                if line.startswith('new file:'):
+                    fname = line.replace('new file:', '', 1).strip()
+                    status[modpath(fname)] = dict(status='added')
+                elif line.startswith('modified:'):
+                    fname = line.replace('modified:', '', 1).strip()
+                    status[modpath(fname)] = dict(status='modified')
+                elif line.startswith('deleted:'):
+                    fname = line.replace('deleted:', '', 1).strip()
+                    status[modpath(fname)] = dict(status='deleted')
                 else:
                     continue
-            start_unknown = False
 
-            # Find applicable status information based on given paths
-            for path in paths:
-                for name, stat in collect.iteritems():
-                    name = name.replace(path, u'').strip(os.path.sep)
-                    status[name] = {'status' : stat}
+            self.logOutput(out)
+            self.closeProcess(out)
 
-                # Mark all update date files
-                if not os.path.isdir(path):
-                    path = os.path.dirname(path)
-                files = os.listdir(path)
-                files = [pjoin(path, x) for x in files]
-                for fname in files:
-                    if fname not in collect and fname not in unknown:
-                        # Make sure name is not under an unknown as well
-                        for x in unknown:
-                            if fname.startswith(x):
-                                break
-                        else:
-                            fname = fname.replace(path, u'').strip(os.path.sep)
-                            status[fname] = {'status' : 'uptodate'}
+        # Find all untracked files
+        out = self.run(root, ['ls-files', '--others', '-t'] + files)
+        if out:
+            for line in out.stdout:
+                self.log(line)
+                if len(line):
+                    fname = line.lstrip('?').strip()
+                    unknown.append(modpath(fname))
+            self.logOutput(out)
+
+        # Find up to date files
+        unknown += status.keys()
+        for path in os.listdir(root):
+            if path not in unknown:
+                status[path] = dict(status='uptodate')
+
         return status
 
     def untrackedFiles(self, path):
