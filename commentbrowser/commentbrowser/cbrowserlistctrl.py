@@ -2,7 +2,7 @@
 # Name:  cbrowserlistctrl.py                                                  #
 # Purpose: a simple to use listctrl for todo tasks                            #
 # Author: DR0ID <dr0iddr0id@googlemail.com>                                   #
-# Copyright: (c) 2007 DR0ID                                                   #
+# Copyright: (c) 2008 DR0ID                                                   #
 # License: wxWindows License                                                  #
 ###############################################################################
 
@@ -11,7 +11,7 @@ Provides a virtual ListCtrl for the CommentBrowser
 """
 
 __author__ = "DR0ID"
-__svnid__ = "$Id: $"
+__svnid__ = "$Id: Exp $"
 __revision__ = "$Revision$"
 
 #------------------------------------------------------------------------------#
