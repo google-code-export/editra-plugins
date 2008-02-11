@@ -1,12 +1,14 @@
 CommentBrowser Plugin for Editra
 Author: DR0ID
-Licence: wxWindows
+License: wxWindows
 
 Version 0.2:
 Released:
 
-  + Fix some performance issues
+  + Fix some performance issues for when multiple windows are open
   + Update icons when Editra's icon theme changes
+
+#-----------------------------------------------------------------------------#
 
 Version 0.1:
     Initial release. 02/08/2008
@@ -16,7 +18,7 @@ Version 0.1:
     
     - priority bases on '!' and type of task
     - highlightening priority by color
-    - it looks for TODO, HACK, XXX, FIXME (you can change that through a translation file)
+    - it looks for TODO, HACK, XXX, FIXME, NOTE
     - should work with any language (it parses for example for 'todo :' and it has to be in a comment)
     - switch between one file and all open files
     - filter task type
