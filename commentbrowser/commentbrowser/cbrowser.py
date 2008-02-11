@@ -302,6 +302,10 @@ class CBrowserPane(wx.Panel):
         """
         return self._mainwin
 
+    def IsActive(self):
+        """Check whether this browser is active or not"""
+        return self._mainwin.IsActive()
+
     def IsComment(self, stc, bufferpos):
         """
         Check whether the given point in the buffer is a comment
@@ -333,6 +337,9 @@ class CBrowserPane(wx.Panel):
         @param event: Message Object ((x, y), keycode)
 
         """
+        if not self.IsActive():
+            return
+
 #        self._log('OnKey')
         # Don't update on meta key events
         data = msg.GetData()
@@ -347,6 +354,9 @@ class CBrowserPane(wx.Panel):
         """
         #called on: ed_msg.EDMSG_FILE_SAVED
 #        self._log('OnListUpdate')
+        if not self.IsActive():
+            return
+
         self.UpdateCurrent()
 
     def OnPageChange(self, msg):
@@ -355,6 +365,9 @@ class CBrowserPane(wx.Panel):
         @param event: Message Object (notebook, current page)
 
         """
+        if not self.IsActive():
+            return
+
         # Get the Current Control
         nb, page = msg.GetData()
         ctrl = nb.GetPage(page)
@@ -370,6 +383,9 @@ class CBrowserPane(wx.Panel):
         @param event: Message Object (notebook, page index)
 
         """
+        if not self.IsActive():
+            return
+
         nb, page = msg.GetData()
         if nb.GetPageCount() < page:
             ctrl = nb.GetPage(page)
