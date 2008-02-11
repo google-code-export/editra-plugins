@@ -6,6 +6,7 @@ Version 0.2:
 Released:
 
   + Fix some performance issues
+  + Update icons when Editra's icon theme changes
 
 Version 0.1:
     Initial release. 02/08/2008

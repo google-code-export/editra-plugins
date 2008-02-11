@@ -22,6 +22,7 @@ import wx.lib.mixins.listctrl as listmix
 
 #Editra Library Modules
 import ed_glob
+import ed_msg
 
 #------------------------------------------------------------------------------#
 # Globals
@@ -56,22 +57,10 @@ class CustomListCtrl(wx.ListCtrl, listmix.ListCtrlAutoWidthMixin,
             )
 
         #---- Images used by the list ----#
-        isize = (8, 8)
-        self._img_list = wx.ImageList(8, 8)
-        
-        ups = wx.ArtProvider_GetBitmap(str(ed_glob.ID_UP), wx.ART_MENU, isize)
-        if not ups.IsOk():
-            ups = wx.ArtProvider_GetBitmap(wx.ART_GO_UP, wx.ART_TOOLBAR, isize)
-        self.sm_up = self._img_list.Add(ups)
-
-        down = wx.ArtProvider_GetBitmap(str(ed_glob.ID_DOWN), wx.ART_MENU,
-                                                                        isize)
-        if not down.IsOk():
-            down = wx.ArtProvider_GetBitmap(wx.ART_GO_DOWN, wx.ART_TOOLBAR,
-                                                                        isize)
-        self.sm_dn = self._img_list.Add(down)
-
-        self.SetImageList(self._img_list, wx.IMAGE_LIST_SMALL)
+        self._img_list = None
+        self.sm_up = None
+        self.sm_down = None
+        self._SetupImages()
 
         #---- Set Columns Headers ----#
         self.InsertColumn(0, "!")
@@ -107,12 +96,16 @@ class CustomListCtrl(wx.ListCtrl, listmix.ListCtrlAutoWidthMixin,
         #---- Events ----#
         self.Bind(wx.EVT_LIST_ITEM_RIGHT_CLICK, self.OnItemRightClick, self)
         self.Bind(wx.EVT_LIST_ITEM_ACTIVATED, self.OnItemActivated, self)
+        ed_msg.Subscribe(self._SetupImages, ed_msg.EDMSG_THEME_CHANGED)
 
         # set initial sort order
         # sort by prio (column 0), descending order (0)
         self.SortListItems(0, 0)
 
-        
+    def __del__(self):
+        ed_msg.Unsubscribe(self._SetupImages)
+        super(CustomListCtrl, self).__del__()
+
     #---- methods ----#
 
     def _log(self, msg):
@@ -121,6 +114,27 @@ class CustomListCtrl(wx.ListCtrl, listmix.ListCtrlAutoWidthMixin,
         @params msg: message to log
         """
         wx.GetApp().GetLog()('[commentbrowser][listctr] ' + str(msg))
+
+    def _SetupImages(self, msg=None):
+        """Setup the images and respond to theme change messages
+        @keyword msg: Message Object or None
+
+        """
+        isize = (8, 8)
+        self._img_list = wx.ImageList(8, 8)
+
+        ups = wx.ArtProvider_GetBitmap(str(ed_glob.ID_UP), wx.ART_MENU, isize)
+        if not ups.IsOk():
+            ups = wx.ArtProvider_GetBitmap(wx.ART_GO_UP, wx.ART_TOOLBAR, isize)
+        self.sm_up = self._img_list.Add(ups)
+
+        down = wx.ArtProvider_GetBitmap(str(ed_glob.ID_DOWN), wx.ART_MENU, isize)
+        if not down.IsOk():
+            down = wx.ArtProvider_GetBitmap(wx.ART_GO_DOWN, wx.ART_TOOLBAR, isize)
+        self.sm_dn = self._img_list.Add(down)
+
+        self.SetImageList(self._img_list, wx.IMAGE_LIST_SMALL)
+        self.Refresh()
 
     def AddEntries(self, entrydict):
         """
