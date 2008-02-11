@@ -1127,7 +1127,8 @@ class ProjectTree(wx.Panel):
 
     def compareToPrevious(self, node):
         """ Use opendiff to compare playpen version to repository version """
-        path = self.tree.GetPyData(node)['path']
+        try: path = self.tree.GetPyData(node)['path']
+        except TypeError: return
         # Only do files
         if os.path.isdir(path):
             for child in self.getChildren(node):
