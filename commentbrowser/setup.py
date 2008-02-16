@@ -23,7 +23,8 @@ if setup != None:
         url="http://editra.org",
         platforms=["Linux", "OS X", "Windows"],
         packages=['commentbrowser'],
-        package_data={'commentbrowser' : ['CHANGELOG.txt']},
+        package_data={'commentbrowser' : ['CHANGELOG.txt',
+                                          'locale/*/LC_MESSAGES/*.mo']},
         entry_points='''
         [Editra.plugins]
         CommentBrowser = commentbrowser:CommentBrowserPanel
