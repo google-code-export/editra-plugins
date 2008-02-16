@@ -1,4 +1,5 @@
 #summary Launch Scripts and Run Programs
+#labels IDE
 
 = Introduction =
 
@@ -19,8 +20,9 @@ Launch is a plugin for running a program on the contents of the current buffer a
 
 = Installation =
 
-*Status* Not yet released but will be available with the release of Editra after 0.2.50
+This plugin is bundled and installed by default with all binary versions of Editra >= 0.2.65. To use it simply enable it in the PluginManager (Tools=>PluginManager)
 
+If you are using a source version of Editra the plugin can also be installed via the PluginManagers builtin downloader. Simply open the PluginManager and choose it from the download list, if it is not listed in the list it means it is already installed.
 
 = Usage =
 
