@@ -10,12 +10,15 @@ CodeBrowser is a plugin for browsing classes, variables and other significant el
 
 = Features =
 
- Support for the following languages
+Support for the following languages
 
   * Bash, Korn, and C Shell scripts
+  * Configuration Files (ini)
+  * Lisp
   * Lua
   * Nullsoft Installer Scripts (NSIS)
   * Python
+  * Tcl/Tk
 
 = Installation =
 
