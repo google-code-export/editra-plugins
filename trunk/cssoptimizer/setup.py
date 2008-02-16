@@ -23,6 +23,8 @@ if setup != None:
         license="wxWindows",
         url="http://editra.org",
         platforms=["Linux", "OS X", "Windows"],
+        package_data={'cssoptimizer' : ['CHANGELOG.txt',
+                                        'locale/*/LC_MESSAGES/*.mo']},
         packages=['cssoptimizer'],
         entry_points='''
         [Editra.plugins]
