@@ -1,0 +1,30 @@
+#summary Browse the structure of the code in a document
+#labels IDE
+
+= Introduction =
+
+CodeBrowser is a plugin for browsing classes, variables and other significant elements that make up the structure of the code in a document. It provides a view for browsing and navigation as a tree side panel.
+
+*Note* This plugin is not hosted by this project but is included in Editra core (>0.2.65). See the project homepage for more details (http://editra.org)
+
+
+= Features =
+
+ Support for the following languages
+
+  * Bash, Korn, and C Shell scripts
+  * Lua
+  * Nullsoft Installer Scripts (NSIS)
+  * Python
+
+= Installation =
+
+*Status* Not yet released but will be available with the release of Editra after 0.2.65
+
+
+= Usage =
+
+Quick list of key points more details after its first release
+
+  * Open an instance (View=>Code Browser)
+  * Double click on an element to navigate to its definition
