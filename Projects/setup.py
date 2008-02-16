@@ -14,6 +14,7 @@ setup(
       author = "Kevin D. Smith",
       author_email = "Kevin.Smith@theMorgue.org",
       license = "wxWindows",
+      package_data={'projects' : ['locale/*/LC_MESSAGES/*.mo']},
       packages = ['projects'],
       entry_points = '''
       [Editra.plugins]
