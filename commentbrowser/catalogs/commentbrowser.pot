@@ -1,4 +1,4 @@
-# Editra Plugins CommentBrowser Template.
+# SOME DESCRIPTIVE TITLE.
 # Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
 # This file is distributed under the same license as the PACKAGE package.
 # FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
@@ -8,46 +8,51 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2008-01-24 17:39-0600\n"
+"POT-Creation-Date: 2008-02-16 18:17-0600\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
 "MIME-Version: 1.0\n"
-"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Type: text/plain; charset=CHARSET\n"
 "Content-Transfer-Encoding: 8bit\n"
 
-#: commentbrowser/commentbrowser/cbrowser.py:128
+#: commentbrowser/commentbrowser/cbrowser.py:120
 msgid "All opened files"
 msgstr ""
 
-#: commentbrowser/commentbrowser/cbrowser.py:46
+#: commentbrowser/commentbrowser/cbrowser.py:45
 msgid "Comment Browser"
 msgstr ""
 
-#: commentbrowser/commentbrowser/cbrowserlistctrl.py:81
+#: commentbrowser/commentbrowser/__init__.py:57
+#: commentbrowser/commentbrowser/__init__.py:61
+msgid "CommentBrowser"
+msgstr ""
+
+#: commentbrowser/commentbrowser/cbrowserlistctrl.py:69
 msgid "Description"
 msgstr ""
 
-#: commentbrowser/commentbrowser/cbrowserlistctrl.py:82
+#: commentbrowser/commentbrowser/cbrowserlistctrl.py:70
 msgid "File"
 msgstr ""
 
-#: commentbrowser/commentbrowser/cbrowserlistctrl.py:83
+#: commentbrowser/commentbrowser/cbrowserlistctrl.py:71
 msgid "Line"
 msgstr ""
 
-#: commentbrowser/commentbrowser/cbrowser.py:115
+#: commentbrowser/commentbrowser/__init__.py:78
 msgid "Open Comment Browser Sidepanel"
 msgstr ""
 
-#: commentbrowser/commentbrowser/cbrowser.py:132
+#: commentbrowser/commentbrowser/cbrowser.py:124
 msgid "Taskfilter: "
 msgstr ""
 
-#: commentbrowser/commentbrowser/cbrowserlistctrl.py:80
+#: commentbrowser/commentbrowser/cbrowserlistctrl.py:68
 msgid "Type"
 msgstr ""
 
-#: commentbrowser/commentbrowser/cbrowser.py:142
+#: commentbrowser/commentbrowser/cbrowser.py:125
 msgid "Update"
 msgstr ""
