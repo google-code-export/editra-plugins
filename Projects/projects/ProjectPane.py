@@ -78,6 +78,7 @@ import ConfigDialog
 from HistWin import AdjustColour
 
 try:
+    import ed_msg
     import profiler
     eol = profiler.Profile_Get('EOL')
     if 'Unix' in eol:
@@ -88,6 +89,7 @@ try:
         eol = '\r'
 except ImportError:
     profiler = None
+    ed_msg = None
     eol = '\n'
 
 # Configure Platform specific commands
@@ -214,75 +216,11 @@ class ProjectTree(wx.Panel):
                                , self.log)
 
         # Load icons for use later
-        icons = self.icons = {}
-        menuicons = self.menuicons = {}
+        self.icons = {}
+        self.menuicons = {}
+        self.il = None
+        self._setupIcons()
 
-        isz = (16, 16)
-        il = wx.ImageList(isz[0], isz[1])
-
-        try:
-            import ed_glob
-            folder = wx.ArtProvider.GetBitmap(str(ed_glob.ID_FOLDER), wx.ART_MENU)
-            folderopen = wx.ArtProvider.GetBitmap(str(ed_glob.ID_OPEN), wx.ART_MENU)
-            icons['folder'] = il.Add(folder)
-            icons['folder-open'] = il.Add(folderopen)
-            menuicons['copy'] = wx.ArtProvider.GetBitmap(str(ed_glob.ID_COPY), wx.ART_MENU)
-            menuicons['cut'] = wx.ArtProvider.GetBitmap(str(ed_glob.ID_CUT), wx.ART_MENU)
-            menuicons['paste'] = wx.ArtProvider.GetBitmap(str(ed_glob.ID_PASTE), wx.ART_MENU)
-            menuicons['delete'] = wx.ArtProvider.GetBitmap(str(ed_glob.ID_DELETE), wx.ART_MENU)
-
-        except ImportError:
-            folder = wx.ArtProvider_GetBitmap(wx.ART_FOLDER, wx.ART_OTHER, isz)
-            folderopen = wx.ArtProvider_GetBitmap(wx.ART_FOLDER_OPEN, wx.ART_OTHER, isz)
-            icons['folder'] = il.Add(folder)
-            icons['folder-open'] = il.Add(folderopen)
-            menuicons['copy'] = wx.ArtProvider_GetBitmap(wx.ART_COPY, wx.ART_OTHER, isz)
-            menuicons['cut'] = wx.ArtProvider_GetBitmap(wx.ART_CUT, wx.ART_OTHER, isz)
-            menuicons['paste'] = wx.ArtProvider_GetBitmap(wx.ART_PASTE, wx.ART_OTHER, isz)
-            menuicons['delete'] = wx.ArtProvider_GetBitmap(wx.ART_DELETE, wx.ART_OTHER, isz)
-
-        menuicons['blank'] = FileIcons.getBlankBitmap()
-        menuicons['sc-commit'] = FileIcons.getScCommitBitmap()
-        menuicons['sc-patch'] = FileIcons.getScPatchBitmap()
-        menuicons['sc-add'] = FileIcons.getScAddBitmap()
-        menuicons['sc-diff'] = FileIcons.getScDiffBitmap()
-        menuicons['sc-history'] = FileIcons.getScHistoryBitmap()
-        menuicons['sc-remove'] = FileIcons.getScRemoveBitmap()
-        menuicons['sc-status'] = FileIcons.getScStatusBitmap()
-        menuicons['sc-update'] = FileIcons.getScUpdateBitmap()
-        menuicons['sc-revert'] = FileIcons.getScRevertBitmap()
-
-        icons['file'] = il.Add(FileIcons.getFileBitmap())
-        
-        # Create badged icons
-        for badge in ['uptodate', 'modified', 'conflict', 'added', 'merge', 'inaccessible']:
-            badgeicon = getattr(FileIcons, 'getBadge' + badge.title() + 'Bitmap')().ConvertToImage()
-            badgeicon.Rescale(11, 11, wx.IMAGE_QUALITY_HIGH)
-            for icotype in ['file', 'folder', 'folder-open']:
-                icon = wx.MemoryDC()
-                if icotype == 'file':
-                    tbmp = FileIcons.getFileBitmap()
-                elif icotype == 'folder':
-                    tbmp = folder
-                else:
-                    tbmp = folderopen
-
-                icon.SelectObject(tbmp)
-                icon.SetBrush(wx.TRANSPARENT_BRUSH)
-                if wx.Platform == '__WXGTK__':
-                    x, y = 3, 4
-                else:
-                    x, y = 5, 5
-                icon.DrawBitmap(wx.BitmapFromImage(badgeicon), x, y, False)
-                icon.SelectObject(wx.NullBitmap)
-                icons[icotype + '-' + badge] = il.Add(tbmp)
-
-        icons['project-add'] = il.Add(FileIcons.getProjectAddBitmap())
-        icons['project-delete'] = il.Add(FileIcons.getProjectDeleteBitmap())
-
-        self.tree.SetImageList(il)
-        self.il = il
-        
         # Read configuration
         self.config = ConfigDialog.ConfigData()
 
@@ -335,6 +273,7 @@ class ProjectTree(wx.Panel):
             nb.Bind(fnb.EVT_FLATNOTEBOOK_PAGE_CHANGED, self.OnPageChanged)
             nb.Bind(fnb.EVT_FLATNOTEBOOK_PAGE_CLOSING, self.OnPageClosing)
             mw.Bind(ed_event.EVT_MAINWINDOW_EXIT, self.OnMainWindowExit)
+            ed_msg.Subscribe(self.OnThemeChange, ed_msg.EDMSG_THEME_CHANGED)
         except ImportError:
             pass
 
@@ -343,6 +282,95 @@ class ProjectTree(wx.Panel):
         #self.tree.Bind(wx.EVT_LEFT_DCLICK, self.OnLeftDClick)
         #self.tree.Bind(wx.EVT_RIGHT_DOWN, self.OnRightDown)
         #self.tree.Bind(wx.EVT_RIGHT_UP, self.OnRightUp)
+
+    def __del__(self):
+        """ Clean up resources """
+        if ed_msg is not None:
+            ed_msg.Unsubscribe(self.OnThemeChange)
+
+        # Kill all watcher threads
+        for value in self.watchers.values():
+            value.pop()
+            
+        # Stop any currently running source control threads
+        for t in self.scThreads:
+            t._Thread__stop()
+        
+        # Clean up tempdir
+        if self.tempdir:
+            shutil.rmtree(self.tempdir, ignore_errors=True)
+        diffwin.CleanupTempFiles()
+
+    def _setupIcons(self):
+        """ Setup the icons used by the tree and menus """
+        isz = (16, 16)
+        il = wx.ImageList(isz[0], isz[1])
+
+        try:
+            # Try to get theme icons from Editra
+            import ed_glob
+            folder = wx.ArtProvider.GetBitmap(str(ed_glob.ID_FOLDER), wx.ART_MENU)
+            folderopen = wx.ArtProvider.GetBitmap(str(ed_glob.ID_OPEN), wx.ART_MENU)
+            self.icons['folder'] = il.Add(folder)
+            self.icons['folder-open'] = il.Add(folderopen)
+            self.menuicons['copy'] = wx.ArtProvider.GetBitmap(str(ed_glob.ID_COPY), wx.ART_MENU)
+            self.menuicons['cut'] = wx.ArtProvider.GetBitmap(str(ed_glob.ID_CUT), wx.ART_MENU)
+            self.menuicons['paste'] = wx.ArtProvider.GetBitmap(str(ed_glob.ID_PASTE), wx.ART_MENU)
+            self.menuicons['delete'] = wx.ArtProvider.GetBitmap(str(ed_glob.ID_DELETE), wx.ART_MENU)
+
+        except ImportError:
+            folder = wx.ArtProvider_GetBitmap(wx.ART_FOLDER, wx.ART_OTHER, isz)
+            folderopen = wx.ArtProvider_GetBitmap(wx.ART_FOLDER_OPEN, wx.ART_OTHER, isz)
+            self.icons['folder'] = il.Add(folder)
+            self.icons['folder-open'] = il.Add(folderopen)
+            self.menuicons['copy'] = wx.ArtProvider_GetBitmap(wx.ART_COPY, wx.ART_OTHER, isz)
+            self.menuicons['cut'] = wx.ArtProvider_GetBitmap(wx.ART_CUT, wx.ART_OTHER, isz)
+            self.menuicons['paste'] = wx.ArtProvider_GetBitmap(wx.ART_PASTE, wx.ART_OTHER, isz)
+            self.menuicons['delete'] = wx.ArtProvider_GetBitmap(wx.ART_DELETE, wx.ART_OTHER, isz)
+
+        self.menuicons['blank'] = FileIcons.getBlankBitmap()
+        self.menuicons['sc-commit'] = FileIcons.getScCommitBitmap()
+        self.menuicons['sc-patch'] = FileIcons.getScPatchBitmap()
+        self.menuicons['sc-add'] = FileIcons.getScAddBitmap()
+        self.menuicons['sc-diff'] = FileIcons.getScDiffBitmap()
+        self.menuicons['sc-history'] = FileIcons.getScHistoryBitmap()
+        self.menuicons['sc-remove'] = FileIcons.getScRemoveBitmap()
+        self.menuicons['sc-status'] = FileIcons.getScStatusBitmap()
+        self.menuicons['sc-update'] = FileIcons.getScUpdateBitmap()
+        self.menuicons['sc-revert'] = FileIcons.getScRevertBitmap()
+
+        self.icons['file'] = il.Add(FileIcons.getFileBitmap())
+        
+        # Create badged icons
+        for badge in ['uptodate', 'modified', 'conflict',
+                      'added', 'merge', 'inaccessible']:
+            badgeicon = getattr(FileIcons, 'getBadge' + badge.title() + \
+                                'Bitmap')().ConvertToImage()
+            badgeicon.Rescale(11, 11, wx.IMAGE_QUALITY_HIGH)
+            for icotype in ['file', 'folder', 'folder-open']:
+                icon = wx.MemoryDC()
+                if icotype == 'file':
+                    tbmp = FileIcons.getFileBitmap()
+                elif icotype == 'folder':
+                    tbmp = folder
+                else:
+                    tbmp = folderopen
+
+                icon.SelectObject(tbmp)
+                icon.SetBrush(wx.TRANSPARENT_BRUSH)
+                if wx.Platform == '__WXGTK__':
+                    x, y = 3, 4
+                else:
+                    x, y = 5, 5
+                icon.DrawBitmap(wx.BitmapFromImage(badgeicon), x, y, False)
+                icon.SelectObject(wx.NullBitmap)
+                self.icons[icotype + '-' + badge] = il.Add(tbmp)
+
+        self.icons['project-add'] = il.Add(FileIcons.getProjectAddBitmap())
+        self.icons['project-delete'] = il.Add(FileIcons.getProjectDeleteBitmap())
+
+        self.tree.SetImageList(il)
+        self.il = il # Save reference to the image list
 
     def saveProjects(self):
         """ Save projects to config file """
@@ -490,6 +518,14 @@ class ProjectTree(wx.Panel):
         self.tree.SortChildren(parent)
         
         evt.Skip()
+
+    def OnThemeChange(self, msg):
+        """Update the icons when a theme change method has been recieved
+        from Editra's preference dialog.
+
+        """
+        self._setupIcons()
+        self.tree.Refresh()
 
     def getSelectedNodes(self):
         """ Get the selected items from the tree """
@@ -1757,21 +1793,6 @@ class ProjectTree(wx.Panel):
                 if not flag:
                     return
                 time.sleep(1)
-        
-    def __del__(self):
-        """ Clean up resources """
-        # Kill all watcher threads
-        for value in self.watchers.values():
-            value.pop()
-            
-        # Stop any currently running source control threads
-        for t in self.scThreads:
-            t._Thread__stop()
-        
-        # Clean up tempdir
-        if self.tempdir:
-            shutil.rmtree(self.tempdir, ignore_errors=True)
-        diffwin.CleanupTempFiles()
 
 #-----------------------------------------------------------------------------#
 
