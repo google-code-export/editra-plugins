@@ -251,6 +251,7 @@ generate_files () {
             fi
         done
     else
+        # TODO: Remove any trailing / from the path
         do_one_build "$WORKPATH"
     fi
 
