@@ -17,6 +17,7 @@ Support for the following languages
   * Lisp
   * Lua
   * Nullsoft Installer Scripts (NSIS)
+  * Perl
   * Python
   * Tcl/Tk
 
