@@ -11,6 +11,7 @@ Released:
 New:
 +Support for Bazaar version control system
 +Make Patch command for making (unified) patches
++Syncronize icons with Editra when the theme is changed
 
 Bug Fixes:
 +Expanding directories that don't have permissions
