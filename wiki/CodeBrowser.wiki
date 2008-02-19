@@ -12,14 +12,20 @@ CodeBrowser is a plugin for browsing classes, variables and other significant el
 
 Support for the following languages
 
-  * Bash, Korn, and C Shell scripts
-  * Configuration Files (ini)
-  * Lisp
-  * Lua
-  * Nullsoft Installer Scripts (NSIS)
-  * Perl
-  * Python
-  * Tcl/Tk
+  * Ada (Procedure Definitions)
+  * Cascading Style Sheets (Global Classes, Global Identities)
+  * Configuration Files (ini) (sections, keys)
+  * Dos Batch Scripts (Labels)
+  * Editra Style Sheets (Style Tags Definitions)
+  * Fortran (Programs, Subroutines, Functions)
+  * Lisp (Function Definitions)
+  * Lua (Function Definitions)
+  * Nullsoft Installer Scripts (Defines, Functions, Sections)
+  * Perl (Packages, Subroutine Declarations, Subroutine Definitions)
+  * Php (Classes, Class Variables, Class Methods, Functions)
+  * Python (Classes, Class/Global Variables, Function Definitions)
+  * Shell Scripts (Function Definitions)
+  * Tcl/Tk (Procedure Definitions)
 
 = Installation =
 
