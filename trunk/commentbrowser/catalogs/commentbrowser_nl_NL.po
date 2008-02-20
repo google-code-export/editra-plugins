@@ -1,0 +1,54 @@
+# Dutch translation for editra
+# Copyright (c) 2008 Rosetta Contributors and Canonical Ltd 2008
+# This file is distributed under the same license as the editra package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, 2008.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: editra\n"
+"Report-Msgid-Bugs-To: FULL NAME <EMAIL@ADDRESS>\n"
+"POT-Creation-Date: 2008-01-24 17:39-0600\n"
+"PO-Revision-Date: 2008-02-18 18:53+0000\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: Dutch <nl@li.org>\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"X-Launchpad-Export-Date: 2008-02-19 08:00+0000\n"
+"X-Generator: Launchpad (build Unknown)\n"
+
+#: commentbrowser/commentbrowser/cbrowser.py:128
+msgid "All opened files"
+msgstr "Alle geopende bestanden"
+
+#: commentbrowser/commentbrowser/cbrowser.py:46
+msgid "Comment Browser"
+msgstr "Commentaar verkenner"
+
+#: commentbrowser/commentbrowser/cbrowserlistctrl.py:81
+msgid "Description"
+msgstr "Omschrijving"
+
+#: commentbrowser/commentbrowser/cbrowserlistctrl.py:82
+msgid "File"
+msgstr "Bestand"
+
+#: commentbrowser/commentbrowser/cbrowserlistctrl.py:83
+msgid "Line"
+msgstr "Regel"
+
+#: commentbrowser/commentbrowser/cbrowser.py:115
+msgid "Open Comment Browser Sidepanel"
+msgstr "open commentaar verkenner paneel"
+
+#: commentbrowser/commentbrowser/cbrowser.py:132
+msgid "Taskfilter: "
+msgstr "Taak filter: "
+
+#: commentbrowser/commentbrowser/cbrowserlistctrl.py:80
+msgid "Type"
+msgstr "Type"
+
+#: commentbrowser/commentbrowser/cbrowser.py:142
+msgid "Update"
+msgstr "Bijwerken"
