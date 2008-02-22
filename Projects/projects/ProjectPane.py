@@ -11,15 +11,15 @@ files to the Recycle Bin or Trash.
 
 While the file management utilities are useful, the source control functions
 are where the majority of the functionality of the ProjectPane lies.
-Currently, the ProjectPane has support for CVS, GIT, and Subversion.  It 
+Currently, the ProjectPane has support for CVS, GIT, and Subversion.  It
 is possible to create objects to handle other source control systems
 as well (see SourceControl.py).  The ProjectPane uses a non-invasive approach
 to handling source control.  It doesn't check files out or browse repositories,
-it simply detects directories and files that are under source control and 
+it simply detects directories and files that are under source control and
 gives you access to the operations available to that system.  When properly
 configured, files and folders under source control will display the status
-of the file/folder as a badge on the icon.  The right-click menu gives you 
-access to source control operations such as status updates, committing, 
+of the file/folder as a badge on the icon.  The right-click menu gives you
+access to source control operations such as status updates, committing,
 removing, and reverting to the repository revision.
 
 But it doesn't end there.  Probably the most powerful feature of the ProjectPane
@@ -44,12 +44,12 @@ to your needs.  The general options are listed below:
     Diff Program -- you can choose to use an internal visuall diffing program
         or specify an external command.
 
-The source control options are even more extensive.  Each source control 
+The source control options are even more extensive.  Each source control
 repository has its own set of options.  You can set authentication information
 and environment variables for each repository.  It is also possible to use
 partial repository paths.  All settings from partial or full repository path
-matches will be applied.  The longer the match string, the higher the 
-precedence. All settings in the Default section have the lowest priority, but 
+matches will be applied.  The longer the match string, the higher the
+precedence. All settings in the Default section have the lowest priority, but
 are applied to all repositories.
 
 """
@@ -60,18 +60,18 @@ __scid__ = "$Id$"
 
 #-----------------------------------------------------------------------------#
 # Imports
-import wx 
-import os 
-import time 
-import threading 
-import stat 
+import wx
+import os
+import time
+import threading
+import stat
 import fnmatch
-import re 
+import re
 import FileIcons
 import subprocess
 import shutil
 import Trash
-import wx.lib.delayedresult 
+import wx.lib.delayedresult
 import diffwin
 
 import ConfigDialog
@@ -130,7 +130,7 @@ FILE_TYPES = {
     _('Php File'): {'ext':'.php', 'template':'<?php\n\n?>'},
     _('Python File'): {'ext':'.py', 'template':'#!/usr/bin/env python\n\n'},
 }
-    
+
 ID_PROJECTPANE = wx.NewId()
 ID_PROJECTTREE = wx.NewId()
 
@@ -195,7 +195,7 @@ class ProjectTree(wx.Panel):
 
     def __init__(self, parent, log):
         # Use the WANTS_CHARS style so the panel doesn't eat the Return key.
-        wx.Panel.__init__(self, parent, -1, 
+        wx.Panel.__init__(self, parent, -1,
                           style=wx.WANTS_CHARS|wx.SUNKEN_BORDER)
 
         self.Bind(wx.EVT_SIZE, self.OnSize)
@@ -226,27 +226,27 @@ class ProjectTree(wx.Panel):
 
         # Threads that watch directories corresponding to open folders
         self.watchers = {}
-        
+
         # Temporary directory for all working files
         self.tempdir = None
-        
+
         # Information for copy/cut/paste of files
         self.clipboard = {'files' : [], 'delete' : False}
-        
+
         # Notebook tab is opening because another was closed
         self.isClosing = False
-        
+
         # Number of seconds to allow a source control command to run
         # before timing out
         self.scTimeout = 60
-        
+
         # Storage for currently running source control threads
         self.scThreads = {}
-        
+
         # Create root of tree
         self.root = self.tree.AddRoot('Projects')
         self.tree.SetPyData(self.root, None)
-        self.tree.SetItemImage(self.root, self.icons['folder'], 
+        self.tree.SetItemImage(self.root, self.icons['folder'],
                                wx.TreeItemIcon_Normal)
         self.tree.SetItemImage(self.root, self.icons['folder-open'],
                                 wx.TreeItemIcon_Expanded)
@@ -291,11 +291,11 @@ class ProjectTree(wx.Panel):
         # Kill all watcher threads
         for value in self.watchers.values():
             value.pop()
-            
+
         # Stop any currently running source control threads
         for t in self.scThreads:
             t._Thread__stop()
-        
+
         # Clean up tempdir
         if self.tempdir:
             shutil.rmtree(self.tempdir, ignore_errors=True)
@@ -340,7 +340,7 @@ class ProjectTree(wx.Panel):
         self.menuicons['sc-revert'] = FileIcons.getScRevertBitmap()
 
         self.icons['file'] = il.Add(FileIcons.getFileBitmap())
-        
+
         # Create badged icons
         for badge in ['uptodate', 'modified', 'conflict',
                       'added', 'merge', 'inaccessible']:
@@ -380,23 +380,23 @@ class ProjectTree(wx.Panel):
             if item not in projects:
                 self.config.addProject(item)
         self.config.save()
-    
+
     def loadProjects(self):
         """ Add all projects from config to tree """
-        items = sorted([(os.path.basename(x), x) 
+        items = sorted([(os.path.basename(x), x)
                         for x in self.config.getProjects().keys()])
         for item in items:
-            self.addProject(item[1], save=False) 
+            self.addProject(item[1], save=False)
 
     def addProject(self, path, save=True):
         """
         Add a project for the given path
-        
+
         Required Arguments:
         path -- full path to the project directory
-        
+
         Returns: tree node for the project
-        
+
         """
         node = self.tree.AppendItem(self.tree.GetRootItem(),
                                     os.path.basename(path))
@@ -404,7 +404,7 @@ class ProjectTree(wx.Panel):
         self.tree.AppendItem(proj, '')  # <- workaround for windows
         self.tree.SetItemHasChildren(node)
         self.tree.SetPyData(node, {'path' : path})
-        self.tree.SetItemImage(node, self.icons['folder'], 
+        self.tree.SetItemImage(node, self.icons['folder'],
                                wx.TreeItemIcon_Normal)
         self.tree.SetItemImage(node, self.icons['folder-open'],
                                 wx.TreeItemIcon_Expanded)
@@ -438,19 +438,19 @@ class ProjectTree(wx.Panel):
     def getChildren(self, parent):
         """
         Return a generator to loop over all children of given node
-                
+
         Required Arguments:
         parent -- node to search
-        
+
         Returns: list of child nodes
-        
+
         """
         if not parent.IsOk():
             return
         child, cookie = self.tree.GetFirstChild(parent)
         if not child or not child.IsOk():
             return
-        yield child    
+        yield child
         while True:
             if not parent.IsOk():
                 return
@@ -462,19 +462,19 @@ class ProjectTree(wx.Panel):
     def OnSyncNode(self, evt):
         """
         Synchronize the tree nodes with the file system changes
-        
+
         Required Arguments:
         added -- files that were added
         modified -- files that were modified
         deleted -- files that were deleted
         parent -- tree node corresponding to the directory
-        
-        """            
+
+        """
         added, modified, deleted, parent = evt.GetValue()
         children = {}
         for child in self.getChildren(parent):
             children[self.tree.GetItemText(child)] = child
-            
+
         # Sort so that files in directories get operated on
         # before the directories themselves
         added = list(reversed(sorted(added)))
@@ -482,7 +482,7 @@ class ProjectTree(wx.Panel):
         deleted = list(reversed(sorted(deleted)))
 
         updates = []
-            
+
         if children:
             for item in deleted:
                 if item in children:
@@ -491,7 +491,7 @@ class ProjectTree(wx.Panel):
                        os.path.isdir(self.tree.GetPyData(node)['path']):
                         self.tree.Collapse(node)
                     if node.IsOk():
-                        self.tree.Delete(node)                    
+                        self.tree.Delete(node)
 
             # Update status on modified files
             for item in modified:
@@ -514,9 +514,9 @@ class ProjectTree(wx.Panel):
 
         if items:
             self.scStatus(items)
-        
+
         self.tree.SortChildren(parent)
-        
+
         evt.Skip()
 
     def OnThemeChange(self, msg):
@@ -530,23 +530,23 @@ class ProjectTree(wx.Panel):
     def getSelectedNodes(self):
         """ Get the selected items from the tree """
         return self.tree.GetSelections()
-                        
+
     def getSelectedPaths(self):
         """ Get paths associated with selected items """
         paths = []
         for item in self.getSelectedNodes():
             paths.append(self.tree.GetPyData(item)['path'])
         return paths
-        
+
     def OnMainWindowExit(self, evt):
         """ Shutdown threads when main window closes """
         evt.Skip()
-    
+
     def OnPageClosing(self, evt):
         """ Notebook tab was closed """
         self.isClosing = True
         evt.Skip()
-        
+
     def OnPageChanged(self, evt):
         """ Notebook tab was changed """
         evt.Skip()
@@ -558,18 +558,18 @@ class ProjectTree(wx.Panel):
         if self.isClosing:
             self.isClosing = False
             return
-        
+
         notebook = evt.GetEventObject()
         pg_num = evt.GetSelection()
         txt_ctrl = notebook.GetPage(pg_num)
 
-        # With the text control (ed_stc.EditraStc) this will return the full 
-        # path of the file or a wx.EmptyString if the buffer does not contain 
+        # With the text control (ed_stc.EditraStc) this will return the full
+        # path of the file or a wx.EmptyString if the buffer does not contain
         # an on disk file
         filename = txt_ctrl.GetFileName()
         if filename in self.getSelectedPaths():
             return
-        
+
         for project in self.getChildren(self.root):
             dir = path = self.tree.GetPyData(project)['path']
             if not os.path.isdir(dir):
@@ -601,7 +601,7 @@ class ProjectTree(wx.Panel):
         item, flags = self.tree.HitTest(pt)
         if item:
             self.log.WriteText("OnRightClick: %s, %s, %s\n" %
-                               (self.tree.GetItemText(item), 
+                               (self.tree.GetItemText(item),
                                 type(item), item.__class__))
             self.tree.SelectItem(item)
 
@@ -609,7 +609,7 @@ class ProjectTree(wx.Panel):
         """Enable label editing with right clicks"""
         pt = event.GetPosition()
         item, flags = self.tree.HitTest(pt)
-        if item:        
+        if item:
             self.log.WriteText("OnRightUp: %s (manually starting label edit)\n"
                                % self.tree.GetItemText(item))
             self.tree.EditLabel(item)
@@ -617,7 +617,7 @@ class ProjectTree(wx.Panel):
     def OnBeginEdit(self, event):
         """Begin editing of tree item"""
         self.log.WriteText("OnBeginEdit\n")
- 
+
     def OnEndEdit(self, event):
         """ Finish editing tree node label """
         if event.IsEditCancelled():
@@ -626,7 +626,7 @@ class ProjectTree(wx.Panel):
         data = self.tree.GetPyData(node)
         path = data['path']
         newpath = os.path.join(os.path.dirname(path), event.GetLabel())
-        try: 
+        try:
             os.rename(path, newpath)
             data['path'] = newpath
         except OSError:
@@ -651,7 +651,7 @@ class ProjectTree(wx.Panel):
     def OnItemExpanded(self, event):
         """
         When an item is expanded, track the contents of that directory
-        
+
         """
         parent = event.GetItem()
         if not parent:
@@ -668,9 +668,9 @@ class ProjectTree(wx.Panel):
             for item in os.listdir(path):
                 self.addPath(parent, item)
         except (OSError, IOError):
-            self.tree.SetItemImage(parent, self.icons['folder-inaccessible'], 
+            self.tree.SetItemImage(parent, self.icons['folder-inaccessible'],
                                    wx.TreeItemIcon_Normal)
-            self.tree.SetItemImage(parent, self.icons['folder-inaccessible'], 
+            self.tree.SetItemImage(parent, self.icons['folder-inaccessible'],
                                    wx.TreeItemIcon_Expanded)
             self.tree.Delete(self.tree.GetFirstChild(parent)[0])
             return
@@ -680,19 +680,19 @@ class ProjectTree(wx.Panel):
         self.tree.SortChildren(parent)
         self.addDirectoryWatcher(parent)
         self.scStatus([parent])
-        
+
     def getSCSystem(self, path):
         """ Determine source control system being used on path if any """
         for key, value in self.config.getSCSystems().items():
             if value['instance'].isControlled(path):
-                return value            
+                return value
 
     def scAdd(self, nodes):
         """ Send an add to repository command to current control system """
         self.scCommand(nodes, 'add')
 
     def scRemove(self, nodes):
-        """ 
+        """
         Send an remove from repository command to current control system
 
         """
@@ -708,12 +708,12 @@ class ProjectTree(wx.Panel):
 
     def scCheckout(self, nodes):
         """ Send an checkout command to current control system """
-        self.scCommand(nodes, 'checkout') 
+        self.scCommand(nodes, 'checkout')
 
     def scStatus(self, nodes):
         """ Send an status command to current control system """
-        self.scCommand(nodes, 'status') 
-        
+        self.scCommand(nodes, 'status')
+
     def scHistory(self, nodes):
         """ Open source control history window """
         if not nodes:
@@ -724,16 +724,16 @@ class ProjectTree(wx.Panel):
             path = self.tree.GetPyData(node)['path']
             win = HistoryWindow(self, path, self, node, path)
             win.Show()
-        
-    def scCommit(self, nodes, **options): 
+
+    def scCommit(self, nodes, **options):
         """ Commit files to source control """
         if not self.isSingleRepository(nodes):
             return
-            
+
         while True:
             paths = list()
             for node in nodes:
-                try: 
+                try:
                     data = self.tree.GetPyData(node)
                 except:
                     data = {}
@@ -746,7 +746,7 @@ class ProjectTree(wx.Panel):
                 else:
                     paths.append(data['path'])
 
-            ted = CommitDialog(self, _("Commit Dialog"), 
+            ted = CommitDialog(self, _("Commit Dialog"),
                                _("Enter your commit message:"), paths)
 
             if ted.ShowModal() != wx.ID_OK:
@@ -776,22 +776,22 @@ class ProjectTree(wx.Panel):
             wx.CallAfter(wx.PostEvent, self, evt)
 
     def isSingleRepository(self, nodes):
-        """ 
+        """
         Are all selected files from the same repository ?
-        
+
         Required Arguments:
         nodes -- list of nodes to test
-        
+
         Returns: boolean indicating if all nodes are in the same repository
             (True), or if they are not (False).
-        
+
         """
         previous = ''
-        for node in nodes:             
+        for node in nodes:
             # Get node data
-            try: 
+            try:
                 path = self.tree.GetPyData(node)['path']
-            except: 
+            except:
                 continue
             try:
                 reppath = self.getSCSystem(path)['instance'].getRepository(path)
@@ -801,48 +801,48 @@ class ProjectTree(wx.Panel):
             if not previous:
                 previous = reppath
             elif previous != reppath:
-                wx.MessageDialog(self, 
+                wx.MessageDialog(self,
                    _('You can not execute source control commands across multiple repositories.'),
-                   _('Selected files are from multiple repositories'), 
+                   _('Selected files are from multiple repositories'),
                    style=wx.OK|wx.ICON_ERROR).ShowModal()
                 return False
         return True
 
     def scCommand(self, nodes, command, callback=None, **options):
         """
-        Run a source control command 
-        
+        Run a source control command
+
         Required Arguments:
         nodes -- selected tree nodes
         command -- name of command type to run
-        
+
         """
         if not self.isSingleRepository(nodes):
             return
-            
+
         try:
             self.GetParent().StartBusy()
         except:
             pass
-        
+
         def run(callback, nodes, command, **options):
             """Does the running of the command"""
             concurrentcmds = ['status', 'history']
             NODE, DATA, SC = 0, 1, 2
             nodeinfo = []
-            for node in nodes: 
+            for node in nodes:
                 if not node.IsOk():
-                    return 
-                                   
+                    return
+
                 # Get node data
                 try:
                     data = self.tree.GetPyData(node)
                 except:
                     data = {}
-                
+
                 # node, data, sc
                 info = [node, data, None]
-                
+
                 # See if the node already has an operation running
                 i = 0
                 while data.get('sclock', None):
@@ -866,22 +866,22 @@ class ProjectTree(wx.Panel):
                     else:
                         continue
                 info[SC] = sc
-                
+
                 nodeinfo.append(info)
-                
+
             # Lock node while command is running
             if command not in concurrentcmds:
                 for node, data, sc in nodeinfo:
                     data['sclock'] = command
 
-            rc = True            
+            rc = True
             try:
                 # Find correct method
                 method = getattr(sc['instance'], command, None)
                 if method:
                     # Run command (only if it isn't the status command)
                     if command != 'status':
-                        rc = self._timeoutCommand(callback, method, 
+                        rc = self._timeoutCommand(callback, method,
                              [x[DATA]['path'] for x in nodeinfo], **options)
 
             finally:
@@ -893,12 +893,12 @@ class ProjectTree(wx.Panel):
                 # Unlock
                 if command not in concurrentcmds:
                     for node, data, sc in nodeinfo:
-                        del data['sclock'] 
-                            
-        wx.lib.delayedresult.startWorker(self.endSCCommand, run, 
-                                         wargs=(callback, nodes, command), 
+                        del data['sclock']
+
+        wx.lib.delayedresult.startWorker(self.endSCCommand, run,
+                                         wargs=(callback, nodes, command),
                                          wkwargs=options)
-                                         
+
     def _timeoutCommand(self, callback, *args, **kwargs):
         """ Run command, but kill it if it takes longer than `timeout` secs """
         result = []
@@ -910,7 +910,7 @@ class ProjectTree(wx.Panel):
 
         # Insert result object to catch output
         args = list(args)
-        args.insert(0, result)    
+        args.insert(0, result)
 
         # Start thread
         t = threading.Thread(target=resultWrapper, args=args, kwargs=kwargs)
@@ -918,7 +918,7 @@ class ProjectTree(wx.Panel):
         self.scThreads[t] = True
         t.join(self.scTimeout)
         del self.scThreads[t]
-        
+
         if t.isAlive():
             t._Thread__stop()
             #print 'COMMAND TIMED OUT'
@@ -927,11 +927,11 @@ class ProjectTree(wx.Panel):
         if callback is not None:
             callback(result[0])
         return True
-        
+
     def _updateStatus(self, node, data, sc):
         """
         Update the icons in the tree view to show the status of the files
-                
+
         """
         # Update status of nodes
         updates = []
@@ -952,23 +952,23 @@ class ProjectTree(wx.Panel):
                         icon = self.icons.get('folder-' + \
                                               status[text].get('status', ''))
                         if icon and child.IsOk():
-                            updates.append((self.tree.SetItemImage, child, 
+                            updates.append((self.tree.SetItemImage, child,
                                             icon, wx.TreeItemIcon_Normal))
                         # Open folder icon
                         icon = self.icons.get('folder-open-' + \
                                               status[text].get('status', ''))
-                        if icon and child.IsOk():   
-                            updates.append((self.tree.SetItemImage, child, 
+                        if icon and child.IsOk():
+                            updates.append((self.tree.SetItemImage, child,
                                             icon, wx.TreeItemIcon_Expanded))
                         # Update children status if opened
                         if child.IsOk() and self.tree.IsExpanded(child):
-                            self._updateStatus(child, 
+                            self._updateStatus(child,
                                                self.tree.GetPyData(child), sc)
                     else:
                         icon = self.icons.get('file-' + \
                                               status[text].get('status', ''))
                         if icon and child.IsOk():
-                            updates.append((self.tree.SetItemImage, child, 
+                            updates.append((self.tree.SetItemImage, child,
                                             icon, wx.TreeItemIcon_Normal))
                         #if 'tag' in status[text]:
                         #    updates.append((self.tree.SetToolTip,
@@ -979,7 +979,7 @@ class ProjectTree(wx.Panel):
                 if text in status:
                     icon = self.icons.get('file-' + status[text].get('status', ''))
                     if icon and node.IsOk():
-                        updates.append((self.tree.SetItemImage, node, 
+                        updates.append((self.tree.SetItemImage, node,
                                         icon, wx.TreeItemIcon_Normal))
                     #if 'tag' in status[text]:
                     #    updates.append((self.tree.SetToolTip,
@@ -997,9 +997,9 @@ class ProjectTree(wx.Panel):
             update = list(update)
             method = update.pop(0)
             try:
-                if update[0].IsOk(): 
+                if update[0].IsOk():
                     method(*update)
-            except: 
+            except:
                 pass
         evt.Skip()
 
@@ -1030,20 +1030,20 @@ class ProjectTree(wx.Panel):
             self.GetParent().StopBusy()
         except wx.PyDeadObjectError:
             pass
-        
-    def compareRevisions(self, path, rev1=None, date1=None, 
+
+    def compareRevisions(self, path, rev1=None, date1=None,
                          rev2=None, date2=None, callback=None):
         """
-        Compare the playpen path to a specific revision, or compare two 
+        Compare the playpen path to a specific revision, or compare two
         revisions
-        
+
         Required Arguments:
         path -- absolute path of file to compare
-        
+
         Keyword Arguments:
         rev1/date1 -- first file revision/date to compare against
         rev2/date2 -- second file revision/date to campare against
-        
+
         """
         def diff(path, rev1, date1, rev2, date2, callback):
             """ Do the actual diff of two files by sending the files
@@ -1062,7 +1062,7 @@ class ProjectTree(wx.Panel):
                 if callback is not None:
                     callback()
                 return
-                
+
             content1 = content2 = ext1 = ext2 = None
 
             # Grab the first specified revision
@@ -1071,29 +1071,29 @@ class ProjectTree(wx.Panel):
                 if content1 and content1[0] is None:
                     if callback is not None:
                         callback()
-                    return wx.MessageDialog(self, 
+                    return wx.MessageDialog(self,
                                             _('The requested file could not '
                                               'be retrieved from the source '
-                                              'control system.'), 
-                                            _('Could not retrieve file'), 
+                                              'control system.'),
+                                            _('Could not retrieve file'),
                                             style=wx.OK|wx.ICON_ERROR).ShowModal()
                 content1 = content1[0]
                 if rev1:
                     ext1 = rev1
                 elif date1:
                     ext1 = date1
-        
+
             # Grab the second specified revision
             if rev2 or date2:
                 content2 = sc['instance'].fetch([path], rev=rev2, date=date2)
                 if content2 and content2[0] is None:
                     if callback is not None:
                         callback()
-                    return wx.MessageDialog(self, 
+                    return wx.MessageDialog(self,
                                             _('The requested file could not '
                                               'be retrieved from the source '
                                               'control system.'),
-                                            _('Could not retrieve file'), 
+                                            _('Could not retrieve file'),
                                             style=wx.OK|wx.ICON_ERROR).ShowModal()
                 content2 = content2[0]
                 if rev2:
@@ -1106,15 +1106,15 @@ class ProjectTree(wx.Panel):
                 if content1 and content1[0] is None:
                     if callback is not None:
                         callback()
-                    return wx.MessageDialog(self, 
+                    return wx.MessageDialog(self,
                                             _('The requested file could not '
                                               'be retrieved from the source '
                                               'control system.'),
-                                            _('Could not retrieve file'),  
+                                            _('Could not retrieve file'),
                                             style=wx.OK|wx.ICON_ERROR).ShowModal()
                 content1 = content1[0]
                 ext1 = 'previous'
-                
+
             if not self.tempdir:
                 import tempfile
                 self.tempdir = tempfile.mkdtemp()
@@ -1145,21 +1145,21 @@ class ProjectTree(wx.Panel):
                 tfile2 = open(path2, 'w')
                 tfile2.write(content2)
                 tfile2.close()
-            
+
             # Run comparison program
             if self.config.getBuiltinDiff() or \
                not (self.config.getDiffProgram()):
                 diffwin.GenerateDiff(path2, path1, html=True)
             else:
-                subprocess.call([self.config.getDiffProgram(), path2, path1]) 
-            
+                subprocess.call([self.config.getDiffProgram(), path2, path1])
+
             if callback is not None:
                 callback()
-            
+
         t = threading.Thread(target=diff,
                              args=(path, rev1, date1, rev2, date2, callback))
         t.setDaemon(True)
-        t.start()        
+        t.start()
 
     def compareToPrevious(self, node):
         """ Use opendiff to compare playpen version to repository version """
@@ -1172,24 +1172,24 @@ class ProjectTree(wx.Panel):
             return
         self.compareRevisions(path)
 
-    def addDirectoryWatcher(self, node):                
+    def addDirectoryWatcher(self, node):
         """
         Add a directory watcher thread to the given node
-        
-        Directory watchers keep tree nodes and the file system 
+
+        Directory watchers keep tree nodes and the file system
         constantly in sync
-        
+
         Required Arguments:
         node -- the tree node to keep in sync
-        
+
         """
         data = self.tree.GetPyData(node)
         path = data['path']
         # Start a directory watcher to keep branch in sync.
         # When the flag variable is emptied, the thread stops.
         flag = [1]
-        data['watcher'] = w = threading.Thread(target=self.watchDirectory, 
-                                               args=(path,), 
+        data['watcher'] = w = threading.Thread(target=self.watchDirectory,
+                                               args=(path,),
                                                kwargs={'flag':flag,
                                                        'data':node})
         w.flag = flag
@@ -1200,18 +1200,18 @@ class ProjectTree(wx.Panel):
     def addPath(self, parent, name):
         """
         Add a file system path to the given node
-        
-        The new node can be a directory or a file.  
+
+        The new node can be a directory or a file.
         Either one will be handled appropriately.
-        
+
         Required Arguments:
         parent -- tree node to add the new node to
         name -- name of the item to add
-        
-        Returns: newly created node or None if the path isn't a file or 
+
+        Returns: newly created node or None if the path isn't a file or
             directory.  It will also return None if the path is being
             filtered out.
-        
+
         """
         if name.endswith('\r'):
             return
@@ -1242,13 +1242,13 @@ class ProjectTree(wx.Panel):
     def addFolder(self, parent, name):
         """
         Add a folder to the given tree node
-        
+
         Required Arguments:
         parent -- node to add the folder to
         name -- name of node to add
-        
+
         Returns: newly created node
-        
+
         """
         parentpath = self.tree.GetPyData(parent)['path']
         node = self.tree.AppendItem(parent, name)
@@ -1266,13 +1266,13 @@ class ProjectTree(wx.Panel):
     def addFile(self, parent, name):
         """
         Add a file to the given tree node
-        
+
         Required Arguments:
         parent -- node to add the file to
         name -- name of node to add
-        
+
         Returns: newly created node
-        
+
         """
         parentpath = self.tree.GetPyData(parent)['path']
         node = self.tree.AppendItem(parent, name)
@@ -1283,18 +1283,18 @@ class ProjectTree(wx.Panel):
     def OnItemCollapsed(self, event):
         """
         When an item is collapsed, quit tracking the folder contents
-        
+
         """
         item = event.GetItem()
         if not item:
             return
-        
+
         # Collapse all children first so that their watchers get deleted
         self.tree.CollapseAllChildren(item)
-        
+
         self.tree.DeleteChildren(item)
         self.tree.AppendItem(item, '')  # <- Dummy node workaround for MSW
-        
+
         # Kill the watcher thread
         data = self.tree.GetPyData(item)
         if data and 'watcher' in data:
@@ -1323,7 +1323,7 @@ class ProjectTree(wx.Panel):
         #
         # Yet another anternate way to do IDs. Some prefer them up top to
         # avoid clutter, some prefer them close to the object of interest
-        # for clarity. 
+        # for clarity.
         if not hasattr(self, "popupIDEdit"):
             self.popupIDEdit = wx.NewId()
             self.popupIDOpen = wx.NewId()
@@ -1407,8 +1407,8 @@ class ProjectTree(wx.Panel):
         # Do we have something to paste
         pastable = False
         if len(paths) == 1 and os.path.isdir(paths[0]):
-            pastable = not (not (self.clipboard['files'])) 
-        
+            pastable = not (not (self.clipboard['files']))
+
         # Is directory controlled by source control
         scenabled = False
         for item in paths:
@@ -1418,12 +1418,12 @@ class ProjectTree(wx.Panel):
 
         # Add or remove
         if scenabled:
-            addremove = (self.popupIDSCRemove, 
+            addremove = (self.popupIDSCRemove,
                          _("Remove from repository"), 'sc-remove', True)
         else:
-            addremove = (self.popupIDSCAdd, _("Add to repository"), 
+            addremove = (self.popupIDSCAdd, _("Add to repository"),
                          'sc-add', True)
-            
+
         # New file / folder submenu
         newmenu = wx.Menu()
         newmenu.AppendItem(wx.MenuItem(newmenu, self.popupIDNewFolder, _('Folder')))
@@ -1445,7 +1445,7 @@ class ProjectTree(wx.Panel):
             (self.popupIDCopy, _('Copy'), 'copy', True),
             (self.popupIDPaste, _('Paste'), 'paste', pastable),
             (None, None, None, None),
-            (self.popupIDExecuteCommand, _('Execute command...'), None, True),            
+            (self.popupIDExecuteCommand, _('Execute command...'), None, True),
             (None, None, None, None),
             #(self.popupIDRename, _('Rename'), None, True),
             #(None, None, None, None),
@@ -1458,7 +1458,7 @@ class ProjectTree(wx.Panel):
             (self.popupIDSCRevert, _("Revert to repository version"), 'sc-revert', scenabled),
             addremove,
             (None, None, None, None),
-            (self.popupIDDelete, _("Move to " + TRASH), 'delete', False),
+            (self.popupIDDelete, _("Move to " + TRASH), 'delete', True),
         ]
         for menu_id, title, icon, enabled in items:
             if menu_id is None:
@@ -1470,7 +1470,7 @@ class ProjectTree(wx.Panel):
                 continue
 
             item = wx.MenuItem(menu, menu_id, _(title))
-            if icon: 
+            if icon:
                 item.SetBitmap(self.menuicons[icon])
             else:
                 item.SetBitmap(self.menuicons['blank'])
@@ -1481,7 +1481,7 @@ class ProjectTree(wx.Panel):
         # will be called before PopupMenu returns.
         self.PopupMenu(menu)
         menu.Destroy()
-        
+
     def onPopupNewFolder(self):
         """ Create a new folder from popup menu selection """
         node = self.getSelectedNodes()[0]
@@ -1516,10 +1516,10 @@ class ProjectTree(wx.Panel):
 
         if not key or key not in FILE_TYPES:
             return
-            
+
         # Get informatio about file type
         info = FILE_TYPES[key]
-        
+
         # Create unique name
         newpath = os.path.join(path, 'untitled file' + info['ext'])
         i = 1
@@ -1528,7 +1528,7 @@ class ProjectTree(wx.Panel):
             newpath = re.sub(r'-\d+$', r'', newpath)
             newpath += '-%d%s' % (i, info['ext'])
             i += 1
-        
+
         # Write template info
         f = open(newpath, 'w')
         f.write(info.get('template', '').replace('\n', eol))
@@ -1537,11 +1537,11 @@ class ProjectTree(wx.Panel):
     def onPopupEdit(self, event):
         """ Open the current file in the editor """
         return self.OnActivate(event)
-        
+
     def onPopupExecuteCommand(self):
         """ Execute commands on file system tree """
-    
-        ted = wx.TextEntryDialog(self, 
+
+        ted = wx.TextEntryDialog(self,
               _('The following command will be executed on all selected\n' \
                 'files and files contained in selected directories.'),
               _('Enter command to execute on all files'))
@@ -1559,10 +1559,10 @@ class ProjectTree(wx.Panel):
                     for fname in files:
                         #print command, os.path.join(root,f)
                         os.system('%s "%s"' % \
-                                  (command, os.path.join(root, fname))) 
+                                  (command, os.path.join(root, fname)))
             else:
                 #print command, item
-                os.system('%s "%s"' % (command, item)) 
+                os.system('%s "%s"' % (command, item))
 
     def onPopupOpen(self):
         """ Open the current file using Finder """
@@ -1583,7 +1583,7 @@ class ProjectTree(wx.Panel):
         """ Diff the file to the file in the repository """
         for node in self.getSelectedNodes():
             self.compareToPrevious(node)
-            
+
     def onPopupCut(self):
         """ Cut the files to the clipboard """
         self.clipboard['files'] = self.getSelectedPaths()
@@ -1595,10 +1595,10 @@ class ProjectTree(wx.Panel):
         """ Copy the files to the clipboard """
         self.clipboard['files'] = self.getSelectedPaths()
         self.clipboard['delete'] = False
-        
+
     def onPopupPaste(self):
         """ Paste the files to the selected directory """
-        try: 
+        try:
             self.GetParent().StartBusy()
         except:
             pass
@@ -1606,7 +1606,7 @@ class ProjectTree(wx.Panel):
         dest = self.getSelectedPaths()[0]
         if not os.path.isdir(dest):
             dest = os.path.dirname(dest)
-            
+
         def run(dest):
             delete = self.clipboard['delete']
             self.clipboard['delete'] = False
@@ -1627,19 +1627,19 @@ class ProjectTree(wx.Panel):
                     newclipboard.append(fname)
                     # Do we have more files to copy/move?
                     if i < (len(self.clipboard['files'])-1):
-                        rc = wx.MessageDialog(self, 
+                        rc = wx.MessageDialog(self,
                           _('The system returned the following message when ' \
                             'attempting to move/copy %s: %s. ' \
-                            'Do you wish to continue?') % (fname, msg), 
-                          _('Error occurred when copying/moving files'), 
+                            'Do you wish to continue?') % (fname, msg),
+                          _('Error occurred when copying/moving files'),
                           style=wx.YES_NO|wx.YES_DEFAULT|wx.ICON_ERROR).ShowModal()
                         if rc == wx.ID_NO:
-                            break 
+                            break
                     else:
-                        rc = wx.MessageDialog(self, 
+                        rc = wx.MessageDialog(self,
                           _('The system returned the following message when ' \
-                            'attempting to move/copy %s: %s.') % (fname, msg), 
-                          _('Error occurred when copying/moving files'), 
+                            'attempting to move/copy %s: %s.') % (fname, msg),
+                          _('Error occurred when copying/moving files'),
                           style=wx.OK|wx.ICON_ERROR).ShowModal()
             self.clipboard['files'] = newclipboard
 
@@ -1677,25 +1677,25 @@ class ProjectTree(wx.Panel):
         self.scAdd(self.getSelectedNodes())
 
     def onPopupDelete(self, event):
-        """ Delete selected files/directories """            
+        """ Delete selected files/directories """
         projects = self.getChildren(self.root)
-        selections = [(x, self.tree.GetPyData(x)['path']) 
+        selections = [(x, self.tree.GetPyData(x)['path'])
                       for x in self.getSelectedNodes()]
- 
+
         def delete():
             """Does the delete"""
             # Delete previously cut files
             for node, path in selections:
-                try: 
+                try:
                     Trash.moveToTrash(path)
                 except Exception, msg:
-                    rc = wx.MessageDialog(self, 
+                    rc = wx.MessageDialog(self,
                       _('An error occurred when attempting to remove ') + \
                       msg[1] + _('. Do you wish to continue?'),
-                      _('Error occurred when removing files'), 
+                      _('Error occurred when removing files'),
                       style=wx.YES_NO|wx.YES_DEFAULT|wx.ICON_ERROR).ShowModal()
                     if rc == wx.ID_NO:
-                        break 
+                        break
                     continue
 
                 # If node is a project, remove it
@@ -1704,13 +1704,13 @@ class ProjectTree(wx.Panel):
                     self.tree.Delete(node)
                     self.saveProjects()
 
-        if selections:             
+        if selections:
             threading.Thread(target=delete).start()
 
     def OnActivate(self, event):
         """
-        Handles item activations events. (i.e double clicked or 
-        enter is hit) and passes the clicked on file to be opened in 
+        Handles item activations events. (i.e double clicked or
+        enter is hit) and passes the clicked on file to be opened in
         the notebook.
 
         """
@@ -1739,30 +1739,30 @@ class ProjectTree(wx.Panel):
     def watchDirectory(self, path, data=None, flag=True, delay=2):
         """
         Watch a directory for changes
-    
+
         Required Arguments:
         path -- the path to watch
         func -- callback function with four arguments for added, modified,
-            and deleted files and the data passed in
+                and deleted files and the data passed in
         data -- arbitrary data that will be passed to `func`
         flag -- if flag evaluates to false, the function should exit
         delay -- number of seconds between each poll
-    
+
         """
         def getMTime(path):
             """ Get last modified times of all items in path """
             fileinfo = {}
-            try: 
+            try:
                 for item in os.listdir(path):
                     try:
                         fileinfo[item] = os.stat(os.path.join(path, item))[stat.ST_MTIME]
                     except OSError:
                         pass
             except OSError:
-                pass        
+                pass
             return fileinfo
-        
-        # Continuously compare directory listings for 
+
+        # Continuously compare directory listings for
         delay = max(1, int(delay))
         old = getMTime(path)
         while True:
@@ -1781,13 +1781,13 @@ class ProjectTree(wx.Panel):
 
             # Set file list up for next pass
             old = new
-            
+
             # Do callback if something changed
             if added or modified or deleted:
-                evt = SyncNodesEvent(ppEVT_SYNC_NODES, self.GetId(), 
+                evt = SyncNodesEvent(ppEVT_SYNC_NODES, self.GetId(),
                                        (added, modified, deleted, data))
-                wx.PostEvent(self, evt)
-            
+                wx.CallAfter(wx.PostEvent, self, evt)
+
             # Check for the kill signal every second until the delay is finished
             for i in range(delay):
                 if not flag:
@@ -1808,14 +1808,14 @@ class ProjectPane(wx.Panel):
     def __init__(self, parent, id=ID_PROJECTPANE, pos=wx.DefaultPosition,
                  size=wx.DefaultSize, style=wx.NO_BORDER):
         wx.Panel.__init__(self, parent, id, pos, size, style)
-        
+
         # Attributes
         self._mw = parent       # Save ref to owner window
         try:
             import ed_glob
             mb = self._mw.GetMenuBar()
             vm = mb.GetMenuByName("view")
-            self._mi = vm.InsertAlpha(self.ID_PROJECTS, _("Projects"), 
+            self._mi = vm.InsertAlpha(self.ID_PROJECTS, _("Projects"),
                                       _("Open Projects Sidepanel"),
                                       wx.ITEM_CHECK,
                                       after=ed_glob.ID_PRE_MARK)
@@ -1831,12 +1831,12 @@ class ProjectPane(wx.Panel):
 
         # Layout Panes
         self.buttonbox = wx.BoxSizer(wx.HORIZONTAL)
-        addbutton = wx.BitmapButton(self, self.ID_ADD_PROJECT, 
-                                    self.projects.il.GetBitmap(self.projects.icons['project-add']), 
+        addbutton = wx.BitmapButton(self, self.ID_ADD_PROJECT,
+                                    self.projects.il.GetBitmap(self.projects.icons['project-add']),
                                     style=wx.NO_BORDER)
         addbutton.SetToolTip(wx.ToolTip(_("Add Project")))
-        removebutton = wx.BitmapButton(self, self.ID_REMOVE_PROJECT, 
-                                       self.projects.il.GetBitmap(self.projects.icons['project-delete']), 
+        removebutton = wx.BitmapButton(self, self.ID_REMOVE_PROJECT,
+                                       self.projects.il.GetBitmap(self.projects.icons['project-delete']),
                                        style=wx.NO_BORDER)
         removebutton.SetToolTip(wx.ToolTip(_("Remove Project")))
 
@@ -1845,7 +1845,7 @@ class ProjectPane(wx.Panel):
         else:
             cfgbmp = wx.ArtProvider.GetBitmap(wx.ART_EXECUTABLE_FILE,
                                               wx.ART_MENU)
-        configbutton = wx.BitmapButton(self, self.ID_CONFIG, 
+        configbutton = wx.BitmapButton(self, self.ID_CONFIG,
                                        cfgbmp, style=wx.NO_BORDER)
         configbutton.SetToolTip(wx.ToolTip(_("Configure")))
 
@@ -1906,7 +1906,7 @@ class ProjectPane(wx.Panel):
         col1 = AdjustColour(col1, -20)
 
         rect = self.GetRect()
-        grad = gc.CreateLinearGradientBrush(0, 1, 0, 
+        grad = gc.CreateLinearGradientBrush(0, 1, 0,
                                             self.buttonbox.GetSize()[1],
                                             col2, col1)
         gc.SetBrush(grad)
@@ -1931,8 +1931,8 @@ class ProjectPane(wx.Panel):
             self.projects.removeSelectedProject()
         elif e_id == self.ID_CONFIG:
             if not self.FindWindowById(self.ID_CFGDLG):
-                cfg = ConfigDialog.ConfigDialog(self, self.ID_CFGDLG, 
-                                                self.projects.config) 
+                cfg = ConfigDialog.ConfigDialog(self, self.ID_CFGDLG,
+                                                self.projects.config)
                 cfg.Show()
             else:
                 pass
@@ -1979,7 +1979,7 @@ class ProjectPane(wx.Panel):
                 break
 
         if not running:
-            self.buttonbox.Add(self.busy, 0, 
+            self.buttonbox.Add(self.busy, 0,
                                wx.ALIGN_CENTER_VERTICAL | wx.ALIGN_RIGHT)
             self.buttonbox.Add((10, 10), 0, wx.ALIGN_RIGHT)
 
@@ -2006,7 +2006,7 @@ class CommitDialog(wx.Dialog):
 
         """
         wx.Dialog.__init__(self, parent, title=title)
-        
+
         # Attributes
         self._caption = wx.StaticText(self, label=caption)
         self._commit = wx.Button(self, wx.ID_OK, _("Commit"))
@@ -2024,7 +2024,7 @@ class CommitDialog(wx.Dialog):
 
         self._DefaultMessage(default)
         self._entry.SetFocus()
-        
+
         # Layout
         self._DoLayout()
         self.CenterOnParent()
@@ -2059,8 +2059,8 @@ class CommitDialog(wx.Dialog):
         csizer.Add(self._caption, 0, wx.ALIGN_LEFT, 5)
         sizer.Add(csizer, 0)
         sizer.Add((10, 10), 0)
-        esizer.AddMany([((10, 10), 0), 
-                        (self._entry, 1, wx.EXPAND), 
+        esizer.AddMany([((10, 10), 0),
+                        (self._entry, 1, wx.EXPAND),
                         ((10, 10), 0)])
         sizer.Add(esizer, 0, wx.EXPAND)
         bsizer.AddStretchSpacer()
@@ -2076,7 +2076,7 @@ class CommitDialog(wx.Dialog):
         """Return the value of the commit message"""
         txt = self._entry.GetString(0, self._entry.GetLastPosition()).strip()
         txt = txt.replace('\r\n', '\n')
-        return os.linesep.join([ x for x in txt.split('\n') 
+        return os.linesep.join([ x for x in txt.split('\n')
                                  if not x.lstrip().startswith(':') ])
 
 #-----------------------------------------------------------------------------#
@@ -2085,11 +2085,11 @@ class ExecuteCommandDialog(wx.Dialog):
     """ Creates a dialog for getting a shell command to execute """
     def __init__(self, parent, id):
         wx.Dialog.__init__(self, parent, id, _('Execute command on files'))
-        
+
         sizer = wx.BoxSizer(wx.VERTICAL)
-        
+
         hsizer = wx.BoxSizer(wx.HORIZONTAL)
-        hsizer.Add(wx.StaticText(self, -1, 
+        hsizer.Add(wx.StaticText(self, -1,
             _('Enter a command to be executed on all selected files ' \
               'and files in selected directories.')))
 
@@ -2102,7 +2102,7 @@ class ExecuteCommandDialog(wx.Dialog):
 
 #-----------------------------------------------------------------------------#
 if __name__ == '__main__':
-        
+
     class MyApp(wx.App):
         """ Test Application """
         def OnInit(self):
