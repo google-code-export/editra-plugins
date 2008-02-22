@@ -23,7 +23,8 @@ This plugin is still in early development, but is quite useful in its current im
   * Progress indicator for long operations
   * Automatically display file from currently selected editor tab in project view (if file exists in a project)
   * Utilize system's Trash / Recycle Bin
-  * Seamless source control integration (CVS, GIT, Subversion)
+  * Seamless source control integration (Bazaar, CVS, GIT, Subversion)
+  * Make Patch from diff of selected files and open it in the editor
 
 The following are the currently implemented source control features that are available for each of the supported systems that can be executed on either files or directories.  The status features are automatic.  Other features are accessed using the right-click menu.
 
@@ -33,7 +34,7 @@ The following are the currently implemented source control features that are ava
   * Compare to previous version using FileMerge or other file comparing tool
   * Revert to repository version
   * Commit changes (dialog for message entry)
-  * Configurable commands for CVS and Subversion
+  * Configurable commands for Bazaar, CVS, Git, and Subversion
   * Add to repository
   * Remove from repository
   * Revision history window with ability to compare playpen version to any previous version, as well being able to compare any two repository versions
