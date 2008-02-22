@@ -6,12 +6,15 @@ Changelog:
 
 #-----------------------------------------------------------------------------#
 Version: 0.3
-Released:
+Released: xx/xx/2008
+
+Feature update and bug fix release
 
 New:
 +Support for Bazaar version control system
 +Make Patch command for making (unified) patches
 +Syncronize icons with Editra when the theme is changed
++Move to Trash command is now enabled
 
 Bug Fixes:
 +Expanding directories that don't have permissions
