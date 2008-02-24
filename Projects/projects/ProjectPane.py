@@ -941,6 +941,15 @@ class ProjectTree(wx.Panel):
                                       [data['path']], status=status)
             if not rc:
                 return updates
+
+        except (OSError, IOError):
+            pass
+
+        def prepUpdates():
+            """Post to the main thread for processing as it requires
+            access to gui components.
+
+            """
             # Update the icons for the file nodes
             if os.path.isdir(data['path']) and node.IsOk():
                 for child in self.getChildren(node):
@@ -985,15 +994,16 @@ class ProjectTree(wx.Panel):
                     #    updates.append((self.tree.SetToolTip,
                     #                   wx.ToolTip('Tag: %s' % \
                     #                              status[text]['tag'])))
-        except (OSError, IOError):
-            pass
+            return updates
 
         wx.PostEvent(self, UpdateStatusEvent(ppEVT_UPDATE_STATUS,
-                                             self.GetId(), updates))
+                                             self.GetId(), prepUpdates))
 
     def OnUpdateStatus(self, evt):
         """ Apply status updates to tree view """
-        for update in evt.GetValue():
+        # The event value is a method for preparing the update data
+        updates = evt.GetValue()()
+        for update in updates:
             update = list(update)
             method = update.pop(0)
             try:
