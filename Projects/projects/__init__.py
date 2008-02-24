@@ -42,7 +42,12 @@ def InstallCatalogs():
         locale.AddCatalogLookupPathPrefix(path)
         locale.AddCatalog(PANE_NAME)
 
-InstallCatalogs()
+# Might error out is used in a version of Editra < 0.2.65
+try:
+    InstallCatalogs()
+except:
+    pass
+
 #-----------------------------------------------------------------------------#
 
 class Projects(plugin.Plugin):
