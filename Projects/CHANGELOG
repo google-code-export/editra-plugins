@@ -15,6 +15,8 @@ New:
 +Make Patch command for making (unified) patches
 +Syncronize icons with Editra when the theme is changed
 +Move to Trash command is now enabled
++i18n support
++Simplified Chinese translation
 
 Bug Fixes:
 +Expanding directories that don't have permissions
