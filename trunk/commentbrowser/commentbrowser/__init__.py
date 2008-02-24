@@ -29,6 +29,29 @@ import cbrowser
 # Globals
 _ = wx.GetTranslation
 
+# Install localization catalogs
+try:
+    from pkg_resources import resource_filename
+except ImportError:
+    from extern.pkg_resources import resource_filename
+
+def InstallCatalogs():
+    """Add this plugins message catalogs to the app's locale object.
+    the Catalog name must be the name of the file in locale dir without the
+    extension.
+
+    """
+    locale = wx.GetApp().GetLocaleObject()
+    if locale is not None:
+        path = resource_filename(__name__, 'locale')
+        locale.AddCatalogLookupPathPrefix(path)
+        locale.AddCatalog("commentbrowser")
+
+try:
+    InstallCatalogs()
+except:
+    pass
+
 #-----------------------------------------------------------------------------#
 # Interface implementation
 class CommentBrowserPanel(plugin.Plugin):
