@@ -10,6 +10,13 @@ __version__ = "0.3"
 #-----------------------------------------------------------------------------#
 # Imports
 import wx 
+
+try:
+    from pkg_resources import resource_filename
+except ImportError:
+    from extern.pkg_resources import resource_filename
+
+# Editra Libraries
 import plugin 
 import ed_glob
 import iface
@@ -23,6 +30,19 @@ from ProjectPane import ProjectPane
 _ = wx.GetTranslation
 PANE_NAME = ProjectPane.PANE_NAME
 
+def InstallCatalogs():
+    """Add this plugins message catalogs to the app's locale object.
+    the Catalog name must be the name of the file in locale dir without the
+    extension.
+
+    """
+    locale = wx.GetApp().GetLocaleObject()
+    if locale is not None:
+        path = resource_filename(__name__, 'locale')
+        locale.AddCatalogLookupPathPrefix(path)
+        locale.AddCatalog(PANE_NAME)
+
+InstallCatalogs()
 #-----------------------------------------------------------------------------#
 
 class Projects(plugin.Plugin):
