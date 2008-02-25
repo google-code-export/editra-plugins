@@ -35,26 +35,9 @@ This will create all the mo files and put them in PLUGIN_NAME/PLUGIN_NAME/locale
 The following code should be put in the plugins `__init__.py` module. The only part that needs to be changed is to replace MOFILE_NAME with the name of the generated locale file found under `locale/xx_XX/LC_MESSAGES/xxxx.mo` without the mo extension. The name of the mo file should be the same as that of the given plugins top level directory in the project.
 
 {{{
-# Try to use the system installed version of pkg_resources else fallback to Editra's copy
+# Try and add this plugins message catalogs to the app
 try:
-    from pkg_resources import resource_filename
-except ImportError:
-    from extern.pkg_resources import resource_filename
-
-def InstallCatalogs():
-    """Add this plugins message catalogs to the app's locale object.
-    the Catalog name must be the name of the file in locale dir without the
-    extension.
-
-    """
-    locale = wx.GetApp().GetLocaleObject()
-    if locale is not None:
-        path = resource_filename(__name__, 'locale')
-        locale.AddCatalogLookupPathPrefix(path)
-        locale.AddCatalog("MOFILE_NAME")
-
-try:
-    InstallCatalogs()
+    wx.GetApp().AddMessageCatalog('MOFILE_NAME', __name__)
 except:
     pass
 }}}
