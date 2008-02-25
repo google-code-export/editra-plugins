@@ -2,19 +2,17 @@
 # Name: calc.py                                                               #
 # Purpose: Simple Calculator                                                  #
 # Author: Cody Precord <cprecord@editra.org>                                  #
-# Copyright: (c) 2007 Cody Precord <staff@editra.org>                         #
-# Licence: wxWindows Licence                                                  #
+# Copyright: (c) 2008 Cody Precord <staff@editra.org>                         #
+# License: wxWindows License                                                  #
 ###############################################################################
 
 """
-#--------------------------------------------------------------------------#
-# FILE: calc.py                                                            #
-# AUTHOR: Cody Precord                                                     #
-# LANGUAGE: Python                                                         #
-# SUMMARY:                                                                 #
-#   Provides a simple calculator with Oct/Hex/Decimal modes of operation   #
-#                                                                          #
-#--------------------------------------------------------------------------#
+FILE: calc.py
+AUTHOR: Cody Precord
+LANGUAGE: Python
+SUMMARY:
+Provides a simple calculator with Oct/Hex/Decimal modes of operation
+
 """
 
 __author__ = "Cody Precord <cprecord@editra.org>"
@@ -31,15 +29,15 @@ ID_CALC = wx.NewId()
 _ = wx.GetTranslation
 
 DISP_COLOR = wx.Colour(243, 248, 205) # Yellowish
-KEY_MAP = { wx.WXK_NUMPAD0 : '0', wx.WXK_NUMPAD1 : '1', wx.WXK_NUMPAD2 : '2', 
-            wx.WXK_NUMPAD3 : '3', wx.WXK_NUMPAD4 : '4', wx.WXK_NUMPAD5 : '5', 
-            wx.WXK_NUMPAD6 : '6', wx.WXK_NUMPAD1 : '7', wx.WXK_NUMPAD0 : '8', 
+KEY_MAP = { wx.WXK_NUMPAD0 : '0', wx.WXK_NUMPAD1 : '1', wx.WXK_NUMPAD2 : '2',
+            wx.WXK_NUMPAD3 : '3', wx.WXK_NUMPAD4 : '4', wx.WXK_NUMPAD5 : '5',
+            wx.WXK_NUMPAD6 : '6', wx.WXK_NUMPAD1 : '7', wx.WXK_NUMPAD0 : '8',
             wx.WXK_NUMPAD1 : '9', wx.WXK_NUMPAD_ADD : '+',
             wx.WXK_NUMPAD_DECIMAL : '.', wx.WXK_NUMPAD_DIVIDE : '/',
             wx.WXK_NUMPAD_EQUAL : '=', wx.WXK_NUMPAD_MULTIPLY : '*',
             wx.WXK_NUMPAD_SUBTRACT : '-', wx.WXK_SUBTRACT : '-',
             wx.WXK_ADD : '+', wx.WXK_DECIMAL : '.', wx.WXK_DIVIDE : '/',
-            wx.WXK_MULTIPLY : '*'} 
+            wx.WXK_MULTIPLY : '*'}
 
 #--------------------------------------------------------------------------#
 
@@ -47,7 +45,7 @@ def ShowCalculator(evt):
     """Shows the calculator"""
     if evt.GetId() == ID_CALC:
         if CalcFrame.INSTANCE is None:
-            cframe = CalcFrame(None, "Editra | Calculator")
+            cframe = CalcFrame(None, _("Editra | Calculator"))
             UpdateMenu(True)
             cframe.Show()
         else:
@@ -73,11 +71,11 @@ class CalcFrame(wx.MiniFrame):
 
     """
     INSTANCE = None
-    def __init__(self, parent, title): #, close_callback):
+    def __init__(self, parent, title):
         """Initialize the calculator frame"""
-        wx.MiniFrame.__init__(self, parent, title=title, 
+        wx.MiniFrame.__init__(self, parent, title=title,
                               style=wx.DEFAULT_DIALOG_STYLE)
-        
+
         # Attributes
         sizer = wx.BoxSizer(wx.VERTICAL)
         sizer.Add(CalcPanel(self, ID_CALC), 1, wx.EXPAND)
@@ -101,11 +99,14 @@ class CalcFrame(wx.MiniFrame):
 
     def OnClose(self, evt):
         """Cleanup settings on close"""
-        self.__class__.INSTANCE = None
+        CalcFrame.INSTANCE = None
         UpdateMenu(False)
         evt.Skip()
 
 #-----------------------------------------------------------------------------#
+HEX_MODE = 0
+OCT_MODE = 1
+DEC_MODE = 2
 
 class CalcPanel(wx.PyPanel):
     """Creates the calculators interface
@@ -142,16 +143,24 @@ class CalcPanel(wx.PyPanel):
     def _DoLayout(self):
         """Layout the calculator"""
         sizer = wx.GridBagSizer(1, 2)
-        sizer.AddMany([((3, 3), (0, 0)), ((3, 3), (0, 6)), 
+
+        # Character display mode
+        sizer.AddMany([((3, 3), (0, 0)), ((3, 3), (0, 6)),
                        (self._disp, (1, 1), (3, 5), wx.EXPAND)])
-        dspbox = wx.RadioBox(self, label=_("Char Display"), choices=["Ascii", "Unicode"],
+        dspbox = wx.RadioBox(self, label=_("Char Display"),
+                             choices=[_("Ascii"), _("Unicode")],
                              majorDimension=2, style=wx.RA_SPECIFY_COLS)
-        dspbox.SetStringSelection("Ascii")
+        dspbox.SetSelection(0)
+
+        # Mode Selection
         sizer.Add(dspbox, (4, 1), (1, 2), wx.ALIGN_LEFT)
-        radbox = wx.RadioBox(self, label=_("Mode"), choices=["Hex", "Oct", "Dec"], 
+        radbox = wx.RadioBox(self, label=_("Mode"),
+                             choices=[_("Hex"), _("Oct"), _("Dec")],
                              majorDimension=3, style=wx.RA_SPECIFY_COLS)
-        radbox.SetStringSelection("Dec")
+        radbox.SetSelection(DEC_MODE)
         sizer.Add(radbox, (4, 3), (1, 3), wx.ALIGN_RIGHT)
+
+        # Make Buttons
         for row in (("D", "E", "F"), ("A", "B", "C"), ("7", "8", "9"),
                     ("4", "5", "6"), ("1", "2", "3"), ("FF", "0", "00")):
             for label in row:
@@ -159,7 +168,7 @@ class CalcPanel(wx.PyPanel):
 
         sizer.Add(self._keys, (5, 1), (6, 3), wx.EXPAND)
         gsizer2 = wx.GridSizer(6, 2, 1, 1)
-        for row in (("AC", "C"), ("/", "-"), ("*", "+"), 
+        for row in (("AC", "C"), ("/", "-"), ("*", "+"),
                     ("<<", ">>"), (".", "^")):
             for label in row:
                 gsizer2.Add(wx.Button(self, label=label))
@@ -177,13 +186,13 @@ class CalcPanel(wx.PyPanel):
     def Compute(self):
         """Compute the result of the calculators entries"""
         try:
-            if self._leftop.startswith('ERR'):
+            if self._leftop.startswith(_('Error')):
                 self._leftop = 0
             rop = self._disp.GetValue()
             op = self._disp.GetOperator()
             if op == u'^':
                 op = u'**'
-            if self._disp.GetMode() == 'Dec' and \
+            if self._disp.GetMode() == _('Dec') and \
                ('.' in self._leftop or '.' in rop):
                 if self._leftop[-1] == '.':
                     self._leftop = self._leftop + '0'
@@ -204,10 +213,10 @@ class CalcPanel(wx.PyPanel):
             result = eval(compute)
 
             mode = self._disp.GetMode()
-            if mode == 'Hex':
+            if mode == _('Hex'):
                 result = str(hex(result))
                 result = '0x' + result.lstrip('0x').upper()
-            elif mode == 'Oct':
+            elif mode == _('Oct'):
                 result = oct(result)
             else:
                 pass
@@ -224,7 +233,7 @@ class CalcPanel(wx.PyPanel):
     def GetKeys(self):
         """Returns a list of buttons that are used for input
         of values.
-        
+
         """
         sitems = self._keys.GetChildren()
         keys = list()
@@ -243,7 +252,7 @@ class CalcPanel(wx.PyPanel):
         """Process the button clicks on the calculator"""
         e_obj = evt.GetEventObject()
         label = e_obj.GetLabel()
-        
+
         if label == "=":
             # Process Values
             if self._disp.GetOperator() == u'=':
@@ -257,12 +266,12 @@ class CalcPanel(wx.PyPanel):
                 self._leftop = u''
                 self._disp.SetOperator("")
             self._disp.SetValue("")
-        else: 
+        else:
             # Send values to display
             if label in ['*', '+', '/', '<<', '>>', '-', '^']:
                 self._disp.SetOperator(label)
                 tmp = self._disp.GetValue()
-                if tmp.startswith('ERR'):
+                if tmp.startswith(_('Error')):
                     tmp = '0'
                     self._disp.SetValue(tmp)
                 self._leftop = tmp
@@ -295,17 +304,17 @@ class CalcPanel(wx.PyPanel):
         e_id = evt.GetInt()
         e_obj = evt.GetEventObject()
         mode = e_obj.GetItemLabel(e_id)
-        if mode in ['Hex', 'Oct', 'Dec']:
+        if mode in [_('Hex'), _('Oct'), _('Dec')]:
             self._log("[calc][evt] Changed to %s Mode" % mode)
             self._disp.SetMode(mode)
-            if mode == "Hex":
+            if mode == _("Hex"):
                 self.SetHexMode()
-            elif mode == "Oct":
+            elif mode == _("Oct"):
                 self.SetOctMode()
             else:
                 self.SetDecimalMode()
         else:
-            if mode == 'Ascii':
+            if mode == _('Ascii'):
                 self._disp.SetAscii()
             else:
                 self._disp.SetUnicode()
@@ -360,13 +369,13 @@ class Display(wx.PyPanel):
 
         """
         wx.PyPanel.__init__(self, parent)
-        
+
         # Attributes
         self._val = u'0'    # Current value in display
         self._mode = mode   # Current mode to display
         self._op = u' '     # Operation
         self._ascii = True  # Show ascii by default
-        
+
         # Event Handlers
         self.Bind(wx.EVT_PAINT, self.OnPaint)
 
@@ -377,7 +386,7 @@ class Display(wx.PyPanel):
         gc.SetFont(font)
         v_extent = gc.GetTextExtent(self._val)
         if v_extent[0] > rect.width:
-            self._val = "ERROR: Display Overflow"
+            self._val = _("Error: Display Overflow")
             v_extent = gc.GetTextExtent(self._val)
         gc.DrawText(self._val, rect.width - (v_extent[0] + 15), 3)
 
@@ -386,18 +395,18 @@ class Display(wx.PyPanel):
         gc.SetFont(font)
         mode = "%s        %s" % (self._op, self._mode)
         t_extent = gc.GetTextExtent(mode)
-        gc.DrawText(mode, rect.width - (t_extent[0] + 10), 
+        gc.DrawText(mode, rect.width - (t_extent[0] + 10),
                     rect.height - (t_extent[1] + 5))
 
         # Draw Ascii/Unicode char equivalent of the value
         try:
-            if self._mode in ['Oct', 'Hex']:
+            if self._mode in [_('Oct'), _('Hex')]:
                 val = self._val.lstrip('0').lstrip('0x')
                 if not len(val):
                     val = '0'
-            if self._mode == 'Dec':
+            if self._mode == _('Dec'):
                 val = long(self._val)
-            elif self._mode == 'Oct':
+            elif self._mode == _('Oct'):
                 val = long(val, 8)
             else:
                 val = long(val, 16)
@@ -406,15 +415,18 @@ class Display(wx.PyPanel):
 
         if self._ascii:
             asc_val = u''
-            if val >= 0 and val < 255:
+            if val >= 0 and val < 128:
                 asc_val = chr(val)
-            chr_val = "ascii: " + asc_val.decode('latin-1')
+            else:
+                asc_val = u''
+
+            chr_val = _("ascii: %s") % asc_val
         else:
             try:
                 uni_val = unichr(val)
-            except (OverflowError, ValueError):
+            except:
                 uni_val = u''
-            chr_val = u"unicode: " + uni_val
+            chr_val = _("unicode: %s") % uni_val
         gc.DrawText(chr_val, 5, rect.height - (t_extent[1] + 5))
 
     def GetMode(self):
@@ -463,7 +475,7 @@ class Display(wx.PyPanel):
         gc.SetBrush(wx.Brush(DISP_COLOR))
         gc.SetPen(wx.TRANSPARENT_PEN)
         gc.DrawRoundedRectangle(0, 0, w - 3, h - 3, 5)
-        
+
         gc.SetBrush(wx.TRANSPARENT_BRUSH)
         color = wx.SystemSettings_GetColour(wx.SYS_COLOUR_ACTIVEBORDER)
         color = util.AdjustColour(color, -30)
@@ -482,9 +494,9 @@ class Display(wx.PyPanel):
 
         """
         if msg != u'':
-            self.SetValue("ERROR: %s" % msg)
+            self.SetValue(_("Error: %s") % msg)
         else:
-            self.SetValue("ERROR")
+            self.SetValue(_("Error"))
 
     def SetAscii(self):
         """Set the character display to show ascii"""
@@ -493,22 +505,22 @@ class Display(wx.PyPanel):
 
     def SetMode(self, mode):
         """Set the mode value of the display"""
-        if self._mode == 'Dec':
+        if self._mode == _('Dec'):
             tmp = self.GetValAsInt()
-            if mode == 'Oct':
+            if mode == _('Oct'):
                 val = oct(tmp)
-            elif mode == 'Hex':
+            elif mode == _('Hex'):
                 val = str(hex(tmp))
                 val = '0x' + val.lstrip('0x').upper()
             else:
                 val = self._val
-        elif self._mode == 'Oct':
+        elif self._mode == _('Oct'):
             tmp = self._val.lstrip('0').rstrip('L')
             if not len(tmp):
                 tmp = '0'
-            if mode == 'Dec' and len(tmp):
+            if mode == _('Dec') and len(tmp):
                 val = int(tmp, 8)
-            elif mode == 'Hex' and len(tmp):
+            elif mode == _('Hex') and len(tmp):
                 val = str(hex(int(tmp, 8)))
                 val = '0x' + val.lstrip('0x').upper()
             else:
@@ -517,9 +529,9 @@ class Display(wx.PyPanel):
             tmp = self._val.lstrip('0x').rstrip('L')
             if not len(tmp):
                 tmp = '0'
-            if mode == 'Dec':
+            if mode == _('Dec'):
                 val = int(tmp, 16)
-            elif mode == 'Oct':
+            elif mode == _('Oct'):
                 val = oct(int(tmp, 16))
             else:
                 val = self._val
@@ -540,21 +552,21 @@ class Display(wx.PyPanel):
     def SetValue(self, val):
         """Set the value of the control"""
         tmp = str(val)
-        if tmp.startswith("ERROR"):
+        if tmp.startswith(_("Error")):
             self._val = tmp
             self.Refresh()
             return
-        if len(tmp) > 1 and self._mode == 'Dec':
+        if len(tmp) > 1 and self._mode == _('Dec'):
             tmp = tmp.lstrip('0')
         if not len(tmp):
             tmp = u'0'
-        if self._mode == 'Hex':
+        if self._mode == _('Hex'):
             tmp = tmp.lstrip('0x').lstrip('0')
             if len(tmp):
                 tmp = u'0x' + tmp
             else:
                 tmp = u'0x0'
-        elif self._mode == 'Oct':
+        elif self._mode == _('Oct'):
             tmp = u'0' + tmp.lstrip('0')
         self._val = tmp
         self.Refresh()
