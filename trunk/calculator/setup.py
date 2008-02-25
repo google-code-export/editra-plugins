@@ -19,13 +19,14 @@ __author__ = "Cody Precord"
 if setup != None:
     setup(
         name='Calculator',
-        version='0.4',
+        version='0.5',
         description=__doc__,
         author=__author__,
         author_email="cprecord@editra.org",
         license="wxWindows",
         url="http://editra.org",
         platforms=["Linux", "OS X", "Windows"],
+        package_data={'calculator' : ['locale/*/LC_MESSAGES/*.mo']},
         packages=['calculator'],
         entry_points='''
         [Editra.plugins]
