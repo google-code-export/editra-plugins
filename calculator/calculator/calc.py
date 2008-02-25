@@ -416,18 +416,23 @@ class Display(wx.PyPanel):
         if self._ascii:
             asc_val = u''
             if val >= 0 and val < 128:
-                asc_val = chr(val)
+                c_val = chr(val)
             else:
-                asc_val = u''
+                c_val = u''
 
-            chr_val = _("ascii: %s") % asc_val
+            chr_val = _("ascii: %s")
         else:
             try:
-                uni_val = unichr(val)
+                c_val = unichr(val)
             except:
-                uni_val = u''
-            chr_val = _("unicode: %s") % uni_val
-        gc.DrawText(chr_val, 5, rect.height - (t_extent[1] + 5))
+                c_val = u''
+            chr_val = _("unicode: %s")
+
+        # Trap encoding errors that can happen on a non unicode build
+        try:
+            gc.DrawText(chr_val % c_val, 5, rect.height - (t_extent[1] + 5))
+        except UnicodeEncodeError:
+            pass
 
     def GetMode(self):
         """Returns the mode of the display"""
