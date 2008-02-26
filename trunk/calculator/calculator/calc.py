@@ -39,6 +39,11 @@ KEY_MAP = { wx.WXK_NUMPAD0 : '0', wx.WXK_NUMPAD1 : '1', wx.WXK_NUMPAD2 : '2',
             wx.WXK_ADD : '+', wx.WXK_DECIMAL : '.', wx.WXK_DIVIDE : '/',
             wx.WXK_MULTIPLY : '*'}
 
+HEX_MODE = 0
+OCT_MODE = 1
+DEC_MODE = 2
+MODE_MAP = { HEX_MODE : "Hex", OCT_MODE : "Oct", DEC_MODE : "Dec" }
+
 #--------------------------------------------------------------------------#
 
 def ShowCalculator(evt):
@@ -104,9 +109,7 @@ class CalcFrame(wx.MiniFrame):
         evt.Skip()
 
 #-----------------------------------------------------------------------------#
-HEX_MODE = 0
-OCT_MODE = 1
-DEC_MODE = 2
+ID_CHAR_DSP = wx.NewId()
 
 class CalcPanel(wx.PyPanel):
     """Creates the calculators interface
@@ -123,7 +126,7 @@ class CalcPanel(wx.PyPanel):
         self._log = wx.GetApp().GetLog()
         self._leftop = u''
         self._rstart = False
-        self._disp = Display(self, "Dec")
+        self._disp = Display(self, DEC_MODE)
         self._eq = wx.Button(self, label="=")
         self._ascii = wx.StaticText(self, label="")
         self._keys = wx.GridSizer(6, 3, 1, 1)
@@ -147,7 +150,7 @@ class CalcPanel(wx.PyPanel):
         # Character display mode
         sizer.AddMany([((3, 3), (0, 0)), ((3, 3), (0, 6)),
                        (self._disp, (1, 1), (3, 5), wx.EXPAND)])
-        dspbox = wx.RadioBox(self, label=_("Char Display"),
+        dspbox = wx.RadioBox(self, ID_CHAR_DSP, label=_("Char Display"),
                              choices=[_("Ascii"), _("Unicode")],
                              majorDimension=2, style=wx.RA_SPECIFY_COLS)
         dspbox.SetSelection(0)
@@ -192,7 +195,7 @@ class CalcPanel(wx.PyPanel):
             op = self._disp.GetOperator()
             if op == u'^':
                 op = u'**'
-            if self._disp.GetMode() == _('Dec') and \
+            if self._disp.GetMode() == DEC_MODE and \
                ('.' in self._leftop or '.' in rop):
                 if self._leftop[-1] == '.':
                     self._leftop = self._leftop + '0'
@@ -213,10 +216,10 @@ class CalcPanel(wx.PyPanel):
             result = eval(compute)
 
             mode = self._disp.GetMode()
-            if mode == _('Hex'):
+            if mode == HEX_MODE:
                 result = str(hex(result))
                 result = '0x' + result.lstrip('0x').upper()
-            elif mode == _('Oct'):
+            elif mode == OCT_MODE:
                 result = oct(result)
             else:
                 pass
@@ -270,10 +273,8 @@ class CalcPanel(wx.PyPanel):
             # Send values to display
             if label in ['*', '+', '/', '<<', '>>', '-', '^']:
                 self._disp.SetOperator(label)
+                self._disp.ClearError() # Clear any errors
                 tmp = self._disp.GetValue()
-                if tmp.startswith(_('Error')):
-                    tmp = '0'
-                    self._disp.SetValue(tmp)
                 self._leftop = tmp
                 self._rstart = True
             else:
@@ -301,20 +302,21 @@ class CalcPanel(wx.PyPanel):
         in the RadioBox.
 
         """
-        e_id = evt.GetInt()
         e_obj = evt.GetEventObject()
-        mode = e_obj.GetItemLabel(e_id)
-        if mode in [_('Hex'), _('Oct'), _('Dec')]:
-            self._log("[calc][evt] Changed to %s Mode" % mode)
+        mode = evt.GetInt()
+        if evt.GetId() != ID_CHAR_DSP:
+            # Change calculator the mode
+            self._log("[calc][evt] Changed to %s Mode" % e_obj.GetString(mode))
             self._disp.SetMode(mode)
-            if mode == _("Hex"):
+            if mode == HEX_MODE:
                 self.SetHexMode()
-            elif mode == _("Oct"):
+            elif mode == OCT_MODE:
                 self.SetOctMode()
             else:
                 self.SetDecimalMode()
         else:
-            if mode == _('Ascii'):
+            # Change the character display mode
+            if mode == 0:
                 self._disp.SetAscii()
             else:
                 self._disp.SetUnicode()
@@ -361,7 +363,7 @@ class Display(wx.PyPanel):
             |Charval           Op     Mode  |
             |-------------------------------|
 
-    @todo: optimize drawning there is some flickering on Windows
+    @todo: optimize drawing there is some flickering on Windows
     """
     def __init__(self, parent, mode):
         """Initialize the display the mode parameter is the
@@ -375,6 +377,7 @@ class Display(wx.PyPanel):
         self._mode = mode   # Current mode to display
         self._op = u' '     # Operation
         self._ascii = True  # Show ascii by default
+        self._error = False # Is an error displayed
 
         # Event Handlers
         self.Bind(wx.EVT_PAINT, self.OnPaint)
@@ -393,23 +396,27 @@ class Display(wx.PyPanel):
         # Draw the mode and operator
         font.SetPointSize(12)
         gc.SetFont(font)
-        mode = "%s        %s" % (self._op, self._mode)
+        mstr = _(MODE_MAP.get(self._mode, "Dec"))
+        mode = "%s        %s" % (self._op, mstr)
         t_extent = gc.GetTextExtent(mode)
-        gc.DrawText(mode, rect.width - (t_extent[0] + 10),
+        gc.DrawText(mode, rect.width - (t_extent[0] + 12),
                     rect.height - (t_extent[1] + 5))
 
         # Draw Ascii/Unicode char equivalent of the value
         try:
-            if self._mode in [_('Oct'), _('Hex')]:
+            val = '0'
+            if self._mode in [OCT_MODE, HEX_MODE]:
                 val = self._val.lstrip('0').lstrip('0x')
                 if not len(val):
                     val = '0'
-            if self._mode == _('Dec'):
+
+            if self._mode == DEC_MODE:
                 val = long(self._val)
-            elif self._mode == _('Oct'):
+            elif self._mode == OCT_MODE:
                 val = long(val, 8)
             else:
                 val = long(val, 16)
+
         except (ValueError, OverflowError):
             val = 0
 
@@ -433,6 +440,12 @@ class Display(wx.PyPanel):
             gc.DrawText(chr_val % c_val, 5, rect.height - (t_extent[1] + 5))
         except UnicodeEncodeError:
             pass
+
+    def ClearError(self):
+        """Clear an errors in the display"""
+        if self._error:
+            self._error = False
+            self.SetValue('0')
 
     def GetMode(self):
         """Returns the mode of the display"""
@@ -478,10 +491,6 @@ class Display(wx.PyPanel):
         h = rect.height
 
         gc.SetBrush(wx.Brush(DISP_COLOR))
-        gc.SetPen(wx.TRANSPARENT_PEN)
-        gc.DrawRoundedRectangle(0, 0, w - 3, h - 3, 5)
-
-        gc.SetBrush(wx.TRANSPARENT_BRUSH)
         color = wx.SystemSettings_GetColour(wx.SYS_COLOUR_ACTIVEBORDER)
         color = util.AdjustColour(color, -30)
         gc.SetPen(wx.Pen(color, 2))
@@ -498,6 +507,7 @@ class Display(wx.PyPanel):
         @todo: perhaps add more detailed messages
 
         """
+        self._error = True
         if msg != u'':
             self.SetValue(_("Error: %s") % msg)
         else:
@@ -510,22 +520,22 @@ class Display(wx.PyPanel):
 
     def SetMode(self, mode):
         """Set the mode value of the display"""
-        if self._mode == _('Dec'):
+        if self._mode == DEC_MODE:
             tmp = self.GetValAsInt()
-            if mode == _('Oct'):
+            if mode == OCT_MODE:
                 val = oct(tmp)
-            elif mode == _('Hex'):
+            elif mode == HEX_MODE:
                 val = str(hex(tmp))
                 val = '0x' + val.lstrip('0x').upper()
             else:
                 val = self._val
-        elif self._mode == _('Oct'):
+        elif self._mode == OCT_MODE:
             tmp = self._val.lstrip('0').rstrip('L')
             if not len(tmp):
                 tmp = '0'
-            if mode == _('Dec') and len(tmp):
+            if mode == DEC_MODE and len(tmp):
                 val = int(tmp, 8)
-            elif mode == _('Hex') and len(tmp):
+            elif mode == HEX_MODE and len(tmp):
                 val = str(hex(int(tmp, 8)))
                 val = '0x' + val.lstrip('0x').upper()
             else:
@@ -534,14 +544,14 @@ class Display(wx.PyPanel):
             tmp = self._val.lstrip('0x').rstrip('L')
             if not len(tmp):
                 tmp = '0'
-            if mode == _('Dec'):
+            if mode == DEC_MODE:
                 val = int(tmp, 16)
-            elif mode == _('Oct'):
+            elif mode == OCT_MODE:
                 val = oct(int(tmp, 16))
             else:
                 val = self._val
         self._val = str(val)
-        self._mode = str(mode)
+        self._mode = mode
         self.Refresh()
 
     def SetOperator(self, op):
@@ -554,24 +564,28 @@ class Display(wx.PyPanel):
         self._ascii = False
         self.Refresh()
 
-    def SetValue(self, val):
-        """Set the value of the control"""
-        tmp = str(val)
-        if tmp.startswith(_("Error")):
+    def SetValue(self, val, verbatim=False):
+        """Set the value of the control main display portion
+        @param val: Value to set in display
+        @keyword verbatim: Print the value verbatim without transformations
+
+        """
+        tmp = unicode(val)
+        if verbatim:
             self._val = tmp
             self.Refresh()
             return
-        if len(tmp) > 1 and self._mode == _('Dec'):
+        if len(tmp) > 1 and self._mode == DEC_MODE:
             tmp = tmp.lstrip('0')
         if not len(tmp):
             tmp = u'0'
-        if self._mode == _('Hex'):
+        if self._mode == HEX_MODE:
             tmp = tmp.lstrip('0x').lstrip('0')
             if len(tmp):
                 tmp = u'0x' + tmp
             else:
                 tmp = u'0x0'
-        elif self._mode == _('Oct'):
+        elif self._mode == OCT_MODE:
             tmp = u'0' + tmp.lstrip('0')
         self._val = tmp
         self.Refresh()
