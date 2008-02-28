@@ -159,11 +159,6 @@ class CBrowserPane(wx.Panel):
 
         self.Bind(wx.EVT_CHECKBOX, lambda evt: self.UpdateCurrent(), self._checkBoxAllFiles)
 
-        # Only bind this event when the pane is using the mainwindow interface
-        if self.GetId() == ID_CBROWSERPANE:
-            self._mainwin.GetFrameManager().Bind(wx.aui.EVT_AUI_PANE_CLOSE,
-                                                 self.OnPaneClose)
-
         # File action messages
         ed_msg.Subscribe(self.OnListUpdate, ed_msg.EDMSG_FILE_SAVED)
         ed_msg.Subscribe(self.OnListUpdate, ed_msg.EDMSG_FILE_OPENED)
@@ -424,25 +419,13 @@ class CBrowserPane(wx.Panel):
         else:
             evt.Skip()
 
-    def UpdateMenuItem(self, evt):
-        """Update the check mark for the menu item"""
-        mgr = self._mainwin.GetFrameManager()
-        pane = mgr.GetPane(self.PANE_NAME)
-        self._mi.Check(pane.IsShown())
-        evt.Skip()
-
-    def OnPaneClose(self, evt):
-        """
-        Clean up settings when Comment Browser Pane is closed
-        @param event: wxEvent
+    def OnUpdateMenu(self, evt):
+        """UpdateUI handler for the panels menu item, to update the check
+        mark.
+        @param evt: wx.UpdateUIEvent
 
         """
-        pane = evt.GetPane()
-        paneName = pane.name
-        if PANE_NAME == paneName and pane.window.GetId() == ID_CBROWSERPANE:
-            self._mi.Check(False)
-        evt.Skip()
-
-        #TODO: save pane position in config?
+        pane = self._mainwin.GetFrameManager().GetPane(PANE_NAME)
+        evt.Check(pane.IsShown())
 
 #---------------------------------------------------------------------------- #
