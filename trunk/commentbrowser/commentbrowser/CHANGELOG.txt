@@ -5,8 +5,10 @@ License: wxWindows
 Version 0.2:
 Released:
 
-  + Fix some performance issues for when multiple windows are open
   + Update icons when Editra's icon theme changes
+  + Fix some performance issues for when multiple windows are open
+  + Fix menu checkmark not updating properly
+  + Fix some unicode issues
 
 #-----------------------------------------------------------------------------#
 
