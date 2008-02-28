@@ -264,15 +264,16 @@ class CBrowserPane(wx.Panel):
                                      + todo_hit.start(1)):
                                 descr = todo_hit.group(1).strip()
                                 prio = descr.count('!')
+
                                 #prio is higher if further in the list
                                 prio += tasknr
                                 taskentry = (
                                     int(prio),
                                     str(self._taskChoices[tasknr]),
-                                    str(descr),
-                                    str(filename),
+                                    descr,
+                                    filename,
                                     int(idx + 1),
-                                    str(fullname),
+                                    fullname,
                                     )
                                 taskdict[self.__getNewKey()] = taskentry
         self._listctrl.Freeze()
