@@ -1,76 +1,77 @@
-# SOME DESCRIPTIVE TITLE.
-# Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
-# This file is distributed under the same license as the PACKAGE package.
-# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+# Japanese translation for editra
+# Copyright (c) 2008 Rosetta Contributors and Canonical Ltd 2008
+# This file is distributed under the same license as the editra package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, 2008.
 #
-#, fuzzy
 msgid ""
 msgstr ""
-"Project-Id-Version: PACKAGE VERSION\n"
+"Project-Id-Version: editra\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2008-02-29 03:21-0600\n"
-"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
-"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
-"Language-Team: LANGUAGE <LL@li.org>\n"
+"PO-Revision-Date: 2008-02-29 09:01+0000\n"
+"Last-Translator: Cody Precord <Unknown>\n"
+"Language-Team: Japanese <ja@li.org>\n"
 "MIME-Version: 1.0\n"
-"Content-Type: text/plain; charset=CHARSET\n"
+"Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
+"X-Launchpad-Export-Date: 2008-02-29 09:08+0000\n"
+"X-Generator: Launchpad (build Unknown)\n"
 
 #: calculator/calculator/calc.py:154
 msgid "Ascii"
-msgstr ""
+msgstr "ASCII"
 
 #: calculator/calculator/__init__.py:41
 msgid "Calculator"
-msgstr ""
+msgstr "計算機"
 
 #: calculator/calculator/calc.py:153
 msgid "Char Display"
-msgstr ""
+msgstr "文字表示"
 
 #: calculator/calculator/calc.py:161
 msgid "Dec"
-msgstr ""
+msgstr "10 進"
 
 #: calculator/calculator/calc.py:53
 msgid "Editra | Calculator"
-msgstr ""
+msgstr "Editra | 計算機"
 
 #: calculator/calculator/calc.py:192 calculator/calculator/calc.py:514
 msgid "Error"
-msgstr ""
+msgstr "エラー"
 
 #: calculator/calculator/calc.py:512
 #, python-format
 msgid "Error: %s"
-msgstr ""
+msgstr "エラー: %s"
 
 #: calculator/calculator/calc.py:392
 msgid "Error: Display Overflow"
-msgstr ""
+msgstr "エラー：ディスプレイオーバーフロー"
 
 #: calculator/calculator/calc.py:161
 msgid "Hex"
-msgstr ""
+msgstr "16 進"
 
 #: calculator/calculator/calc.py:160
 msgid "Mode"
-msgstr ""
+msgstr "モード"
 
 #: calculator/calculator/calc.py:161
 msgid "Oct"
-msgstr ""
+msgstr "8 進"
 
 #: calculator/calculator/calc.py:154
 msgid "Unicode"
-msgstr ""
+msgstr "Unicode"
 
 #: calculator/calculator/calc.py:430
 #, python-format
 msgid "ascii: %s"
-msgstr ""
+msgstr "ascii: %s"
 
 #: calculator/calculator/calc.py:436
 #, python-format
 msgid "unicode: %s"
-msgstr ""
+msgstr "unicode: %s"

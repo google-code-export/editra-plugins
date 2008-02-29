@@ -6,8 +6,8 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: editra\n"
-"Report-Msgid-Bugs-To: FULL NAME <EMAIL@ADDRESS>\n"
-"POT-Creation-Date: 2008-02-25 04:44-0600\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2008-02-29 03:21-0600\n"
 "PO-Revision-Date: 2008-02-25 13:34+0000\n"
 "Last-Translator: heccj <heccjj@gmail.com>\n"
 "Language-Team: Simplified Chinese <zh_CN@li.org>\n"
@@ -17,72 +17,61 @@ msgstr ""
 "X-Launchpad-Export-Date: 2008-02-25 14:00+0000\n"
 "X-Generator: Launchpad (build Unknown)\n"
 
-#: calculator/calculator/calc.py:151 calculator/calculator/calc.py:317
+#: calculator/calculator/calc.py:154
 msgid "Ascii"
 msgstr "Ascii"
 
-#: calculator/calculator/__init__.py:34
+#: calculator/calculator/__init__.py:41
 msgid "Calculator"
 msgstr "计算器"
 
-#: calculator/calculator/calc.py:150
+#: calculator/calculator/calc.py:153
 msgid "Char Display"
 msgstr "字符显示"
 
-#: calculator/calculator/calc.py:158 calculator/calculator/calc.py:195
-#: calculator/calculator/calc.py:307 calculator/calculator/calc.py:407
-#: calculator/calculator/calc.py:509 calculator/calculator/calc.py:522
-#: calculator/calculator/calc.py:533 calculator/calculator/calc.py:560
+#: calculator/calculator/calc.py:161
 msgid "Dec"
 msgstr "十进制"
 
-#: calculator/calculator/calc.py:48
+#: calculator/calculator/calc.py:53
 msgid "Editra | Calculator"
 msgstr "Editra | 计算器"
 
-#: calculator/calculator/calc.py:189 calculator/calculator/calc.py:274
-#: calculator/calculator/calc.py:500 calculator/calculator/calc.py:556
+#: calculator/calculator/calc.py:192 calculator/calculator/calc.py:514
 msgid "Error"
 msgstr "错误"
 
-#: calculator/calculator/calc.py:498
+#: calculator/calculator/calc.py:512
 #, python-format
 msgid "Error: %s"
 msgstr "错误：%s"
 
-#: calculator/calculator/calc.py:389
+#: calculator/calculator/calc.py:392
 msgid "Error: Display Overflow"
 msgstr "错误：显示溢出"
 
-#: calculator/calculator/calc.py:158 calculator/calculator/calc.py:216
-#: calculator/calculator/calc.py:307 calculator/calculator/calc.py:310
-#: calculator/calculator/calc.py:403 calculator/calculator/calc.py:513
-#: calculator/calculator/calc.py:524 calculator/calculator/calc.py:564
+#: calculator/calculator/calc.py:161
 msgid "Hex"
 msgstr "十六进制"
 
-#: calculator/calculator/calc.py:157
+#: calculator/calculator/calc.py:160
 msgid "Mode"
 msgstr "模式"
 
-#: calculator/calculator/calc.py:158 calculator/calculator/calc.py:219
-#: calculator/calculator/calc.py:307 calculator/calculator/calc.py:312
-#: calculator/calculator/calc.py:403 calculator/calculator/calc.py:409
-#: calculator/calculator/calc.py:511 calculator/calculator/calc.py:518
-#: calculator/calculator/calc.py:535 calculator/calculator/calc.py:570
+#: calculator/calculator/calc.py:161
 msgid "Oct"
 msgstr "八进制"
 
-#: calculator/calculator/calc.py:151
+#: calculator/calculator/calc.py:154
 msgid "Unicode"
 msgstr "Unicode"
 
-#: calculator/calculator/calc.py:423
+#: calculator/calculator/calc.py:430
 #, python-format
 msgid "ascii: %s"
 msgstr "ascii:%s"
 
-#: calculator/calculator/calc.py:430
+#: calculator/calculator/calc.py:436
 #, python-format
 msgid "unicode: %s"
 msgstr "unicode:%s"
