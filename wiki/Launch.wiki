@@ -23,6 +23,7 @@ Launch is a plugin for running a program on the contents of the current buffer a
   * Boo
   * C-Shell
   * Ferite
+  * haXe
   * Korn Shell
   * Lua
   * NSIS
