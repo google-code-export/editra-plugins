@@ -62,8 +62,6 @@ for task in TASK_CHOICES:
 
 #TODO: remove selection of a listitem when sorting
 #TODO: save pane position in config?
-#TODO: how to do translations of plugins?
-#TODO: coloring of priorities: if all entries have same prio?
 
 #---- examples ----#
 
@@ -119,6 +117,8 @@ class CBrowserPane(wx.Panel):
         self._taskFilter.SetStringSelection(self._taskChoices[0])
         self._checkBoxAllFiles = wx.CheckBox(self, label=_('All opened files'),
                  style=wx.ALIGN_LEFT)
+        self._chekcBoxAfterKey = wx.CheckBox(self, label=_('After key'), \
+                style=wx.ALIGN_LEFT)
 
         hsizer = wx.BoxSizer(wx.HORIZONTAL)
         tasklbl = wx.StaticText(self, label=_('Taskfilter: '))
@@ -128,6 +128,8 @@ class CBrowserPane(wx.Panel):
                         ((-1, 5), 1, wx.EXPAND),
                         (self._checkBoxAllFiles, 0, wx.ALIGN_CENTER_VERTICAL |\
                                                     wx.ALIGN_RIGHT),
+                        (self._chekcBoxAfterKey, 0, wx.ALIGN_CENTER_VERTICAL |\
+                                                    wx.ALIGN_RIGHT),
                         ((5, 5)),
                         (btn, 0, wx.ALIGN_CENTER_VERTICAL | wx.ALIGN_RIGHT),
                         ((5, 5))])
@@ -135,7 +137,7 @@ class CBrowserPane(wx.Panel):
         # Use small version of controls on osx
         if wx.Platform == '__WXMAC__':
             for win in [self._taskFilter, tasklbl, btn,
-                        self._checkBoxAllFiles]:
+                        self._checkBoxAllFiles, self._chekcBoxAfterKey]:
                 win.SetWindowVariant(wx.WINDOW_VARIANT_SMALL)
 
         sizer = wx.BoxSizer(wx.VERTICAL)
@@ -333,7 +335,7 @@ class CBrowserPane(wx.Panel):
         @param event: Message Object ((x, y), keycode)
 
         """
-        if not self.IsActive():
+        if not self.IsActive() or not self._chekcBoxAfterKey.GetValue():
             return
 
 #        self._log('OnKey')
