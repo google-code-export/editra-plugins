@@ -2,6 +2,9 @@ CommentBrowser Plugin for Editra
 Author: DR0ID
 License: wxWindows
 
+
+#-----------------------------------------------------------------------------#
+
 Version 0.2:
 Released:
 
@@ -9,6 +12,7 @@ Released:
   + Fix some performance issues for when multiple windows are open
   + Fix menu checkmark not updating properly
   + Fix some unicode issues
+  + Added a checkbox to enable/disable after keypress update of the entries
 
 #-----------------------------------------------------------------------------#
 
