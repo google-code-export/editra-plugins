@@ -17,6 +17,21 @@ Launch is a plugin for running a program on the contents of the current buffer a
   * Abort running processes at any time
   * Support for multiple instances at one time open in the Shelf
 
+= Supported File Types =
+
+  * Bash Shell
+  * Boo
+  * C-Shell
+  * Ferite
+  * Korn Shell
+  * Lua
+  * NSIS
+  * Perl
+  * Php
+  * Pike
+  * Python
+  * Ruby
+  * Tcl/Tk
 
 = Installation =
 
