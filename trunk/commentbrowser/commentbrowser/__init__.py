@@ -93,7 +93,7 @@ class CommentBrowserPanel(plugin.Plugin):
             mgr = self._mainwin.GetFrameManager()
             mgr.AddPane(self._commentbrowser, 
                         wx.aui.AuiPaneInfo().Name(cbrowser.PANE_NAME).\
-                        Caption("Comment Browser").Bottom().Layer(1).\
+                        Caption(_("Comment Browser")).Bottom().Layer(1).\
                         CloseButton(True).MaximizeButton(True).\
                         BestSize(wx.Size(-1, 350)))
 
