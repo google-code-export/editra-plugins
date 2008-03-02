@@ -119,6 +119,7 @@ class CBrowserPane(wx.Panel):
                  style=wx.ALIGN_LEFT)
         self._chekcBoxAfterKey = wx.CheckBox(self, label=_('After key'), \
                 style=wx.ALIGN_LEFT)
+        self._chekcBoxAfterKey.SetToolTipString(_("Update as you type"))
 
         hsizer = wx.BoxSizer(wx.HORIZONTAL)
         tasklbl = wx.StaticText(self, label=_('Taskfilter: '))
@@ -128,6 +129,7 @@ class CBrowserPane(wx.Panel):
                         ((-1, 5), 1, wx.EXPAND),
                         (self._checkBoxAllFiles, 0, wx.ALIGN_CENTER_VERTICAL |\
                                                     wx.ALIGN_RIGHT),
+                        ((5, 5), 0),
                         (self._chekcBoxAfterKey, 0, wx.ALIGN_CENTER_VERTICAL |\
                                                     wx.ALIGN_RIGHT),
                         ((5, 5)),
