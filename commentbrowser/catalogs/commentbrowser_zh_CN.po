@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: editra\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2008-02-16 18:17-0600\n"
+"POT-Creation-Date: 2008-03-01 19:39-0600\n"
 "PO-Revision-Date: 2008-02-16 17:41+0000\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: Simplified Chinese <zh_CN@li.org>\n"
@@ -18,6 +18,10 @@ msgstr ""
 "X-Generator: Launchpad (build Unknown)\n"
 
 #: commentbrowser/commentbrowser/cbrowser.py:120
+msgid "After key"
+msgstr ""
+
+#: commentbrowser/commentbrowser/cbrowser.py:118
 msgid "All opened files"
 msgstr "所有打开文件"
 
@@ -25,8 +29,8 @@ msgstr "所有打开文件"
 msgid "Comment Browser"
 msgstr "注释浏览"
 
-#: commentbrowser/commentbrowser/__init__.py:57
-#: commentbrowser/commentbrowser/__init__.py:61
+#: commentbrowser/commentbrowser/__init__.py:63
+#: commentbrowser/commentbrowser/__init__.py:67
 #, fuzzy
 msgid "CommentBrowser"
 msgstr "注释浏览"
@@ -43,11 +47,11 @@ msgstr "文件"
 msgid "Line"
 msgstr "行"
 
-#: commentbrowser/commentbrowser/__init__.py:78
+#: commentbrowser/commentbrowser/__init__.py:85
 msgid "Open Comment Browser Sidepanel"
 msgstr "打开注释浏览面板"
 
-#: commentbrowser/commentbrowser/cbrowser.py:124
+#: commentbrowser/commentbrowser/cbrowser.py:125
 msgid "Taskfilter: "
 msgstr "任务过滤： "
 
@@ -55,6 +59,10 @@ msgstr "任务过滤： "
 msgid "Type"
 msgstr "类型"
 
-#: commentbrowser/commentbrowser/cbrowser.py:125
+#: commentbrowser/commentbrowser/cbrowser.py:126
 msgid "Update"
 msgstr "更新"
+
+#: commentbrowser/commentbrowser/cbrowser.py:122
+msgid "Update as you type"
+msgstr ""
