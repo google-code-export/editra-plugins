@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2008-02-16 18:17-0600\n"
+"POT-Creation-Date: 2008-03-01 19:39-0600\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -17,6 +17,10 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 
 #: commentbrowser/commentbrowser/cbrowser.py:120
+msgid "After key"
+msgstr ""
+
+#: commentbrowser/commentbrowser/cbrowser.py:118
 msgid "All opened files"
 msgstr ""
 
@@ -24,8 +28,8 @@ msgstr ""
 msgid "Comment Browser"
 msgstr ""
 
-#: commentbrowser/commentbrowser/__init__.py:57
-#: commentbrowser/commentbrowser/__init__.py:61
+#: commentbrowser/commentbrowser/__init__.py:63
+#: commentbrowser/commentbrowser/__init__.py:67
 msgid "CommentBrowser"
 msgstr ""
 
@@ -41,11 +45,11 @@ msgstr ""
 msgid "Line"
 msgstr ""
 
-#: commentbrowser/commentbrowser/__init__.py:78
+#: commentbrowser/commentbrowser/__init__.py:85
 msgid "Open Comment Browser Sidepanel"
 msgstr ""
 
-#: commentbrowser/commentbrowser/cbrowser.py:124
+#: commentbrowser/commentbrowser/cbrowser.py:125
 msgid "Taskfilter: "
 msgstr ""
 
@@ -53,6 +57,10 @@ msgstr ""
 msgid "Type"
 msgstr ""
 
-#: commentbrowser/commentbrowser/cbrowser.py:125
+#: commentbrowser/commentbrowser/cbrowser.py:126
 msgid "Update"
+msgstr ""
+
+#: commentbrowser/commentbrowser/cbrowser.py:122
+msgid "Update as you type"
 msgstr ""

@@ -6,8 +6,8 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: editra\n"
-"Report-Msgid-Bugs-To: FULL NAME <EMAIL@ADDRESS>\n"
-"POT-Creation-Date: 2008-01-24 17:39-0600\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2008-03-01 19:39-0600\n"
 "PO-Revision-Date: 2008-02-18 18:53+0000\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: Dutch <nl@li.org>\n"
@@ -17,38 +17,52 @@ msgstr ""
 "X-Launchpad-Export-Date: 2008-02-19 08:00+0000\n"
 "X-Generator: Launchpad (build Unknown)\n"
 
-#: commentbrowser/commentbrowser/cbrowser.py:128
+#: commentbrowser/commentbrowser/cbrowser.py:120
+msgid "After key"
+msgstr ""
+
+#: commentbrowser/commentbrowser/cbrowser.py:118
 msgid "All opened files"
 msgstr "Alle geopende bestanden"
 
-#: commentbrowser/commentbrowser/cbrowser.py:46
+#: commentbrowser/commentbrowser/cbrowser.py:45
 msgid "Comment Browser"
 msgstr "Commentaar verkenner"
 
-#: commentbrowser/commentbrowser/cbrowserlistctrl.py:81
+#: commentbrowser/commentbrowser/__init__.py:63
+#: commentbrowser/commentbrowser/__init__.py:67
+#, fuzzy
+msgid "CommentBrowser"
+msgstr "Commentaar verkenner"
+
+#: commentbrowser/commentbrowser/cbrowserlistctrl.py:69
 msgid "Description"
 msgstr "Omschrijving"
 
-#: commentbrowser/commentbrowser/cbrowserlistctrl.py:82
+#: commentbrowser/commentbrowser/cbrowserlistctrl.py:70
 msgid "File"
 msgstr "Bestand"
 
-#: commentbrowser/commentbrowser/cbrowserlistctrl.py:83
+#: commentbrowser/commentbrowser/cbrowserlistctrl.py:71
 msgid "Line"
 msgstr "Regel"
 
-#: commentbrowser/commentbrowser/cbrowser.py:115
+#: commentbrowser/commentbrowser/__init__.py:85
 msgid "Open Comment Browser Sidepanel"
 msgstr "open commentaar verkenner paneel"
 
-#: commentbrowser/commentbrowser/cbrowser.py:132
+#: commentbrowser/commentbrowser/cbrowser.py:125
 msgid "Taskfilter: "
 msgstr "Taak filter: "
 
-#: commentbrowser/commentbrowser/cbrowserlistctrl.py:80
+#: commentbrowser/commentbrowser/cbrowserlistctrl.py:68
 msgid "Type"
 msgstr "Type"
 
-#: commentbrowser/commentbrowser/cbrowser.py:142
+#: commentbrowser/commentbrowser/cbrowser.py:126
 msgid "Update"
 msgstr "Bijwerken"
+
+#: commentbrowser/commentbrowser/cbrowser.py:122
+msgid "Update as you type"
+msgstr ""
