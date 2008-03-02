@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: editra\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2008-03-01 19:39-0600\n"
+"POT-Creation-Date: 2008-03-01 19:49-0600\n"
 "PO-Revision-Date: 2008-02-18 18:53+0000\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: Dutch <nl@li.org>\n"
@@ -25,6 +25,7 @@ msgstr ""
 msgid "All opened files"
 msgstr "Alle geopende bestanden"
 
+#: commentbrowser/commentbrowser/__init__.py:96
 #: commentbrowser/commentbrowser/cbrowser.py:45
 msgid "Comment Browser"
 msgstr "Commentaar verkenner"
