@@ -1,4 +1,4 @@
-# Simplified Chinese translation for editra
+# German translation for editra
 # Copyright (c) 2008 Rosetta Contributors and Canonical Ltd 2008
 # This file is distributed under the same license as the editra package.
 # FIRST AUTHOR <EMAIL@ADDRESS>, 2008.
@@ -6,11 +6,11 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: editra\n"
-"Report-Msgid-Bugs-To: \n"
+"Report-Msgid-Bugs-To: FULL NAME <EMAIL@ADDRESS>\n"
 "POT-Creation-Date: 2008-02-16 17:41-0600\n"
-"PO-Revision-Date: 2008-03-02 01:33+0000\n"
-"Last-Translator: heccj <heccjj@gmail.com>\n"
-"Language-Team: Simplified Chinese <zh_CN@li.org>\n"
+"PO-Revision-Date: 2008-03-01 15:16+0000\n"
+"Last-Translator: DR0ID <Unknown>\n"
+"Language-Team: German <de@li.org>\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
@@ -19,342 +19,358 @@ msgstr ""
 
 #: Projects/projects/ConfigDialog.py:413
 msgid "*NAME*"
-msgstr "*名字*"
+msgstr "*NAME*"
 
 #: Projects/projects/ConfigDialog.py:414
 msgid "*VALUE*"
-msgstr "*值*"
+msgstr "*WERT*"
 
 #: Projects/projects/ProjectPane.py:1658
 msgid ". Do you wish to continue?"
-msgstr "要继续吗？"
+msgstr "Wollen Sie weiterfahren?"
 
 #: Projects/projects/ProjectPane.py:1816
 msgid "Add Project"
-msgstr "添加工程"
+msgstr "Projekt hinzufügen"
 
 #: Projects/projects/ConfigDialog.py:478
 msgid "Add a New Repository Path"
-msgstr "添加新的库路径"
+msgstr "Einen neuen Repository Pfad hinzufügen"
 
 #: Projects/projects/ProjectPane.py:1388
 msgid "Add to repository"
-msgstr "添加到库"
+msgstr "Repository hinzufügen"
 
 #: Projects/projects/ProjectPane.py:1657
 msgid "An error occurred when attempting to remove "
-msgstr "移除时产生错误 "
+msgstr "Beim Versuch %s zu entfernen ist ein Fehler aufgetreten. "
 
 #: Projects/projects/HistWin.py:364
 msgid "Author"
-msgstr "作者"
+msgstr "Autor/in"
 
 #: Projects/projects/ConfigDialog.py:133
 msgid "Built-in"
-msgstr "内建"
+msgstr "Built-in"
 
 #: Projects/projects/ProjectPane.py:126
 msgid "C File"
-msgstr "C 文件"
+msgstr "C Datei"
 
 #: Projects/projects/ProjectPane.py:1906
 msgid "Choose a Project Directory"
-msgstr "选择工程目录"
+msgstr "Wählen Sie einen Projekt ordner"
 
 #: Projects/projects/ProjectPane.py:1991
 msgid "Commit"
-msgstr "提交"
+msgstr "Commit"
 
 #: Projects/projects/ProjectPane.py:713
 msgid "Commit Dialog"
-msgstr "提交对话框"
+msgstr "Commit Dialog"
 
 #: Projects/projects/ProjectPane.py:1420
 msgid "Commit changes"
-msgstr "提交更改"
+msgstr "Commit Änderungen"
 
 #: Projects/projects/HistWin.py:191
 msgid "Compare Revisions"
-msgstr "比较版本"
+msgstr "Vergleiche Versionen"
 
 #: Projects/projects/HistWin.py:193
 msgid "Compare Selected Revisions"
-msgstr "比较选定版本"
+msgstr "Vergleiche ausgewählte Versionen"
 
 #: Projects/projects/HistWin.py:192
 msgid "Compare to Selected Revision"
-msgstr "比较于选定版本"
+msgstr "Vergleiche mit ausgewählter Version"
 
 #: Projects/projects/ProjectPane.py:1418
 msgid "Compare to previous version"
-msgstr "比较于以前版本"
+msgstr "Vergleiche mit vorherigen Version"
 
 #: Projects/projects/ProjectPane.py:1829
 msgid "Configure"
-msgstr "设置"
+msgstr "Konfiguriere"
 
 #: Projects/projects/ProjectPane.py:1409
 msgid "Copy"
-msgstr "复制"
+msgstr "Kopieren"
 
 #: Projects/projects/ProjectPane.py:1042 Projects/projects/ProjectPane.py:1060
 #: Projects/projects/ProjectPane.py:1077
 msgid "Could not retrieve file"
-msgstr "无法检索文件"
+msgstr "Konnte Datei nicht wiederfinden"
 
 #: Projects/projects/ProjectPane.py:1408
 msgid "Cut"
-msgstr "剪切"
+msgstr "Ausschneiden"
 
 #: Projects/projects/HistWin.py:363
 msgid "Date"
-msgstr "日期"
+msgstr "Datum"
 
 #: Projects/projects/ConfigDialog.py:132
 msgid "Diff Program"
-msgstr "diff 程序"
+msgstr "Diff-Programm"
 
 #: Projects/projects/ProjectPane.py:1403
 msgid "Edit"
-msgstr "编辑"
+msgstr "Bearbeiten"
 
 #: Projects/projects/ProjectPane.py:2072
 msgid ""
 "Enter a command to be executed on all selected files and files in selected "
 "directories."
-msgstr "输入命令运行于所有选定文件和选定目录中的文件"
+msgstr ""
+"Geben Sie einen Befehl ein der auf alle ausgewählten Dateien und Dateien in "
+"ausgewälten Ordnern ausgeführt wird."
 
 #: Projects/projects/ProjectPane.py:1511
 msgid "Enter command to execute on all files"
-msgstr "输入命令运行于所有文件"
+msgstr "Geben Sie einen Befehl ein der auf all Dateien angewendet wird"
 
 #: Projects/projects/ProjectPane.py:714
 msgid "Enter your commit message:"
-msgstr "输入提交信息："
+msgstr "Geben Sie die Commit Nachricht ein:"
 
 #: Projects/projects/ConfigDialog.py:264
 msgid "Environment Variables"
-msgstr "环境变量"
+msgstr "Umgebungsvariablen"
 
 #: Projects/projects/ProjectPane.py:1598 Projects/projects/ProjectPane.py:1606
 msgid "Error occurred when copying/moving files"
-msgstr "在复制/移动文件时发生错误"
+msgstr ""
+"Ein Fehler ist aufgetreten während dem kopieren/verschiebend von Dateien"
 
 #: Projects/projects/ProjectPane.py:1659
 msgid "Error occurred when removing files"
-msgstr "移动文件时产生错误"
+msgstr "Ein Fehler ist aufgetreten beim Entfernen von Dateien"
 
 #: Projects/projects/ProjectPane.py:2066
 msgid "Execute command on files"
-msgstr "运行命令于文件"
+msgstr "Führe Befehl auf Dateien aus"
 
 #: Projects/projects/ProjectPane.py:1412
 msgid "Execute command..."
-msgstr "运行命令..."
+msgstr "Führe Befehl aus..."
 
 #: Projects/projects/ConfigDialog.py:114
 msgid "File Filters"
-msgstr "文件过滤器"
+msgstr "Datei Filter"
 
 #: Projects/projects/ProjectPane.py:1393
 msgid "Folder"
-msgstr "文件夹"
+msgstr "Verzeichnis"
 
 #: Projects/projects/ConfigDialog.py:90
 msgid "General"
-msgstr "常规"
+msgstr "Allgemein"
 
 #: Projects/projects/ProjectPane.py:127
 msgid "HTML File"
-msgstr "HTML 文件"
+msgstr "HTML-Datei"
 
 #: Projects/projects/HistWin.py:434
 msgid "History information could not be retrieved"
-msgstr "历史信息无法检索"
+msgstr "Verlaufs-Information konnte nicht wiederhergestellt werden"
 
 #: Projects/projects/ConfigDialog.py:127
 msgid "Keep project tree synchronized with editor notebook"
-msgstr "保持工程树与编辑器笔记同步"
+msgstr "Projekt Baum mit editor Seite synchron behalten"
 
 #: Projects/projects/HistWin.py:365
 msgid "Log Message"
-msgstr "日志信息"
+msgstr "Protokollmeldung"
 
 #: Projects/projects/ProjectPane.py:1421
 msgid "Make Patch"
-msgstr "生成补丁"
+msgstr "Patch erstellen"
 
 #: Projects/projects/ProjectPane.py:1425
 msgid "Move to "
-msgstr "移动到 "
+msgstr "Verschieben nach "
 
 #: Projects/projects/ConfigDialog.py:268
 msgid "Name"
-msgstr "名字"
+msgstr "Name"
 
 #: Projects/projects/ProjectPane.py:1406
 msgid "New..."
-msgstr "新建..."
+msgstr "Neu..."
 
 #: Projects/projects/ProjectPane.py:1404
 msgid "Open"
-msgstr "打开"
+msgstr "Öffnen"
 
 #: Projects/projects/ProjectPane.py:1798
 msgid "Open Projects Sidepanel"
-msgstr "打开工程面板"
+msgstr "Öffnet Projekt Seitenfenster"
 
 #: Projects/projects/ProjectPane.py:1405
 msgid "Open enclosing folder"
-msgstr "打开折叠文件"
+msgstr "Überverzeichniss öffnen"
 
 #: Projects/projects/ConfigDialog.py:256
 msgid "Password"
-msgstr "密码"
+msgstr "Passwort"
 
 #: Projects/projects/ProjectPane.py:1410
 msgid "Paste"
-msgstr "粘贴"
+msgstr "Einfügen"
 
 #: Projects/projects/ProjectPane.py:128
 msgid "Php File"
-msgstr "Php 文件"
+msgstr "PHP-Datei"
 
 #: Projects/projects/ConfigDialog.py:477
 msgid "Please enter a repository path.  Partial paths may also be entered."
-msgstr "请输入库路径。包括部分路径。"
+msgstr ""
+"Bitte geben Sie einen Pfad zu einem Repository ein. Relative Pfade können "
+"auch eingegeben werden."
 
 #: Projects/projects/ProjectPane.py:1797
 msgid "Projects"
-msgstr "工程"
+msgstr "Projekte"
 
 #: Projects/projects/ConfigDialog.py:44
 msgid "Projects Configuration"
-msgstr "工程配置"
+msgstr "Projekt Konfiguration"
 
 #: Projects/projects/ProjectPane.py:129
 msgid "Python File"
-msgstr "Python 文件"
+msgstr "Python Datei"
 
 #: Projects/projects/ProjectPane.py:1416
 msgid "Refresh status"
-msgstr "刷新"
+msgstr "Erneuerungs Status"
 
 #: Projects/projects/ProjectPane.py:1820
 msgid "Remove Project"
-msgstr "移除工程"
+msgstr "Projekt entfernen"
 
 #: Projects/projects/ProjectPane.py:1386
 msgid "Remove from repository"
-msgstr "从库中移除"
+msgstr "Aus Repository entfernen"
 
 #: Projects/projects/ConfigDialog.py:469
 msgid "Remove repository"
-msgstr "移除库"
+msgstr "Repository entfernen"
 
 #: Projects/projects/ConfigDialog.py:245
 msgid "Repository Configuration"
-msgstr "库配置"
+msgstr "Repository Konfiguration"
 
 #: Projects/projects/HistWin.py:112
 msgid "Retrieving File History"
-msgstr "检索文件历史"
+msgstr "Datei Verlauf abrufen"
 
 #: Projects/projects/HistWin.py:362
 msgid "Rev #"
-msgstr "Rev *"
+msgstr "Version #"
 
 #: Projects/projects/ProjectPane.py:1422
 msgid "Revert to repository version"
-msgstr "恢复库版本"
+msgstr "Repository Version wiederherstellen"
 
 #: Projects/projects/HistWin.py:198
 msgid "Revision History"
-msgstr "版本历史"
+msgstr "Versionshistorie"
 
 #: Projects/projects/HistWin.py:474
 msgid "Search Log"
-msgstr "查找日志"
+msgstr "Such log"
 
 #: Projects/projects/ConfigDialog.py:148
 msgid "Select diff program"
-msgstr "选择 diff 程序"
+msgstr "Diff-Program auswählen"
 
 #: Projects/projects/ConfigDialog.py:468
 msgid "Select the repository path to remove"
-msgstr "选择移除库路径"
+msgstr "Wählen Sie Repository Pfad zum entfernen aus"
 
 #: Projects/projects/ProjectPane.py:770
 msgid "Selected files are from multiple repositories"
-msgstr "选定文件来自多个库"
+msgstr "Die ausgewählten Dateien sind aus verschiedenen Repositories"
 
 #: Projects/projects/ProjectPane.py:1419
 msgid "Show revision history"
-msgstr "显示修订历史"
+msgstr "Zeige Versions Verlauf an"
 
 #: Projects/projects/ConfigDialog.py:92
 msgid "Source Control"
-msgstr "源代码控制"
+msgstr "Quellcode Kontrolle"
 
 #: Projects/projects/ConfigDialog.py:121
 msgid ""
 "Space separated list of files patterns to exclude from view\n"
 "The use of wildcards (*) are permitted."
 msgstr ""
-"从视图中去除的文件匹配列表，用空格分隔\n"
-"可以使用(*)"
+"Leerzeichen getrennte Liste von Datei Mustern um in der Anzeige nicht "
+"anzuzeigen\n"
+"Der gebrauch von Wildcards (*) ist erlaubt."
 
 #: Projects/projects/ProjectPane.py:125
 msgid "Text File"
-msgstr "文本文件"
+msgstr "Textdatei"
 
 #: Projects/projects/ProjectPane.py:1509
 msgid ""
 "The following command will be executed on all selected\n"
 "files and files contained in selected directories."
 msgstr ""
-"以下命令将会执行于所有选定文件\n"
-"以及选定目录下的文件"
+"Def folgende Befehl wird auf alle ausgewählten Dateien \n"
+"und Dateien in ausgewählten Verzeichnissen angewendet"
 
 #: Projects/projects/HistWin.py:431
 msgid ""
 "The history information for the requested file could not be retrieved.  "
 "Please make sure that you have network access."
-msgstr "所需文件历史信息无法获取。请检查网络连接。"
+msgstr ""
+"Der Verlauf der angeforderten Datei konnte nicht abgerufen werden. "
+"Vergewissern Sie sich, dass sie Netzwerk-Anschluss haben."
 
 #: Projects/projects/ProjectPane.py:1039 Projects/projects/ProjectPane.py:1057
 #: Projects/projects/ProjectPane.py:1074
 msgid ""
 "The requested file could not be retrieved from the source control system."
-msgstr "所需文件历史信息无法从版本控制系统中获取。"
+msgstr ""
+"Die angeforderte Datei konnte nicht im Quellcode Kontroll System gefunden "
+"werden."
 
 #: Projects/projects/ProjectPane.py:1604
 #, python-format
 msgid ""
 "The system returned the following message when attempting to move/copy %s: "
 "%s."
-msgstr "移动/复制 %s 时，系统返回以下信息：%s"
+msgstr ""
+"Das System antwortete mit folgender Nachricht beim Versuch %s zu "
+"verschieben/kopieren: %s."
 
 #: Projects/projects/ProjectPane.py:1595
 #, python-format
 msgid ""
 "The system returned the following message when attempting to move/copy %s: "
 "%s. Do you wish to continue?"
-msgstr "移动/复制 %s 时，系统返回以下信息：%s。要继续吗？"
+msgstr ""
+"Das System antwortete mit folgender Nachricht beim Versuch %s zu "
+"verschieben/kopieren: %s. Möchten Sie Fortfahren?"
 
 #: Projects/projects/ProjectPane.py:1417
 msgid "Update"
-msgstr "更新"
+msgstr "Aktualisieren"
 
 #: Projects/projects/ConfigDialog.py:254
 msgid "Username"
-msgstr "用户名"
+msgstr "Benutzername"
 
 #: Projects/projects/ConfigDialog.py:269
 msgid "Value"
-msgstr "值"
+msgstr "Wert"
 
 #: Projects/projects/ProjectPane.py:769
 msgid ""
 "You can not execute source control commands across multiple repositories."
-msgstr "不能跨多个库执行版本控制命令。"
+msgstr ""
+"Sie können keine Quellcode Kontroll System Befehle auf mehrere Repositories "
+"ausführen."
