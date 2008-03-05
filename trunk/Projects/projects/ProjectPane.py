@@ -1741,7 +1741,6 @@ class ProjectTree(wx.Panel):
                     ctrl = nb.GetPage(page)
                     if item == ctrl.GetFileName():
                         nb.SetSelection(page)
-                        nb.ChangePage(page)
                         break
             else:
                 nb.OnDrop([item])
