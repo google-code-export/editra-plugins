@@ -1,4 +1,4 @@
-# Japanese translation for editra
+# German translation for editra
 # Copyright (c) 2008 Rosetta Contributors and Canonical Ltd 2008
 # This file is distributed under the same license as the editra package.
 # FIRST AUTHOR <EMAIL@ADDRESS>, 2008.
@@ -8,9 +8,9 @@ msgstr ""
 "Project-Id-Version: editra\n"
 "Report-Msgid-Bugs-To: FULL NAME <EMAIL@ADDRESS>\n"
 "POT-Creation-Date: 2008-02-25 04:44-0600\n"
-"PO-Revision-Date: 2008-02-29 09:01+0000\n"
-"Last-Translator: Cody Precord <Unknown>\n"
-"Language-Team: Japanese <ja@li.org>\n"
+"PO-Revision-Date: 2008-03-01 14:31+0000\n"
+"Last-Translator: DR0ID <Unknown>\n"
+"Language-Team: German <de@li.org>\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
@@ -19,51 +19,51 @@ msgstr ""
 
 #: calculator/calculator/calc.py:151 calculator/calculator/calc.py:317
 msgid "Ascii"
-msgstr "ASCII"
+msgstr "Ascii"
 
 #: calculator/calculator/__init__.py:34
 msgid "Calculator"
-msgstr "計算機"
+msgstr "Rechner"
 
 #: calculator/calculator/calc.py:150
 msgid "Char Display"
-msgstr "文字表示"
+msgstr "Zeichen Anzeige"
 
 #: calculator/calculator/calc.py:158 calculator/calculator/calc.py:195
 #: calculator/calculator/calc.py:307 calculator/calculator/calc.py:407
 #: calculator/calculator/calc.py:509 calculator/calculator/calc.py:522
 #: calculator/calculator/calc.py:533 calculator/calculator/calc.py:560
 msgid "Dec"
-msgstr "10 進"
+msgstr "Dez"
 
 #: calculator/calculator/calc.py:48
 msgid "Editra | Calculator"
-msgstr "Editra | 計算機"
+msgstr "Editra | Rechner"
 
 #: calculator/calculator/calc.py:189 calculator/calculator/calc.py:274
 #: calculator/calculator/calc.py:500 calculator/calculator/calc.py:556
 msgid "Error"
-msgstr "エラー"
+msgstr "Fehler"
 
 #: calculator/calculator/calc.py:498
 #, python-format
 msgid "Error: %s"
-msgstr "エラー: %s"
+msgstr "Fehler: %s"
 
 #: calculator/calculator/calc.py:389
 msgid "Error: Display Overflow"
-msgstr "エラー：ディスプレイオーバーフロー"
+msgstr "Error: Anzeige Überlauf"
 
 #: calculator/calculator/calc.py:158 calculator/calculator/calc.py:216
 #: calculator/calculator/calc.py:307 calculator/calculator/calc.py:310
 #: calculator/calculator/calc.py:403 calculator/calculator/calc.py:513
 #: calculator/calculator/calc.py:524 calculator/calculator/calc.py:564
 msgid "Hex"
-msgstr "16 進"
+msgstr "Hex"
 
 #: calculator/calculator/calc.py:157
 msgid "Mode"
-msgstr "モード"
+msgstr "Modus"
 
 #: calculator/calculator/calc.py:158 calculator/calculator/calc.py:219
 #: calculator/calculator/calc.py:307 calculator/calculator/calc.py:312
@@ -71,7 +71,7 @@ msgstr "モード"
 #: calculator/calculator/calc.py:511 calculator/calculator/calc.py:518
 #: calculator/calculator/calc.py:535 calculator/calculator/calc.py:570
 msgid "Oct"
-msgstr "8 進"
+msgstr "Okt"
 
 #: calculator/calculator/calc.py:151
 msgid "Unicode"
