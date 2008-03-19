@@ -7,7 +7,7 @@
 ###############################################################################
 """Oxygen icon theme for Editra"""
 __author__ = "Cody Precord"
-__version__ = "0.3"
+__version__ = "0.4"
 
 import wx
 import os
