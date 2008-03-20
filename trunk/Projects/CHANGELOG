@@ -5,8 +5,17 @@ License: wxWindows
 Changelog:
 
 #-----------------------------------------------------------------------------#
-Version: 0.3
+Version: 0.4
 Released: xx/xx/2008
+
+New:
++Added Serbian translation
+
+Bug Fixes:
+
+#-----------------------------------------------------------------------------#
+Version: 0.3
+Released: 03/14/2008
 
 Feature update and bug fix release
 
@@ -17,6 +26,8 @@ New:
 +Move to Trash command is now enabled
 +i18n support
 +Simplified Chinese translation
++German translation
++Japanese translation
 
 Bug Fixes:
 +Expanding directories that don't have permissions
