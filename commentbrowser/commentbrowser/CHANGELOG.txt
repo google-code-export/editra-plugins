@@ -5,8 +5,15 @@ License: wxWindows
 
 #-----------------------------------------------------------------------------#
 
+Version 0.3
+Released: xx/xx/xxxx
+
++ Added Serbian translation
+
+#-----------------------------------------------------------------------------#
+
 Version 0.2:
-Released:
+Released: 03/14/2008
 
   + Update icons when Editra's icon theme changes
   + Fix some performance issues for when multiple windows are open
