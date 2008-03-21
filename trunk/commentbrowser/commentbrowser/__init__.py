@@ -10,7 +10,7 @@
 # Plugin Meta
 """Adds a Comment Browser Sidepanel"""
 __author__ = "DR0ID"
-__version__ = "0.1"
+__version__ = "0.2"
 
 #-----------------------------------------------------------------------------#
 # Imports
