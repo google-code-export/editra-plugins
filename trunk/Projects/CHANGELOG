@@ -12,6 +12,9 @@ New:
 +Added Serbian translation
 
 Bug Fixes:
++Use system provided colors instead of hard coded values for the tree control,
+this fixes some visibility problems that can occur when using certain themes on
+gtk.
 
 #-----------------------------------------------------------------------------#
 Version: 0.3
