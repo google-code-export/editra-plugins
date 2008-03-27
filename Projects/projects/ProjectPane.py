@@ -113,10 +113,10 @@ else: # Other/Linux
     #FILEMAN = 'Konqueror'
     #FILEMAN_CMD = 'konqueror'
 
-ODD_PROJECT_COLOR = wx.Colour(232, 239, 250)
-EVEN_PROJECT_COLOR = wx.Colour(232, 239, 250)
-ODD_BACKGROUND_COLOR = wx.Colour(255, 255, 255)
-EVEN_BACKGROUND_COLOR = wx.Colour(255, 255, 255)
+ODD_PROJECT_COLOR = wx.SystemSettings_GetColour(wx.SYS_COLOUR_HIGHLIGHT)
+EVEN_PROJECT_COLOR = wx.SystemSettings_GetColour(wx.SYS_COLOUR_HIGHLIGHT)
+ODD_BACKGROUND_COLOR = wx.SystemSettings_GetColour(wx.SYS_COLOUR_LISTBOX)
+EVEN_BACKGROUND_COLOR = wx.SystemSettings_GetColour(wx.SYS_COLOUR_LISTBOX)
 
 # i18n support
 _ = wx.GetTranslation
@@ -204,7 +204,7 @@ class ProjectTree(wx.Panel):
 
         global ODD_PROJECT_COLOR
         global EVEN_PROJECT_COLOR
-        ODD_PROJECT_COLOR = EVEN_PROJECT_COLOR = AdjustColour(wx.SystemSettings_GetColour(wx.SYS_COLOUR_3DHIGHLIGHT), 15)
+        ODD_PROJECT_COLOR = EVEN_PROJECT_COLOR = AdjustColour(wx.SystemSettings_GetColour(wx.SYS_COLOUR_HIGHLIGHT), 25)
 
         self.tree = MyTreeCtrl(self, tID, wx.DefaultPosition, wx.DefaultSize,
                                wx.TR_DEFAULT_STYLE
