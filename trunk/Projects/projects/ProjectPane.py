@@ -581,20 +581,23 @@ class ProjectTree(wx.Panel):
                 dir += os.sep
             if filename.startswith(dir):
                 filename = filename[len(dir):].split(os.sep)
-                self.tree.Expand(project)
+                if not self.tree.IsExpanded(project):
+                    self.tree.Expand(project)
                 folder = project
                 try:
                     while filename:
                         name = filename.pop(0)
                         for item in self.getChildren(folder):
                             if self.tree.GetItemText(item) == name:
-                                self.tree.Expand(item)
+                                if not self.tree.IsExpanded(item):
+                                    self.tree.Expand(item)
                                 folder = item
                                 continue
                 except:
                     pass
 
                 self.tree.UnselectAll()
+                self.tree.EnsureVisible(folder)
                 self.tree.SelectItem(folder)
                 break
 
@@ -1801,7 +1804,7 @@ class ProjectTree(wx.Panel):
                 wx.CallAfter(wx.PostEvent, self, evt)
 
             # Check for the kill signal every second until the delay is finished
-            for i in range(delay):
+            for i in xrange(delay):
                 if not flag:
                     return
                 time.sleep(1)
