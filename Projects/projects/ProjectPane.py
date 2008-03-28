@@ -490,7 +490,7 @@ class ProjectTree(wx.Panel):
             for item in deleted:
                 if item in children:
                     node = children[item]
-                    if node.IsOk() and \
+                    if node.IsOk() and self.tree.IsExpanded(node) and \
                        os.path.isdir(self.tree.GetPyData(node)['path']):
                         self.tree.Collapse(node)
                     if node.IsOk():
@@ -519,7 +519,6 @@ class ProjectTree(wx.Panel):
             self.scStatus(items)
 
         self.tree.SortChildren(parent)
-
         evt.Skip()
 
     def OnThemeChange(self, msg):
@@ -683,7 +682,6 @@ class ProjectTree(wx.Panel):
 
         # Delete dummy node from self.addFolder
         self.tree.Delete(self.tree.GetFirstChild(parent)[0])
-        self.tree.SortChildren(parent)
         self.addDirectoryWatcher(parent)
         self.scStatus([parent])
 
@@ -945,71 +943,27 @@ class ProjectTree(wx.Panel):
             status = {}
             rc = self._timeoutCommand(None, sc['instance'].status,
                                       [data['path']], status=status)
+
             if not rc:
                 return updates
 
-        except (OSError, IOError):
-            pass
-
-        def prepUpdates():
-            """Post to the main thread for processing as it requires
-            access to gui components.
-
-            """
-            # Update the icons for the file nodes
-            if os.path.isdir(data['path']) and node.IsOk():
-                for child in self.getChildren(node):
-                    text = self.tree.GetItemText(child)
-                    if text not in status:
-                        continue
-                    if os.path.isdir(os.path.join(data['path'], text)):
-                        # Closed folder icon
-                        icon = self.icons.get('folder-' + \
-                                              status[text].get('status', ''))
-                        if icon and child.IsOk():
-                            updates.append((self.tree.SetItemImage, child,
-                                            icon, wx.TreeItemIcon_Normal))
-                        # Open folder icon
-                        icon = self.icons.get('folder-open-' + \
-                                              status[text].get('status', ''))
-                        if icon and child.IsOk():
-                            updates.append((self.tree.SetItemImage, child,
-                                            icon, wx.TreeItemIcon_Expanded))
-                        # Update children status if opened
-                        if child.IsOk() and self.tree.IsExpanded(child):
-                            self._updateStatus(child,
-                                               self.tree.GetPyData(child), sc)
-                    else:
-                        icon = self.icons.get('file-' + \
-                                              status[text].get('status', ''))
-                        if icon and child.IsOk():
-                            updates.append((self.tree.SetItemImage, child,
-                                            icon, wx.TreeItemIcon_Normal))
-                        #if 'tag' in status[text]:
-                        #    updates.append((self.tree.SetToolTip,
-                        #                   wx.ToolTip('Tag: %s' % \
-                        #                               status[text]['tag'])))
-            elif node.IsOk():
-                text = self.tree.GetItemText(node)
-                if text in status:
-                    icon = self.icons.get('file-' + status[text].get('status', ''))
-                    if icon and node.IsOk():
-                        updates.append((self.tree.SetItemImage, node,
-                                        icon, wx.TreeItemIcon_Normal))
-                    #if 'tag' in status[text]:
-                    #    updates.append((self.tree.SetToolTip,
-                    #                   wx.ToolTip('Tag: %s' % \
-                    #                              status[text]['tag'])))
-            return updates
+        except Exception, msg: #(OSError, IOError), msg:
+            print "WTF!!!!", msg
 
         wx.PostEvent(self, UpdateStatusEvent(ppEVT_UPDATE_STATUS,
-                                             self.GetId(), prepUpdates))
+                                             self.GetId(),
+                                             (node, data, status, sc)))
 
     def OnUpdateStatus(self, evt):
         """ Apply status updates to tree view """
         # The event value is a method for preparing the update data
-        updates = evt.GetValue()()
-        for update in updates:
+        args = evt.GetValue()
+        if args is not None:
+            updates = self.prepUpdates(*args)
+        else:
+            updates = list()
+
+        for update in list(set(updates)):
             update = list(update)
             method = update.pop(0)
             try:
@@ -1017,7 +971,61 @@ class ProjectTree(wx.Panel):
                     method(*update)
             except:
                 pass
-        evt.Skip()
+
+    def prepUpdates(self, node, data, status, sc):
+        """Prepare the tree updates
+        @param node: node to update
+        @param data: node data
+        @param status: source control status dictionary
+        @param sc: Source control system
+
+        """
+        updates = list()
+        # Update the icons for the file nodes
+        if os.path.isdir(data['path']) and node.IsOk():
+            for child in self.getChildren(node):
+                text = self.tree.GetItemText(child)
+                if text not in status:
+                    continue
+                if os.path.isdir(os.path.join(data['path'], text)):
+                    # Closed folder icon
+                    icon = self.icons.get('folder-' + \
+                                          status[text].get('status', ''))
+                    if icon and child.IsOk():
+                        updates.append((self.tree.SetItemImage, child,
+                                        icon, wx.TreeItemIcon_Normal))
+                    # Open folder icon
+                    icon = self.icons.get('folder-open-' + \
+                                          status[text].get('status', ''))
+                    if icon and child.IsOk():
+                        updates.append((self.tree.SetItemImage, child,
+                                        icon, wx.TreeItemIcon_Expanded))
+                    # Update children status if opened
+                    if child.IsOk() and self.tree.IsExpanded(child):
+                        self._updateStatus(child,
+                                           self.tree.GetPyData(child), sc)
+                else:
+                    icon = self.icons.get('file-' + \
+                                          status[text].get('status', ''))
+                    if icon and child.IsOk():
+                        updates.append((self.tree.SetItemImage, child,
+                                        icon, wx.TreeItemIcon_Normal))
+                    #if 'tag' in status[text]:
+                    #    updates.append((self.tree.SetToolTip,
+                    #                   wx.ToolTip('Tag: %s' % \
+                    #                               status[text]['tag'])))
+        elif node.IsOk():
+            text = self.tree.GetItemText(node)
+            if text in status:
+                icon = self.icons.get('file-' + status[text].get('status', ''))
+                if icon and node.IsOk():
+                    updates.append((self.tree.SetItemImage, node,
+                                    icon, wx.TreeItemIcon_Normal))
+                #if 'tag' in status[text]:
+                #    updates.append((self.tree.SetToolTip,
+                #                   wx.ToolTip('Tag: %s' % \
+                #                              status[text]['tag'])))
+        return updates
 
     def OnOpenBuffer(self, evt):
         """ Opening patch texts in a new buffer in Editra """
