@@ -17,6 +17,7 @@ this fixes some visibility problems that can occur when using certain themes on
 gtk.
 +Fix duplicate entries in tree view under Windows
 +Fix performance issue when changing tabs under Windows
++Fix menu checkmark not updateing properly under Windows
 
 #-----------------------------------------------------------------------------#
 Version: 0.3

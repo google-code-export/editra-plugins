@@ -1838,11 +1838,9 @@ class ProjectPane(wx.Panel):
             import ed_glob
             mb = self._mw.GetMenuBar()
             vm = mb.GetMenuByName("view")
-            self._mi = vm.InsertAlpha(self.ID_PROJECTS, _("Projects"),
-                                      _("Open Projects Sidepanel"),
-                                      wx.ITEM_CHECK,
-                                      after=ed_glob.ID_PRE_MARK)
-            vm.Bind(wx.EVT_MENU_OPEN, self.UpdateMenuItem)
+            vm.InsertAlpha(ProjectPane.ID_PROJECTS, _("Projects"),
+                           _("Open Projects Sidepanel"),
+                           wx.ITEM_CHECK, after=ed_glob.ID_PRE_MARK)
         except ImportError:
             ed_glob = None
 
@@ -1964,25 +1962,25 @@ class ProjectPane(wx.Panel):
 
     def OnShowProjects(self, evt):
         """ Shows the projects """
-        if evt.GetId() == self.ID_PROJECTS and profiler:
+        if evt.GetId() == self.ID_PROJECTS:
             mgr = self._mw.GetFrameManager()
-            pane = mgr.GetPane(self.PANE_NAME)
+            pane = mgr.GetPane(ProjectPane.PANE_NAME)
             if pane.IsShown():
                 pane.Hide()
-                profiler.Profile_Set('Projects.Show', False)
             else:
                 pane.Show()
-                profiler.Profile_Set('Projects.Show', True)
             mgr.Update()
         else:
             evt.Skip()
 
-    def UpdateMenuItem(self, evt):
+    def OnUpdateMenu(self, evt):
         """Update the check mark for the menu item"""
-        mgr = self._mw.GetFrameManager()
-        pane = mgr.GetPane(self.PANE_NAME)
-        self._mi.Check(pane.IsShown())
-        evt.Skip()
+        if evt.GetId() == ProjectPane.ID_PROJECTS:
+            mgr = self._mw.GetFrameManager()
+            pane = mgr.GetPane(ProjectPane.PANE_NAME)
+            evt.Check(pane.IsShown())
+        else:
+            evt.Skip()
 
     def OnTick(self, evt):
         """Pulse the indicator on every tick of the clock"""

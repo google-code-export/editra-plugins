@@ -17,7 +17,6 @@ import ed_glob
 import iface
 import ed_menu
 import util
-from profiler import Profile_Get, Profile_Set
 from ProjectPane import ProjectPane
 
 #-----------------------------------------------------------------------------#
@@ -49,30 +48,12 @@ class Projects(plugin.Plugin):
                         CloseButton(True).MaximizeButton(False).\
                         BestSize(wx.Size(215, 350)))
 
-            # Get settings from profile
-            if Profile_Get('Projects.Show', 'bool', False):
-                mgr.GetPane(PANE_NAME).Show()
-            else:
-                mgr.GetPane(PANE_NAME).Hide()
-
             mgr.Update()
-
-            # Event Handlers
-            mainw.Bind(wx.aui.EVT_AUI_PANE_CLOSE, self.OnPaneClose)
 
     def GetMenuHandlers(self):
         """Returns the menu event handlers"""
-        return [(self._projects.ID_PROJECTS, self._projects.OnShowProjects)]
+        return [(ProjectPane.ID_PROJECTS, self._projects.OnShowProjects)]
 
     def GetUIHandlers(self):
         """Returns handlers for UpdateUI events"""
-        return list()
-
-    def OnPaneClose(self, evt):
-        """ Handles when the pane is closed to update the profile """
-        pane = evt.GetPane()
-        if pane.name == PANE_NAME:
-            util.Log('[projects][info] Closed Projects pane')
-            Profile_Set('Projects.Show', False)
-        else:
-            evt.Skip()
+        return [(ProjectPane.ID_PROJECTS, self._projects.OnUpdateMenu)]
