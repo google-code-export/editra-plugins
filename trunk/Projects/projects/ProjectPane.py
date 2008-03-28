@@ -113,8 +113,8 @@ else: # Other/Linux
     #FILEMAN = 'Konqueror'
     #FILEMAN_CMD = 'konqueror'
 
-ODD_PROJECT_COLOR = wx.SystemSettings_GetColour(wx.SYS_COLOUR_HIGHLIGHT)
-EVEN_PROJECT_COLOR = wx.SystemSettings_GetColour(wx.SYS_COLOUR_HIGHLIGHT)
+ODD_PROJECT_COLOR = wx.SystemSettings_GetColour(wx.SYS_COLOUR_3DLIGHT)
+EVEN_PROJECT_COLOR = wx.SystemSettings_GetColour(wx.SYS_COLOUR_3DLIGHT)
 ODD_BACKGROUND_COLOR = wx.SystemSettings_GetColour(wx.SYS_COLOUR_LISTBOX)
 EVEN_BACKGROUND_COLOR = wx.SystemSettings_GetColour(wx.SYS_COLOUR_LISTBOX)
 
@@ -204,8 +204,11 @@ class ProjectTree(wx.Panel):
 
         global ODD_PROJECT_COLOR
         global EVEN_PROJECT_COLOR
-        ODD_PROJECT_COLOR = EVEN_PROJECT_COLOR = AdjustColour(wx.SystemSettings_GetColour(wx.SYS_COLOUR_HIGHLIGHT), 25)
-
+        if wx.Platform == '__WXMAC__':
+            color = AdjustColour(wx.SystemSettings_GetColour(wx.SYS_COLOUR_3DHIGHLIGHT), 15)
+        else:
+            color = wx.SystemSettings_GetColour(wx.SYS_COLOUR_3DLIGHT)
+        ODD_PROJECT_COLOR = EVEN_PROJECT_COLOR = color
         self.tree = MyTreeCtrl(self, tID, wx.DefaultPosition, wx.DefaultSize,
                                wx.TR_DEFAULT_STYLE
                                #wx.TR_HAS_BUTTONS
@@ -2022,7 +2025,8 @@ class CommitDialog(wx.Dialog):
         self._commit.SetDefault()
         self._cancel = wx.Button(self, wx.ID_CANCEL)
 
-        self._entry = wx.TextCtrl(self, size=(400, 250), style=wx.TE_MULTILINE)
+        self._entry = wx.TextCtrl(self, size=(400, 250), \
+                                  style=wx.TE_MULTILINE|wx.TE_RICH2)
         font = self._entry.GetFont()
         if wx.Platform == '__WXMAC__':
             font.SetPointSize(12)
