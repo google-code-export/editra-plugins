@@ -947,8 +947,8 @@ class ProjectTree(wx.Panel):
             if not rc:
                 return updates
 
-        except Exception, msg: #(OSError, IOError), msg:
-            print "WTF!!!!", msg
+        except:
+            pass
 
         wx.PostEvent(self, UpdateStatusEvent(ppEVT_UPDATE_STATUS,
                                              self.GetId(),
