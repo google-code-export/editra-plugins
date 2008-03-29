@@ -123,13 +123,19 @@ _ = wx.GetTranslation
 
 #-----------------------------------------------------------------------------#
 
-FILE_TYPES = {
-    _('Text File'): {'ext':'.txt'},
-    _('C File'): {'ext':'.c'},
-    _('HTML File'): {'ext':'.html', 'template':'<html>\n<head><title></title></head>\n<body>\n\n</body>\n</html>'},
-    _('Php File'): {'ext':'.php', 'template':'<?php\n\n?>'},
-    _('Python File'): {'ext':'.py', 'template':'#!/usr/bin/env python\n\n'},
-}
+def getFileTypes():
+    """Get filetypes for NewFile command. Moved inside a method so that the
+    strings are translatable when they are needed and not at import time.
+
+    """
+    file_types = {
+        _('Text File'): {'ext':'.txt'},
+        _('C File'): {'ext':'.c'},
+        _('HTML File'): {'ext':'.html', 'template':'<html>\n<head><title></title></head>\n<body>\n\n</body>\n</html>'},
+        _('Php File'): {'ext':'.php', 'template':'<?php\n\n?>'},
+        _('Python File'): {'ext':'.py', 'template':'#!/usr/bin/env python\n\n'},
+    }
+    return file_types
 
 ID_PROJECTPANE = wx.NewId()
 ID_PROJECTTREE = wx.NewId()
@@ -1452,7 +1458,7 @@ class ProjectTree(wx.Panel):
         newmenu = wx.Menu()
         newmenu.AppendItem(wx.MenuItem(newmenu, self.popupIDNewFolder, _('Folder')))
         newmenu.AppendSeparator()
-        for ftype in FILE_TYPES:
+        for ftype in getFileTypes():
             menu_id = wx.NewId()
             newmenu.AppendItem(wx.MenuItem(newmenu, menu_id, ftype))
             self.Bind(wx.EVT_MENU, self.onPopupNewFile, id=menu_id)
@@ -1535,14 +1541,15 @@ class ProjectTree(wx.Panel):
         key = None
         for item in menu.GetMenuItems():
             if item.GetId() == e_id:
-                key = item.GetLabel()
+                key = item.GetText()
                 break
 
-        if not key or key not in FILE_TYPES:
+        file_types = getFileTypes()
+        if not key or key not in file_types:
             return
 
         # Get informatio about file type
-        info = FILE_TYPES[key]
+        info = file_types[key]
 
         # Create unique name
         newpath = os.path.join(path, 'untitled file' + info['ext'])
@@ -2120,7 +2127,6 @@ class ExecuteCommandDialog(wx.Dialog):
 
         self.SetSizer(sizer)
         self.SetAutoLayout(True)
-
 
 #-----------------------------------------------------------------------------#
 if __name__ == '__main__':
