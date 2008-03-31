@@ -19,6 +19,8 @@ gtk.
 +Fix performance issue when changing tabs under Windows
 +Fix menu checkmark not updateing properly under Windows
 +Items in New File menu are now translatable
++Fix index out of range error that can occur when making a new file under some
+use cases.
 
 #-----------------------------------------------------------------------------#
 Version: 0.3

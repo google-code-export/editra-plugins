@@ -1514,7 +1514,13 @@ class ProjectTree(wx.Panel):
 
     def onPopupNewFolder(self):
         """ Create a new folder from popup menu selection """
-        node = self.getSelectedNodes()[0]
+        # See onPopupNewFile
+        nodes = self.getSelectedNodes()
+        if len(nodes):
+            node = nodes[0]
+        else:
+            return
+
         path = self.tree.GetPyData(node)['path']
         if not os.path.isdir(path):
             path = os.path.dirname(path)
@@ -1530,11 +1536,22 @@ class ProjectTree(wx.Panel):
 
     def onPopupNewFile(self, event):
         """ Create a new file """
-        node = self.getSelectedNodes()[0]
+        # Some errors have come in showing that this can under some use cases
+        # be called when there is no selection, so check that there is at least
+        # one selected node before trying to get it from the list
+        nodes = self.getSelectedNodes()
+        if len(nodes):
+            node = nodes[0]
+        else:
+            # Do nothing
+            # XXX: should we prompt a nag dialog to the the user to make
+            #      sure they have selected a node to put the new file under?
+            return
+
         path = self.tree.GetPyData(node)['path']
         if not os.path.isdir(path):
             path = os.path.dirname(path)
-        #print path
+
         # Determine file type
         e_id = event.GetId()
         menu = event.GetEventObject()
