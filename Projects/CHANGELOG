@@ -9,7 +9,7 @@ Version: 0.4
 Released: xx/xx/2008
 
 New:
-+Added Serbian translation
++Added Russian and Serbian translation
 
 Bug Fixes:
 +Use system provided colors instead of hard coded values for the tree control,
