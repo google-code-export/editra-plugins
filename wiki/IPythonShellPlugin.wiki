@@ -1,18 +1,19 @@
-#summary IPython interactive shell window
+IPython interactive shell window
 
 = Introduction =
 
 This plugin creates an interactive python shell that supports autocompletion, good introspection, unix/dos shell commands, %magic keys
 
-Status                                                                                            Works under windows and linux.Little problem under OSX under investigation.
-%cpaste still bugguy.
+Status                                                                                                      
+    * Works under windows and linux.Little problem under OSX under investigation.
+    * %cpaste still bugguy.
 
 Installation:
 You will need development version of ipython in 0.1 version of the plugin.
-- install bazaar:
-http://bazaar-vcs.org/
-- install ipython stable-dev branch:
-bzr branch http://bazaar.launchpad.net/~ipython/ipython/stable-dev
+    * install bazaar:
+    http://bazaar-vcs.org/
+    * install ipython stable-dev branch:
+    bzr branch http://bazaar.launchpad.net/~ipython/ipython/stable-dev
 python setup.py install
 
 = Implemented Features =
