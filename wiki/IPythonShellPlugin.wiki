@@ -18,16 +18,14 @@ This plugin creates an interactive python shell that supports autocompletion, go
 
 = Implemented Features =
 
-    ?         -> Introduction and overview of IPython's features.
-    %quickref -> Quick reference.
-                 magic key support:
-                 %bookmark etc...
-    help      -> Python's own help system.
-    object?   -> Details about 'object'. ?object also works, ?? prints more.
-                 ex: import smtplib
-                     smtplib?
-    !command  -> Execute command in shell ex: !ls,!dir,!cd
-    TAB       -> Autocompletion
+    * ?         -> Introduction and overview of IPython's features.
+    * %quickref -> Quick reference.
+        magic keys support: %bookmark
+    * help      -> Python's own help system.
+    * object?   -> Details about 'object'. ?object also works, ?? prints more.
+        ex: import smtplib then smtplib?
+    * !command  -> Execute command in shell ex: !ls,!dir,!cd
+    * TAB       -> Autocompletion
 
 = Planned Features =
 
