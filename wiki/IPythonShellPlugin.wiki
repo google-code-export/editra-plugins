@@ -1,8 +1,43 @@
-#summary One-sentence summary of this page.
+#summary IPython interactive shell window
 
 = Introduction =
 
-Add your content here.
+This plugin project has two parts:
+
+This plugin creates an interactive python shell that supports autocompletion, good introspection, unix/dos shell commands, %magic keys
+
+Status
+Works under windows and linux.Little problem under OSX under investigation.
+%cpaste still bugguy.
+
+Installation:
+You will need development version of ipython in 0.1 version of the plugin.
+- install bazaar:
+http://bazaar-vcs.org/
+- install ipython stable-dev branch:
+bzr branch http://bazaar.launchpad.net/~ipython/ipython/stable-dev
+python setup.py install
+
+Implemented Features
+
+    ?         -> Introduction and overview of IPython's features.
+    %quickref -> Quick reference.
+                 magic key support:
+                 %bookmark etc...
+    help      -> Python's own help system.
+    object?   -> Details about 'object'. ?object also works, ?? prints more.
+                 ex: import smtplib
+                     smtplib?
+    !command  -> Execute command in shell ex: !ls,!dir,!cd
+    TAB       -> Autocompletion
+
+Planned Features
+
+    * History reload on startup
+    * Background color selection
+    * %cpaste support of ctrl+c
+    * ctrl+c,ctrl+v
+
 
 
 = Details =
