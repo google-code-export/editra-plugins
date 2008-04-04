@@ -2,12 +2,9 @@
 
 = Introduction =
 
-This plugin project has two parts:
-
 This plugin creates an interactive python shell that supports autocompletion, good introspection, unix/dos shell commands, %magic keys
 
-Status
-Works under windows and linux.Little problem under OSX under investigation.
+Status                                                                                            Works under windows and linux.Little problem under OSX under investigation.
 %cpaste still bugguy.
 
 Installation:
@@ -18,7 +15,7 @@ http://bazaar-vcs.org/
 bzr branch http://bazaar.launchpad.net/~ipython/ipython/stable-dev
 python setup.py install
 
-Implemented Features
+= Implemented Features =
 
     ?         -> Introduction and overview of IPython's features.
     %quickref -> Quick reference.
@@ -31,18 +28,9 @@ Implemented Features
     !command  -> Execute command in shell ex: !ls,!dir,!cd
     TAB       -> Autocompletion
 
-Planned Features
+= Planned Features =
 
     * History reload on startup
     * Background color selection
     * %cpaste support of ctrl+c
     * ctrl+c,ctrl+v
-
-
-
-= Details =
-
-Add your content here.  Format your content with:
-  * Text in *bold* or _italic_
-  * Headings, paragraphs, and lists
-  * Automatic links to other wiki pages
