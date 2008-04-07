@@ -9,7 +9,7 @@
 # Plugin Metadata
 """Adds an IPythonShell to the Shelf"""
 __author__ = "Laurent Dufrechou"
-__version__ = "0.1"
+__version__ = "0.2"
 
 #-----------------------------------------------------------------------------#
 # Imports
@@ -18,6 +18,9 @@ import wx
 import iface
 #from profiler import Profile_Get
 import plugin
+
+# Make it easy to import extensions - they are always directly on pythonpath.
+# Therefore, non-IPython modules can be added to Extensions directory
 from IPython.gui.wx.ipython_view import IPShellWidget
 
 #-----------------------------------------------------------------------------#
@@ -75,7 +78,17 @@ class IPyShell(plugin.Plugin):
         """Returns an IPythonShell Panel"""
         self._log = wx.GetApp().GetLog()
         self._log("[IPyShell][info] Creating IPythonShell instance for Shelf")
-        self.ipython_panel    = IPShellWidget(parent,background_color = "BLACK")
+        #self.history_panel    = IPythonHistoryPanel(self)
+        
+        self.ipython_panel    = IPShellWidget(parent,background_color = "BLACK",)
+                                              #user_ns=locals(),user_global_ns=globals(),)
+        
+        #self.ipython_panel    = IPShellWidget(self,background_color = "WHITE")
+
+        #self.ipython_panel.setHistoryTrackerHook(self.history_panel.write)
+        #self.ipython_panel.setStatusTrackerHook(self.updateStatus)
+        #self.ipython_panel.setAskExitHandler(self.OnExitDlg)
+        #self.ipython_panel    = IPShellWidget(parent,background_color = "BLACK")
         
         #pyshell = shell.Shell(parent, locals=dict())
         #pyshell.setStyles(self.__SetupFonts())
