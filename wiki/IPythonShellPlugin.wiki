@@ -1,4 +1,4 @@
-IPython interactive shell window
+#summary IPython interactive shell window
 
 = Introduction =
 
