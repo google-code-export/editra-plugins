@@ -9,7 +9,9 @@ This plugin creates an interactive python shell that supports autocompletion, go
     * %cpaste still bugguy.
 
 *Installation: * 
-    You will need development version of ipython in 0.1 version of the plugin.
+    * New: in version 0.2 ipython source tree is included in the plugin.
+    Just do setup.py bdist_egg and copy the .egg in plugins directory.
+    * You will need development version of ipython in 0.1 version of the plugin.
     * install bazaar:
     http://bazaar-vcs.org/
     * install ipython stable-dev branch:
