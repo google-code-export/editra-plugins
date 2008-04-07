@@ -8,7 +8,7 @@ License: wxWindows
 Version 0.3
 Released: xx/xx/xxxx
 
-+ Added Serbian translation
++ Added (Italian, Russian, and Serbian) translations
 
 #-----------------------------------------------------------------------------#
 
