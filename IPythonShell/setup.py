@@ -9,7 +9,7 @@ __author__ = "Laurent Dufrechou"
 
 import sys
 try:
-    from setuptools import setup
+    from setuptools import setup, find_packages
 except ImportError:
     print "You must have setup tools installed in order to build this plugin"
     setup = None
@@ -17,14 +17,21 @@ except ImportError:
 if setup != None:
     setup(
         name='IPyShell',
-        version='0.1',
+        version='0.2',
         description=__doc__,
         author=__author__,
         author_email="laurent.dufrechou@gmail.com",
         license="bsd",
         url="http://ipython.scipy.org/moin/About",
         platforms=["Linux", "OS X", "Windows"],
-        packages=['IPyShell'],
+        packages=['IPyShell',
+                  'IPython',
+                  'IPython.gui',
+                  'IPython.gui.wx',
+                  'IPython.external',
+                  'IPython.Extensions',
+                  ],
+        
         entry_points='''
         [Editra.plugins]
         IPyShell = IPyShell:IPyShell
