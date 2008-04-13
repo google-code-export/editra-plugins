@@ -9,7 +9,7 @@
 # Plugin Metadata
 """Adds an IPythonShell to the Shelf"""
 __author__ = "Laurent Dufrechou"
-__version__ = "0.2"
+__version__ = "0.3"
 
 #-----------------------------------------------------------------------------#
 # Imports
@@ -19,8 +19,6 @@ import iface
 #from profiler import Profile_Get
 import plugin
 
-# Make it easy to import extensions - they are always directly on pythonpath.
-# Therefore, non-IPython modules can be added to Extensions directory
 from IPython.gui.wx.ipython_view import IPShellWidget
 
 #-----------------------------------------------------------------------------#
