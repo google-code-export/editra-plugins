@@ -4,7 +4,7 @@
 # Purpose: IPythonShell Plugin                                                #
 # Author: Laurent Dufréchou <laurent.dufrechou@gmail.com>                     #
 # Copyright: (c) 2008 Laurent Dufréchou                                       #
-# Licence: wxWindows Licence                                                  #
+# License: wxWindows License                                                  #
 ###############################################################################
 # Plugin Metadata
 """Adds an IPythonShell to the Shelf"""
@@ -31,39 +31,7 @@ class IPyShell(plugin.Plugin):
     """Adds a PyShell to the Shelf"""
     plugin.Implements(iface.ShelfI)
     ID_IPYSHELL = wx.NewId()
-    __name__ = u'IPythonShell'
-
-    #def __SetupFonts(self):
-        #"""Create the font settings for the shell by trying to get the
-        #users prefered font settings used in the EdStc
-        #"""
-        #fonts = { 
-        #          'size'      : 11,
-        #          'lnsize'    : 10,
-        #          'backcol'   : '#FFFFFF',
-        #          'calltipbg' : '#FFFFB8',
-        #          'calltipfg' : '#404040',
-        #}
-
-        #font = Profile_Get('FONT1', 'font', wx.Font(11, wx.FONTFAMILY_MODERN, 
-        #                                                wx.FONTSTYLE_NORMAL, 
-        #                                                wx.FONTWEIGHT_NORMAL))
-        #if font.IsOk() and len(font.GetFaceName()):
-        #    fonts['mono'] = font.GetFaceName()
-        #    fonts['size'] = font.GetPointSize()
-        #    if fonts['size'] < 11:
-        #        fonts['size'] = 11
-        #    fonts['lnsize'] = fonts['size'] - 1
-
-        #font = Profile_Get('FONT2', 'font', wx.Font(11, wx.FONTFAMILY_SWISS, 
-        #                                                wx.FONTSTYLE_NORMAL, 
-        #                                                wx.FONTWEIGHT_NORMAL))
-        #if font.IsOk() and len(font.GetFaceName()):
-        #    fonts['times'] = font.GetFaceName()
-        #    fonts['helv'] = font.GetFaceName()
-        #    fonts['other'] = font.GetFaceName()
-
-        #return fonts
+    __name__ = u'IPyShell'
 
     def AllowMultiple(self):
         """IPythonShell allows multiple instances"""
@@ -78,7 +46,7 @@ class IPyShell(plugin.Plugin):
         self._log("[IPyShell][info] Creating IPythonShell instance for Shelf")
         #self.history_panel    = IPythonHistoryPanel(self)
         
-        self.ipython_panel    = IPShellWidget(parent,background_color = "BLACK",)
+        self.ipython_panel    = IPShellWidget(parent, background_color="BLACK")
                                               #user_ns=locals(),user_global_ns=globals(),)
         
         #self.ipython_panel    = IPShellWidget(self,background_color = "WHITE")
@@ -93,14 +61,15 @@ class IPyShell(plugin.Plugin):
         return self.ipython_panel
 
     def GetId(self):
-        return self.ID_IPYSHELL
+        return IPyShell.ID_IPYSHELL
 
     def GetMenuEntry(self, menu):
-        return wx.MenuItem(menu, self.ID_IPYSHELL, self.__name__, 
-                                        _("Open an IPython Shell"))
+        return wx.MenuItem(menu, IPyShell.ID_IPYSHELL,
+                           IPyShell.__name__, 
+                           _("Open an IPython Shell"))
 
     def GetName(self):
-        return self.__name__
+        return IPyShell.__name__
 
     def IsStockable(self):
         return True
