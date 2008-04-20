@@ -58,6 +58,16 @@ class IPyShell(plugin.Plugin):
         
         #pyshell = shell.Shell(parent, locals=dict())
         #pyshell.setStyles(self.__SetupFonts())
+##        main_win = wx.GetApp().GetActiveWindow()
+##        my_panel = wx.Panel(main_win, wx.ID_ANY)
+##        mgr = main_win.GetFrameManager()
+##        mgr.AddPane(my_panel, wx.aui.AuiPaneInfo().Name("MyPanel").\
+##                    Caption("My Test Panel").Left().Layer(0).\
+##                    CloseButton(True).MaximizeButton(False).\
+##                    BestSize(wx.Size(300, 500)
+##        mgr.GetPane("MyPanel").Show()
+                     
+        self._log("[IPyShell][info] IPythonShell succesfully created")
         return self.ipython_panel
 
     def GetId(self):

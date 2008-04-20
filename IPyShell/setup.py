@@ -30,6 +30,14 @@ if setup != None:
                   'IPython.gui.wx',
                   'IPython.external',
                   'IPython.Extensions',
+                  'pyreadline',
+                  'pyreadline.clipboard',
+                  'pyreadline.configuration',
+                  'pyreadline.console',
+                  'pyreadline.keysyms',
+                  'pyreadline.lineeditor',
+                  'pyreadline.modes',
+                  'pyreadline.test',
                   ],
         
         entry_points='''
