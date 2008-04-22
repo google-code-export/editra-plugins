@@ -13,13 +13,14 @@ __version__ = "0.3"
 
 #-----------------------------------------------------------------------------#
 # Imports
-import wx
-#from wx.py import shell
+
+import wx,sys
 import iface
-#from profiler import Profile_Get
 import plugin
 
-from IPython.gui.wx.ipython_view import IPShellWidget
+import profiler
+
+from IPython.gui.wx.ipython_view import *
 
 #-----------------------------------------------------------------------------#
 # Globals
@@ -37,36 +38,29 @@ class IPyShell(plugin.Plugin):
         """IPythonShell allows multiple instances"""
         return True
 
-    def OnExitDlg(self,evt):
-        pass
-    
+    def OptionSave(self,key,value):
+        profiler.Profile_Set('IPython.'+key, value)
+        
     def CreateItem(self, parent):
         """Returns an IPythonShell Panel"""
         self._log = wx.GetApp().GetLog()
+        main_win = wx.GetApp().GetMainWindow()
+
         self._log("[IPyShell][info] Creating IPythonShell instance for Shelf")
-        #self.history_panel    = IPythonHistoryPanel(self)
         
         self.ipython_panel    = IPShellWidget(parent, background_color="BLACK")
                                               #user_ns=locals(),user_global_ns=globals(),)
+        self.ipython_panel.setOptionTrackerHook(self.OptionSave)
         
-        #self.ipython_panel    = IPShellWidget(self,background_color = "WHITE")
+        options = self.ipython_panel.getOptions()
+        for key in options.keys():
+            saved_value = profiler.Profile_Get('IPython.'+key)
+            if saved_value is not None:
+                options[key]['value'] = saved_value
+        
+        self.ipython_panel.reloadOptions(options)
 
-        #self.ipython_panel.setHistoryTrackerHook(self.history_panel.write)
-        #self.ipython_panel.setStatusTrackerHook(self.updateStatus)
-        #self.ipython_panel.setAskExitHandler(self.OnExitDlg)
-        #self.ipython_panel    = IPShellWidget(parent,background_color = "BLACK")
-        
-        #pyshell = shell.Shell(parent, locals=dict())
-        #pyshell.setStyles(self.__SetupFonts())
-##        main_win = wx.GetApp().GetActiveWindow()
-##        my_panel = wx.Panel(main_win, wx.ID_ANY)
-##        mgr = main_win.GetFrameManager()
-##        mgr.AddPane(my_panel, wx.aui.AuiPaneInfo().Name("MyPanel").\
-##                    Caption("My Test Panel").Left().Layer(0).\
-##                    CloseButton(True).MaximizeButton(False).\
-##                    BestSize(wx.Size(300, 500)
-##        mgr.GetPane("MyPanel").Show()
-                     
+            
         self._log("[IPyShell][info] IPythonShell succesfully created")
         return self.ipython_panel
 
