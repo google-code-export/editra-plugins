@@ -29,7 +29,10 @@ This plugin creates an interactive python shell that supports autocompletion, go
 
 = Planned Features =
 
-    * History reload on startup
+    * 1)History reload on startup
+    * 2)History widget : a widget that can be edited and that display all commands previously executed.
+    * 3)Live help widget : a widget that display help content each time you push a key :) <- hot feature!
+    * 4)Script toolbar : a toolbar where button are added from ipython shell to execute scripts :) <- cool feature!
 
 = Known Bugs =
     * Version 0.3:
