@@ -5,15 +5,18 @@
 This plugin creates an interactive python shell that supports autocompletion, good introspection, unix/dos shell commands, %magic keys
 
 *Status                                                                                                      *
-    * Works under windows and linux. Little problem under OSX under investigation.
-    * Ctrl+c not working due to interaction with editra. under investigation.
-    * %cpaste currently disabled
+    * Works under windows,linux and macosx too(thx cody)
+    * Alt+c can be used to break infinite loop
+    * %cpaste disabled because it supports direct multiline copy/paste on right click
+    * Options auto save/load to keep previous startup state
+    * Option to select between ipython autocompletion display or scintilla one.
+    * Option to select background color
 
 *Installation: * 
-    * New: in version > 0.2 ipython source tree is included in the plugin.
+    * New: in version > 0.2 ipython and pyreadline source tree are included in the plugin.
     Just do setup.py bdist_egg and copy the .egg in plugins directory.
     
-= Implemented Features =
+= Implemented IPython Features =
 
     * ?         -> Introduction and overview of IPython's features.
     * %quickref -> Quick reference.
@@ -27,11 +30,7 @@ This plugin creates an interactive python shell that supports autocompletion, go
 = Planned Features =
 
     * History reload on startup
-    * Background color selection
-    * %cpaste support of ctrl+c
-    * ctrl+c,ctrl+v
 
 = Known Bugs =
     * Version 0.3:
-          * ctrl+c not working
-          * MAC OS X don't catch enter...
+          * Breaking infinite loop with Alt+c while displaying text can freeze the widget.(Hard to solve)
