@@ -16,7 +16,7 @@ This page contains a list of links to pages about individual plugins and their r
 ||ProjectsPlugin || _Project management plugin with integrated source control_ ||
 ||PyRun || Launch python scripts from Editra and see their output in shelf buffer ||
 ||TerminalPlugin    || Built in system shell window ||
-||IPythonShellPlugin    || IPython interactive shell window ||
+||[IPythonShellPlugin IPythonShellPlugin] || IPython interactive shell window ||
 
 = Theme Plugins =
 ||Theme Name || Short Description ||
