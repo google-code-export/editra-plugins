@@ -4,6 +4,10 @@
 
 This plugin creates an interactive python shell that supports autocompletion, good introspection, unix/dos shell commands, %magic keys
 
+= Screenshot =
+
+http://editra-plugins.googlecode.com/svn/wiki/images/IPythonShellPlugin/Ipyshell.png
+
 *Status                                                                                                      *
     * Works under windows,linux and macosx too(thx cody)
     * Alt+c can be used to break infinite loop
