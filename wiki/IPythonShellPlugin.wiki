@@ -1,12 +1,12 @@
 #summary IPython interactive shell window
 
-= Introduction =
-
-This plugin creates an interactive python shell that supports autocompletion, good introspection, unix/dos shell commands, %magic keys
-
 = Screenshot =
 
 http://editra-plugins.googlecode.com/svn/wiki/images/IPythonShellPlugin/Ipyshell.png
+
+= Introduction =
+
+This plugin creates an interactive python shell that supports autocompletion, good introspection, unix/dos shell commands, %magic keys
 
 *Status                                                                                                      *
     * Works under windows,linux and macosx too(thx cody)
