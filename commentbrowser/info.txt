@@ -1,4 +1,0 @@
-Name=CommentBrowser
-Author=DR0ID
-Description=Browse and navigate TODO statements
-Version=0.2
