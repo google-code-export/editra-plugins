@@ -20,7 +20,9 @@ import plugin
 
 import profiler
 
-from IPython.gui.wx.ipython_view import *
+#used for ipython GUI objects
+from IPython.gui.wx.ipython_view import IPShellWidget
+from IPython.gui.wx.ipython_history import IPythonHistoryPanel
 
 #-----------------------------------------------------------------------------#
 # Globals
@@ -44,13 +46,17 @@ class IPyShell(plugin.Plugin):
     def CreateItem(self, parent):
         """Returns an IPythonShell Panel"""
         self._log = wx.GetApp().GetLog()
-        main_win = wx.GetApp().GetMainWindow()
-
         self._log("[IPyShell][info] Creating IPythonShell instance for Shelf")
+        #main_win = wx.GetApp().GetMainWindow()
+        #parent.AddPage(self.history_panel,'IPythonHistory',False)
         
-        self.ipython_panel    = IPShellWidget(parent, background_color="BLACK")
+        splitter = wx.SplitterWindow(parent, -1, style = wx.SP_LIVE_UPDATE)
+        
+        self.history_panel    = IPythonHistoryPanel(splitter)
+        self.ipython_panel    = IPShellWidget(splitter, background_color="BLACK")
                                               #user_ns=locals(),user_global_ns=globals(),)
         self.ipython_panel.setOptionTrackerHook(self.OptionSave)
+        self.ipython_panel.setHistoryTrackerHook(self.history_panel.write)
         
         options = self.ipython_panel.getOptions()
         for key in options.keys():
@@ -60,7 +66,11 @@ class IPyShell(plugin.Plugin):
         
         self.ipython_panel.reloadOptions(options)
 
-            
+        splitter.SetMinimumPaneSize(20)
+        splitter.SplitVertically(self.ipython_panel, self.history_panel, -100)
+
+        return splitter
+
         self._log("[IPyShell][info] IPythonShell succesfully created")
         return self.ipython_panel
 
