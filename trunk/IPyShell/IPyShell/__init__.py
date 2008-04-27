@@ -53,18 +53,27 @@ class IPyShell(plugin.Plugin):
         splitter = wx.SplitterWindow(parent, -1, style = wx.SP_LIVE_UPDATE)
         
         self.history_panel    = IPythonHistoryPanel(splitter)
+        self.history_panel.setOptionTrackerHook(self.OptionSave)
+        
         self.ipython_panel    = IPShellWidget(splitter, background_color="BLACK")
                                               #user_ns=locals(),user_global_ns=globals(),)
         self.ipython_panel.setOptionTrackerHook(self.OptionSave)
         self.ipython_panel.setHistoryTrackerHook(self.history_panel.write)
         
-        options = self.ipython_panel.getOptions()
-        for key in options.keys():
+        options_ipython = self.ipython_panel.getOptions()
+        for key in options_ipython.keys():
             saved_value = profiler.Profile_Get('IPython.'+key)
             if saved_value is not None:
-                options[key]['value'] = saved_value
+                options_ipython[key]['value'] = saved_value
+
+        options_history = self.history_panel.getOptions()
+        for key in options_history.keys():
+            saved_value = profiler.Profile_Get('IPython.'+key)
+            if saved_value is not None:
+                options_history[key]['value'] = saved_value
         
-        self.ipython_panel.reloadOptions(options)
+        self.ipython_panel.reloadOptions(options_ipython)
+        self.history_panel.reloadOptions(options_history)
 
         splitter.SetMinimumPaneSize(20)
         splitter.SplitVertically(self.ipython_panel, self.history_panel, -100)
