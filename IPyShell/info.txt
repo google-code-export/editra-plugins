@@ -1,4 +1,4 @@
 Name=IPyShell
 Author=Laurent Dufrechou
 Description=Adds an IPythonShell to the Shelf Menu
-Version=0.1
+Version=0.3
