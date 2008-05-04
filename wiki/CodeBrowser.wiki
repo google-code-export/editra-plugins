@@ -38,6 +38,11 @@ Version 0.2 Adds
   * System Verilog (Classes, Tasks)
   * Verilog (Tasks)
 
+Version 0.3 Adds (not released yet)
+
+  * Sql (Packages, Functions, Procedures)
+  * PL/Sql (Packages, Functions, Procedures)
+
 = Installation =
 
 NOTE: Only compatible with Editra 0.2.90 and higher
