@@ -676,7 +676,8 @@ class ProjectTree(wx.Panel):
         if not os.path.isdir(path):
             return
         try:
-            for item in os.listdir(path):
+            for isfile, item in sorted([(int(not(os.path.isdir(os.path.join(path,x)))), x) 
+                                        for x in os.listdir(path)]):
                 self.addPath(parent, item)
         except (OSError, IOError):
             self.tree.SetItemImage(parent, self.icons['folder-inaccessible'],
