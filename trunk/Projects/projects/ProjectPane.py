@@ -385,19 +385,23 @@ class ProjectTree(wx.Panel):
         """ Save projects to config file """
         projects = self.config.getProjects()
         self.config.clearProjects()
-        for item in self.getProjectPaths():
-            if item not in projects:
-                self.config.addProject(item)
+        for data in self.getProjectData():
+            path = data['path']
+            if path not in projects:
+                data = data.copy()
+                if 'watcher' in data:
+                    del data['watcher']
+                del data['path']
+                self.config.addProject(path, options=data)
         self.config.save()
 
     def loadProjects(self):
         """ Add all projects from config to tree """
-        items = sorted([(os.path.basename(x), x)
-                        for x in self.config.getProjects().keys()])
-        for item in items:
-            self.addProject(item[1], save=False)
+        projects = self.config.getProjects()
+        for name, path in sorted([(os.path.basename(x), x) for x in projects.keys()]):
+            self.addProject(path, options=projects[path], save=False)
 
-    def addProject(self, path, save=True):
+    def addProject(self, path, options={}, save=True):
         """
         Add a project for the given path
 
@@ -408,11 +412,13 @@ class ProjectTree(wx.Panel):
 
         """
         node = self.tree.AppendItem(self.tree.GetRootItem(),
-                                    os.path.basename(path))
+                                    options.get('name', os.path.basename(path)))
+        data = options.copy()
+        data['path'] = path
         proj = self.tree.AppendItem(node, '')
         self.tree.AppendItem(proj, '')  # <- workaround for windows
         self.tree.SetItemHasChildren(node)
-        self.tree.SetPyData(node, {'path' : path})
+        self.tree.SetPyData(node, data)
         self.tree.SetItemImage(node, self.icons['folder'],
                                wx.TreeItemIcon_Normal)
         self.tree.SetItemImage(node, self.icons['folder-open'],
@@ -442,6 +448,13 @@ class ProjectTree(wx.Panel):
         paths = []
         for child in self.getChildren(self.root):
             paths.append(self.tree.GetPyData(child)['path'])
+        return paths
+
+    def getProjectData(self):
+        """ Get the paths and data for all projects """
+        paths = []
+        for child in self.getChildren(self.root):
+            paths.append(self.tree.GetPyData(child))
         return paths
 
     def getChildren(self, parent):
@@ -636,12 +649,17 @@ class ProjectTree(wx.Panel):
         node = event.GetItem()
         data = self.tree.GetPyData(node)
         path = data['path']
-        newpath = os.path.join(os.path.dirname(path), event.GetLabel())
-        try:
-            os.rename(path, newpath)
-            data['path'] = newpath
-        except OSError:
-            pass
+        # Renaming a project really just changes the label in the tree
+        if self.tree.GetItemParent(node) == self.root:
+            data['name'] = event.GetLabel()
+            self.saveProjects()
+        else:
+            newpath = os.path.join(os.path.dirname(path), event.GetLabel())
+            try:
+                os.rename(path, newpath)
+                data['path'] = newpath
+            except OSError:
+                pass
 
     def OnLeftDClick(self, event):
         """Handle mouse events and update tree"""
