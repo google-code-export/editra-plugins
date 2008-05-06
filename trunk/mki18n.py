@@ -155,7 +155,7 @@ def makePO(app_dir,  app_domain=None, verbose=0, src='app.fil', out='messages', 
     #   --files-from=app.fil : The list of files is taken from the file: app.fil
     #   --output= : specifies the name of the output file 
     #               (using a .pot extension)
-    cmd = "xgettext -s --no-wrap --files-from=%s --output=%s.pot" % (src, out)
+    cmd = "xgettext -s --no-wrap --from-code=utf-8 --files-from=%s --output=%s.pot" % (src, out)
     if verbose: 
         print cmd
     os.system(cmd)                                                

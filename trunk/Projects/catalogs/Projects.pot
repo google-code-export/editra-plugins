@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2008-04-03 23:11-0500\n"
+"POT-Creation-Date: 2008-05-06 11:46-0500\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -24,11 +24,11 @@ msgstr ""
 msgid "*VALUE*"
 msgstr ""
 
-#: Projects/projects/ProjectPane.py:1742
+#: Projects/projects/ProjectPane.py:1744
 msgid ". Do you wish to continue?"
 msgstr ""
 
-#: Projects/projects/ProjectPane.py:1882
+#: Projects/projects/ProjectPane.py:1884
 msgid "Add Project"
 msgstr ""
 
@@ -36,11 +36,11 @@ msgstr ""
 msgid "Add a New Repository Path"
 msgstr ""
 
-#: Projects/projects/ProjectPane.py:1454
+#: Projects/projects/ProjectPane.py:1455
 msgid "Add to repository"
 msgstr ""
 
-#: Projects/projects/ProjectPane.py:1741
+#: Projects/projects/ProjectPane.py:1743
 msgid "An error occurred when attempting to remove "
 msgstr ""
 
@@ -56,19 +56,19 @@ msgstr ""
 msgid "C File"
 msgstr ""
 
-#: Projects/projects/ProjectPane.py:1972
+#: Projects/projects/ProjectPane.py:1974
 msgid "Choose a Project Directory"
 msgstr ""
 
-#: Projects/projects/ProjectPane.py:2057
+#: Projects/projects/ProjectPane.py:2059
 msgid "Commit"
 msgstr ""
 
-#: Projects/projects/ProjectPane.py:759
+#: Projects/projects/ProjectPane.py:760
 msgid "Commit Dialog"
 msgstr ""
 
-#: Projects/projects/ProjectPane.py:1486
+#: Projects/projects/ProjectPane.py:1487
 msgid "Commit changes"
 msgstr ""
 
@@ -84,24 +84,24 @@ msgstr ""
 msgid "Compare to Selected Revision"
 msgstr ""
 
-#: Projects/projects/ProjectPane.py:1484
+#: Projects/projects/ProjectPane.py:1485
 msgid "Compare to previous version"
 msgstr ""
 
-#: Projects/projects/ProjectPane.py:1895
+#: Projects/projects/ProjectPane.py:1897
 msgid "Configure"
 msgstr ""
 
-#: Projects/projects/ProjectPane.py:1475
+#: Projects/projects/ProjectPane.py:1476
 msgid "Copy"
 msgstr ""
 
-#: Projects/projects/ProjectPane.py:1108 Projects/projects/ProjectPane.py:1126
-#: Projects/projects/ProjectPane.py:1143
+#: Projects/projects/ProjectPane.py:1109 Projects/projects/ProjectPane.py:1127
+#: Projects/projects/ProjectPane.py:1144
 msgid "Could not retrieve file"
 msgstr ""
 
-#: Projects/projects/ProjectPane.py:1474
+#: Projects/projects/ProjectPane.py:1475
 msgid "Cut"
 msgstr ""
 
@@ -113,19 +113,19 @@ msgstr ""
 msgid "Diff Program"
 msgstr ""
 
-#: Projects/projects/ProjectPane.py:1469
+#: Projects/projects/ProjectPane.py:1470
 msgid "Edit"
 msgstr ""
 
-#: Projects/projects/ProjectPane.py:2139
+#: Projects/projects/ProjectPane.py:2141
 msgid "Enter a command to be executed on all selected files and files in selected directories."
 msgstr ""
 
-#: Projects/projects/ProjectPane.py:1595
+#: Projects/projects/ProjectPane.py:1596
 msgid "Enter command to execute on all files"
 msgstr ""
 
-#: Projects/projects/ProjectPane.py:760
+#: Projects/projects/ProjectPane.py:761
 msgid "Enter your commit message:"
 msgstr ""
 
@@ -133,19 +133,19 @@ msgstr ""
 msgid "Environment Variables"
 msgstr ""
 
-#: Projects/projects/ProjectPane.py:1682 Projects/projects/ProjectPane.py:1690
+#: Projects/projects/ProjectPane.py:1684 Projects/projects/ProjectPane.py:1692
 msgid "Error occurred when copying/moving files"
 msgstr ""
 
-#: Projects/projects/ProjectPane.py:1743
+#: Projects/projects/ProjectPane.py:1745
 msgid "Error occurred when removing files"
 msgstr ""
 
-#: Projects/projects/ProjectPane.py:2133
+#: Projects/projects/ProjectPane.py:2135
 msgid "Execute command on files"
 msgstr ""
 
-#: Projects/projects/ProjectPane.py:1478
+#: Projects/projects/ProjectPane.py:1479
 msgid "Execute command..."
 msgstr ""
 
@@ -153,7 +153,7 @@ msgstr ""
 msgid "File Filters"
 msgstr ""
 
-#: Projects/projects/ProjectPane.py:1459
+#: Projects/projects/ProjectPane.py:1460
 msgid "Folder"
 msgstr ""
 
@@ -177,11 +177,11 @@ msgstr ""
 msgid "Log Message"
 msgstr ""
 
-#: Projects/projects/ProjectPane.py:1487
+#: Projects/projects/ProjectPane.py:1488
 msgid "Make Patch"
 msgstr ""
 
-#: Projects/projects/ProjectPane.py:1491
+#: Projects/projects/ProjectPane.py:1492
 msgid "Move to "
 msgstr ""
 
@@ -189,19 +189,19 @@ msgstr ""
 msgid "Name"
 msgstr ""
 
-#: Projects/projects/ProjectPane.py:1472
+#: Projects/projects/ProjectPane.py:1473
 msgid "New..."
 msgstr ""
 
-#: Projects/projects/ProjectPane.py:1470
+#: Projects/projects/ProjectPane.py:1471
 msgid "Open"
 msgstr ""
 
-#: Projects/projects/ProjectPane.py:1866
+#: Projects/projects/ProjectPane.py:1868
 msgid "Open Projects Sidepanel"
 msgstr ""
 
-#: Projects/projects/ProjectPane.py:1471
+#: Projects/projects/ProjectPane.py:1472
 msgid "Open enclosing folder"
 msgstr ""
 
@@ -209,7 +209,7 @@ msgstr ""
 msgid "Password"
 msgstr ""
 
-#: Projects/projects/ProjectPane.py:1476
+#: Projects/projects/ProjectPane.py:1477
 msgid "Paste"
 msgstr ""
 
@@ -221,7 +221,7 @@ msgstr ""
 msgid "Please enter a repository path.  Partial paths may also be entered."
 msgstr ""
 
-#: Projects/projects/ProjectPane.py:1865
+#: Projects/projects/ProjectPane.py:1867
 msgid "Projects"
 msgstr ""
 
@@ -233,15 +233,15 @@ msgstr ""
 msgid "Python File"
 msgstr ""
 
-#: Projects/projects/ProjectPane.py:1482
+#: Projects/projects/ProjectPane.py:1483
 msgid "Refresh status"
 msgstr ""
 
-#: Projects/projects/ProjectPane.py:1886
+#: Projects/projects/ProjectPane.py:1888
 msgid "Remove Project"
 msgstr ""
 
-#: Projects/projects/ProjectPane.py:1452
+#: Projects/projects/ProjectPane.py:1453
 msgid "Remove from repository"
 msgstr ""
 
@@ -261,7 +261,7 @@ msgstr ""
 msgid "Rev #"
 msgstr ""
 
-#: Projects/projects/ProjectPane.py:1488
+#: Projects/projects/ProjectPane.py:1489
 msgid "Revert to repository version"
 msgstr ""
 
@@ -281,11 +281,11 @@ msgstr ""
 msgid "Select the repository path to remove"
 msgstr ""
 
-#: Projects/projects/ProjectPane.py:816
+#: Projects/projects/ProjectPane.py:817
 msgid "Selected files are from multiple repositories"
 msgstr ""
 
-#: Projects/projects/ProjectPane.py:1485
+#: Projects/projects/ProjectPane.py:1486
 msgid "Show revision history"
 msgstr ""
 
@@ -303,7 +303,7 @@ msgstr ""
 msgid "Text File"
 msgstr ""
 
-#: Projects/projects/ProjectPane.py:1593
+#: Projects/projects/ProjectPane.py:1594
 msgid ""
 "The following command will be executed on all selected\n"
 "files and files contained in selected directories."
@@ -313,22 +313,22 @@ msgstr ""
 msgid "The history information for the requested file could not be retrieved.  Please make sure that you have network access."
 msgstr ""
 
-#: Projects/projects/ProjectPane.py:1105 Projects/projects/ProjectPane.py:1123
-#: Projects/projects/ProjectPane.py:1140
+#: Projects/projects/ProjectPane.py:1106 Projects/projects/ProjectPane.py:1124
+#: Projects/projects/ProjectPane.py:1141
 msgid "The requested file could not be retrieved from the source control system."
 msgstr ""
 
-#: Projects/projects/ProjectPane.py:1688
+#: Projects/projects/ProjectPane.py:1690
 #, python-format
-msgid "The system returned the following message when attempting to move/copy %s: %s."
+msgid "The system returned the following message when attempting to move/copy %(filename)s: %(errmsg)s."
 msgstr ""
 
-#: Projects/projects/ProjectPane.py:1679
+#: Projects/projects/ProjectPane.py:1681
 #, python-format
-msgid "The system returned the following message when attempting to move/copy %s: %s. Do you wish to continue?"
+msgid "The system returned the following message when attempting to move/copy %(filename)s: %(errmsg)s. Do you wish to continue?"
 msgstr ""
 
-#: Projects/projects/ProjectPane.py:1483
+#: Projects/projects/ProjectPane.py:1484
 msgid "Update"
 msgstr ""
 
@@ -340,6 +340,6 @@ msgstr ""
 msgid "Value"
 msgstr ""
 
-#: Projects/projects/ProjectPane.py:815
+#: Projects/projects/ProjectPane.py:816
 msgid "You can not execute source control commands across multiple repositories."
 msgstr ""
