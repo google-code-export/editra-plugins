@@ -1693,20 +1693,21 @@ class ProjectTree(wx.Panel):
                     newclipboard.pop()
                     newclipboard.append(fname)
                     # Do we have more files to copy/move?
+                    msgmap = dict(filename=fname, errmsg=msg)
                     if i < (len(self.clipboard['files'])-1):
                         rc = wx.MessageDialog(self,
-                          _('The system returned the following message when ' \
-                            'attempting to move/copy %s: %s. ' \
-                            'Do you wish to continue?') % (fname, msg),
+                          _("The system returned the following message when " \
+                            "attempting to move/copy %(filename)s: %(errmsg)s. " \
+                            "Do you wish to continue?") % msgmap,
                           _('Error occurred when copying/moving files'),
                           style=wx.YES_NO|wx.YES_DEFAULT|wx.ICON_ERROR).ShowModal()
                         if rc == wx.ID_NO:
                             break
                     else:
                         rc = wx.MessageDialog(self,
-                          _('The system returned the following message when ' \
-                            'attempting to move/copy %s: %s.') % (fname, msg),
-                          _('Error occurred when copying/moving files'),
+                          _("The system returned the following message when " \
+                            "attempting to move/copy %(filename)s: %(errmsg)s.") % msgmap,
+                          _("Error occurred when copying/moving files"),
                           style=wx.OK|wx.ICON_ERROR).ShowModal()
             self.clipboard['files'] = newclipboard
 
