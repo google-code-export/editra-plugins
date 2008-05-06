@@ -189,6 +189,17 @@ do_one_build () {
         generate_src_list "$WORKPATH"
         echo "${CYAN}Outputting${OFF} catalogs to ${GREEN}$PO${OFF}..."
         $(python mki18n.py  -pv --domain=$WORKPATH --podir=$PO) 2>/dev/null
+        CLOCATION=$(pwd)
+        cd $PO
+        # Copy all .new files to override the originals
+        for fname in $(ls); do
+            if ! [ -z $(echo $fname | grep '.*\.new') ]; then
+                name=$(echo $fname | sed 's/.new//')
+                mv $fname $name
+            fi
+        done
+        cd $CLOCATION
+        unset CLOCATION
         echo "${RED}**${OFF} ${GREEN}Complete${OFF} ${RED}**${OFF}"
     else
         SRC=''
