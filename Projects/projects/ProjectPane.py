@@ -123,17 +123,24 @@ _ = wx.GetTranslation
 
 #-----------------------------------------------------------------------------#
 
+# New File Menu Id's
+ID_TXT_FILE = wx.NewId()
+ID_C_FILE = wx.NewId()
+ID_HTML_FILE = wx.NewId()
+ID_PHP_FILE = wx.NewId()
+ID_PY_FILE = wx.NewId()
+
 def getFileTypes():
     """Get filetypes for NewFile command. Moved inside a method so that the
     strings are translatable when they are needed and not at import time.
 
     """
     file_types = {
-        _('Text File'): {'ext':'.txt'},
-        _('C File'): {'ext':'.c'},
-        _('HTML File'): {'ext':'.html', 'template':'<html>\n<head><title></title></head>\n<body>\n\n</body>\n</html>'},
-        _('Php File'): {'ext':'.php', 'template':'<?php\n\n?>'},
-        _('Python File'): {'ext':'.py', 'template':'#!/usr/bin/env python\n\n'},
+        ID_TXT_FILE : {'ext':'.txt', 'lbl': _('Text File')},
+        ID_C_FILE : {'ext':'.c', 'lbl' : _('C File')},
+        ID_HTML_FILE : {'ext':'.html', 'lbl' : _('HTML File'), 'template':'<html>\n<head><title></title></head>\n<body>\n\n</body>\n</html>'},
+        ID_PHP_FILE : {'ext':'.php', 'lbl' : _('Php File'), 'template':'<?php\n\n?>'},
+        ID_PY_FILE : {'ext':'.py', 'lbl' : _('Python File'), 'template':'#!/usr/bin/env python\n\n'},
     }
     return file_types
 
@@ -1477,9 +1484,8 @@ class ProjectTree(wx.Panel):
         newmenu = wx.Menu()
         newmenu.AppendItem(wx.MenuItem(newmenu, self.popupIDNewFolder, _('Folder')))
         newmenu.AppendSeparator()
-        for ftype in getFileTypes():
-            menu_id = wx.NewId()
-            newmenu.AppendItem(wx.MenuItem(newmenu, menu_id, ftype))
+        for menu_id, ftype in getFileTypes().iteritems():
+            newmenu.AppendItem(wx.MenuItem(newmenu, menu_id, ftype['lbl']))
             self.Bind(wx.EVT_MENU, self.onPopupNewFile, id=menu_id)
 
         # make a menu
@@ -1573,19 +1579,12 @@ class ProjectTree(wx.Panel):
 
         # Determine file type
         e_id = event.GetId()
-        menu = event.GetEventObject()
-        key = None
-        for item in menu.GetMenuItems():
-            if item.GetId() == e_id:
-                key = item.GetText()
-                break
-
         file_types = getFileTypes()
-        if not key or key not in file_types:
+        if not file_types.has_key(e_id):
             return
 
         # Get informatio about file type
-        info = file_types[key]
+        info = file_types[e_id]
 
         # Create unique name
         newpath = os.path.join(path, 'untitled file' + info['ext'])

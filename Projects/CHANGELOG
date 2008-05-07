@@ -5,6 +5,17 @@ License: wxWindows
 Changelog:
 
 #-----------------------------------------------------------------------------#
+Version: 0.5
+Released: xx/xx/2008
+
+New:
++Project folders can be edited and given aliases
+
+Bug Fixes:
++File sorting issues
++New File context menu not working on Windows
+
+#-----------------------------------------------------------------------------#
 Version: 0.4
 Released: 04/25/2008
 
