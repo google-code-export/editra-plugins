@@ -191,8 +191,10 @@ class MyTreeCtrl(wx.TreeCtrl):
 
     def OnCompareItems(self, item1, item2):
         """Compare the text of two tree items"""
-        t1 = self.GetItemText(item1).lower()
-        t2 = self.GetItemText(item2).lower()
+        t1 = (int(not(os.path.isdir(self.GetPyData(item1)['path']))),
+              self.GetItemText(item1).lower())
+        t2 = (int(not(os.path.isdir(self.GetPyData(item2)['path']))),
+              self.GetItemText(item2).lower())
         #self.log.WriteText('compare: ' + t1 + ' <> ' + t2 + '\n')
         if t1 < t2:
             return -1
@@ -701,8 +703,7 @@ class ProjectTree(wx.Panel):
         if not os.path.isdir(path):
             return
         try:
-            for isfile, item in sorted([(int(not(os.path.isdir(os.path.join(path,x)))), x) 
-                                        for x in os.listdir(path)]):
+            for item in os.listdir(path):
                 self.addPath(parent, item)
         except (OSError, IOError):
             self.tree.SetItemImage(parent, self.icons['folder-inaccessible'],
@@ -714,6 +715,7 @@ class ProjectTree(wx.Panel):
 
         # Delete dummy node from self.addFolder
         self.tree.Delete(self.tree.GetFirstChild(parent)[0])
+        self.tree.SortChildren(parent)
         self.addDirectoryWatcher(parent)
         self.scStatus([parent])
 
