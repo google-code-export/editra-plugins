@@ -292,6 +292,8 @@ class ProjectTree(wx.Panel):
             nb.Bind(fnb.EVT_FLATNOTEBOOK_PAGE_CLOSING, self.OnPageClosing)
             mw.Bind(ed_event.EVT_MAINWINDOW_EXIT, self.OnMainWindowExit)
             ed_msg.Subscribe(self.OnThemeChange, ed_msg.EDMSG_THEME_CHANGED)
+            if hasattr(ed_msg, 'EDMSG_DSP_FONT'):
+                ed_msg.Subscribe(self.OnUpdateFont, ed_msg.EDMSG_DSP_FONT)
         except ImportError:
             pass
 
@@ -305,6 +307,7 @@ class ProjectTree(wx.Panel):
         """ Clean up resources """
         if ed_msg is not None:
             ed_msg.Unsubscribe(self.OnThemeChange)
+            ed_msg.Unsubscribe(self.OnUpdateFont)
 
         # Kill all watcher threads
         for value in self.watchers.values():
@@ -556,6 +559,12 @@ class ProjectTree(wx.Panel):
         """
         self._setupIcons()
         self.tree.Refresh()
+
+    def OnUpdateFont(self, msg):
+        """Update the ui font when a message comes saying to do so."""
+        font = msg.GetData()
+        if isinstance(font, wx.Font) and not font.IsNull():
+            self.tree.SetFont(font)
 
     def getSelectedNodes(self):
         """ Get the selected items from the tree """
