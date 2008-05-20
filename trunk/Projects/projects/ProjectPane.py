@@ -1792,20 +1792,17 @@ class ProjectTree(wx.Panel):
         the notebook.
 
         """
-#       item = event.GetItem()
-#       if not item:
-#           return
-#       if self.tree.IsExpanded(item):
-#           self.tree.Collapse(item)
-#       else:
-#           self.tree.Expand(item)
-#       return 
-
         files = []
-        for fname in self.getSelectedPaths():
+        for node in self.getSelectedNodes():
+            fname = self.tree.GetPyData(node)['path']
             try:
                 st = os.stat(fname)[0]
-                if stat.S_ISREG(st) or stat.S_ISDIR(st) or stat.S_ISLNK(st):
+                if stat.S_ISDIR(st):
+                    if self.tree.IsExpanded(node):
+                        self.tree.Collapse(node)
+                    else:
+                        self.tree.Expand(node)
+                elif stat.S_ISREG(st) or stat.S_ISLNK(st):
                     files.append(fname)
             except (IOError, OSError):
                 pass
