@@ -1805,8 +1805,6 @@ class ProjectTree(wx.Panel):
         for fname in self.getSelectedPaths():
             try:
                 st = os.stat(fname)[0]
-                if stat.S_ISDIR(st):
-
                 if stat.S_ISREG(st) or stat.S_ISDIR(st) or stat.S_ISLNK(st):
                     files.append(fname)
             except (IOError, OSError):
