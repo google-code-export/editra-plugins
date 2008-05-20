@@ -1792,35 +1792,37 @@ class ProjectTree(wx.Panel):
         the notebook.
 
         """
-        item = event.GetItem()
-        if not item:
-            return
-        if self.tree.IsExpanded(item):
-            self.tree.Collapse(item)
-        else:
-            self.tree.Expand(item)
-        return 
+#       item = event.GetItem()
+#       if not item:
+#           return
+#       if self.tree.IsExpanded(item):
+#           self.tree.Collapse(item)
+#       else:
+#           self.tree.Expand(item)
+#       return 
 
-#       files = []
-#       for fname in self.getSelectedPaths():
-#           try:
-#               st = os.stat(fname)[0]
-#               if stat.S_ISREG(st) or stat.S_ISDIR(st) or stat.S_ISLNK(st):
-#                   files.append(fname)
-#           except (IOError, OSError):
-#               pass
+        files = []
+        for fname in self.getSelectedPaths():
+            try:
+                st = os.stat(fname)[0]
+                if stat.S_ISDIR(st):
 
-#       nb = self.GetParent().GetOwnerWindow().GetNotebook()
+                if stat.S_ISREG(st) or stat.S_ISDIR(st) or stat.S_ISLNK(st):
+                    files.append(fname)
+            except (IOError, OSError):
+                pass
 
-#       for item in files:
-#           if nb.HasFileOpen(item):
-#               for page in xrange(nb.GetPageCount()):
-#                   ctrl = nb.GetPage(page)
-#                   if item == ctrl.GetFileName():
-#                       nb.SetSelection(page)
-#                       break
-#           else:
-#               nb.OnDrop([item])
+        nb = self.GetParent().GetOwnerWindow().GetNotebook()
+
+        for item in files:
+            if nb.HasFileOpen(item):
+                for page in xrange(nb.GetPageCount()):
+                    ctrl = nb.GetPage(page)
+                    if item == ctrl.GetFileName():
+                        nb.SetSelection(page)
+                        break
+            else:
+                nb.OnDrop([item])
 
     def watchDirectory(self, path, data=None, flag=True, delay=2):
         """
