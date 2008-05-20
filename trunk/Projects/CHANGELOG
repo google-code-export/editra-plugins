@@ -10,6 +10,7 @@ Released: xx/xx/2008
 
 New:
 +Project folders can be edited and given aliases
++Double click on folders expands them instead of opening contents
 
 Bug Fixes:
 +File sorting issues
