@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: editra\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2008-05-06 11:46-0500\n"
+"POT-Creation-Date: 2008-05-29 22:52-0500\n"
 "PO-Revision-Date: 2008-03-02 09:44+0000\n"
 "Last-Translator: Cody Precord <Unknown>\n"
 "Language-Team: Japanese <ja@li.org>\n"
@@ -25,11 +25,11 @@ msgstr "＊名前＊"
 msgid "*VALUE*"
 msgstr ""
 
-#: Projects/projects/ProjectPane.py:1744
+#: Projects/projects/ProjectPane.py:1772
 msgid ". Do you wish to continue?"
 msgstr ""
 
-#: Projects/projects/ProjectPane.py:1884
+#: Projects/projects/ProjectPane.py:1918
 msgid "Add Project"
 msgstr "プロジェクトを追加する"
 
@@ -37,11 +37,11 @@ msgstr "プロジェクトを追加する"
 msgid "Add a New Repository Path"
 msgstr ""
 
-#: Projects/projects/ProjectPane.py:1455
+#: Projects/projects/ProjectPane.py:1491
 msgid "Add to repository"
 msgstr "リポジトリに追加する"
 
-#: Projects/projects/ProjectPane.py:1743
+#: Projects/projects/ProjectPane.py:1771
 msgid "An error occurred when attempting to remove "
 msgstr ""
 
@@ -53,23 +53,23 @@ msgstr "作者"
 msgid "Built-in"
 msgstr "内蔵"
 
-#: Projects/projects/ProjectPane.py:133
+#: Projects/projects/ProjectPane.py:140
 msgid "C File"
 msgstr "Cファイル"
 
-#: Projects/projects/ProjectPane.py:1974
+#: Projects/projects/ProjectPane.py:2008
 msgid "Choose a Project Directory"
 msgstr "プロジェクトディレクトリを選択する"
 
-#: Projects/projects/ProjectPane.py:2059
+#: Projects/projects/ProjectPane.py:2093
 msgid "Commit"
 msgstr "コミット"
 
-#: Projects/projects/ProjectPane.py:760
+#: Projects/projects/ProjectPane.py:796
 msgid "Commit Dialog"
 msgstr "コミットダイアログ"
 
-#: Projects/projects/ProjectPane.py:1487
+#: Projects/projects/ProjectPane.py:1522
 msgid "Commit changes"
 msgstr "変更をコミットする"
 
@@ -85,24 +85,24 @@ msgstr ""
 msgid "Compare to Selected Revision"
 msgstr ""
 
-#: Projects/projects/ProjectPane.py:1485
+#: Projects/projects/ProjectPane.py:1520
 msgid "Compare to previous version"
 msgstr ""
 
-#: Projects/projects/ProjectPane.py:1897
+#: Projects/projects/ProjectPane.py:1931
 msgid "Configure"
 msgstr "設定"
 
-#: Projects/projects/ProjectPane.py:1476
+#: Projects/projects/ProjectPane.py:1511
 msgid "Copy"
 msgstr "コピー"
 
-#: Projects/projects/ProjectPane.py:1109 Projects/projects/ProjectPane.py:1127
-#: Projects/projects/ProjectPane.py:1144
+#: Projects/projects/ProjectPane.py:1145 Projects/projects/ProjectPane.py:1163
+#: Projects/projects/ProjectPane.py:1180
 msgid "Could not retrieve file"
 msgstr "ファイルを取得できませんでした"
 
-#: Projects/projects/ProjectPane.py:1475
+#: Projects/projects/ProjectPane.py:1510
 msgid "Cut"
 msgstr "カット"
 
@@ -114,19 +114,19 @@ msgstr "日付"
 msgid "Diff Program"
 msgstr "Diffプログラム"
 
-#: Projects/projects/ProjectPane.py:1470
+#: Projects/projects/ProjectPane.py:1505
 msgid "Edit"
 msgstr "編集"
 
-#: Projects/projects/ProjectPane.py:2141
+#: Projects/projects/ProjectPane.py:2175
 msgid "Enter a command to be executed on all selected files and files in selected directories."
 msgstr ""
 
-#: Projects/projects/ProjectPane.py:1596
+#: Projects/projects/ProjectPane.py:1624
 msgid "Enter command to execute on all files"
 msgstr ""
 
-#: Projects/projects/ProjectPane.py:761
+#: Projects/projects/ProjectPane.py:797
 msgid "Enter your commit message:"
 msgstr ""
 
@@ -134,19 +134,19 @@ msgstr ""
 msgid "Environment Variables"
 msgstr "環境変数"
 
-#: Projects/projects/ProjectPane.py:1684 Projects/projects/ProjectPane.py:1692
+#: Projects/projects/ProjectPane.py:1712 Projects/projects/ProjectPane.py:1720
 msgid "Error occurred when copying/moving files"
 msgstr ""
 
-#: Projects/projects/ProjectPane.py:1745
+#: Projects/projects/ProjectPane.py:1773
 msgid "Error occurred when removing files"
 msgstr ""
 
-#: Projects/projects/ProjectPane.py:2135
+#: Projects/projects/ProjectPane.py:2169
 msgid "Execute command on files"
 msgstr ""
 
-#: Projects/projects/ProjectPane.py:1479
+#: Projects/projects/ProjectPane.py:1514
 msgid "Execute command..."
 msgstr ""
 
@@ -154,7 +154,7 @@ msgstr ""
 msgid "File Filters"
 msgstr "ファイルフィルタ"
 
-#: Projects/projects/ProjectPane.py:1460
+#: Projects/projects/ProjectPane.py:1496
 msgid "Folder"
 msgstr "フォルダ"
 
@@ -162,7 +162,7 @@ msgstr "フォルダ"
 msgid "General"
 msgstr "全般"
 
-#: Projects/projects/ProjectPane.py:134
+#: Projects/projects/ProjectPane.py:141
 msgid "HTML File"
 msgstr "HTMLファイル"
 
@@ -178,11 +178,11 @@ msgstr ""
 msgid "Log Message"
 msgstr "ログメッセージ"
 
-#: Projects/projects/ProjectPane.py:1488
+#: Projects/projects/ProjectPane.py:1523
 msgid "Make Patch"
 msgstr "パッチを作る"
 
-#: Projects/projects/ProjectPane.py:1492
+#: Projects/projects/ProjectPane.py:1527
 msgid "Move to "
 msgstr ""
 
@@ -190,19 +190,19 @@ msgstr ""
 msgid "Name"
 msgstr "名前"
 
-#: Projects/projects/ProjectPane.py:1473
+#: Projects/projects/ProjectPane.py:1508
 msgid "New..."
 msgstr "新規..."
 
-#: Projects/projects/ProjectPane.py:1471
+#: Projects/projects/ProjectPane.py:1506
 msgid "Open"
 msgstr "開く"
 
-#: Projects/projects/ProjectPane.py:1868
+#: Projects/projects/ProjectPane.py:1902
 msgid "Open Projects Sidepanel"
 msgstr ""
 
-#: Projects/projects/ProjectPane.py:1472
+#: Projects/projects/ProjectPane.py:1507
 msgid "Open enclosing folder"
 msgstr ""
 
@@ -210,11 +210,11 @@ msgstr ""
 msgid "Password"
 msgstr "パスワード"
 
-#: Projects/projects/ProjectPane.py:1477
+#: Projects/projects/ProjectPane.py:1512
 msgid "Paste"
 msgstr "貼り付け"
 
-#: Projects/projects/ProjectPane.py:135
+#: Projects/projects/ProjectPane.py:142
 msgid "Php File"
 msgstr "PHPファイル"
 
@@ -222,7 +222,7 @@ msgstr "PHPファイル"
 msgid "Please enter a repository path.  Partial paths may also be entered."
 msgstr ""
 
-#: Projects/projects/ProjectPane.py:1867
+#: Projects/projects/ProjectPane.py:1901
 msgid "Projects"
 msgstr "プロジェクト"
 
@@ -230,19 +230,19 @@ msgstr "プロジェクト"
 msgid "Projects Configuration"
 msgstr "プロジェクトの設定"
 
-#: Projects/projects/ProjectPane.py:136
+#: Projects/projects/ProjectPane.py:143
 msgid "Python File"
 msgstr "Pythonファイル"
 
-#: Projects/projects/ProjectPane.py:1483
+#: Projects/projects/ProjectPane.py:1518
 msgid "Refresh status"
 msgstr "リフレッシュステータス"
 
-#: Projects/projects/ProjectPane.py:1888
+#: Projects/projects/ProjectPane.py:1922
 msgid "Remove Project"
 msgstr "プロジェクトを削除する"
 
-#: Projects/projects/ProjectPane.py:1453
+#: Projects/projects/ProjectPane.py:1489
 msgid "Remove from repository"
 msgstr ""
 
@@ -262,7 +262,7 @@ msgstr "ファイルの履歴を取得しています"
 msgid "Rev #"
 msgstr "改正号"
 
-#: Projects/projects/ProjectPane.py:1489
+#: Projects/projects/ProjectPane.py:1524
 msgid "Revert to repository version"
 msgstr ""
 
@@ -282,11 +282,11 @@ msgstr ""
 msgid "Select the repository path to remove"
 msgstr ""
 
-#: Projects/projects/ProjectPane.py:817
+#: Projects/projects/ProjectPane.py:853
 msgid "Selected files are from multiple repositories"
 msgstr ""
 
-#: Projects/projects/ProjectPane.py:1486
+#: Projects/projects/ProjectPane.py:1521
 msgid "Show revision history"
 msgstr ""
 
@@ -300,11 +300,11 @@ msgid ""
 "The use of wildcards (*) are permitted."
 msgstr ""
 
-#: Projects/projects/ProjectPane.py:132
+#: Projects/projects/ProjectPane.py:139
 msgid "Text File"
 msgstr "テキストファイル"
 
-#: Projects/projects/ProjectPane.py:1594
+#: Projects/projects/ProjectPane.py:1622
 msgid ""
 "The following command will be executed on all selected\n"
 "files and files contained in selected directories."
@@ -314,22 +314,22 @@ msgstr ""
 msgid "The history information for the requested file could not be retrieved.  Please make sure that you have network access."
 msgstr ""
 
-#: Projects/projects/ProjectPane.py:1106 Projects/projects/ProjectPane.py:1124
-#: Projects/projects/ProjectPane.py:1141
+#: Projects/projects/ProjectPane.py:1142 Projects/projects/ProjectPane.py:1160
+#: Projects/projects/ProjectPane.py:1177
 msgid "The requested file could not be retrieved from the source control system."
 msgstr ""
 
-#: Projects/projects/ProjectPane.py:1690
+#: Projects/projects/ProjectPane.py:1718
 #, python-format
 msgid "The system returned the following message when attempting to move/copy %(filename)s: %(errmsg)s."
 msgstr ""
 
-#: Projects/projects/ProjectPane.py:1681
+#: Projects/projects/ProjectPane.py:1709
 #, python-format
 msgid "The system returned the following message when attempting to move/copy %(filename)s: %(errmsg)s. Do you wish to continue?"
 msgstr ""
 
-#: Projects/projects/ProjectPane.py:1484
+#: Projects/projects/ProjectPane.py:1519
 msgid "Update"
 msgstr "更新"
 
@@ -341,6 +341,6 @@ msgstr "ユーザー名"
 msgid "Value"
 msgstr "値"
 
-#: Projects/projects/ProjectPane.py:816
+#: Projects/projects/ProjectPane.py:852
 msgid "You can not execute source control commands across multiple repositories."
 msgstr ""

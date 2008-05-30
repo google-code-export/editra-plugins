@@ -1,4 +1,4 @@
-# Serbian translation for editra
+# Brazilian Portuguese translation for editra
 # Copyright (c) 2008 Rosetta Contributors and Canonical Ltd 2008
 # This file is distributed under the same license as the editra package.
 # FIRST AUTHOR <EMAIL@ADDRESS>, 2008.
@@ -8,343 +8,343 @@ msgstr ""
 "Project-Id-Version: editra\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2008-05-29 22:52-0500\n"
-"PO-Revision-Date: 2008-03-20 04:42+0000\n"
-"Last-Translator: Vladimir Lazic <vlazic@gmail.com>\n"
-"Language-Team: Serbian <sr@li.org>\n"
+"PO-Revision-Date: 2008-05-28 14:56+0000\n"
+"Last-Translator: Ricardo Crudo <ricardo.crudo@yahoo.com.br>\n"
+"Language-Team: Brazilian Portuguese <pt_BR@li.org>\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"X-Launchpad-Export-Date: 2008-03-20 06:32+0000\n"
+"X-Launchpad-Export-Date: 2008-05-29 03:00+0000\n"
 "X-Generator: Launchpad (build Unknown)\n"
 
 #: Projects/projects/ConfigDialog.py:413
 msgid "*NAME*"
-msgstr "*ИМЕ*"
+msgstr "*NOME*"
 
 #: Projects/projects/ConfigDialog.py:414
 msgid "*VALUE*"
-msgstr "*ВРЕДНОСТ*"
+msgstr "*VALOR*"
 
 #: Projects/projects/ProjectPane.py:1772
 msgid ". Do you wish to continue?"
-msgstr ". Да ли желите да наставите?"
+msgstr ". Você deseja continuar?"
 
 #: Projects/projects/ProjectPane.py:1918
 msgid "Add Project"
-msgstr "Додај пројекат"
+msgstr "Adicionar projeto"
 
 #: Projects/projects/ConfigDialog.py:478
 msgid "Add a New Repository Path"
-msgstr "Додај нову путању до сервера"
+msgstr "Adicionar um novo caminho repositório"
 
 #: Projects/projects/ProjectPane.py:1491
 msgid "Add to repository"
-msgstr "Додај на сервер"
+msgstr "adicionar ao repositório"
 
 #: Projects/projects/ProjectPane.py:1771
 msgid "An error occurred when attempting to remove "
-msgstr "Дошло је до грешке при покушају уклањања "
+msgstr "Um erro ocorreu quando tentava remover "
 
 #: Projects/projects/HistWin.py:364
 msgid "Author"
-msgstr "Аутор"
+msgstr "Autor"
 
 #: Projects/projects/ConfigDialog.py:133
 msgid "Built-in"
-msgstr "Уграђен"
+msgstr "Contruído com"
 
 #: Projects/projects/ProjectPane.py:140
 msgid "C File"
-msgstr "C датотека"
+msgstr "Arquivo C"
 
 #: Projects/projects/ProjectPane.py:2008
 msgid "Choose a Project Directory"
-msgstr "Изаберите директоријум пројекта"
+msgstr "Escolher a pasta do projeto"
 
 #: Projects/projects/ProjectPane.py:2093
 msgid "Commit"
-msgstr "Предај"
+msgstr "Confirmar"
 
 #: Projects/projects/ProjectPane.py:796
 msgid "Commit Dialog"
-msgstr "Предај дијалог"
+msgstr "Confirmar diálogo"
 
 #: Projects/projects/ProjectPane.py:1522
 msgid "Commit changes"
-msgstr "Предај измене"
+msgstr "Confirmar mudanças"
 
 #: Projects/projects/HistWin.py:191
 msgid "Compare Revisions"
-msgstr "Упореди ревизије"
+msgstr "Comparar Revisões"
 
 #: Projects/projects/HistWin.py:193
 msgid "Compare Selected Revisions"
-msgstr "Упореди селектоване ревизије"
+msgstr "Comparar revisões selecionadas"
 
 #: Projects/projects/HistWin.py:192
 msgid "Compare to Selected Revision"
-msgstr "Упореди са селектованом ревизијом"
+msgstr "Comparar a revisões selecionadas"
 
 #: Projects/projects/ProjectPane.py:1520
 msgid "Compare to previous version"
-msgstr "Упореди са претходном ревизијом"
+msgstr "Comparar a versões anteriores"
 
 #: Projects/projects/ProjectPane.py:1931
 msgid "Configure"
-msgstr "Подеси"
+msgstr "Configurar"
 
 #: Projects/projects/ProjectPane.py:1511
 msgid "Copy"
-msgstr "Умножи"
+msgstr "Copiar"
 
 #: Projects/projects/ProjectPane.py:1145 Projects/projects/ProjectPane.py:1163
 #: Projects/projects/ProjectPane.py:1180
 msgid "Could not retrieve file"
-msgstr "Не могу да добавим датотеку"
+msgstr "Não foi possível restaurar o arquivo"
 
 #: Projects/projects/ProjectPane.py:1510
 msgid "Cut"
-msgstr "Исеци"
+msgstr "Recortar"
 
 #: Projects/projects/HistWin.py:363
 msgid "Date"
-msgstr "Датум"
+msgstr "Data"
 
 #: Projects/projects/ConfigDialog.py:132
 msgid "Diff Program"
-msgstr "Програм за разликовање"
+msgstr "Programa Diff"
 
 #: Projects/projects/ProjectPane.py:1505
 msgid "Edit"
-msgstr "Уређивање"
+msgstr "Editar"
 
 #: Projects/projects/ProjectPane.py:2175
 msgid "Enter a command to be executed on all selected files and files in selected directories."
-msgstr "Унеси команду која ће бити извршена над свим селектованим датотекама и датотекама из селектованих директоријумима"
+msgstr "Entre com um comando para executar em todos arquivos selecionados e arquivos nas pastas selecionadas"
 
 #: Projects/projects/ProjectPane.py:1624
 msgid "Enter command to execute on all files"
-msgstr "Унеси команду која ће бити извршена над свим датотекама"
+msgstr "Entre com um comando para executar em todos arquivos"
 
 #: Projects/projects/ProjectPane.py:797
 msgid "Enter your commit message:"
-msgstr "Унеси твоју поруку при предаји:"
+msgstr "Entre com sua mensagem de confirmação:"
 
 #: Projects/projects/ConfigDialog.py:264
 msgid "Environment Variables"
-msgstr "Променљиве окружења"
+msgstr "Variáveis de Ambiente"
 
 #: Projects/projects/ProjectPane.py:1712 Projects/projects/ProjectPane.py:1720
 msgid "Error occurred when copying/moving files"
-msgstr "Дошло је до грешке при умножавању/премештању датотека"
+msgstr "Ocorreu um erro quando copiava/movia arquivos"
 
 #: Projects/projects/ProjectPane.py:1773
 msgid "Error occurred when removing files"
-msgstr "Дошло је до грешке при уклањању датотека"
+msgstr "Um erro ocorreu ao remover arquivos"
 
 #: Projects/projects/ProjectPane.py:2169
 msgid "Execute command on files"
-msgstr "Изврши команде над датотекама"
+msgstr "Executar comands nos arquivos"
 
 #: Projects/projects/ProjectPane.py:1514
 msgid "Execute command..."
-msgstr "Извтши команду..."
+msgstr "Executar comando"
 
 #: Projects/projects/ConfigDialog.py:114
 msgid "File Filters"
-msgstr "Филтери датотека"
+msgstr "Filtro de arquivos"
 
 #: Projects/projects/ProjectPane.py:1496
 msgid "Folder"
-msgstr "Директоријум"
+msgstr "Pasta"
 
 #: Projects/projects/ConfigDialog.py:90
 msgid "General"
-msgstr "Опште"
+msgstr "Geral"
 
 #: Projects/projects/ProjectPane.py:141
 msgid "HTML File"
-msgstr "HTML фајл"
+msgstr "Arquivo HTML"
 
 #: Projects/projects/HistWin.py:434
 msgid "History information could not be retrieved"
-msgstr "Информација о претходним активностима се не може добавити"
+msgstr "O histórico de informações não pode ser restaurado"
 
 #: Projects/projects/ConfigDialog.py:127
 msgid "Keep project tree synchronized with editor notebook"
-msgstr "Одржавај пројектно стабло синхонизовано са уређивачем"
+msgstr "Manter a árvore do projeto sincronizada com o editor de agenda"
 
 #: Projects/projects/HistWin.py:365
 msgid "Log Message"
-msgstr "Лог порука"
+msgstr "Mensagem de Log"
 
 #: Projects/projects/ProjectPane.py:1523
 msgid "Make Patch"
-msgstr "Направи закрпу"
+msgstr "Consertar"
 
 #: Projects/projects/ProjectPane.py:1527
 msgid "Move to "
-msgstr "Премести у "
+msgstr "Mover para "
 
 #: Projects/projects/ConfigDialog.py:268
 msgid "Name"
-msgstr "Назив"
+msgstr "Nome"
 
 #: Projects/projects/ProjectPane.py:1508
 msgid "New..."
-msgstr "Нови..."
+msgstr "Novo..."
 
 #: Projects/projects/ProjectPane.py:1506
 msgid "Open"
-msgstr "Отвори"
+msgstr "Abrir"
 
 #: Projects/projects/ProjectPane.py:1902
 msgid "Open Projects Sidepanel"
-msgstr "Отвори панел пројеката у бочном панелу"
+msgstr "Abrir projeto na barra lateral"
 
 #: Projects/projects/ProjectPane.py:1507
 msgid "Open enclosing folder"
-msgstr "Отвори директоријум"
+msgstr "Abrir pasta confinada"
 
 #: Projects/projects/ConfigDialog.py:256
 msgid "Password"
-msgstr "Лозинка"
+msgstr "Senha"
 
 #: Projects/projects/ProjectPane.py:1512
 msgid "Paste"
-msgstr "Убаци"
+msgstr "Colar"
 
 #: Projects/projects/ProjectPane.py:142
 msgid "Php File"
-msgstr "PHP датотека"
+msgstr "Arquivo PHP"
 
 #: Projects/projects/ConfigDialog.py:477
 msgid "Please enter a repository path.  Partial paths may also be entered."
-msgstr "Молим унесите путању до сервера. И непотпуне путање такође могу бити унете."
+msgstr "Por favor entre com o caminho do repositório. Caminhos parciais também são aceitos."
 
 #: Projects/projects/ProjectPane.py:1901
 msgid "Projects"
-msgstr "Пројекти"
+msgstr "Projetos"
 
 #: Projects/projects/ConfigDialog.py:44
 msgid "Projects Configuration"
-msgstr "Подешавања пројеката"
+msgstr "Configurações de Projetos"
 
 #: Projects/projects/ProjectPane.py:143
 msgid "Python File"
-msgstr "Python датотека"
+msgstr "Arquivo Python"
 
 #: Projects/projects/ProjectPane.py:1518
 msgid "Refresh status"
-msgstr "Освежи статус"
+msgstr "Atualizar Estado"
 
 #: Projects/projects/ProjectPane.py:1922
 msgid "Remove Project"
-msgstr "Уклони пројекат"
+msgstr "Remover projeto"
 
 #: Projects/projects/ProjectPane.py:1489
 msgid "Remove from repository"
-msgstr "Уклони са сервера"
+msgstr "Remover do repositório"
 
 #: Projects/projects/ConfigDialog.py:469
 msgid "Remove repository"
-msgstr "Уклони сервер"
+msgstr "Remover repositório"
 
 #: Projects/projects/ConfigDialog.py:245
 msgid "Repository Configuration"
-msgstr "Подешавања сервера"
+msgstr "Configuração do repositório"
 
 #: Projects/projects/HistWin.py:112
 msgid "Retrieving File History"
-msgstr "Добави информације о претходим активостима са датотеком"
+msgstr "Restaurando Arquivo do Histórico"
 
 #: Projects/projects/HistWin.py:362
 msgid "Rev #"
-msgstr "Рев #"
+msgstr "Rev #"
 
 #: Projects/projects/ProjectPane.py:1524
 msgid "Revert to repository version"
-msgstr "Поврати на верзију са сервера"
+msgstr "Reverter para o repositório versão"
 
 #: Projects/projects/HistWin.py:198
 msgid "Revision History"
-msgstr "Историјат издања"
+msgstr "Histórico de revisão"
 
 #: Projects/projects/HistWin.py:474
 msgid "Search Log"
-msgstr "Лог претраживања"
+msgstr "Buscar Log"
 
 #: Projects/projects/ConfigDialog.py:148
 msgid "Select diff program"
-msgstr "Изабери diff програм"
+msgstr "Selecionar programa diff"
 
 #: Projects/projects/ConfigDialog.py:468
 msgid "Select the repository path to remove"
-msgstr "Селектуј путању до сервера коју желиш да уклониш"
+msgstr "Selecionar o caminho do repositório para remover"
 
 #: Projects/projects/ProjectPane.py:853
 msgid "Selected files are from multiple repositories"
-msgstr "Селектоване датотеке су са више сервера"
+msgstr "Selecionar arquivos de múltiplos repositórios"
 
 #: Projects/projects/ProjectPane.py:1521
 msgid "Show revision history"
-msgstr "Прикажи историју измена"
+msgstr "Mostrar histórico de revisão"
 
 #: Projects/projects/ConfigDialog.py:92
 msgid "Source Control"
-msgstr "Контрола извора"
+msgstr "Controle de origem"
 
 #: Projects/projects/ConfigDialog.py:121
 msgid ""
 "Space separated list of files patterns to exclude from view\n"
 "The use of wildcards (*) are permitted."
 msgstr ""
-"Размаком одвојена листа датотека које не желите да буду приказане\n"
-"Коришћење џокера (*) је дозвољено."
+"Espaço separa lista de arquivos para excluir das visualizações\n"
+"O uso de curingas(*) é permitido."
 
 #: Projects/projects/ProjectPane.py:139
 msgid "Text File"
-msgstr "Текстуална датотека"
+msgstr "Arquivo texto"
 
 #: Projects/projects/ProjectPane.py:1622
 msgid ""
 "The following command will be executed on all selected\n"
 "files and files contained in selected directories."
 msgstr ""
-"Следеђа команда ће бити извршена на д свим селектованим\n"
-"датотекама и датотекама које се налазе у селектованим директоријумима."
+"Os seguintes comandos devem ser executados em todos arquivo\n"
+"selecionados e arquivos contido nas pastas selecionadas."
 
 #: Projects/projects/HistWin.py:431
 msgid "The history information for the requested file could not be retrieved.  Please make sure that you have network access."
-msgstr "Историја измена за одабрану датотеку не може да буде добављена. Проверите да ли је све у реду са интернет конекцијом."
+msgstr "As informações do histórico do arquivo solicitado, não puderam ser restauradas. Por favor esteja certo que você tem acesso à internet."
 
 #: Projects/projects/ProjectPane.py:1142 Projects/projects/ProjectPane.py:1160
 #: Projects/projects/ProjectPane.py:1177
 msgid "The requested file could not be retrieved from the source control system."
-msgstr "Захтевана датотека не може да будде добављена са сервера."
+msgstr "O arquivo solicitado não pode ser restaurado do sistema de controle de origem."
 
 #: Projects/projects/ProjectPane.py:1718
 #, fuzzy, python-format
 msgid "The system returned the following message when attempting to move/copy %(filename)s: %(errmsg)s."
-msgstr "Сервер је вратио следећу поруку при покушају копирања/премештања %s: %s."
+msgstr "O sistema retornou a seguinte mensagem quando tentava mover/copiar %s: %s."
 
 #: Projects/projects/ProjectPane.py:1709
 #, fuzzy, python-format
 msgid "The system returned the following message when attempting to move/copy %(filename)s: %(errmsg)s. Do you wish to continue?"
-msgstr "Сервер је вратио следећу поруку при покушају копирања/премештања %s: %s. Да ли желите да наставите?"
+msgstr "O sistema retornou a seguinte mensagem quando tentava mover/copiar %s: %s. Deseja continuar?"
 
 #: Projects/projects/ProjectPane.py:1519
 msgid "Update"
-msgstr "Освежи"
+msgstr "Atualizar"
 
 #: Projects/projects/ConfigDialog.py:254
 msgid "Username"
-msgstr "Корисничко име"
+msgstr "Nome do usuário"
 
 #: Projects/projects/ConfigDialog.py:269
 msgid "Value"
-msgstr "Вредност"
+msgstr "Valor"
 
 #: Projects/projects/ProjectPane.py:852
 msgid "You can not execute source control commands across multiple repositories."
-msgstr "Нисте у могућности да извршите команде на бише сервера."
+msgstr "Você não pode executar o comando de controle de origem através de múltiplos repositórios."
