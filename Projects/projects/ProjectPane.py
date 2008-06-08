@@ -1815,6 +1815,9 @@ class ProjectTree(wx.Panel):
                     ctrl = nb.GetPage(page)
                     if item == ctrl.GetFileName():
                         nb.SetSelection(page)
+                        # Send out page change message for other listeners
+                        ed_msg.PostMessage(ed_msg.EDMSG_UI_NB_CHANGED,
+                                           (nb, page))
                         break
             else:
                 nb.OnDrop([item])
