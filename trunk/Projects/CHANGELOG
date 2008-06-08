@@ -5,6 +5,16 @@ License: wxWindows
 Changelog:
 
 #-----------------------------------------------------------------------------#
+Version: 0.6
+Released: xx/xx/2008
+
+New:
+
+
+Bug Fixes:
++Fix some compatibility issues with other plugins
+
+#-----------------------------------------------------------------------------#
 Version: 0.5
 Released: 05/31/2008
 
