@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: editra\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2008-05-29 22:57-0500\n"
+"POT-Creation-Date: 2008-06-14 00:15-0500\n"
 "PO-Revision-Date: 2008-03-01 15:16+0000\n"
 "Last-Translator: DR0ID <Unknown>\n"
 "Language-Team: German <de@li.org>\n"
@@ -29,7 +29,7 @@ msgstr "*WERT*"
 msgid ". Do you wish to continue?"
 msgstr "Wollen Sie weiterfahren?"
 
-#: Projects/projects/ProjectPane.py:1918
+#: Projects/projects/ProjectPane.py:1921
 msgid "Add Project"
 msgstr "Projekt hinzufügen"
 
@@ -57,11 +57,11 @@ msgstr "Built-in"
 msgid "C File"
 msgstr "C Datei"
 
-#: Projects/projects/ProjectPane.py:2008
+#: Projects/projects/ProjectPane.py:2011
 msgid "Choose a Project Directory"
 msgstr "Wählen Sie einen Projekt ordner"
 
-#: Projects/projects/ProjectPane.py:2093
+#: Projects/projects/ProjectPane.py:2096
 msgid "Commit"
 msgstr "Commit"
 
@@ -89,7 +89,7 @@ msgstr "Vergleiche mit ausgewählter Version"
 msgid "Compare to previous version"
 msgstr "Vergleiche mit vorherigen Version"
 
-#: Projects/projects/ProjectPane.py:1931
+#: Projects/projects/ProjectPane.py:1934
 msgid "Configure"
 msgstr "Konfiguriere"
 
@@ -118,7 +118,7 @@ msgstr "Diff-Programm"
 msgid "Edit"
 msgstr "Bearbeiten"
 
-#: Projects/projects/ProjectPane.py:2175
+#: Projects/projects/ProjectPane.py:2178
 msgid "Enter a command to be executed on all selected files and files in selected directories."
 msgstr "Geben Sie einen Befehl ein der auf alle ausgewählten Dateien und Dateien in ausgewälten Ordnern ausgeführt wird."
 
@@ -142,7 +142,7 @@ msgstr "Ein Fehler ist aufgetreten während dem kopieren/verschiebend von Dateie
 msgid "Error occurred when removing files"
 msgstr "Ein Fehler ist aufgetreten beim Entfernen von Dateien"
 
-#: Projects/projects/ProjectPane.py:2169
+#: Projects/projects/ProjectPane.py:2172
 msgid "Execute command on files"
 msgstr "Führe Befehl auf Dateien aus"
 
@@ -198,7 +198,7 @@ msgstr "Neu..."
 msgid "Open"
 msgstr "Öffnen"
 
-#: Projects/projects/ProjectPane.py:1902
+#: Projects/projects/ProjectPane.py:1905
 msgid "Open Projects Sidepanel"
 msgstr "Öffnet Projekt Seitenfenster"
 
@@ -222,7 +222,7 @@ msgstr "PHP-Datei"
 msgid "Please enter a repository path.  Partial paths may also be entered."
 msgstr "Bitte geben Sie einen Pfad zu einem Repository ein. Relative Pfade können auch eingegeben werden."
 
-#: Projects/projects/ProjectPane.py:1901
+#: Projects/projects/ProjectPane.py:1904
 msgid "Projects"
 msgstr "Projekte"
 
@@ -238,7 +238,7 @@ msgstr "Python Datei"
 msgid "Refresh status"
 msgstr "Erneuerungs Status"
 
-#: Projects/projects/ProjectPane.py:1922
+#: Projects/projects/ProjectPane.py:1925
 msgid "Remove Project"
 msgstr "Projekt entfernen"
 

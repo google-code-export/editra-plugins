@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: editra\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2008-05-29 22:57-0500\n"
+"POT-Creation-Date: 2008-06-14 00:15-0500\n"
 "PO-Revision-Date: 2008-03-02 01:33+0000\n"
 "Last-Translator: heccj <heccjj@gmail.com>\n"
 "Language-Team: Simplified Chinese <zh_CN@li.org>\n"
@@ -29,7 +29,7 @@ msgstr "*值*"
 msgid ". Do you wish to continue?"
 msgstr "要继续吗？"
 
-#: Projects/projects/ProjectPane.py:1918
+#: Projects/projects/ProjectPane.py:1921
 msgid "Add Project"
 msgstr "添加工程"
 
@@ -57,11 +57,11 @@ msgstr "内建"
 msgid "C File"
 msgstr "C 文件"
 
-#: Projects/projects/ProjectPane.py:2008
+#: Projects/projects/ProjectPane.py:2011
 msgid "Choose a Project Directory"
 msgstr "选择工程目录"
 
-#: Projects/projects/ProjectPane.py:2093
+#: Projects/projects/ProjectPane.py:2096
 msgid "Commit"
 msgstr "提交"
 
@@ -89,7 +89,7 @@ msgstr "比较于选定版本"
 msgid "Compare to previous version"
 msgstr "比较于以前版本"
 
-#: Projects/projects/ProjectPane.py:1931
+#: Projects/projects/ProjectPane.py:1934
 msgid "Configure"
 msgstr "设置"
 
@@ -118,7 +118,7 @@ msgstr "diff 程序"
 msgid "Edit"
 msgstr "编辑"
 
-#: Projects/projects/ProjectPane.py:2175
+#: Projects/projects/ProjectPane.py:2178
 msgid "Enter a command to be executed on all selected files and files in selected directories."
 msgstr "输入命令运行于所有选定文件和选定目录中的文件"
 
@@ -142,7 +142,7 @@ msgstr "在复制/移动文件时发生错误"
 msgid "Error occurred when removing files"
 msgstr "移动文件时产生错误"
 
-#: Projects/projects/ProjectPane.py:2169
+#: Projects/projects/ProjectPane.py:2172
 msgid "Execute command on files"
 msgstr "运行命令于文件"
 
@@ -198,7 +198,7 @@ msgstr "新建..."
 msgid "Open"
 msgstr "打开"
 
-#: Projects/projects/ProjectPane.py:1902
+#: Projects/projects/ProjectPane.py:1905
 msgid "Open Projects Sidepanel"
 msgstr "打开工程面板"
 
@@ -222,7 +222,7 @@ msgstr "Php 文件"
 msgid "Please enter a repository path.  Partial paths may also be entered."
 msgstr "请输入库路径。包括部分路径。"
 
-#: Projects/projects/ProjectPane.py:1901
+#: Projects/projects/ProjectPane.py:1904
 msgid "Projects"
 msgstr "工程"
 
@@ -238,7 +238,7 @@ msgstr "Python 文件"
 msgid "Refresh status"
 msgstr "刷新"
 
-#: Projects/projects/ProjectPane.py:1922
+#: Projects/projects/ProjectPane.py:1925
 msgid "Remove Project"
 msgstr "移除工程"
 
