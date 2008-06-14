@@ -8,7 +8,8 @@ License: wxWindows
 Version 0.3
 Released: xx/xx/xxxx
 
-+ Added (Italian, Russian, and Serbian, Brazilian Portuguese) translations
++ Added Italian, Russian, and Serbian, Brazilian Portuguese, Ukrainian 
+  translations
 
 #-----------------------------------------------------------------------------#
 
