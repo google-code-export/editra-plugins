@@ -7,14 +7,14 @@ msgid ""
 msgstr ""
 "Project-Id-Version: editra\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2008-05-29 22:57-0500\n"
+"POT-Creation-Date: 2008-06-14 00:15-0500\n"
 "PO-Revision-Date: 2008-05-28 14:56+0000\n"
 "Last-Translator: Ricardo Crudo <ricardo.crudo@yahoo.com.br>\n"
 "Language-Team: Brazilian Portuguese <pt_BR@li.org>\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"X-Launchpad-Export-Date: 2008-05-29 03:00+0000\n"
+"X-Launchpad-Export-Date: 2008-06-14 05:08+0000\n"
 "X-Generator: Launchpad (build Unknown)\n"
 
 #: Projects/projects/ConfigDialog.py:413
@@ -29,7 +29,7 @@ msgstr "*VALOR*"
 msgid ". Do you wish to continue?"
 msgstr ". Você deseja continuar?"
 
-#: Projects/projects/ProjectPane.py:1918
+#: Projects/projects/ProjectPane.py:1921
 msgid "Add Project"
 msgstr "Adicionar projeto"
 
@@ -57,11 +57,11 @@ msgstr "Contruído com"
 msgid "C File"
 msgstr "Arquivo C"
 
-#: Projects/projects/ProjectPane.py:2008
+#: Projects/projects/ProjectPane.py:2011
 msgid "Choose a Project Directory"
 msgstr "Escolher a pasta do projeto"
 
-#: Projects/projects/ProjectPane.py:2093
+#: Projects/projects/ProjectPane.py:2096
 msgid "Commit"
 msgstr "Confirmar"
 
@@ -89,7 +89,7 @@ msgstr "Comparar a revisões selecionadas"
 msgid "Compare to previous version"
 msgstr "Comparar a versões anteriores"
 
-#: Projects/projects/ProjectPane.py:1931
+#: Projects/projects/ProjectPane.py:1934
 msgid "Configure"
 msgstr "Configurar"
 
@@ -118,7 +118,7 @@ msgstr "Programa Diff"
 msgid "Edit"
 msgstr "Editar"
 
-#: Projects/projects/ProjectPane.py:2175
+#: Projects/projects/ProjectPane.py:2178
 msgid "Enter a command to be executed on all selected files and files in selected directories."
 msgstr "Entre com um comando para executar em todos arquivos selecionados e arquivos nas pastas selecionadas"
 
@@ -142,7 +142,7 @@ msgstr "Ocorreu um erro quando copiava/movia arquivos"
 msgid "Error occurred when removing files"
 msgstr "Um erro ocorreu ao remover arquivos"
 
-#: Projects/projects/ProjectPane.py:2169
+#: Projects/projects/ProjectPane.py:2172
 msgid "Execute command on files"
 msgstr "Executar comands nos arquivos"
 
@@ -198,7 +198,7 @@ msgstr "Novo..."
 msgid "Open"
 msgstr "Abrir"
 
-#: Projects/projects/ProjectPane.py:1902
+#: Projects/projects/ProjectPane.py:1905
 msgid "Open Projects Sidepanel"
 msgstr "Abrir projeto na barra lateral"
 
@@ -222,7 +222,7 @@ msgstr "Arquivo PHP"
 msgid "Please enter a repository path.  Partial paths may also be entered."
 msgstr "Por favor entre com o caminho do repositório. Caminhos parciais também são aceitos."
 
-#: Projects/projects/ProjectPane.py:1901
+#: Projects/projects/ProjectPane.py:1904
 msgid "Projects"
 msgstr "Projetos"
 
@@ -238,7 +238,7 @@ msgstr "Arquivo Python"
 msgid "Refresh status"
 msgstr "Atualizar Estado"
 
-#: Projects/projects/ProjectPane.py:1922
+#: Projects/projects/ProjectPane.py:1925
 msgid "Remove Project"
 msgstr "Remover projeto"
 

@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: editra\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2008-05-29 22:57-0500\n"
+"POT-Creation-Date: 2008-06-14 00:15-0500\n"
 "PO-Revision-Date: 2008-03-02 09:44+0000\n"
 "Last-Translator: Cody Precord <Unknown>\n"
 "Language-Team: Japanese <ja@li.org>\n"
@@ -29,7 +29,7 @@ msgstr ""
 msgid ". Do you wish to continue?"
 msgstr ""
 
-#: Projects/projects/ProjectPane.py:1918
+#: Projects/projects/ProjectPane.py:1921
 msgid "Add Project"
 msgstr "プロジェクトを追加する"
 
@@ -57,11 +57,11 @@ msgstr "内蔵"
 msgid "C File"
 msgstr "Cファイル"
 
-#: Projects/projects/ProjectPane.py:2008
+#: Projects/projects/ProjectPane.py:2011
 msgid "Choose a Project Directory"
 msgstr "プロジェクトディレクトリを選択する"
 
-#: Projects/projects/ProjectPane.py:2093
+#: Projects/projects/ProjectPane.py:2096
 msgid "Commit"
 msgstr "コミット"
 
@@ -89,7 +89,7 @@ msgstr ""
 msgid "Compare to previous version"
 msgstr ""
 
-#: Projects/projects/ProjectPane.py:1931
+#: Projects/projects/ProjectPane.py:1934
 msgid "Configure"
 msgstr "設定"
 
@@ -118,7 +118,7 @@ msgstr "Diffプログラム"
 msgid "Edit"
 msgstr "編集"
 
-#: Projects/projects/ProjectPane.py:2175
+#: Projects/projects/ProjectPane.py:2178
 msgid "Enter a command to be executed on all selected files and files in selected directories."
 msgstr ""
 
@@ -142,7 +142,7 @@ msgstr ""
 msgid "Error occurred when removing files"
 msgstr ""
 
-#: Projects/projects/ProjectPane.py:2169
+#: Projects/projects/ProjectPane.py:2172
 msgid "Execute command on files"
 msgstr ""
 
@@ -198,7 +198,7 @@ msgstr "新規..."
 msgid "Open"
 msgstr "開く"
 
-#: Projects/projects/ProjectPane.py:1902
+#: Projects/projects/ProjectPane.py:1905
 msgid "Open Projects Sidepanel"
 msgstr ""
 
@@ -222,7 +222,7 @@ msgstr "PHPファイル"
 msgid "Please enter a repository path.  Partial paths may also be entered."
 msgstr ""
 
-#: Projects/projects/ProjectPane.py:1901
+#: Projects/projects/ProjectPane.py:1904
 msgid "Projects"
 msgstr "プロジェクト"
 
@@ -238,7 +238,7 @@ msgstr "Pythonファイル"
 msgid "Refresh status"
 msgstr "リフレッシュステータス"
 
-#: Projects/projects/ProjectPane.py:1922
+#: Projects/projects/ProjectPane.py:1925
 msgid "Remove Project"
 msgstr "プロジェクトを削除する"
 

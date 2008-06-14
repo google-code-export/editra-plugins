@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: editra\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2008-05-29 22:57-0500\n"
+"POT-Creation-Date: 2008-06-14 00:15-0500\n"
 "PO-Revision-Date: 2008-04-01 07:31+0000\n"
 "Last-Translator: Sergei Zivukov <Unknown>\n"
 "Language-Team: Russian <ru@li.org>\n"
@@ -29,7 +29,7 @@ msgstr "*ЗНАЧЕНИЕ*"
 msgid ". Do you wish to continue?"
 msgstr "Хотите продолжить?"
 
-#: Projects/projects/ProjectPane.py:1918
+#: Projects/projects/ProjectPane.py:1921
 msgid "Add Project"
 msgstr "Добавить проект"
 
@@ -57,11 +57,11 @@ msgstr "Встроенный"
 msgid "C File"
 msgstr "C файл"
 
-#: Projects/projects/ProjectPane.py:2008
+#: Projects/projects/ProjectPane.py:2011
 msgid "Choose a Project Directory"
 msgstr "Выбрать каталог проекта"
 
-#: Projects/projects/ProjectPane.py:2093
+#: Projects/projects/ProjectPane.py:2096
 msgid "Commit"
 msgstr "Подтвердить"
 
@@ -89,7 +89,7 @@ msgstr "Сравнить выбранную версию"
 msgid "Compare to previous version"
 msgstr "Сравнить предыдущую версию"
 
-#: Projects/projects/ProjectPane.py:1931
+#: Projects/projects/ProjectPane.py:1934
 msgid "Configure"
 msgstr "Настройка"
 
@@ -118,7 +118,7 @@ msgstr "Программа сравнения"
 msgid "Edit"
 msgstr "Правка"
 
-#: Projects/projects/ProjectPane.py:2175
+#: Projects/projects/ProjectPane.py:2178
 msgid "Enter a command to be executed on all selected files and files in selected directories."
 msgstr "Введите команду, которая должна быть выполнена для всех выбранных файлов и файлов в выбранных каталогах."
 
@@ -142,7 +142,7 @@ msgstr "Произошла ошибка при копировании/перем
 msgid "Error occurred when removing files"
 msgstr "Произошла ошибка при удалении файлов"
 
-#: Projects/projects/ProjectPane.py:2169
+#: Projects/projects/ProjectPane.py:2172
 msgid "Execute command on files"
 msgstr "Выполнение команды для файлов"
 
@@ -198,7 +198,7 @@ msgstr "Новый..."
 msgid "Open"
 msgstr "Открыть"
 
-#: Projects/projects/ProjectPane.py:1902
+#: Projects/projects/ProjectPane.py:1905
 msgid "Open Projects Sidepanel"
 msgstr "Открыть боковую панель проектов"
 
@@ -222,7 +222,7 @@ msgstr "PHP-файл"
 msgid "Please enter a repository path.  Partial paths may also be entered."
 msgstr "Пожалуйста, введите путь к репозитарию. Может быть также введен неполный путь."
 
-#: Projects/projects/ProjectPane.py:1901
+#: Projects/projects/ProjectPane.py:1904
 msgid "Projects"
 msgstr "Проекты"
 
@@ -238,7 +238,7 @@ msgstr "Файл Python"
 msgid "Refresh status"
 msgstr "Обновить состояние"
 
-#: Projects/projects/ProjectPane.py:1922
+#: Projects/projects/ProjectPane.py:1925
 msgid "Remove Project"
 msgstr "Удалить проект"
 

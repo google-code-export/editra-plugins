@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: editra\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2008-05-29 22:57-0500\n"
+"POT-Creation-Date: 2008-06-14 00:15-0500\n"
 "PO-Revision-Date: 2008-04-06 21:17+0000\n"
 "Last-Translator: Angelo <angeloballabio@gmail.com>\n"
 "Language-Team: Italian <it@li.org>\n"
@@ -29,7 +29,7 @@ msgstr "*VALORE*"
 msgid ". Do you wish to continue?"
 msgstr "Volete continuare?"
 
-#: Projects/projects/ProjectPane.py:1918
+#: Projects/projects/ProjectPane.py:1921
 msgid "Add Project"
 msgstr "Aggiungi progetto"
 
@@ -57,11 +57,11 @@ msgstr "Auto costruito"
 msgid "C File"
 msgstr "Fle C"
 
-#: Projects/projects/ProjectPane.py:2008
+#: Projects/projects/ProjectPane.py:2011
 msgid "Choose a Project Directory"
 msgstr "Seleziona la cartella del progetto"
 
-#: Projects/projects/ProjectPane.py:2093
+#: Projects/projects/ProjectPane.py:2096
 msgid "Commit"
 msgstr "Invia"
 
@@ -89,7 +89,7 @@ msgstr "Compara alla versione selezionata"
 msgid "Compare to previous version"
 msgstr "Compara con la versione precedente"
 
-#: Projects/projects/ProjectPane.py:1931
+#: Projects/projects/ProjectPane.py:1934
 msgid "Configure"
 msgstr "Configura"
 
@@ -118,7 +118,7 @@ msgstr "Programma di confronto"
 msgid "Edit"
 msgstr "Edita"
 
-#: Projects/projects/ProjectPane.py:2175
+#: Projects/projects/ProjectPane.py:2178
 msgid "Enter a command to be executed on all selected files and files in selected directories."
 msgstr "Entra un comando da eseguire in tutti i file selezionati e files nella selezionata cartella"
 
@@ -142,7 +142,7 @@ msgstr "Errore occorso"
 msgid "Error occurred when removing files"
 msgstr "Errore occorso durante la rimozione dei files"
 
-#: Projects/projects/ProjectPane.py:2169
+#: Projects/projects/ProjectPane.py:2172
 msgid "Execute command on files"
 msgstr "Esegui il comando sui files"
 
@@ -198,7 +198,7 @@ msgstr "Nuovo..."
 msgid "Open"
 msgstr "Apri"
 
-#: Projects/projects/ProjectPane.py:1902
+#: Projects/projects/ProjectPane.py:1905
 msgid "Open Projects Sidepanel"
 msgstr "Apri il pannello laterale del progetto"
 
@@ -222,7 +222,7 @@ msgstr "Fle PHP"
 msgid "Please enter a repository path.  Partial paths may also be entered."
 msgstr "Per cortesia inserire l'indirizzo dell'archivio. Percosri parziali possono essere inseriti"
 
-#: Projects/projects/ProjectPane.py:1901
+#: Projects/projects/ProjectPane.py:1904
 msgid "Projects"
 msgstr "Progetti"
 
@@ -238,7 +238,7 @@ msgstr "File Python"
 msgid "Refresh status"
 msgstr "Rinfresca lo stato"
 
-#: Projects/projects/ProjectPane.py:1922
+#: Projects/projects/ProjectPane.py:1925
 msgid "Remove Project"
 msgstr "Togli le priorita"
 
