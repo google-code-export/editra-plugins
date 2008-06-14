@@ -1,4 +1,4 @@
-# Serbian translation for editra
+# Ukrainian translation for editra
 # Copyright (c) 2008 Rosetta Contributors and Canonical Ltd 2008
 # This file is distributed under the same license as the editra package.
 # FIRST AUTHOR <EMAIL@ADDRESS>, 2008.
@@ -8,51 +8,51 @@ msgstr ""
 "Project-Id-Version: editra\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2008-06-14 00:48-0500\n"
-"PO-Revision-Date: 2008-03-19 18:43+0000\n"
-"Last-Translator: Vladimir Lazic <vlazic@gmail.com>\n"
-"Language-Team: Serbian <sr@li.org>\n"
+"PO-Revision-Date: 2008-06-13 18:01+0000\n"
+"Last-Translator: Ihor Chomko <igorchomko@gmail.com>\n"
+"Language-Team: Ukrainian <uk@li.org>\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"X-Launchpad-Export-Date: 2008-03-20 06:44+0000\n"
+"X-Launchpad-Export-Date: 2008-06-14 05:20+0000\n"
 "X-Generator: Launchpad (build Unknown)\n"
 
 #: calculator/calculator/calc.py:154
 msgid "Ascii"
-msgstr "Аски код"
+msgstr "ASCII"
 
 #: calculator/calculator/__init__.py:41
 msgid "Calculator"
-msgstr "Калкулатор"
+msgstr "Калькулятор"
 
 #: calculator/calculator/calc.py:153
 msgid "Char Display"
-msgstr "Приказ карактера"
+msgstr "Екран символів"
 
 #: calculator/calculator/calc.py:161
 msgid "Dec"
-msgstr "Дец"
+msgstr "Десятковий"
 
 #: calculator/calculator/calc.py:53
 msgid "Editra | Calculator"
-msgstr "Editra | Калкулатор"
+msgstr "Editra | Калькулятор"
 
 #: calculator/calculator/calc.py:192 calculator/calculator/calc.py:514
 msgid "Error"
-msgstr "Грешка"
+msgstr "Помилка"
 
 #: calculator/calculator/calc.py:512
 #, python-format
 msgid "Error: %s"
-msgstr "Грешка: %s"
+msgstr "Помилка: %s"
 
 #: calculator/calculator/calc.py:392
 msgid "Error: Display Overflow"
-msgstr "Грешка: Резултат прелази границе диплеја"
+msgstr "Помилка: Переповнення екрану"
 
 #: calculator/calculator/calc.py:161
 msgid "Hex"
-msgstr "Хекс"
+msgstr "Шістнадцятковий"
 
 #: calculator/calculator/calc.py:160
 msgid "Mode"
@@ -60,18 +60,18 @@ msgstr "Режим"
 
 #: calculator/calculator/calc.py:161
 msgid "Oct"
-msgstr "Окт"
+msgstr "Вісімковий"
 
 #: calculator/calculator/calc.py:154
 msgid "Unicode"
-msgstr "Уникод"
+msgstr "Юнікод"
 
 #: calculator/calculator/calc.py:430
 #, python-format
 msgid "ascii: %s"
-msgstr "аски код: %s"
+msgstr ""
 
 #: calculator/calculator/calc.py:436
 #, python-format
 msgid "unicode: %s"
-msgstr "уникод: %s"
+msgstr "юнікод:%s"
