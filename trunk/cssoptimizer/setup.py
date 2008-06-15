@@ -16,7 +16,7 @@ __author__ = "Cody Precord"
 if setup != None:
     setup(
         name='CssOptimizer',
-        version='0.2',
+        version='0.3',
         description=__doc__,
         author=__author__,
         author_email="cprecord@editra.org",
