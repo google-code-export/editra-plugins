@@ -5,14 +5,15 @@
 
 #----------------------------------------------------------------------------#
 # Version 0.3
-# Released: xx/xx/xxxx
+# Released: 06/14/2008
 
++Slightly improved compression
 +Added Dutch, German, Italian, Japanese, Portuguese, Serbian, Czech,
        Ukrainian, Basque, and Simplifed Chinese translations.
 
 #----------------------------------------------------------------------------#
 # Version 0.2
-# Released: ??
+# Released: 10/30/2007
 
 Minor bug fixes
 
