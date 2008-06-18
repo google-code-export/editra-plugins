@@ -35,6 +35,9 @@ __scid__ = "$Id$"
 #-----------------------------------------------------------------------------#
 # Imports
 import os
+import locale
+import codecs
+import types
 import fnmatch
 import subprocess
 import sys
@@ -533,6 +536,28 @@ def recursiveupdate(dest, src):
         else:
             dest[key] = value
     return dest
+
+#-----------------------------------------------------------------------------#
+
+def DecodeString(string, encoding=None):
+    """Decode the given string to Unicode using the provided
+    encoding or the DEFAULT_ENCODING if None is provided.
+    @param string: string to decode
+    @keyword encoding: encoding to decode string with
+
+    """
+    if not encoding:
+        encoding =  locale.getpreferredencoding()
+
+    if not isinstance(string, types.UnicodeType):
+        try:
+            rtxt = codecs.getdecoder(encoding)(string)[0]
+        except Exception, msg:
+            rtxt = string
+        return rtxt
+    else:
+        # The string is already unicode so just return it
+        return string
 
 #-----------------------------------------------------------------------------#
 

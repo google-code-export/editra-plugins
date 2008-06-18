@@ -8,17 +8,15 @@
 ###############################################################################
 
 """
-#--------------------------------------------------------------------------#
-# FILE: HistWin.py                                                         #
-# AUTHOR: Cody Precord                                                     #
-# LANGUAGE: Python                                                         #
-# SUMMARY:                                                                 #
-#   Provides a revision history window that shows the list of revisions    #
-# for a specific file and its related log entries. The window also         #
-# provides interactive searching/filtering of revision entries by searching#
-# the log entries.                                                         #
-#                                                                          #
-#--------------------------------------------------------------------------#
+FILE: HistWin.py
+AUTHOR: Cody Precord
+LANGUAGE: Python
+SUMMARY:
+Provides a revision history window that shows the list of revisions
+for a specific file and its related log entries. The window also
+provides interactive searching/filtering of revision entries by searching
+the log entries.
+
 """
 
 __author__ = "Cody Precord <cprecord@editra.org>"
@@ -64,7 +62,7 @@ class HistoryWindow(wx.Frame):
     def __init__(self, parent, title, projects, node, path):
         wx.Frame.__init__(self, parent, title=title,
                           style=wx.DEFAULT_DIALOG_STYLE)
-        
+
         # Set Frame Icon
         if util is not None:
             util.SetWindowIcon(self)
@@ -98,7 +96,7 @@ class HistoryWindow(wx.Frame):
         in the handling of the events in this code or in wx. This is just a
         handler to trap the event before it propagates to the project pane when
         the click is originated here.
-        
+
         """
         evt.StopPropagation()
 
@@ -123,7 +121,7 @@ class HistoryStatusBar(wx.StatusBar):
     """Custom status bar for history window to show when its busy"""
     def __init__(self, parent):
         wx.StatusBar.__init__(self, parent)
-  
+
         # Attributes
         self._changed = False
         self.timer = wx.Timer(self)
@@ -193,7 +191,7 @@ class HistoryPane(wx.Panel):
     BTN_LBL3 = _("Compare Selected Revisions")
     def __init__(self, parent, projects, node, path):
         wx.Panel.__init__(self, parent)
-        
+
         # Attributes
         sbox = wx.StaticBox(self, label=_("Revision History"))
         # Note box sizer must be created before its siblings
@@ -263,7 +261,7 @@ class HistoryPane(wx.Panel):
         else:
             rev1 = self._list.GetItem(selected[0], self._list.REV_COL).GetText().strip()
             rev2 = self._list.GetItem(selected[-1], self._list.REV_COL).GetText().strip()
-            self.projects.compareRevisions(self.path, rev1=rev1, rev2=rev2, 
+            self.projects.compareRevisions(self.path, rev1=rev1, rev2=rev2,
                                            callback=self.endCompare)
 
     def endCompare(self):
@@ -282,7 +280,7 @@ class HistoryPane(wx.Panel):
                 break
             selected.append(item)
         return selected
-        
+
     def selectOnly(self, indices):
         """ Select only the given indices """
         item = -1
@@ -293,7 +291,7 @@ class HistoryPane(wx.Panel):
                 break
             if item not in indices:
                 self._list.SetItemState(item, 0, wx.LIST_STATE_SELECTED)
-                    
+
     def OnItemSelected(self, evt):
         """Update text control when an item is selected in the
         list control.
@@ -320,7 +318,7 @@ class HistoryPane(wx.Panel):
         elif len(selected) == 1:
             self.selected = selected[0]
         self.updateButton()
-        
+
     def updateButton(self):
         """ Change button text based on selection state """
         selected = self.getSelectedItems()
@@ -337,7 +335,7 @@ class HistoryPane(wx.Panel):
 
 #-----------------------------------------------------------------------------#
 
-class HistList(wx.ListCtrl, 
+class HistList(wx.ListCtrl,
                listmix.ListCtrlAutoWidthMixin):
     """List for displaying a files revision history"""
     REV_COL = 0
@@ -395,7 +393,7 @@ class HistList(wx.ListCtrl,
                 if index == -1:
                     append = True
                     index = self.InsertStringItem(sys.maxint, '')
-            
+
             if self.GetItemText(index).strip() != item['revision']:
                 self.SetStringItem(index, 0, item['revision'])
                 self.SetStringItem(index, 1, item['date'].strftime(DATE_FORMAT))
@@ -413,7 +411,7 @@ class HistList(wx.ListCtrl,
                 self.DeleteItem(i)
 
         self.Thaw()
-                
+
     def GetFullLog(self, rev, timestamp):
         """Get the full log entry for the given revision"""
         for item in self._data:
@@ -427,16 +425,16 @@ class HistList(wx.ListCtrl,
         """Populate the list with the history data"""
         self._data = data
         if not data:
-            wx.MessageDialog(self, 
+            wx.MessageDialog(self,
                _('The history information for the requested file could ' \
                  'not be retrieved.  Please make sure that you have ' \
-                 'network access.'), 
-               _('History information could not be retrieved'), 
+                 'network access.'),
+               _('History information could not be retrieved'),
                style=wx.OK|wx.ICON_ERROR).ShowModal()
             self.GetGrandParent().GetParent().Destroy()
             return
         evt = UpdateItemsEvent(edEVT_UPDATE_ITEMS, self.GetId(), data)
-        wx.PostEvent(self, evt)                                
+        wx.PostEvent(self, evt)
         wx.CallAfter(self._frame.StopBusy)
 
     def Filter(self, query):
@@ -454,7 +452,7 @@ class HistList(wx.ListCtrl,
         else:
             newdata = self._data
         evt = UpdateItemsEvent(edEVT_UPDATE_ITEMS, self.GetId(), newdata)
-        wx.PostEvent(self, evt)                                
+        wx.PostEvent(self, evt)
 
 #-----------------------------------------------------------------------------#
 
@@ -467,7 +465,7 @@ class LogSearch(wx.SearchCtrl):
 
         """
         wx.SearchCtrl.__init__(self, parent, wx.ID_ANY, value, pos, size, style)
-        
+
         # Attributes
 
         # Appearance
