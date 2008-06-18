@@ -7,7 +7,7 @@ __revision__ = "$Revision$"
 __scid__ = "$Id$"
 
 import re, os, crypto, datetime
-from SourceControl import SourceControl
+from SourceControl import SourceControl, DecodeString
 
 class SVN(SourceControl):
     """ Subversion source control class """
@@ -125,10 +125,10 @@ class SVN(SourceControl):
                         for data in out.stdout:
                             self.log(data)
                             rev, author, date, lines = data.split(' | ')
-                            current['revision'] = rev
-                            current['author'] = author
+                            current['revision'] = DecodeString(rev)
+                            current['author'] = DecodeString(author)
                             current['date'] = self.str2datetime(date)
-                            current['log'] = ''
+                            current['log'] = u''
                             self.log(out.stdout.next())
                             break
                     else:
