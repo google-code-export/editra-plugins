@@ -38,10 +38,14 @@ Version 0.2 Adds
   * System Verilog (Classes, Tasks)
   * Verilog (Tasks)
 
-Version 0.3 Adds (not released yet)
+Version 0.3 Adds
 
   * Sql (Packages, Functions, Procedures)
   * PL/Sql (Packages, Functions, Procedures)
+
+Version 0.4 Adds (not released yet)
+
+
 
 = Installation =
 
