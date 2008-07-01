@@ -57,4 +57,4 @@ class Calculator(plugin.Plugin):
         so return an empty list.
 
         """
-        return list()
+        return [(calc.ID_CALC, calc.UpdateMenu)]
