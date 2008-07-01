@@ -22,7 +22,6 @@ __revision__ = "$Revision$"
 #--------------------------------------------------------------------------#
 # Dependancies
 import wx
-import util
 
 #--------------------------------------------------------------------------#
 ID_CALC = wx.NewId()
@@ -51,22 +50,16 @@ def ShowCalculator(evt):
     if evt.GetId() == ID_CALC:
         if CalcFrame.INSTANCE is None:
             cframe = CalcFrame(None, _("Editra | Calculator"))
-            UpdateMenu(True)
             cframe.Show()
         else:
-            UpdateMenu(False)
             CalcFrame.INSTANCE.Destroy()
             CalcFrame.INSTANCE = None
     else:
         evt.Skip()
 
-def UpdateMenu(val):
+def UpdateMenu(evt):
     """Update the check mark in the menus of the windows"""
-    for win in wx.GetApp().GetMainWindows():
-        menub = win.GetMenuBar()
-        mitem = menub.GetMenuByName("view").FindItemById(ID_CALC)
-        if mitem:
-            mitem.Check(val)
+    evt.Check(CalcFrame.INSTANCE is not None)
 
 #-----------------------------------------------------------------------------#
 
@@ -105,7 +98,6 @@ class CalcFrame(wx.MiniFrame):
     def OnClose(self, evt):
         """Cleanup settings on close"""
         CalcFrame.INSTANCE = None
-        UpdateMenu(False)
         evt.Skip()
 
 #-----------------------------------------------------------------------------#
@@ -123,13 +115,13 @@ class CalcPanel(wx.PyPanel):
         wx.PyPanel.__init__(self, parent, id_)
 
         # Attributes
-        self._log = wx.GetApp().GetLog()
+        self._log = LogFunction
         self._leftop = u''
         self._rstart = False
         self._disp = Display(self, DEC_MODE)
         self._eq = wx.Button(self, label="=")
         self._ascii = wx.StaticText(self, label="")
-        self._keys = wx.GridSizer(6, 3, 1, 1)
+        self._keys = wx.GridSizer(6, 3, 2, 2)
 
         # Layout
         self._DoLayout()
@@ -145,7 +137,7 @@ class CalcPanel(wx.PyPanel):
 
     def _DoLayout(self):
         """Layout the calculator"""
-        sizer = wx.GridBagSizer(1, 2)
+        sizer = wx.GridBagSizer(2, 2)
 
         # Character display mode
         sizer.AddMany([((3, 3), (0, 0)), ((3, 3), (0, 6)),
@@ -170,7 +162,7 @@ class CalcPanel(wx.PyPanel):
                 self._keys.Add(wx.Button(self, label=label))
 
         sizer.Add(self._keys, (5, 1), (6, 3), wx.EXPAND)
-        gsizer2 = wx.GridSizer(6, 2, 1, 1)
+        gsizer2 = wx.GridSizer(6, 2, 2, 2)
         for row in (("AC", "C"), ("/", "-"), ("*", "+"),
                     ("<<", ">>"), (".", "^")):
             for label in row:
@@ -363,7 +355,6 @@ class Display(wx.PyPanel):
             |Charval           Op     Mode  |
             |-------------------------------|
 
-    @todo: optimize drawing there is some flickering on Windows
     """
     def __init__(self, parent, mode):
         """Initialize the display the mode parameter is the
@@ -379,8 +370,12 @@ class Display(wx.PyPanel):
         self._ascii = True  # Show ascii by default
         self._error = False # Is an error displayed
 
+        # Setup
+        self.SetMinSize((250, 60))
+
         # Event Handlers
         self.Bind(wx.EVT_PAINT, self.OnPaint)
+        self.Bind(wx.EVT_ERASE_BACKGROUND, self.OnEraseBG)
 
     def _DrawText(self, gc, rect, font):
         """Draws the text into the display"""
@@ -481,9 +476,20 @@ class Display(wx.PyPanel):
             fval = int(val)
         return fval
 
+    def OnEraseBG(self, evt):
+        """Reduce flickering on msw"""
+        pass
+
     def OnPaint(self, evt):
         """Paint the display and its values"""
-        dc = wx.PaintDC(self)
+        if wx.Platform == "__WXMSW__":
+            dc = wx.BufferedPaintDC(self)
+            brush =wx.Brush(wx.SystemSettings_GetColour(wx.SYS_COLOUR_MENU), wx.SOLID)
+            dc.SetBackground(brush)
+            dc.Clear()
+        else:
+            dc = wx.PaintDC(self)
+
         gc = wx.GCDC(dc)
 
         rect = self.GetRect()
@@ -492,7 +498,7 @@ class Display(wx.PyPanel):
 
         gc.SetBrush(wx.Brush(DISP_COLOR))
         color = wx.SystemSettings_GetColour(wx.SYS_COLOUR_ACTIVEBORDER)
-        color = util.AdjustColour(color, -30)
+        color = AdjustColour(color, -30)
         gc.SetPen(wx.Pen(color, 2))
         gc.DrawRoundedRectangle(1, 1, w - 2, h - 2, 5)
 
@@ -589,3 +595,48 @@ class Display(wx.PyPanel):
             tmp = u'0' + tmp.lstrip('0')
         self._val = tmp
         self.Refresh()
+
+#-----------------------------------------------------------------------------#
+# Utility Function
+
+def AdjustColour(color, percent, alpha=wx.ALPHA_OPAQUE):
+    """ Brighten/Darken input colour by percent and adjust alpha
+    channel if needed. Returns the modified color.
+    @param color: color object to adjust
+    @type color: wx.Color
+    @param percent: percent to adjust +(brighten) or -(darken)
+    @type percent: int
+    @keyword alpha: Value to adjust alpha channel to
+
+    """
+    radj, gadj, badj = [ int(val * (abs(percent) / 100.))
+                         for val in color.Get() ]
+
+    if percent < 0:
+        radj, gadj, badj = [ val * -1 for val in [radj, gadj, badj] ]
+    else:
+        radj, gadj, badj = [ val or percent for val in [radj, gadj, badj] ]
+
+    red = min(color.Red() + radj, 255)
+    green = min(color.Green() + gadj, 255)
+    blue = min(color.Blue() + badj, 255)
+    return wx.Colour(red, green, blue, alpha)
+
+def LogFunction(msg):
+    """Print Log Messages
+    @param msg: string
+
+    """
+    try:
+        wx.GetApp().GetLog()(msg)
+    except AttributeError:
+        pass
+
+#-----------------------------------------------------------------------------#
+# Test
+
+if __name__ == '__main__':
+    APP = wx.App(False)
+    CALC = CalcFrame(None, _("Calculator"))
+    CALC.Show(True)
+    APP.MainLoop()
