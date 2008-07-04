@@ -270,7 +270,7 @@ class ProjectTree(wx.Panel):
                                 wx.TreeItemIcon_Expanded)
 
         # Bind events
-        self.Bind(wx.EVT_TREE_ITEM_EXPANDED, self.OnItemExpanded, self.tree)
+        self.Bind(wx.EVT_TREE_ITEM_EXPANDING, self.OnItemExpanding, self.tree)
         self.Bind(wx.EVT_TREE_ITEM_COLLAPSED, self.OnItemCollapsed, self.tree)
         #self.Bind(wx.EVT_TREE_SEL_CHANGED, self.OnSelChanged, self.tree)
         #self.Bind(wx.EVT_TREE_BEGIN_LABEL_EDIT, self.OnBeginEdit, self.tree)
@@ -695,7 +695,7 @@ class ProjectTree(wx.Panel):
         width, height = self.GetClientSizeTuple()
         self.tree.SetDimensions(0, 0, width, height)
 
-    def OnItemExpanded(self, event):
+    def OnItemExpanding(self, event):
         """
         When an item is expanded, track the contents of that directory
 
