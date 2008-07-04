@@ -423,6 +423,11 @@ class ProjectTree(wx.Panel):
         Returns: tree node for the project
 
         """
+        # Check that project exists before adding it
+        if not os.path.exists(path):
+            self.config.removeProject(path)
+            return
+
         node = self.tree.AppendItem(self.tree.GetRootItem(),
                                     options.get('name', os.path.basename(path)))
         data = options.copy()

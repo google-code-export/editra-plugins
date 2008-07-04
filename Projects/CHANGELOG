@@ -13,6 +13,8 @@ New:
 
 Bug Fixes:
 +Fix some compatibility issues with other plugins
++Fix regression in tree sorting that caused multiple entries and poor
+performance on Windows.
 
 #-----------------------------------------------------------------------------#
 Version: 0.5
