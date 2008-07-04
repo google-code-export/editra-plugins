@@ -54,6 +54,10 @@ class Projects(plugin.Plugin):
         """Returns the menu event handlers"""
         return [(ProjectPane.ID_PROJECTS, self._projects.OnShowProjects)]
 
+    def GetMinVersion(self):
+        """Get the minimum version of Editra that this plugin supports"""
+        return "0.3.15"
+
     def GetUIHandlers(self):
         """Returns handlers for UpdateUI events"""
         return [(ProjectPane.ID_PROJECTS, self._projects.OnUpdateMenu)]
