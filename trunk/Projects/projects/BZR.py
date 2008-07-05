@@ -20,7 +20,7 @@ import re
 import time
 
 # Local imports
-from SourceControl import SourceControl
+from SourceControl import SourceControl, DecodeString
 
 #------------------------------------------------------------------------------#
 
@@ -166,10 +166,10 @@ class BZR(SourceControl):
                     elif logstart:
                         current['log'] += line
                     elif line.startswith('revno:'):
-                        current['revision'] = line.split(None, 1)[-1].strip()
+                        current['revision'] = DecodeString(line.split(None, 1)[-1].strip())
                     elif line.startswith('committer:'):
                         author = line.split(None, 1)[-1]
-                        current['author'] = author.strip()
+                        current['author'] = DecodeString(author.strip())
                     elif line.startswith('timestamp:'):
                         date = line.split(None, 1)[-1]
                         current['date'] = self.str2datetime(date.strip())

@@ -132,7 +132,7 @@ class SVN(SourceControl):
                             self.log(out.stdout.next())
                             break
                     else:
-                        current['log'] += line
+                        current['log'] += DecodeString(line)
             self.logOutput(out)
             if pophistory:
                 history.pop()
