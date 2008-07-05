@@ -112,7 +112,7 @@ class CVS(SourceControl):
             out = self.run(root, ['rlog', fname])
             if out:
                 revision_re = re.compile(r'^revision\s+(\S+)')
-                dasl_re = re.compile(r'^date:\s+(\S+\s+\S+);\s+author:\s+(\S+);\s+state:\s+(\S+);')
+                dasl_re = re.compile(r'^date:\s+(\S+\s+\S+)(?:\s+\S+)?;\s+author:\s+(\S+);\s+state:\s+(\S+);')
                 current = None
                 for line in out.stdout:
                     self.log(line)
