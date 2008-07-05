@@ -221,7 +221,7 @@ class CVS(SourceControl):
     def str2datetime(self, s):
         """ Convert a time stamp string to a datetime object """
         return datetime.datetime(*[int(x)
-                                 for x in re.split(r'[\s+/:]', s.strip()) if x])
+                                 for x in re.split(r'[\s+/:-]', s.strip()) if x])
 
     def update(self, paths):
         """ Recursively update paths """
