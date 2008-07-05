@@ -20,7 +20,7 @@ import os
 import sys
 import datetime
 import re
-from SourceControl import SourceControl
+from SourceControl import SourceControl, DecodeString
 
 #-----------------------------------------------------------------------------#
 # Globals
@@ -130,14 +130,14 @@ class GIT(SourceControl):
                         if re.match(COMPAT, line.strip()):
                             current = {'path':fname}
                             history.append(current)
-                            current['revision'] = line.split()[-1].strip()
+                            current['revision'] = DecodeString(line.split()[-1].strip())
                             current['log'] = ''
                         elif line.startswith('Author: '):
-                            current['author'] = line.split(' ', 1)[-1]
+                            current['author'] = DecodeString(line.split(' ', 1)[-1])
                         elif line.startswith('Date: '):
                             current['date'] = self.str2datetime(line.split(' ', 1)[-1].strip())
                         else:
-                            current['log'] += line
+                            current['log'] += DecodeString(line)
 
         # Cleanup log formatting
         for item in history:
