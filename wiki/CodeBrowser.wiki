@@ -46,6 +46,7 @@ Version 0.3 Adds
 Version 0.4 Adds (not released yet)
 
   * C (Functions, Macros)
+  * Ruby (Classes, Modules, Functions, Methods)
 
 
 = Installation =
