@@ -7,7 +7,7 @@ __revision__ = "$Revision$"
 __scid__ = "$Id$"
 
 import re, os, datetime
-from SourceControl import SourceControl
+from SourceControl import SourceControl, DecodeString
 
 class CVS(SourceControl):
     """ Concurent Versioning System implementation for the
@@ -121,21 +121,21 @@ class CVS(SourceControl):
                         history.append(current)
                         line = out.stdout.next()
                         self.log(line)
-                        current['revision'] = revision_re.match(line).group(1)
+                        current['revision'] = DecodeString(revision_re.match(line).group(1))
                         current['sortkey'] = [int(x) for x in current['revision'].split('.')]
                         line = out.stdout.next()
                         self.log(line)
                         m = dasl_re.match(line)
                         current['date'] = self.str2datetime(m.group(1))
-                        current['author'] = m.group(2)
-                        current['state'] = m.group(3)
+                        current['author'] = DecodeString(m.group(2))
+                        current['state'] = DecodeString(m.group(3))
                         line = out.stdout.next()
                         self.log(line)
-                        current['log'] = line
+                        current['log'] = DecodeString(line)
                     elif line.startswith('========'):
                         current = None
                     elif current is not None:
-                        current['log'] += line
+                        current['log'] += DecodeString(line)
                 self.logOutput(out)
         history.sort(key=lambda x:x['sortkey'])
         history.reverse()
