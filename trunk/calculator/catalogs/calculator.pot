@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2008-06-14 00:48-0500\n"
+"POT-Creation-Date: 2008-07-08 19:35-0500\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -16,61 +16,61 @@ msgstr ""
 "Content-Type: text/plain; charset=CHARSET\n"
 "Content-Transfer-Encoding: 8bit\n"
 
-#: calculator/calculator/calc.py:154
+#: calculator/calculator/calc.py:146
 msgid "Ascii"
 msgstr ""
 
-#: calculator/calculator/__init__.py:41
+#: calculator/calculator/__init__.py:41 calculator/calculator/calc.py:640
 msgid "Calculator"
 msgstr ""
 
-#: calculator/calculator/calc.py:153
+#: calculator/calculator/calc.py:145
 msgid "Char Display"
 msgstr ""
 
-#: calculator/calculator/calc.py:161
+#: calculator/calculator/calc.py:153
 msgid "Dec"
 msgstr ""
 
-#: calculator/calculator/calc.py:53
+#: calculator/calculator/calc.py:52
 msgid "Editra | Calculator"
 msgstr ""
 
-#: calculator/calculator/calc.py:192 calculator/calculator/calc.py:514
+#: calculator/calculator/calc.py:184 calculator/calculator/calc.py:520
 msgid "Error"
 msgstr ""
 
-#: calculator/calculator/calc.py:512
+#: calculator/calculator/calc.py:518
 #, python-format
 msgid "Error: %s"
 msgstr ""
 
-#: calculator/calculator/calc.py:392
+#: calculator/calculator/calc.py:387
 msgid "Error: Display Overflow"
 msgstr ""
 
-#: calculator/calculator/calc.py:161
+#: calculator/calculator/calc.py:153
 msgid "Hex"
 msgstr ""
 
-#: calculator/calculator/calc.py:160
+#: calculator/calculator/calc.py:152
 msgid "Mode"
 msgstr ""
 
-#: calculator/calculator/calc.py:161
+#: calculator/calculator/calc.py:153
 msgid "Oct"
 msgstr ""
 
-#: calculator/calculator/calc.py:154
+#: calculator/calculator/calc.py:146
 msgid "Unicode"
 msgstr ""
 
-#: calculator/calculator/calc.py:430
+#: calculator/calculator/calc.py:425
 #, python-format
 msgid "ascii: %s"
 msgstr ""
 
-#: calculator/calculator/calc.py:436
+#: calculator/calculator/calc.py:431
 #, python-format
 msgid "unicode: %s"
 msgstr ""
