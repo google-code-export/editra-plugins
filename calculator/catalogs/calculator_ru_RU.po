@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: editra\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2008-06-14 00:48-0500\n"
+"POT-Creation-Date: 2008-07-08 19:35-0500\n"
 "PO-Revision-Date: 2008-03-31 07:09+0000\n"
 "Last-Translator: Sergei Zivukov <Unknown>\n"
 "Language-Team: Russian <ru@li.org>\n"
@@ -17,61 +17,61 @@ msgstr ""
 "X-Launchpad-Export-Date: 2008-04-04 02:20+0000\n"
 "X-Generator: Launchpad (build Unknown)\n"
 
-#: calculator/calculator/calc.py:154
+#: calculator/calculator/calc.py:146
 msgid "Ascii"
 msgstr "Ascii"
 
-#: calculator/calculator/__init__.py:41
+#: calculator/calculator/__init__.py:41 calculator/calculator/calc.py:640
 msgid "Calculator"
 msgstr "Калькулятор"
 
-#: calculator/calculator/calc.py:153
+#: calculator/calculator/calc.py:145
 msgid "Char Display"
 msgstr "Символы дисплея"
 
-#: calculator/calculator/calc.py:161
+#: calculator/calculator/calc.py:153
 msgid "Dec"
 msgstr "Десятичная"
 
-#: calculator/calculator/calc.py:53
+#: calculator/calculator/calc.py:52
 msgid "Editra | Calculator"
 msgstr "Editra | Калькулятор"
 
-#: calculator/calculator/calc.py:192 calculator/calculator/calc.py:514
+#: calculator/calculator/calc.py:184 calculator/calculator/calc.py:520
 msgid "Error"
 msgstr "Ошибка"
 
-#: calculator/calculator/calc.py:512
+#: calculator/calculator/calc.py:518
 #, python-format
 msgid "Error: %s"
 msgstr "Ошибка: %s"
 
-#: calculator/calculator/calc.py:392
+#: calculator/calculator/calc.py:387
 msgid "Error: Display Overflow"
 msgstr "Ошибка: дисплей переполнен"
 
-#: calculator/calculator/calc.py:161
+#: calculator/calculator/calc.py:153
 msgid "Hex"
 msgstr "Шестнадцатиричная"
 
-#: calculator/calculator/calc.py:160
+#: calculator/calculator/calc.py:152
 msgid "Mode"
 msgstr "Режим"
 
-#: calculator/calculator/calc.py:161
+#: calculator/calculator/calc.py:153
 msgid "Oct"
 msgstr "Восьмеричная"
 
-#: calculator/calculator/calc.py:154
+#: calculator/calculator/calc.py:146
 msgid "Unicode"
 msgstr "Юникод"
 
-#: calculator/calculator/calc.py:430
+#: calculator/calculator/calc.py:425
 #, python-format
 msgid "ascii: %s"
 msgstr "ascii: %s"
 
-#: calculator/calculator/calc.py:436
+#: calculator/calculator/calc.py:431
 #, python-format
 msgid "unicode: %s"
 msgstr "юникод: %s"

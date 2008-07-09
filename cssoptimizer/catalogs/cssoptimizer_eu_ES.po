@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: editra\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2008-06-14 00:23-0500\n"
+"POT-Creation-Date: 2008-07-08 19:35-0500\n"
 "PO-Revision-Date: 2008-06-10 15:35+0000\n"
 "Last-Translator: Mikel Alzibar <mikelalzibar@gmail.com>\n"
 "Language-Team: Basque <eu@li.org>\n"
@@ -17,11 +17,11 @@ msgstr ""
 "X-Launchpad-Export-Date: 2008-06-14 05:12+0000\n"
 "X-Generator: Launchpad (build Unknown)\n"
 
-#: cssoptimizer/cssoptimizer/__init__.py:76
+#: cssoptimizer/cssoptimizer/__init__.py:93
 msgid "Generate an optimized version of the css"
 msgstr "css-ren bertsio optimizatu bat sortzen du"
 
-#: cssoptimizer/cssoptimizer/__init__.py:75
+#: cssoptimizer/cssoptimizer/__init__.py:92
 #, python-format
 msgid "Optimize %s"
 msgstr "Optimizatu %s"
