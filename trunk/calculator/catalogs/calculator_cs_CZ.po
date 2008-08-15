@@ -1,4 +1,4 @@
-# Dutch translation for editra
+# Czech translation for editra
 # Copyright (c) 2008 Rosetta Contributors and Canonical Ltd 2008
 # This file is distributed under the same license as the editra package.
 # FIRST AUTHOR <EMAIL@ADDRESS>, 2008.
@@ -8,26 +8,26 @@ msgstr ""
 "Project-Id-Version: editra\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2008-08-14 19:37-0500\n"
-"PO-Revision-Date: 2008-04-30 09:10+0000\n"
-"Last-Translator: Gerard <Unknown>\n"
-"Language-Team: Dutch <nl@li.org>\n"
+"PO-Revision-Date: 2008-08-13 21:32+0000\n"
+"Last-Translator: Tomáš Frýda <t.fryda@gmail.com>\n"
+"Language-Team: Czech <cs@li.org>\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"X-Launchpad-Export-Date: 2008-05-03 04:28+0000\n"
+"X-Launchpad-Export-Date: 2008-08-15 00:12+0000\n"
 "X-Generator: Launchpad (build Unknown)\n"
 
 #: calculator/calculator/calc.py:146
 msgid "Ascii"
-msgstr "Ascii"
+msgstr "ASCII"
 
 #: calculator/calculator/__init__.py:41 calculator/calculator/calc.py:640
 msgid "Calculator"
-msgstr "Calculator"
+msgstr "Kalkulačka"
 
 #: calculator/calculator/calc.py:145
 msgid "Char Display"
-msgstr "Karakter weergave"
+msgstr "Zobrazení Znaků"
 
 #: calculator/calculator/calc.py:153
 msgid "Dec"
@@ -35,20 +35,20 @@ msgstr "Dec"
 
 #: calculator/calculator/calc.py:52
 msgid "Editra | Calculator"
-msgstr "Editra | Calculator"
+msgstr "Editra | Kalkulačka"
 
 #: calculator/calculator/calc.py:184 calculator/calculator/calc.py:520
 msgid "Error"
-msgstr "Fout"
+msgstr "Chyba"
 
 #: calculator/calculator/calc.py:518
 #, python-format
 msgid "Error: %s"
-msgstr "Fout: %s"
+msgstr "Chyba: %s"
 
 #: calculator/calculator/calc.py:387
 msgid "Error: Display Overflow"
-msgstr "Fout: Weergave overloop"
+msgstr "Chyba: Přetečení displeje"
 
 #: calculator/calculator/calc.py:153
 msgid "Hex"
@@ -56,7 +56,7 @@ msgstr "Hex"
 
 #: calculator/calculator/calc.py:152
 msgid "Mode"
-msgstr "Modus"
+msgstr "Režim"
 
 #: calculator/calculator/calc.py:153
 msgid "Oct"
