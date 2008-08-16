@@ -1255,18 +1255,25 @@ class ProjectTree(wx.Panel):
         node -- the tree node to keep in sync
 
         """
-        data = self.tree.GetPyData(node)
+        # Calling GetPyData on an empty node can cause an
+        # AssertionError on windows for some reason so trap it
+        # an don't add the watcher
+        try:
+            data = self.tree.GetPyData(node)
+        except wx.PyAssertionError:
+            return
+
         path = data['path']
         # Start a directory watcher to keep branch in sync.
         # When the flag variable is emptied, the thread stops.
         flag = [1]
-        data['watcher'] = w = threading.Thread(target=self.watchDirectory,
-                                               args=(path,),
-                                               kwargs={'flag':flag,
-                                                       'data':node})
-        w.flag = flag
-        w.start()
-        self.watchers[w] = flag
+        data['watcher'] = threading.Thread(target=self.watchDirectory,
+                                           args=(path,),
+                                           kwargs={'flag':flag,
+                                                   'data':node})
+        data['watcher'].flag = flag
+        data['watcher'].start()
+        self.watchers[data['watcher']] = flag
         #print 'WATCHING', path, self.tree.GetItemText(node)
 
     def addPath(self, parent, name):
@@ -1327,12 +1334,16 @@ class ProjectTree(wx.Panel):
         # Work around Windows bug where folders cannot expand unless it
         # has children.  This item is deleted when the folder is expanded.
         self.tree.AppendItem(node, '')
-        self.tree.SetItemHasChildren(node)
-        self.tree.SetPyData(node, {'path' : os.path.join(parentpath, name)})
+        fpath = os.path.join(parentpath, name)
+        if len(os.listdir(fpath)):
+            self.tree.SetItemHasChildren(node)
+
+        self.tree.SetPyData(node, {'path' : fpath})
         self.tree.SetItemImage(node, self.icons['folder'],
                                wx.TreeItemIcon_Normal)
         self.tree.SetItemImage(node, self.icons['folder-open'],
                                wx.TreeItemIcon_Expanded)
+
         return node
 
     def addFile(self, parent, name):
@@ -1565,11 +1576,11 @@ class ProjectTree(wx.Panel):
         path = self.tree.GetPyData(node)['path']
         if not os.path.isdir(path):
             path = os.path.dirname(path)
-        newpath = os.path.join(path, 'untitled folder')
+        newpath = os.path.join(path, _("Untitled Folder"))
         i = 1
         while os.path.exists(newpath):
-            newpath = re.sub(r'-\d+$', r'', newpath)
-            newpath += '-%d' % i
+            newpath = re.sub(u'-\d+$', u'', newpath)
+            newpath += u'-%d' % i
             i += 1
             #print newpath
         #print newpath
