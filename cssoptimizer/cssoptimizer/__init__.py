@@ -45,8 +45,8 @@ class CssOptimizer(plugin.Plugin):
         """
         stc = txt_ctrl
         eol = stc.GetEOLChar()
-        if stc.GetLexer() == wx.stc.STC_LEX_CSS or \
-           (len(stc.filename) > 3 and stc.filename[-3:] == "css"):
+        fname = stc.GetFileName()
+        if stc.GetLexer() == wx.stc.STC_LEX_CSS or fname.endswith(".css"):
             # Optimize the text
             lines = [stc.GetLine(x) for x in xrange(stc.GetLineCount()+1)]
 
