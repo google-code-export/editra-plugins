@@ -9,7 +9,7 @@
 # Plugin Metadata
 """Generate optimized Css code"""
 __author__ = "Cody Precord"
-__version__ = "0.3"
+__version__ = "0.4"
 
 #-----------------------------------------------------------------------------#
 # Imports
