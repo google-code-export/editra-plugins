@@ -216,9 +216,9 @@ class SVN(SourceControl):
                 output.append(None)
         return output
         
-    @property
     def salt(self):
         return '"\x17\x9f/D\xcf'
+    salt = property(salt)
 
 #-----------------------------------------------------------------------------#
 if __name__ == '__main__':
