@@ -41,7 +41,22 @@ import types
 import fnmatch
 import subprocess
 import sys
-import wx
+try: import wx
+except: pass
+
+try: sorted
+except:
+    def sorted(arr):
+        arr = list(arr)
+        arr.sort()
+        return arr
+
+try: reversed
+except:
+    def reversed(arr):
+        arr = list(arr)
+        arr.reverse()
+        return arr
 
 #-----------------------------------------------------------------------------#
 
@@ -200,7 +215,7 @@ class SourceControl(object):
         self.log('%s %s %s\n' % (directory, self.command, ' '.join(options)))
         environ = os.environ.copy()
         # Add repository settings        
-        environ.update(self.getRepositorySettings(directory)['env'])
+        environ.update(self.getRepositorySettings(directory).get('env', {}))
         # Merge passed in environment
         environ.update(env)
         try:
@@ -277,7 +292,7 @@ class SourceControl(object):
         """Log output either to Editra's log or stdout"""
         try:
             wx.GetApp().GetLog()('[projects]' + s)
-        except AttributeError:
+        except:
             sys.stdout.write(s)
 
     def logOutput(self, p, close=True):
@@ -288,9 +303,10 @@ class SourceControl(object):
         flush = write = None
         try: 
             write = wx.GetApp().GetLog()
-        except AttributeError: 
+        except:
             write = sys.stdout.write
-            flush = sys.stdout.flush
+            try: flush = sys.stdout.flush
+            except AttributeError: pass
 
         while write:
             err = out = None

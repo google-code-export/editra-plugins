@@ -105,7 +105,7 @@ class CVS(SourceControl):
             history = []
         root, files = self.splitFiles(paths)
         for i, fname in enumerate(files):
-            rep = open(os.path.join(root, 'CVS', 'Repository')).read().strip()
+            rep = open(os.path.join(root, 'CVS', 'Repository')).read().strip().replace('/', os.sep)
             files[i] = os.path.join(rep, fname)
 
         for fname in files:
@@ -247,7 +247,7 @@ class CVS(SourceControl):
                 continue
             root, files = self.splitFiles(path)
             for i, fname in enumerate(files):
-                rep = open(os.path.join(root, 'CVS', 'Repository')).read().strip()
+                rep = open(os.path.join(root, 'CVS', 'Repository')).read().strip().replace('/', os.sep)
                 files[i] = os.path.join(rep, fname)
                 
             options = []
