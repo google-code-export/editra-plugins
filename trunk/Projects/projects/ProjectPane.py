@@ -1301,7 +1301,15 @@ class ProjectTree(wx.Panel):
             if fnmatch.fnmatchcase(name, pattern):
                 return
 
-        data = self.tree.GetPyData(parent)
+        # On Windows (again...) this can for some reason cause an assertion
+        # under certain conditions such as running an svn update from an
+        # external program.
+        # TODO: find real cause for these issues instead of just trapping them
+        try:
+            data = self.tree.GetPyData(parent)
+        except wx.PyAssertionError:
+            data = None
+
         if data is None:
             return
 
