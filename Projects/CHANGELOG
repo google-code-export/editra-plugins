@@ -5,6 +5,16 @@ License: wxWindows
 Changelog:
 
 #-----------------------------------------------------------------------------#
+Version 0.7
+Released: 0x/xx/2008
+
+New:
++Add shortcut for dismising History Window
+
+Bug Fixes:
++Fix more tree control related bugs on windows
+
+#-----------------------------------------------------------------------------#
 Version: 0.6
 Released: 08/05/2008
 
