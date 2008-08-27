@@ -579,7 +579,9 @@ class ProjectTree(wx.Panel):
         """ Get paths associated with selected items """
         paths = []
         for item in self.getSelectedNodes():
-            paths.append(self.tree.GetPyData(item)['path'])
+            pdata = self.tree.GetPyData(item)
+            if pdata is not None:
+                paths.append(pdata['path'])
         return paths
 
     def OnMainWindowExit(self, evt):
