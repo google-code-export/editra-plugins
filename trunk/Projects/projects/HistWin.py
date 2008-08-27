@@ -64,6 +64,11 @@ class HistoryWindow(wx.Frame):
                           style=wx.DEFAULT_DIALOG_STYLE)
 
         # Set Frame Icon
+        if wx.Platform == '__WXMAC__':
+            self._accel = wx.AcceleratorTable([(wx.ACCEL_CMD, ord('W'), wx.ID_CLOSE)])
+        else:
+            self._accel = wx.AcceleratorTable([(wx.ACCEL_CTRL, ord('W'), wx.ID_CLOSE)])
+        self.SetAcceleratorTable(self._accel)
         if util is not None:
             util.SetWindowIcon(self)
 
@@ -79,6 +84,7 @@ class HistoryWindow(wx.Frame):
         # Event Handlers
         self.Bind(wx.EVT_CLOSE, self.OnClose)
         self.Bind(wx.EVT_CONTEXT_MENU, self.OnContextMenu)
+        self.Bind(wx.EVT_MENU, lambda evt: self.Close(), id=wx.ID_CLOSE)
 
     def _DoLayout(self):
         """Layout the controls"""
