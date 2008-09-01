@@ -48,7 +48,6 @@ class DiffWindow(wx.Frame):
         self._book = DiffBook(self, files)
         sizer.Add(self._book, 1, wx.EXPAND)
         self.SetSizer(sizer)
-#         self.SetInitialSize()
 
     def OpenDiffs(self, flist):
         """Open a list of diffed files

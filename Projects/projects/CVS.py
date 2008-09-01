@@ -168,21 +168,21 @@ class CVS(SourceControl):
         root, files = self.splitFiles(paths)
         out = self.run(root, ['status', '-l'] + rec + files, mergeerr=True)
         if out:
-            status_re = re.compile(r'^File:\s+(\S+)\s+Status:\s+(.+?)\s*$')        
+            status_re = re.compile(r'^File:\s+(\S+|.+)\s+Status:\s+(.+)\s*$')        
             rep_re = re.compile(r'^\s*Working revision:\s*(\S+)')        
             rrep_re = re.compile(r'^\s*Repository revision:\s*(\S+)')        
             tag_re = re.compile(r'^\s*Sticky Tag:\s*(\S+)')        
             date_re = re.compile(r'^\s*Sticky Date:\s*(\S+)')        
             options_re = re.compile(r'^\s*Sticky Options:\s*(\S+)')
             directory_re = re.compile(r'^cvs server: Examining (\S+)')
-            dir = ''        
+            fdir = ''        
             for line in out.stdout:
                 self.log(line)
                 if status_re.match(line):
                     m = status_re.match(line)
                     key, value = m.group(1), m.group(2) 
-                    if dir and dir != '.':
-                        key = os.path.join(dir, key)
+                    if fdir and fdir != '.':
+                        key = os.path.join(fdir, key)
                     value = value.replace('-','').replace(' ','').lower()
                     current = status[key] = {}
                     if 'modified' in value:
@@ -198,7 +198,7 @@ class CVS(SourceControl):
                     elif 'merge' in value:
                         current['status'] = 'merge'
                 elif directory_re.match(line):
-                    dir = directory_re.match(line).group(1)
+                    fdir = directory_re.match(line).group(1)
                 elif rep_re.match(line):
                     current['revision'] = rep_re.match(line).group(1)
                 elif rrep_re.match(line):
