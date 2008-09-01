@@ -1306,7 +1306,8 @@ class ProjectTree(wx.Panel):
 
         # Popup the menu.  If an item is selected then its handler
         # will be called before PopupMenu returns.
-        self.PopupMenu(menu)
+        self._menu = menu
+        self.PopupMenu(self._menu)
 
     def onPopupNewFolder(self):
         """ Create a new folder from popup menu selection """
