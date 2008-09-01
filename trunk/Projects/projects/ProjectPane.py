@@ -244,9 +244,6 @@ class ProjectTree(wx.Panel):
         # Threads that watch directories corresponding to open folders
         self.watchers = {}
 
-        # Temporary directory for all working files
-        self.tempdir = None
-
         # Information for copy/cut/paste of files
         self.clipboard = {'files' : [], 'delete' : False}
 
@@ -305,11 +302,6 @@ class ProjectTree(wx.Panel):
         # Kill all watcher threads
         for value in self.watchers.values():
             value.pop()
-
-        # Clean up tempdir
-        if self.tempdir:
-            shutil.rmtree(self.tempdir, ignore_errors=True)
-        diffwin.CleanupTempFiles()
 
     def _setupIcons(self):
         """ Setup the icons used by the tree and menus """
@@ -786,11 +778,10 @@ class ProjectTree(wx.Panel):
                                           _("Enter your commit message:"),
                                           paths)
 
-            if ted.ShowModal() != wx.ID_OK:
-                ted.Destroy()
-                return
+            msg = u''
+            if ted.ShowModal() == wx.ID_OK:
+                message = ted.GetValue().strip()
 
-            message = ted.GetValue().strip()
             ted.Destroy()
             if message:
                 break
