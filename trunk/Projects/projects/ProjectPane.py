@@ -70,7 +70,6 @@ import re
 import subprocess
 import shutil
 import wx.lib.delayedresult
-import diffwin
 
 # Local Imports
 import ConfigDialog
@@ -84,17 +83,17 @@ import ProjCmnDlg
 try:
     import ed_msg
     import profiler
-    eol = profiler.Profile_Get('EOL')
-    if 'Unix' in eol:
-        eol = '\n'
-    elif 'Windows' in eol:
-        eol = '\r\n'
+    EOL = profiler.Profile_Get('EOL')
+    if 'Unix' in EOL:
+        EOL = '\n'
+    elif 'Windows' in EOL:
+        EOL = '\r\n'
     else:
-        eol = '\r'
+        EOL = '\r'
 except ImportError:
     profiler = None
     ed_msg = None
-    eol = '\n'
+    EOL = '\n'
 
 # Configure Platform specific commands
 if wx.Platform == '__WXMAC__': # MAC
@@ -151,6 +150,13 @@ def getFileTypes():
 ID_PROJECTPANE = wx.NewId()
 ID_PROJECTTREE = wx.NewId()
 
+def UnusedArg(*args):
+    """Dummy method to signify unused arguments
+    @param arg: anything
+
+    """
+    return len(args)
+
 #-----------------------------------------------------------------------------#
 
 class SimpleEvent(wx.PyCommandEvent):
@@ -173,21 +179,21 @@ class SyncNodesEvent(SimpleEvent):
 
 class MyTreeCtrl(wx.TreeCtrl):
     """Base class used for displaying the project files"""
-    def __init__(self, parent, id, pos, size, style, log):
+    def __init__(self, parent, id_, pos, size, style, log):
         """ Create the tree control for viewing the projects """
-        wx.TreeCtrl.__init__(self, parent, id, pos, size, style)
+        wx.TreeCtrl.__init__(self, parent, id_, pos, size, style)
         self.log = log
 
     def OnCompareItems(self, item1, item2):
         """Compare the text of two tree items"""
-        t1 = (int(not(os.path.isdir(self.GetPyData(item1)['path']))),
+        tup1 = (int(not(os.path.isdir(self.GetPyData(item1)['path']))),
               self.GetItemText(item1).lower())
-        t2 = (int(not(os.path.isdir(self.GetPyData(item2)['path']))),
+        tup2 = (int(not(os.path.isdir(self.GetPyData(item2)['path']))),
               self.GetItemText(item2).lower())
         #self.log.WriteText('compare: ' + t1 + ' <> ' + t2 + '\n')
-        if t1 < t2:
+        if tup1 < tup2:
             return -1
-        elif t1 == t2:
+        elif tup1 == tup2:
             return 0
         else:
             return 1
@@ -202,7 +208,6 @@ class ProjectTree(wx.Panel):
         wx.Panel.__init__(self, parent, -1,
                           style=wx.WANTS_CHARS|wx.SUNKEN_BORDER)
 
-        self.Bind(wx.EVT_SIZE, self.OnSize)
         self.log = log
         tID = wx.NewId()
 
@@ -250,6 +255,7 @@ class ProjectTree(wx.Panel):
                                 wx.TreeItemIcon_Expanded)
 
         # Bind events
+        self.Bind(wx.EVT_SIZE, self.OnSize)
         self.Bind(wx.EVT_TREE_ITEM_EXPANDING, self.OnItemExpanding, self.tree)
         self.Bind(wx.EVT_TREE_ITEM_COLLAPSED, self.OnItemCollapsed, self.tree)
         #self.Bind(wx.EVT_TREE_SEL_CHANGED, self.OnSelChanged, self.tree)
@@ -263,14 +269,12 @@ class ProjectTree(wx.Panel):
 
         # Notebook syncronization
         try:
-            import ed_event
             import extern.flatnotebook as fnb
             #self.Bind(fnb.EVT_FLATNOTEBOOK_PAGE_CHANGING,
-            mw = self.GetGrandParent()
-            nb = mw.GetNotebook()
-            nb.Bind(fnb.EVT_FLATNOTEBOOK_PAGE_CHANGED, self.OnPageChanged)
-            nb.Bind(fnb.EVT_FLATNOTEBOOK_PAGE_CLOSING, self.OnPageClosing)
-            mw.Bind(ed_event.EVT_MAINWINDOW_EXIT, self.OnMainWindowExit)
+            mainw = self.GetGrandParent()
+            nbook = mainw.GetNotebook()
+            nbook.Bind(fnb.EVT_FLATNOTEBOOK_PAGE_CHANGED, self.OnPageChanged)
+            nbook.Bind(fnb.EVT_FLATNOTEBOOK_PAGE_CLOSING, self.OnPageClosing)
             ed_msg.Subscribe(self.OnThemeChange, ed_msg.EDMSG_THEME_CHANGED)
             if hasattr(ed_msg, 'EDMSG_DSP_FONT'):
                 ed_msg.Subscribe(self.OnUpdateFont, ed_msg.EDMSG_DSP_FONT)
@@ -381,10 +385,10 @@ class ProjectTree(wx.Panel):
     def loadProjects(self):
         """ Add all projects from config to tree """
         projects = self.config.getProjects()
-        for name, path in sorted([(os.path.basename(x), x) for x in projects.keys()]):
+        for path in sorted(projects.keys()):
             self.addProject(path, options=projects[path], save=False)
 
-    def addProject(self, path, options={}, save=True):
+    def addProject(self, path, options=dict(), save=True):
         """
         Add a project for the given path
 
@@ -457,6 +461,7 @@ class ProjectTree(wx.Panel):
         """
         if not parent.IsOk():
             return
+
         child, cookie = self.tree.GetFirstChild(parent)
         if not child or not child.IsOk():
             return
@@ -533,6 +538,7 @@ class ProjectTree(wx.Panel):
         from Editra's preference dialog.
 
         """
+        UnusedArg(msg)
         self._setupIcons()
         self.tree.Refresh()
 
@@ -554,10 +560,6 @@ class ProjectTree(wx.Panel):
             if pdata is not None:
                 paths.append(pdata['path'])
         return paths
-
-    def OnMainWindowExit(self, evt):
-        """ Shutdown threads when main window closes """
-        evt.Skip()
 
     def OnPageClosing(self, evt):
         """ Notebook tab was closed """
@@ -588,13 +590,13 @@ class ProjectTree(wx.Panel):
             return
 
         for project in self.getChildren(self.root):
-            dir = path = self.tree.GetPyData(project)['path']
-            if not os.path.isdir(dir):
-                dir = os.path.dirname(dir)
-            if not dir.endswith(os.sep):
-                dir += os.sep
-            if filename.startswith(dir):
-                filename = filename[len(dir):].split(os.sep)
+            dname = self.tree.GetPyData(project)['path']
+            if not os.path.isdir(dname):
+                dname = os.path.dirname(dname)
+            if not dname.endswith(os.sep):
+                dname += os.sep
+            if filename.startswith(dname):
+                filename = filename[len(dname):].split(os.sep)
                 if not self.tree.IsExpanded(project):
                     self.tree.Expand(project)
                 folder = project
@@ -617,8 +619,7 @@ class ProjectTree(wx.Panel):
 
     def OnRightDown(self, event):
         """Select tree item on mouse button right down event"""
-        pt = event.GetPosition()
-        item, flags = self.tree.HitTest(pt)
+        item  = self.tree.HitTest(event.GetPosition())[0]
         if item:
             self.log.WriteText("OnRightClick: %s, %s, %s\n" %
                                (self.tree.GetItemText(item),
@@ -627,8 +628,7 @@ class ProjectTree(wx.Panel):
 
     def OnRightUp(self, event):
         """Enable label editing with right clicks"""
-        pt = event.GetPosition()
-        item, flags = self.tree.HitTest(pt)
+        item = self.tree.HitTest(event.GetPosition())[0]
         if item:
             self.log.WriteText("OnRightUp: %s (manually starting label edit)\n"
                                % self.tree.GetItemText(item))
@@ -637,11 +637,13 @@ class ProjectTree(wx.Panel):
     def OnBeginEdit(self, event):
         """Begin editing of tree item"""
         self.log.WriteText("OnBeginEdit\n")
+        event.Skip()
 
     def OnEndEdit(self, event):
         """ Finish editing tree node label """
         if event.IsEditCancelled():
             return
+
         node = event.GetItem()
         data = self.tree.GetPyData(node)
         path = data['path']
@@ -659,10 +661,8 @@ class ProjectTree(wx.Panel):
 
     def OnLeftDClick(self, event):
         """Handle mouse events and update tree"""
-        pt = event.GetPosition()
-        item, flags = self.tree.HitTest(pt)
+        item  = self.tree.HitTest(event.GetPosition())[0]
         if item:
-            self.log.WriteText("OnLeftDClick: %s\n" % self.tree.GetItemText(item))
             parent = self.tree.GetItemParent(item)
             if parent.IsOk():
                 self.tree.SortChildren(parent)
@@ -670,6 +670,7 @@ class ProjectTree(wx.Panel):
 
     def OnSize(self, event):
         """Reset Tree dimensions"""
+        UnusedArg(event)
         width, height = self.GetClientSizeTuple()
         self.tree.SetDimensions(0, 0, width, height)
 
@@ -682,11 +683,11 @@ class ProjectTree(wx.Panel):
         if not parent:
             return
 
-        vars = self.tree.GetPyData(parent)
-        if not vars:
+        data = self.tree.GetPyData(parent)
+        if not data:
             return
 
-        path = vars['path']
+        path = data['path']
         if not os.path.isdir(path):
             return
         try:
@@ -743,7 +744,7 @@ class ProjectTree(wx.Panel):
             win = HistoryWindow(self, data['path'], node, data)
             win.Show()
 
-    def scCommit(self, nodes, **options):
+    def scCommit(self, nodes):
         """ Commit files to source control """
         if not self.isSingleRepository(nodes):
             return
@@ -768,7 +769,7 @@ class ProjectTree(wx.Panel):
                                           _("Enter your commit message:"),
                                           paths)
 
-            msg = u''
+            message = u''
             if ted.ShowModal() == wx.ID_OK:
                 message = ted.GetValue().strip()
 
@@ -783,9 +784,8 @@ class ProjectTree(wx.Panel):
         self.scCommand(nodes, 'makePatch', callback=self.openPatches)
 
     def openPatches(self, results):
-        """Open the patches in Editra's notebook by posting EVT_OPEN_BUFFER to
-        the main thread as this may get called on a thread that is not the main
-        gui thread.
+        """Open the patches in Editra's notebook this method is called as
+        a callback from the ScCommand worker thread.
         Parameter -- results list of tuples [(filename, patch text)]
 
         """
@@ -813,7 +813,7 @@ class ProjectTree(wx.Panel):
             paths.append(path)
 
         if not self.srcCtrl.IsSingleRepository(paths):
-            dlg = wx.MessageDB(self,
+            dlg = wx.MessageDialog(self,
                _('You can not execute source control commands across multiple repositories.'),
                _('Selected files are from multiple repositories'),
                style=wx.OK|wx.ICON_ERROR)
@@ -937,20 +937,23 @@ class ProjectTree(wx.Panel):
         return updates
 
     def OpenPatchBuffer(self, patch):
-        """ Opening patch texts in a new buffer in Editra """
+        """ Opening patch texts in a new buffer in Editra
+        @param patches: patch (string)
+
+        """
         # The event value holds the text
-        mw = self.GetParent().GetOwnerWindow()
-        if hasattr(mw, 'GetNotebook'):
-            nb = mw.GetNotebook()
-            nb.NewPage()
-            ctrl = nb.GetCurrentCtrl()
+        mainw = self.GetParent().GetOwnerWindow()
+        if hasattr(mainw, 'GetNotebook'):
+            nbook = mainw.GetNotebook()
+            nbook.NewPage()
+            ctrl = nbook.GetCurrentCtrl()
             ctrl.SetText(patch)
             ctrl.FindLexer('diff')
-        else:
-            self.log
 
     def OnScCommandFinish(self, evt):
         """ Stops progress indicator when source control command is finished """
+        UnusedArg(evt)
+
         try:
             self.GetParent().StopBusy()
         except wx.PyDeadObjectError:
@@ -960,6 +963,7 @@ class ProjectTree(wx.Panel):
 
     def endPaste(self, delayedresult):
         """ Stops progress indicator when paste is finished """
+        UnusedArg(delayedresult)
         try:
             self.GetParent().StopBusy()
         except wx.PyDeadObjectError:
@@ -1146,6 +1150,7 @@ class ProjectTree(wx.Panel):
     def OnContextMenu(self, event):
         """ Handle showing context menu to show the commands """
         #self.log.WriteText("OnContextMenu\n")
+        UnusedArg(event)
 
         # only do this part the first time so the events are only bound once
         #
@@ -1276,13 +1281,17 @@ class ProjectTree(wx.Panel):
             (None, None, None, None),
             #(self.popupIDRename, _('Rename'), None, True),
             #(None, None, None, None),
-            (self.popupIDSCRefresh, _("Refresh status"), 'sc-status', scenabled),
+            (self.popupIDSCRefresh, _("Refresh status"),
+            'sc-status', scenabled),
             (self.popupIDSCUpdate, _("Update"), 'sc-update', scenabled),
-            (self.popupIDSCDiff, _("Compare to previous version"), 'sc-diff', scenabled),
-            (self.popupIDSCHistory, _("Show revision history"), 'sc-history', scenabled),
+            (self.popupIDSCDiff, _("Compare to previous version"),
+            'sc-diff', scenabled),
+            (self.popupIDSCHistory, _("Show revision history"),
+             'sc-history', scenabled),
             (self.popupIDSCCommit, _("Commit changes"), 'sc-commit', scenabled),
             (self.popupIDSCPatch, _("Make Patch"), 'sc-patch', scenabled),
-            (self.popupIDSCRevert, _("Revert to repository version"), 'sc-revert', scenabled),
+            (self.popupIDSCRevert, _("Revert to repository version"),
+             'sc-revert', scenabled),
             addremove,
             (None, None, None, None),
             (self.popupIDDelete, _("Move to " + TRASH), 'delete', True),
@@ -1340,9 +1349,6 @@ class ProjectTree(wx.Panel):
         if len(nodes):
             node = nodes[0]
         else:
-            # Do nothing
-            # XXX: should we prompt a nag dialog to the the user to make
-            #      sure they have selected a node to put the new file under?
             return
 
         path = self.tree.GetPyData(node)['path']
@@ -1368,9 +1374,9 @@ class ProjectTree(wx.Panel):
             i += 1
 
         # Write template info
-        f = open(newpath, 'w')
-        f.write(info.get('template', '').replace('\n', eol))
-        f.close()
+        f_handle = open(newpath, 'w')
+        f_handle.write(info.get('template', '').replace('\n', EOL))
+        f_handle.close()
 
     def onPopupEdit(self, event):
         """ Open the current file in the editor """
@@ -1446,6 +1452,7 @@ class ProjectTree(wx.Panel):
             dest = os.path.dirname(dest)
 
         def run(dest):
+            """Run the paste job"""
             delete = self.clipboard['delete']
             self.clipboard['delete'] = False
             newclipboard = []
@@ -1486,6 +1493,10 @@ class ProjectTree(wx.Panel):
 
     def onPopupDelete(self, event):
         """ Delete selected files/directories """
+        if event.GetId() != self.popupIDDelete:
+            event.Skip()
+            return
+
         projects = self.getChildren(self.root)
         selections = [(x, self.tree.GetPyData(x)['path'])
                       for x in self.getSelectedNodes()]
@@ -1522,32 +1533,34 @@ class ProjectTree(wx.Panel):
         the notebook.
 
         """
+        UnusedArg(event)
+
         files = []
         for node in self.getSelectedNodes():
             fname = self.tree.GetPyData(node)['path']
             try:
-                st = os.stat(fname)[0]
-                if stat.S_ISDIR(st):
+                status = os.stat(fname)[0]
+                if stat.S_ISDIR(status):
                     if self.tree.IsExpanded(node):
                         self.tree.Collapse(node)
                     else:
                         self.tree.Expand(node)
-                elif stat.S_ISREG(st) or stat.S_ISLNK(st):
+                elif stat.S_ISREG(status) or stat.S_ISLNK(status):
                     files.append(fname)
             except (IOError, OSError):
                 pass
 
-        nb = self.GetParent().GetOwnerWindow().GetNotebook()
+        nbook = self.GetParent().GetOwnerWindow().GetNotebook()
 
         for item in files:
-            if nb.HasFileOpen(item):
-                for page in xrange(nb.GetPageCount()):
-                    ctrl = nb.GetPage(page)
+            if nbook.HasFileOpen(item):
+                for page in xrange(nbook.GetPageCount()):
+                    ctrl = nbook.GetPage(page)
                     if item == ctrl.GetFileName():
-                        nb.ChangePage(page)
+                        nbook.ChangePage(page)
                         break
             else:
-                nb.OnDrop([item])
+                nbook.OnDrop([item])
 
     def watchDirectory(self, path, data=None, flag=True, delay=2):
         """
@@ -1618,19 +1631,19 @@ class ProjectPane(wx.Panel):
     ID_PROJECTS = wx.NewId()
     PANE_NAME = u'Projects'
 
-    def __init__(self, parent, id=ID_PROJECTPANE, pos=wx.DefaultPosition,
+    def __init__(self, parent, id_=ID_PROJECTPANE, pos=wx.DefaultPosition,
                  size=wx.DefaultSize, style=wx.NO_BORDER):
-        wx.Panel.__init__(self, parent, id, pos, size, style)
+        wx.Panel.__init__(self, parent, id_, pos, size, style)
 
         # Attributes
         self._mw = parent       # Save ref to owner window
         try:
             import ed_glob
-            mb = self._mw.GetMenuBar()
-            vm = mb.GetMenuByName("view")
-            vm.InsertAlpha(ProjectPane.ID_PROJECTS, _("Projects"),
-                           _("Open Projects Sidepanel"),
-                           wx.ITEM_CHECK, after=ed_glob.ID_PRE_MARK)
+            menub = self._mw.GetMenuBar()
+            viewm = menub.GetMenuByName("view")
+            viewm.InsertAlpha(ProjectPane.ID_PROJECTS, _("Projects"),
+                              _("Open Projects Sidepanel"),
+                              wx.ITEM_CHECK, after=ed_glob.ID_PRE_MARK)
         except ImportError:
             ed_glob = None
 
@@ -1708,8 +1721,8 @@ class ProjectPane(wx.Panel):
 
     def OnPaint(self, evt):
         """Paint the button area of the panel with a gradient"""
-        dc = wx.PaintDC(self)
-        gc = wx.GraphicsContext.Create(dc)
+        drawc = wx.PaintDC(self)
+        graphc = wx.GraphicsContext.Create(drawc)
 
         # Get some system colors
         col1 = wx.SystemSettings_GetColour(wx.SYS_COLOUR_3DFACE)
@@ -1717,17 +1730,17 @@ class ProjectPane(wx.Panel):
         col1 = AdjustColour(col1, -20)
 
         rect = self.GetRect()
-        grad = gc.CreateLinearGradientBrush(0, 1, 0,
-                                            self.buttonbox.GetSize()[1],
-                                            col2, col1)
-        gc.SetBrush(grad)
+        grad = graphc.CreateLinearGradientBrush(0, 1, 0,
+                                                self.buttonbox.GetSize()[1],
+                                                col2, col1)
+        graphc.SetBrush(grad)
 
         # Create the background path
-        path = gc.CreatePath()
+        path = graphc.CreatePath()
         path.AddRectangle(0, 0, rect.width - 0.5, rect.height - 0.5)
 
-        gc.SetPen(wx.Pen(AdjustColour(col1, -10), 1))
-        gc.DrawPath(path)
+        graphc.SetPen(wx.Pen(AdjustColour(col1, -10), 1))
+        graphc.DrawPath(path)
 
         evt.Skip()
 
@@ -1775,6 +1788,7 @@ class ProjectPane(wx.Panel):
     def OnTick(self, evt):
         """Pulse the indicator on every tick of the clock"""
         self.busy.Pulse()
+        UnusedArg(evt)
 
     def StartBusy(self):
         """Show and start the busy indicator"""
