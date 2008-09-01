@@ -8,10 +8,8 @@
 ###############################################################################
 
 """
-FILE: HistWin.py
-AUTHOR: Cody Precord
-LANGUAGE: Python
-SUMMARY:
+History Window
+
 Provides a revision history window that shows the list of revisions
 for a specific file and its related log entries. The window also
 provides interactive searching/filtering of revision entries by searching
@@ -35,10 +33,9 @@ import ScCommand
 import ProjCmnDlg
 
 # Editra Library Imports
-try:
-    import util
-except ImportError:
-    util = None
+import util
+import eclib.pstatbar as pstatbar
+import eclib.elistmix as elistmix
 
 _ = wx.GetTranslation
 #--------------------------------------------------------------------------#
@@ -73,12 +70,12 @@ class HistoryWindow(wx.Frame):
         else:
             self._accel = wx.AcceleratorTable([(wx.ACCEL_CTRL, ord('W'), wx.ID_CLOSE)])
         self.SetAcceleratorTable(self._accel)
-
-        if util is not None:
-            util.SetWindowIcon(self)
+        util.SetWindowIcon(self)
 
         # Attributes
-        self.SetStatusBar(HistoryStatusBar(self))
+        statbar = pstatbar.ProgressStatusBar(self)
+        statbar.SetStatusWidths([-1, 125])
+        self.SetStatusBar(statbar)
         self._ctrls = HistoryPane(self, node, data)
 
         # Layout
@@ -125,73 +122,6 @@ class HistoryWindow(wx.Frame):
         """Start the window as busy"""
         self.SetStatusText(u"", SB_INFO)
         wx.CallAfter(self.GetStatusBar().StopBusy)
-
-#-----------------------------------------------------------------------------#
-
-class HistoryStatusBar(wx.StatusBar):
-    """Custom status bar for history window to show when its busy"""
-    def __init__(self, parent):
-        wx.StatusBar.__init__(self, parent)
-
-        # Attributes
-        self._changed = False
-        self.timer = wx.Timer(self)
-        self.prog = wx.Gauge(self, style=wx.GA_HORIZONTAL)
-        self.prog.Hide()
-
-        # Layout
-        self.SetFieldsCount(2)
-        self.SetStatusWidths([-1, 125])
-
-        # Event Handlers
-        self.Bind(wx.EVT_TIMER, self.OnTick)
-        self.Bind(wx.EVT_SIZE, self.OnSize)
-        self.Bind(wx.EVT_IDLE, self.OnIdle)
-
-    def __del__(self):
-        """Make sure the timer is stopped"""
-        if self.timer.IsRunning():
-            self.timer.Stop()
-
-    def Destroy(self):
-        """Cleanup timer"""
-        if self.timer.IsRunning():
-            self.timer.Stop()
-        del self.timer
-        wx.StatusBar.Destroy(self)
-
-    def OnIdle(self, evt):
-        """Reposition progress bar as necessary on moves, ect..."""
-        if self._changed:
-            self.Reposition()
-        evt.Skip()
-
-    def OnSize(self, evt):
-        """Reposition progress bar on resize"""
-        self.Reposition()
-        self._changed = True
-        evt.Skip()
-
-    def OnTick(self, evt):
-        """Update progress bar"""
-        self.prog.Pulse()
-
-    def Reposition(self):
-        """Move the progress bar to proper location"""
-        rect = self.GetFieldRect(1)
-        self.prog.SetPosition((rect.x+2, rect.y+2))
-        self.prog.SetSize((rect.width-4, rect.height-4))
-        self._changed = False
-
-    def StartBusy(self):
-        """Start the timer"""
-        self.prog.Show()
-        self.timer.Start(100)
-
-    def StopBusy(self):
-        """Stop the timer"""
-        self.prog.Hide()
-        self.timer.Stop()
 
 #-----------------------------------------------------------------------------#
 
@@ -286,11 +216,8 @@ class HistoryPane(wx.Panel):
             # Check for error in running diff command
             if evt.GetError() == ScCommand.SC_ERROR_RETRIEVAL_FAIL:
                 ProjCmnDlg.RetrievalErrorDlg(self)
-        else:
-            cmd = evt.GetValue()
-            if cmd == 'history':
-                pass
-                #self._list.Populate()
+#        else:
+#            cmd = evt.GetValue()
 
     def getSelectedItems(self):
         """ Get the selected items """
@@ -359,7 +286,8 @@ class HistoryPane(wx.Panel):
 #-----------------------------------------------------------------------------#
 
 class HistList(wx.ListCtrl,
-               listmix.ListCtrlAutoWidthMixin):
+               listmix.ListCtrlAutoWidthMixin,
+               elistmix.ListRowHighlighter):
     """List for displaying a files revision history"""
     REV_COL  = 0
     DATE_COL = 1
@@ -371,7 +299,7 @@ class HistList(wx.ListCtrl,
                              style=wx.LC_REPORT | \
                                    wx.LC_SORT_ASCENDING | \
                                    wx.LC_VRULES)
-
+        elistmix.ListRowHighlighter.__init__(self)
         listmix.ListCtrlAutoWidthMixin.__init__(self)
 
         # Attributes
@@ -435,11 +363,6 @@ class HistList(wx.ListCtrl,
                 self.SetStringItem(index, 2, item['author'])
                 self.SetStringItem(index, 3, item['shortlog'])
 
-            if index % 2:
-                syscolor = wx.SystemSettings_GetColour(wx.SYS_COLOUR_HIGHLIGHT)
-                color = AdjustColour(syscolor, 15)
-                self.SetItemBackgroundColour(index, color)
-
         # We never got to append mode, delete the extras
         if not append:
             for i in range(self.GetItemCount()-1, index, -1):
@@ -459,8 +382,7 @@ class HistList(wx.ListCtrl,
     def Populate(self, data):
         """Populate the list with the history data"""
         self._data = data
-        evt = UpdateItemsEvent(edEVT_UPDATE_ITEMS, -1, data)
-        wx.PostEvent(self, evt)
+        wx.PostEvent(self, UpdateItemsEvent(edEVT_UPDATE_ITEMS, -1, data))
         wx.CallAfter(self._frame.StopBusy)
 
     def Filter(self, query):
