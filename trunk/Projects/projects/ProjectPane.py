@@ -126,6 +126,28 @@ _ = wx.GetTranslation
 
 #-----------------------------------------------------------------------------#
 
+# Context Menu Id's
+ID_POPUP_EDIT = wx.NewId()
+ID_POPUP_OPEN = wx.NewId()
+ID_POPUP_REVEAL = wx.NewId()
+ID_POPUP_CUT = wx.NewId()
+ID_POPUP_COPY = wx.NewId()
+ID_POPUP_PASTE = wx.NewId()
+ID_POPUP_REFRESH = wx.NewId()
+ID_POPUP_DIFF = wx.NewId()
+ID_POPUP_UPDATE = wx.NewId()
+ID_POPUP_HISTORY = wx.NewId()
+ID_POPUP_COMMIT = wx.NewId()
+ID_POPUP_PATCH = wx.NewId()
+ID_POPUP_REMOVE = wx.NewId()
+ID_POPUP_REVERT = wx.NewId()
+ID_POPUP_ADD = wx.NewId()
+ID_POPUP_DELETE = wx.NewId()
+ID_POPUP_RENAME = wx.NewId()
+ID_POPUP_EXEC = wx.NewId()
+ID_POPUP_NFOLDER = wx.NewId()
+ID_POPUP_NMENU = wx.NewId()
+
 # New File Menu Id's
 ID_TXT_FILE = wx.NewId()
 ID_C_FILE = wx.NewId()
@@ -232,6 +254,7 @@ class ProjectTree(wx.Panel):
         self.menuicons = {}
         self.il = None
         self._setupIcons()
+        self._menu = None
 
         # Read configuration
         self.config = ConfigDialog.ConfigData()
@@ -280,6 +303,53 @@ class ProjectTree(wx.Panel):
                 ed_msg.Subscribe(self.OnUpdateFont, ed_msg.EDMSG_DSP_FONT)
         except ImportError:
             pass
+
+        # Setup Context Menu Handlers
+        self.Bind(wx.EVT_MENU, self.onPopupEdit, id=ID_POPUP_EDIT)
+        self.Bind(wx.EVT_MENU,
+                  lambda evt: self.onPopupOpen(), id=ID_POPUP_OPEN)
+        self.Bind(wx.EVT_MENU,
+                  lambda evt: self.onPopupReveal(), id=ID_POPUP_REVEAL)
+        self.Bind(wx.EVT_MENU,
+                  lambda evt: self.onPopupCopy(), id=ID_POPUP_COPY)
+        self.Bind(wx.EVT_MENU,
+                  lambda evt: self.onPopupCut(), id=ID_POPUP_CUT)
+        self.Bind(wx.EVT_MENU,
+                  lambda evt: self.onPopupPaste(), id=ID_POPUP_PASTE)
+        self.Bind(wx.EVT_MENU,
+                  lambda evt: self.scStatus(self.getSelectedNodes()),
+                  id=ID_POPUP_REFRESH)
+        self.Bind(wx.EVT_MENU,
+                  lambda evt: self.onPopupSCDiff(), id=ID_POPUP_DIFF)
+        self.Bind(wx.EVT_MENU,
+                  lambda evt: self.scUpdate(self.getSelectedNodes()),
+                  id=ID_POPUP_UPDATE)
+        self.Bind(wx.EVT_MENU,
+                  lambda evt: self.scHistory(self.getSelectedNodes()),
+                  id=ID_POPUP_HISTORY)
+        self.Bind(wx.EVT_MENU,
+                  lambda evt: self.scCommit(self.getSelectedNodes()),
+                  id=ID_POPUP_COMMIT)
+        self.Bind(wx.EVT_MENU,
+                  lambda evt: self.scPatch(self.getSelectedNodes()),
+                  id=ID_POPUP_PATCH)
+        self.Bind(wx.EVT_MENU,
+                  lambda evt: self.scRemove(self.getSelectedNodes()),
+                  id=ID_POPUP_REMOVE)
+        self.Bind(wx.EVT_MENU,
+                  lambda evt: self.scRevert(self.getSelectedNodes()),
+                  id=ID_POPUP_REVERT)
+        self.Bind(wx.EVT_MENU,
+                  lambda evt: self.scAdd(self.getSelectedNodes()),
+                  id=ID_POPUP_ADD)
+        self.Bind(wx.EVT_MENU, self.onPopupDelete, id=ID_POPUP_DELETE)
+        self.Bind(wx.EVT_MENU,
+                  lambda evt: self.onPopupRename(), id=ID_POPUP_RENAME)
+        self.Bind(wx.EVT_MENU,
+                  lambda evt: self.onPopupExecuteCommand(), id=ID_POPUP_EXEC)
+        self.Bind(wx.EVT_MENU,
+                  lambda evt: self.onPopupNewFolder(), id=ID_POPUP_NFOLDER)
+
 
         self.loadProjects()
 
@@ -1152,88 +1222,10 @@ class ProjectTree(wx.Panel):
         #self.log.WriteText("OnContextMenu\n")
         UnusedArg(event)
 
-        # only do this part the first time so the events are only bound once
-        #
-        # Yet another anternate way to do IDs. Some prefer them up top to
-        # avoid clutter, some prefer them close to the object of interest
-        # for clarity.
-        if not hasattr(self, "popupIDEdit"):
-            self.popupIDEdit = wx.NewId()
-            self.popupIDOpen = wx.NewId()
-            self.popupIDReveal = wx.NewId()
-            self.popupIDCut = wx.NewId()
-            self.popupIDCopy = wx.NewId()
-            self.popupIDPaste = wx.NewId()
-            self.popupIDSCRefresh = wx.NewId()
-            self.popupIDSCDiff = wx.NewId()
-            self.popupIDSCUpdate = wx.NewId()
-            self.popupIDSCHistory = wx.NewId()
-            self.popupIDSCCommit = wx.NewId()
-            self.popupIDSCPatch = wx.NewId()
-            self.popupIDSCRemove = wx.NewId()
-            self.popupIDSCRevert = wx.NewId()
-            self.popupIDSCAdd = wx.NewId()
-            self.popupIDDelete = wx.NewId()
-            self.popupIDRename = wx.NewId()
-            self.popupIDExecuteCommand = wx.NewId()
-            self.popupIDNewFolder = wx.NewId()
-            self.popupIDNewFile = wx.NewId()
-            self.popupIDNewMenu = wx.NewId()
-
-            # Setup handlers
-            self.Bind(wx.EVT_MENU, self.onPopupEdit, id=self.popupIDEdit)
-            self.Bind(wx.EVT_MENU,
-                      lambda evt: self.onPopupOpen(),
-                      id=self.popupIDOpen)
-            self.Bind(wx.EVT_MENU,
-                      lambda evt: self.onPopupReveal(),
-                      id=self.popupIDReveal)
-            self.Bind(wx.EVT_MENU,
-                      lambda evt: self.onPopupCopy(),
-                      id=self.popupIDCopy)
-            self.Bind(wx.EVT_MENU,
-                      lambda evt: self.onPopupCut(),
-                      id=self.popupIDCut)
-            self.Bind(wx.EVT_MENU,
-                      lambda evt: self.onPopupPaste(),
-                      id=self.popupIDPaste)
-            self.Bind(wx.EVT_MENU,
-                      lambda evt: self.scStatus(self.getSelectedNodes()),
-                      id=self.popupIDSCRefresh)
-            self.Bind(wx.EVT_MENU,
-                      lambda evt: self.onPopupSCDiff(),
-                      id=self.popupIDSCDiff)
-            self.Bind(wx.EVT_MENU,
-                      lambda evt: self.scUpdate(self.getSelectedNodes()),
-                      id=self.popupIDSCUpdate)
-            self.Bind(wx.EVT_MENU,
-                      lambda evt: self.scHistory(self.getSelectedNodes()),
-                      id=self.popupIDSCHistory)
-            self.Bind(wx.EVT_MENU,
-                      lambda evt: self.scCommit(self.getSelectedNodes()),
-                      id=self.popupIDSCCommit)
-            self.Bind(wx.EVT_MENU,
-                      lambda evt: self.scPatch(self.getSelectedNodes()),
-                      id=self.popupIDSCPatch)
-            self.Bind(wx.EVT_MENU,
-                      lambda evt: self.scRemove(self.getSelectedNodes()),
-                      id=self.popupIDSCRemove)
-            self.Bind(wx.EVT_MENU,
-                      lambda evt: self.scRevert(self.getSelectedNodes()),
-                      id=self.popupIDSCRevert)
-            self.Bind(wx.EVT_MENU,
-                      lambda evt: self.scAdd(self.getSelectedNodes()),
-                      id=self.popupIDSCAdd)
-            self.Bind(wx.EVT_MENU, self.onPopupDelete, id=self.popupIDDelete)
-            self.Bind(wx.EVT_MENU,
-                      lambda evt: self.onPopupRename(),
-                      id=self.popupIDRename)
-            self.Bind(wx.EVT_MENU,
-                      lambda evt: self.onPopupExecuteCommand(),
-                      id=self.popupIDExecuteCommand)
-            self.Bind(wx.EVT_MENU,
-                      lambda evt: self.onPopupNewFolder(),
-                      id=self.popupIDNewFolder)
+        # Destroy any existing menu
+        if self._menu is not None:
+            self._menu.Destroy()
+            self._menu = None
 
         paths = self.getSelectedPaths()
 
@@ -1251,15 +1243,14 @@ class ProjectTree(wx.Panel):
 
         # Add or remove
         if scenabled:
-            addremove = (self.popupIDSCRemove,
+            addremove = (ID_POPUP_REMOVE,
                          _("Remove from repository"), 'sc-remove', True)
         else:
-            addremove = (self.popupIDSCAdd, _("Add to repository"),
-                         'sc-add', True)
+            addremove = (ID_POPUP_ADD, _("Add to repository"), 'sc-add', True)
 
         # New file / folder submenu
         newmenu = wx.Menu()
-        newmenu.AppendItem(wx.MenuItem(newmenu, self.popupIDNewFolder, _('Folder')))
+        newmenu.AppendItem(wx.MenuItem(newmenu, ID_POPUP_NFOLDER, _('Folder')))
         newmenu.AppendSeparator()
         for menu_id, ftype in getFileTypes().iteritems():
             newmenu.AppendItem(wx.MenuItem(newmenu, menu_id, ftype['lbl']))
@@ -1268,33 +1259,33 @@ class ProjectTree(wx.Panel):
         # make a menu
         menu = wx.Menu()
         items = [
-            (self.popupIDEdit, _('Edit'), None, True),
-            (self.popupIDOpen, _('Open'), None, True),
-            (self.popupIDReveal, _('Open enclosing folder'), None, True),
-            (self.popupIDNewMenu, _('New...'), newmenu, True),
+            (ID_POPUP_EDIT, _('Edit'), None, True),
+            (ID_POPUP_OPEN, _('Open'), None, True),
+            (ID_POPUP_REVEAL, _('Open enclosing folder'), None, True),
+            (ID_POPUP_NMENU, _('New...'), newmenu, True),
             (None, None, None, None),
-            (self.popupIDCut, _('Cut'), 'cut', True),
-            (self.popupIDCopy, _('Copy'), 'copy', True),
-            (self.popupIDPaste, _('Paste'), 'paste', pastable),
+            (ID_POPUP_CUT, _('Cut'), 'cut', True),
+            (ID_POPUP_COPY, _('Copy'), 'copy', True),
+            (ID_POPUP_PASTE, _('Paste'), 'paste', pastable),
             (None, None, None, None),
-            (self.popupIDExecuteCommand, _('Execute command...'), None, True),
+            (ID_POPUP_EXEC, _('Execute command...'), None, True),
             (None, None, None, None),
-            #(self.popupIDRename, _('Rename'), None, True),
+            #(ID_POPUP_RENAME, _('Rename'), None, True),
             #(None, None, None, None),
-            (self.popupIDSCRefresh, _("Refresh status"),
-            'sc-status', scenabled),
-            (self.popupIDSCUpdate, _("Update"), 'sc-update', scenabled),
-            (self.popupIDSCDiff, _("Compare to previous version"),
+            (ID_POPUP_REFRESH, _("Refresh status"), 'sc-status', scenabled),
+            (ID_POPUP_UPDATE, _("Update"), 'sc-update', scenabled),
+            (ID_POPUP_DIFF, _("Compare to previous version"),
             'sc-diff', scenabled),
-            (self.popupIDSCHistory, _("Show revision history"),
+            (ID_POPUP_HISTORY, _("Show revision history"),
              'sc-history', scenabled),
-            (self.popupIDSCCommit, _("Commit changes"), 'sc-commit', scenabled),
-            (self.popupIDSCPatch, _("Make Patch"), 'sc-patch', scenabled),
-            (self.popupIDSCRevert, _("Revert to repository version"),
+            (ID_POPUP_COMMIT, _("Commit changes"), 'sc-commit', scenabled),
+            (ID_POPUP_PATCH, _("Make Patch"), 'sc-patch', scenabled),
+            (ID_POPUP_REVERT, _("Revert to repository version"),
              'sc-revert', scenabled),
             addremove,
             (None, None, None, None),
-            (self.popupIDDelete, _("Move to " + TRASH), 'delete', True),
+            (ID_POPUP_DELETE, _("Move to %(trash)s") % dict(trash=TRASH),
+             'delete', True),
         ]
         for menu_id, title, icon, enabled in items:
             if menu_id is None:
@@ -1316,7 +1307,6 @@ class ProjectTree(wx.Panel):
         # Popup the menu.  If an item is selected then its handler
         # will be called before PopupMenu returns.
         self.PopupMenu(menu)
-        menu.Destroy()
 
     def onPopupNewFolder(self):
         """ Create a new folder from popup menu selection """
@@ -1493,7 +1483,7 @@ class ProjectTree(wx.Panel):
 
     def onPopupDelete(self, event):
         """ Delete selected files/directories """
-        if event.GetId() != self.popupIDDelete:
+        if event.GetId() != ID_POPUP_DELETE:
             event.Skip()
             return
 
