@@ -169,15 +169,6 @@ class SyncNodesEvent(SimpleEvent):
     """ Event to notify that nodes need updating """
     pass
 
-ppEVT_OPEN_BUFFER = wx.NewEventType()
-EVT_OPEN_BUFFER = wx.PyEventBinder(ppEVT_OPEN_BUFFER, 1)
-class OpenBufferEvent(SimpleEvent):
-    """ Used to communicate to main thread for opening new buffers
-    GetValue will return the text to put in the buffer
-
-    """
-    pass
-
 #-----------------------------------------------------------------------------#
 
 class MyTreeCtrl(wx.TreeCtrl):
@@ -269,7 +260,6 @@ class ProjectTree(wx.Panel):
         self.Bind(EVT_SYNC_NODES, self.OnSyncNode)
         self.Bind(ScCommand.EVT_STATUS, self.OnUpdateStatus)
         self.Bind(ScCommand.EVT_CMD_COMPLETE, self.OnScCommandFinish)
-        self.Bind(EVT_OPEN_BUFFER, self.OnOpenBuffer)
 
         # Notebook syncronization
         try:
@@ -800,8 +790,7 @@ class ProjectTree(wx.Panel):
 
         """
         for result in results:
-            evt = OpenBufferEvent(ppEVT_OPEN_BUFFER, -1, result[1])
-            wx.CallAfter(wx.PostEvent, self, evt)
+            wx.CallAfter(self.OpenPatchBuffer, result[1])
 
     def isSingleRepository(self, nodes):
         """
@@ -947,16 +936,15 @@ class ProjectTree(wx.Panel):
                 #                              status[text]['tag'])))
         return updates
 
-    def OnOpenBuffer(self, evt):
+    def OpenPatchBuffer(self, patch):
         """ Opening patch texts in a new buffer in Editra """
         # The event value holds the text
-        txt = evt.GetValue()
         mw = self.GetParent().GetOwnerWindow()
         if hasattr(mw, 'GetNotebook'):
             nb = mw.GetNotebook()
             nb.NewPage()
             ctrl = nb.GetCurrentCtrl()
-            ctrl.SetText(txt)
+            ctrl.SetText(patch)
             ctrl.FindLexer('diff')
         else:
             self.log
