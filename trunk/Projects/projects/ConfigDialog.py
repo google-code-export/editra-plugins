@@ -547,28 +547,44 @@ class AutoWidthListCtrl(listmix.TextEditMixin,
 
 class ConfigData(dict):
     """ Configuration data storage class """
+    _instance = None
+    _created = False
+
     def __init__(self, data=dict()):
         """ Create the config data object """
-        self['source-control'] = {}
-        self['general'] = {}
-        self['projects'] = {}
+        if not ConfigData._created:
+            self['source-control'] = {}
+            self['general'] = {}
+            self['projects'] = {}
 
-        self.setFilters(sorted(['CVS', 'dntnd', '.DS_Store', '.dpp', '.newpp',
-                                '*~', '*.a', '*.o', '.poem', '.dll', '._*',
-                                '.localized', '.svn', '*.pyc', '*.bak', '#*',
-                                '*.pyo','*%*', '.git', '*.previous', '*.swp',
-                                '.#*', '.bzr']))
-        self.setBuiltinDiff(True)
-        self.setDiffProgram('opendiff')
-        self.setSyncWithNotebook(True)
-        
-        self.addSCSystem(CVS.CVS())
-        self.addSCSystem(SVN.SVN())
-        self.addSCSystem(GIT.GIT())
-        self.addSCSystem(BZR.BZR())
-        
-        self.load()
-    
+            self.setFilters(sorted(['CVS', 'dntnd', '.DS_Store', '.dpp', '.newpp',
+                                    '*~', '*.a', '*.o', '.poem', '.dll', '._*',
+                                    '.localized', '.svn', '*.pyc', '*.bak', '#*',
+                                    '*.pyo','*%*', '.git', '*.previous', '*.swp',
+                                    '.#*', '.bzr']))
+            self.setBuiltinDiff(True)
+            self.setDiffProgram('opendiff')
+            self.setSyncWithNotebook(True)
+            
+            self.addSCSystem(CVS.CVS())
+            self.addSCSystem(SVN.SVN())
+            self.addSCSystem(GIT.GIT())
+            self.addSCSystem(BZR.BZR())
+            
+            self.load()
+            ConfigData._created = True
+        else:
+            pass
+
+    def __new__(cls, *args, **kargs):
+        """Singleton instance
+        @return: instance of this class
+
+        """
+        if cls._instance is None:
+            cls._instance = dict.__new__(cls, *args, **kargs)
+        return cls._instance
+
     @property
     def salt(self):
         return '"\x17\x9f/D\xcf'

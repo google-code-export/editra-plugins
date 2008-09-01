@@ -67,16 +67,19 @@ import threading
 import stat
 import fnmatch
 import re
-import FileIcons
 import subprocess
 import shutil
-import Trash
 import wx.lib.delayedresult
 import diffwin
 
+# Local Imports
 import ConfigDialog
-from HistWin import AdjustColour
+import ScCommand
+import FileIcons
+import Trash
+from HistWin import AdjustColour, HistoryWindow
 
+# Editra Imports
 try:
     import ed_msg
     import profiler
@@ -165,12 +168,6 @@ class SyncNodesEvent(SimpleEvent):
     """ Event to notify that nodes need updating """
     pass
 
-ppEVT_UPDATE_STATUS = wx.NewEventType()
-EVT_UPDATE_STATUS = wx.PyEventBinder(ppEVT_UPDATE_STATUS, 1)
-class UpdateStatusEvent(SimpleEvent):
-    """ Event to notify to do an update of the tree view """
-    pass
-
 ppEVT_OPEN_BUFFER = wx.NewEventType()
 EVT_OPEN_BUFFER = wx.PyEventBinder(ppEVT_OPEN_BUFFER, 1)
 class OpenBufferEvent(SimpleEvent):
@@ -241,6 +238,7 @@ class ProjectTree(wx.Panel):
 
         # Read configuration
         self.config = ConfigDialog.ConfigData()
+        self.srcCtrl = ScCommand.SourceController(self)
 
         # Threads that watch directories corresponding to open folders
         self.watchers = {}
@@ -253,13 +251,6 @@ class ProjectTree(wx.Panel):
 
         # Notebook tab is opening because another was closed
         self.isClosing = False
-
-        # Number of seconds to allow a source control command to run
-        # before timing out
-        self.scTimeout = 60
-
-        # Storage for currently running source control threads
-        self.scThreads = {}
 
         # Create root of tree
         self.root = self.tree.AddRoot('Projects')
@@ -278,7 +269,8 @@ class ProjectTree(wx.Panel):
         self.Bind(wx.EVT_TREE_ITEM_ACTIVATED, self.OnActivate, self.tree)
         self.Bind(wx.EVT_CONTEXT_MENU, self.OnContextMenu)
         self.Bind(EVT_SYNC_NODES, self.OnSyncNode)
-        self.Bind(EVT_UPDATE_STATUS, self.OnUpdateStatus)
+        self.Bind(ScCommand.EVT_STATUS, self.OnUpdateStatus)
+        self.Bind(ScCommand.EVT_CMD_COMPLETE, self.OnScCommandFinish)
         self.Bind(EVT_OPEN_BUFFER, self.OnOpenBuffer)
 
         # Notebook syncronization
@@ -312,10 +304,6 @@ class ProjectTree(wx.Panel):
         # Kill all watcher threads
         for value in self.watchers.values():
             value.pop()
-
-        # Stop any currently running source control threads
-        for t in self.scThreads:
-            t._Thread__stop()
 
         # Clean up tempdir
         if self.tempdir:
@@ -735,12 +723,6 @@ class ProjectTree(wx.Panel):
         self.addDirectoryWatcher(parent)
         self.scStatus([parent])
 
-    def getSCSystem(self, path):
-        """ Determine source control system being used on path if any """
-        for key, value in self.config.getSCSystems().items():
-            if value['instance'].isControlled(path):
-                return value
-
     def scAdd(self, nodes):
         """ Send an add to repository command to current control system """
         self.scCommand(nodes, 'add')
@@ -773,10 +755,9 @@ class ProjectTree(wx.Panel):
         if not nodes:
             return
 
-        from HistWin import HistoryWindow
         for node in self.getSelectedNodes():
-            path = self.tree.GetPyData(node)['path']
-            win = HistoryWindow(self, path, self, node, path)
+            data = self.tree.GetPyData(node)
+            win = HistoryWindow(self, data['path'], node, data)
             win.Show()
 
     def scCommit(self, nodes, **options):
@@ -814,7 +795,7 @@ class ProjectTree(wx.Panel):
 
         self.scCommand(nodes, 'commit', message=message)
 
-    def scPatch(self, nodes, **options):
+    def scPatch(self, nodes):
         """ Make patch files for the given nodes """
         self.scCommand(nodes, 'makePatch', callback=self.openPatches)
 
@@ -840,29 +821,26 @@ class ProjectTree(wx.Panel):
             (True), or if they are not (False).
 
         """
-        previous = ''
+        paths = list()
         for node in nodes:
             # Get node data
             try:
                 path = self.tree.GetPyData(node)['path']
             except:
                 continue
-            try:
-                reppath = self.getSCSystem(path)['instance'].getRepository(path)
-            except:
-                continue
+            paths.append(path)
 
-            if not previous:
-                previous = reppath
-            elif previous != reppath:
-                wx.MessageDialog(self,
-                   _('You can not execute source control commands across multiple repositories.'),
-                   _('Selected files are from multiple repositories'),
-                   style=wx.OK|wx.ICON_ERROR).ShowModal()
-                return False
+        if not self.srcCtrl.IsSingleRepository(paths):
+            dlg = wx.MessageDB(self,
+               _('You can not execute source control commands across multiple repositories.'),
+               _('Selected files are from multiple repositories'),
+               style=wx.OK|wx.ICON_ERROR)
+            dlg.ShowModal()
+            dlg.Destroy()
+            return False
         return True
 
-    def scCommand(self, nodes, command, callback=None, **options):
+    def scCommand(self, nodes, command, **options):
         """
         Run a source control command
 
@@ -879,130 +857,27 @@ class ProjectTree(wx.Panel):
         except:
             pass
 
-        def run(callback, nodes, command, **options):
-            """Does the running of the command"""
-            concurrentcmds = ['status', 'history']
-            NODE, DATA, SC = 0, 1, 2
-            nodeinfo = []
-            for node in nodes:
-                if not node.IsOk():
-                    return
+        # Validate nodes
+        s_nodes = list()
+        for node in nodes:
+            if not node.IsOk():
+                continue
 
-                # Get node data
-                try:
-                    data = self.tree.GetPyData(node)
-                except:
-                    data = {}
-
-                # node, data, sc
-                info = [node, data, None]
-
-                # See if the node already has an operation running
-                i = 0
-                while data.get('sclock', None):
-                    time.sleep(1)
-                    i += 1
-                    if i > self.scTimeout:
-                        return
-
-                # See if the node has a path associated
-                # Technically, all nodes should (except the root node)
-                if 'path' not in data:
-                    continue
-
-                # Determine source control system
-                sc = self.getSCSystem(data['path'])
-                if sc is None:
-                    if os.path.isdir(data['path']) or command == 'add':
-                        sc = self.getSCSystem(os.path.dirname(data['path']))
-                        if sc is None:
-                            continue
-                    else:
-                        continue
-                info[SC] = sc
-
-                nodeinfo.append(info)
-
-            # Lock node while command is running
-            if command not in concurrentcmds:
-                for node, data, sc in nodeinfo:
-                    data['sclock'] = command
-
-            rc = True
+            # Get node data
             try:
-                # Find correct method
-                method = getattr(sc['instance'], command, None)
-                if method:
-                    # Run command (only if it isn't the status command)
-                    if command != 'status':
-                        rc = self._timeoutCommand(callback, method,
-                             [x[DATA]['path'] for x in nodeinfo], **options)
+                data = self.tree.GetPyData(node)
+            except:
+                data = {}
 
-            finally:
-                # Only update status if last command didn't time out
-                if command not in ['history', 'revert', 'update'] and rc:
-                    for node, data, sc in nodeinfo:
-                        self._updateStatus(node, data, sc)
+            s_nodes.append((node, data))
 
-                # Unlock
-                if command not in concurrentcmds:
-                    for node, data, sc in nodeinfo:
-                        del data['sclock']
-
-        wx.lib.delayedresult.startWorker(self.endSCCommand, run,
-                                         wargs=(callback, nodes, command),
-                                         wkwargs=options)
-
-    def _timeoutCommand(self, callback, *args, **kwargs):
-        """ Run command, but kill it if it takes longer than `timeout` secs """
-        result = []
-        def resultWrapper(result, *args, **kwargs):
-            """ Function to catch output of threaded method """
-            args = list(args)
-            method = args.pop(0)
-            result.append(method(*args, **kwargs))
-
-        # Insert result object to catch output
-        args = list(args)
-        args.insert(0, result)
-
-        # Start thread
-        t = threading.Thread(target=resultWrapper, args=args, kwargs=kwargs)
-        t.start()
-        self.scThreads[t] = True
-        t.join(self.scTimeout)
-        del self.scThreads[t]
-
-        if t.isAlive():
-            t._Thread__stop()
-            #print 'COMMAND TIMED OUT'
-            return False
-        #print 'COMMAND SUCCEEDED'
-        if callback is not None:
-            callback(result[0])
-        return True
-
-    def _updateStatus(self, node, data, sc):
-        """
-        Update the icons in the tree view to show the status of the files
-
-        """
-        # Update status of nodes
-        updates = []
-        try:
-            status = {}
-            rc = self._timeoutCommand(None, sc['instance'].status,
-                                      [data['path']], status=status)
-
-            if not rc:
-                return updates
-
-        except:
-            pass
-
-        wx.PostEvent(self, UpdateStatusEvent(ppEVT_UPDATE_STATUS,
-                                             self.GetId(),
-                                             (node, data, status, sc)))
+        # Check for a callback argument
+        callb = None
+        if 'callback' in options:
+            callb = options['callback']
+            del options['callback']
+        
+        self.srcCtrl.ScCommand(s_nodes, command, callb, **options)
 
     def OnUpdateStatus(self, evt):
         """ Apply status updates to tree view """
@@ -1037,6 +912,7 @@ class ProjectTree(wx.Panel):
                 text = self.tree.GetItemText(child)
                 if text not in status:
                     continue
+
                 if os.path.isdir(os.path.join(data['path'], text)):
                     # Closed folder icon
                     icon = self.icons.get('folder-' + \
@@ -1052,8 +928,9 @@ class ProjectTree(wx.Panel):
                                         icon, wx.TreeItemIcon_Expanded))
                     # Update children status if opened
                     if child.IsOk() and self.tree.IsExpanded(child):
-                        self._updateStatus(child,
-                                           self.tree.GetPyData(child), sc)
+                        self.srcCtrl.StatusWithTimeout(sc,
+                                                       child,
+                                                       self.tree.GetPyData(child))
                 else:
                     icon = self.icons.get('file-' + \
                                           status[text].get('status', ''))
@@ -1091,12 +968,14 @@ class ProjectTree(wx.Panel):
         else:
             self.log
 
-    def endSCCommand(self, delayedresult):
+    def OnScCommandFinish(self, evt):
         """ Stops progress indicator when source control command is finished """
         try:
             self.GetParent().StopBusy()
         except wx.PyDeadObjectError:
             pass
+
+#        cmd = evt.GetValue()
 
     def endPaste(self, delayedresult):
         """ Stops progress indicator when paste is finished """
@@ -1105,146 +984,21 @@ class ProjectTree(wx.Panel):
         except wx.PyDeadObjectError:
             pass
 
-    def compareRevisions(self, path, rev1=None, date1=None,
-                         rev2=None, date2=None, callback=None):
-        """
-        Compare the playpen path to a specific revision, or compare two
-        revisions
-
-        Required Arguments:
-        path -- absolute path of file to compare
-
-        Keyword Arguments:
-        rev1/date1 -- first file revision/date to compare against
-        rev2/date2 -- second file revision/date to campare against
-
-        """
-        def diff(path, rev1, date1, rev2, date2, callback):
-            """ Do the actual diff of two files by sending the files
-            to be compared to the appropriate diff program.
-
-            """
-            # Only do files
-            if os.path.isdir(path):
-                for fname in os.listdir(path):
-                    self.compareRevisions(fname, rev1=rev1, date1=date1,
-                                                 rev2=rev2, date2=date2)
-                return
-
-            sc = self.getSCSystem(path)
-            if sc is None:
-                if callback is not None:
-                    callback()
-                return
-
-            content1 = content2 = ext1 = ext2 = None
-
-            # Grab the first specified revision
-            if rev1 or date1:
-                content1 = sc['instance'].fetch([path], rev=rev1, date=date1)
-                if content1 and content1[0] is None:
-                    if callback is not None:
-                        callback()
-                    return wx.MessageDialog(self,
-                                            _('The requested file could not '
-                                              'be retrieved from the source '
-                                              'control system.'),
-                                            _('Could not retrieve file'),
-                                            style=wx.OK|wx.ICON_ERROR).ShowModal()
-                content1 = content1[0]
-                if rev1:
-                    ext1 = rev1
-                elif date1:
-                    ext1 = date1
-
-            # Grab the second specified revision
-            if rev2 or date2:
-                content2 = sc['instance'].fetch([path], rev=rev2, date=date2)
-                if content2 and content2[0] is None:
-                    if callback is not None:
-                        callback()
-                    return wx.MessageDialog(self,
-                                            _('The requested file could not '
-                                              'be retrieved from the source '
-                                              'control system.'),
-                                            _('Could not retrieve file'),
-                                            style=wx.OK|wx.ICON_ERROR).ShowModal()
-                content2 = content2[0]
-                if rev2:
-                    ext2 = rev2
-                elif date2:
-                    ext2 = date2
-
-            if not(rev1 or date1 or rev2 or date2):
-                content1 = sc['instance'].fetch([path])
-                if content1 and content1[0] is None:
-                    if callback is not None:
-                        callback()
-                    return wx.MessageDialog(self,
-                                            _('The requested file could not '
-                                              'be retrieved from the source '
-                                              'control system.'),
-                                            _('Could not retrieve file'),
-                                            style=wx.OK|wx.ICON_ERROR).ShowModal()
-                content1 = content1[0]
-                ext1 = 'previous'
-
-            if not self.tempdir:
-                import tempfile
-                self.tempdir = tempfile.mkdtemp()
-
-            # Write temporary files
-            path1 = path2 = None
-            if content1 and content2:
-                path = os.path.join(self.tempdir, os.path.basename(path))
-                path1 = '%s.%s' % (path, ext1)
-                path2 = '%s.%s' % (path, ext2)
-                tfile = open(path1, 'w')
-                tfile.write(content1)
-                tfile.close()
-                tfile2 = open(path2, 'w')
-                tfile2.write(content2)
-                tfile2.close()
-            elif content1:
-                path1 = path
-                path = os.path.join(self.tempdir, os.path.basename(path))
-                path2 = '%s.%s' % (path, ext1)
-                tfile = open(path2, 'w')
-                tfile.write(content1)
-                tfile.close()
-            elif content2:
-                path1 = path
-                path = os.path.join(self.tempdir, os.path.basename(path))
-                path2 = '%s.%s' % (path, ext2)
-                tfile2 = open(path2, 'w')
-                tfile2.write(content2)
-                tfile2.close()
-
-            # Run comparison program
-            if self.config.getBuiltinDiff() or \
-               not (self.config.getDiffProgram()):
-                diffwin.GenerateDiff(path2, path1, html=True)
-            else:
-                subprocess.call([self.config.getDiffProgram(), path2, path1])
-
-            if callback is not None:
-                callback()
-
-        t = threading.Thread(target=diff,
-                             args=(path, rev1, date1, rev2, date2, callback))
-        t.setDaemon(True)
-        t.start()
-
     def compareToPrevious(self, node):
         """ Use opendiff to compare playpen version to repository version """
-        try: path = self.tree.GetPyData(node)['path']
-        except TypeError: return
+        try:
+            path = self.tree.GetPyData(node)['path']
+        except TypeError:
+            return
+
         # Only do files
         if os.path.isdir(path):
             for child in self.getChildren(node):
                 self.compareToPrevious(child)
             return
-        self.compareRevisions(path)
+
+        # Run the actual Diff job
+        self.srcCtrl.CompareRevisions(path)
 
     def addDirectoryWatcher(self, node):
         """
@@ -1458,31 +1212,31 @@ class ProjectTree(wx.Panel):
                       lambda evt: self.onPopupPaste(),
                       id=self.popupIDPaste)
             self.Bind(wx.EVT_MENU,
-                      lambda evt: self.onPopupSCRefresh(),
+                      lambda evt: self.scStatus(self.getSelectedNodes()),
                       id=self.popupIDSCRefresh)
             self.Bind(wx.EVT_MENU,
                       lambda evt: self.onPopupSCDiff(),
                       id=self.popupIDSCDiff)
             self.Bind(wx.EVT_MENU,
-                      lambda evt: self.onPopupSCUpdate(),
+                      lambda evt: self.scUpdate(self.getSelectedNodes()),
                       id=self.popupIDSCUpdate)
             self.Bind(wx.EVT_MENU,
-                      lambda evt: self.onPopupSCHistory(),
+                      lambda evt: self.scHistory(self.getSelectedNodes()),
                       id=self.popupIDSCHistory)
             self.Bind(wx.EVT_MENU,
-                      lambda evt: self.onPopupSCCommit(),
+                      lambda evt: self.scCommit(self.getSelectedNodes()),
                       id=self.popupIDSCCommit)
             self.Bind(wx.EVT_MENU,
-                      lambda evt: self.onPopupSCPatch(),
+                      lambda evt: self.scPatch(self.getSelectedNodes()),
                       id=self.popupIDSCPatch)
             self.Bind(wx.EVT_MENU,
-                      lambda evt: self.onPopupSCRemove(),
+                      lambda evt: self.scRemove(self.getSelectedNodes()),
                       id=self.popupIDSCRemove)
             self.Bind(wx.EVT_MENU,
-                      lambda evt: self.onPopupSCRevert(),
+                      lambda evt: self.scRevert(self.getSelectedNodes()),
                       id=self.popupIDSCRevert)
             self.Bind(wx.EVT_MENU,
-                      lambda evt: self.onPopupSCAdd(),
+                      lambda evt: self.scAdd(self.getSelectedNodes()),
                       id=self.popupIDSCAdd)
             self.Bind(wx.EVT_MENU, self.onPopupDelete, id=self.popupIDDelete)
             self.Bind(wx.EVT_MENU,
@@ -1505,7 +1259,7 @@ class ProjectTree(wx.Panel):
         # Is directory controlled by source control
         scenabled = False
         for item in paths:
-            if self.getSCSystem(item):
+            if self.srcCtrl.GetSCSystem(item):
                 scenabled = True
                 break
 
@@ -1748,37 +1502,6 @@ class ProjectTree(wx.Panel):
             self.clipboard['files'] = newclipboard
 
         wx.lib.delayedresult.startWorker(self.endPaste, run, wargs=(dest,))
-
-    def onPopupSCRefresh(self):
-        """ Handle context menu status update command """
-        self.scStatus(self.getSelectedNodes())
-
-    def onPopupSCUpdate(self):
-        """ Handle context menu update repository command """
-        self.scUpdate(self.getSelectedNodes())
-
-    def onPopupSCHistory(self):
-        """ Handle context menu command to show History Window """
-        self.scHistory(self.getSelectedNodes())
-
-    def onPopupSCCommit(self):
-        """ Handle context menu command commit selected nodes """
-        self.scCommit(self.getSelectedNodes())
-
-    def onPopupSCPatch(self):
-        self.scPatch(self.getSelectedNodes())
-
-    def onPopupSCRemove(self):
-        """ Handle context menu command to remove selected nodes """
-        self.scRemove(self.getSelectedNodes())
-
-    def onPopupSCRevert(self):
-        """ Handle context menu command to revert selected nodes """
-        self.scRevert(self.getSelectedNodes())
-
-    def onPopupSCAdd(self):
-        """ Handle context menu command add selected node to source control """
-        self.scAdd(self.getSelectedNodes())
 
     def onPopupDelete(self, event):
         """ Delete selected files/directories """

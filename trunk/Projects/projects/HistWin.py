@@ -24,11 +24,15 @@ __cvsid__ = "$Id$"
 __revision__ = "$Revision$"
 
 #--------------------------------------------------------------------------#
-# Dependancies
+# Imports
 import wx
 import re
 import sys
 import wx.lib.mixins.listctrl as listmix
+
+# Local Imports
+import ScCommand
+import ProjCmnDlg
 
 # Editra Library Imports
 try:
@@ -59,7 +63,7 @@ SB_INFO = 0
 SB_PROG = 1
 class HistoryWindow(wx.Frame):
     """Window for displaying the Revision History of a file"""
-    def __init__(self, parent, title, projects, node, path):
+    def __init__(self, parent, title, node, data):
         wx.Frame.__init__(self, parent, title=title,
                           style=wx.DEFAULT_DIALOG_STYLE)
 
@@ -69,12 +73,13 @@ class HistoryWindow(wx.Frame):
         else:
             self._accel = wx.AcceleratorTable([(wx.ACCEL_CTRL, ord('W'), wx.ID_CLOSE)])
         self.SetAcceleratorTable(self._accel)
+
         if util is not None:
             util.SetWindowIcon(self)
 
         # Attributes
         self.SetStatusBar(HistoryStatusBar(self))
-        self._ctrls = HistoryPane(self, projects, node, path)
+        self._ctrls = HistoryPane(self, node, data)
 
         # Layout
         self._DoLayout()
@@ -192,26 +197,24 @@ class HistoryStatusBar(wx.StatusBar):
 
 class HistoryPane(wx.Panel):
     """Panel for housing the the history window controls"""
-    BTN_LBL1 = _("Compare Revisions")
-    BTN_LBL2 = _("Compare to Selected Revision")
-    BTN_LBL3 = _("Compare Selected Revisions")
-    def __init__(self, parent, projects, node, path):
+    def __init__(self, parent, node, data):
         wx.Panel.__init__(self, parent)
 
         # Attributes
+        self.srcCtrl = ScCommand.SourceController(self)
+
         sbox = wx.StaticBox(self, label=_("Revision History"))
         # Note box sizer must be created before its siblings
         self.boxsz = wx.StaticBoxSizer(sbox, wx.VERTICAL)
         self._search = LogSearch(self, size=(150, -1))
         self._split = wx.SplitterWindow(self,
                                         style=wx.SP_3DSASH | wx.SP_LIVE_UPDATE)
-        self._list = HistList(self._split, projects, node, path)
+        self._list = HistList(self._split)
         self._txt = wx.TextCtrl(self._split,
                                 style=wx.TE_MULTILINE | wx.TE_READONLY)
-        self._btn = wx.Button(self, label=_(self.BTN_LBL1))
+        self._btn = wx.Button(self, label=_("Compare Revisions"))
         self._btn.Disable()
-        self.projects = projects
-        self.path = path
+        self.path = data['path']
         self.selected = -1
 
         # Layout
@@ -222,6 +225,12 @@ class HistoryPane(wx.Panel):
         self.Bind(wx.EVT_BUTTON, self.OnButton, self._btn)
         self.Bind(wx.EVT_LIST_ITEM_SELECTED, self.OnItemSelected)
         self.Bind(wx.EVT_LIST_ITEM_DESELECTED, self.OnItemDeselected)
+        self.Bind(ScCommand.EVT_DIFF_COMPLETE, self.OnEndScCommand)
+        self.Bind(ScCommand.EVT_CMD_COMPLETE, self.OnEndScCommand)
+
+        # Start lookup
+        wx.CallAfter(self.GetParent().StartBusy)
+        self.srcCtrl.ScCommand([(node, data)], 'history', self._list.Populate)
 
     def _DoLayout(self):
         """Layout the controls on the panel"""
@@ -258,22 +267,30 @@ class HistoryPane(wx.Panel):
         self._btn.Enable(False)
         selected = self.getSelectedItems()
         if not selected:
-            self.projects.compareRevisions(self.path, callback=self.endCompare)
+            self.srcCtrl.CompareRevisions(self.path)
         elif len(selected) == 1:
             rev = self._list.GetItem(selected[0], self._list.REV_COL)
             rev = rev.GetText().strip()
-            self.projects.compareRevisions(self.path, rev1=rev,
-                                           callback=self.endCompare)
+            self.srcCtrl.CompareRevisions(self.path, rev1=rev)
         else:
             rev1 = self._list.GetItem(selected[0], self._list.REV_COL).GetText().strip()
             rev2 = self._list.GetItem(selected[-1], self._list.REV_COL).GetText().strip()
-            self.projects.compareRevisions(self.path, rev1=rev1, rev2=rev2,
-                                           callback=self.endCompare)
+            self.srcCtrl.CompareRevisions(self.path, rev1=rev1, rev2=rev2)
 
-    def endCompare(self):
-        """ Re-enable button and stop progress bar """
-        wx.CallAfter(self._btn.Enable, True)
-        wx.CallAfter(self.GetParent().StopBusy)
+    def OnEndScCommand(self, evt):
+        """Handle when a source control event has completed"""
+        etype = evt.GetEventType()
+        if etype == ScCommand.ppEVT_DIFF_COMPLETE:
+            self._btn.Enable(True)
+            self.GetParent().StopBusy()
+            # Check for error in running diff command
+            if evt.GetError() == ScCommand.SC_ERROR_RETRIEVAL_FAIL:
+                ProjCmnDlg.RetrievalErrorDlg(self)
+        else:
+            cmd = evt.GetValue()
+            if cmd == 'history':
+                pass
+                #self._list.Populate()
 
     def getSelectedItems(self):
         """ Get the selected items """
@@ -329,11 +346,11 @@ class HistoryPane(wx.Panel):
         """ Change button text based on selection state """
         selected = self.getSelectedItems()
         if not selected:
-            self._btn.SetLabel(self.BTN_LBL1)
+            self._btn.SetLabel(_("Compare Revisions"))
         elif len(selected) == 1:
-            self._btn.SetLabel(self.BTN_LBL2)
+            self._btn.SetLabel(_("Compare to Selected Revision"))
         else:
-            self._btn.SetLabel(self.BTN_LBL3)
+            self._btn.SetLabel(_("Compare Selected Revisions"))
 
         self.Layout()
         self.GetParent().SendSizeEvent()
@@ -344,22 +361,24 @@ class HistoryPane(wx.Panel):
 class HistList(wx.ListCtrl,
                listmix.ListCtrlAutoWidthMixin):
     """List for displaying a files revision history"""
-    REV_COL = 0
+    REV_COL  = 0
     DATE_COL = 1
     AUTH_COL = 2
-    COM_COL = 3
-    def __init__(self, parent, projects, node, path):
+    COM_COL  = 3
+    def __init__(self, parent):
         """ Create the list control """
         wx.ListCtrl.__init__(self, parent,
-                             style=wx.LC_REPORT | wx.LC_SORT_ASCENDING | \
+                             style=wx.LC_REPORT | \
+                                   wx.LC_SORT_ASCENDING | \
                                    wx.LC_VRULES)
 
         listmix.ListCtrlAutoWidthMixin.__init__(self)
 
         # Attributes
-        self._frame = parent.GetGrandParent()
+        self._frame = parent.GetTopLevelParent()
         self._data = {}
 
+        # Event Handlers
         self.Bind(EVT_UPDATE_ITEMS, self.OnUpdateItems)
 
         # Setup columns
@@ -367,13 +386,23 @@ class HistList(wx.ListCtrl,
         self.InsertColumn(self.DATE_COL, _("Date"))
         self.InsertColumn(self.AUTH_COL, _("Author"))
         self.InsertColumn(self.COM_COL, _("Log Message"))
-        wx.CallAfter(self._frame.StartBusy)
-        projects.scCommand([node], 'history', callback=self.Populate)
         self.SetColumnWidth(self.COM_COL, wx.LIST_AUTOSIZE)
         self.SendSizeEvent()
 
     def OnUpdateItems(self, evt):
         """ Update and add items to the list """
+        if not self._data:
+            dlg = wx.MessageDialog(self,
+               _('The history information for the requested file could ' \
+                 'not be retrieved.  Please make sure that you have ' \
+                 'network access.'),
+               _('History information could not be retrieved'),
+               style=wx.OK|wx.ICON_ERROR)
+            dlg.ShowModal()
+            dlg.Destroy()
+            self.GetGrandParent().GetParent().Destroy()
+            return
+
         index = -1
         append = False
         self.Freeze()
@@ -430,16 +459,7 @@ class HistList(wx.ListCtrl,
     def Populate(self, data):
         """Populate the list with the history data"""
         self._data = data
-        if not data:
-            wx.MessageDialog(self,
-               _('The history information for the requested file could ' \
-                 'not be retrieved.  Please make sure that you have ' \
-                 'network access.'),
-               _('History information could not be retrieved'),
-               style=wx.OK|wx.ICON_ERROR).ShowModal()
-            self.GetGrandParent().GetParent().Destroy()
-            return
-        evt = UpdateItemsEvent(edEVT_UPDATE_ITEMS, self.GetId(), data)
+        evt = UpdateItemsEvent(edEVT_UPDATE_ITEMS, -1, data)
         wx.PostEvent(self, evt)
         wx.CallAfter(self._frame.StopBusy)
 
