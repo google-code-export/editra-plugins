@@ -311,7 +311,7 @@ class SourceController:
         Run a source control command
 
         Required Arguments:
-        nodes -- selected tree nodes
+        nodes -- selected tree nodes [(treeitem, dict(path='', watcher=thread)]
         command -- name of command type to run
 
         """
@@ -395,14 +395,19 @@ class SourceController:
 
         return (command, None)
 
-    def StatusWithTimeout(self, sc, node, data):
+    def StatusWithTimeout(self, sc, node, data, recursive=False):
         """Run a SourceControl status command with a timeout
+        @param sc: SourceControll instance
+        @param node: tree node, data
+        @param data: data dict(path='')
 
         """
         status = {}
         try:
             rval = self._TimeoutCommand(None, sc['instance'].status,
-                                        [data['path']], status=status)
+                                        [data['path']],
+                                        recursive=recursive,
+                                        status=status)
         except Exception, msg:
             print "ERROR:", msg
 
