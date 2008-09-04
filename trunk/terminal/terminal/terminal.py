@@ -45,6 +45,8 @@ try:
     if sys.platform == 'win32':
         import popen2
         import stat
+        import msvcrt
+        import ctypes
         USE_PTY = False
     else:
         import pty
@@ -151,6 +153,7 @@ class Xterm(wx.stc.StyledTextCtrl):
         self._exited = False    # Is shell still running
         self._setspecs = [0]
         self._history = dict(cmds=[''], index=-1, lastexe='')  # Command history
+        self._menu = None
 
         # Setup
         self.__Configure()
@@ -203,7 +206,10 @@ class Xterm(wx.stc.StyledTextCtrl):
 
     def __Configure(self):
         """Configure the base settings of the control"""
-        self.SetEOLMode(wx.stc.STC_EOL_LF)
+        if wx.Platform == '__WXMSW__':
+            self.SetEOLMode(wx.stc.STC_EOL_CRLF)
+        else:
+            self.SetEOLMode(wx.stc.STC_EOL_LF)
         self.SetViewWhiteSpace(False)
         self.SetTabWidth(0)
         self.SetUseTabs(False)
@@ -214,8 +220,8 @@ class Xterm(wx.stc.StyledTextCtrl):
     def __ConfigureStyles(self):
         """Configure the text coloring of the terminal"""
         # Clear Styles
-        self.StyleResetDefault()
-        self.StyleClearAll()
+        #self.StyleResetDefault()
+#        self.StyleClearAll()
 
         # Set margins
         self.SetMargins(4, 4)
@@ -227,8 +233,8 @@ class Xterm(wx.stc.StyledTextCtrl):
 
         # Configure text styles
         # TODO make this configurable
-        fore = "#000000"
-        back = "#DBE0C4"
+        fore = "#FFFFFF" #"#000000"
+        back = "#000000" #"#DBE0C4"
         global FONT
         global FONT_SIZE
         global FONT_FACE
@@ -353,7 +359,7 @@ class Xterm(wx.stc.StyledTextCtrl):
     def _ProcessRead(self, lines):
         """Process the raw lines from stdout"""
         DebugLog("[terminal][info] Processing Read...")
-        lines_to_print = lines.split('\n')
+        lines_to_print = lines.split(os.linesep)
 
         #  Filter out invalid blank lines from begining/end input
         if sys.platform == 'win32':
@@ -372,7 +378,7 @@ class Xterm(wx.stc.StyledTextCtrl):
 
         errors = self.CheckStdErr()
         if errors:
-            DebugLog("[terminal][err] Process Read stderr --> " + errors)
+            DebugLog("[terminal][err] Process Read stderr --> " + '\n'.join(errors))
             lines_to_print = errors + lines_to_print
 
         return lines_to_print
@@ -435,9 +441,9 @@ class Xterm(wx.stc.StyledTextCtrl):
                 DebugLog('[terminal][info] not using windows extensions')
                 self.stdout, self.stdin, self.stderr = popen2.popen3(SHELL, -1, 'b')
 
-            self.outd = self.stdout.fileno()
-            self.ind  = self.stdin.fileno()
-            self.errd = self.stderr.fileno()
+            self.outd = self.stdout#.fileno()
+            self.ind  = self.stdin#.fileno()
+            self.errd = self.stderr#.fileno()
 
             self.intr_key = ''
             self.eof_key  = ''
@@ -487,7 +493,7 @@ class Xterm(wx.stc.StyledTextCtrl):
         for regex in ['^\s*Password:', 'password:', 'Password required']:
             if re.search(regex, prev_line):
                 try:
-                    print "FIX ME"
+                    print "FIX ME: CheckForPassword"
                 except KeyboardInterrupt:
                     return
 
@@ -633,7 +639,9 @@ class Xterm(wx.stc.StyledTextCtrl):
 
     def OnContextMenu(self, evt):
         """Display the context menu"""
-        self.PopupMenu(self.GetContextMenu())
+        if self._menu is None:
+            self._menu = self.GetContextMenu()
+        self.PopupMenu(self._menu)
 
     def OnIdle(self, evt):
         """While idle check for more output"""
@@ -781,15 +789,24 @@ class Xterm(wx.stc.StyledTextCtrl):
         DebugLog("[terminal][pipe] minimum to read is " + str(minimum_to_read))
 
         time.sleep(self.delay)
-        count = os.fstat(pipe)[stat.ST_SIZE]
+        handle = msvcrt.get_osfhandle(pipe.fileno())
+        avail = ctypes.c_long()
+        ctypes.windll.kernel32.PeekNamedPipe(handle, None, 0, 0,
+                                             ctypes.byref(avail), None)
+        count = avail.value
+#        count = os.fstat(pipe.fileno())[stat.ST_SIZE]
         data = ''
         DebugLog("[terminal][pipe] initial count via fstat is " + str(count))
 
         while (count > 0):
-            tmp = os.read(pipe, 1)
+            tmp = os.read(pipe.fileno(), 1)
             data += tmp
 
-            count = os.fstat(pipe)[stat.ST_SIZE]
+#            count = os.fstat(pipe.fileno())[stat.ST_SIZE]
+            avail = ctypes.c_long()
+            ctypes.windll.kernel32.PeekNamedPipe(handle, None, 0, 0,
+                                             ctypes.byref(avail), None)
+            count = avail.value
             if len(tmp) == 0:
                 DebugLog("[terminal][pipe] count %s but nothing read" % str(count))
                 break
@@ -866,7 +883,7 @@ class Xterm(wx.stc.StyledTextCtrl):
 
         """
         DebugLog("[terminal][info] Writting out command: " + cmd)
-        os.write(self.ind, cmd)
+        os.write(self.ind.fileno(), cmd)
 
 #-----------------------------------------------------------------------------#
 # Utility Functions
