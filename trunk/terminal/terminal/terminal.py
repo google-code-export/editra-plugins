@@ -165,6 +165,9 @@ class Xterm(wx.stc.StyledTextCtrl):
         # General Events
         self.Bind(wx.EVT_IDLE, self.OnIdle)
 
+        # Stc events
+        self.Bind(wx.stc.EVT_STC_DO_DROP, self.OnDrop)
+
         # Key events
         self.Bind(wx.EVT_KEY_DOWN, self.OnKeyDown)
         self.Bind(wx.EVT_CHAR, self.OnChar)
@@ -441,9 +444,9 @@ class Xterm(wx.stc.StyledTextCtrl):
                 DebugLog('[terminal][info] not using windows extensions')
                 self.stdout, self.stdin, self.stderr = popen2.popen3(SHELL, -1, 'b')
 
-            self.outd = self.stdout#.fileno()
-            self.ind  = self.stdin#.fileno()
-            self.errd = self.stderr#.fileno()
+            self.outd = self.stdout.fileno()
+            self.ind  = self.stdin.fileno()
+            self.errd = self.stderr.fileno()
 
             self.intr_key = ''
             self.eof_key  = ''
@@ -472,6 +475,9 @@ class Xterm(wx.stc.StyledTextCtrl):
         recalled by using the up/down keys.
 
         """
+        if cmd.isspace():
+            return
+
         if len(self._history['cmds']) > MAX_HIST:
             self._history['cmds'].pop()
         self._history['cmds'].insert(0, cmd)
@@ -643,6 +649,11 @@ class Xterm(wx.stc.StyledTextCtrl):
             self._menu = self.GetContextMenu()
         self.PopupMenu(self._menu)
 
+    def OnDrop(self, evt):
+        """Handle drop events"""
+        if evt.GetPosition() < self._fpos:
+            evt.SetDragResult(wx.DragCancel)
+
     def OnIdle(self, evt):
         """While idle check for more output"""
         if not self._exited:
@@ -689,7 +700,12 @@ class Xterm(wx.stc.StyledTextCtrl):
 
     def OnKeyUp(self, evt):
         """Handle when the key comes up"""
-        evt.Skip()
+        key = evt.GetKeyCode()
+        sel_s, sel_e = self.GetSelection()
+        if evt.ControlDown() and key == ord('C') and sel_s == sel_e:
+            self.ExecuteCmd(self.intr_key, null=False)
+        else:
+            evt.Skip()
 
     def OnLeftDown(self, evt):
         """Set selection anchor"""
@@ -703,8 +719,9 @@ class Xterm(wx.stc.StyledTextCtrl):
         """
         evt.Skip()
         pos = evt.GetPosition()
-#         self.SetSelectionEnd(self.PositionFromPoint(pos))
-        if self._fpos > self.PositionFromPoint(pos):
+        sel_s = self.GetSelectionStart()
+        sel_e = self.GetSelectionEnd()
+        if (self._fpos > self.PositionFromPoint(pos)) and (sel_s == sel_e):
             wx.CallAfter(self.GotoPos, self._fpos)
 
     def OnUpdateUI(self, evt):
@@ -789,20 +806,18 @@ class Xterm(wx.stc.StyledTextCtrl):
         DebugLog("[terminal][pipe] minimum to read is " + str(minimum_to_read))
 
         time.sleep(self.delay)
-        handle = msvcrt.get_osfhandle(pipe.fileno())
+        handle = msvcrt.get_osfhandle(pipe)
         avail = ctypes.c_long()
         ctypes.windll.kernel32.PeekNamedPipe(handle, None, 0, 0,
                                              ctypes.byref(avail), None)
         count = avail.value
-#        count = os.fstat(pipe.fileno())[stat.ST_SIZE]
         data = ''
         DebugLog("[terminal][pipe] initial count via fstat is " + str(count))
 
         while (count > 0):
-            tmp = os.read(pipe.fileno(), 1)
+            tmp = os.read(pipe, 1)
             data += tmp
 
-#            count = os.fstat(pipe.fileno())[stat.ST_SIZE]
             avail = ctypes.c_long()
             ctypes.windll.kernel32.PeekNamedPipe(handle, None, 0, 0,
                                              ctypes.byref(avail), None)
@@ -883,7 +898,7 @@ class Xterm(wx.stc.StyledTextCtrl):
 
         """
         DebugLog("[terminal][info] Writting out command: " + cmd)
-        os.write(self.ind.fileno(), cmd)
+        os.write(self.ind, cmd)
 
 #-----------------------------------------------------------------------------#
 # Utility Functions
