@@ -74,6 +74,7 @@ else:
 
 #---- Callables ----#
 _ = wx.GetTranslation
+
 #---- End Callables ----#
 
 #---- ANSI color code support ----#
@@ -159,6 +160,7 @@ class Xterm(wx.stc.StyledTextCtrl):
         self.__Configure()
         self.__ConfigureStyles()
         self.__ConfigureKeyCmds()
+        self.SetViewEOL(True)
         self._SetupPTY()
 
         #---- Event Handlers ----#
@@ -223,8 +225,8 @@ class Xterm(wx.stc.StyledTextCtrl):
     def __ConfigureStyles(self):
         """Configure the text coloring of the terminal"""
         # Clear Styles
-        #self.StyleResetDefault()
-#        self.StyleClearAll()
+        self.StyleResetDefault()
+        self.StyleClearAll()
 
         # Set margins
         self.SetMargins(4, 4)
@@ -338,8 +340,9 @@ class Xterm(wx.stc.StyledTextCtrl):
             self._fpos = self.GetCurrentPos()
 
         DebugLog("[terminal][info] Set valid cursor to > %d" % self._fpos)
-#         self.ScrollToLine(self.GetCurrentLine())
+        self.PrintPrompt()
         self.EnsureCaretVisible()
+        self.EnsureVisibleEnforcePolicy(self.GetCurrentLine())
 
     def _HandleExit(self, cmd):
         """Handle closing the shell connection"""
@@ -349,7 +352,7 @@ class Xterm(wx.stc.StyledTextCtrl):
         if not self._exited:
             try:
                 DebugLog("[terminal][exit] Shell still around, trying to close")
-                self.Write(cmd + '\n')
+                self.Write(cmd + os.linesep)
                 self._CheckAfterExe()
             except Exception, msg:            
                 DebugLog("[terminal][err] Exception on exit: %s" % str(msg))
@@ -372,6 +375,7 @@ class Xterm(wx.stc.StyledTextCtrl):
                 DebugLog('[terminal][info] Win32, removing leading blank line')
                 lines_to_print = lines_to_print[ 1: ]
 
+        # Check for extra blank line at end
         num_lines = len(lines_to_print)
         if num_lines > 1:
             last_line = lines_to_print[num_lines - 1].strip()
@@ -379,6 +383,7 @@ class Xterm(wx.stc.StyledTextCtrl):
             if last_line == "":
                 lines_to_print = lines_to_print[ :-1 ]
 
+        # Look on StdErr for any error output
         errors = self.CheckStdErr()
         if errors:
             DebugLog("[terminal][err] Process Read stderr --> " + '\n'.join(errors))
@@ -434,7 +439,7 @@ class Xterm(wx.stc.StyledTextCtrl):
         else:
             ##  Use pipes on Win32. not as reliable/nice but 
             ##  works with limitations.
-            self.delay = 0.1
+            self.delay = 0.15
 
             try:
                 import win32pipe
@@ -511,13 +516,13 @@ class Xterm(wx.stc.StyledTextCtrl):
         errors  = ''
         if sys.platform == 'win32':
             err_txt  = self.PipeRead(self.errd, 0)
-            errors   = err_txt.split('\n')
+            errors   = err_txt.split(os.linesep)
 
             num_lines = len(errors)
             last_line = errors[num_lines - 1].strip()
 
             if last_line == "":
-                errors = errors[ :-1 ]
+                errors = errors[:-1]
 
         return errors
 
@@ -526,8 +531,8 @@ class Xterm(wx.stc.StyledTextCtrl):
         view and a new prompt is shown on the top of the screen.
 
         """
-        self.AppendText("\n" * 5)
-        self.Write("\n")
+        self.AppendText(os.linesep * 5)
+        self.Write(os.linesep)
         self._CheckAfterExe()
         self.Freeze()
         wx.PostEvent(self, wx.ScrollEvent(wx.wxEVT_SCROLLWIN_PAGEDOWN, 
@@ -582,25 +587,8 @@ class Xterm(wx.stc.StyledTextCtrl):
         if not self._exited:
             self._CleanUp()
 
-        self.PrintLines(["[process complete]\n"])
+        self.PrintLines(["[process complete]" + os.linesep,])
         self.SetReadOnly(True)
-
-    def GetContextMenu(self):
-        """Create and return a context menu to override the builtin scintilla
-        one. To prevent it from allowing modifications to text that is to the
-        left of the prompt.
-
-        """
-        menu = wx.Menu()
-        menu.Append(wx.ID_CUT, _("Cut"))
-        menu.Append(wx.ID_COPY, _("Copy"))
-        menu.Append(wx.ID_PASTE, _("Paste"))
-        menu.AppendSeparator()
-        menu.Append(wx.ID_SELECTALL, _("Select All"))
-        menu.AppendSeparator()
-        menu.Append(wx.ID_SETUP, _("Preferences"))
-
-        return menu
 
     def GetNextCommand(self):
         """Get the next command from history based on the current
@@ -646,7 +634,8 @@ class Xterm(wx.stc.StyledTextCtrl):
     def OnContextMenu(self, evt):
         """Display the context menu"""
         if self._menu is None:
-            self._menu = self.GetContextMenu()
+            self._menu = GetContextMenu()
+        print "HELLO", self._menu
         self.PopupMenu(self._menu)
 
     def OnDrop(self, evt):
@@ -747,9 +736,8 @@ class Xterm(wx.stc.StyledTextCtrl):
         for line in lines:
             DebugLog("[terminal][print] Current line is --> %s" % line)
             m = None
-            while re.search( '\r$', line):
-                DebugLog('[terminal][print] removing trailing ^M' )
-                line = line[:-1]
+            if line.endswith("\r\n"):
+                line = line.rstrip()
                 m = True
 
             # Parse ANSI escape sequences
@@ -793,7 +781,28 @@ class Xterm(wx.stc.StyledTextCtrl):
             ##  If there's a '\n' or using pipes and it's not the last line
             if not USE_PTY or m:
                 DebugLog("[terminal][print] Appending new line since ^M or not using pty")
-                self.AppendText("\n")
+                self.AppendText(os.linesep)
+
+    def PrintPrompt(self):
+        """Construct a windows prompt and print it to the screen.
+        Has no affect on other platforms as their prompt can be read from
+        the screen.
+
+        """
+        if wx.Platform != '__WXMSW__':
+            return
+        else:
+            cmd = self._history['lastexe']
+            if cmd.lower().startswith('cd '):
+                try:
+                    os.chdir(cmd[2:].strip())
+                except:
+                    pass
+
+            self.AppendText(u"%s>" % os.getcwd())
+            self._fpos = self.GetLength()
+            self.GotoPos(self._fpos)
+            self.EnsureCaretVisible()
 
     def PipeRead(self, pipe, minimum_to_read):
         """Read from pipe, used on Windows. This is needed because select
@@ -806,34 +815,44 @@ class Xterm(wx.stc.StyledTextCtrl):
         DebugLog("[terminal][pipe] minimum to read is " + str(minimum_to_read))
 
         time.sleep(self.delay)
-        handle = msvcrt.get_osfhandle(pipe)
-        avail = ctypes.c_long()
-        ctypes.windll.kernel32.PeekNamedPipe(handle, None, 0, 0,
-                                             ctypes.byref(avail), None)
-        count = avail.value
-        data = ''
-        DebugLog("[terminal][pipe] initial count via fstat is " + str(count))
+        data = u''
 
-        while (count > 0):
-            tmp = os.read(pipe, 1)
-            data += tmp
-
+        # Take a peek to see if any output is available
+        try:
+            handle = msvcrt.get_osfhandle(pipe)
             avail = ctypes.c_long()
             ctypes.windll.kernel32.PeekNamedPipe(handle, None, 0, 0,
-                                             ctypes.byref(avail), None)
-            count = avail.value
+                                                 ctypes.byref(avail), None)
+        except IOError, msg:
+            DebugLog("[terminal][err] Pipe read failed: %s" % msg)
+            return data
+
+        count = avail.value
+        DebugLog("[terminal][pipe] PeekNamedPipe is " + str(count))
+
+        # If there is some output start reading it
+        while (count > 0):
+            tmp = os.read(pipe, 32)
+            data += tmp
+
             if len(tmp) == 0:
                 DebugLog("[terminal][pipe] count %s but nothing read" % str(count))
                 break
 
             #  Be sure to break the read, if asked to do so,
             #  after we've read in a line termination.
-            if minimum_to_read != 0 and len(data) > 0 and data[len(data) - 1] == '\n':
+            if minimum_to_read != 0 and len(data) > 0 and data[len(data) - 1] == os.linesep:
                 if len(data) >= minimum_to_read:
                     DebugLog("[terminal][pipe] read minimum and found termination")
                     break
                 else:
                     DebugLog("[terminal][pipe] more data to read: count is " + str(count))
+
+            # Check for more output
+            avail = ctypes.c_long()
+            ctypes.windll.kernel32.PeekNamedPipe(handle, None, 0, 0,
+                                             ctypes.byref(avail), None)
+            count = avail.value
 
         return data
 
@@ -906,6 +925,23 @@ def DebugLog(errmsg):
     """Print debug messages"""
     if DEBUG:
         print errmsg
+
+def GetContextMenu():
+    """Create and return a context menu to override the builtin scintilla
+    one. To prevent it from allowing modifications to text that is to the
+    left of the prompt.
+
+    """
+    menu = wx.Menu()
+    menu.Append(wx.ID_CUT, _("Cut"))
+    menu.Append(wx.ID_COPY, _("Copy"))
+    menu.Append(wx.ID_PASTE, _("Paste"))
+    menu.AppendSeparator()
+    menu.Append(wx.ID_SELECTALL, _("Select All"))
+    menu.AppendSeparator()
+    menu.Append(wx.ID_SETUP, _("Preferences"))
+
+    return menu
 
 #-----------------------------------------------------------------------------#
 # For Testing
