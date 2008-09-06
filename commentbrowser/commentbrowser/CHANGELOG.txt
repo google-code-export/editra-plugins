@@ -9,8 +9,8 @@ Version 0.3
 Released: xx/xx/xxxx
 
 + Some ui improvements
-+ Added Italian, Russian, and Serbian, Brazilian Portuguese, Ukrainian 
-  translations
++ Added Italian, Russian, and Serbian, Brazilian Portuguese, Ukrainian, and
+  Finnish translations
 
 #-----------------------------------------------------------------------------#
 

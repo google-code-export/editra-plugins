@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: editra\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2008-07-08 19:35-0500\n"
+"POT-Creation-Date: 2008-09-06 14:40-0500\n"
 "PO-Revision-Date: 2008-03-02 09:34+0000\n"
 "Last-Translator: Cody Precord <Unknown>\n"
 "Language-Team: Japanese <ja@li.org>\n"
@@ -17,16 +17,16 @@ msgstr ""
 "X-Launchpad-Export-Date: 2008-03-05 12:44+0000\n"
 "X-Generator: Launchpad (build Unknown)\n"
 
-#: commentbrowser/commentbrowser/cbrowser.py:120
+#: commentbrowser/commentbrowser/cbrowser.py:114
 msgid "After key"
 msgstr "キーの後"
 
-#: commentbrowser/commentbrowser/cbrowser.py:118
+#: commentbrowser/commentbrowser/cbrowser.py:112
 msgid "All opened files"
 msgstr "すべてのファイル"
 
+#: commentbrowser/commentbrowser/__init__.py:84
 #: commentbrowser/commentbrowser/__init__.py:96
-#: commentbrowser/commentbrowser/cbrowser.py:45
 msgid "Comment Browser"
 msgstr "コメントブラウザ"
 
@@ -35,15 +35,15 @@ msgstr "コメントブラウザ"
 msgid "CommentBrowser"
 msgstr "コメントブラウザ"
 
-#: commentbrowser/commentbrowser/cbrowserlistctrl.py:69
+#: commentbrowser/commentbrowser/cbrowserlistctrl.py:58
 msgid "Description"
 msgstr "説明"
 
-#: commentbrowser/commentbrowser/cbrowserlistctrl.py:70
+#: commentbrowser/commentbrowser/cbrowserlistctrl.py:59
 msgid "File"
 msgstr "ファイル"
 
-#: commentbrowser/commentbrowser/cbrowserlistctrl.py:71
+#: commentbrowser/commentbrowser/cbrowserlistctrl.py:60
 msgid "Line"
 msgstr "行"
 
@@ -51,18 +51,18 @@ msgstr "行"
 msgid "Open Comment Browser Sidepanel"
 msgstr "コメントブラウザを開ける"
 
-#: commentbrowser/commentbrowser/cbrowser.py:125
+#: commentbrowser/commentbrowser/cbrowser.py:105
 msgid "Taskfilter: "
 msgstr "タスクフィルタ: "
 
-#: commentbrowser/commentbrowser/cbrowserlistctrl.py:68
+#: commentbrowser/commentbrowser/cbrowserlistctrl.py:57
 msgid "Type"
 msgstr "種類"
 
-#: commentbrowser/commentbrowser/cbrowser.py:126
+#: commentbrowser/commentbrowser/cbrowser.py:117
 msgid "Update"
 msgstr "更新"
 
-#: commentbrowser/commentbrowser/cbrowser.py:122
+#: commentbrowser/commentbrowser/cbrowser.py:115
 msgid "Update as you type"
 msgstr "プログラムの入力時に更新する"
