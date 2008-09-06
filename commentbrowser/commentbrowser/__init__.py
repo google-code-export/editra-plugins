@@ -81,7 +81,7 @@ class CommentBrowserPanel(plugin.Plugin):
             #---- Add Menu Items ----#
             viewm = self._mainwin.GetMenuBar().GetMenuByName('view')
             mi = viewm.InsertAlpha(cbrowser.ID_COMMENTBROWSE,
-                                   cbrowser.CAPTION,
+                                   _('Comment Browser'),
                                    _('Open Comment Browser Sidepanel'),
                                    wx.ITEM_CHECK,
                                    after=ed_glob.ID_PRE_MARK)

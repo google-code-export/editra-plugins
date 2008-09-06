@@ -41,7 +41,6 @@ _ = wx.GetTranslation
 
 # Identifiers
 PANE_NAME = 'CommentBrowser'
-CAPTION = _('Comment Browser')
 CB_KEY = 'CommentBrowser.Show'
 ID_CBROWSERPANE = wx.NewId()
 ID_COMMENTBROWSE = wx.NewId()  #menu item
