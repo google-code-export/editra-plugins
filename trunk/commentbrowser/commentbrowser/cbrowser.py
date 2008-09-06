@@ -25,12 +25,10 @@ import re
 import wx
 
 # Editra Library Modules
-import ed_glob
 import syntax
 import ed_msg
 import profiler
 import eclib.ctrlbox as ctrlbox
-from extern import flatnotebook as FNB
 
 
 # Local
@@ -111,7 +109,8 @@ class CBrowserPane(ctrlbox.ControlBox):
         self._taskFilter.SetStringSelection(self._taskChoices[0])
         ctrlbar.AddControl(self._taskFilter, wx.ALIGN_LEFT)
         ctrlbar.AddStretchSpacer()
-        self._checkBoxAllFiles = wx.CheckBox(ctrlbar, label=_('All opened files'))
+        self._checkBoxAllFiles = wx.CheckBox(ctrlbar,
+                                             label=_('All opened files'))
         ctrlbar.AddControl(self._checkBoxAllFiles, wx.ALIGN_RIGHT)
         self._chekcBoxAfterKey = wx.CheckBox(ctrlbar, label=_('After key'))
         self._chekcBoxAfterKey.SetToolTipString(_("Update as you type"))
@@ -121,16 +120,18 @@ class CBrowserPane(ctrlbox.ControlBox):
 
         #---- Bind events ----#
 
-        self._mainwin.Bind(wx.EVT_ACTIVATE, self.OnActivate)
         self.Bind(wx.EVT_TIMER, lambda evt: self.UpdateCurrent(), self._timer)
         self.Bind(wx.EVT_BUTTON, lambda evt: self.UpdateCurrent(), btn)
-        self.Bind(wx.EVT_CHOICE, lambda evt: self.UpdateCurrent(), self._taskFilter)
+        self.Bind(wx.EVT_CHOICE,
+                  lambda evt: self.UpdateCurrent(), self._taskFilter)
 
         # Main notebook events
         ed_msg.Subscribe(self.OnPageClose, ed_msg.EDMSG_UI_NB_CLOSED)
         ed_msg.Subscribe(self.OnPageChange, ed_msg.EDMSG_UI_NB_CHANGED)
 
-        self.Bind(wx.EVT_CHECKBOX, lambda evt: self.UpdateCurrent(), self._checkBoxAllFiles)
+        self.Bind(wx.EVT_CHECKBOX,
+                  lambda evt: self.UpdateCurrent(),
+                  self._checkBoxAllFiles)
 
         # File action messages
         ed_msg.Subscribe(self.OnListUpdate, ed_msg.EDMSG_FILE_SAVED)
@@ -147,7 +148,8 @@ class CBrowserPane(ctrlbox.ControlBox):
 
         """
         def IsMainWin(win):
-            return getattr(tlw, '__name__', '') == 'MainWindow'
+            """Is the window a mainwindow"""
+            return getattr(win, '__name__', '') == 'MainWindow'
 
         tlw = self.GetTopLevelParent()
         if IsMainWin(tlw):
@@ -178,7 +180,6 @@ class CBrowserPane(ctrlbox.ControlBox):
         ed_msg.Unsubscribe(self.OnPageChange)
         self._log('__del__(): stopping timer')
         self._timer.Stop()
-        super(CBrowserPane, self).__del__()
 
     #---- Methods ----#
 
@@ -254,11 +255,13 @@ class CBrowserPane(ctrlbox.ControlBox):
         self._listctrl.AddEntries(taskdict)
         self._listctrl.Thaw()
         self._listctrl.SortItems() # SortItems() calls Refresh()
-        
-    def __getNewKey(self):
+
+    @staticmethod
+    def __getNewKey():
         """
         key generator method for the list entries
         @returns: integer
+
         """
         z = 0
         while 1:
@@ -275,13 +278,15 @@ class CBrowserPane(ctrlbox.ControlBox):
         """Check whether this browser is active or not"""
         return self._mainwin.IsActive()
 
-    def IsComment(self, stc, bufferpos):
+    @staticmethod
+    def IsComment(stc, bufferpos):
         """
         Check whether the given point in the buffer is a comment
         region or not (special case python: it returns also True if the region
         is a documentation string, using triple quotes).
         @param stc: an EdStc object
         @param bufferpos: Zero based index of position in the buffer to check
+
         """
 
         style_id = stc.GetStyleAt(bufferpos)
@@ -290,7 +295,7 @@ class CBrowserPane(ctrlbox.ControlBox):
             return True
         else:
 
-            #python is special: look if its is in a documentation string
+            # Python is special: look if its is in a documentation string
 
             if stc.GetLangId() == syntax.synglob.ID_LANG_PYTHON:
                 if wx.stc.STC_P_TRIPLEDOUBLE == style_id or wx.stc.STC_P_TRIPLE\
@@ -338,8 +343,8 @@ class CBrowserPane(ctrlbox.ControlBox):
             return
 
         # Get the Current Control
-        nb, page = msg.GetData()
-        ctrl = nb.GetPage(page)
+        nbook, page = msg.GetData()
+        ctrl = nbook.GetPage(page)
         self.UpdateCurrent(ctrl)
 
         # only sort if it lists the tasks only for one file
@@ -355,24 +360,10 @@ class CBrowserPane(ctrlbox.ControlBox):
         if not self.IsActive():
             return
 
-        nb, page = msg.GetData()
-        if nb.GetPageCount() < page:
-            ctrl = nb.GetPage(page)
+        nbook, page = msg.GetData()
+        if nbook.GetPageCount() < page:
+            ctrl = nbook.GetPage(page)
             wx.CallAfter(self.UpdateCurrent, ctrl)
-
-    def OnActivate(self, event):
-        """
-        Callback when app goes to sleep or awakes.
-        @param event: wxEvent
-        """
-        if event.GetActive():
-            pass
-            #awake, reastart timer
-#            self.UpdateCurrent()
-        else:
-            pass
-            #going to sleep
-        event.Skip()
 
     def OnShow(self, evt):
         """
