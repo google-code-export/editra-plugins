@@ -77,8 +77,8 @@ for task in TASK_CHOICES:
 
 class CBrowserPane(ctrlbox.ControlBox):
     """Creates a Commentbrowser panel"""
-    def __init__( self, parent, id=wx.ID_ANY, pos=wx.DefaultPosition,
-                  size=wx.DefaultSize, style=wx.NO_BORDER, menu=None):
+    def __init__(self, parent, id=wx.ID_ANY, pos=wx.DefaultPosition,
+                 size=wx.DefaultSize, style=wx.NO_BORDER, menu=None):
         """ Initializes the CBrowserPane class"""
         ctrlbox.ControlBox.__init__(self, parent, id, pos, size, style)
 
@@ -215,7 +215,7 @@ class CBrowserPane(ctrlbox.ControlBox):
                     filename = os.path.split(fullname)[1]
                     textlines = textctrl.GetText().splitlines()
                 except Exception, excp:
-                    self._log('[error]:' + str(excp.message))
+                    self._log('[error] ' + str(excp.message))
                     self._log(type(excp))
                     return
 
@@ -236,20 +236,19 @@ class CBrowserPane(ctrlbox.ControlBox):
                                  and self.IsComment(textctrl,
                                     textctrl.PositionFromLine(idx)
                                      + todo_hit.start(1)):
+
                                 descr = todo_hit.group(1).strip()
                                 prio = descr.count('!')
 
                                 #prio is higher if further in the list
                                 prio += tasknr
-                                taskentry = (
-                                    int(prio),
-                                    str(self._taskChoices[tasknr]),
-                                    descr,
-                                    filename,
-                                    int(idx + 1),
-                                    fullname,
-                                    )
+                                taskentry = (int(prio),
+                                             str(self._taskChoices[tasknr]),
+                                             descr, filename, int(idx + 1),
+                                             fullname)
                                 taskdict[self.__getNewKey()] = taskentry
+
+        # Update the list
         self._listctrl.Freeze()
         self._listctrl.ClearEntries()
         self._listctrl.AddEntries(taskdict)
@@ -271,6 +270,7 @@ class CBrowserPane(ctrlbox.ControlBox):
     def GetMainWindow(self):
         """
         Get them main window that owns this instance
+
         """
         return self._mainwin
 
@@ -325,6 +325,7 @@ class CBrowserPane(ctrlbox.ControlBox):
         """
         Callback if EVT_TIMER, EVT_BUTTON or EVT_CHOICE is fired.
         @param event: wxEvent
+
         """
         #called on: ed_msg.EDMSG_FILE_SAVED
 #        self._log('OnListUpdate')
