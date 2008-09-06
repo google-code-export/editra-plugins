@@ -9,18 +9,16 @@
 ###############################################################################
 
 """
-This script started as an adaption of the vim plugin 'vimsh' by 
-brian m sturk <bsturk@adelphia.net> for use with a StyledTextCtrl. It has been
-extended and improved upon mostly in the areas of updating during long running
-commands because it does not have to work within the limitations of vim when
-doing this.
+This script started as an adaption of the vim plugin 'vimsh' by brian m sturk 
+but has since been partially reimplemented to take advantage of newer libraries
+and the features that wx offers.
 
 It currently should run on any unix like operating system that supports:
     - wxPython
     - Psuedo TTY's
 
-There is some code for trying to get it to run on Windows but it is still under
-development.
+On windows things are basically working now but support is not as good as it is
+on unix like operating systems.
 
 """
 
@@ -160,7 +158,6 @@ class Xterm(wx.stc.StyledTextCtrl):
         self.__Configure()
         self.__ConfigureStyles()
         self.__ConfigureKeyCmds()
-        self.SetViewEOL(True)
         self._SetupPTY()
 
         #---- Event Handlers ----#
@@ -398,13 +395,13 @@ class Xterm(wx.stc.StyledTextCtrl):
             DebugLog("[terminal][info] Slave Pty name: " + str(pty_name))
 
             self.pid, self.fd = pty.fork()
+            print "GRRR", self.fd, self.pid, "WTF"
 
             self.outd = self.fd
             self.ind  = self.fd
             self.errd = self.fd
 
-            signal.signal(signal.SIGCHLD, self._SigChildHandler)
-
+#            signal.signal(signal.SIGCHLD, self._SigChildHandler)
             if self.pid == 0:
                 attrs = tty.tcgetattr(1)
 
@@ -423,7 +420,7 @@ class Xterm(wx.stc.StyledTextCtrl):
 
             else:
                 try:
-                    attrs = tty.tcgetattr(1)
+                    attrs = tty.tcgetattr(self.fd)
                     termios_keys = attrs[6]
                 except:
                     DebugLog('[terminal][err] tcgetattr failed')
@@ -545,7 +542,7 @@ class Xterm(wx.stc.StyledTextCtrl):
         @keyword null: should the command be null terminated
 
         """
-        DebugLog("terminal][exec] Running command: %s" % str(cmd))
+        DebugLog("[terminal][exec] Running command: %s" % str(cmd))
 
         try:
             # Get text from prompt to eol when no command is given
@@ -735,8 +732,8 @@ class Xterm(wx.stc.StyledTextCtrl):
 
         for line in lines:
             DebugLog("[terminal][print] Current line is --> %s" % line)
-            m = None
-            if line.endswith("\r\n"):
+            m = False
+            if len(line) > 2 and "\r" in line[-2:]:
                 line = line.rstrip()
                 m = True
 
