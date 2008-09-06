@@ -33,34 +33,23 @@ _ = wx.GetTranslation
 #------------------------------------------------------------------------------#
 
 
-class CustomListCtrl(wx.ListCtrl, listmix.ListCtrlAutoWidthMixin,
-            listmix.ColumnSorterMixin):
-
+class CustomListCtrl(wx.ListCtrl,
+                     listmix.ListCtrlAutoWidthMixin,
+                     listmix.ColumnSorterMixin):
     """The list ctrl used for the list"""
 
-    def __init__(
-        self,
-        parent,
-        ID=-1,
-        pos=wx.DefaultPosition,
-        size=wx.DefaultSize,
-        style=wx.BORDER_NONE|wx.LC_REPORT|wx.LC_HRULES|wx.LC_VRULES|
-                        wx.LC_SINGLE_SEL|wx.LC_VIRTUAL|wx.LC_SORT_DESCENDING):
+    def __init__(self, parent, id_=wx.ID_ANY, pos=wx.DefaultPosition,
+                 size=wx.DefaultSize,
+                 style=wx.BORDER_NONE|wx.LC_REPORT|wx.LC_HRULES|wx.LC_VRULES|
+                       wx.LC_SINGLE_SEL|wx.LC_VIRTUAL|wx.LC_SORT_DESCENDING):
         """Init the CustomListCtrl"""
 
-        wx.ListCtrl.__init__(
-            self,
-            parent,
-            ID,
-            pos,
-            size,
-            style,
-            )
+        wx.ListCtrl.__init__(self, parent, id_, pos, size, style)
 
         #---- Images used by the list ----#
         self._img_list = None
         self.sm_up = None
-        self.sm_down = None
+        self.sm_dn = None
         self._SetupImages()
 
         #---- Set Columns Headers ----#
@@ -109,7 +98,8 @@ class CustomListCtrl(wx.ListCtrl, listmix.ListCtrlAutoWidthMixin,
 
     #---- methods ----#
 
-    def _log(self, msg):
+    @staticmethod
+    def _log(msg):
         """
         Private log method of this class
         @params msg: message to log
@@ -129,9 +119,11 @@ class CustomListCtrl(wx.ListCtrl, listmix.ListCtrlAutoWidthMixin,
             ups = wx.ArtProvider_GetBitmap(wx.ART_GO_UP, wx.ART_TOOLBAR, isize)
         self.sm_up = self._img_list.Add(ups)
 
-        down = wx.ArtProvider_GetBitmap(str(ed_glob.ID_DOWN), wx.ART_MENU, isize)
+        down = wx.ArtProvider_GetBitmap(str(ed_glob.ID_DOWN),
+                                        wx.ART_MENU, isize)
         if not down.IsOk():
-            down = wx.ArtProvider_GetBitmap(wx.ART_GO_DOWN, wx.ART_TOOLBAR, isize)
+            down = wx.ArtProvider_GetBitmap(wx.ART_GO_DOWN,
+                                            wx.ART_TOOLBAR, isize)
         self.sm_dn = self._img_list.Add(down)
 
         self.SetImageList(self._img_list, wx.IMAGE_LIST_SMALL)
@@ -144,6 +136,7 @@ class CustomListCtrl(wx.ListCtrl, listmix.ListCtrlAutoWidthMixin,
         entrytuple = (prio, tasktype, description, file, line, fullname)
         Refresh is not called.
         @param entrydict: a dictionary containing {key:entrytuple}
+
         """
         self.itemDataMap = dict(entrydict)
         self.itemIndexMap = self.itemDataMap.keys()
@@ -151,8 +144,8 @@ class CustomListCtrl(wx.ListCtrl, listmix.ListCtrlAutoWidthMixin,
         try:
             self._max_prio = max([item[0]
                                   for item in self.itemDataMap.values()])
-        except:
-            pass
+        except Exception, msg:
+            self._log("[err] %s" % msg)
 
     def ClearEntries(self):
         """Removes all entries from list ctrl, refresh is not called"""
@@ -164,26 +157,26 @@ class CustomListCtrl(wx.ListCtrl, listmix.ListCtrlAutoWidthMixin,
         """
         Navigates to the file and position saved in this item
         @param itemIndex: a int
+
         """
         if itemIndex < 0 or itemIndex > len(self.itemDataMap):
-            self._log('[error] itemIndex out of range!')
+            self._log('[err] itemIndex out of range!')
             return
         
         key = self.itemIndexMap[itemIndex]
         source = str(self.itemDataMap[key][-1])
         line = self.itemDataMap[key][-2]
         try:
-            nb = self.GetParent().GetMainWindow().GetNotebook()
-            ctrls = nb.GetTextControls()
+            nbook = self.GetParent().GetMainWindow().GetNotebook()
+            ctrls = nbook.GetTextControls()
             for ctrl in ctrls:
                 if source == ctrl.GetFileName():
-                    nb.SetSelection(nb.GetPageIndex(ctrl))
-                    nb.GoCurrentPage()
+                    nbook.SetSelection(nbook.GetPageIndex(ctrl))
+                    nbook.GoCurrentPage()
                     ctrl.GotoLine(line-1)
                     break
         except Exception, excp:
             self._log("[error] %s" % excp)
-
 
     #---- special methods used by the mixinx classes ----#
     
@@ -202,6 +195,7 @@ class CustomListCtrl(wx.ListCtrl, listmix.ListCtrlAutoWidthMixin,
         """
         This method is required by the 
         wx.lib.mixins.listctrl.ColumnSorterMixin, for internal usage only
+
         """
         sorter = self.SpecialSorter # always use the special sorter
         items = list(self.itemDataMap.keys())
@@ -216,6 +210,7 @@ class CustomListCtrl(wx.ListCtrl, listmix.ListCtrlAutoWidthMixin,
         Overwrites the default GetColumnSorter of the mixin.
         @returns: a compare function object that takes two arguments: 
         func(key1, key2)
+
         """
         return self.SpecialSorter
 
@@ -227,9 +222,10 @@ class CustomListCtrl(wx.ListCtrl, listmix.ListCtrlAutoWidthMixin,
         @param key1: first item index to compare
         @param key2: second item index to compare
         @returns: a tuple of the keys either (key1, key2) or (key2, key1)
+
         """
-        cmpVal = self.SpecialSorter(key1, key2)
-        if 0 < cmpVal:
+        cval = self.SpecialSorter(key1, key2)
+        if 0 < cval:
             return (key2, key1)
         return (key1, key2)
         
@@ -241,6 +237,7 @@ class CustomListCtrl(wx.ListCtrl, listmix.ListCtrlAutoWidthMixin,
         @param key1: first key to compare
         @param key2: second key to compare
         @returns: -1, 0 or 1 like the compare function
+
         """
         col = self._col
         ascending = self._colSortFlag[col]
@@ -256,16 +253,16 @@ class CustomListCtrl(wx.ListCtrl, listmix.ListCtrlAutoWidthMixin,
         elif 4 == col: # line number -> sortorder: file, line
             _sortorder = [3, 4]
             
-        cmpVal = 0
+        cmpval = 0
         _idx = 0
-        while( 0 == cmpVal and _idx < len(_sortorder) ):
+        while( 0 == cmpval and _idx < len(_sortorder) ):
             item1 = self.itemDataMap[key1][ _sortorder[_idx] ]
             item2 = self.itemDataMap[key2][ _sortorder[_idx] ]
             #--- Internationalization of string sorting with locale module
             if type(item1) == type('') or type(item2) == type(''):
-                cmpVal = locale.strcoll(str(item1), str(item2))
+                cmpval = locale.strcoll(str(item1), str(item2))
             else:
-                cmpVal = cmp(item1, item2)
+                cmpval = cmp(item1, item2)
             #---
             _idx += 1
 
@@ -278,15 +275,16 @@ class CustomListCtrl(wx.ListCtrl, listmix.ListCtrlAutoWidthMixin,
             ascending = 1
             
         if ascending:
-            return cmpVal
+            return cmpval
         else:
-            return -cmpVal
+            return -cmpval
 
     #Used by the ColumnSorterMixin, see wx/lib/mixins/listctrl.py
     def GetSortImages(self):
         """
         This method is required by the 
         wx.lib.mixins.listctrl.ColumnSorterMixin, for internal usage only
+
         """
         return (self.sm_dn, self.sm_up)
         
@@ -294,43 +292,48 @@ class CustomListCtrl(wx.ListCtrl, listmix.ListCtrlAutoWidthMixin,
         # These methods are callbacks for implementing the
         # "virtualness" of the list...
 
-    def OnGetItemText(self, itemIdx, col):
+    def OnGetItemText(self, idx, col):
         """
         Virtual ListCtrl have to define this method, returns the text of the
         requested item.
         @param itemIdx: a int defining the item
         @param col: column
         @returns: text as a string for the item and column
+
         """
-        index = self.itemIndexMap[itemIdx]
+        index = self.itemIndexMap[idx]
         text = self.itemDataMap[index][col]
         return text
 
-    def OnGetItemImage(self, item):
+    @staticmethod
+    def OnGetItemImage(item):
         """
         Virtual ListCtrl have to define this method, should return an image
         for the item, but since we have no images it always returns -1.
         @param item: itemindex (not used)
         @returns: always -1 because we have no images for the items.
+
         """
         return -1
 
-    def OnGetItemAttr(self, itemIdx):
+    def OnGetItemAttr(self, idx):
         """
         Virtual ListCtrl have to define this method, should return item 
         attributes, but since we have none it always returns None.
         @param itemIdx: index of an item for which we want the attributes
         @returns: a wx.ListItemAttr if the prio of the item is high enough, 
         None otherwise
+
         """
-        idx = self.itemIndexMap[itemIdx]
+        idx = self.itemIndexMap[idx]
         prio = self.itemDataMap[idx][0]
         prionum = [self._max_prio-i for i in range(5)]
-        if prio in prionum and prio>1:
+        if prio in prionum and prio > 1:
             idx = prionum.index(prio)
             val = int( 255 - 255. / (2**idx) )
-            self._attr = wx.ListItemAttr(wx.NullColor, wx.Color(255, 255, val),\
-                                                                    wx.NullFont)
+            self._attr = wx.ListItemAttr(wx.NullColor,
+                                         wx.Color(255, 255, val),
+                                         wx.NullFont)
             return self._attr
         return None
 
