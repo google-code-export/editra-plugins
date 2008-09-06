@@ -29,6 +29,7 @@ import ed_glob
 import syntax
 import ed_msg
 import profiler
+import eclib.ctrlbox as ctrlbox
 from extern import flatnotebook as FNB
 
 
@@ -76,28 +77,12 @@ for task in TASK_CHOICES:
 #---- examples ----#
 
 
-class CBrowserPane(wx.Panel):
-
+class CBrowserPane(ctrlbox.ControlBox):
     """Creates a Commentbrowser panel"""
-
-    def __init__(
-        self,
-        parent,
-        id=wx.ID_ANY,
-        pos=wx.DefaultPosition,
-        size=wx.DefaultSize,
-        style=wx.NO_BORDER,
-        menu=None):
+    def __init__( self, parent, id=wx.ID_ANY, pos=wx.DefaultPosition,
+                  size=wx.DefaultSize, style=wx.NO_BORDER, menu=None):
         """ Initializes the CBrowserPane class"""
-
-        wx.Panel.__init__(
-            self,
-            parent,
-            id,
-            pos,
-            size,
-            style,
-            )
+        ctrlbox.ControlBox.__init__(self, parent, id, pos, size, style)
 
         #---- private attr ----#
 
@@ -108,47 +93,31 @@ class CBrowserPane(wx.Panel):
         self._timer = wx.Timer(self, ID_TIMER)
         self._intervall = 500  # milli seconds
 
+        self._taskChoices = TASK_CHOICES
+
         #---- Gui ----#
 
+        ctrlbar = ctrlbox.ControlBar(self, style=ctrlbox.CTRLBAR_STYLE_GRADIENT)
+        if wx.Platform == '__WXGTK__':
+            ctrlbar.SetWindowStyle(ctrlbox.CTRLBAR_STYLE_DEFAULT)
+
+        self.SetControlBar(ctrlbar)
         self._listctrl = CustomListCtrl(self)
+        self.SetWindow(self._listctrl)
 
-        self._taskChoices = TASK_CHOICES
-        self._taskFilter = wx.Choice(self, choices=self._taskChoices)
+        tasklbl = wx.StaticText(ctrlbar, label=_('Taskfilter: '))
+        ctrlbar.AddControl(tasklbl, wx.ALIGN_LEFT)
+        self._taskFilter = wx.Choice(ctrlbar, choices=self._taskChoices)
         self._taskFilter.SetStringSelection(self._taskChoices[0])
-        self._checkBoxAllFiles = wx.CheckBox(self, label=_('All opened files'),
-                 style=wx.ALIGN_LEFT)
-        self._chekcBoxAfterKey = wx.CheckBox(self, label=_('After key'), \
-                style=wx.ALIGN_LEFT)
+        ctrlbar.AddControl(self._taskFilter, wx.ALIGN_LEFT)
+        ctrlbar.AddStretchSpacer()
+        self._checkBoxAllFiles = wx.CheckBox(ctrlbar, label=_('All opened files'))
+        ctrlbar.AddControl(self._checkBoxAllFiles, wx.ALIGN_RIGHT)
+        self._chekcBoxAfterKey = wx.CheckBox(ctrlbar, label=_('After key'))
         self._chekcBoxAfterKey.SetToolTipString(_("Update as you type"))
-
-        hsizer = wx.BoxSizer(wx.HORIZONTAL)
-        tasklbl = wx.StaticText(self, label=_('Taskfilter: '))
-        btn = wx.Button(self, label=_('Update'))
-        hsizer.AddMany([((5, 5)), (tasklbl, 0, wx.ALIGN_CENTER_VERTICAL),
-                        ((5, 5)), (self._taskFilter, 0, wx.ALIGN_CENTER_VERTICAL),
-                        ((-1, 5), 1, wx.EXPAND),
-                        (self._checkBoxAllFiles, 0, wx.ALIGN_CENTER_VERTICAL |\
-                                                    wx.ALIGN_RIGHT),
-                        ((5, 5), 0),
-                        (self._chekcBoxAfterKey, 0, wx.ALIGN_CENTER_VERTICAL |\
-                                                    wx.ALIGN_RIGHT),
-                        ((5, 5)),
-                        (btn, 0, wx.ALIGN_CENTER_VERTICAL | wx.ALIGN_RIGHT),
-                        ((5, 5))])
-
-        # Use small version of controls on osx
-        if wx.Platform == '__WXMAC__':
-            for win in [self._taskFilter, tasklbl, btn,
-                        self._checkBoxAllFiles, self._chekcBoxAfterKey]:
-                win.SetWindowVariant(wx.WINDOW_VARIANT_SMALL)
-
-        sizer = wx.BoxSizer(wx.VERTICAL)
-        sizer.Add(hsizer, 0, wx.EXPAND)
-        sizer.Add(self._listctrl, 1, wx.EXPAND)
-
-        self.SetSizer(sizer)
-        self.SetAutoLayout(True)
-        self.Layout()
+        ctrlbar.AddControl(self._chekcBoxAfterKey, wx.ALIGN_RIGHT)
+        btn = wx.Button(ctrlbar, label=_('Update'))
+        ctrlbar.AddControl(btn, wx.ALIGN_RIGHT)
 
         #---- Bind events ----#
 
