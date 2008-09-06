@@ -15,7 +15,7 @@ except ImportError:
 if setup != None:
     setup(
         name='CommentBrowser',
-        version='0.2',
+        version='0.3',
         description=__doc__,
         author=__author__,
         author_email="dr0iddr0id@googlemail.com",
