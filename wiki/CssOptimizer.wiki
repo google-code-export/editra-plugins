@@ -4,6 +4,9 @@
 
 The Css optimizer plugin is an Editra Generator that generates css files that are optimized for size. It works by taking the css file that is in the current buffer and removing comments and compressing extra whitespace. In order to preserve some level of readability though definitions are only compressed to one definition per line.
 
+  * Removes Comments
+  * Compacts extra whitespace
+  * Compacts color values into smaller strings
 
 = How To =
 
