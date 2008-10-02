@@ -1301,8 +1301,8 @@ class ProjectTree(wx.Panel):
                 item.SetBitmap(self.menuicons[icon])
             else:
                 item.SetBitmap(self.menuicons['blank'])
-            item.Enable(enabled)
             menu.AppendItem(item)
+            item.Enable(enabled)
 
         # Popup the menu.  If an item is selected then its handler
         # will be called before PopupMenu returns.
