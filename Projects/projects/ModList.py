@@ -26,7 +26,7 @@ import wx.lib.mixins.listctrl as listmix
 # For Testing
 import sys
 import os
-path = os.path.abspath('../../../../../src')
+path = os.path.abspath('..\\..\\..\\..\\src')
 sys.path.insert(0, path)
 
 # Local Imports
@@ -37,7 +37,8 @@ import ScCommand
 # Editra Imports
 import ed_glob
 
-ed_glob.CONFIG['CACHE_DIR'] = "/Users/codyprecord/.Editra/cache/"
+#ed_glob.CONFIG['CACHE_DIR'] = "/Users/codyprecord/.Editra/cache/"
+ed_glob.CONFIG['CACHE_DIR'] = "C:\\Documents and Settings\\cjprecord\\.Editra\\cache\\"
 import eclib.ctrlbox as ctrlbox
 import eclib.platebtn as platebtn
 import eclib.elistmix as elistmix
@@ -161,8 +162,7 @@ class RepoModList(wx.ListCtrl,
     def __init__(self, parent, id=wx.ID_ANY):
         """Create the list control"""
         wx.ListCtrl.__init__(self, parent, id,
-                             style=wx.LC_REPORT | wx.LC_SORT_ASCENDING | \
-                                   wx.LC_VRULES | wx.BORDER)
+                             style=wx.LC_REPORT | wx.LC_VRULES | wx.BORDER)
         listmix.ListCtrlAutoWidthMixin.__init__(self)
         elistmix.ListRowHighlighter.__init__(self)
 
@@ -320,8 +320,8 @@ class RepoModList(wx.ListCtrl,
         self.DeleteAllItems()
 
         # Update the display
-        for fname, status in status.iteritems():
-            fstatus = status.get('status', 'uptodate')
+        for fname, stat in status.iteritems():
+            fstatus = stat.get('status', 'uptodate')
             if fstatus != 'uptodate':
                 self.AddFile(STATUS.get(fstatus, u'U'),
                              os.path.join(path, fname))
