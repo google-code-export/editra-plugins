@@ -82,7 +82,12 @@ build_all () {
         BUILD="setup.py --quiet bdist_egg --dist-dir=../."
     fi
 
-    ## Check if both python 2.4 and 2.5 are available ##
+    ## Check what Pythons are available (2.4, 2.5, 2.6) ##
+    python2.6 -V 2>/dev/null
+    if [ $? -eq 0 ]; then
+       PY26="python2.6"
+    fi
+
     python2.5 -V 2>/dev/null
     if [ $? -eq 0 ]; then
        PY25="python2.5"
@@ -94,7 +99,7 @@ build_all () {
     fi
 
     # Abort if no suitable python is found
-    if [[ -z "$PY25" && -z "$PY24" ]]; then
+    if [[ -z "$PY26" && -z "$PY25" && -z "$PY24" ]]; then
         echo "${RED}!!${OFF} Neither Python 2.4 or 2.5 could be found ${RED}!!${OFF}"
         echo "${RED}!!${OFF} Aborting build ${RED}!!${OFF}"
         exit
@@ -109,11 +114,19 @@ build_all () {
         if [ -d "$plugin" ]; then
             echo "${GREEN}Building${OFF} $plugin...";
             cd $plugin
+
+            if [ -n "$PY26" ]; then
+                echo "${CYAN}Python2.6${OFF} Building..";
+                `$PY26 $BUILD`
+                echo "${CYAN}Python2.6${OFF} Build finished"
+            fi
+
             if [ -n "$PY25" ]; then
                 echo "${CYAN}Python2.5${OFF} Building..";
                 `$PY25 $BUILD`
                 echo "${CYAN}Python2.5${OFF} Build finished"
             fi
+
             if [ -n "$PY24" ]; then
                 echo "${CYAN}Python2.4${OFF} Building..";
                 `$PY24 $BUILD`
