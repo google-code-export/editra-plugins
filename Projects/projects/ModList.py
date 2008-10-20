@@ -55,7 +55,16 @@ ID_REVISION_HIST = wx.NewId()
 # Control Id's
 ID_REPO_CHOICE = wx.NewId()
 
+
+# Status Keys used by SourceControl modules
+STATUS = { u'modified' : u'M',
+           u'added'    : u'A',
+           u'deleted'  : u'D',
+           u'conflict' : u'C',
+           u'unknown'  : u'?' }
+           
 _ = wx.GetTranslation
+
 #--------------------------------------------------------------------------#
 
 class RepoModBox(ctrlbox.ControlBox):
@@ -156,7 +165,11 @@ class RepoModBox(ctrlbox.ControlBox):
 class RepoModList(wx.ListCtrl,
                   elistmix.ListRowHighlighter,
                   listmix.ListCtrlAutoWidthMixin):
-    """List control"""
+    """List for managing and listing files under SourceControl.
+    Specifically it displays the summary of modified files under a given
+    repository.
+
+    """
     STATUS_COL = 0
     FILENAME_COL = 1
     def __init__(self, parent, id=wx.ID_ANY):
@@ -325,15 +338,6 @@ class RepoModList(wx.ListCtrl,
             if fstatus != 'uptodate':
                 self.AddFile(STATUS.get(fstatus, u'U'),
                              os.path.join(path, fname))
-        
-#--------------------------------------------------------------------------#
-
-# Status
-STATUS = { u'modified' : u'M',
-           u'added'    : u'A',
-           u'deleted'  : u'D',
-           u'conflict' : u'C',
-           u'unknown'  : u'?' }
 
 #--------------------------------------------------------------------------#
 
