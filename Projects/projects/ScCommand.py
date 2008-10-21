@@ -109,18 +109,21 @@ class ScCommandThread(threading.Thread):
 
 #--------------------------------------------------------------------------#
 
-class SourceController:
+class SourceController(object):
     """Source control command controller"""
     def __init__(self, owner):
         """Create the SourceController
         @param owner: Owner window
 
         """
+        object.__init__(self)
+
         # Attributes
         self._parent = owner
         self.config = ConfigData() # Singleton config data instance
         self.tempdir = None
         self.scThreads = {}
+
         # Number of seconds to allow a source control command to run
         # before timing out
         self.scTimeout = 60
