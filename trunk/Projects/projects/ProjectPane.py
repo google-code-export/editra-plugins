@@ -819,22 +819,22 @@ class ProjectTree(wx.Panel):
         if not self.isSingleRepository(nodes):
             return
 
+        paths = list()
+        for node in nodes:
+            try:
+                data = self.tree.GetPyData(node)
+            except:
+                data = {}
+
+            if data.get('sclock', None):
+                continue
+
+            if 'path' not in data:
+                continue
+            else:
+                paths.append(data['path'])
+
         while True:
-            paths = list()
-            for node in nodes:
-                try:
-                    data = self.tree.GetPyData(node)
-                except:
-                    data = {}
-
-                if data.get('sclock', None):
-                    continue
-
-                if 'path' not in data:
-                    continue
-                else:
-                    paths.append(data['path'])
-
             ted = ProjCmnDlg.CommitDialog(self, _("Commit Dialog"),
                                           _("Enter your commit message:"),
                                           paths)
@@ -842,6 +842,8 @@ class ProjectTree(wx.Panel):
             message = u''
             if ted.ShowModal() == wx.ID_OK:
                 message = ted.GetValue().strip()
+            else:
+                return
 
             ted.Destroy()
             if message:
