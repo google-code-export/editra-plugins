@@ -26,8 +26,8 @@ import wx.lib.mixins.listctrl as listmix
 # For Testing
 import sys
 import os
-path = os.path.abspath('..\\..\\..\\..\\src')
-#path = os.path.abspath('../../../../../src')
+#path = os.path.abspath('..\\..\\..\\..\\src')
+path = os.path.abspath('../../../../../src')
 sys.path.insert(0, path)
 
 # Local Imports
@@ -35,12 +35,13 @@ import FileIcons
 import ConfigDialog
 import ScCommand
 import ProjCmnDlg
+from HistWin import HistoryWindow
 
 # Editra Imports
 import ed_glob
-
-#ed_glob.CONFIG['CACHE_DIR'] = "/Users/codyprecord/.Editra/cache/"
-ed_glob.CONFIG['CACHE_DIR'] = "C:\\Documents and Settings\\cjprecord\\.Editra\\cache\\"
+ed_glob.CONFIG['CACHE_DIR'] = "/Users/codyprecord/.Editra/cache/"
+ed_glob.CONFIG['SYSPIX_DIR'] = "/Users/codyprecord/Desktop/devel/Editra/pixmaps/"
+#ed_glob.CONFIG['CACHE_DIR'] = "C:\\Documents and Settings\\cjprecord\\.Editra\\cache\\"
 import eclib.ctrlbox as ctrlbox
 import eclib.platebtn as platebtn
 import eclib.elistmix as elistmix
@@ -50,9 +51,9 @@ import eclib.elistmix as elistmix
 
 # Menu Id's
 ID_COMPARE_TO_PREVIOUS = wx.NewId()
-ID_COMMIT = wx.NewId()
-ID_REVERT = wx.NewId()
-ID_REVISION_HIST = wx.NewId()
+ID_COMMIT              = wx.NewId()
+ID_REVERT              = wx.NewId()
+ID_REVISION_HIST       = wx.NewId()
 
 # Control Id's
 ID_REPO_CHOICE = wx.NewId()
@@ -92,6 +93,8 @@ class RepoModBox(ctrlbox.ControlBox):
                   lambda evt: self.DoRevert(), id=wx.ID_REVERT)
         self.Bind(wx.EVT_CHOICE, self.OnChoice, id=ID_REPO_CHOICE)
 
+        self.Bind(wx.EVT_UPDATE_UI, self.OnUpdateUI)
+
     def __DoLayout(self):
         """Layout and setup the results screen ui"""
         ctrlbar = ctrlbox.ControlBar(self, style=ctrlbox.CTRLBAR_STYLE_GRADIENT)
@@ -118,17 +121,17 @@ class RepoModBox(ctrlbox.ControlBox):
 
         ctrlbar.AddStretchSpacer()
 
-        # Commit
-        commit = platebtn.PlateButton(ctrlbar, ID_COMMIT, _("Commit"),
-                                      FileIcons.getScCommitBitmap(),
-                                      style=platebtn.PB_STYLE_NOBG)
-        ctrlbar.AddControl(commit, wx.ALIGN_RIGHT)
-
         # Refresh Button
         refresh = platebtn.PlateButton(ctrlbar, wx.ID_REFRESH, _("Refresh"),
                                        FileIcons.getScStatusBitmap(),
                                        style=platebtn.PB_STYLE_NOBG)
         ctrlbar.AddControl(refresh, wx.ALIGN_RIGHT)
+
+        # Commit
+        commit = platebtn.PlateButton(ctrlbar, ID_COMMIT, _("Commit"),
+                                      FileIcons.getScCommitBitmap(),
+                                      style=platebtn.PB_STYLE_NOBG)
+        ctrlbar.AddControl(commit, wx.ALIGN_RIGHT)
 
         # Clear Button
         revert = platebtn.PlateButton(ctrlbar, ID_REVERT, _("Revert"),
@@ -159,6 +162,19 @@ class RepoModBox(ctrlbox.ControlBox):
             self._crepo = self._repo_ch.GetSelection()
             self._repo_ch.SetToolTipString(self._repos[self._crepo])
             self.DoStatusRefresh()
+        else:
+            evt.Skip()
+
+    def OnUpdateUI(self, evt):
+        """Update UI of buttons based on state of list
+        @param evt: wx.UpdateUIEvent
+
+        """
+        e_id = evt.GetId()
+        if e_id in (ID_REVERT, ID_COMMIT):
+            evt.Enable(self._list.GetSelectedItemCount())
+        elif e_id == ID_REPO_CHOICE:
+            evt.Enable(self._repo_ch.GetCount())
         else:
             evt.Skip()
 
@@ -199,6 +215,16 @@ class RepoModList(wx.ListCtrl,
         self.Bind(ScCommand.EVT_STATUS, self.OnStatus)
         self.Bind(ScCommand.EVT_CMD_COMPLETE, self.OnCommandComplete)
 
+    def __ConstructNodes(self):
+        """Make the node's list from the selected list items
+        @return: list of tuples
+
+        """
+        paths = self.GetSelectedPaths()
+        print "NODES:", paths
+        nodes = [(None, {'path' : path}) for path in paths]
+        return nodes
+
     def AddFile(self, status, fname):
         """Add a file to the list
         @param status: Status indicator
@@ -217,6 +243,7 @@ class RepoModList(wx.ListCtrl,
     def CommitSelectedFiles(self):
         """Commit the selected files"""
         paths = self.GetSelectedPaths()
+        nodes = self.__ConstructNodes()
         message = u""
 
         # Make sure a commit message is entered
@@ -234,8 +261,6 @@ class RepoModList(wx.ListCtrl,
             if message:
                 break
 
-        nodes = [(None, {'path' : path}) for path in paths]
-        print "NODES", nodes
 #        self._ctrl.ScCommand(nodes, 'commit', message=message)
 
     def GetSelectedPaths(self):
@@ -265,6 +290,8 @@ class RepoModList(wx.ListCtrl,
     def RefreshStatus(self):
         """Refresh the screen with the latest status info from the
         current repository.
+        @postcondition: status of current files in repository is refreshed and
+                        displayed in the list.
 
         """
         self.DeleteAllItems()
@@ -272,9 +299,32 @@ class RepoModList(wx.ListCtrl,
             self.UpdatePathStatus(self._path)
 
     def RevertSelectedFiles(self):
-        """Revert the selected files"""
+        """Revert the selected files
+        @postcondition: selected items in the list are reverted to the
+                        repository version.
+
+        """
+        nodes = self.__ConstructNodes()
+#        self._ctrl.ScCommand(nodes, 'revert')
+
+    def ShowRevisionHistory(self):
+        """Show the revision history for the selected files
+        @postcondition: History dialog is shown for each selected file
+
+        """
         paths = self.GetSelectedPaths()
-        
+        pos = wx.DefaultPosition
+        win = None
+
+        for path in paths:
+            if win is not None:
+                pos = win.GetPosition()
+                pos = (pos[0] + 22, pos[1] + 22)
+
+            win = HistoryWindow(self, path, None, dict(path=path))
+            win.Show()
+            if pos != wx.DefaultPosition:
+                win.SetPosition(pos)
 
     def UpdatePathStatus(self, path):
         """Run an status update job
@@ -308,14 +358,15 @@ class RepoModList(wx.ListCtrl,
         if self._menu is None:
             # Create the menu once
             self._menu = wx.Menu()
+            item = self._menu.Append(wx.ID_REFRESH, _("Refresh status"))
+            item.SetBitmap(FileIcons.getScStatusBitmap())
             item = self._menu.Append(ID_COMPARE_TO_PREVIOUS,
                                      _("Compare to previous version"))
             item.SetBitmap(FileIcons.getScDiffBitmap())
             item = self._menu.Append(ID_REVISION_HIST,
                                      _("Show revision history"))
             item.SetBitmap(FileIcons.getScHistoryBitmap())
-            item = self._menu.Append(ID_COMMIT,
-                                     _("Commit changes"))
+            item = self._menu.Append(ID_COMMIT, _("Commit changes"))
             item.SetBitmap(FileIcons.getScCommitBitmap())
             item = self._menu.Append(ID_REVERT,
                                      _("Revert to repository version"))
@@ -334,13 +385,13 @@ class RepoModList(wx.ListCtrl,
             self.CommitSelectedFiles()
         elif e_id == ID_REVERT:
             # Revert changes
-            pass
+            self.RevertSelectedFiles()
         elif e_id == ID_REVISION_HIST:
             # Show the history of the selected file
-            pass
+            self.ShowRevisionHistory()
         elif e_id == wx.ID_REFRESH:
             # Refresh the status
-            pass
+            self.RefreshStatus()
         else:
             evt.Skip()
 
@@ -373,6 +424,8 @@ class RepoModList(wx.ListCtrl,
 #--------------------------------------------------------------------------#
 
 if __name__ == '__main__':
+    # NOTE: to run standalone modify the commented out path adjustment
+    #       lines near the top of the file.
     app = wx.App(False)
     frame = wx.Frame(None)
     box = RepoModBox(frame)
