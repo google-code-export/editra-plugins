@@ -164,13 +164,24 @@ class SVN(SourceControl):
                 code = line[0]
                 if code == '?':
                     continue
-                workrev, line = line[8:].strip().split(' ', 1)
+
+                tmp = line[8:].strip().split(' ', 1)
+                # svn externals don't have the workrev in the string
+                # so skip them
+                if len(tmp) != 2:
+                    continue
+
+                workrev, line = tmp
                 rev, line = line.strip().split(' ', 1)
                 author, line = line.strip().split(' ', 1)
                 name = line.strip()
                 current = status[name] = {}
-                try: current['status'] = codes[code]
-                except KeyError: pass
+
+                try:
+                    current['status'] = codes[code]
+                except KeyError:
+                    pass
+
             self.logOutput(out)
         return status
 
