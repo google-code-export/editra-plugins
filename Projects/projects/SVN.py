@@ -9,6 +9,8 @@ __scid__ = "$Id$"
 import re, os, crypto, datetime
 from SourceControl import SourceControl, DecodeString
 
+#-----------------------------------------------------------------------------#
+
 class SVN(SourceControl):
     """ Subversion source control class """
     name = 'Subversion'
@@ -31,26 +33,40 @@ class SVN(SourceControl):
     
     def getRepository(self, path):
         """ Get the repository of a given path """
+        # Make sure path is under source control
         if not self.isControlled(path):
             return
+
+        # Get the directory of the given path
         if not os.path.isdir(path):
             path = os.path.dirname(path)
+
+        # Check the entries file
         repfile = os.path.join(path, '.svn', 'entries')
         if not os.path.isfile(repfile):
             return
+
+        # Parse entries file for repository
         f = open(repfile, 'r')
+        rline = None
         for line in f:
             line = line.strip()
             if line == 'dir':
                 for i, line in enumerate(f):
                     if i == 2:
-                        return line.strip()  
+                        rline = line.strip()
+                        break
+        f.close()
+        return rline
     
     def isControlled(self, path):
-        """ Is the path controlled by CVS? """
+        """ Is the path controlled by SVN? """
+        # If a directory just check if it has a .svn directory
         if os.path.isdir(path):
             if os.path.isfile(os.path.join(path, '.svn', 'entries')):
                 return True
+
+        # See if the path is in the entries file
         path, basename = os.path.split(path)
         svndir = os.path.join(path,'.svn')
         if os.path.isdir(svndir):
@@ -153,9 +169,11 @@ class SVN(SourceControl):
         """ Get SVN status information from given file/directory """
         codes = {' ':'uptodate', 'A':'added', 'C':'conflict', 'D':'deleted',
                  'M':'modified'}
+
         options = ['status', '-v', '--non-interactive']
         if not recursive:
             options.append('-N')
+
         root, files = self.splitFiles(paths)
         out = self.run(root, options + self.getAuthOptions(root) + files)
         if out:
@@ -197,6 +215,7 @@ class SVN(SourceControl):
         root, files = self.splitFiles(paths)
         if not files:
             files = ['.']
+
         out = self.run(root, ['revert', '-R'] + files)
         self.logOutput(out)
             
