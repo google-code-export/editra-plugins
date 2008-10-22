@@ -17,7 +17,11 @@ import ed_glob
 import iface
 import ed_menu
 import util
+
+# Local libraries
 from ProjectPane import ProjectPane
+from ModList import RepoModBox
+import FileIcons
 
 #-----------------------------------------------------------------------------#
 # Globals
@@ -61,3 +65,53 @@ class Projects(plugin.Plugin):
     def GetUIHandlers(self):
         """Returns handlers for UpdateUI events"""
         return [(ProjectPane.ID_PROJECTS, self._projects.OnUpdateMenu)]
+
+#-----------------------------------------------------------------------------#
+
+ID_MODLIST = wx.NewId()
+
+class ProjectsModList(plugin.Plugin):
+    """Shelf interface implementation for the Repo Modification List"""
+    plugin.Implements(iface.ShelfI)
+
+    @property
+    def __name__(self):
+        return u'Source Control'
+
+    def AllowMultiple(self):
+        """ModList allows multiple instances"""
+        return True
+
+    def CreateItem(self, parent):
+        """Returns a log viewr panel"""
+        return RepoModBox(parent)
+
+    def GetBitmap(self):
+        """Get the tab icon
+        @return: wx.Bitmap
+
+        """
+        return FileIcons.getScUpdateBitmap()
+
+    def GetId(self):
+        """Plugin menu identifier ID"""
+        return ID_MODLIST
+
+    def GetMenuEntry(self, menu):
+        """Get the menu entry for the log viewer
+        @param menu: the menu items parent menu
+
+        """
+        item = wx.MenuItem(menu, ID_MODLIST, _("Source Control"),
+                           _("Open the Projects source control summary list"))
+        item.SetBitmap(self.GetBitmap())
+        return item
+
+    def GetName(self):
+        """Return the name of this control"""
+        return self.__name__
+
+    def IsStockable(self):
+        """ModList can be saved in the shelf preference stack"""
+        return True
+
