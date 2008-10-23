@@ -151,7 +151,7 @@ class GIT(SourceControl):
         # Reverse paths so that files get deleted first
         for path in reversed(sorted(paths)):
             root, files = self.splitFiles(path)           
-            out = self.run(root, ['rm', '-R', '-f'] + files)
+            out = self.run(root, ['rm', '-r', '-f'] + files)
             self.logOutput(out)
 
     def str2datetime(self, datestr):
