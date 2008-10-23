@@ -20,5 +20,6 @@ setup(
       entry_points = '''
       [Editra.plugins]
       Projects = projects:Projects
+      ModList = projects:ProjectsModList
       ''',
      )
