@@ -4,8 +4,8 @@ sys.path.append('..')
 
 from nose.tools import *
 
-import editra.GIT as GIT
-import editra.SVN as SVN
+import projects.GIT as GIT
+import projects.SVN as SVN
 scms = ['GIT', 'SVN']
 
 def setup_module():
