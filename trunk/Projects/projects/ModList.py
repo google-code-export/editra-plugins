@@ -221,7 +221,6 @@ class RepoModList(wx.ListCtrl,
 
         """
         paths = self.GetSelectedPaths()
-        print "NODES:", paths
         nodes = [(None, {'path' : path}) for path in paths]
         return nodes
 
@@ -239,6 +238,19 @@ class RepoModList(wx.ListCtrl,
         for item in range(len(self._items)):
             self._items.pop()
         wx.ListCtrl.DeleteAllItems(self)
+
+    def DoDiff(self):
+        """Open the diff between the selected file and its previous version."""
+        paths = self.GetSelectedPaths()
+
+        for path in paths:
+            # Only do files
+            if os.path.isdir(path):
+                # TODO: prompt that this cant be done?
+                pass
+
+            # Run the actual Diff job
+            self._ctrl.CompareRevisions(path)
 
     def CommitSelectedFiles(self):
         """Commit the selected files"""
@@ -379,7 +391,7 @@ class RepoModList(wx.ListCtrl,
         e_id = evt.GetId()
         if e_id == ID_COMPARE_TO_PREVIOUS:
             # Do Diff
-            pass
+            self.DoDiff()
         elif e_id == ID_COMMIT:
             # Checkin
             self.CommitSelectedFiles()
