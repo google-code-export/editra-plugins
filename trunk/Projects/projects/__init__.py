@@ -84,7 +84,9 @@ class ProjectsModList(plugin.Plugin):
 
     def CreateItem(self, parent):
         """Returns a log viewr panel"""
-        return RepoModBox(parent)
+        modbox = RepoModBox(parent)
+        modbox.SetFileOpenerHook(wx.GetApp().MacOpenFile)
+        return modbox
 
     def GetBitmap(self):
         """Get the tab icon

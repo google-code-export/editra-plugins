@@ -26,8 +26,8 @@ import wx.lib.mixins.listctrl as listmix
 # For Testing
 import sys
 import os
-#path = os.path.abspath('..\\..\\..\\..\\src')
-path = os.path.abspath('../../../../../src')
+path = os.path.abspath('..\\..\\..\\..\\src')
+#path = os.path.abspath('../../../../../src')
 sys.path.insert(0, path)
 
 # Local Imports
@@ -39,9 +39,10 @@ from HistWin import HistoryWindow
 
 # Editra Imports
 import ed_glob
-ed_glob.CONFIG['CACHE_DIR'] = "/Users/codyprecord/.Editra/cache/"
-ed_glob.CONFIG['SYSPIX_DIR'] = "/Users/codyprecord/Desktop/devel/Editra/pixmaps/"
-#ed_glob.CONFIG['CACHE_DIR'] = "C:\\Documents and Settings\\cjprecord\\.Editra\\cache\\"
+#ed_glob.CONFIG['CACHE_DIR'] = "/Users/codyprecord/.Editra/cache/"
+#ed_glob.CONFIG['SYSPIX_DIR'] = "/Users/codyprecord/Desktop/devel/Editra/pixmaps/"
+ed_glob.CONFIG['SYSPIX_DIR'] = "C:\\Documents and Settings\\cjprecord\\Desktop\\Editra\\pixmaps\\"
+ed_glob.CONFIG['CACHE_DIR'] = "C:\\Documents and Settings\\cjprecord\\.Editra\\cache\\"
 import eclib.ctrlbox as ctrlbox
 import eclib.platebtn as platebtn
 import eclib.elistmix as elistmix
@@ -156,6 +157,14 @@ class RepoModBox(ctrlbox.ControlBox):
         path = self._repos[self._crepo]
         self._list.UpdatePathStatus(path)
 
+    def SetFileOpenerHook(self, meth):
+        """Set the hook method for handling when items are activated in the
+        list. The callable should accept a file path string as an argument.
+        @param meth: callable
+
+        """
+        self._list.SetFileOpenerHook(meth)
+
     def OnChoice(self, evt):
         """Handle changes in selection of the current repo"""
         if evt.GetId() == ID_REPO_CHOICE:
@@ -168,6 +177,8 @@ class RepoModBox(ctrlbox.ControlBox):
     def OnUpdateUI(self, evt):
         """Update UI of buttons based on state of list
         @param evt: wx.UpdateUIEvent
+        @note: wish there was access to the wx.Window.Enable virtual method
+               so that the overridden method would be called.
 
         """
         e_id = evt.GetId()
@@ -175,6 +186,8 @@ class RepoModBox(ctrlbox.ControlBox):
             evt.Enable(self._list.GetSelectedItemCount())
         elif e_id == ID_REPO_CHOICE:
             evt.Enable(self._repo_ch.GetCount())
+        elif e_id == wx.ID_REFRESH:
+            evt.Enable(len(self._repo_ch.GetStringSelection()))
         else:
             evt.Skip()
 
@@ -202,6 +215,9 @@ class RepoModList(wx.ListCtrl,
         self._items = list()
         self._path = None
         self._ctrl = ScCommand.SourceController(self)
+        
+        # Interface attributes
+        self.fileHook = None
 
         # Setup
         self.InsertColumn(RepoModList.STATUS_COL, _("Status"),
@@ -317,7 +333,14 @@ class RepoModList(wx.ListCtrl,
 
         """
         nodes = self.__ConstructNodes()
-#        self._ctrl.ScCommand(nodes, 'revert')
+        self._ctrl.ScCommand(nodes, 'revert')
+
+    def SetFileOpenerHook(self, meth):
+        """Set the file opener method hook.
+        @param meth: callable (def fhook(path))
+
+        """
+        self.fileHook = meth
 
     def ShowRevisionHistory(self):
         """Show the revision history for the selected files
@@ -333,6 +356,7 @@ class RepoModList(wx.ListCtrl,
                 pos = win.GetPosition()
                 pos = (pos[0] + 22, pos[1] + 22)
 
+            # Log lookup and ScCommands are handled by HistoryWindow
             win = HistoryWindow(self, path, None, dict(path=path))
             win.Show()
             if pos != wx.DefaultPosition:
@@ -353,8 +377,12 @@ class RepoModList(wx.ListCtrl,
     #---- Event Handlers ----#
 
     def OnActivated(self, evt):
-        """Open the file in the editor"""
-        evt.Skip()
+        """Open the file in the editor when it is activated in the list"""
+        if self.fileHook is not None:
+            for path in self.GetSelectedPaths():
+                self.fileHook(path)
+        else:
+            evt.Skip()
 
     def OnCommandComplete(self, evt):
         """Handle when a source control command has completed."""
@@ -441,6 +469,9 @@ if __name__ == '__main__':
     app = wx.App(False)
     frame = wx.Frame(None)
     box = RepoModBox(frame)
+    def testHook(path):
+        print "FILE PATH HOOK", path
+    box.SetFileOpenerHook(testHook)
     frame.Show()
     app.MainLoop()
 
