@@ -28,7 +28,7 @@ import sys
 import os
 #path = os.path.abspath('..\\..\\..\\..\\src')
 #path = os.path.abspath('../../../../../src')
-sys.path.insert(0, path)
+#sys.path.insert(0, path)
 
 # Local Imports
 import FileIcons
