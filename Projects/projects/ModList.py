@@ -26,8 +26,8 @@ import wx.lib.mixins.listctrl as listmix
 # For Testing
 import sys
 import os
-path = os.path.abspath('..\\..\\..\\..\\src')
-#path = os.path.abspath('../../../../../src')
+#path = os.path.abspath('..\\..\\..\\..\\src')
+path = os.path.abspath('../../../../../src')
 sys.path.insert(0, path)
 
 # Local Imports
@@ -39,10 +39,10 @@ from HistWin import HistoryWindow
 
 # Editra Imports
 import ed_glob
-#ed_glob.CONFIG['CACHE_DIR'] = "/Users/codyprecord/.Editra/cache/"
-#ed_glob.CONFIG['SYSPIX_DIR'] = "/Users/codyprecord/Desktop/devel/Editra/pixmaps/"
-ed_glob.CONFIG['SYSPIX_DIR'] = "C:\\Documents and Settings\\cjprecord\\Desktop\\Editra\\pixmaps\\"
-ed_glob.CONFIG['CACHE_DIR'] = "C:\\Documents and Settings\\cjprecord\\.Editra\\cache\\"
+ed_glob.CONFIG['CACHE_DIR'] = "/Users/codyprecord/.Editra/cache/"
+ed_glob.CONFIG['SYSPIX_DIR'] = "/Users/codyprecord/Desktop/devel/Editra/pixmaps/"
+#ed_glob.CONFIG['SYSPIX_DIR'] = "C:\\Documents and Settings\\cjprecord\\Desktop\\Editra\\pixmaps\\"
+#ed_glob.CONFIG['CACHE_DIR'] = "C:\\Documents and Settings\\cjprecord\\.Editra\\cache\\"
 import eclib.ctrlbox as ctrlbox
 import eclib.platebtn as platebtn
 import eclib.elistmix as elistmix
@@ -51,6 +51,7 @@ import eclib.elistmix as elistmix
 # Globals
 
 # Menu Id's
+ID_UPDATE              = wx.NewId()
 ID_COMPARE_TO_PREVIOUS = wx.NewId()
 ID_COMMIT              = wx.NewId()
 ID_REVERT              = wx.NewId()
@@ -58,7 +59,6 @@ ID_REVISION_HIST       = wx.NewId()
 
 # Control Id's
 ID_REPO_CHOICE = wx.NewId()
-
 
 # Status Keys used by SourceControl modules
 STATUS = { u'modified' : u'M',
@@ -88,12 +88,12 @@ class RepoModBox(ctrlbox.ControlBox):
 
         # Event Handlers
         self.Bind(wx.EVT_BUTTON, lambda evt: self.DoCommit(), id=ID_COMMIT)
+        self.Bind(wx.EVT_BUTTON, lambda evt: self.DoUpdate(), id=ID_UPDATE)
         self.Bind(wx.EVT_BUTTON,
                   lambda evt: self.DoStatusRefresh(), id=wx.ID_REFRESH)
         self.Bind(wx.EVT_BUTTON,
                   lambda evt: self.DoRevert(), id=wx.ID_REVERT)
         self.Bind(wx.EVT_CHOICE, self.OnChoice, id=ID_REPO_CHOICE)
-
         self.Bind(wx.EVT_UPDATE_UI, self.OnUpdateUI)
 
     def __DoLayout(self):
@@ -128,6 +128,12 @@ class RepoModBox(ctrlbox.ControlBox):
                                        style=platebtn.PB_STYLE_NOBG)
         ctrlbar.AddControl(refresh, wx.ALIGN_RIGHT)
 
+        # Update
+        update = platebtn.PlateButton(ctrlbar, ID_UPDATE, _("Update"),
+                                      FileIcons.getScUpdateBitmap(),
+                                      style=platebtn.PB_STYLE_NOBG)
+        ctrlbar.AddControl(update, wx.ALIGN_RIGHT)
+
         # Commit
         commit = platebtn.PlateButton(ctrlbar, ID_COMMIT, _("Commit"),
                                       FileIcons.getScCommitBitmap(),
@@ -156,6 +162,11 @@ class RepoModBox(ctrlbox.ControlBox):
         """Refresh the status of the currently selected repository"""
         path = self._repos[self._crepo]
         self._list.UpdatePathStatus(path)
+
+    def DoUpdate(self):
+        """Update the current repisitory"""
+        path = self._repos[self._crepo]
+        self._list.UpdateRepository(path)
 
     def SetFileOpenerHook(self, meth):
         """Set the hook method for handling when items are activated in the
@@ -289,7 +300,7 @@ class RepoModList(wx.ListCtrl,
             if message:
                 break
 
-#        self._ctrl.ScCommand(nodes, 'commit', message=message)
+        self._ctrl.ScCommand(nodes, 'commit', None, message=message)
 
     def GetSelectedPaths(self):
         """Get the paths of the selected items
@@ -374,6 +385,13 @@ class RepoModList(wx.ListCtrl,
                                          dict(path=path),
                                          recursive=True)
 
+    def UpdateRepository(self, path):
+        """Update the repository
+        @param path: repository path
+
+        """
+        self._ctrl.ScCommand([(None, {'path' : path})], 'update')
+
     #---- Event Handlers ----#
 
     def OnActivated(self, evt):
@@ -386,8 +404,9 @@ class RepoModList(wx.ListCtrl,
 
     def OnCommandComplete(self, evt):
         """Handle when a source control command has completed."""
-        print evt.GetValue()
-        print evt.GetError()
+#        print evt.GetValue()
+#        print evt.GetError()
+        self.RefreshStatus()
 
     def OnContextMenu(self, evt):
         """Show the context menu"""
