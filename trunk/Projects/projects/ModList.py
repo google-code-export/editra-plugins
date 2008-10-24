@@ -27,7 +27,7 @@ import wx.lib.mixins.listctrl as listmix
 import sys
 import os
 #path = os.path.abspath('..\\..\\..\\..\\src')
-path = os.path.abspath('../../../../../src')
+#path = os.path.abspath('../../../../../src')
 sys.path.insert(0, path)
 
 # Local Imports
@@ -39,8 +39,8 @@ from HistWin import HistoryWindow
 
 # Editra Imports
 import ed_glob
-ed_glob.CONFIG['CACHE_DIR'] = "/Users/codyprecord/.Editra/cache/"
-ed_glob.CONFIG['SYSPIX_DIR'] = "/Users/codyprecord/Desktop/devel/Editra/pixmaps/"
+#ed_glob.CONFIG['CACHE_DIR'] = "/Users/codyprecord/.Editra/cache/"
+#ed_glob.CONFIG['SYSPIX_DIR'] = "/Users/codyprecord/Desktop/devel/Editra/pixmaps/"
 #ed_glob.CONFIG['SYSPIX_DIR'] = "C:\\Documents and Settings\\cjprecord\\Desktop\\Editra\\pixmaps\\"
 #ed_glob.CONFIG['CACHE_DIR'] = "C:\\Documents and Settings\\cjprecord\\.Editra\\cache\\"
 import eclib.ctrlbox as ctrlbox
