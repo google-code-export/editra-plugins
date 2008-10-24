@@ -39,6 +39,7 @@ except:
 class Projects(plugin.Plugin):
     """Adds a projects pane to the view menu"""
     plugin.Implements(iface.MainWindowI)
+
     def PlugIt(self, parent):
         """Adds the view menu entry and registers the event handler"""
         mainw = parent
@@ -48,7 +49,7 @@ class Projects(plugin.Plugin):
             self._projects = ProjectPane(mainw)
             mgr = mainw.GetFrameManager()
             mgr.AddPane(self._projects, wx.aui.AuiPaneInfo().Name(PANE_NAME).\
-                        Caption("Projects").Left().Layer(1).\
+                        Caption(_("Projects")).Left().Layer(1).\
                         CloseButton(True).MaximizeButton(False).\
                         BestSize(wx.Size(215, 350)))
 
