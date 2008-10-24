@@ -17,7 +17,7 @@ except ImportError:
 if setup != None:
     setup(
         name='IPyShell',
-        version='0.3',
+        version='0.4',
         description=__doc__,
         author=__author__,
         author_email="laurent.dufrechou@gmail.com",

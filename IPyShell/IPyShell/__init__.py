@@ -9,12 +9,13 @@
 # Plugin Metadata
 """Adds an IPythonShell to the Shelf"""
 __author__ = "Laurent Dufrechou"
-__version__ = "0.3"
+__version__ = "0.4"
 
 #-----------------------------------------------------------------------------#
 # Imports
 
-import wx,sys
+import wx
+import sys
 import iface
 import plugin
 
@@ -31,7 +32,10 @@ _ = wx.GetTranslation
 #-----------------------------------------------------------------------------#
 # Interface Implementation
 class IPyShell(plugin.Plugin):
-    """Adds a PyShell to the Shelf"""
+    """Adds a PyShell to the Shelf
+    @todo: implement new GetBitmap interface method
+
+    """
     plugin.Implements(iface.ShelfI)
     ID_IPYSHELL = wx.NewId()
     __name__ = u'IPyShell'
