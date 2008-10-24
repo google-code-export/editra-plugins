@@ -930,7 +930,7 @@ class ProjectTree(wx.Panel):
         if 'callback' in options:
             callb = options['callback']
             del options['callback']
-        
+
         self.srcCtrl.ScCommand(s_nodes, command, callb, **options)
 
     def OnUpdateStatus(self, evt):
