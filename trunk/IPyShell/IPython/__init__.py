@@ -60,7 +60,7 @@ for name in __all__:
 import Shell
 
 # Release data
-from IPython import Release # do it explicitly so pydoc can see it - pydoc bug
+import Release # do it explicitly so pydoc can see it - pydoc bug
 __author__   = '%s <%s>\n%s <%s>\n%s <%s>' % \
                ( Release.authors['Fernando'] + Release.authors['Janko'] + \
                  Release.authors['Nathan'] )
