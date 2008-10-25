@@ -35,7 +35,11 @@ import textwrap
 from cStringIO import StringIO
 from getopt import getopt,GetoptError
 from pprint import pprint, pformat
-from sets import Set
+
+try:
+    Set = set
+except NameError:
+    from sets import Set
 
 # cProfile was added in Python2.5
 try:
