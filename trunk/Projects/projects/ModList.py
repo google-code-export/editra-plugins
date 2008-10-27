@@ -26,9 +26,9 @@ import wx.lib.mixins.listctrl as listmix
 # For Testing
 import sys
 import os
-path = os.path.abspath('..\\..\\..\\..\\src')
+#path = os.path.abspath('..\\..\\..\\..\\src')
 #path = os.path.abspath('../../../../../src')
-sys.path.insert(0, path)
+#sys.path.insert(0, path)
 
 # Local Imports
 import FileIcons
@@ -41,8 +41,8 @@ from HistWin import HistoryWindow
 import ed_glob
 #ed_glob.CONFIG['CACHE_DIR'] = "/Users/codyprecord/.Editra/cache/"
 #ed_glob.CONFIG['SYSPIX_DIR'] = "/Users/codyprecord/Desktop/devel/Editra/pixmaps/"
-ed_glob.CONFIG['SYSPIX_DIR'] = "C:\\Documents and Settings\\cjprecord\\Desktop\\Editra\\pixmaps\\"
-ed_glob.CONFIG['CACHE_DIR'] = "C:\\Documents and Settings\\cjprecord\\.Editra\\cache\\"
+#ed_glob.CONFIG['SYSPIX_DIR'] = "C:\\Documents and Settings\\cjprecord\\Desktop\\Editra\\pixmaps\\"
+#ed_glob.CONFIG['CACHE_DIR'] = "C:\\Documents and Settings\\cjprecord\\.Editra\\cache\\"
 import eclib.ctrlbox as ctrlbox
 import eclib.platebtn as platebtn
 import eclib.elistmix as elistmix
