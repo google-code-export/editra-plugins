@@ -26,9 +26,9 @@ import wx.lib.mixins.listctrl as listmix
 # For Testing
 import sys
 import os
-#path = os.path.abspath('..\\..\\..\\..\\src')
+path = os.path.abspath('..\\..\\..\\..\\src')
 #path = os.path.abspath('../../../../../src')
-#sys.path.insert(0, path)
+sys.path.insert(0, path)
 
 # Local Imports
 import FileIcons
@@ -41,8 +41,8 @@ from HistWin import HistoryWindow
 import ed_glob
 #ed_glob.CONFIG['CACHE_DIR'] = "/Users/codyprecord/.Editra/cache/"
 #ed_glob.CONFIG['SYSPIX_DIR'] = "/Users/codyprecord/Desktop/devel/Editra/pixmaps/"
-#ed_glob.CONFIG['SYSPIX_DIR'] = "C:\\Documents and Settings\\cjprecord\\Desktop\\Editra\\pixmaps\\"
-#ed_glob.CONFIG['CACHE_DIR'] = "C:\\Documents and Settings\\cjprecord\\.Editra\\cache\\"
+ed_glob.CONFIG['SYSPIX_DIR'] = "C:\\Documents and Settings\\cjprecord\\Desktop\\Editra\\pixmaps\\"
+ed_glob.CONFIG['CACHE_DIR'] = "C:\\Documents and Settings\\cjprecord\\.Editra\\cache\\"
 import eclib.ctrlbox as ctrlbox
 import eclib.platebtn as platebtn
 import eclib.elistmix as elistmix
@@ -80,7 +80,8 @@ class RepoModBox(ctrlbox.ControlBox):
         self._list = RepoModList(self)
         self._config = ConfigDialog.ConfigData() # Singleton Config Obj
         self._crepo = 0
-        self._repos = self._config['projects'].keys()
+        self._ctrl = ScCommand.SourceController(self)
+        self._repos = self.FindRepos(self._config['projects'].keys())
         self._repo_ch = None
 
         # Setup
@@ -167,6 +168,36 @@ class RepoModBox(ctrlbox.ControlBox):
         """Update the current repisitory"""
         path = self._repos[self._crepo]
         self._list.UpdateRepository(path)
+
+    def FindRepos(self, path_list):
+        """Find the top level source repositories under the given list
+        of paths.
+        @param path_list: list of strings
+        @return: list
+
+        """
+        rlist = list()
+        for path in path_list:
+            # Only check existing paths and directories
+            if not os.path.exists(path) or not os.path.isdir(path):
+                continue
+
+            scsys = self._ctrl.GetSCSystem(path)
+
+            # If the top level project directory is not under source control
+            # check the directories one level down to see if they are.
+            if scsys is None:
+                dirs = [ os.path.join(path, dname)
+                         for dname in os.listdir(path)
+                         if os.path.isdir(os.path.join(path, dname)) ]
+
+                for dname in dirs:
+                    if self._ctrl.GetSCSystem(dname) is not None:
+                        rlist.append(dname)
+            else:
+                rlist.append(path)
+
+        return rlist
 
     def SetFileOpenerHook(self, meth):
         """Set the hook method for handling when items are activated in the
