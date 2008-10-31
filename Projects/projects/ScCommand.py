@@ -10,6 +10,9 @@
 """
 Source Control Commands
 
+@author: Cody Precord <cprecord@editra.org>
+@author: Kevin D. Smith <Kevin.Smith@sixquickrun.com>
+
 """
 
 __author__ = "Kevin D. Smith <Kevin.Smith@sixquickrun.com>"
@@ -104,6 +107,8 @@ class ScCommandThread(threading.Thread):
     def run(self):
         """Start running the task"""
         value, err = self.task(*self._args, **self._kwargs)
+
+        # Post Results back to parent window
         evt = SourceControlEvent(self.etype, self._pid, value, err)
         wx.PostEvent(self._parent, evt)
 
@@ -280,7 +285,11 @@ class SourceController(object):
         return (None, SC_ERROR_NONE)
 
     def GetSCSystem(self, path):
-        """ Determine source control system being used on path if any """
+        """ Determine source control system being used on path if any
+        @todo: possibly cache paths that are found to be under source control
+               and the systems the belong to in order to improve performance
+
+        """
         for key, value in self.config.getSCSystems().items():
             if value['instance'].isControlled(path):
                 return value
