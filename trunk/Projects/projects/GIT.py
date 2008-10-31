@@ -20,6 +20,8 @@ import os
 import sys
 import datetime
 import re
+
+# Local imports
 from SourceControl import SourceControl, DecodeString
 
 #-----------------------------------------------------------------------------#
