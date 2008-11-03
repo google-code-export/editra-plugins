@@ -1,28 +1,45 @@
 #!/usr/bin/env python
-#
-# This code in this file uses a fairly simple octal transformation algorithm
-# combined with a random salt for the encryption/decryption, and I threw in 
-# a little code obfustication just for fun ;-).
-#
-# Encrypt:
-#   1) Get the password string to encrypt
-#   2) Generate a new random salt with os.urandom() or some other randomly 
-#      generated string for each password to encrypt
-#   3) Encrypt the password by calling Encrypt(password, salt)
-#   4) Save the salt in the users Profile (profiler.Profile_Set(KEY, VALUE)) in
-#      in some way that you can associate it with the repository or passwd when
-#      you need to fetch it later.
-#       - You can put any of pythons basic types in the profile
-#   5) Write out the encrypted password to your config file
-#
-# Decrypt:
-#   1) Get the encrypted password string
-#   2) Get the associated salt from the profile (profiler.Profile_Get(KEY, VALUE))
-#   3) Decrypt and get the orignal password by calling Decrypt(encrypted_passwd, salt)
-#
-# Finally:
-#   This message will self destruct in 5 seconds ...
-#
+###############################################################################
+# Name: crypto.py                                                             #
+# Purpose: Cryptography helper modules                                        #
+# Author: Cody Precord <cprecord@editra.org>                                  #
+# Copyright: (c) 2008 Cody Precord <staff@editra.org>                         #
+# License: wxWindows License                                                  #
+###############################################################################
+
+"""
+ The code in this file uses a fairly simple octal transformation algorithm
+ combined with a random salt for the encryption/decryption, and I threw in 
+ a little code obfustication just for fun ;-).
+
+ Encrypt:
+   1) Get the password string to encrypt
+   2) Generate a new random salt with os.urandom() or some other randomly 
+      generated string for each password to encrypt
+   3) Encrypt the password by calling Encrypt(password, salt)
+   4) Save the salt in the users Profile (profiler.Profile_Set(KEY, VALUE)) in
+      in some way that you can associate it with the repository or passwd when
+      you need to fetch it later.
+       - You can put any of pythons basic types in the profile
+   5) Write out the encrypted password to your config file
+
+ Decrypt:
+   1) Get the encrypted password string
+   2) Get the associated salt from the profile (profiler.Profile_Get(KEY, VALUE))
+   3) Decrypt and get the orignal password by calling Decrypt(encrypted_passwd, salt)
+
+ Finally:
+   This message will self destruct in 5 seconds ...
+
+"""
+
+#-----------------------------------------------------------------------------#
+
+__author__ = "Cody Precord <cprecord@editra.org>"
+__svnid__ = "$Id$"
+__revision__ = "$Revision$"
+
+#-----------------------------------------------------------------------------#
 
 import os
 import zlib
