@@ -20,6 +20,7 @@ __revision__ = "$Revision$"
 
 #--------------------------------------------------------------------------#
 # Imports
+import os
 import wx
 import wx.lib.mixins.listctrl as listmix
 
