@@ -7,7 +7,6 @@ anywhere in the mainwindow by implementing the MainWindowI.
 
 """
 
-import sys
 try:
     from setuptools import setup
 except ImportError:
