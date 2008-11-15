@@ -125,6 +125,7 @@ class SourceController(object):
 
         # Attributes
         self._parent = owner
+        self._pid = self._parent.GetId()
         self.config = ConfigData() # Singleton config data instance
         self.tempdir = None
         self.scThreads = {}
@@ -423,7 +424,6 @@ class SourceController(object):
         except Exception, msg:
             print "ERROR:", msg
 
-        evt = SourceControlEvent(ppEVT_STATUS,
-                                 self._parent.GetId(),
+        evt = SourceControlEvent(ppEVT_STATUS, self._pid,
                                  (node, data, status, sc))
         wx.PostEvent(self._parent, evt)

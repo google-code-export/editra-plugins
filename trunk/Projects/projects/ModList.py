@@ -21,6 +21,7 @@ __revision__ = "$Revision$"
 #--------------------------------------------------------------------------#
 # Imports
 import os
+import threading
 import wx
 import wx.lib.mixins.listctrl as listmix
 
@@ -33,6 +34,7 @@ from HistWin import HistoryWindow
 
 # Editra Imports
 import ed_glob
+import ed_msg
 import eclib.ctrlbox as ctrlbox
 import eclib.platebtn as platebtn
 import eclib.elistmix as elistmix
@@ -246,6 +248,7 @@ class RepoModList(wx.ListCtrl,
         self._menu = None
         self._items = list()
         self._path = None
+        self._busy = False
         self._ctrl = ScCommand.SourceController(self)
         
         # Interface attributes
@@ -364,14 +367,33 @@ class RepoModList(wx.ListCtrl,
                         repository version.
 
         """
+        self.SetCommandRunning(True)
         nodes = self.__ConstructNodes()
         self._ctrl.ScCommand(nodes, 'revert')
+
+    def SetCommandRunning(self, running=True):
+        """Set whether a commadn is running or not
+        @keyword running: bool
+
+        """
+        self._busy = running
+        fid = self.GetTopLevelParent().GetId()
+        state = (fid, 0, 0)
+        if running:
+            state = (fid, -1, -1)
+            ed_msg.PostMessage(ed_msg.EDMSG_PROGRESS_SHOW, (fid, True))
+            ed_msg.PostMessage(ed_msg.EDMSG_PROGRESS_STATE, state)
+        else:
+            ed_msg.PostMessage(ed_msg.EDMSG_PROGRESS_SHOW, (fid, False))
 
     def SetFileOpenerHook(self, meth):
         """Set the file opener method hook.
         @param meth: callable (def fhook(path))
 
         """
+        if not callable(meth):
+            raise ValueError("meth must be callable")
+
         self.fileHook = meth
 
     def ShowRevisionHistory(self):
@@ -399,18 +421,21 @@ class RepoModList(wx.ListCtrl,
         @param path: path to check status on
 
         """
+        self.SetCommandRunning(True)
         src_c = self._ctrl.GetSCSystem(path)
         if src_c is not None:
             self._path = path
-            self._ctrl.StatusWithTimeout(src_c, None,
-                                         dict(path=path),
-                                         recursive=True)
+            t = threading.Thread(target=self._ctrl.StatusWithTimeout,
+                                 args=(src_c, None, dict(path=path)),
+                                 kwargs=dict(recursive=True))
+            t.start()
 
     def UpdateRepository(self, path):
         """Update the repository
         @param path: repository path
 
         """
+        self.SetCommandRunning(True)
         self._ctrl.ScCommand([(None, {'path' : path})], 'update')
 
     #---- Event Handlers ----#
@@ -428,10 +453,11 @@ class RepoModList(wx.ListCtrl,
 #        print evt.GetValue()
 #        print evt.GetError()
         self.RefreshStatus()
+        self.SetCommandRunning(False)
 
     def OnContextMenu(self, evt):
         """Show the context menu"""
-        if not self.GetSelectedItemCount():
+        if not self.GetSelectedItemCount() or self._busy:
             evt.Skip()
             return
 
@@ -501,3 +527,4 @@ class RepoModList(wx.ListCtrl,
                 self.AddFile(STATUS.get(fstatus, u'U'),
                              os.path.join(path, fname))
 
+        self.SetCommandRunning(False)
