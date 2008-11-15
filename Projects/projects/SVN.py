@@ -48,16 +48,15 @@ class SVN(SourceControl):
 
         # Parse entries file for repository
         f = open(repfile, 'r')
-        rline = None
         for line in f:
             line = line.strip()
             if line == 'dir':
                 for i, line in enumerate(f):
                     if i == 2:
-                        rline = line.strip()
-                        break
-        f.close()
-        return rline
+                        f.close()
+                        return line.strip()
+        else:
+            f.close()
     
     def isControlled(self, path):
         """ Is the path controlled by SVN? """
