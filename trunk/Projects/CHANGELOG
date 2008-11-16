@@ -7,12 +7,12 @@ Changelog:
 
 #-----------------------------------------------------------------------------#
 Version 0.7
-Released: 0x/xx/2008
+Released: 11/15/2008
 
 New:
 +New source control window that can be shown in the Shelf to summarize the
 status of the repository.
-+Add shortcut for dismising History Window
++Add shortcut for dismissing History Window
 
 Bug Fixes:
 +Fix more tree control related bugs on windows
