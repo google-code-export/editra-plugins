@@ -951,6 +951,8 @@ class ProjectTree(wx.Panel):
             except:
                 pass
 
+        self.GetParent().StopBusy()
+
     def prepUpdates(self, node, data, status, sc):
         """Prepare the tree updates
         @param node: node to update
@@ -974,12 +976,14 @@ class ProjectTree(wx.Panel):
                     if icon and child.IsOk():
                         updates.append((self.tree.SetItemImage, child,
                                         icon, wx.TreeItemIcon_Normal))
+
                     # Open folder icon
                     icon = self.icons.get('folder-open-' + \
                                           status[text].get('status', ''))
                     if icon and child.IsOk():
                         updates.append((self.tree.SetItemImage, child,
                                         icon, wx.TreeItemIcon_Expanded))
+
                     # Update children status if opened
                     if child.IsOk() and self.tree.IsExpanded(child):
                         self.srcCtrl.StatusWithTimeout(sc,
@@ -988,6 +992,7 @@ class ProjectTree(wx.Panel):
                 else:
                     icon = self.icons.get('file-' + \
                                           status[text].get('status', ''))
+
                     if icon and child.IsOk():
                         updates.append((self.tree.SetItemImage, child,
                                         icon, wx.TreeItemIcon_Normal))
@@ -1808,10 +1813,13 @@ class ProjectPane(wx.Panel):
     def StopBusy(self):
         """Stop and then hide the busy indicator"""
         self.isBusy -= 1
+        self.isBusy = max(0, self.isBusy)
         if self.isBusy > 0:
             return
+
         if self.timer.IsRunning():
             self.timer.Stop()
+
         self.busy.SetValue(0)
         wx.CallLater(1200, self.busy.Hide)
 
