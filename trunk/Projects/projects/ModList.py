@@ -87,7 +87,7 @@ class RepoModBox(ctrlbox.ControlBox):
         self.Bind(wx.EVT_BUTTON,
                   lambda evt: self.DoRevert(), id=wx.ID_REVERT)
         self.Bind(wx.EVT_CHOICE, self.OnChoice, id=ID_REPO_CHOICE)
-        self.Bind(wx.EVT_UPDATE_UI, self.OnUpdateUI)
+#        self.Bind(wx.EVT_UPDATE_UI, self.OnUpdateUI)
 
     def __DoLayout(self):
         """Layout and setup the results screen ui"""
@@ -160,6 +160,13 @@ class RepoModBox(ctrlbox.ControlBox):
         """Update the current repisitory"""
         path = self._repos[self._crepo]
         self._list.UpdateRepository(path)
+
+    def EnableCommandBar(self, enable=True):
+        """Enable or disable the command bar
+        @keyword enable: bool
+
+        """
+        self.GetControlBar().Enable(enable)
 
     def FindRepos(self, path_list):
         """Find the top level source repositories under the given list
@@ -306,6 +313,9 @@ class RepoModList(wx.ListCtrl,
     def CommitSelectedFiles(self):
         """Commit the selected files"""
         paths = self.GetSelectedPaths()
+        if not len(paths):
+            return
+
         nodes = self.__ConstructNodes()
         message = u""
 
@@ -367,8 +377,11 @@ class RepoModList(wx.ListCtrl,
                         repository version.
 
         """
-        self.SetCommandRunning(True)
         nodes = self.__ConstructNodes()
+        if not len(nodes):
+            return
+
+        self.SetCommandRunning(True)
         self._ctrl.ScCommand(nodes, 'revert')
 
     def SetCommandRunning(self, running=True):
@@ -377,6 +390,7 @@ class RepoModList(wx.ListCtrl,
 
         """
         self._busy = running
+        self.GetParent().EnableCommandBar(not running)
         fid = self.GetTopLevelParent().GetId()
         state = (fid, 0, 0)
         if running:
