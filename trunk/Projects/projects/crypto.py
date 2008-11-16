@@ -40,11 +40,13 @@ __svnid__ = "$Id$"
 __revision__ = "$Revision$"
 
 #-----------------------------------------------------------------------------#
-
+# Imports
 import os
 import zlib
 import random
 import base64
+
+#-----------------------------------------------------------------------------#
 
 def _Encode(text):
     g = lambda y: (y!='\\' and [y] or [str(8+(random.randint(0,100)%2))])[0]
