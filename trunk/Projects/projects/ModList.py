@@ -89,6 +89,9 @@ class RepoModBox(ctrlbox.ControlBox):
         self.Bind(wx.EVT_CHOICE, self.OnChoice, id=ID_REPO_CHOICE)
 #        self.Bind(wx.EVT_UPDATE_UI, self.OnUpdateUI)
 
+        # Do a refresh when first shown
+        wx.CallLater(500, self.DoStatusRefresh)
+
     def __DoLayout(self):
         """Layout and setup the results screen ui"""
         ctrlbar = ctrlbox.ControlBar(self, style=ctrlbox.CTRLBAR_STYLE_GRADIENT)
@@ -153,13 +156,15 @@ class RepoModBox(ctrlbox.ControlBox):
 
     def DoStatusRefresh(self):
         """Refresh the status of the currently selected repository"""
-        path = self._repos[self._crepo]
-        self._list.UpdatePathStatus(path)
+        if len(self._repos) > self._crepo:
+            path = self._repos[self._crepo]
+            self._list.UpdatePathStatus(path)
 
     def DoUpdate(self):
         """Update the current repisitory"""
-        path = self._repos[self._crepo]
-        self._list.UpdateRepository(path)
+        if len(self._repos) > self._crepo:
+            path = self._repos[self._crepo]
+            self._list.UpdateRepository(path)
 
     def EnableCommandBar(self, enable=True):
         """Enable or disable the command bar
@@ -325,7 +330,8 @@ class RepoModList(wx.ListCtrl,
 
         # Make sure a commit message is entered
         while True:
-            ted = ProjCmnDlg.CommitDialog(self, _("Commit Dialog"),
+            parent = self.GetTopLevelParent()
+            ted = ProjCmnDlg.CommitDialog(parent, _("Commit Dialog"),
                                           _("Enter your commit message:"),
                                           paths)
 
