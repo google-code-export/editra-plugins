@@ -205,7 +205,7 @@ class RepoModBox(ctrlbox.ControlBox):
             else:
                 rlist.append(path)
 
-        return rlist
+        return list(set(rlist))
 
     def SetFileOpenerHook(self, meth):
         """Set the hook method for handling when items are activated in the
