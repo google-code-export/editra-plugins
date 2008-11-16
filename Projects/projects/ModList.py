@@ -166,7 +166,11 @@ class RepoModBox(ctrlbox.ControlBox):
         @keyword enable: bool
 
         """
-        self.GetControlBar().Enable(enable)
+        ctrlb = self.GetControlBar()#.Enable(enable)
+        # Workaround Enable not being overridable in by platebtn
+        for child in ctrlb.GetChildren():
+            if hasattr(child, 'Enable'):
+                child.Enable(enable)
 
     def FindRepos(self, path_list):
         """Find the top level source repositories under the given list
