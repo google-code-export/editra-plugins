@@ -25,3 +25,4 @@ import plugin
 
 class PyDebugger(plugin.Plugin):
     """Python Debugger Plugin"""
+    

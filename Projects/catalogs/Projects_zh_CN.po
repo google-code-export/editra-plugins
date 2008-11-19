@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: editra\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2008-10-19 21:25-0500\n"
+"POT-Creation-Date: 2008-11-18 20:35-0600\n"
 "PO-Revision-Date: 2008-03-02 01:33+0000\n"
 "Last-Translator: heccj <heccjj@gmail.com>\n"
 "Language-Team: Simplified Chinese <zh_CN@li.org>\n"
@@ -25,11 +25,11 @@ msgstr "*名字*"
 msgid "*VALUE*"
 msgstr "*值*"
 
-#: Projects/projects/ProjectPane.py:1504
+#: Projects/projects/ProjectPane.py:1511
 msgid ". Do you wish to continue?"
 msgstr "要继续吗？"
 
-#: Projects/projects/ProjectPane.py:1652
+#: Projects/projects/ProjectPane.py:1659
 msgid "Add Project"
 msgstr "添加工程"
 
@@ -37,11 +37,11 @@ msgstr "添加工程"
 msgid "Add a New Repository Path"
 msgstr "添加新的库路径"
 
-#: Projects/projects/ProjectPane.py:1249
+#: Projects/projects/ProjectPane.py:1256
 msgid "Add to repository"
 msgstr "添加到库"
 
-#: Projects/projects/ProjectPane.py:1503
+#: Projects/projects/ProjectPane.py:1510
 msgid "An error occurred when attempting to remove "
 msgstr "移除时产生错误 "
 
@@ -57,19 +57,19 @@ msgstr "内建"
 msgid "C File"
 msgstr "C 文件"
 
-#: Projects/projects/ProjectPane.py:1742
+#: Projects/projects/ProjectPane.py:1749
 msgid "Choose a Project Directory"
 msgstr "选择工程目录"
 
-#: Projects/projects/ModList.py:111 Projects/projects/ProjCmnDlg.py:61
+#: Projects/projects/ModList.py:134 Projects/projects/ProjCmnDlg.py:61
 msgid "Commit"
 msgstr "提交"
 
-#: Projects/projects/ProjectPane.py:838
+#: Projects/projects/ModList.py:334 Projects/projects/ProjectPane.py:838
 msgid "Commit Dialog"
 msgstr "提交对话框"
 
-#: Projects/projects/ModList.py:274 Projects/projects/ProjectPane.py:1281
+#: Projects/projects/ModList.py:499 Projects/projects/ProjectPane.py:1288
 msgid "Commit changes"
 msgstr "提交更改"
 
@@ -85,15 +85,15 @@ msgstr "比较选定版本"
 msgid "Compare to Selected Revision"
 msgstr "比较于选定版本"
 
-#: Projects/projects/ModList.py:268 Projects/projects/ProjectPane.py:1277
+#: Projects/projects/ModList.py:494 Projects/projects/ProjectPane.py:1284
 msgid "Compare to previous version"
 msgstr "比较于以前版本"
 
-#: Projects/projects/ProjectPane.py:1665
+#: Projects/projects/ProjectPane.py:1672
 msgid "Configure"
 msgstr "设置"
 
-#: Projects/projects/ProjectPane.py:1268
+#: Projects/projects/ProjectPane.py:1275
 msgid "Copy"
 msgstr "复制"
 
@@ -101,7 +101,7 @@ msgstr "复制"
 msgid "Could not retrieve file"
 msgstr "无法检索文件"
 
-#: Projects/projects/ProjectPane.py:1267
+#: Projects/projects/ProjectPane.py:1274
 msgid "Cut"
 msgstr "剪切"
 
@@ -113,7 +113,7 @@ msgstr "日期"
 msgid "Diff Program"
 msgstr "diff 程序"
 
-#: Projects/projects/ProjectPane.py:1262
+#: Projects/projects/ProjectPane.py:1269
 msgid "Edit"
 msgstr "编辑"
 
@@ -121,11 +121,11 @@ msgstr "编辑"
 msgid "Enter a command to be executed on all selected files and files in selected directories."
 msgstr "输入命令运行于所有选定文件和选定目录中的文件"
 
-#: Projects/projects/ProjectPane.py:1382
+#: Projects/projects/ProjectPane.py:1389
 msgid "Enter command to execute on all files"
 msgstr "输入命令运行于所有文件"
 
-#: Projects/projects/ProjectPane.py:839
+#: Projects/projects/ModList.py:335 Projects/projects/ProjectPane.py:839
 msgid "Enter your commit message:"
 msgstr "输入提交信息："
 
@@ -133,11 +133,11 @@ msgstr "输入提交信息："
 msgid "Environment Variables"
 msgstr "环境变量"
 
-#: Projects/projects/ProjectPane.py:1471 Projects/projects/ProjectPane.py:1479
+#: Projects/projects/ProjectPane.py:1478 Projects/projects/ProjectPane.py:1486
 msgid "Error occurred when copying/moving files"
 msgstr "在复制/移动文件时发生错误"
 
-#: Projects/projects/ProjectPane.py:1505
+#: Projects/projects/ProjectPane.py:1512
 msgid "Error occurred when removing files"
 msgstr "移动文件时产生错误"
 
@@ -145,7 +145,7 @@ msgstr "移动文件时产生错误"
 msgid "Execute command on files"
 msgstr "运行命令于文件"
 
-#: Projects/projects/ProjectPane.py:1271
+#: Projects/projects/ProjectPane.py:1278
 msgid "Execute command..."
 msgstr "运行命令..."
 
@@ -153,12 +153,12 @@ msgstr "运行命令..."
 msgid "File Filters"
 msgstr "文件过滤器"
 
-#: Projects/projects/ModList.py:178
+#: Projects/projects/ModList.py:276
 #, fuzzy
 msgid "Filename"
 msgstr "用户名"
 
-#: Projects/projects/ProjectPane.py:1253
+#: Projects/projects/ProjectPane.py:1260
 msgid "Folder"
 msgstr "文件夹"
 
@@ -182,11 +182,11 @@ msgstr "保持工程树与编辑器笔记同步"
 msgid "Log Message"
 msgstr "日志信息"
 
-#: Projects/projects/ProjectPane.py:1282
+#: Projects/projects/ProjectPane.py:1289
 msgid "Make Patch"
 msgstr "生成补丁"
 
-#: Projects/projects/ProjectPane.py:1287
+#: Projects/projects/ProjectPane.py:1294
 #, fuzzy, python-format
 msgid "Move to %(trash)s"
 msgstr "移动到 "
@@ -195,27 +195,31 @@ msgstr "移动到 "
 msgid "Name"
 msgstr "名字"
 
-#: Projects/projects/ProjectPane.py:1265
+#: Projects/projects/ProjectPane.py:1272
 msgid "New..."
 msgstr "新建..."
 
-#: Projects/projects/ProjectPane.py:1263
+#: Projects/projects/ProjectPane.py:1270
 msgid "Open"
 msgstr "打开"
 
-#: Projects/projects/ProjectPane.py:1636
+#: Projects/projects/ProjectPane.py:1643
 msgid "Open Projects Sidepanel"
 msgstr "打开工程面板"
 
-#: Projects/projects/ProjectPane.py:1264
+#: Projects/projects/ProjectPane.py:1271
 msgid "Open enclosing folder"
 msgstr "打开折叠文件"
+
+#: Projects/projects/__init__.py:109
+msgid "Open the Projects source control summary list"
+msgstr ""
 
 #: Projects/projects/ConfigDialog.py:256
 msgid "Password"
 msgstr "密码"
 
-#: Projects/projects/ProjectPane.py:1269
+#: Projects/projects/ProjectPane.py:1276
 msgid "Paste"
 msgstr "粘贴"
 
@@ -227,7 +231,7 @@ msgstr "Php 文件"
 msgid "Please enter a repository path.  Partial paths may also be entered."
 msgstr "请输入库路径。包括部分路径。"
 
-#: Projects/projects/ProjectPane.py:1635
+#: Projects/projects/ProjectPane.py:1642 Projects/projects/__init__.py:52
 msgid "Projects"
 msgstr "工程"
 
@@ -239,20 +243,20 @@ msgstr "工程配置"
 msgid "Python File"
 msgstr "Python 文件"
 
-#: Projects/projects/ModList.py:117
+#: Projects/projects/ModList.py:122
 #, fuzzy
 msgid "Refresh"
 msgstr "刷新"
 
-#: Projects/projects/ProjectPane.py:1275
+#: Projects/projects/ModList.py:491 Projects/projects/ProjectPane.py:1282
 msgid "Refresh status"
 msgstr "刷新"
 
-#: Projects/projects/ProjectPane.py:1656
+#: Projects/projects/ProjectPane.py:1663
 msgid "Remove Project"
 msgstr "移除工程"
 
-#: Projects/projects/ProjectPane.py:1247
+#: Projects/projects/ProjectPane.py:1254
 msgid "Remove from repository"
 msgstr "从库中移除"
 
@@ -260,7 +264,7 @@ msgstr "从库中移除"
 msgid "Remove repository"
 msgstr "移除库"
 
-#: Projects/projects/ModList.py:99
+#: Projects/projects/ModList.py:110
 #, fuzzy
 msgid "Repository"
 msgstr "移除库"
@@ -277,12 +281,12 @@ msgstr "检索文件历史"
 msgid "Rev #"
 msgstr "Rev *"
 
-#: Projects/projects/ModList.py:123
+#: Projects/projects/ModList.py:140
 #, fuzzy
 msgid "Revert"
 msgstr "移除工程"
 
-#: Projects/projects/ModList.py:277 Projects/projects/ProjectPane.py:1283
+#: Projects/projects/ModList.py:502 Projects/projects/ProjectPane.py:1290
 msgid "Revert to repository version"
 msgstr "恢复库版本"
 
@@ -302,15 +306,15 @@ msgstr "选择 diff 程序"
 msgid "Select the repository path to remove"
 msgstr "选择移除库路径"
 
-#: Projects/projects/ProjectPane.py:888
+#: Projects/projects/ProjectPane.py:890
 msgid "Selected files are from multiple repositories"
 msgstr "选定文件来自多个库"
 
-#: Projects/projects/ModList.py:271 Projects/projects/ProjectPane.py:1279
+#: Projects/projects/ModList.py:497 Projects/projects/ProjectPane.py:1286
 msgid "Show revision history"
 msgstr "显示修订历史"
 
-#: Projects/projects/ConfigDialog.py:92
+#: Projects/projects/ConfigDialog.py:92 Projects/projects/__init__.py:108
 msgid "Source Control"
 msgstr "源代码控制"
 
@@ -322,7 +326,7 @@ msgstr ""
 "从视图中去除的文件匹配列表，用空格分隔\n"
 "可以使用(*)"
 
-#: Projects/projects/ModList.py:176
+#: Projects/projects/ModList.py:274
 msgid "Status"
 msgstr ""
 
@@ -330,7 +334,7 @@ msgstr ""
 msgid "Text File"
 msgstr "文本文件"
 
-#: Projects/projects/ProjectPane.py:1380
+#: Projects/projects/ProjectPane.py:1387
 msgid ""
 "The following command will be executed on all selected\n"
 "files and files contained in selected directories."
@@ -346,21 +350,21 @@ msgstr "所需文件历史信息无法获取。请检查网络连接。"
 msgid "The requested file could not be retrieved from the source control system."
 msgstr "所需文件历史信息无法从版本控制系统中获取。"
 
-#: Projects/projects/ProjectPane.py:1477
+#: Projects/projects/ProjectPane.py:1484
 #, fuzzy, python-format
 msgid "The system returned the following message when attempting to move/copy %(filename)s: %(errmsg)s."
 msgstr "移动/复制 %s 时，系统返回以下信息：%s"
 
-#: Projects/projects/ProjectPane.py:1468
+#: Projects/projects/ProjectPane.py:1475
 #, fuzzy, python-format
 msgid "The system returned the following message when attempting to move/copy %(filename)s: %(errmsg)s. Do you wish to continue?"
 msgstr "移动/复制 %s 时，系统返回以下信息：%s。要继续吗？"
 
-#: Projects/projects/ProjectPane.py:1324
+#: Projects/projects/ProjectPane.py:1331
 msgid "Untitled Folder"
 msgstr ""
 
-#: Projects/projects/ProjectPane.py:1276
+#: Projects/projects/ModList.py:128 Projects/projects/ProjectPane.py:1283
 msgid "Update"
 msgstr "更新"
 
@@ -372,6 +376,6 @@ msgstr "用户名"
 msgid "Value"
 msgstr "值"
 
-#: Projects/projects/ProjectPane.py:887
+#: Projects/projects/ProjectPane.py:889
 msgid "You can not execute source control commands across multiple repositories."
 msgstr "不能跨多个库执行版本控制命令。"
