@@ -16,6 +16,15 @@ __version__ = "0.4"
 
 import wx
 import sys
+import os
+
+import pkg_resources as pkg_r
+#f = pkg_r.resource_filename(__name__, 'IPython')
+path = __path__[0]
+#a = ','.join(os.listdir('.'))
+wx.MessageBox(__name__)
+sys.path.insert(0, path)
+
 import iface
 import plugin
 
