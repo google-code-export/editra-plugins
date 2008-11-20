@@ -80,6 +80,8 @@ from HistWin import AdjustColour, HistoryWindow
 import ProjCmnDlg
 
 # Editra Imports
+import eclib.ctrlbox as ctrlbox
+import eclib.platebtn as platebtn
 try:
     import ed_msg
     import profiler
@@ -1620,7 +1622,7 @@ class ProjectTree(wx.Panel):
 
 #-----------------------------------------------------------------------------#
 
-class ProjectPane(wx.Panel):
+class ProjectPane(ctrlbox.ControlBox):
     """Creates a project pane"""
     ID_REMOVE_PROJECT = wx.NewId()
     ID_ADD_PROJECT = wx.NewId()
@@ -1631,10 +1633,12 @@ class ProjectPane(wx.Panel):
 
     def __init__(self, parent, id_=ID_PROJECTPANE, pos=wx.DefaultPosition,
                  size=wx.DefaultSize, style=wx.NO_BORDER):
-        wx.Panel.__init__(self, parent, id_, pos, size, style)
+        ctrlbox.ControlBox.__init__(self, parent)#, id_, pos, size, style)
 
         # Attributes
         self._mw = parent       # Save ref to owner window
+        self.busy = None
+
         try:
             import ed_glob
             menub = self._mw.GetMenuBar()
@@ -1645,57 +1649,52 @@ class ProjectPane(wx.Panel):
         except ImportError:
             ed_glob = None
 
-        sizer = wx.BoxSizer(wx.VERTICAL)
         self.timer = wx.Timer(self)
         self.isBusy = 0
-
         self.projects = ProjectTree(self, None)
 
         # Layout Panes
-        self.buttonbox = wx.BoxSizer(wx.HORIZONTAL)
-        addbutton = wx.BitmapButton(self, self.ID_ADD_PROJECT,
-                                    self.projects.il.GetBitmap(self.projects.icons['project-add']),
-                                    style=wx.NO_BORDER)
-        addbutton.SetToolTip(wx.ToolTip(_("Add Project")))
-        removebutton = wx.BitmapButton(self, self.ID_REMOVE_PROJECT,
-                                       self.projects.il.GetBitmap(self.projects.icons['project-delete']),
-                                       style=wx.NO_BORDER)
-        removebutton.SetToolTip(wx.ToolTip(_("Remove Project")))
+        self.ctrlbar = ctrlbox.ControlBar(self, style=ctrlbox.CTRLBAR_STYLE_GRADIENT)
+        if wx.Platform == '__WXGTK__':
+            ctrlbar.SetWindowStyle(ctrlbox.CTRLBAR_STYLE_DEFAULT)
+        self.ctrlbar.SetToolSpacing(0)
+        self.ctrlbar.AddSpacer(5, 5)
+
+        addbmp = self.projects.il.GetBitmap(self.projects.icons['project-add'])
+        addbutton = platebtn.PlateButton(self.ctrlbar, self.ID_ADD_PROJECT,
+                                         bmp=addbmp,
+                                         style=platebtn.PB_STYLE_NOBG)
+        addbutton.SetToolTipString(_("Add Project"))
+        self.ctrlbar.AddControl(addbutton, wx.ALIGN_LEFT)
+
+        rembmp = self.projects.il.GetBitmap(self.projects.icons['project-delete'])
+        removebutton = platebtn.PlateButton(self.ctrlbar, self.ID_REMOVE_PROJECT,
+                                            bmp=rembmp,
+                                            style=platebtn.PB_STYLE_NOBG)
+        removebutton.SetToolTipString(_("Remove Project"))
+        self.ctrlbar.AddControl(removebutton, wx.ALIGN_LEFT)
 
         if ed_glob:
             cfgbmp = wx.ArtProvider.GetBitmap(str(ed_glob.ID_PREF), wx.ART_MENU)
         else:
             cfgbmp = wx.ArtProvider.GetBitmap(wx.ART_EXECUTABLE_FILE,
                                               wx.ART_MENU)
-        configbutton = wx.BitmapButton(self, self.ID_CONFIG,
-                                       cfgbmp, style=wx.NO_BORDER)
-        configbutton.SetToolTip(wx.ToolTip(_("Configure")))
+        configbutton = platebtn.PlateButton(self.ctrlbar, self.ID_CONFIG,
+                                            bmp=cfgbmp,
+                                            style=platebtn.PB_STYLE_NOBG)
+        configbutton.SetToolTipString(_("Configure"))
+        self.ctrlbar.AddControl(configbutton, wx.ALIGN_LEFT)
 
+        self.ctrlbar.AddStretchSpacer()
         self.busy = wx.Gauge(self, size=(50, 16), style=wx.GA_HORIZONTAL)
+        self.ctrlbar.AddControl(self.busy, wx.ALIGN_RIGHT)
+        self.ctrlbar.AddSpacer(5, 5)
         self.busy.Hide()
 
-        if wx.Platform == '__WXGTK__':
-            spacer = (3, 3)
-            self.buttonbox.Add((5, 24))
-        else:
-            spacer = (10, 10)
-            self.buttonbox.Add((10, 24))
-
-        self.buttonbox.Add(addbutton, 0, wx.ALIGN_CENTER_VERTICAL)
-        self.buttonbox.Add(spacer)
-        self.buttonbox.Add(removebutton, 0, wx.ALIGN_CENTER_VERTICAL)
-        self.buttonbox.Add(spacer)
-        self.buttonbox.Add(configbutton, 0, wx.ALIGN_CENTER_VERTICAL)
-        self.buttonbox.AddStretchSpacer()
-        sizer.Add(self.buttonbox, 0, wx.EXPAND)
-
-        sizer.Add(self.projects, 1, wx.EXPAND)
-
-        self.SetSizer(sizer)
-        self.SetAutoLayout(True)
+        self.SetControlBar(self.ctrlbar)
+        self.SetWindow(self.projects)
 
         # Event Handlers
-        self.Bind(wx.EVT_PAINT, self.OnPaint)
         self.Bind(wx.EVT_BUTTON, self.OnPress)
         self.Bind(wx.EVT_TIMER, self.OnTick)
         self.Bind(ConfigDialog.EVT_CONFIG_EXIT, self.OnCfgClose)
@@ -1716,31 +1715,6 @@ class ProjectPane(wx.Panel):
             self.projects.config.save()
         else:
             evt.Skip()
-
-    def OnPaint(self, evt):
-        """Paint the button area of the panel with a gradient"""
-        drawc = wx.PaintDC(self)
-        graphc = wx.GraphicsContext.Create(drawc)
-
-        # Get some system colors
-        col1 = wx.SystemSettings_GetColour(wx.SYS_COLOUR_3DFACE)
-        col2 = AdjustColour(col1, 20)
-        col1 = AdjustColour(col1, -20)
-
-        rect = self.GetRect()
-        grad = graphc.CreateLinearGradientBrush(0, 1, 0,
-                                                self.buttonbox.GetSize()[1],
-                                                col2, col1)
-        graphc.SetBrush(grad)
-
-        # Create the background path
-        path = graphc.CreatePath()
-        path.AddRectangle(0, 0, rect.width - 0.5, rect.height - 0.5)
-
-        graphc.SetPen(wx.Pen(AdjustColour(col1, -10), 1))
-        graphc.DrawPath(path)
-
-        evt.Skip()
 
     def OnPress(self, evt):
         """ Add/Remove projects """
@@ -1794,20 +1768,9 @@ class ProjectPane(wx.Panel):
         if self.isBusy > 1:
             return
 
-        running = False
-        for item in self.buttonbox.GetChildren():
-            win = item.GetWindow()
-            if isinstance(win, wx.Gauge):
-                running = True
-                break
-
-        if not running:
-            self.buttonbox.Add(self.busy, 0,
-                               wx.ALIGN_CENTER_VERTICAL | wx.ALIGN_RIGHT)
-            self.buttonbox.Add((10, 10), 0, wx.ALIGN_RIGHT)
-
         self.busy.Show()
-        self.buttonbox.Layout()
+        self.busy.Pulse()
+        self.ctrlbar.Layout()
         self.timer.Start(100)
 
     def StopBusy(self):
