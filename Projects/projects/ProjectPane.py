@@ -1358,7 +1358,7 @@ class ProjectTree(wx.Panel):
         # Determine file type
         e_id = event.GetId()
         file_types = getFileTypes()
-        if not file_types.has_key(e_id):
+        if e_id not in file_types:
             return
 
         # Get informatio about file type

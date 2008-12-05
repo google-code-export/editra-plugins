@@ -41,7 +41,7 @@ class BZR(SourceControl):
     
     def getRepository(self, path):
         """ Get the repository of a given path """
-        if self.repocache.has_key(path):
+        if path in self.repocache:
             return self.repocache[path]
 
         if not os.path.isdir(path):

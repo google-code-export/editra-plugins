@@ -143,7 +143,7 @@ class GIT(SourceControl):
 
         # Cleanup log formatting
         for item in history:
-            if item.has_key('log'):
+            if 'log' in item:
                 item['log'] = item['log'].strip()
 
         return history
