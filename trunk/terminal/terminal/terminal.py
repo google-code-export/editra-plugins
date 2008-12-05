@@ -64,7 +64,7 @@ MAX_HIST = 50       # Max command history to save
 if sys.platform == 'win32':
     SHELL = 'cmd.exe'
 else:
-    if os.environ.has_key('SHELL'):
+    if 'SHELL' in os.environ:
         SHELL = os.environ['SHELL']
     else:
         SHELL = '/bin/sh'

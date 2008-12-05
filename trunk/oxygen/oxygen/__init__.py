@@ -45,7 +45,7 @@ class OxygenTheme(plugin.Plugin):
         return u'Oxygen'
 
     def GetMenuBitmap(self, bmp_id):
-        if ed_theme.ART.has_key(bmp_id):
+        if bmp_id in ed_theme.ART:
             path = MENU_PATH + ed_theme.ART[bmp_id]
             bmp = self.__LoadBitmapData(path)
             if bmp is not None:
@@ -57,7 +57,7 @@ class OxygenTheme(plugin.Plugin):
 
     def GetFileBitmap(self, bmp_id):
         bmp = None
-        if ed_theme.MIME_ART.has_key(bmp_id):
+        if bmp_id in ed_theme.MIME_ART:
             path = MIME_PATH + ed_theme.MIME_ART[bmp_id]
             bmp = self.__LoadBitmapData(path)
             if bmp is not None:
@@ -73,7 +73,7 @@ class OxygenTheme(plugin.Plugin):
         return wx.NullBitmap
 
     def GetToolbarBitmap(self, bmp_id):
-        if ed_theme.ART.has_key(bmp_id):
+        if bmp_id in ed_theme.ART:
             path = TOOL_PATH + ed_theme.ART[bmp_id]
             bmp = self.__LoadBitmapData(path)
             if bmp is not None:
