@@ -83,18 +83,20 @@ import ProjCmnDlg
 import eclib.ctrlbox as ctrlbox
 import eclib.platebtn as platebtn
 try:
+    import ed_glob
     import ed_msg
     import profiler
-    EOL = profiler.Profile_Get('EOL')
-    if 'Unix' in EOL:
+    EOL = profiler.Profile_Get('EOL_MODE')
+    if EOL == ed_glob.EOL_MODE_UNIX:
         EOL = '\n'
-    elif 'Windows' in EOL:
+    elif EOL == ed_glob.EOL_MODE_CRLF:
         EOL = '\r\n'
     else:
         EOL = '\r'
 except ImportError:
     profiler = None
     ed_msg = None
+except (ValueError, AttributeError):
     EOL = '\n'
 
 # Configure Platform specific commands
