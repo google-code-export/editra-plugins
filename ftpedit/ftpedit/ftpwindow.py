@@ -24,6 +24,9 @@ import eclib.ctrlbox as ctrlbox
 import eclib.platebtn as platebtn
 import eclib.elistmix as elistmix
 
+# Local Imports
+import ftpconfig
+
 #-----------------------------------------------------------------------------#
 # Globals
 ID_SITES = wx.NewId()
@@ -39,6 +42,7 @@ class FtpWindow(ctrlbox.ControlBox):
         ctrlbox.ControlBox.__init__(self, parent, id)
 
         # Attributes
+        self._mw = self.__FindMainWindow()
         self._connected = False
         self._cbar = None     # ControlBar
         self._sites = None    # wx.Choice
@@ -96,6 +100,25 @@ class FtpWindow(ctrlbox.ControlBox):
         self.SetControlBar(self._cbar, wx.TOP)
         self.SetWindow(FtpList(self, wx.ID_ANY))
 
+    def __FindMainWindow(self):
+        """Find the mainwindow of this control
+        @return: MainWindow or None
+
+        """
+        def IsMainWin(win):
+            """Check if the given window is a main window"""
+            return getattr(tlw, '__name__', '') == 'MainWindow'
+
+        tlw = self.GetTopLevelParent()
+        if IsMainWin(tlw):
+            return tlw
+        elif hasattr(tlw, 'GetParent'):
+            tlw = tlw.GetParent()
+            if IsMainWin(tlw):
+                return tlw
+
+        return None
+
     def OnButton(self, evt):
         """Handle Button click events"""
         e_id = evt.GetId()
@@ -115,7 +138,14 @@ class FtpWindow(ctrlbox.ControlBox):
             self._cbar.Layout()
         elif e_id == wx.ID_PREFERENCES:
             # Show preferences dialog
-            pass
+            app = wx.GetApp()
+            win = app.GetWindowInstance(ftpconfig.FtpConfigDialog)
+            if win is None:
+                config = ftpconfig.FtpConfigDialog(self._mw, _("Ftp Configuration"))
+                config.CentreOnParent()
+                config.Show()
+            else:
+                win.Raise()
         else:
             evt.Skip()
 
@@ -153,3 +183,6 @@ class FtpList(listmix.ListCtrlAutoWidthMixin,
 
         self.setResizeColumn(0)
 
+    def AddItem(self, item):
+        """Add an item to the list"""
+        pass
