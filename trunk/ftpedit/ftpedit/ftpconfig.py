@@ -53,6 +53,7 @@ class FtpConfigPanel(wx.Panel):
 
         # Attributes
         self._sites = FtpSitesPanel(self)
+        self._login = FtpLoginPanel(self)
 
         # Layout
         self.__DoLayout()
@@ -65,12 +66,17 @@ class FtpConfigPanel(wx.Panel):
         sizer = wx.BoxSizer(wx.HORIZONTAL)
 
         # Sites
-        sizer.Add(self._sites, 1, wx.EXPAND)
+        sizer.Add(self._sites, 0, wx.EXPAND)
+        sizer.Add((10, 10), 0)
+        sizer.Add(self._login, 1, wx.EXPAND)
+        sizer.Add((5, 5), 0)
 
         # Final layout
         self.SetSizer(sizer)
         self.SetAutoLayout(True)
 
+#-----------------------------------------------------------------------------#
+# Left hand side panels
 #-----------------------------------------------------------------------------#
 
 class FtpSitesTree(wx.TreeCtrl):
@@ -153,6 +159,61 @@ class FtpSitesPanel(wx.Panel):
         msizer = wx.BoxSizer(wx.HORIZONTAL)
         msizer.AddMany([((5, 5), 0), (sizer, 1, wx.EXPAND), ((5, 5), 0)])
         self.SetSizer(msizer)
+        self.SetAutoLayout(True)
+
+#-----------------------------------------------------------------------------#
+# Right hand side panels
+#-----------------------------------------------------------------------------#
+
+class FtpLoginPanel(wx.Panel):
+    """Login information panel"""
+    def __init__(self, parent):
+        wx.Panel.__init__(self, parent)
+
+        # Attributes
+        self._box = wx.StaticBox(self, label=_("Login Settings"))
+        self._boxsz = wx.StaticBoxSizer(self._box, wx.HORIZONTAL)
+        self._host = wx.TextCtrl(self)
+        self._port = wx.TextCtrl(self, value=u"21")
+        self._user = wx.TextCtrl(self)
+        self._pass = wx.TextCtrl(self, style=wx.TE_PASSWORD)
+
+        # Layout
+        self.__DoLayout()
+        
+        # Event handlers
+        
+
+    def __DoLayout(self):
+        """Layout the panel"""
+        sizer = wx.BoxSizer(wx.VERTICAL)
+
+        host_sz = wx.BoxSizer(wx.HORIZONTAL)
+        host_sz.AddMany([(self._host, 0, wx.EXPAND), ((5, 5), 0),
+                         (wx.StaticText(self, label=_("Port:")), 0, wx.ALIGN_CENTER_VERTICAL),
+                         ((5, 5), 0),
+                         (self._port, 0), ((5, 5), 0)])
+
+        fgrid = wx.FlexGridSizer(4, 2, 5, 5)
+        fgrid.AddMany([(wx.StaticText(self, label=_("Host:")), 0, wx.ALIGN_CENTER_VERTICAL),
+                       (host_sz, 1, wx.EXPAND),
+
+                       (wx.StaticLine(self, size=(-1, 2), style=wx.LI_HORIZONTAL), 0, wx.EXPAND),
+                       (wx.StaticLine(self, size=(-1, 2), style=wx.LI_HORIZONTAL), 0, wx.EXPAND),
+
+                       (wx.StaticText(self, label=_("User:")), 0, wx.ALIGN_CENTER_VERTICAL),
+                       (self._user, 0, wx.EXPAND),
+                       
+                       (wx.StaticText(self, label=_("Password:")), 0, wx.ALIGN_CENTER_VERTICAL),
+                       (self._pass, 0, wx.EXPAND)
+                       ])
+
+        hsizer = wx.BoxSizer(wx.HORIZONTAL)
+        hsizer.AddMany([((5, 5), 0), (fgrid, 1, wx.EXPAND), ((5, 5), 0)])
+        
+        sizer.AddMany([((5, 5), 0), (hsizer, 1, wx.EXPAND), ((5, 5), 0)])
+        self._boxsz.Add(sizer, 1, wx.EXPAND)
+        self.SetSizer(self._boxsz)
         self.SetAutoLayout(True)
 
 #-----------------------------------------------------------------------------#
