@@ -93,7 +93,8 @@ class FtpWindow(ctrlbox.ControlBox):
 
         # Connect
         self._cbar.AddStretchSpacer()
-        connect = platebtn.PlateButton(self._cbar, ID_CONNECT, label=_("Connect"))
+        connect = platebtn.PlateButton(self._cbar, ID_CONNECT, label=_("Connect"),
+                                       style=platebtn.PB_STYLE_NOBG)
         self._cbar.AddControl(connect, wx.ALIGN_RIGHT)
 
         # Setup Window
@@ -174,7 +175,7 @@ class FtpList(listmix.ListCtrlAutoWidthMixin,
               wx.ListCtrl):
     """Ftp File List"""
     def __init__(self, parent, id=wx.ID_ANY):
-        wx.ListCtrl.__init__(self, parent, id, style=wx.LC_ICON|wx.LC_REPORT) 
+        wx.ListCtrl.__init__(self, parent, id, style=wx.LC_REPORT) 
         listmix.ListCtrlAutoWidthMixin.__init__(self)
         elistmix.ListRowHighlighter.__init__(self)
         self.InsertColumn(0, _("Filename"))
