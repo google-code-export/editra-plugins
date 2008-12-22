@@ -1,0 +1,4 @@
+Author=Cody Precord
+Version=0.1
+Name=FtpEdit
+Description=Edit files over Ftp
