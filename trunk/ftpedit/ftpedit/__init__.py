@@ -62,7 +62,8 @@ class FtpEdit(plugin.Plugin):
         @return: wx.Bitmap
 
         """
-        return wx.NullBitmap
+        bmp = wx.ArtProvider.GetBitmap(str(ed_glob.ID_WEB), wx.ART_MENU)
+        return bmp
 
     def GetId(self):
         """Plugin menu identifier ID"""
@@ -75,7 +76,7 @@ class FtpEdit(plugin.Plugin):
         """
         item = wx.MenuItem(menu, ID_FTPWINDOW, _("Ftp Window"),
                            _("Ftp File Window"))
-#        item.SetBitmap(self.GetBitmap())
+        item.SetBitmap(self.GetBitmap())
         return item
 
     def GetMinVersion(self):

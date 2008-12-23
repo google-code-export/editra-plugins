@@ -25,6 +25,7 @@ import eclib.platebtn as platebtn
 import eclib.elistmix as elistmix
 
 # Local Imports
+import IconFile
 import ftpconfig
 
 #-----------------------------------------------------------------------------#
@@ -93,7 +94,9 @@ class FtpWindow(ctrlbox.ControlBox):
 
         # Connect
         self._cbar.AddStretchSpacer()
-        connect = platebtn.PlateButton(self._cbar, ID_CONNECT, label=_("Connect"),
+        bmp = IconFile.Connect.GetBitmap()
+        connect = platebtn.PlateButton(self._cbar, ID_CONNECT, bmp=bmp,
+                                       label=_("Connect"),
                                        style=platebtn.PB_STYLE_NOBG)
         self._cbar.AddControl(connect, wx.ALIGN_RIGHT)
 
@@ -129,6 +132,7 @@ class FtpWindow(ctrlbox.ControlBox):
                 self._connected = False
                 # TODO: Disconnect from server
                 e_obj.SetLabel(_("Connect"))
+                e_obj.SetBitmap(IconFile.Connect.GetBitmap())
             else:
                 # Connect to site
                 user = self._username.GetValue().strip()
@@ -136,6 +140,7 @@ class FtpWindow(ctrlbox.ControlBox):
                 site = self._sites.GetStringSelection()
                 self._connected = True
                 e_obj.SetLabel(_("Disconnect"))
+                e_obj.SetBitmap(IconFile.Disconnect.GetBitmap())
             self._cbar.Layout()
         elif e_id == wx.ID_PREFERENCES:
             # Show preferences dialog
