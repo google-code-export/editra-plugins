@@ -20,6 +20,7 @@ import wx.lib.mixins.listctrl as listmix
 # Editra Libraries
 import ed_glob
 import ed_msg
+from profiler import Profile_Get, Profile_Set
 import eclib.ctrlbox as ctrlbox
 import eclib.platebtn as platebtn
 import eclib.elistmix as elistmix
@@ -30,6 +31,7 @@ import ftpconfig
 
 #-----------------------------------------------------------------------------#
 # Globals
+CONFIG_KEY = u"FtpEdit.Sites"
 ID_SITES = wx.NewId()
 ID_CONNECT = wx.NewId()
 
@@ -44,6 +46,8 @@ class FtpWindow(ctrlbox.ControlBox):
 
         # Attributes
         self._mw = self.__FindMainWindow()
+        self._config = ftpconfig.ConfigData
+        self._config.SetData(Profile_Get(CONFIG_KEY, default=dict()))
         self._connected = False
         self._cbar = None     # ControlBar
         self._sites = None    # wx.Choice
@@ -52,6 +56,7 @@ class FtpWindow(ctrlbox.ControlBox):
 
         # Layout
         self.__DoLayout()
+        self.EnableControls(bool(self._config.GetCount()))
 
         # Event Handlers
         self.Bind(wx.EVT_BUTTON, self.OnButton, id=wx.ID_PREFERENCES)
@@ -122,6 +127,15 @@ class FtpWindow(ctrlbox.ControlBox):
                 return tlw
 
         return None
+
+    def EnableControls(self, enable=True):
+        """Enable or disable controls in the control bar
+        @keyword enable: bool
+
+        """
+        for child in self._cbar.GetChildren():
+            if child.GetId() != wx.ID_PREFERENCES:
+                child.Enable(enable)
 
     def OnButton(self, evt):
         """Handle Button click events"""

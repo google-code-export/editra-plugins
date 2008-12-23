@@ -14,10 +14,12 @@ __revision__ = "$Revision$"
 
 #-----------------------------------------------------------------------------#
 # Imports
+import os
 import wx
 
 # Editra Libraries
 import ed_glob
+import ed_crypt
 
 # Local Imports
 
@@ -32,6 +34,7 @@ class FtpConfigDialog(wx.Dialog):
         wx.Dialog.__init__(self, parent, title=title)
 
         # Attributes
+        self.config = ConfigData
         self._panel = FtpConfigPanel(self)
 
         # Layout
@@ -39,13 +42,21 @@ class FtpConfigDialog(wx.Dialog):
         self.SetInitialSize()
 
         # Event Handlers
-        
+        self.Bind(wx.EVT_CLOSE, self.OnClose)
+        self.Bind(wx.EVT_WINDOW_DESTROY, self.OnClose)
+
+        wx.GetApp().RegisterWindow(repr(self), self)
 
     def __DoLayout(self):
         """Layout the Dialog"""
         sizer = wx.BoxSizer(wx.HORIZONTAL)
         sizer.Add(self._panel, 1, wx.EXPAND)
         self.SetSizer(sizer)
+
+    def OnClose(self, evt):
+        """Handle closing the dialog"""
+        wx.GetApp().UnRegisterWindow(repr(self))
+        evt.Skip()
 
 #-----------------------------------------------------------------------------#
 
@@ -87,7 +98,8 @@ class FtpSitesTree(wx.TreeCtrl):
     def __init__(self, parent):
         """create the tree"""
         wx.TreeCtrl.__init__(self, parent,
-                             style=wx.TR_FULL_ROW_HIGHLIGHT|\
+                             style=wx.TR_DEFAULT_STYLE|\
+                                   wx.TR_FULL_ROW_HIGHLIGHT|\
                                    wx.TR_EDIT_LABELS|\
                                    wx.TR_SINGLE|\
                                    wx.SIMPLE_BORDER)
@@ -101,6 +113,8 @@ class FtpSitesTree(wx.TreeCtrl):
         self.SetImageList(self._imglst)
         self.__SetupImageList()
         self._root = self.AddRoot(_("My Sites"), self._imgidx['folder'])
+        self.SetItemHasChildren(self._root, True)
+        self.Expand(self._root)
         self.SetMinSize(wx.Size(-1, 150))
 
         # Event Handlers
@@ -115,13 +129,41 @@ class FtpSitesTree(wx.TreeCtrl):
         bmp = wx.ArtProvider.GetBitmap(str(ed_glob.ID_WEB), wx.ART_MENU)
         self._imgidx['site'] = self._imglst.Add(bmp)
 
+    def CanRemove(self):
+        """Can the selected item be removed
+        @return: bool
+
+        """
+        return self.GetSelection() != self._root
+
+    def NewSite(self, name):
+        """Add a new site node
+        @param name: site name
+
+        """
+        val = self.AppendItem(self._root, name, self._imgidx['site'])
+        self.SortChildren(self._root)
+
     def OnBeginLabelEdit(self, evt):
         """Handle updating after a tree label has been edited"""
-        pass
+        if evt.GetItem() != self._root:
+            evt.Skip()
+        else:
+            # Don't allow root to be edited
+            evt.Veto()
 
     def OnEndLabelEdit(self, evt):
         """Handle updating after a tree label has been edited"""
         pass
+
+    def RemoveSelected(self):
+        """Remove the selected site"""
+        sel = self.GetSelection()
+        if sel != self._root:
+            self.Delete(sel)
+            # TODO: Remove from config as well
+        else:
+            pass
 
 #-----------------------------------------------------------------------------#
 
@@ -137,7 +179,8 @@ class FtpSitesPanel(wx.Panel):
         self.__DoLayout()
 
         # Event Handlers
-        
+        self.Bind(wx.EVT_TREE_SEL_CHANGED, self.OnTreeSelChanged)
+        self.Bind(wx.EVT_BUTTON, self.OnButton)
 
     def __DoLayout(self):
         """Layout the Dialog"""
@@ -155,6 +198,7 @@ class FtpSitesPanel(wx.Panel):
         hsizer = wx.BoxSizer(wx.HORIZONTAL)
         newbtn = wx.Button(self, wx.ID_NEW, _("New Site"))
         delbtn = wx.Button(self, wx.ID_DELETE, _("Delete"))
+        delbtn.Enable(False)
         hsizer.AddMany([(newbtn, 0, wx.ALIGN_CENTER_VERTICAL),
                         ((5, 5), 0),
                         (delbtn, 0, wx.ALIGN_CENTER_VERTICAL)])
@@ -165,6 +209,26 @@ class FtpSitesPanel(wx.Panel):
         msizer.AddMany([((5, 5), 0), (sizer, 1, wx.EXPAND), ((5, 5), 0)])
         self.SetSizer(msizer)
         self.SetAutoLayout(True)
+
+    def OnButton(self, evt):
+        """Handle Button clicks"""
+        e_id = evt.GetId()
+        if e_id == wx.ID_NEW:
+            # TODO: make sure its unique name and update config with
+            #       empty configuration.
+            item = self._tree.NewSite(_("New Site"))
+        elif e_id == wx.ID_DELETE:
+            item = self._tree.GetSelection()
+            self._tree.Delete(item)
+            #TODO: delete from config
+        else:
+            evt.Skip()
+
+    def OnTreeSelChanged(self, evt):
+        """Notify parent of change in tree"""
+        item = evt.GetItem()
+        self.FindWindowById(wx.ID_DELETE).Enable(item != self._tree.GetRootItem())
+        print self._tree.GetItemText(item)
 
 #-----------------------------------------------------------------------------#
 # Right hand side panels
@@ -269,4 +333,66 @@ class FtpLoginPanel(wx.Panel):
         self._pword.SetValue(name)
 
 #-----------------------------------------------------------------------------#
+
+class __ConfigData(object):
+    """Configuration data Object"""
+    DEFAULT = dict(url=u'', port=u'21', user=u'', pword=u'')
+    def __init__(self, data):
+        """Create a configration data object
+        @param data: dict
+
+        """
+        object.__init__(self)
+
+        # Attributes
+        self._data = data
+
+    def AddSite(self, name, url=u'', port=u'', user=u'', pword=u''):
+        """Add/Update a site in the configuration
+        @param name: configuration name
+        @keyword url: site url
+        @keyword port: port number
+        @keyword user: username
+        @keyword pword: password
+
+        """
+        data = dict(url=url, port=port, user=user, pword=pword)
+        salt = os.urandom(8)
+        pword = ed_crypt.Encrypt(data['pword'], salt)
+        data['salt'] = salt
+        data['pword'] = pword
+        self._data[name] = data
+
+    def GetCount(self):
+        """Get number of sites in the config
+        @return: int
+
+        """
+        return len(self._data.keys())
+
+    def GetSite(self, name):
+        """Get the information for a given site
+        @param name: site name
+
+        """
+        data = self._data.get(name, None)
+        if data is None:
+            return dict(ConfigData.DEFAULT)
+
+        pword = ed_crypt.Decrypt(data['pword'], data['salt'])
+        rdata = dict(data)
+        del rdata['salt']
+        rdata['pword'] = pword
+        return rdata
+
+    def SetData(self, data):
+        """Set the configurations site data
+        @param data: dict(name=dict(url,port,user,pword))
+
+        """
+        self._data = data
+
+#-----------------------------------------------------------------------------#
+
+ConfigData = __ConfigData(dict())
 
