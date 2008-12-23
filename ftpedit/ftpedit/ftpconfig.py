@@ -19,6 +19,8 @@ import wx
 # Editra Libraries
 import ed_glob
 
+# Local Imports
+
 #-----------------------------------------------------------------------------#
 # Globals
 
@@ -34,13 +36,14 @@ class FtpConfigDialog(wx.Dialog):
 
         # Layout
         self.__DoLayout()
+        self.SetInitialSize()
 
         # Event Handlers
         
 
     def __DoLayout(self):
         """Layout the Dialog"""
-        sizer = wx.BoxSizer(wx.VERTICAL)
+        sizer = wx.BoxSizer(wx.HORIZONTAL)
         sizer.Add(self._panel, 1, wx.EXPAND)
         self.SetSizer(sizer)
 
@@ -69,7 +72,7 @@ class FtpConfigPanel(wx.Panel):
         sizer.Add(self._sites, 0, wx.EXPAND)
         sizer.Add((10, 10), 0)
         sizer.Add(self._login, 1, wx.EXPAND)
-        sizer.Add((5, 5), 0)
+        sizer.Add((10, 10), 0)
 
         # Final layout
         self.SetSizer(sizer)
@@ -86,7 +89,8 @@ class FtpSitesTree(wx.TreeCtrl):
         wx.TreeCtrl.__init__(self, parent,
                              style=wx.TR_FULL_ROW_HIGHLIGHT|\
                                    wx.TR_EDIT_LABELS|\
-                                   wx.TR_SINGLE)
+                                   wx.TR_SINGLE|\
+                                   wx.SIMPLE_BORDER)
 
         # Attributes
         self._imglst = wx.ImageList(16, 16)
@@ -97,6 +101,7 @@ class FtpSitesTree(wx.TreeCtrl):
         self.SetImageList(self._imglst)
         self.__SetupImageList()
         self._root = self.AddRoot(_("My Sites"), self._imgidx['folder'])
+        self.SetMinSize(wx.Size(-1, 150))
 
         # Event Handlers
         self.Bind(wx.EVT_TREE_BEGIN_LABEL_EDIT, self.OnBeginLabelEdit)
@@ -180,7 +185,8 @@ class FtpLoginPanel(wx.Panel):
 
         # Layout
         self.__DoLayout()
-        
+        self.SetInitialSize()
+
         # Event handlers
         
 
@@ -189,12 +195,12 @@ class FtpLoginPanel(wx.Panel):
         sizer = wx.BoxSizer(wx.VERTICAL)
 
         host_sz = wx.BoxSizer(wx.HORIZONTAL)
-        host_sz.AddMany([(self._host, 0, wx.EXPAND), ((5, 5), 0),
+        host_sz.AddMany([(self._host, 1, wx.EXPAND), ((5, 5)),
                          (wx.StaticText(self, label=_("Port:")), 0, wx.ALIGN_CENTER_VERTICAL),
-                         ((5, 5), 0),
-                         (self._port, 0), ((5, 5), 0)])
+                         ((5, 5)), (self._port, 0, wx.ALIGN_CENTER_VERTICAL)])
 
-        fgrid = wx.FlexGridSizer(4, 2, 5, 5)
+        fgrid = wx.FlexGridSizer(4, 2, 10, 5)
+        fgrid.AddGrowableCol(1, 1)
         fgrid.AddMany([(wx.StaticText(self, label=_("Host:")), 0, wx.ALIGN_CENTER_VERTICAL),
                        (host_sz, 1, wx.EXPAND),
 
@@ -211,10 +217,56 @@ class FtpLoginPanel(wx.Panel):
         hsizer = wx.BoxSizer(wx.HORIZONTAL)
         hsizer.AddMany([((5, 5), 0), (fgrid, 1, wx.EXPAND), ((5, 5), 0)])
         
-        sizer.AddMany([((5, 5), 0), (hsizer, 1, wx.EXPAND), ((5, 5), 0)])
-        self._boxsz.Add(sizer, 1, wx.EXPAND)
-        self.SetSizer(self._boxsz)
+        self._boxsz.Add(hsizer, 1, wx.EXPAND)
+        sizer.AddMany([((5, 5), 0), (self._boxsz, 0, wx.EXPAND), ((5, 5), 0)])
+
+        if wx.Platform == '__WXMAC__':
+            for child in self.GetChildren():
+                if not isinstance(child, wx.StaticLine):
+                    child.SetWindowVariant(wx.WINDOW_VARIANT_SMALL)
+
+        self.SetSizer(sizer)
         self.SetAutoLayout(True)
+
+    def GetLoginInfo(self):
+        """Get the login information
+        @return: {url:'',port:'',user:'',pword:''}
+        @rtype: dict
+
+        """
+        rdict = dict(url=self._host.GetValue(),
+                     port=self._port.GetValue(),
+                     user=self._user.GetValue(),
+                     pword=self._pass.GetValue())
+        return rdict
+
+    def SetHostName(self, name):
+        """Set the hostname field
+        @param name: string
+
+        """
+        self._host.SetValue(name)
+
+    def SetPort(self, port):
+        """Set the port field
+        @param port: string
+
+        """
+        self._port.SetValue(port)
+
+    def SetUserName(self, name):
+        """Set the username field
+        @param name: string
+
+        """
+        self._user.SetValue(name)
+
+    def SetPassword(self, pword):
+        """Set the hostname field
+        @param pword: string
+
+        """
+        self._pword.SetValue(name)
 
 #-----------------------------------------------------------------------------#
 
