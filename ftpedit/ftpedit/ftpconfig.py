@@ -105,6 +105,7 @@ class FtpSitesTree(wx.TreeCtrl):
                                    wx.SIMPLE_BORDER)
 
         # Attributes
+        self._editing = (None, None)
         self._imglst = wx.ImageList(16, 16)
         self._imgidx = dict(folder=0, site=1)
         self._root = None # TreeItemId
@@ -141,12 +142,15 @@ class FtpSitesTree(wx.TreeCtrl):
         @param name: site name
 
         """
-        val = self.AppendItem(self._root, name, self._imgidx['site'])
-        self.SortChildren(self._root)
+        item = self.AppendItem(self._root, name, self._imgidx['site'])
+        self.SetItemPyData(item, dict(url=u'', port=u'21', user=u'', pword=u''))
+        wx.CallAfter(self.SortChildren, self._root)
 
     def OnBeginLabelEdit(self, evt):
         """Handle updating after a tree label has been edited"""
-        if evt.GetItem() != self._root:
+        item = evt.GetItem()
+        if item != self._root:
+            self._editing = (item, self.GetItemText(item))
             evt.Skip()
         else:
             # Don't allow root to be edited
@@ -154,7 +158,16 @@ class FtpSitesTree(wx.TreeCtrl):
 
     def OnEndLabelEdit(self, evt):
         """Handle updating after a tree label has been edited"""
-        pass
+        item = evt.GetItem()
+        if item != self._root and item == self._editing[0]:
+            label = self.GetItemText(item)
+            old = self._editing[1]
+            self._editing = (None, None)
+            if old != label:
+                # TODO: UPDATE CONFIG
+                print label
+        else:
+            evt.Skip()
 
     def RemoveSelected(self):
         """Remove the selected site"""
@@ -228,6 +241,9 @@ class FtpSitesPanel(wx.Panel):
         """Notify parent of change in tree"""
         item = evt.GetItem()
         self.FindWindowById(wx.ID_DELETE).Enable(item != self._tree.GetRootItem())
+
+        old = evt.GetOldItem()
+        # TODO: Store old selection
         print self._tree.GetItemText(item)
 
 #-----------------------------------------------------------------------------#
