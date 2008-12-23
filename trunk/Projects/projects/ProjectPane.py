@@ -86,7 +86,7 @@ try:
     import ed_glob
     import ed_msg
     import profiler
-    EOL = profiler.Profile_Get('EOL_MODE')
+    EOL = profiler.Profile_Get('EOL_MODE', default=ed_glob.EOL_MODE_UNIX)
     if EOL == ed_glob.EOL_MODE_UNIX:
         EOL = '\n'
     elif EOL == ed_glob.EOL_MODE_CRLF:
