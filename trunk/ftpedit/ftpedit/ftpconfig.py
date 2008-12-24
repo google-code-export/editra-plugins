@@ -20,11 +20,15 @@ import wx
 # Editra Libraries
 import ed_glob
 import ed_crypt
+import ed_msg
+from eclib.encdlg import GetAllEncodings
 
 # Local Imports
 
 #-----------------------------------------------------------------------------#
 # Globals
+EDMSG_FTPCFG_UPDATED = ('FtpEdit', 'cfg', 'updated')
+EDMSG_FTPCFG_LOADED = ('FtpEdit', 'cfg', 'loaded')
 
 _ = wx.GetTranslation
 #-----------------------------------------------------------------------------#
@@ -68,19 +72,25 @@ class FtpConfigPanel(wx.Panel):
         # Attributes
         self._sites = FtpSitesPanel(self)
         self._login = FtpLoginPanel(self)
+        self._login.Disable()
 
         # Layout
         self.__DoLayout()
 
+        # Setup
+        self._sites.SetSelectionNotifier(self.OnSelectionNotify)
+
         # Event Handlers
-        
+        self.Bind(wx.EVT_BUTTON, self.OnSave, id=wx.ID_SAVE)
 
     def __DoLayout(self):
         """Layout the Dialog"""
         sizer = wx.BoxSizer(wx.HORIZONTAL)
 
         # Sites
-        sizer.Add(self._sites, 0, wx.EXPAND)
+        vsizer2 = wx.BoxSizer(wx.VERTICAL)
+        vsizer2.Add(self._sites, 1, wx.EXPAND)
+        sizer.Add(vsizer2, 1, wx.EXPAND)
         sizer.Add((10, 10), 0)
 
         vsizer = wx.BoxSizer(wx.VERTICAL)
@@ -94,6 +104,7 @@ class FtpConfigPanel(wx.Panel):
         save.SetDefault()
         bsizer.Realize()
         vsizer.Add(bsizer, 0, wx.ALIGN_RIGHT)
+        vsizer.Add((5, 5), 0)
 
         sizer.Add(vsizer, 0, wx.EXPAND)
         sizer.Add((10, 10), 0)
@@ -101,6 +112,25 @@ class FtpConfigPanel(wx.Panel):
         # Final layout
         self.SetSizer(sizer)
         self.SetAutoLayout(True)
+
+    def OnSave(self, evt):
+        """Save the configuration"""
+        evt.Skip()
+
+    def OnSelectionNotify(self, old, new, isroot):
+        """Notification callback for when tree selection changes
+        @param old: old label string
+        @param new: new item string
+        @param isroot: new selection is root item (bool)
+
+        """
+        if not isroot:
+            info = self._login.GetLoginInfo()
+            ConfigData.AddSite(old, **info)
+
+        self._login.Enable(not isroot)
+        ninfo = ConfigData.GetSite(new)
+        self._login.SetLoginInfo(ninfo)
 
 #-----------------------------------------------------------------------------#
 # Left hand side panels
@@ -201,8 +231,9 @@ class FtpSitesPanel(wx.Panel):
         wx.Panel.__init__(self, parent)
 
         # Attributes
-        self._box = wx.StaticBox(self, label=_("Sites:"))
+        self._box = wx.StaticBox(self, label=_("Sites"))
         self._tree = FtpSitesTree(self)
+        self._selNotifier = None
 
         # Layout
         self.__DoLayout()
@@ -216,7 +247,7 @@ class FtpSitesPanel(wx.Panel):
         sizer = wx.BoxSizer(wx.VERTICAL)
 
         boxsz = wx.StaticBoxSizer(self._box, wx.VERTICAL)
-        sizer.Add(self._tree, 1, wx.EXPAND|wx.ALIGN_LEFT)
+        sizer.Add(self._tree, 1, wx.EXPAND)
 
         # Buttons
         hsizer = wx.BoxSizer(wx.HORIZONTAL)
@@ -231,14 +262,21 @@ class FtpSitesPanel(wx.Panel):
                         (delbtn, 0, wx.ALIGN_CENTER_VERTICAL)])
 
         sizer.AddMany([((5, 5), 0), (hsizer, 0, wx.EXPAND)])
-        boxsz.Add(sizer, 0, wx.EXPAND)
+        boxsz.Add(sizer, 1, wx.EXPAND)
 
         msizer = wx.BoxSizer(wx.HORIZONTAL)
-        msizer.AddMany([((5, 5), 0), (boxsz, 0), ((5, 5), 0)])
+        msizer.AddMany([((5, 5), 0), (boxsz, 1, wx.EXPAND), ((5, 5), 0)])
         vsizer = wx.BoxSizer(wx.VERTICAL)
-        vsizer.AddMany([((5, 5), 0), (msizer, 0, wx.EXPAND), ((5, 5), 0)])
+        vsizer.AddMany([((5, 5), 0), (msizer, 1, wx.EXPAND), ((5, 5), 0)])
         self.SetSizer(vsizer)
         self.SetAutoLayout(True)
+
+    def GetTreeCtrl(self):
+        """Get this panels tree control
+        @return: FtpSitesTree
+
+        """
+        return self._tree
 
     def OnButton(self, evt):
         """Handle Button clicks"""
@@ -260,8 +298,17 @@ class FtpSitesPanel(wx.Panel):
         self.FindWindowById(wx.ID_DELETE).Enable(item != self._tree.GetRootItem())
 
         old = evt.GetOldItem()
-        # TODO: Store old selection
-        print self._tree.GetItemText(item)
+        if self._selNotifier is not None:
+            self._selNotifier(self._tree.GetItemText(old),
+                              self._tree.GetItemText(item),
+                              item == self._tree.GetRootItem())
+
+    def SetSelectionNotifier(self, callb):
+        """Set the selction changed notifier method
+        @param callb: def fun(old_sel, new_sel, isroot)
+
+        """
+        self._selNotifier = callb
 
 #-----------------------------------------------------------------------------#
 # Right hand side panels
@@ -280,6 +327,7 @@ class FtpLoginPanel(wx.Panel):
         self._user = wx.TextCtrl(self)
         self._pass = wx.TextCtrl(self, style=wx.TE_PASSWORD)
         self._path = wx.TextCtrl(self)
+        self._enc = wx.Choice(self, choices=GetAllEncodings())
 
         # Layout
         self.__DoLayout()
@@ -297,7 +345,7 @@ class FtpLoginPanel(wx.Panel):
                          (wx.StaticText(self, label=_("Port:")), 0, wx.ALIGN_CENTER_VERTICAL),
                          ((5, 5)), (self._port, 0, wx.ALIGN_CENTER_VERTICAL)])
 
-        fgrid = wx.FlexGridSizer(6, 2, 10, 5)
+        fgrid = wx.FlexGridSizer(7, 2, 10, 5)
         fgrid.AddGrowableCol(1, 1)
         fgrid.AddMany([(wx.StaticText(self, label=_("Host:")), 0, wx.ALIGN_CENTER_VERTICAL),
                        (host_sz, 1, wx.EXPAND),
@@ -315,7 +363,10 @@ class FtpLoginPanel(wx.Panel):
                        (wx.StaticLine(self, size=(-1, 2), style=wx.LI_HORIZONTAL), 0, wx.EXPAND),
 
                        (wx.StaticText(self, label=_("Default Path:")), 0, wx.ALIGN_CENTER_VERTICAL),
-                       (self._path, 0, wx.EXPAND)
+                       (self._path, 0, wx.EXPAND),
+
+                       (wx.StaticText(self, label=_("Encoding:")), 0, wx.ALIGN_CENTER_VERTICAL),
+                       (self._enc, 0, wx.EXPAND)
                        ])
 
         hsizer = wx.BoxSizer(wx.HORIZONTAL)
@@ -341,8 +392,25 @@ class FtpLoginPanel(wx.Panel):
         rdict = dict(url=self._host.GetValue(),
                      port=self._port.GetValue(),
                      user=self._user.GetValue(),
-                     pword=self._pass.GetValue())
+                     pword=self._pass.GetValue(),
+                     path=self._path.GetValue(),
+                     enc=self._enc.GetStringSelection())
         return rdict
+
+    def SetLoginInfo(self, info):
+        """Set the data in all the fields
+        @param info: login info dict
+
+        """
+        vmap = { 'url' : self.SetHostName,
+                 'port' : self.SetPort,
+                 'user' : self.SetUserName,
+                 'pword' : self.SetPassword,
+                 'path' : self.SetDefaultPath,
+                 'enc' : self.SetEncoding }
+
+        for key, val in info.iteritems():
+            vmap.get(key, lambda v: len(v))(val)
 
     def SetHostName(self, name):
         """Set the hostname field
@@ -370,13 +438,28 @@ class FtpLoginPanel(wx.Panel):
         @param pword: string
 
         """
-        self._pword.SetValue(name)
+        self._pass.SetValue(pword)
+
+    def SetDefaultPath(self, path):
+        """Set the default path field
+        @param path: string
+
+        """
+        self._path.SetValue(path)
+
+    def SetEncoding(self, enc):
+        """Set the encoding to use
+        @param enc: string
+
+        """
+        self._enc.SetStringSelection(enc)
 
 #-----------------------------------------------------------------------------#
 
 class __ConfigData(object):
-    """Configuration data Object"""
-    DEFAULT = dict(url=u'', port=u'21', user=u'', pword=u'')
+    """Configuration Data Object"""
+    DEFAULT = dict(url=u'', port=u'21', user=u'',
+                   pword=u'', path=u'', enc=u'utf-8')
     def __init__(self, data):
         """Create a configration data object
         @param data: dict
@@ -387,21 +470,28 @@ class __ConfigData(object):
         # Attributes
         self._data = data
 
-    def AddSite(self, name, url=u'', port=u'', user=u'', pword=u''):
+    def AddSite(self, name, url=u'', port=u'21', user=u'',
+                      pword=u'', path=u'', enc=u'utf-8'):
         """Add/Update a site in the configuration
         @param name: configuration name
         @keyword url: site url
         @keyword port: port number
         @keyword user: username
         @keyword pword: password
+        @keyword path: default path
+        @keyword enc: encoding
 
         """
-        data = dict(url=url, port=port, user=user, pword=pword)
+        data = dict(url=url, port=port, user=user,
+                    pword=pword, path=path, enc=enc)
         salt = os.urandom(8)
         pword = ed_crypt.Encrypt(data['pword'], salt)
         data['salt'] = salt
         data['pword'] = pword
         self._data[name] = data
+
+        # Notify all others of change
+        ed_msg.PostMessage(EDMSG_FTPCFG_UPDATED, (name,))
 
     def GetCount(self):
         """Get number of sites in the config
@@ -413,6 +503,7 @@ class __ConfigData(object):
     def GetSite(self, name):
         """Get the information for a given site
         @param name: site name
+        @return: site config dictionary
 
         """
         data = self._data.get(name, None)
@@ -427,10 +518,13 @@ class __ConfigData(object):
 
     def SetData(self, data):
         """Set the configurations site data
-        @param data: dict(name=dict(url,port,user,pword))
+        @param data: dict(name=dict(url,port,user,pword,path,enc))
 
         """
         self._data = data
+
+        # Notify of settings load
+        ed_msg.PostMessage(EDMSG_FTPCFG_LOADED)
 
 #-----------------------------------------------------------------------------#
 
