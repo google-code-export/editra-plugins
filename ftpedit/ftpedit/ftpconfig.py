@@ -82,7 +82,20 @@ class FtpConfigPanel(wx.Panel):
         # Sites
         sizer.Add(self._sites, 0, wx.EXPAND)
         sizer.Add((10, 10), 0)
-        sizer.Add(self._login, 1, wx.EXPAND)
+
+        vsizer = wx.BoxSizer(wx.VERTICAL)
+        vsizer.Add(self._login, 0, wx.EXPAND)
+        vsizer.Add((10, 10), 0)
+        bsizer = wx.StdDialogButtonSizer()
+        cancel = wx.Button(self, wx.ID_CANCEL, _("Cancel"))
+        save = wx.Button(self, wx.ID_SAVE, _("Save"))
+        bsizer.AddButton(cancel)
+        bsizer.AddButton(save)
+        save.SetDefault()
+        bsizer.Realize()
+        vsizer.Add(bsizer, 0, wx.ALIGN_RIGHT)
+
+        sizer.Add(vsizer, 0, wx.EXPAND)
         sizer.Add((10, 10), 0)
 
         # Final layout
@@ -145,6 +158,8 @@ class FtpSitesTree(wx.TreeCtrl):
         item = self.AppendItem(self._root, name, self._imgidx['site'])
         self.SetItemPyData(item, dict(url=u'', port=u'21', user=u'', pword=u''))
         wx.CallAfter(self.SortChildren, self._root)
+        if not self.IsExpanded(self._root):
+            self.Expand(self._root)
 
     def OnBeginLabelEdit(self, evt):
         """Handle updating after a tree label has been edited"""
@@ -186,6 +201,7 @@ class FtpSitesPanel(wx.Panel):
         wx.Panel.__init__(self, parent)
 
         # Attributes
+        self._box = wx.StaticBox(self, label=_("Sites:"))
         self._tree = FtpSitesTree(self)
 
         # Layout
@@ -199,28 +215,29 @@ class FtpSitesPanel(wx.Panel):
         """Layout the Dialog"""
         sizer = wx.BoxSizer(wx.VERTICAL)
 
-        lbl = wx.StaticText(self, label=_("Sites:"))
-        lsizer = wx.BoxSizer(wx.HORIZONTAL)
-        lsizer.AddMany([((3, 3), 0), (lbl, 0)])
-        sizer.AddMany([((5, 5), 0),
-                       (lsizer, 0, wx.ALIGN_LEFT),
-                       ((5, 5), 0),
-                       (self._tree, 1, wx.EXPAND|wx.ALIGN_LEFT)])
+        boxsz = wx.StaticBoxSizer(self._box, wx.VERTICAL)
+        sizer.Add(self._tree, 1, wx.EXPAND|wx.ALIGN_LEFT)
 
         # Buttons
         hsizer = wx.BoxSizer(wx.HORIZONTAL)
         newbtn = wx.Button(self, wx.ID_NEW, _("New Site"))
         delbtn = wx.Button(self, wx.ID_DELETE, _("Delete"))
+        if wx.Platform == '__WXMAC__':
+            newbtn.SetWindowVariant(wx.WINDOW_VARIANT_SMALL)
+            delbtn.SetWindowVariant(wx.WINDOW_VARIANT_SMALL) 
         delbtn.Enable(False)
         hsizer.AddMany([(newbtn, 0, wx.ALIGN_CENTER_VERTICAL),
                         ((5, 5), 0),
                         (delbtn, 0, wx.ALIGN_CENTER_VERTICAL)])
 
-        sizer.AddMany([((5, 5), 0), (hsizer, 0, wx.EXPAND), ((5, 5), 0)])
+        sizer.AddMany([((5, 5), 0), (hsizer, 0, wx.EXPAND)])
+        boxsz.Add(sizer, 0, wx.EXPAND)
 
         msizer = wx.BoxSizer(wx.HORIZONTAL)
-        msizer.AddMany([((5, 5), 0), (sizer, 1, wx.EXPAND), ((5, 5), 0)])
-        self.SetSizer(msizer)
+        msizer.AddMany([((5, 5), 0), (boxsz, 0), ((5, 5), 0)])
+        vsizer = wx.BoxSizer(wx.VERTICAL)
+        vsizer.AddMany([((5, 5), 0), (msizer, 0, wx.EXPAND), ((5, 5), 0)])
+        self.SetSizer(vsizer)
         self.SetAutoLayout(True)
 
     def OnButton(self, evt):
@@ -262,6 +279,7 @@ class FtpLoginPanel(wx.Panel):
         self._port = wx.TextCtrl(self, value=u"21")
         self._user = wx.TextCtrl(self)
         self._pass = wx.TextCtrl(self, style=wx.TE_PASSWORD)
+        self._path = wx.TextCtrl(self)
 
         # Layout
         self.__DoLayout()
@@ -279,7 +297,7 @@ class FtpLoginPanel(wx.Panel):
                          (wx.StaticText(self, label=_("Port:")), 0, wx.ALIGN_CENTER_VERTICAL),
                          ((5, 5)), (self._port, 0, wx.ALIGN_CENTER_VERTICAL)])
 
-        fgrid = wx.FlexGridSizer(4, 2, 10, 5)
+        fgrid = wx.FlexGridSizer(6, 2, 10, 5)
         fgrid.AddGrowableCol(1, 1)
         fgrid.AddMany([(wx.StaticText(self, label=_("Host:")), 0, wx.ALIGN_CENTER_VERTICAL),
                        (host_sz, 1, wx.EXPAND),
@@ -291,7 +309,13 @@ class FtpLoginPanel(wx.Panel):
                        (self._user, 0, wx.EXPAND),
                        
                        (wx.StaticText(self, label=_("Password:")), 0, wx.ALIGN_CENTER_VERTICAL),
-                       (self._pass, 0, wx.EXPAND)
+                       (self._pass, 0, wx.EXPAND),
+
+                       (wx.StaticLine(self, size=(-1, 2), style=wx.LI_HORIZONTAL), 0, wx.EXPAND),
+                       (wx.StaticLine(self, size=(-1, 2), style=wx.LI_HORIZONTAL), 0, wx.EXPAND),
+
+                       (wx.StaticText(self, label=_("Default Path:")), 0, wx.ALIGN_CENTER_VERTICAL),
+                       (self._path, 0, wx.EXPAND)
                        ])
 
         hsizer = wx.BoxSizer(wx.HORIZONTAL)
