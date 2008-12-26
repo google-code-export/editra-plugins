@@ -60,6 +60,8 @@ class FtpConfigDialog(wx.Dialog):
     def OnClose(self, evt):
         """Handle closing the dialog"""
         wx.GetApp().UnRegisterWindow(repr(self))
+        # TODO: Save current state of selected tree item before exit
+        
         evt.Skip()
 
 #-----------------------------------------------------------------------------#
@@ -81,8 +83,7 @@ class FtpConfigPanel(wx.Panel):
         self._sites.SetSelectionNotifier(self.OnSelectionNotify)
 
         # Event Handlers
-        self.Bind(wx.EVT_BUTTON, self.OnSave, id=wx.ID_SAVE)
-        self.Bind(wx.EVT_BUTTON, self.GetParent().OnClose, id=wx.ID_CANCEL)
+        self.Bind(wx.EVT_BUTTON, self.GetParent().OnClose, id=wx.ID_OK)
 
     def __DoLayout(self):
         """Layout the Dialog"""
@@ -98,11 +99,9 @@ class FtpConfigPanel(wx.Panel):
         vsizer.Add(self._login, 0, wx.EXPAND)
         vsizer.Add((10, 10), 0)
         bsizer = wx.StdDialogButtonSizer()
-        cancel = wx.Button(self, wx.ID_CANCEL, _("Cancel"))
-        save = wx.Button(self, wx.ID_SAVE, _("Save"))
-        bsizer.AddButton(cancel)
-        bsizer.AddButton(save)
-        save.SetDefault()
+        ok = wx.Button(self, wx.ID_OK, _("Ok"))
+        bsizer.AddButton(ok)
+        ok.SetDefault()
         bsizer.Realize()
         vsizer.Add(bsizer, 0, wx.ALIGN_RIGHT)
         vsizer.Add((5, 5), 0)
@@ -113,10 +112,6 @@ class FtpConfigPanel(wx.Panel):
         # Final layout
         self.SetSizer(sizer)
         self.SetAutoLayout(True)
-
-    def OnSave(self, evt):
-        """Save the configuration"""
-        evt.Skip()
 
     def OnSelectionNotify(self, old, new, isroot):
         """Notification callback for when tree selection changes
@@ -191,7 +186,9 @@ class FtpSitesTree(wx.TreeCtrl):
         count = self.GetChildrenCount(self._root)
         nodes = list()
         if count:
-            child = self.GetFirstChild(self._root)
+            # TODO: find out why GetFirstChild returns a (TreeId, void *)
+            #       seems like a wxBUG.
+            child = self.GetFirstChild(self._root)[0]
             lchild = self.GetLastChild(self._root)
             while child != lchild:
                 txt = self.GetItemText(child)
@@ -236,13 +233,16 @@ class FtpSitesTree(wx.TreeCtrl):
             evt.Skip()
 
     def RemoveSelected(self):
-        """Remove the selected site"""
+        """Remove the selected site
+        @return: bool
+
+        """
         sel = self.GetSelection()
         if sel != self._root:
             self.Delete(sel)
-            # TODO: Remove from config as well
+            return True
         else:
-            pass
+            return False
 
 #-----------------------------------------------------------------------------#
 
@@ -303,16 +303,22 @@ class FtpSitesPanel(wx.Panel):
         """Handle Button clicks"""
         e_id = evt.GetId()
         if e_id == wx.ID_NEW:
-            # TODO: make sure its unique name and update config with
-            #       empty configuration.
-            item = self._tree.NewSite(_("New Site"))
+            # Get a unique label name for the new site
+            lbl = _("New Site")
+            count = 1
+            while lbl in self._tree.GetNodeLabels():
+                lbl = lbl + unicode(count)
+                count += 1
+
+            item = self._tree.NewSite(lbl)
         elif e_id == wx.ID_DELETE:
             item = self._tree.GetSelection()
-            site = self._tree.GetItemText(item)
+            if item != self._tree.GetRootItem():
+                site = self._tree.GetItemText(item)
 
-            # Delete from Config and tree view
-            self._tree.Delete(item)
-            ConfigData.RemoveSite(site)
+                # Delete from Config and tree view
+                self._tree.Delete(item)
+                ConfigData.RemoveSite(site)
         else:
             evt.Skip()
 
