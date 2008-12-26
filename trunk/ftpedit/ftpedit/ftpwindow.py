@@ -56,7 +56,6 @@ class FtpWindow(ctrlbox.ControlBox):
 
         # Layout
         self.__DoLayout()
-        print self._config.GetCount(), self._config.GetData()
         self.EnableControls(bool(self._config.GetCount()))
         self.RefreshControlBar()
 
@@ -159,6 +158,8 @@ class FtpWindow(ctrlbox.ControlBox):
                 self._connected = True
                 e_obj.SetLabel(_("Disconnect"))
                 e_obj.SetBitmap(IconFile.Disconnect.GetBitmap())
+
+                # TODO: start ftp connection thread
             self._cbar.Layout()
         elif e_id == wx.ID_PREFERENCES:
             # Show preferences dialog
