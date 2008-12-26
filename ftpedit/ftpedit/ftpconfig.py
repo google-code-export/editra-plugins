@@ -308,8 +308,11 @@ class FtpSitesPanel(wx.Panel):
             item = self._tree.NewSite(_("New Site"))
         elif e_id == wx.ID_DELETE:
             item = self._tree.GetSelection()
+            site = self._tree.GetItemText(item)
+
+            # Delete from Config and tree view
             self._tree.Delete(item)
-            #TODO: delete from config
+            ConfigData.RemoveSite(site)
         else:
             evt.Skip()
 
@@ -320,8 +323,16 @@ class FtpSitesPanel(wx.Panel):
 
         old = evt.GetOldItem()
         if self._selNotifier is not None:
-            self._selNotifier(self._tree.GetItemText(old),
-                              self._tree.GetItemText(item),
+            oldlbl = u''
+            newlbl = u''
+            if old.IsOk():
+                oldlbl = self._tree.GetItemText(old)
+
+            if item.IsOk():
+                newlbl = self._tree.GetItemText(item)
+
+            self._selNotifier(oldlbl,
+                              newlbl,
                               old == self._tree.GetRootItem())
 
     def SetSelectionNotifier(self, callb):
@@ -568,6 +579,14 @@ class __ConfigData(object):
         data = self.GetSiteData(site)
         return data['user']
 
+    def RemoveSite(self, site):
+        """Remove a site from the config
+        @param site: site name
+
+        """
+        if site in self._data:
+            del self._data[site]
+        
     def SetData(self, data):
         """Set the configurations site data
         @param data: dict(name=dict(url,port,user,pword,path,enc))
