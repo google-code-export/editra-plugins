@@ -82,6 +82,7 @@ class FtpConfigPanel(wx.Panel):
 
         # Event Handlers
         self.Bind(wx.EVT_BUTTON, self.OnSave, id=wx.ID_SAVE)
+        self.Bind(wx.EVT_BUTTON, self.GetParent().OnClose, id=wx.ID_CANCEL)
 
     def __DoLayout(self):
         """Layout the Dialog"""
@@ -121,15 +122,15 @@ class FtpConfigPanel(wx.Panel):
         """Notification callback for when tree selection changes
         @param old: old label string
         @param new: new item string
-        @param isroot: new selection is root item (bool)
+        @param isroot: old selection was root item (bool)
 
         """
         if not isroot:
             info = self._login.GetLoginInfo()
             ConfigData.AddSite(old, **info)
 
-        self._login.Enable(not isroot)
-        ninfo = ConfigData.GetSite(new)
+        self._login.Enable(isroot)
+        ninfo = ConfigData.GetSiteData(new)
         self._login.SetLoginInfo(ninfo)
 
 #-----------------------------------------------------------------------------#
@@ -159,6 +160,8 @@ class FtpSitesTree(wx.TreeCtrl):
         self._root = self.AddRoot(_("My Sites"), self._imgidx['folder'])
         self.SetItemHasChildren(self._root, True)
         self.Expand(self._root)
+        for site in ConfigData.GetSites():
+            self.AppendItem(self._root, site, self._imgidx['site'])
         self.SetMinSize(wx.Size(-1, 150))
 
         # Event Handlers
@@ -180,14 +183,31 @@ class FtpSitesTree(wx.TreeCtrl):
         """
         return self.GetSelection() != self._root
 
+    def GetNodeLabels(self):
+        """Get the labels of all the nodes
+        @return: list of strings
+
+        """
+        count = self.GetChildrenCount(self._root)
+        nodes = list()
+        if count:
+            child = self.GetFirstChild(self._root)
+            lchild = self.GetLastChild(self._root)
+            while child != lchild:
+                txt = self.GetItemText(child)
+                nodes.append(txt)
+                child = self.GetNextSibling(child)
+            nodes.append(self.GetItemText(lchild))
+
+        return nodes
+
     def NewSite(self, name):
         """Add a new site node
         @param name: site name
 
         """
         item = self.AppendItem(self._root, name, self._imgidx['site'])
-        self.SetItemPyData(item, dict(url=u'', port=u'21', user=u'', pword=u''))
-        wx.CallAfter(self.SortChildren, self._root)
+        wx.CallLater(200, self.EditLabel, item)
         if not self.IsExpanded(self._root):
             self.Expand(self._root)
 
@@ -211,6 +231,7 @@ class FtpSitesTree(wx.TreeCtrl):
             if old != label:
                 # TODO: UPDATE CONFIG
                 print label
+                wx.CallAfter(self.SortChildren, self._root)
         else:
             evt.Skip()
 
@@ -301,7 +322,7 @@ class FtpSitesPanel(wx.Panel):
         if self._selNotifier is not None:
             self._selNotifier(self._tree.GetItemText(old),
                               self._tree.GetItemText(item),
-                              item == self._tree.GetRootItem())
+                              old == self._tree.GetRootItem())
 
     def SetSelectionNotifier(self, callb):
         """Set the selction changed notifier method
@@ -500,7 +521,14 @@ class __ConfigData(object):
         """
         return len(self._data.keys())
 
-    def GetSite(self, name):
+    def GetData(self):
+        """Get the configuration data dictionary
+        @return: dict
+
+        """
+        return self._data
+
+    def GetSiteData(self, name):
         """Get the information for a given site
         @param name: site name
         @return: site config dictionary
@@ -515,6 +543,30 @@ class __ConfigData(object):
         del rdata['salt']
         rdata['pword'] = pword
         return rdata
+
+    def GetSites(self):
+        """Return the list of configured sites
+        @return: list of strings
+
+        """
+        return sorted(self._data.keys())
+
+    def GetSitePassword(self, site):
+        """Get the password set for the given site
+        @return: string
+
+        """
+        data = self.GetSiteData(site)
+        return data['pword']
+
+    def GetSiteUsername(self, site):
+        """Get the username configured for the given site
+        @param site: site name
+        @return: string
+
+        """
+        data = self.GetSiteData(site)
+        return data['user']
 
     def SetData(self, data):
         """Set the configurations site data
