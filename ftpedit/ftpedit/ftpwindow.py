@@ -192,7 +192,10 @@ class FtpWindow(ctrlbox.ControlBox):
         @param msg: ftpconfig.EDMSG_FTPCFG_UPDATED
 
         """
+        # Refresh persistent state
         Profile_Set(CONFIG_KEY, ftpconfig.ConfigData.GetData())
+
+        # Update view for new data
         self.RefreshControlBar()
 
     def OnThemeChanged(self, msg):
@@ -225,9 +228,12 @@ class FtpWindow(ctrlbox.ControlBox):
 #-----------------------------------------------------------------------------#
 
 class FtpList(listmix.ListCtrlAutoWidthMixin,
-              elistmix.ListRowHighlighter,
-              wx.ListCtrl):
-    """Ftp File List"""
+               elistmix.ListRowHighlighter,
+               wx.ListCtrl):
+    """Ftp File List
+    Displays the list of files in the currently connected ftp site.
+
+    """
     def __init__(self, parent, id=wx.ID_ANY):
         wx.ListCtrl.__init__(self, parent, id, style=wx.LC_REPORT) 
         listmix.ListCtrlAutoWidthMixin.__init__(self)
