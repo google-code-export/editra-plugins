@@ -3,7 +3,7 @@
 #
 from extern.embeddedimage import PyEmbeddedImage
 
-Connect = PyEmbeddedImage(
+Disconnect = PyEmbeddedImage(
     "iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAABHNCSVQICAgIfAhkiAAAAohJ"
     "REFUOI2Vkj1PFFEUht/ZOzPOwBpB3fClNgYKCws/ChoKoiZYWJjYWJkQC0IstDKhMEZbjQkJ"
     "If4AYrCw0AYN2VCIBCQqUVlUCCzs7Dczs7sz9965d3Zs1LhxMXrq931ynpOj4D/n3pO1AcbE"
@@ -18,12 +18,12 @@ Connect = PyEmbeddedImage(
     "j4GyABqJsJVxUSpVQasMrEpBK+yNadPxZj+j1hh72HkwjigKsZ2vYttyYBdqE1LKmZCxIpcs"
     "k/Bta+6H8x8At0qRzoYgiJDZcWCX3cHFqWvJZuGmAFalnRu7bk76ggqfDr19Ojz3r2UA+A5Y"
     "z3SvHbteLQAAAABJRU5ErkJggg==")
-getConnectData = Connect.GetData
-getConnectImage = Connect.GetImage
-getConnectBitmap = Connect.GetBitmap
+getDisconnectData = Disconnect.GetData
+getDisconnectImage = Disconnect.GetImage
+getDisconnectBitmap = Disconnect.GetBitmap
 
 #----------------------------------------------------------------------
-Disconnect = PyEmbeddedImage(
+Connect = PyEmbeddedImage(
     "iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAABHNCSVQICAgIfAhkiAAAAr1J"
     "REFUOI2FkktoFGkUhU+9urrS6dGEpMVEHYY4UUFwIS6iLgRH0NWAoKC7yCxEmNUQHBwYcSOu"
     "dOHKnW5ctMFHUIlxgo8hj9VEMIpRY0zHTtOdTlWq+q//Vf/fPQtRBNN61vd+nHPPNfAdPXrU"
@@ -39,7 +39,6 @@ Disconnect = PyEmbeddedImage(
     "aUDXNQpzS1he1mf+u3P2yWoA254NiJexHK0UYiawUAxRC2IwwsGJAI3iiZCoy80ezl6J6aiF"
     "1MGX1Ro+LPiJpOyMlslrULkktC52JsHii8lzqikgiMPDUdm4qZnYH4lU68sbJ2Sz4dX0P7YL"
     "jqnaHUJ7AAAAAElFTkSuQmCC")
-getDisconnectData = Disconnect.GetData
-getDisconnectImage = Disconnect.GetImage
-getDisconnectBitmap = Disconnect.GetBitmap
-
+getConnectData = Connect.GetData
+getConnectImage = Connect.GetImage
+getConnectBitmap = Connect.GetBitmap

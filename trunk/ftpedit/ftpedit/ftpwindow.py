@@ -58,6 +58,7 @@ class FtpWindow(ctrlbox.ControlBox):
         self.__DoLayout()
         print self._config.GetCount(), self._config.GetData()
         self.EnableControls(bool(self._config.GetCount()))
+        self.RefreshControlBar()
 
         # Event Handlers
         self.Bind(wx.EVT_BUTTON, self.OnButton, id=wx.ID_PREFERENCES)
@@ -164,7 +165,8 @@ class FtpWindow(ctrlbox.ControlBox):
             app = wx.GetApp()
             win = app.GetWindowInstance(ftpconfig.FtpConfigDialog)
             if win is None:
-                config = ftpconfig.FtpConfigDialog(self._mw, _("Ftp Configuration"))
+                config = ftpconfig.FtpConfigDialog(self._mw,
+                                                   _("Ftp Configuration"))
                 config.CentreOnParent()
                 config.Show()
             else:
@@ -176,7 +178,11 @@ class FtpWindow(ctrlbox.ControlBox):
         """Handle Choice Control Events"""
         if evt.GetId() == ID_SITES:
             # Change the current Site
-            pass
+            site = self._sites.GetStringSelection()
+            password = self._config.GetSitePassword(site)
+            user = self._config.GetSiteUsername(site)
+            self._username.SetValue(user)
+            self._password.SetValue(password)
         else:
             evt.Skip()
 
