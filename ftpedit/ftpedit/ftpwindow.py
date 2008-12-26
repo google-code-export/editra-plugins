@@ -56,6 +56,7 @@ class FtpWindow(ctrlbox.ControlBox):
 
         # Layout
         self.__DoLayout()
+        print self._config.GetCount(), self._config.GetData()
         self.EnableControls(bool(self._config.GetCount()))
 
         # Event Handlers
@@ -65,10 +66,12 @@ class FtpWindow(ctrlbox.ControlBox):
 
         # Editra Message Handlers
         ed_msg.Subscribe(self.OnThemeChanged, ed_msg.EDMSG_THEME_CHANGED)
+        ed_msg.Subscribe(self.OnCfgUpdated, ftpconfig.EDMSG_FTPCFG_UPDATED)
 
     def __del__(self):
         """Cleanup"""
         ed_msg.Unsubscribe(self.OnThemeChanged)
+        ed_msg.Unsubscribe(self.OnCfgUpdated)
 
     def __DoLayout(self):
         """Layout the window"""
@@ -177,6 +180,14 @@ class FtpWindow(ctrlbox.ControlBox):
         else:
             evt.Skip()
 
+    def OnCfgUpdated(self, msg):
+        """Update state of control bar when configuration data is updated
+        @param msg: ftpconfig.EDMSG_FTPCFG_UPDATED
+
+        """
+        Profile_Set(CONFIG_KEY, ftpconfig.ConfigData.GetData())
+        self.RefreshControlBar()
+
     def OnThemeChanged(self, msg):
         """Update icons when the theme changes
         @param msg: ed_msg.EDMSG_THEME_CHANGED
@@ -186,6 +197,23 @@ class FtpWindow(ctrlbox.ControlBox):
         pref = self._cbar.FindWindowById(wx.ID_PREFERENCES)
         pref.SetBitmap(bmp)
         self._cbar.Layout()
+
+    def RefreshControlBar(self):
+        """Refresh the status of the control bar"""
+        csel = self._sites.GetStringSelection()
+        sites = self._config.GetSites()
+        self._sites.SetItems(sites)
+        if csel in sites:
+            self._sites.SetStringSelection(csel)
+        elif len(sites):
+            self._sites.SetSelection(0)
+
+        csel = self._sites.GetStringSelection()
+        data = self._config.GetSiteData(csel)
+        self._username.SetValue(self._config.GetSiteUsername(csel))
+        self._password.SetValue(self._config.GetSitePassword(csel))
+        self._cbar.Layout()
+        self.EnableControls(len(sites))
 
 #-----------------------------------------------------------------------------#
 
