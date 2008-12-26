@@ -178,9 +178,10 @@ class FtpSitesTree(wx.TreeCtrl):
         """
         return self.GetSelection() != self._root
 
-    def GetNodeLabels(self):
-        """Get the labels of all the nodes
-        @return: list of strings
+    def GetItemLabelPairs(self):
+        """Get a list of (itemId, label) tuples for each site in the
+        config tree.
+        @return: list of tuples
 
         """
         count = self.GetChildrenCount(self._root)
@@ -192,9 +193,20 @@ class FtpSitesTree(wx.TreeCtrl):
             lchild = self.GetLastChild(self._root)
             while child != lchild:
                 txt = self.GetItemText(child)
-                nodes.append(txt)
+                nodes.append((child, txt))
                 child = self.GetNextSibling(child)
-            nodes.append(self.GetItemText(lchild))
+            nodes.append((lchild, self.GetItemText(lchild)))
+
+        return nodes
+
+    def GetNodeLabels(self):
+        """Get the labels of all the nodes
+        @return: list of strings
+
+        """
+        nodes = list()
+        for pair in self.GetItemLabelPairs():
+            nodes.append(pair[1])
 
         return nodes
 
@@ -222,13 +234,30 @@ class FtpSitesTree(wx.TreeCtrl):
         """Handle updating after a tree label has been edited"""
         item = evt.GetItem()
         if item != self._root and item == self._editing[0]:
-            label = self.GetItemText(item)
+            label = evt.GetLabel()
             old = self._editing[1]
+
+            # Label didn't change
+            if label == old:
+                evt.Skip()
+                return
+
+            # Check that the new label isn't same as existing one
+            labels = self.GetNodeLabels()
+            if label in labels:
+                wx.MessageBox(_("%s already exists. Please enter a different name.") % label,
+                              _("%s already exists!") % label,
+                              style=wx.OK|wx.CENTER|wx.ICON_WARNING)
+                evt.Veto()
+                return
+
+            # Update configuration
+            if ConfigData.HasSite(old):
+                ConfigData.RenameSite(old, label)
+
+            # Sort the view
+            wx.CallAfter(self.SortChildren, self._root)
             self._editing = (None, None)
-            if old != label:
-                # TODO: UPDATE CONFIG
-                print label
-                wx.CallAfter(self.SortChildren, self._root)
         else:
             evt.Skip()
 
@@ -310,15 +339,22 @@ class FtpSitesPanel(wx.Panel):
                 lbl = lbl + unicode(count)
                 count += 1
 
+            # Add the new site to the config and tree view
+            ConfigData.AddSite(lbl)
             item = self._tree.NewSite(lbl)
+            ed_msg.PostMessage(EDMSG_FTPCFG_UPDATED, (lbl,))
+
         elif e_id == wx.ID_DELETE:
             item = self._tree.GetSelection()
+            # Cannot delete the root item.
             if item != self._tree.GetRootItem():
                 site = self._tree.GetItemText(item)
 
                 # Delete from Config and tree view
                 self._tree.Delete(item)
                 ConfigData.RemoveSite(site)
+                ed_msg.PostMessage(EDMSG_FTPCFG_UPDATED, (site,))
+
         else:
             evt.Skip()
 
@@ -585,6 +621,14 @@ class __ConfigData(object):
         data = self.GetSiteData(site)
         return data['user']
 
+    def HasSite(self, site):
+        """Does the configuration object have data for the given site.
+        @param site: string
+        @return: bool
+
+        """
+        return site in self._data
+
     def RemoveSite(self, site):
         """Remove a site from the config
         @param site: site name
@@ -592,7 +636,15 @@ class __ConfigData(object):
         """
         if site in self._data:
             del self._data[site]
+
+    def RenameSite(self, oldSite, newName):
+        """Re-associate the old sites data with the new sites name
+        @param oldSite: old site name
+        @param newName: new site name
+
+        """
         
+
     def SetData(self, data):
         """Set the configurations site data
         @param data: dict(name=dict(url,port,user,pword,path,enc))
