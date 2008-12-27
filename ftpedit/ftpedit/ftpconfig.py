@@ -117,14 +117,16 @@ class FtpConfigPanel(wx.Panel):
         """Notification callback for when tree selection changes
         @param old: old label string
         @param new: new item string
-        @param isroot: old selection was root item (bool)
+        @param isroot: selection is root item (bool)
 
         """
-        if not isroot:
+        # Update data for changes in login panel
+        if ConfigData.HasSite(old):
             info = self._login.GetLoginInfo()
             ConfigData.AddSite(old, **info)
 
-        self._login.Enable(isroot)
+        # Refresh for new data
+        self._login.Enable(not isroot)
         ninfo = ConfigData.GetSiteData(new)
         self._login.SetLoginInfo(ninfo)
 
@@ -152,7 +154,9 @@ class FtpSitesTree(wx.TreeCtrl):
         # Setup
         self.SetImageList(self._imglst)
         self.__SetupImageList()
-        self._root = self.AddRoot(_("My Sites"), self._imgidx['folder'])
+        self._root = self.AddRoot(_("My Sites"))
+        self.SetItemImage(self._root, self._imgidx['folder'], wx.TreeItemIcon_Normal)
+        self.SetItemImage(self._root, self._imgidx['open'], wx.TreeItemIcon_Expanded)
         self.SetItemHasChildren(self._root, True)
         self.Expand(self._root)
         for site in ConfigData.GetSites():
@@ -163,10 +167,19 @@ class FtpSitesTree(wx.TreeCtrl):
         self.Bind(wx.EVT_TREE_BEGIN_LABEL_EDIT, self.OnBeginLabelEdit)
         self.Bind(wx.EVT_TREE_END_LABEL_EDIT, self.OnEndLabelEdit)
 
+        # Editra Message Handlers
+        ed_msg.Subscribe(self.OnThemeChanged, ed_msg.EDMSG_THEME_CHANGED)
+
+    def __del__(self):
+        ed_msg.Unsubscribe(self.OnThemeChanged)
+
     def __SetupImageList(self):
         """Setup the image list"""
         bmp = wx.ArtProvider.GetBitmap(str(ed_glob.ID_FOLDER), wx.ART_MENU)
         self._imgidx['folder'] = self._imglst.Add(bmp)
+
+        bmp = wx.ArtProvider.GetBitmap(str(ed_glob.ID_OPEN), wx.ART_MENU)
+        self._imgidx['open'] = self._imglst.Add(bmp)
 
         bmp = wx.ArtProvider.GetBitmap(str(ed_glob.ID_WEB), wx.ART_MENU)
         self._imgidx['site'] = self._imglst.Add(bmp)
@@ -260,6 +273,22 @@ class FtpSitesTree(wx.TreeCtrl):
             self._editing = (None, None)
         else:
             evt.Skip()
+
+    def OnThemeChanged(self, msg):
+        """Update icons when the theme changes
+        @param msg: ed_msg.EDMSG_THEME_CHANGED
+
+        """
+        bmp = wx.ArtProvider.GetBitmap(str(ed_glob.ID_FOLDER), wx.ART_MENU)
+        self._imglst.Replace(self._imgidx['folder'], bmp)
+
+        bmp = wx.ArtProvider.GetBitmap(str(ed_glob.ID_OPEN), wx.ART_MENU)
+        self._imglst.Replace(self._imgidx['open'], bmp)
+
+        bmp = wx.ArtProvider.GetBitmap(str(ed_glob.ID_WEB), wx.ART_MENU)
+        self._imglst.Replace(self._imgidx['site'], bmp)
+
+        self.Refresh()
 
     def RemoveSelected(self):
         """Remove the selected site
@@ -375,7 +404,7 @@ class FtpSitesPanel(wx.Panel):
 
             self._selNotifier(oldlbl,
                               newlbl,
-                              old == self._tree.GetRootItem())
+                              item == self._tree.GetRootItem())
 
     def SetSelectionNotifier(self, callb):
         """Set the selction changed notifier method
@@ -604,6 +633,14 @@ class __ConfigData(object):
         """
         return sorted(self._data.keys())
 
+    def GetSiteHostname(self, site):
+        """Get the url set for the given site
+        @return: string
+
+        """
+        data = self.GetSiteData(site)
+        return data['url']
+
     def GetSitePassword(self, site):
         """Get the password set for the given site
         @return: string
@@ -611,6 +648,18 @@ class __ConfigData(object):
         """
         data = self.GetSiteData(site)
         return data['pword']
+
+    def GetSitePort(self, site):
+        """Get the port set for the given site
+        @return: int
+
+        """
+        data = self.GetSiteData(site)
+        if len(data):
+            rval = int(data['port'])
+        else:
+            rval = 21
+        return rval
 
     def GetSiteUsername(self, site):
         """Get the username configured for the given site
@@ -643,7 +692,11 @@ class __ConfigData(object):
         @param newName: new site name
 
         """
-        
+        if oldSite in self._data:
+            data = self._data[oldSite]
+            self._data[newName] = data
+            del self._data[oldSite]
+            ed_msg.PostMessage(EDMSG_FTPCFG_UPDATED, (newName,))
 
     def SetData(self, data):
         """Set the configurations site data
