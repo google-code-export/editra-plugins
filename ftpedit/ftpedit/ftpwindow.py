@@ -69,6 +69,7 @@ class FtpWindow(ctrlbox.ControlBox):
         self.Bind(wx.EVT_BUTTON, self.OnButton, id=wx.ID_PREFERENCES)
         self.Bind(wx.EVT_BUTTON, self.OnButton, id=ID_CONNECT)
         self.Bind(wx.EVT_CHOICE, self.OnChoice, id=ID_SITES)
+        self.Bind(wx.EVT_LIST_ITEM_ACTIVATED, self.OnItemActivated)
         self.Bind(ftpclient.EVT_FTP_REFRESH, self.OnRefresh)
 
         # Editra Message Handlers
@@ -140,6 +141,18 @@ class FtpWindow(ctrlbox.ControlBox):
 
         return None
 
+    def _StartBusy(self, busy=True):
+        """Start/Stop the main windows busy indicator
+        @keyword busy: bool
+
+        """
+        pid = self._mw.GetId()
+        if busy:
+            ed_msg.PostMessage(ed_msg.EDMSG_PROGRESS_SHOW, (pid, True))
+            ed_msg.PostMessage(ed_msg.EDMSG_PROGRESS_STATE, (pid, 0, 0))
+        else:
+            ed_msg.PostMessage(ed_msg.EDMSG_PROGRESS_SHOW, (pid, False))
+
     def EnableControls(self, enable=True):
         """Enable or disable controls in the control bar
         @keyword enable: bool
@@ -155,12 +168,12 @@ class FtpWindow(ctrlbox.ControlBox):
         if e_id == ID_CONNECT:
             e_obj = evt.GetEventObject()
             if self._connected:
+                # Disconnect from server
                 self._connected = False
-                # TODO: Disconnect from server
                 self._client.Disconnect()
-
                 e_obj.SetLabel(_("Connect"))
                 e_obj.SetBitmap(IconFile.Connect.GetBitmap())
+                self._list.ClearAll()
             else:
                 # Connect to site
                 user = self._username.GetValue().strip()
@@ -180,7 +193,9 @@ class FtpWindow(ctrlbox.ControlBox):
                     # TODO handle errors
                     print self._client.GetLastError()
                 else:
-                    self._client.RefreshPath('.')
+                    self._StartBusy(True)
+                    self._client.RefreshPath()
+
             self._cbar.Layout()
         elif e_id == wx.ID_PREFERENCES:
             # Show preferences dialog
@@ -219,15 +234,34 @@ class FtpWindow(ctrlbox.ControlBox):
         # Update view for new data
         self.RefreshControlBar()
 
+    def OnItemActivated(self, evt):
+        """Handle when items are activated in the list control
+        @param evt: wx.EVT_LIST_ITEM_ACTIVATED
+
+        """
+        idx = evt.GetIndex()
+        if idx < len(self._files):
+            item = self._files[idx]
+            path = item['name']
+            if item['isdir']:
+                self._StartBusy(True)
+                self._client.ChangeDirAsync(path)
+
     def OnRefresh(self, evt):
         """Update the file list when a refresh event is sent by our
         ftp client.
         @param evt: ftpclient.EVT_FTP_REFRESH
 
         """
+        if self._list.GetItemCount():
+            self._list.DeleteAllItems()
+
         self._files = evt.GetValue()
         for item in self._files:
             self._list.AddItem(item)
+
+        pid = self._mw.GetId()
+        self._StartBusy(False)
 
     def OnThemeChanged(self, msg):
         """Update icons when the theme changes
@@ -299,6 +333,7 @@ class FtpList(listmix.ListCtrlAutoWidthMixin,
         else:
             img = self._idx['file']
         self.SetItemImage(self.GetItemCount() - 1, img)
+        self.resizeLastColumn(self.GetTextExtent(u"Dec 31 24:00:00")[0] + 5)
 
     def OnThemeChanged(self, msg):
         """Update image list
