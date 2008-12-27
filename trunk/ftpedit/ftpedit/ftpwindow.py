@@ -28,6 +28,7 @@ import eclib.elistmix as elistmix
 # Local Imports
 import IconFile
 import ftpconfig
+import ftpclient
 
 #-----------------------------------------------------------------------------#
 # Globals
@@ -49,6 +50,9 @@ class FtpWindow(ctrlbox.ControlBox):
         self._config = ftpconfig.ConfigData
         self._config.SetData(Profile_Get(CONFIG_KEY, default=dict()))
         self._connected = False
+        self._client = ftpclient.FtpClient()
+
+        # Ui controls
         self._cbar = None     # ControlBar
         self._sites = None    # wx.Choice
         self._username = None # wx.TextCtrl
@@ -83,6 +87,7 @@ class FtpWindow(ctrlbox.ControlBox):
         bmp = wx.ArtProvider.GetBitmap(str(ed_glob.ID_PREF), wx.ART_MENU)
         btn = platebtn.PlateButton(self._cbar, wx.ID_PREFERENCES,
                                    bmp=bmp, style=platebtn.PB_STYLE_NOBG)
+        btn.SetToolTipString(_("Configuration"))
         self._cbar.AddControl(btn, wx.ALIGN_LEFT)
 
         # Sites
@@ -148,6 +153,8 @@ class FtpWindow(ctrlbox.ControlBox):
             if self._connected:
                 self._connected = False
                 # TODO: Disconnect from server
+                self._client.Disconnect()
+
                 e_obj.SetLabel(_("Connect"))
                 e_obj.SetBitmap(IconFile.Connect.GetBitmap())
             else:
@@ -160,6 +167,16 @@ class FtpWindow(ctrlbox.ControlBox):
                 e_obj.SetBitmap(IconFile.Disconnect.GetBitmap())
 
                 # TODO: start ftp connection thread
+                url = self._config.GetSiteHostname(site)
+                port = self._config.GetSitePort(site)
+                print "URL", url, port
+                self._client.SetHostname(url)
+                self._client.SetPort(port)
+                connected = self._client.Connect(user, password)
+                if not connected:
+                    # TODO handle errors
+                    print self._client.GetLastError()
+
             self._cbar.Layout()
         elif e_id == wx.ID_PREFERENCES:
             # Show preferences dialog
