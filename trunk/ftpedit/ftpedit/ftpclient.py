@@ -75,6 +75,24 @@ class FtpClient(ftplib.FTP):
         # Setup
         self.set_pasv(True) # Use passive mode for now (configurable later)
 
+    def ChangeDirAsync(self, path):
+        """Run L{ChangeDir} asyncronously
+        @param path: directory to change to
+        @note: Generates a refresh event when finished
+
+        """
+        t = FtpThread(self._parent, self.ChangeDir,
+                      edEVT_FTP_REFRESH, args=[path,])
+        t.start()
+
+    def ChangeDir(self, path):
+        """Change the current working directory and get the list of files
+        @return: list
+
+        """
+        self.cwd(path)
+        return self.GetFileList()
+
     def ClearLastError(self):
         """Clear the last know error"""
         del self._lasterr
@@ -110,7 +128,7 @@ class FtpClient(ftplib.FTP):
             self._lasterr = msg
             Log("[ftpedit][err] Disconnect: %s" % msg)
 
-    def GetFileList(self, path):
+    def GetFileList(self):
         """Get list of files at the given path
         @return: list of dict(isdir, name, size, date)
 
@@ -127,7 +145,20 @@ class FtpClient(ftplib.FTP):
         del self._data
         self._data = list()
         self._busy.release()
-        return rval
+
+        # Sort the list (directories, files)
+        dirs = list()
+        files = list()
+        for item in rval:
+            if item['isdir']:
+                dirs.append(item)
+            else:
+                files.append(item)
+
+        dirs.sort(key=lambda x: x['name'])
+        dirs.insert(0, dict(name=u'..', isdir=True, size=u'0 bytes', date=u''))
+        files.sort(key=lambda x: x['name'])
+        return dirs + files
 
     def GetLastError(self):
         """Get the last error that occured
@@ -160,13 +191,13 @@ class FtpClient(ftplib.FTP):
         self._data.append(processed)
         self._busy.release()
 
-    def RefreshPath(self, path):
-        """Refresh the path. Runs L{GetFileList} asyncronously and
-        returns the results in a EVT_FTP_REFRESH event.
+    def RefreshPath(self):
+        """Refresh the current working directory.
+        Runs L{GetFileList} asyncronously and returns the results
+        in a EVT_FTP_REFRESH event.
 
         """
-        t = FtpThread(self._parent, self.GetFileList,
-                      edEVT_FTP_REFRESH, args=[path,])
+        t = FtpThread(self._parent, self.GetFileList, edEVT_FTP_REFRESH)
         t.start()
 
     def SetDefaultPath(self, dpath):
