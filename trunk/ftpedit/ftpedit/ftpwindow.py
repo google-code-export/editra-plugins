@@ -50,10 +50,12 @@ class FtpWindow(ctrlbox.ControlBox):
         self._config = ftpconfig.ConfigData
         self._config.SetData(Profile_Get(CONFIG_KEY, default=dict()))
         self._connected = False
-        self._client = ftpclient.FtpClient()
+        self._client = ftpclient.FtpClient(self)
+        self._files = list()
 
         # Ui controls
         self._cbar = None     # ControlBar
+        self._list = None     # FtpList
         self._sites = None    # wx.Choice
         self._username = None # wx.TextCtrl
         self._password = None # wx.TextCtrl
@@ -67,6 +69,7 @@ class FtpWindow(ctrlbox.ControlBox):
         self.Bind(wx.EVT_BUTTON, self.OnButton, id=wx.ID_PREFERENCES)
         self.Bind(wx.EVT_BUTTON, self.OnButton, id=ID_CONNECT)
         self.Bind(wx.EVT_CHOICE, self.OnChoice, id=ID_SITES)
+        self.Bind(ftpclient.EVT_FTP_REFRESH, self.OnRefresh)
 
         # Editra Message Handlers
         ed_msg.Subscribe(self.OnThemeChanged, ed_msg.EDMSG_THEME_CHANGED)
@@ -115,7 +118,8 @@ class FtpWindow(ctrlbox.ControlBox):
 
         # Setup Window
         self.SetControlBar(self._cbar, wx.TOP)
-        self.SetWindow(FtpList(self, wx.ID_ANY))
+        self._list = FtpList(self, wx.ID_ANY)
+        self.SetWindow(self._list)
 
     def __FindMainWindow(self):
         """Find the mainwindow of this control
@@ -169,14 +173,14 @@ class FtpWindow(ctrlbox.ControlBox):
                 # TODO: start ftp connection thread
                 url = self._config.GetSiteHostname(site)
                 port = self._config.GetSitePort(site)
-                print "URL", url, port
                 self._client.SetHostname(url)
                 self._client.SetPort(port)
                 connected = self._client.Connect(user, password)
                 if not connected:
                     # TODO handle errors
                     print self._client.GetLastError()
-
+                else:
+                    self._client.RefreshPath('.')
             self._cbar.Layout()
         elif e_id == wx.ID_PREFERENCES:
             # Show preferences dialog
@@ -214,6 +218,16 @@ class FtpWindow(ctrlbox.ControlBox):
 
         # Update view for new data
         self.RefreshControlBar()
+
+    def OnRefresh(self, evt):
+        """Update the file list when a refresh event is sent by our
+        ftp client.
+        @param evt: ftpclient.EVT_FTP_REFRESH
+
+        """
+        self._files = evt.GetValue()
+        for item in self._files:
+            self._list.AddItem(item)
 
     def OnThemeChanged(self, msg):
         """Update icons when the theme changes
@@ -255,12 +269,56 @@ class FtpList(listmix.ListCtrlAutoWidthMixin,
         wx.ListCtrl.__init__(self, parent, id, style=wx.LC_REPORT) 
         listmix.ListCtrlAutoWidthMixin.__init__(self)
         elistmix.ListRowHighlighter.__init__(self)
+
+        # Attributes
+        self._il = wx.ImageList(16, 16)
+        self._idx = dict()
+
+        # Setup
+        self.SetupImageList()
         self.InsertColumn(0, _("Filename"))
         self.InsertColumn(1, _("Size"))
         self.InsertColumn(2, _("Modified"))
-
         self.setResizeColumn(0)
 
+        # Message Handlers
+        ed_msg.Subscribe(self.OnThemeChanged, ed_msg.EDMSG_THEME_CHANGED)
+
+    def __del__(self):
+        """Unsubscribe from messages"""
+        ed_msg.Unsubscribe(self.OnThemeChanged)
+
     def AddItem(self, item):
-        """Add an item to the list"""
-        pass
+        """Add an item to the list
+        @param item: dict(isdir, name, size, date)
+
+        """
+        self.Append((item['name'], item['size'], item['date']))
+        if item['isdir']:
+            img = self._idx['folder']
+        else:
+            img = self._idx['file']
+        self.SetItemImage(self.GetItemCount() - 1, img)
+
+    def OnThemeChanged(self, msg):
+        """Update image list
+        @param msg: ed_msg.EDMSG_THEME_CHANGED
+
+        """
+        bmp = wx.ArtProvider.GetBitmap(str(ed_glob.ID_FOLDER), wx.ART_MENU)
+        self._il.Replace(self._idx['folder'], bmp)
+
+        bmp = wx.ArtProvider.GetBitmap(str(ed_glob.ID_FILE), wx.ART_MENU)
+        self._il.Replace(self._idx['file'], bmp)
+
+        self.Refresh()
+
+    def SetupImageList(self):
+        """Setup the image list"""
+        bmp = wx.ArtProvider.GetBitmap(str(ed_glob.ID_FOLDER), wx.ART_MENU)
+        self._idx['folder'] = self._il.Add(bmp)
+
+        bmp = wx.ArtProvider.GetBitmap(str(ed_glob.ID_FILE), wx.ART_MENU)
+        self._idx['file'] = self._il.Add(bmp)
+
+        self.SetImageList(self._il, wx.IMAGE_LIST_SMALL)
