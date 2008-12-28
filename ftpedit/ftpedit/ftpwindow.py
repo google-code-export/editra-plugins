@@ -350,6 +350,8 @@ class FtpList(listmix.ListCtrlAutoWidthMixin,
         self._idx = dict()
 
         # Setup
+        font = Profile_Get('FONT3', 'font', wx.NORMAL_FONT)
+        self.SetFont(font)
         self.SetupImageList()
         self.InsertColumn(0, _("Filename"))
         self.InsertColumn(1, _("Size"))
@@ -358,10 +360,12 @@ class FtpList(listmix.ListCtrlAutoWidthMixin,
 
         # Message Handlers
         ed_msg.Subscribe(self.OnThemeChanged, ed_msg.EDMSG_THEME_CHANGED)
+        ed_msg.Subscribe(self.OnUpdateFont, ed_msg.EDMSG_DSP_FONT)
 
     def __del__(self):
         """Unsubscribe from messages"""
         ed_msg.Unsubscribe(self.OnThemeChanged)
+        ed_msg.Unsubscribe(self.OnUpdateFont)
 
     def AddItem(self, item):
         """Add an item to the list
@@ -388,6 +392,12 @@ class FtpList(listmix.ListCtrlAutoWidthMixin,
         self._il.Replace(self._idx['file'], bmp)
 
         self.Refresh()
+
+    def OnUpdateFont(self, msg):
+        """Update the ui font when changed."""
+        font = msg.GetData()
+        if isinstance(font, wx.Font) and not font.IsNull():
+            self.SetFont(font)
 
     def SetupImageList(self):
         """Setup the image list"""

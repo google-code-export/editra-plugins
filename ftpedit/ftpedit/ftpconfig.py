@@ -21,6 +21,7 @@ import wx
 import ed_glob
 import ed_crypt
 import ed_msg
+from profiler import Profile_Get
 from eclib.encdlg import GetAllEncodings
 
 # Local Imports
@@ -165,6 +166,8 @@ class FtpSitesTree(wx.TreeCtrl):
         self._root = None # TreeItemId
 
         # Setup
+        font = Profile_Get('FONT3', 'font', wx.NORMAL_FONT)
+        self.SetFont(font)
         self.SetImageList(self._imglst)
         self.__SetupImageList()
         self._root = self.AddRoot(_("My Sites"))
@@ -182,9 +185,11 @@ class FtpSitesTree(wx.TreeCtrl):
 
         # Editra Message Handlers
         ed_msg.Subscribe(self.OnThemeChanged, ed_msg.EDMSG_THEME_CHANGED)
+        ed_msg.Subscribe(self.OnUpdateFont, ed_msg.EDMSG_DSP_FONT)
 
     def __del__(self):
         ed_msg.Unsubscribe(self.OnThemeChanged)
+        ed_msg.Unsubscribe(self.OnUpdateFont)
 
     def __SetupImageList(self):
         """Setup the image list"""
@@ -286,6 +291,12 @@ class FtpSitesTree(wx.TreeCtrl):
             self._editing = (None, None)
         else:
             evt.Skip()
+
+    def OnUpdateFont(self, msg):
+        """Update the ui font when changed."""
+        font = msg.GetData()
+        if isinstance(font, wx.Font) and not font.IsNull():
+            self.SetFont(font)
 
     def OnThemeChanged(self, msg):
         """Update icons when the theme changes
