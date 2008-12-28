@@ -118,7 +118,7 @@ class FtpClient(ftplib.FTP):
 
         """
         try:
-            self.connect(self._host, self._port)
+            self.connect(self._host, int(self._port))
             self.login(user, password)
             self._lastlogin = (user, password)
             self.cwd(self._default)
@@ -147,6 +147,7 @@ class FtpClient(ftplib.FTP):
     def Download(self, fname):
         """Download the file at the given path
         @param fname: string
+        @return: (ftppath, temppath)
 
         """
         name = None
@@ -171,7 +172,7 @@ class FtpClient(ftplib.FTP):
         finally:
             os.close(fid)
 
-        return name
+        return (u"/".join([self._curdir, fname]), name)
 
     def DownloadAsync(self, fname):
         """Do an asyncronous download
