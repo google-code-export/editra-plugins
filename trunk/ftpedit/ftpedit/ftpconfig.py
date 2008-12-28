@@ -49,6 +49,7 @@ class FtpConfigDialog(wx.Dialog):
         self.Bind(wx.EVT_CLOSE, self.OnClose)
         self.Bind(wx.EVT_WINDOW_DESTROY, self.OnClose)
 
+        # Register this window with the app
         wx.GetApp().RegisterWindow(repr(self), self)
 
     def __DoLayout(self):
@@ -59,9 +60,12 @@ class FtpConfigDialog(wx.Dialog):
 
     def OnClose(self, evt):
         """Handle closing the dialog"""
+        # Unregister the window from the app
         wx.GetApp().UnRegisterWindow(repr(self))
-        # TODO: Save current state of selected tree item before exit
-        
+
+        # Save the current site data
+        self._panel.SaveState()
+
         evt.Skip()
 
 #-----------------------------------------------------------------------------#
@@ -129,6 +133,15 @@ class FtpConfigPanel(wx.Panel):
         self._login.Enable(not isroot)
         ninfo = ConfigData.GetSiteData(new)
         self._login.SetLoginInfo(ninfo)
+
+    def SaveState(self):
+        """Save the current state of the config panel"""
+        site = self._sites.GetSelectedSite()
+        if site is None:
+            return
+        else:
+            data = self._login.GetLoginInfo()
+            ConfigData.AddSite(site, **data)
 
 #-----------------------------------------------------------------------------#
 # Left hand side panels
@@ -350,6 +363,17 @@ class FtpSitesPanel(wx.Panel):
         self.SetSizer(vsizer)
         self.SetAutoLayout(True)
 
+    def GetSelectedSite(self):
+        """Get the name of the selected site
+        @return: string or None
+
+        """
+        sel = self._tree.GetSelection()
+        if sel != self._tree.GetRootItem():
+            return self._tree.GetItemText(sel)
+        else:
+            return None
+
     def GetTreeCtrl(self):
         """Get this panels tree control
         @return: FtpSitesTree
@@ -513,7 +537,7 @@ class FtpLoginPanel(wx.Panel):
                  'enc' : self.SetEncoding }
 
         for key, val in info.iteritems():
-            vmap.get(key, lambda v: len(v))(val)
+            vmap.get(key, lambda v: len(v))(unicode(val))
 
     def SetHostName(self, name):
         """Set the hostname field
@@ -648,6 +672,16 @@ class __ConfigData(object):
         """
         data = self.GetSiteData(site)
         return data['pword']
+
+    def GetSitePath(self, site):
+        """Get the default path for the given site
+        @return: string
+
+        """
+        data = self.GetSiteData(site)
+        path = data['path']
+        path = path.replace("\\", "/")
+        return path
 
     def GetSitePort(self, site):
         """Get the port set for the given site

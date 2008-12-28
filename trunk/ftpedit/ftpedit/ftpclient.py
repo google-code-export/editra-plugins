@@ -18,10 +18,13 @@ __revision__ = "$Revision$"
 
 #-----------------------------------------------------------------------------#
 # Imports
-import threading
+import os
 import re
+import threading
 import ftplib
 import socket
+import tempfile
+from StringIO import StringIO
 import wx
 
 # Editra Libraries
@@ -33,6 +36,14 @@ from util import Log
 # Event that ftp LIST command has completed value == dict of updates
 edEVT_FTP_REFRESH = wx.NewEventType()
 EVT_FTP_REFRESH = wx.PyEventBinder(edEVT_FTP_REFRESH, 1)
+
+# Download is complete value == file path
+edEVT_FTP_DOWNLOAD = wx.NewEventType()
+EVT_FTP_DOWNLOAD = wx.PyEventBinder(edEVT_FTP_DOWNLOAD, 1)
+
+# Upload is complete value == sucess (bool)
+edEVT_FTP_UPLOAD = wx.NewEventType()
+EVT_FTP_UPLOAD = wx.PyEventBinder(edEVT_FTP_UPLOAD, 1)
 
 class FtpClientEvent(wx.PyCommandEvent):
     """Event for data transfer and signaling actions in the L{OutputBuffer}"""
@@ -54,7 +65,7 @@ class FtpClient(ftplib.FTP):
     """Ftp Client"""
     def __init__(self, parent, host=u'', port=21):
         """Create an ftp client object
-        @param parent: owner window
+        @param parent: owner window (can be None, but no events will be fired)
         @keyword host: host name/ip
         @keyword port: port number
 
@@ -64,7 +75,9 @@ class FtpClient(ftplib.FTP):
         # Attributes
         self._parent = parent   # Owner window
         self._default = u'.'    # Default path
+        self._curdir = u''      # Current directory
         self._host = host       # Host name
+        self._lastlogin = None  # Last used login (user, pass)
         self._port = port       # Port number
         self._active = False    # Connected?
         self._data = list()     # recieved data
@@ -75,6 +88,14 @@ class FtpClient(ftplib.FTP):
         # Setup
         self.set_pasv(True) # Use passive mode for now (configurable later)
 
+    def ChangeDir(self, path):
+        """Change the current working directory and get the list of files
+        @return: list
+
+        """
+        self.cwd(path)
+        return self.GetFileList()
+
     def ChangeDirAsync(self, path):
         """Run L{ChangeDir} asyncronously
         @param path: directory to change to
@@ -84,14 +105,6 @@ class FtpClient(ftplib.FTP):
         t = FtpThread(self._parent, self.ChangeDir,
                       edEVT_FTP_REFRESH, args=[path,])
         t.start()
-
-    def ChangeDir(self, path):
-        """Change the current working directory and get the list of files
-        @return: list
-
-        """
-        self.cwd(path)
-        return self.GetFileList()
 
     def ClearLastError(self):
         """Clear the last know error"""
@@ -107,10 +120,13 @@ class FtpClient(ftplib.FTP):
         try:
             self.connect(self._host, self._port)
             self.login(user, password)
+            self._lastlogin = (user, password)
             self.cwd(self._default)
+            self._curdir = self.pwd()
         except socket.error, msg:
             Log("[ftpedit][err] Connect: %s" % msg)
             self._lasterr = msg
+            self._lastlogin = None
             return False
         else:
             self._active = True
@@ -127,6 +143,53 @@ class FtpClient(ftplib.FTP):
         except Exception, msg:
             self._lasterr = msg
             Log("[ftpedit][err] Disconnect: %s" % msg)
+
+    def Download(self, fname):
+        """Download the file at the given path
+        @param fname: string
+
+        """
+        name = None
+        try:
+            try:
+                if not fname.startswith('.') and '.' in fname:
+                    pre, suf = fname.rsplit('.', 1)
+                    suf = u'.' + suf
+                else:
+                    pre = fname
+                    suf = ''
+
+                fid, name = tempfile.mkstemp(suf, pre, text=True)
+                def GetFileData(data, fid=fid):
+                    """Write the downloaded data to disk"""
+                    os.write(fid, data + u"\n")
+
+                self.retrlines('RETR ' + fname, GetFileData)
+            except (IOError, OSError, socket.error), msg:
+                self._lasterr = msg
+                Log("[ftpedit][err] Download: %s" % msg)
+        finally:
+            os.close(fid)
+
+        return name
+
+    def DownloadAsync(self, fname):
+        """Do an asyncronous download
+        @param fname: filename to download
+        @note: EVT_FTP_DOWNLOAD will be fired when complete containing the
+               location of the on disk file.
+
+        """
+        t = FtpThread(self._parent, self.Download,
+                      edEVT_FTP_DOWNLOAD, args=[fname,])
+        t.start()
+
+    def GetCurrentDirectory(self):
+        """Get the current working directory
+        @return: string
+
+        """
+        return self._curdir
 
     def GetFileList(self):
         """Get list of files at the given path
@@ -166,6 +229,13 @@ class FtpClient(ftplib.FTP):
 
         """
         return self._lasterr
+
+    def GetLastLogin(self):
+        """Get the last used login info
+        @return: (user, pass) or None
+
+        """
+        return self._lastlogin
 
     def IsActive(self):
         """Does the client have an active connection
@@ -221,13 +291,42 @@ class FtpClient(ftplib.FTP):
         """
         self._port = port
 
+    def Upload(self, src, dest):
+        """Upload a file to the server
+        @param src: source file
+        @param dest: destination file on server
+        @return: bool
+
+        """
+        try:
+            f = open(src, 'r')
+            buff = StringIO(f.read())
+            f.close()
+            self.storlines('STOR ' + dest, buff)
+        except Exception, msg:
+            self._lasterr = msg
+            Log("[ftpedit][err] Upload: %s" % msg)
+            return False
+        return True
+
+    def UploadAsync(self, src, dest):
+        """Upload the file asyncronously
+        @param src: source file
+        @param dest: destination file on server
+        @note: completion notified by EVT_FTP_UPLOAD
+
+        """
+        t = FtpThread(self._parent, self.Upload,
+                      edEVT_FTP_UPLOAD, args=[src, dest])
+        t.start()
+
 #-----------------------------------------------------------------------------#
 
 class FtpThread(threading.Thread):
     """Thread for running asyncronous ftp jobs"""
     def __init__(self, parent, funct, etype, args=list()):
         """Create the thread object
-        @param parent: Parent window to recieve event(s)
+        @param parent: Parent window to recieve event(s) (can be None)
         @param funct: method to run in the thread
         @param etype: event type
         @keyword args: list of args to pass to funct
@@ -244,8 +343,11 @@ class FtpThread(threading.Thread):
     def run(self):
         """Run the command"""
         result = self._funct(*self._args)
-        evt = FtpClientEvent(self._etype, result)
-        wx.PostEvent(self._parent, evt)
+
+        # Fire a notification event if we have a parent
+        if self._parent is not None:
+            evt = FtpClientEvent(self._etype, result)
+            wx.PostEvent(self._parent, evt)
 
 #-----------------------------------------------------------------------------#
 # Utility

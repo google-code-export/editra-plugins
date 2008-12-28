@@ -71,6 +71,7 @@ class FtpWindow(ctrlbox.ControlBox):
         self.Bind(wx.EVT_CHOICE, self.OnChoice, id=ID_SITES)
         self.Bind(wx.EVT_LIST_ITEM_ACTIVATED, self.OnItemActivated)
         self.Bind(ftpclient.EVT_FTP_REFRESH, self.OnRefresh)
+        self.Bind(ftpclient.EVT_FTP_DOWNLOAD, self.OnDownload)
 
         # Editra Message Handlers
         ed_msg.Subscribe(self.OnThemeChanged, ed_msg.EDMSG_THEME_CHANGED)
@@ -173,7 +174,7 @@ class FtpWindow(ctrlbox.ControlBox):
                 self._client.Disconnect()
                 e_obj.SetLabel(_("Connect"))
                 e_obj.SetBitmap(IconFile.Connect.GetBitmap())
-                self._list.ClearAll()
+                self._list.DeleteAllItems()
             else:
                 # Connect to site
                 user = self._username.GetValue().strip()
@@ -186,6 +187,7 @@ class FtpWindow(ctrlbox.ControlBox):
                 # TODO: start ftp connection thread
                 url = self._config.GetSiteHostname(site)
                 port = self._config.GetSitePort(site)
+                self._client.SetDefaultPath(self._config.GetSitePath(site))
                 self._client.SetHostname(url)
                 self._client.SetPort(port)
                 connected = self._client.Connect(user, password)
@@ -234,6 +236,16 @@ class FtpWindow(ctrlbox.ControlBox):
         # Update view for new data
         self.RefreshControlBar()
 
+    def OnDownload(self, evt):
+        """File download has completed
+        @param evt: ftpclient.EVT_FTP_DOWNLOAD
+
+        """
+        val = evt.GetValue()
+        print "DOWNLOADED", val
+        self._StartBusy(False)
+        # TODO create proxy file and open in editor
+
     def OnItemActivated(self, evt):
         """Handle when items are activated in the list control
         @param evt: wx.EVT_LIST_ITEM_ACTIVATED
@@ -244,8 +256,16 @@ class FtpWindow(ctrlbox.ControlBox):
             item = self._files[idx]
             path = item['name']
             if item['isdir']:
+                # Change directory
                 self._StartBusy(True)
                 self._client.ChangeDirAsync(path)
+            else:
+                # Retrieve the file
+                ed_msg.PostMessage(ed_msg.EDMSG_UI_SB_TXT,
+                                   (ed_glob.SB_INFO,
+                                   _("Retrieving file") + u"..."))
+                self._StartBusy(True)
+                self._client.DownloadAsync(path)
 
     def OnRefresh(self, evt):
         """Update the file list when a refresh event is sent by our
