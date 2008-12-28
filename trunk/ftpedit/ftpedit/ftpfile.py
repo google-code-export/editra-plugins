@@ -46,7 +46,7 @@ class FtpFile(ed_txt.EdFile):
         self._site = sitedata   # dict(url, port, user, pword, path, enc)
 
         # Setup
-        self.SetEncoding(enc)
+        self.SetEncoding(self._site['enc'])
 
     def __del__(self):
         """Cleanup the temp file"""
@@ -68,7 +68,7 @@ class FtpFile(ed_txt.EdFile):
             err = self._client.GetLastError()
             Log("[ftpedit][err] DoFtpUpload: %s" % err)
         else:
-            self._client.Upload(self.GetPath, self.ftppath)
+            self._client.Upload(self.GetPath(), self.ftppath)
             # TODO: notify of completion
 
     def GetFtpPath(self):
@@ -91,10 +91,13 @@ class FtpFile(ed_txt.EdFile):
 
         """
         # Save the local file
-        super(ed_txt.EdFile, self).Write(value)
+#        obj = super(ed_txt.EdFile, self)
+        ed_txt.EdFile.Write(self, value)
 
         # TODO: fire upload thread
-        
+        t = ftpclient.FtpThread(None, self.DoFtpUpload,
+                                ftpclient.EVT_FTP_UPLOAD)
+        t.start()
 
 #-----------------------------------------------------------------------------#
 

@@ -29,6 +29,7 @@ import eclib.elistmix as elistmix
 import IconFile
 import ftpconfig
 import ftpclient
+import ftpfile
 
 #-----------------------------------------------------------------------------#
 # Globals
@@ -242,10 +243,17 @@ class FtpWindow(ctrlbox.ControlBox):
         @param evt: ftpclient.EVT_FTP_DOWNLOAD
 
         """
-        val = evt.GetValue()
-        print "DOWNLOADED", val
+        ftppath, path = evt.GetValue()
         self._StartBusy(False)
+
         # TODO create proxy file and open in editor
+        csel = self._sites.GetStringSelection()
+        data = self._config.GetSiteData(csel)
+        data['user'] = self._username.GetValue().strip()
+        data['pword'] = self._password.GetValue().strip()
+        nb = self._mw.GetNotebook()
+        fobj = ftpfile.FtpFile(ftppath, data, path)
+        nb.OpenFileObject(fobj)
 
     def OnItemActivated(self, evt):
         """Handle when items are activated in the list control
