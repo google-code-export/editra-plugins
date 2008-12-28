@@ -149,10 +149,11 @@ class FtpWindow(ctrlbox.ControlBox):
         """
         pid = self._mw.GetId()
         if busy:
+            # Pulse
             ed_msg.PostMessage(ed_msg.EDMSG_PROGRESS_SHOW, (pid, True))
-            ed_msg.PostMessage(ed_msg.EDMSG_PROGRESS_STATE, (pid, 0, 0))
+            ed_msg.PostMessage(ed_msg.EDMSG_PROGRESS_STATE, (pid, -1, -1))
         else:
-            ed_msg.PostMessage(ed_msg.EDMSG_PROGRESS_SHOW, (pid, False))
+            ed_msg.PostMessage(ed_msg.EDMSG_PROGRESS_STATE, (pid, 0, 0))
 
     def EnableControls(self, enable=True):
         """Enable or disable controls in the control bar
