@@ -165,6 +165,16 @@ class FtpWindow(ctrlbox.ControlBox):
             if child.GetId() != wx.ID_PREFERENCES:
                 child.Enable(enable)
 
+    def EnableOptions(self, enable=True):
+        """Enable or disable the options controls while connecting/disconnecting
+        from the server.
+        @param enable: bool
+
+        """
+        for child in self._cbar.GetChildren():
+            if child.GetId() != ID_CONNECT:
+                child.Enable(enable)
+
     def OnButton(self, evt):
         """Handle Button click events"""
         e_id = evt.GetId()
@@ -177,6 +187,7 @@ class FtpWindow(ctrlbox.ControlBox):
                 e_obj.SetLabel(_("Connect"))
                 e_obj.SetBitmap(IconFile.Connect.GetBitmap())
                 self._list.DeleteAllItems()
+                self.EnableOptions(True)
             else:
                 # Connect to site
                 user = self._username.GetValue().strip()
@@ -200,6 +211,7 @@ class FtpWindow(ctrlbox.ControlBox):
                     self._StartBusy(True)
                     self._client.RefreshPath()
 
+            self.EnableOptions(False)
             self._cbar.Layout()
         elif e_id == wx.ID_PREFERENCES:
             # Show preferences dialog
