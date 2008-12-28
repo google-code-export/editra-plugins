@@ -91,10 +91,9 @@ class FtpFile(ed_txt.EdFile):
 
         """
         # Save the local file
-#        obj = super(ed_txt.EdFile, self)
-        ed_txt.EdFile.Write(self, value)
+        super(FtpFile, self).Write(value)
 
-        # TODO: fire upload thread
+        # Upload the file to the server
         t = ftpclient.FtpThread(None, self.DoFtpUpload,
                                 ftpclient.EVT_FTP_UPLOAD)
         t.start()
