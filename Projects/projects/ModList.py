@@ -34,6 +34,7 @@ from HistWin import HistoryWindow
 
 # Editra Imports
 import ed_glob
+from profiler import Profile_Get
 import ed_msg
 import eclib.ctrlbox as ctrlbox
 import eclib.platebtn as platebtn
@@ -271,6 +272,8 @@ class RepoModList(wx.ListCtrl,
         self.fileHook = None
 
         # Setup
+        font = Profile_Get('FONT3', 'font', wx.NORMAL_FONT)
+        self.SetFont(font)
         self.InsertColumn(RepoModList.STATUS_COL, _("Status"),
                           wx.LIST_FORMAT_CENTER)
         self.InsertColumn(RepoModList.FILENAME_COL, _("Filename"))
@@ -281,6 +284,12 @@ class RepoModList(wx.ListCtrl,
         self.Bind(wx.EVT_MENU, self.OnMenu)
         self.Bind(ScCommand.EVT_STATUS, self.OnStatus)
         self.Bind(ScCommand.EVT_CMD_COMPLETE, self.OnCommandComplete)
+
+        # Editra Message Handlers
+        ed_msg.Subscribe(self.OnUpdateFont, ed_msg.EDMSG_DSP_FONT)
+
+    def __del__(self):
+        ed_msg.Unsubscribe(self.OnUpdateFont)
 
     def __ConstructNodes(self):
         """Make the node's list from the selected list items
@@ -552,3 +561,9 @@ class RepoModList(wx.ListCtrl,
                              os.path.join(path, fname))
 
         self.SetCommandRunning(False)
+
+    def OnUpdateFont(self, msg):
+        """Update the ui font when changed."""
+        font = msg.GetData()
+        if isinstance(font, wx.Font) and not font.IsNull():
+            self.SetFont(font)
