@@ -295,6 +295,13 @@ class FtpClient(ftplib.FTP):
         files.sort(key=lambda x: x['name'])
         return dirs + files
 
+    def GetHostname(self):
+        """Get the name of the currently connected host
+        @return: string
+
+        """
+        return self._host
+
     def GetLastError(self):
         """Get the last error that occured
         @return: Exception
