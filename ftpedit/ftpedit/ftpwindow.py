@@ -23,6 +23,7 @@ import ed_glob
 import ed_msg
 import ed_menu
 from profiler import Profile_Get, Profile_Set
+import util
 import eclib.ctrlbox as ctrlbox
 import eclib.platebtn as platebtn
 import eclib.elistmix as elistmix
@@ -46,11 +47,12 @@ ID_RENAME = wx.NewId()
 ID_DELETE = wx.NewId()
 ID_NEW_FILE = wx.NewId()
 ID_NEW_FOLDER = wx.NewId()
+ID_COPY_URL = wx.NewId()
 ID_DOWNLOAD = wx.NewId()
 ID_UPLOAD = wx.NewId()
 
 MENU_IDS = [ ID_REFRESH, ID_EDIT, ID_RENAME, ID_DELETE, ID_NEW_FILE,
-             ID_NEW_FOLDER, ID_DOWNLOAD, ID_UPLOAD ]
+             ID_NEW_FOLDER, ID_COPY_URL, ID_DOWNLOAD, ID_UPLOAD ]
 
 _ = wx.GetTranslation
 
@@ -313,13 +315,14 @@ class FtpWindow(ctrlbox.ControlBox):
         path = None
         item = None
         if sel > -1 and sel < len(self._files):
-                item = self._files[sel]
-                path = item['name']
+            item = self._files[sel]
+            path = item['name']
 
         if e_id == ID_EDIT:
             # Open the selected file in the editor
             if path is not None:
                 self.OpenFile(path)
+
         elif e_id == ID_RENAME:
             # Rename the selected file
             if path is not None:
@@ -329,6 +332,7 @@ class FtpWindow(ctrlbox.ControlBox):
                     self._select = name
                     self._StartBusy(True)
                     self._client.RenameAsync(path, name)
+
         elif e_id == ID_DELETE:
             # Remove the selected path
             # TODO: add support for removing directories
@@ -344,6 +348,7 @@ class FtpWindow(ctrlbox.ControlBox):
             # Refresh the file list
             self._select = path
             self.RefreshFiles()
+
         elif e_id in (ID_NEW_FILE, ID_NEW_FOLDER):
 #            if item is not None:
                 # TODO: change to create the new file/folder in the subdirectory
@@ -378,6 +383,11 @@ class FtpWindow(ctrlbox.ControlBox):
                               _("%s already exists" % name),
                               style=wx.OK|wx.CENTER|wx.ICON_WARNING)
 
+        elif e_id == ID_COPY_URL:
+            url = u"/".join([u"ftp:/", self._client.GetHostname().lstrip(u"/"),
+                             self._client.GetCurrentDirectory().lstrip(u"/"),
+                             path.lstrip(u"/")])
+            util.SetClipboardText(url)
         elif e_id == ID_DOWNLOAD:
             pass
         elif e_id == ID_UPLOAD:
@@ -535,6 +545,8 @@ class FtpList(listmix.ListCtrlAutoWidthMixin,
             bmp = wx.ArtProvider.GetBitmap(str(ed_glob.ID_FOLDER), wx.ART_MENU)
             if not bmp.IsNull():
                 item.SetBitmap(bmp)
+            self._menu.AppendSeparator()
+            self._menu.Append(ID_COPY_URL, _("Copy URL"))
             self._menu.AppendSeparator()
             self._menu.Append(ID_DOWNLOAD, _("Download") + u"...")
             self._menu.Append(ID_UPLOAD, _("Upload") + u"...")
