@@ -11,6 +11,8 @@ Released: xx/xx/2008
 
 New:
 +Some UI improvements.
++Don't synchronize with notebook when the panel is not shown on screen. To improve
+efficiency.
 
 Bug Fixes:
 +Fix expanding empty tree nodes on windows causing projects view to be emptied
