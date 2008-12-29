@@ -80,6 +80,7 @@ from HistWin import AdjustColour, HistoryWindow
 import ProjCmnDlg
 
 # Editra Imports
+import util
 import eclib.ctrlbox as ctrlbox
 import eclib.platebtn as platebtn
 try:
@@ -767,7 +768,8 @@ class ProjectTree(wx.Panel):
         try:
             for item in os.listdir(path):
                 self.addPath(parent, item)
-        except (OSError, IOError):
+        except (OSError, IOError), msg:
+            util.Log("[projects][err] OnItemExpanding: %s" % msg)
             self.tree.SetItemImage(parent, self.icons['folder-inaccessible'],
                                    wx.TreeItemIcon_Normal)
             self.tree.SetItemImage(parent, self.icons['folder-inaccessible'],
@@ -776,10 +778,16 @@ class ProjectTree(wx.Panel):
             return
 
         # Delete dummy node from self.addFolder
-        self.tree.Delete(self.tree.GetFirstChild(parent)[0])
-        self.tree.SortChildren(parent)
-        self.addDirectoryWatcher(parent)
-        self.scStatus([parent])
+        if self.tree.GetChildrenCount(parent):
+            self.tree.Delete(self.tree.GetFirstChild(parent)[0])
+            self.tree.SortChildren(parent)
+            self.addDirectoryWatcher(parent)
+            self.scStatus([parent])
+        else:
+            # Is empty folder so clear has children flag and veto
+            # event as it causes the tree ctrl to become emptied on msw.
+#            self.tree.SetItemHasChildren(parent, False)
+            event.Veto()
 
     def scAdd(self, nodes):
         """ Send an add to repository command to current control system """
@@ -1333,6 +1341,7 @@ class ProjectTree(wx.Panel):
         if not os.path.isdir(path):
             path = os.path.dirname(path)
         newpath = os.path.join(path, _("Untitled Folder"))
+
         i = 1
         while os.path.exists(newpath):
             newpath = re.sub(u'-\d+$', u'', newpath)

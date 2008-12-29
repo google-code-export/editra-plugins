@@ -345,6 +345,7 @@ class SourceController(object):
         concurrentcmds = ['status', 'history']
         NODE, DATA, SC = 0, 1, 2
         nodeinfo = []
+        sc = None
         for node, data in nodes:
             # node, data, sc
             info = [node, data, None]
