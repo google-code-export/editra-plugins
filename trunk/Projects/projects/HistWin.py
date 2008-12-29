@@ -300,7 +300,6 @@ class HistList(wx.ListCtrl,
                                    wx.LC_SORT_ASCENDING | \
                                    wx.LC_VRULES)
         elistmix.ListRowHighlighter.__init__(self)
-        listmix.ListCtrlAutoWidthMixin.__init__(self)
 
         # Attributes
         self._frame = parent.GetTopLevelParent()
@@ -314,7 +313,8 @@ class HistList(wx.ListCtrl,
         self.InsertColumn(self.DATE_COL, _("Date"))
         self.InsertColumn(self.AUTH_COL, _("Author"))
         self.InsertColumn(self.COM_COL, _("Log Message"))
-        self.SetColumnWidth(self.COM_COL, wx.LIST_AUTOSIZE)
+        listmix.ListCtrlAutoWidthMixin.__init__(self)
+
         self.SendSizeEvent()
 
     def OnUpdateItems(self, evt):
@@ -399,6 +399,7 @@ class HistList(wx.ListCtrl,
                     newdata.append(item)
         else:
             newdata = self._data
+
         evt = UpdateItemsEvent(edEVT_UPDATE_ITEMS, self.GetId(), newdata)
         wx.PostEvent(self, evt)
 
@@ -409,9 +410,7 @@ class LogSearch(wx.SearchCtrl):
     def __init__(self, parent, value="", \
                  pos=wx.DefaultPosition, size=wx.DefaultSize, \
                  style=wx.TE_PROCESS_ENTER | wx.TE_RICH2):
-        """Initializes the Search Control
-
-        """
+        """Initializes the Search Control"""
         wx.SearchCtrl.__init__(self, parent, wx.ID_ANY, value, pos, size, style)
 
         # Attributes
@@ -427,6 +426,7 @@ class LogSearch(wx.SearchCtrl):
                 if isinstance(child, wx.TextCtrl):
                     child.Bind(wx.EVT_KEY_UP, self.ProcessEvent)
                     break
+
         self.Bind(wx.EVT_TEXT_ENTER, self.OnSearch)
         self.Bind(wx.EVT_KEY_UP, self.OnSearch)
         self.Bind(wx.EVT_SEARCHCTRL_CANCEL_BTN, self.OnCancel)
@@ -440,31 +440,6 @@ class LogSearch(wx.SearchCtrl):
     def OnSearch(self, evt):
         """Search logs and filter"""
         self.GetParent().GetHistoryList().Filter(self.GetValue())
-
-#-----------------------------------------------------------------------------#
-# Helper functions
-def AdjustColour(color, percent, alpha=wx.ALPHA_OPAQUE):
-    """ Brighten/Darken input colour by percent and adjust alpha
-    channel if needed. Returns the modified color.
-    @param color: color object to adjust
-    @type color: wx.Color
-    @param percent: percent to adjust +(brighten) or -(darken)
-    @type percent: int
-    @keyword alpha: Value to adjust alpha channel to
-
-    """
-    radj, gadj, badj = [ int(val * (abs(percent) / 100.))
-                         for val in color.Get() ]
-
-    if percent < 0:
-        radj, gadj, badj = [ val * -1 for val in [radj, gadj, badj] ]
-    else:
-        radj, gadj, badj = [ val or percent for val in [radj, gadj, badj] ]
-
-    red = min(color.Red() + radj, 255)
-    green = min(color.Green() + gadj, 255)
-    blue = min(color.Blue() + badj, 255)
-    return wx.Colour(red, green, blue, alpha)
 
 #-----------------------------------------------------------------------------#
 

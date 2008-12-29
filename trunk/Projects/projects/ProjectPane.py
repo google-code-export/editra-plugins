@@ -76,7 +76,7 @@ import ConfigDialog
 import ScCommand
 import FileIcons
 import Trash
-from HistWin import AdjustColour, HistoryWindow
+from HistWin import HistoryWindow
 import ProjCmnDlg
 
 # Editra Imports
@@ -241,7 +241,7 @@ class ProjectTree(wx.Panel):
         global ODD_PROJECT_COLOR
         global EVEN_PROJECT_COLOR
         if wx.Platform == '__WXMAC__':
-            color = AdjustColour(wx.SystemSettings_GetColour(wx.SYS_COLOUR_3DHIGHLIGHT), 15)
+            color = util.AdjustColour(wx.SystemSettings_GetColour(wx.SYS_COLOUR_3DHIGHLIGHT), 15)
         else:
             color = wx.SystemSettings_GetColour(wx.SYS_COLOUR_3DLIGHT)
 
