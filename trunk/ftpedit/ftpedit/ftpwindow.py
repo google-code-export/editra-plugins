@@ -384,14 +384,18 @@ class FtpWindow(ctrlbox.ControlBox):
                               style=wx.OK|wx.CENTER|wx.ICON_WARNING)
 
         elif e_id == ID_COPY_URL:
+            # Copy the url of the selected file to the clipboard
             url = u"/".join([u"ftp:/", self._client.GetHostname().lstrip(u"/"),
                              self._client.GetCurrentDirectory().lstrip(u"/"),
                              path.lstrip(u"/")])
             util.SetClipboardText(url)
+
         elif e_id == ID_DOWNLOAD:
             pass
+
         elif e_id == ID_UPLOAD:
             pass
+
         else:
             evt.Skip()
 
