@@ -80,13 +80,15 @@ from HistWin import AdjustColour, HistoryWindow
 import ProjCmnDlg
 
 # Editra Imports
+import ed_glob
+import ed_msg
+import profiler
 import util
+import extern.flatnotebook as FNB
 import eclib.ctrlbox as ctrlbox
 import eclib.platebtn as platebtn
+
 try:
-    import ed_glob
-    import ed_msg
-    import profiler
     EOL = profiler.Profile_Get('EOL_MODE', default=ed_glob.EOL_MODE_UNIX)
     if EOL == ed_glob.EOL_MODE_UNIX:
         EOL = '\n'
@@ -94,9 +96,6 @@ try:
         EOL = '\r\n'
     else:
         EOL = '\r'
-except ImportError:
-    profiler = None
-    ed_msg = None
 except (ValueError, AttributeError):
     EOL = '\n'
 
@@ -235,6 +234,7 @@ class ProjectTree(wx.Panel):
         wx.Panel.__init__(self, parent, -1,
                           style=wx.WANTS_CHARS|wx.SUNKEN_BORDER)
 
+        self._mainw = None  # MainWindow
         self.log = log
         tID = wx.NewId()
 
@@ -244,6 +244,7 @@ class ProjectTree(wx.Panel):
             color = AdjustColour(wx.SystemSettings_GetColour(wx.SYS_COLOUR_3DHIGHLIGHT), 15)
         else:
             color = wx.SystemSettings_GetColour(wx.SYS_COLOUR_3DLIGHT)
+
         ODD_PROJECT_COLOR = EVEN_PROJECT_COLOR = color
         self.tree = MyTreeCtrl(self, tID, wx.DefaultPosition, wx.DefaultSize,
                                wx.TR_DEFAULT_STYLE
@@ -296,18 +297,13 @@ class ProjectTree(wx.Panel):
         self.Bind(ScCommand.EVT_CMD_COMPLETE, self.OnScCommandFinish)
 
         # Notebook syncronization
-        try:
-            import extern.flatnotebook as fnb
-            #self.Bind(fnb.EVT_FLATNOTEBOOK_PAGE_CHANGING,
-            mainw = self.GetGrandParent()
-            nbook = mainw.GetNotebook()
-            nbook.Bind(fnb.EVT_FLATNOTEBOOK_PAGE_CHANGED, self.OnPageChanged)
-            nbook.Bind(fnb.EVT_FLATNOTEBOOK_PAGE_CLOSING, self.OnPageClosing)
-            ed_msg.Subscribe(self.OnThemeChange, ed_msg.EDMSG_THEME_CHANGED)
-            if hasattr(ed_msg, 'EDMSG_DSP_FONT'):
-                ed_msg.Subscribe(self.OnUpdateFont, ed_msg.EDMSG_DSP_FONT)
-        except ImportError:
-            pass
+        #self.Bind(fnb.EVT_FLATNOTEBOOK_PAGE_CHANGING,
+        self._mainw = self.GetGrandParent()
+        nbook = self._mainw.GetNotebook()
+        nbook.Bind(FNB.EVT_FLATNOTEBOOK_PAGE_CHANGED, self.OnPageChanged)
+        nbook.Bind(FNB.EVT_FLATNOTEBOOK_PAGE_CLOSING, self.OnPageClosing)
+        ed_msg.Subscribe(self.OnThemeChange, ed_msg.EDMSG_THEME_CHANGED)
+        ed_msg.Subscribe(self.OnUpdateFont, ed_msg.EDMSG_DSP_FONT)
 
         # Setup Context Menu Handlers
         self.Bind(wx.EVT_MENU, self.onPopupEdit, id=ID_POPUP_EDIT)
@@ -364,9 +360,8 @@ class ProjectTree(wx.Panel):
 
     def __del__(self):
         """ Clean up resources """
-        if ed_msg is not None:
-            ed_msg.Unsubscribe(self.OnThemeChange)
-            ed_msg.Unsubscribe(self.OnUpdateFont)
+        ed_msg.Unsubscribe(self.OnThemeChange)
+        ed_msg.Unsubscribe(self.OnUpdateFont)
 
         # Kill all watcher threads
         for value in self.watchers.values():
@@ -376,29 +371,14 @@ class ProjectTree(wx.Panel):
         """ Setup the icons used by the tree and menus """
         isz = (16, 16)
         il = wx.ImageList(isz[0], isz[1])
-
-        try:
-            # Try to get theme icons from Editra
-            import ed_glob
-            folder = wx.ArtProvider.GetBitmap(str(ed_glob.ID_FOLDER), wx.ART_MENU)
-            folderopen = wx.ArtProvider.GetBitmap(str(ed_glob.ID_OPEN), wx.ART_MENU)
-            self.icons['folder'] = il.Add(folder)
-            self.icons['folder-open'] = il.Add(folderopen)
-            self.menuicons['copy'] = wx.ArtProvider.GetBitmap(str(ed_glob.ID_COPY), wx.ART_MENU)
-            self.menuicons['cut'] = wx.ArtProvider.GetBitmap(str(ed_glob.ID_CUT), wx.ART_MENU)
-            self.menuicons['paste'] = wx.ArtProvider.GetBitmap(str(ed_glob.ID_PASTE), wx.ART_MENU)
-            self.menuicons['delete'] = wx.ArtProvider.GetBitmap(str(ed_glob.ID_DELETE), wx.ART_MENU)
-
-        except ImportError:
-            folder = wx.ArtProvider_GetBitmap(wx.ART_FOLDER, wx.ART_OTHER, isz)
-            folderopen = wx.ArtProvider_GetBitmap(wx.ART_FOLDER_OPEN, wx.ART_OTHER, isz)
-            self.icons['folder'] = il.Add(folder)
-            self.icons['folder-open'] = il.Add(folderopen)
-            self.menuicons['copy'] = wx.ArtProvider_GetBitmap(wx.ART_COPY, wx.ART_OTHER, isz)
-            self.menuicons['cut'] = wx.ArtProvider_GetBitmap(wx.ART_CUT, wx.ART_OTHER, isz)
-            self.menuicons['paste'] = wx.ArtProvider_GetBitmap(wx.ART_PASTE, wx.ART_OTHER, isz)
-            self.menuicons['delete'] = wx.ArtProvider_GetBitmap(wx.ART_DELETE, wx.ART_OTHER, isz)
-
+        folder = wx.ArtProvider.GetBitmap(str(ed_glob.ID_FOLDER), wx.ART_MENU)
+        folderopen = wx.ArtProvider.GetBitmap(str(ed_glob.ID_OPEN), wx.ART_MENU)
+        self.icons['folder'] = il.Add(folder)
+        self.icons['folder-open'] = il.Add(folderopen)
+        self.menuicons['copy'] = wx.ArtProvider.GetBitmap(str(ed_glob.ID_COPY), wx.ART_MENU)
+        self.menuicons['cut'] = wx.ArtProvider.GetBitmap(str(ed_glob.ID_CUT), wx.ART_MENU)
+        self.menuicons['paste'] = wx.ArtProvider.GetBitmap(str(ed_glob.ID_PASTE), wx.ART_MENU)
+        self.menuicons['delete'] = wx.ArtProvider.GetBitmap(str(ed_glob.ID_DELETE), wx.ART_MENU)
         self.menuicons['blank'] = FileIcons.getBlankBitmap()
         self.menuicons['sc-commit'] = FileIcons.getScCommitBitmap()
         self.menuicons['sc-patch'] = FileIcons.getScPatchBitmap()
@@ -636,6 +616,19 @@ class ProjectTree(wx.Panel):
                 paths.append(pdata['path'])
         return paths
 
+    def PaneIsShown(self):
+        """Is the projects pane shown
+        @return: bool
+
+        """
+        if self._mainw is not None:
+            mgr = self._mainw.GetFrameManager()
+            pane = mgr.GetPane(ProjectPane.PANE_NAME)
+            return pane.IsShown()
+        else:
+            # Default to True
+            return True
+
     def OnPageClosing(self, evt):
         """ Notebook tab was closed """
         self.isClosing = True
@@ -645,12 +638,13 @@ class ProjectTree(wx.Panel):
         """ Notebook tab was changed """
         evt.Skip()
 
-        if not self.config.getSyncWithNotebook():
-            return
-
         # Don't sync when a tab was just closed
         if self.isClosing:
             self.isClosing = False
+            return
+
+        # If we are not on screen or this feature is disabled then reutrn
+        if not self.config.getSyncWithNotebook() or not self.PaneIsShown():
             return
 
         notebook = evt.GetEventObject()
@@ -1651,15 +1645,11 @@ class ProjectPane(ctrlbox.ControlBox):
         self._mw = parent       # Save ref to owner window
         self.busy = None
 
-        try:
-            import ed_glob
-            menub = self._mw.GetMenuBar()
-            viewm = menub.GetMenuByName("view")
-            viewm.InsertAlpha(ProjectPane.ID_PROJECTS, _("Projects"),
-                              _("Open Projects Sidepanel"),
-                              wx.ITEM_CHECK, after=ed_glob.ID_PRE_MARK)
-        except ImportError:
-            ed_glob = None
+        menub = self._mw.GetMenuBar()
+        viewm = menub.GetMenuByName("view")
+        viewm.InsertAlpha(ProjectPane.ID_PROJECTS, _("Projects"),
+                          _("Open Projects Sidepanel"),
+                          wx.ITEM_CHECK, after=ed_glob.ID_PRE_MARK)
 
         self.timer = wx.Timer(self)
         self.isBusy = 0
@@ -1686,11 +1676,7 @@ class ProjectPane(ctrlbox.ControlBox):
         removebutton.SetToolTipString(_("Remove Project"))
         self.ctrlbar.AddControl(removebutton, wx.ALIGN_LEFT)
 
-        if ed_glob:
-            cfgbmp = wx.ArtProvider.GetBitmap(str(ed_glob.ID_PREF), wx.ART_MENU)
-        else:
-            cfgbmp = wx.ArtProvider.GetBitmap(wx.ART_EXECUTABLE_FILE,
-                                              wx.ART_MENU)
+        cfgbmp = wx.ArtProvider.GetBitmap(str(ed_glob.ID_PREF), wx.ART_MENU)
         configbutton = platebtn.PlateButton(self.ctrlbar, self.ID_CONFIG,
                                             bmp=cfgbmp,
                                             style=platebtn.PB_STYLE_NOBG)
