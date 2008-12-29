@@ -14,12 +14,14 @@ __revision__ = "$Revision$"
 
 #-----------------------------------------------------------------------------#
 # Imports
+import os
 import wx
 import wx.lib.mixins.listctrl as listmix
 
 # Editra Libraries
 import ed_glob
 import ed_msg
+import ed_menu
 from profiler import Profile_Get, Profile_Set
 import eclib.ctrlbox as ctrlbox
 import eclib.platebtn as platebtn
@@ -37,6 +39,15 @@ CONFIG_KEY = u"FtpEdit.Sites"
 ID_SITES = wx.NewId()
 ID_CONNECT = wx.NewId()
 
+# Context Menu
+ID_REFRESH = wx.NewId()
+ID_EDIT = wx.NewId()
+ID_RENAME = wx.NewId()
+ID_NEW_FILE = wx.NewId()
+ID_NEW_FOLDER = wx.NewId()
+ID_DOWNLOAD = wx.NewId()
+ID_UPLOAD = wx.NewId()
+
 _ = wx.GetTranslation
 
 #-----------------------------------------------------------------------------#
@@ -53,6 +64,7 @@ class FtpWindow(ctrlbox.ControlBox):
         self._connected = False
         self._client = ftpclient.FtpClient(self)
         self._files = list()
+        self._select = None
 
         # Ui controls
         self._cbar = None     # ControlBar
@@ -70,6 +82,7 @@ class FtpWindow(ctrlbox.ControlBox):
         self.Bind(wx.EVT_BUTTON, self.OnButton, id=wx.ID_PREFERENCES)
         self.Bind(wx.EVT_BUTTON, self.OnButton, id=ID_CONNECT)
         self.Bind(wx.EVT_CHOICE, self.OnChoice, id=ID_SITES)
+        self.Bind(wx.EVT_MENU, self.OnMenu)
         self.Bind(wx.EVT_LIST_ITEM_ACTIVATED, self.OnItemActivated)
         self.Bind(ftpclient.EVT_FTP_REFRESH, self.OnRefresh)
         self.Bind(ftpclient.EVT_FTP_DOWNLOAD, self.OnDownload)
@@ -156,6 +169,8 @@ class FtpWindow(ctrlbox.ControlBox):
         else:
             ed_msg.PostMessage(ed_msg.EDMSG_PROGRESS_STATE, (pid, 0, 0))
 
+        self._list.Enable(not busy)
+
     def EnableControls(self, enable=True):
         """Enable or disable controls in the control bar
         @keyword enable: bool
@@ -208,8 +223,7 @@ class FtpWindow(ctrlbox.ControlBox):
                     # TODO handle errors
                     print self._client.GetLastError()
                 else:
-                    self._StartBusy(True)
-                    self._client.RefreshPath()
+                    self.RefreshFiles()
 
             self.EnableOptions(False)
             self._cbar.Layout()
@@ -258,7 +272,11 @@ class FtpWindow(ctrlbox.ControlBox):
         ftppath, path = evt.GetValue()
         self._StartBusy(False)
 
-        # TODO create proxy file and open in editor
+        if path is None or not os.path.exists(path):
+            # TODO: Report download failure
+            return
+
+        # Open the downloaded file in the editor
         csel = self._sites.GetStringSelection()
         data = self._config.GetSiteData(csel)
         data['user'] = self._username.GetValue().strip()
@@ -282,11 +300,75 @@ class FtpWindow(ctrlbox.ControlBox):
                 self._client.ChangeDirAsync(path)
             else:
                 # Retrieve the file
-                ed_msg.PostMessage(ed_msg.EDMSG_UI_SB_TXT,
-                                   (ed_glob.SB_INFO,
-                                   _("Retrieving file") + u"..."))
-                self._StartBusy(True)
-                self._client.DownloadAsync(path)
+                self.OpenFile(path)
+
+    def OnMenu(self, evt):
+        """Handle menu events"""
+        e_id = evt.GetId()
+        sel = self._list.GetFirstSelected()
+        path = None
+        item = None
+        if sel > -1 and sel < len(self._files):
+                item = self._files[sel]
+                path = item['name']
+
+        if e_id == ID_EDIT:
+            # Open the selected file in the editor
+            if path is not None:
+                self.OpenFile(path)
+        elif e_id == ID_RENAME:
+            # Rename the selected file
+            if path is not None:
+                name = wx.GetTextFromUser(_("Enter the new name"),
+                                          _("Rename File"))
+                if len(name):
+                    self._select = name
+                    self._StartBusy(True)
+                    self._client.RenameAsync(path, name)
+        elif e_id == ID_REFRESH:
+            # Refresh the file list
+            self._select = path
+            self.RefreshFiles()
+        elif e_id in (ID_NEW_FILE, ID_NEW_FOLDER):
+#            if item is not None:
+                # TODO: change to create the new file/folder in the subdirectory
+                #       when the selected item is a directory.
+#                if item['isdir']:
+#                    pass
+#                else:
+#                    pass
+
+            # Prompt for the new name
+            if e_id == ID_NEW_FILE:
+                name = wx.GetTextFromUser(_("Enter name for new file."),
+                                          _("New File"))
+
+                # Check if the file already exists
+                found = self._list.FindItem(-1, name)
+                if found == wx.NOT_FOUND and len(name):
+                    self._select = name
+                    self._client.NewFileAsync(name)
+            else:
+                name = wx.GetTextFromUser(_("Enter name for new directory."),
+                                          _("New Directory"))
+
+                # Check if the file already exists
+                found = self._list.FindItem(-1, name)
+                if found == wx.NOT_FOUND and len(name):
+                    self._select = name
+                    self._client.NewDirAsync(name)
+
+            if found != wx.NOT_FOUND and len(name):
+                wx.MessageBox(_("%s already exists. Please enter a different name." % name),
+                              _("%s already exists" % name),
+                              style=wx.OK|wx.CENTER|wx.ICON_WARNING)
+
+        elif e_id == ID_DOWNLOAD:
+            pass
+        elif e_id == ID_UPLOAD:
+            pass
+        else:
+            evt.Skip()
 
     def OnRefresh(self, evt):
         """Update the file list when a refresh event is sent by our
@@ -301,8 +383,17 @@ class FtpWindow(ctrlbox.ControlBox):
         for item in self._files:
             self._list.AddItem(item)
 
-        pid = self._mw.GetId()
         self._StartBusy(False)
+
+        # Try to reset the previous selection if there was one
+        if self._select is not None:
+            index = self._list.FindItem(-1, self._select)
+            self._select = None
+            if index != wx.NOT_FOUND:
+                self._list.EnsureVisible(index)
+                self._list.SetItemState(index,
+                                        wx.LIST_STATE_SELECTED,
+                                        wx.LIST_MASK_STATE)
 
     def OnThemeChanged(self, msg):
         """Update icons when the theme changes
@@ -313,6 +404,17 @@ class FtpWindow(ctrlbox.ControlBox):
         pref = self._cbar.FindWindowById(wx.ID_PREFERENCES)
         pref.SetBitmap(bmp)
         self._cbar.Layout()
+
+    def OpenFile(self, path):
+        """Open a file from the connected ftp site
+        @param path: file name
+
+        """
+        ed_msg.PostMessage(ed_msg.EDMSG_UI_SB_TXT,
+                                   (ed_glob.SB_INFO,
+                                   _("Retrieving file") + u"..."))
+        self._StartBusy(True)
+        self._client.DownloadAsync(path)
 
     def RefreshControlBar(self):
         """Refresh the status of the control bar"""
@@ -331,6 +433,11 @@ class FtpWindow(ctrlbox.ControlBox):
         self._cbar.Layout()
         self.EnableControls(len(sites))
 
+    def RefreshFiles(self):
+        """Refresh the current view"""
+        self._StartBusy(True)
+        self._client.RefreshPath()
+
 #-----------------------------------------------------------------------------#
 
 class FtpList(listmix.ListCtrlAutoWidthMixin,
@@ -341,13 +448,14 @@ class FtpList(listmix.ListCtrlAutoWidthMixin,
 
     """
     def __init__(self, parent, id=wx.ID_ANY):
-        wx.ListCtrl.__init__(self, parent, id, style=wx.LC_REPORT) 
+        wx.ListCtrl.__init__(self, parent, id, style=wx.LC_REPORT|wx.LC_SINGLE_SEL) 
         listmix.ListCtrlAutoWidthMixin.__init__(self)
         elistmix.ListRowHighlighter.__init__(self)
 
         # Attributes
         self._il = wx.ImageList(16, 16)
         self._idx = dict()
+        self._menu = None
 
         # Setup
         font = Profile_Get('FONT3', 'font', wx.NORMAL_FONT)
@@ -357,6 +465,9 @@ class FtpList(listmix.ListCtrlAutoWidthMixin,
         self.InsertColumn(1, _("Size"))
         self.InsertColumn(2, _("Modified"))
         self.setResizeColumn(0)
+
+        # Event Handlers
+        self.Bind(wx.EVT_CONTEXT_MENU, self.OnContextMenu)
 
         # Message Handlers
         ed_msg.Subscribe(self.OnThemeChanged, ed_msg.EDMSG_THEME_CHANGED)
@@ -379,6 +490,36 @@ class FtpList(listmix.ListCtrlAutoWidthMixin,
             img = self._idx['file']
         self.SetItemImage(self.GetItemCount() - 1, img)
         self.resizeLastColumn(self.GetTextExtent(u"Dec 31 24:00:00")[0] + 5)
+
+    def OnContextMenu(self, evt):
+        """Show the context menu"""
+        if not self.GetSelectedItemCount():
+            evt.Skip()
+            return
+
+        if self._menu is None:
+            self._menu = wx.Menu()
+            item = self._menu.Append(ID_REFRESH, _("Refresh"))
+            bmp = wx.ArtProvider.GetBitmap(str(ed_glob.ID_REFRESH), wx.ART_MENU)
+            if not bmp.IsNull():
+                item.SetBitmap(bmp)
+            self._menu.AppendSeparator()
+            self._menu.Append(ID_EDIT, _("Edit"))
+            self._menu.Append(ID_RENAME, _("Rename") + u"...")
+            self._menu.AppendSeparator()
+            item = self._menu.Append(ID_NEW_FILE, _("New File") + u"...")
+            bmp = wx.ArtProvider.GetBitmap(str(ed_glob.ID_NEW), wx.ART_MENU)
+            if not bmp.IsNull():
+                item.SetBitmap(bmp)
+            item = self._menu.Append(ID_NEW_FOLDER, _("New Folder") + u"...")
+            bmp = wx.ArtProvider.GetBitmap(str(ed_glob.ID_FOLDER), wx.ART_MENU)
+            if not bmp.IsNull():
+                item.SetBitmap(bmp)
+            self._menu.AppendSeparator()
+            self._menu.Append(ID_DOWNLOAD, _("Download") + u"...")
+            self._menu.Append(ID_UPLOAD, _("Upload") + u"...")
+
+        self.PopupMenu(self._menu)
 
     def OnThemeChanged(self, msg):
         """Update image list
