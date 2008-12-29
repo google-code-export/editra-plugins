@@ -215,7 +215,7 @@ class FtpWindow(ctrlbox.ControlBox):
                 password = self._password.GetValue().strip()
                 site = self._sites.GetStringSelection()
 
-                # TODO: start ftp connection thread
+                # TODO: Do connection asyncronously?
                 url = self._config.GetSiteHostname(site)
                 port = self._config.GetSitePort(site)
                 self._client.SetDefaultPath(self._config.GetSitePath(site))
@@ -281,17 +281,24 @@ class FtpWindow(ctrlbox.ControlBox):
         self._StartBusy(False)
 
         if path is None or not os.path.exists(path):
-            # TODO: Report download failure
-            return
-
-        # Open the downloaded file in the editor
-        csel = self._sites.GetStringSelection()
-        data = self._config.GetSiteData(csel)
-        data['user'] = self._username.GetValue().strip()
-        data['pword'] = self._password.GetValue().strip()
-        nb = self._mw.GetNotebook()
-        fobj = ftpfile.FtpFile(ftppath, data, path)
-        nb.OpenFileObject(fobj)
+            err = self._client.GetLastError()
+            if err is not None:
+                err = unicode(err)
+            else:
+                err = u''
+            wx.MessageBox(_("Failed to download %(file)s\nError:\n%(err)s") % \
+                          dict(file=ftppath, err=err),
+                          _("Ftp Download Failed"),
+                          style=wx.OK|wx.CENTER|wx.ICON_ERROR)
+        else:
+            # Open the downloaded file in the editor
+            csel = self._sites.GetStringSelection()
+            data = self._config.GetSiteData(csel)
+            data['user'] = self._username.GetValue().strip()
+            data['pword'] = self._password.GetValue().strip()
+            nb = self._mw.GetNotebook()
+            fobj = ftpfile.FtpFile(ftppath, data, path)
+            nb.OpenFileObject(fobj)
 
     def OnItemActivated(self, evt):
         """Handle when items are activated in the list control
@@ -481,7 +488,6 @@ class FtpList(listmix.ListCtrlAutoWidthMixin,
     def __init__(self, parent, id=wx.ID_ANY):
         wx.ListCtrl.__init__(self, parent, id, style=wx.LC_REPORT|wx.LC_SINGLE_SEL) 
         elistmix.ListRowHighlighter.__init__(self)
-        listmix.ListCtrlAutoWidthMixin.__init__(self)
 
         # Attributes
         self._il = wx.ImageList(16, 16)
@@ -495,7 +501,10 @@ class FtpList(listmix.ListCtrlAutoWidthMixin,
         self.InsertColumn(0, _("Filename"))
         self.InsertColumn(1, _("Size"))
         self.InsertColumn(2, _("Modified"))
-        self.setResizeColumn(0)
+
+        # Setup autowidth
+        listmix.ListCtrlAutoWidthMixin.__init__(self)
+        self.setResizeColumn(1) # <- NOTE: autowidth mixin starts from index 1
 
         # Event Handlers
 #        self.Bind(wx.EVT_CONTEXT_MENU, self.OnContextMenu)

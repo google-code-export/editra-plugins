@@ -90,6 +90,8 @@ class FtpConfigPanel(wx.Panel):
         # Event Handlers
         self.Bind(wx.EVT_BUTTON, self.GetParent().OnClose, id=wx.ID_OK)
 
+        wx.CallAfter(self._sites.ExpandRoot)
+
     def __DoLayout(self):
         """Layout the Dialog"""
         sizer = wx.BoxSizer(wx.HORIZONTAL)
@@ -373,6 +375,11 @@ class FtpSitesPanel(wx.Panel):
         vsizer.AddMany([((5, 5), 0), (msizer, 1, wx.EXPAND), ((5, 5), 0)])
         self.SetSizer(vsizer)
         self.SetAutoLayout(True)
+
+    def ExpandRoot(self):
+        """Expand the root node."""
+        root = self._tree.GetRootItem()
+        self._tree.Expand(root)
 
     def GetSelectedSite(self):
         """Get the name of the selected site
