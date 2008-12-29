@@ -1510,7 +1510,8 @@ class ProjectTree(wx.Panel):
 
         projects = self.getChildren(self.root)
         selections = [(x, self.tree.GetPyData(x)['path'])
-                      for x in self.getSelectedNodes()]
+                      for x in self.getSelectedNodes()
+                      if self.tree.GetPyData(x) is not None ]
 
         def delete():
             """Does the delete"""
@@ -1521,7 +1522,7 @@ class ProjectTree(wx.Panel):
                 except Exception, msg:
                     rc = wx.MessageDialog(self,
                       _('An error occurred when attempting to remove ') + \
-                      msg[1] + _('. Do you wish to continue?'),
+                      unicode(msg) + _('. Do you wish to continue?'),
                       _('Error occurred when removing files'),
                       style=wx.YES_NO|wx.YES_DEFAULT|wx.ICON_ERROR).ShowModal()
                     if rc == wx.ID_NO:
