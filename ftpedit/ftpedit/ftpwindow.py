@@ -43,10 +43,14 @@ ID_CONNECT = wx.NewId()
 ID_REFRESH = wx.NewId()
 ID_EDIT = wx.NewId()
 ID_RENAME = wx.NewId()
+ID_DELETE = wx.NewId()
 ID_NEW_FILE = wx.NewId()
 ID_NEW_FOLDER = wx.NewId()
 ID_DOWNLOAD = wx.NewId()
 ID_UPLOAD = wx.NewId()
+
+MENU_IDS = [ ID_REFRESH, ID_EDIT, ID_RENAME, ID_DELETE, ID_NEW_FILE,
+             ID_NEW_FOLDER, ID_DOWNLOAD, ID_UPLOAD ]
 
 _ = wx.GetTranslation
 
@@ -325,6 +329,17 @@ class FtpWindow(ctrlbox.ControlBox):
                     self._select = name
                     self._StartBusy(True)
                     self._client.RenameAsync(path, name)
+        elif e_id == ID_DELETE:
+            # Remove the selected path
+            # TODO: add support for removing directories
+            if path is not None:
+                result = wx.MessageBox(_("Are you sure you want to delete %s?") % path,
+                                       _("Delete File?"),
+                                       style=wx.YES_NO|wx.CENTER|wx.ICON_WARNING)
+
+                if result == wx.YES:
+                    self._client.DeleteFileAsync(path)
+
         elif e_id == ID_REFRESH:
             # Refresh the file list
             self._select = path
@@ -467,7 +482,8 @@ class FtpList(listmix.ListCtrlAutoWidthMixin,
         self.setResizeColumn(0)
 
         # Event Handlers
-        self.Bind(wx.EVT_CONTEXT_MENU, self.OnContextMenu)
+#        self.Bind(wx.EVT_CONTEXT_MENU, self.OnContextMenu)
+        self.Bind(wx.EVT_LIST_ITEM_RIGHT_CLICK, self.OnContextMenu)
 
         # Message Handlers
         ed_msg.Subscribe(self.OnThemeChanged, ed_msg.EDMSG_THEME_CHANGED)
@@ -506,6 +522,10 @@ class FtpList(listmix.ListCtrlAutoWidthMixin,
             self._menu.AppendSeparator()
             self._menu.Append(ID_EDIT, _("Edit"))
             self._menu.Append(ID_RENAME, _("Rename") + u"...")
+            item = self._menu.Append(ID_DELETE, _("Delete"))
+            bmp = wx.ArtProvider.GetBitmap(str(ed_glob.ID_DELETE), wx.ART_MENU)
+            if not bmp.IsNull():
+                item.SetBitmap(bmp)
             self._menu.AppendSeparator()
             item = self._menu.Append(ID_NEW_FILE, _("New File") + u"...")
             bmp = wx.ArtProvider.GetBitmap(str(ed_glob.ID_NEW), wx.ART_MENU)
@@ -519,6 +539,8 @@ class FtpList(listmix.ListCtrlAutoWidthMixin,
             self._menu.Append(ID_DOWNLOAD, _("Download") + u"...")
             self._menu.Append(ID_UPLOAD, _("Upload") + u"...")
 
+        # Update the menu state for the current selection
+        self.UpdateMenuState()
         self.PopupMenu(self._menu)
 
     def OnThemeChanged(self, msg):
@@ -549,3 +571,17 @@ class FtpList(listmix.ListCtrlAutoWidthMixin,
         self._idx['file'] = self._il.Add(bmp)
 
         self.SetImageList(self._il, wx.IMAGE_LIST_SMALL)
+
+    def UpdateMenuState(self):
+        """Update the current state of the context menu"""
+        if self._menu is not None:
+            idx = self.GetFirstSelected()
+            item = None
+            isdir = False
+            if idx != wx.NOT_FOUND:
+                item = self.GetItem(idx)
+                isdir = item.GetImage() == self._idx['folder']
+
+            for id_ in (ID_EDIT, ID_DOWNLOAD, ID_DELETE):
+                mitem = self._menu.FindItemById(id_)
+                mitem.Enable(item and not isdir)

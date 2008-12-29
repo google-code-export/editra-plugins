@@ -37,9 +37,13 @@ from util import Log
 edEVT_FTP_REFRESH = wx.NewEventType()
 EVT_FTP_REFRESH = wx.PyEventBinder(edEVT_FTP_REFRESH, 1)
 
-# Download is complete value == file path
+# Download is complete value == (ftppath, temp file path)
 edEVT_FTP_DOWNLOAD = wx.NewEventType()
 EVT_FTP_DOWNLOAD = wx.PyEventBinder(edEVT_FTP_DOWNLOAD, 1)
+
+# DownloadTo is complete value == (ftppath, destfile, success)
+edEVT_FTP_DOWNLOAD_TO = wx.NewEventType()
+EVT_FTP_DOWNLOAD_TO = wx.PyEventBinder(edEVT_FTP_DOWNLOAD_TO, 1)
 
 # Upload is complete value == sucess (bool)
 edEVT_FTP_UPLOAD = wx.NewEventType()
@@ -153,6 +157,31 @@ class FtpClient(ftplib.FTP):
             self._lasterr = msg
             Log("[ftpedit][err] Disconnect: %s" % msg)
 
+    def DeleteFile(self, fname):
+        """Delete the given file
+        @param fname: string
+        @return: bool
+
+        """
+        try:
+            self.delete(fname)
+        except Exception, msg:
+            self._lasterr = msg
+            Log("[ftpedit][err] DeleteFile: %s" % msg)
+            return False
+        return True
+
+    def DeleteFileAsync(self, fname):
+        """Delete the given file asynchronously
+        @param fname: string
+        @return: bool
+        @note: fires EVT_FTP_REFRESH when complete
+
+        """
+        t = FtpThread(self._parent, self._RefreshCommand,
+                      edEVT_FTP_REFRESH, args=[self.DeleteFile, [fname,]])
+        t.start()
+
     def Download(self, fname):
         """Download the file at the given path
         @param fname: string
@@ -201,6 +230,7 @@ class FtpClient(ftplib.FTP):
 
         """
         ftppath = u"/".join([self._curdir, fname])
+        succeed = True
         try:
             try:
                 f = open(dest, 'wb')
@@ -208,22 +238,22 @@ class FtpClient(ftplib.FTP):
             except (IOError, OSError, socket.error), msg:
                 self._lasterr = msg
                 Log("[ftpedit][err] DownloadTo: %s" % msg)
-                dest = None
+                succeed = False
         finally:
             f.close()
 
-        return (ftppath, dest)
+        return (ftppath, dest, succeed)
 
     def DownloadToAsync(self, fname, dest):
-        """Do an asynchronous download
+        """Do an asynchronous download to a specified file.
         @param fname: filename to download
         @param dest: destination file
-        @note: EVT_FTP_DOWNLOAD will be fired when complete containing the
+        @note: EVT_FTP_DOWNLOAD_TO will be fired when complete containing the
                location of the on disk file.
 
         """
         t = FtpThread(self._parent, self.DownloadTo,
-                      edEVT_FTP_DOWNLOAD, args=[fname, dest])
+                      edEVT_FTP_DOWNLOAD_TO, args=[fname, dest])
         t.start()
 
     def GetCurrentDirectory(self):
