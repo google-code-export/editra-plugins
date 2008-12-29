@@ -88,6 +88,15 @@ class FtpClient(ftplib.FTP):
         # Setup
         self.set_pasv(True) # Use passive mode for now (configurable later)
 
+    def _RefreshCommand(self, cmd, args=list()):
+        """Run a refresh command
+        @param cmd: callable
+        @note: Runs cmd and returns result of GetFileList
+
+        """
+        cmd(*args)
+        return self.GetFileList()
+
     def ChangeDir(self, path):
         """Change the current working directory and get the list of files
         @return: list
@@ -97,7 +106,7 @@ class FtpClient(ftplib.FTP):
         return self.GetFileList()
 
     def ChangeDirAsync(self, path):
-        """Run L{ChangeDir} asyncronously
+        """Run L{ChangeDir} asynchronously
         @param path: directory to change to
         @note: Generates a refresh event when finished
 
@@ -175,7 +184,7 @@ class FtpClient(ftplib.FTP):
         return (u"/".join([self._curdir, fname]), name)
 
     def DownloadAsync(self, fname):
-        """Do an asyncronous download
+        """Do an asynchronous download
         @param fname: filename to download
         @note: EVT_FTP_DOWNLOAD will be fired when complete containing the
                location of the on disk file.
@@ -183,6 +192,38 @@ class FtpClient(ftplib.FTP):
         """
         t = FtpThread(self._parent, self.Download,
                       edEVT_FTP_DOWNLOAD, args=[fname,])
+        t.start()
+
+    def DownloadTo(self, fname, dest):
+        """Download the file from the server to the destination
+        @param fname: file on server to download
+        @param dest: destination file on local machine
+
+        """
+        ftppath = u"/".join([self._curdir, fname])
+        try:
+            try:
+                f = open(dest, 'wb')
+                self.retrbinary('RETR ' + fname, lambda data: f.write(data))
+            except (IOError, OSError, socket.error), msg:
+                self._lasterr = msg
+                Log("[ftpedit][err] DownloadTo: %s" % msg)
+                dest = None
+        finally:
+            f.close()
+
+        return (ftppath, dest)
+
+    def DownloadToAsync(self, fname, dest):
+        """Do an asynchronous download
+        @param fname: filename to download
+        @param dest: destination file
+        @note: EVT_FTP_DOWNLOAD will be fired when complete containing the
+               location of the on disk file.
+
+        """
+        t = FtpThread(self._parent, self.DownloadTo,
+                      edEVT_FTP_DOWNLOAD, args=[fname, dest])
         t.start()
 
     def GetCurrentDirectory(self):
@@ -252,9 +293,56 @@ class FtpClient(ftplib.FTP):
         """
         raise NotImplementedError
 
+    def NewDir(self, dname):
+        """Create a new directory relative to the current path
+        @param dname: string
+
+        """
+        try:
+            self.mkd(dname)
+        except Exception, msg:
+            self._lasterr = msg
+            Log("[ftpedit][err] NewDir: %s" % msg)
+            return False
+        return True
+
+    def NewDirAsync(self, dname):
+        """Create a new directory asynchronously and fire an EVT_FTP_REFRESH
+        @param dname: string
+
+        """
+        t = FtpThread(self._parent, self._RefreshCommand,
+                      edEVT_FTP_REFRESH, args=[self.NewDir, [dname,]])
+        t.start()
+
+    def NewFile(self, fname):
+        """Create a new file relative to the current path
+        @param fname: string
+
+        """
+        try:
+            buff = StringIO('')
+            self.storlines('STOR ' + fname, buff)
+        except Exception, msg:
+            self._lasterr = msg
+            Log("[ftpedit][err] Upload: %s" % msg)
+            return False
+        return True
+
+    def NewFileAsync(self, fname):
+        """Create the new file asynchronously and fire an EVT_FTP_REFRESH upon
+        completion.
+        @param fname: name of file.
+
+        """
+        t = FtpThread(self._parent, self._RefreshCommand,
+                      edEVT_FTP_REFRESH, args=[self.NewFile, [fname,]])
+        t.start()
+
     def ProcessInput(self, data):
         """Process incoming data
         @param data: string
+        @note: for internal use
 
         """
         processed = ParseFtpOutput(data)
@@ -264,11 +352,36 @@ class FtpClient(ftplib.FTP):
 
     def RefreshPath(self):
         """Refresh the current working directory.
-        Runs L{GetFileList} asyncronously and returns the results
+        Runs L{GetFileList} asynchronously and returns the results
         in a EVT_FTP_REFRESH event.
 
         """
         t = FtpThread(self._parent, self.GetFileList, edEVT_FTP_REFRESH)
+        t.start()
+
+    def Rename(self, old, new):
+        """Rename the file
+        @param old: old file name
+        @param new: new file name
+        @return: bool
+
+        """
+        try:
+            self.rename(old, new)
+        except Exception, msg:
+            self._lasterr = msg
+            Log("[ftpedit][err] Rename: %s" % msg)
+            return False
+        return True
+
+    def RenameAsync(self, old, new):
+        """Rename the file asynchronously
+        @param old: old file name
+        @param new: new file name
+
+        """
+        t = FtpThread(self._parent, self._RefreshCommand,
+                      edEVT_FTP_REFRESH, args=[self.Rename, [old, new]])
         t.start()
 
     def SetDefaultPath(self, dpath):
