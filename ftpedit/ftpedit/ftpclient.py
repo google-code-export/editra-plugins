@@ -22,7 +22,6 @@ import os
 import re
 import threading
 import ftplib
-import socket
 import tempfile
 from StringIO import StringIO
 import wx
@@ -137,7 +136,7 @@ class FtpClient(ftplib.FTP):
             self._lastlogin = (user, password)
             self.cwd(self._default)
             self._curdir = self.pwd()
-        except socket.error, msg:
+        except Exception, msg:
             Log("[ftpedit][err] Connect: %s" % msg)
             self._lasterr = msg
             self._lastlogin = None
@@ -205,7 +204,7 @@ class FtpClient(ftplib.FTP):
                     os.write(fid, data + u"\n")
 
                 self.retrlines('RETR ' + fname, GetFileData)
-            except (IOError, OSError, socket.error), msg:
+            except Exception, msg:
                 self._lasterr = msg
                 Log("[ftpedit][err] Download: %s" % msg)
         finally:
@@ -236,7 +235,7 @@ class FtpClient(ftplib.FTP):
             try:
                 f = open(dest, 'wb')
                 self.retrbinary('RETR ' + fname, lambda data: f.write(data))
-            except (IOError, OSError, socket.error), msg:
+            except Exception, msg:
                 self._lasterr = msg
                 Log("[ftpedit][err] DownloadTo: %s" % msg)
                 succeed = False

@@ -214,9 +214,6 @@ class FtpWindow(ctrlbox.ControlBox):
                 user = self._username.GetValue().strip()
                 password = self._password.GetValue().strip()
                 site = self._sites.GetStringSelection()
-                self._connected = True
-                e_obj.SetLabel(_("Disconnect"))
-                e_obj.SetBitmap(IconFile.Disconnect.GetBitmap())
 
                 # TODO: start ftp connection thread
                 url = self._config.GetSiteHostname(site)
@@ -226,12 +223,17 @@ class FtpWindow(ctrlbox.ControlBox):
                 self._client.SetPort(port)
                 connected = self._client.Connect(user, password)
                 if not connected:
-                    # TODO handle errors
-                    print self._client.GetLastError()
+                    wx.MessageBox(unicode(self._client.GetLastError()),
+                                  _("Ftp Connection Error"),
+                                  style=wx.OK|wx.CENTER|wx.ICON_ERROR)
                 else:
-                    self.RefreshFiles()
+                    self._connected = True
+                    e_obj.SetLabel(_("Disconnect"))
+                    e_obj.SetBitmap(IconFile.Disconnect.GetBitmap())
 
-            self.EnableOptions(False)
+                    self.RefreshFiles()
+                    self.EnableOptions(False)
+
             self._cbar.Layout()
         elif e_id == wx.ID_PREFERENCES:
             # Show preferences dialog
@@ -478,8 +480,8 @@ class FtpList(listmix.ListCtrlAutoWidthMixin,
     """
     def __init__(self, parent, id=wx.ID_ANY):
         wx.ListCtrl.__init__(self, parent, id, style=wx.LC_REPORT|wx.LC_SINGLE_SEL) 
-        listmix.ListCtrlAutoWidthMixin.__init__(self)
         elistmix.ListRowHighlighter.__init__(self)
+        listmix.ListCtrlAutoWidthMixin.__init__(self)
 
         # Attributes
         self._il = wx.ImageList(16, 16)
