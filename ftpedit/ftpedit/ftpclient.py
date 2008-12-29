@@ -107,6 +107,7 @@ class FtpClient(ftplib.FTP):
 
         """
         self.cwd(path)
+        self._curdir = self.pwd()
         return self.GetFileList()
 
     def ChangeDirAsync(self, path):
