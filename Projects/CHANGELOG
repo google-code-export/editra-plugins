@@ -15,6 +15,7 @@ New:
 Bug Fixes:
 +Fix expanding empty tree nodes on windows causing projects view to be emptied
 on Windows.
++Fix error in deleting files where node may not have any data.
 
 #-----------------------------------------------------------------------------#
 Version 0.7
