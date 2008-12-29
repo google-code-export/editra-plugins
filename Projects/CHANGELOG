@@ -13,7 +13,8 @@ New:
 +Some UI improvements.
 
 Bug Fixes:
-
++Fix expanding empty tree nodes on windows causing projects view to be emptied
+on Windows.
 
 #-----------------------------------------------------------------------------#
 Version 0.7
