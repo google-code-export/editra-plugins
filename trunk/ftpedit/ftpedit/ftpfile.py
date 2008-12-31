@@ -31,7 +31,15 @@ import ftpclient
 
 class FtpFile(ed_txt.EdFile):
     def __init__(self, ftppath, sitedata, path='', modtime=0):
-        """Create the FtpFile
+        """Create the FtpFile.
+        Implementation Note: This file object is only associated with the
+        ftppath as long as it is alive, if the on disk file's name is changed
+        or the in memory instance of this object is deleted the file passed in
+        as path will be automatically removed, as it is intended to be a
+        TEMPORARY file with the real file existing on the ftp server. Do not 
+        pass in non temporary files for the path keyword or it will be DELETED 
+        when this object is destroyed!
+
         @param ftppath: path to file on ftp server
         @param sitedata: site login data
         @keyword path: on disk path (used by EdFile)
@@ -68,12 +76,19 @@ class FtpFile(ed_txt.EdFile):
                                              self._site['pword'])
 
         if not connected:
-            # TODO: report error to upload
+            # TODO: report error to upload in ui
             err = self._client.GetLastError()
             Log("[ftpedit][err] DoFtpUpload: %s" % err)
         else:
-            self._client.Upload(self.GetPath(), self.ftppath)
-            # TODO: notify of completion
+            # NOTE: Currently does a blocking upload possibly use the
+            # Async method to improve responsiveness.
+            success = self._client.Upload(self.GetPath(), self.ftppath)
+            if not success:
+                # TODO: notify of failure
+                err = self._client.GetLastError()
+            else:
+                # TODO: update status text to reflect successful upload
+                pass
 
     def GetFtpPath(self):
         """Get the ftp path
@@ -98,6 +113,12 @@ class FtpFile(ed_txt.EdFile):
         """
         cpath = self.GetPath()
         if path != cpath:
+            # Cleanup the tempfile now
+            try:
+                os.remove(self.GetPath())
+            except OSError, msg:
+                Log("[ftpfile][err] SetFilePath: %s" % msg)
+
             super(FtpFile, self).SetFilePath(path)
             self._ftp = False
 

@@ -10,6 +10,11 @@
 
 Ftp client class for managing connections, uploads, and downloads.
 
+The main class exported by this module is L{FtpClient} it implements an easy
+to use FTP client interface with both blocking and non blocking methods. To
+use the non-blocking methods the client must be initialized with a window object
+to recieve the event callbacks from the Async method calls.
+
 """
 
 __author__ = "Cody Precord <cprecord@editra.org>"
@@ -49,7 +54,10 @@ edEVT_FTP_UPLOAD = wx.NewEventType()
 EVT_FTP_UPLOAD = wx.PyEventBinder(edEVT_FTP_UPLOAD, 1)
 
 class FtpClientEvent(wx.PyCommandEvent):
-    """Event for data transfer and signaling actions in the L{OutputBuffer}"""
+    """Event for data transfer and signaling end of actions from Async
+    L{FtpClient} calls.
+
+    """
     def __init__(self, etype, value=''):
         """Creates the event object"""
         wx.PyCommandEvent.__init__(self, etype)
@@ -63,9 +71,25 @@ class FtpClientEvent(wx.PyCommandEvent):
         return self._value
 
 #-----------------------------------------------------------------------------#
+# FtpClient Exception Classes
+
+class FtpClientError(Exception):
+    """Base L{FtpClient} exception type"""
+    pass
+
+class FtpClientNotConnected(FtpClientError):
+    """L{FtpClient} is not connected to a remote site"""
+    pass
+
+#-----------------------------------------------------------------------------#
 
 class FtpClient(ftplib.FTP):
-    """Ftp Client"""
+    """Ftp Client
+    Supports both syncronous and asynchronous commands. The asynchronous
+    commands are all suffixed with _Async_ and will fire an appropriate
+    L{FtpClientEvent} to the owner window when the command completes.
+
+    """
     def __init__(self, parent, host=u'', port=21):
         """Create an ftp client object
         @param parent: owner window (can be None, but no events will be fired)
@@ -91,22 +115,45 @@ class FtpClient(ftplib.FTP):
         # Setup
         self.set_pasv(True) # Use passive mode for now (configurable later)
 
+    def _ProcessInput(self, data):
+        """Process incoming data
+        @param data: string
+        @note: for internal use
+
+        """
+        processed = ParseFtpOutput(data)
+
+        # Make sure only one thread is modifying the list at a time
+        self._busy.acquire()
+        self._data.append(processed)
+        self._busy.release()
+
     def _RefreshCommand(self, cmd, args=list()):
         """Run a refresh command
         @param cmd: callable
-        @note: Runs cmd and returns result of GetFileList
+        @note: Runs cmd and returns result of GetFileList, internal use only.
 
         """
         cmd(*args)
         return self.GetFileList()
+
+    #---- Public Api ----#
 
     def ChangeDir(self, path):
         """Change the current working directory and get the list of files
         @return: list
 
         """
-        self.cwd(path)
-        self._curdir = self.pwd()
+        if not self.IsActive():
+            raise FtpClientNotConnected, "FtpClient is not connected"
+
+        try:
+            self.cwd(path)
+            self._curdir = self.pwd()
+        except Exception, msg:
+            self._lasterr = msg
+            Log("[ftpedit][err] ChangeDir: %s" % msg)
+
         return self.GetFileList()
 
     def ChangeDirAsync(self, path):
@@ -121,8 +168,10 @@ class FtpClient(ftplib.FTP):
 
     def ClearLastError(self):
         """Clear the last know error"""
+        self._busy.aquire()
         del self._lasterr
         self._lasterr = None
+        self._busy.release()
 
     def Connect(self, user, password):
         """Connect to the site
@@ -131,6 +180,11 @@ class FtpClient(ftplib.FTP):
 
         """
         try:
+            # First disconnect if there is an existing connection
+            if self.IsActive():
+                self.Disconnect()
+
+            # Connect to the server
             self.connect(self._host, int(self._port))
             self.login(user, password)
             self._lastlogin = (user, password)
@@ -163,6 +217,9 @@ class FtpClient(ftplib.FTP):
         @return: bool
 
         """
+        if not self.IsActive():
+            raise FtpClientNotConnected, "FtpClient is not connected"
+
         try:
             self.delete(fname)
         except Exception, msg:
@@ -188,6 +245,9 @@ class FtpClient(ftplib.FTP):
         @return: (ftppath, temppath)
 
         """
+        if not self.IsActive():
+            raise FtpClientNotConnected, "FtpClient is not connected"
+
         name = None
         try:
             try:
@@ -229,6 +289,9 @@ class FtpClient(ftplib.FTP):
         @param dest: destination file on local machine
 
         """
+        if not self.IsActive():
+            raise FtpClientNotConnected, "FtpClient is not connected"
+
         ftppath = u"/".join([self._curdir, fname])
         succeed = True
         try:
@@ -268,18 +331,22 @@ class FtpClient(ftplib.FTP):
         @return: list of dict(isdir, name, size, date)
 
         """
+        if not self.IsActive():
+            raise FtpClientNotConnected, "FtpClient is not connected"
+
         try:
-            code = self.retrlines('LIST', self.ProcessInput)
+            code = self.retrlines('LIST', self._ProcessInput)
         except Exception, msg:
             Log("[ftpedit][err] GetFileList: %s" % msg)
             self._lasterr = msg
 
-        # Critical section
+        #-- Critical section --#
         self._busy.acquire()
         rval = list(self._data)
         del self._data
         self._data = list()
         self._busy.release()
+        #-- End Critical Section --#
 
         # Sort the list (directories, files)
         dirs = list()
@@ -290,9 +357,17 @@ class FtpClient(ftplib.FTP):
             else:
                 files.append(item)
 
+        # Sort dir list by dir name
         dirs.sort(key=lambda x: x['name'])
+
+        # Insert dummy .. entry to allow for navigating backwards with
         dirs.insert(0, dict(name=u'..', isdir=True, size=u'0 bytes', date=u''))
+
+        # Sort file list by file name
         files.sort(key=lambda x: x['name'])
+
+        # Return ordered list of directories followed by files in alphanumeric
+        # sorted order.
         return dirs + files
 
     def GetHostname(self):
@@ -335,6 +410,9 @@ class FtpClient(ftplib.FTP):
         @param dname: string
 
         """
+        if not self.IsActive():
+            raise FtpClientNotConnected, "FtpClient is not connected"
+
         try:
             self.mkd(dname)
         except Exception, msg:
@@ -357,6 +435,9 @@ class FtpClient(ftplib.FTP):
         @param fname: string
 
         """
+        if not self.IsActive():
+            raise FtpClientNotConnected, "FtpClient is not connected"
+
         try:
             buff = StringIO('')
             self.storlines('STOR ' + fname, buff)
@@ -376,16 +457,6 @@ class FtpClient(ftplib.FTP):
                       edEVT_FTP_REFRESH, args=[self.NewFile, [fname,]])
         t.start()
 
-    def ProcessInput(self, data):
-        """Process incoming data
-        @param data: string
-        @note: for internal use
-
-        """
-        processed = ParseFtpOutput(data)
-        self._busy.acquire()
-        self._data.append(processed)
-        self._busy.release()
 
     def RefreshPath(self):
         """Refresh the current working directory.
@@ -403,6 +474,9 @@ class FtpClient(ftplib.FTP):
         @return: bool
 
         """
+        if not self.IsActive():
+            raise FtpClientNotConnected, "FtpClient is not connected"
+
         try:
             self.rename(old, new)
         except Exception, msg:
@@ -449,6 +523,9 @@ class FtpClient(ftplib.FTP):
         @return: bool
 
         """
+        if not self.IsActive():
+            raise FtpClientNotConnected, "FtpClient is not connected"
+
         try:
             f = open(src, 'r')
             buff = StringIO(f.read())
@@ -502,8 +579,10 @@ class FtpThread(threading.Thread):
 
 #-----------------------------------------------------------------------------#
 # Utility
+
 def ParseFtpOutput(line):
-    """parse output from the ftp command
+    """Parse output from the ftp RETR/LIST commands and render a dictionary
+    of tokens.
     @param line: line from ftp list.
     @return: dict(isdir, size, modified, fname)
 
