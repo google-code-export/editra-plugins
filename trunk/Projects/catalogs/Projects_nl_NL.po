@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: editra\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2008-11-18 20:35-0600\n"
+"POT-Creation-Date: 2008-12-30 19:28-0600\n"
 "PO-Revision-Date: 2008-04-30 09:38+0000\n"
 "Last-Translator: Gerard <Unknown>\n"
 "Language-Team: Dutch <nl@li.org>\n"
@@ -25,11 +25,11 @@ msgstr "*NAAM*"
 msgid "*VALUE*"
 msgstr "*WAARDE*"
 
-#: Projects/projects/ProjectPane.py:1511
+#: Projects/projects/ProjectPane.py:1519
 msgid ". Do you wish to continue?"
 msgstr ". Wil je doorgaan?"
 
-#: Projects/projects/ProjectPane.py:1659
+#: Projects/projects/ProjectPane.py:1669
 msgid "Add Project"
 msgstr "Toevoegen project"
 
@@ -37,15 +37,15 @@ msgstr "Toevoegen project"
 msgid "Add a New Repository Path"
 msgstr "Voeg een nieuw data opslag pad toe"
 
-#: Projects/projects/ProjectPane.py:1256
+#: Projects/projects/ProjectPane.py:1262
 msgid "Add to repository"
 msgstr "Voeg toe aan data opslag"
 
-#: Projects/projects/ProjectPane.py:1510
+#: Projects/projects/ProjectPane.py:1518
 msgid "An error occurred when attempting to remove "
 msgstr "Er is een fout opgetreden tijdens het verwijderen "
 
-#: Projects/projects/HistWin.py:315
+#: Projects/projects/HistWin.py:314
 msgid "Author"
 msgstr "Auteur"
 
@@ -53,23 +53,23 @@ msgstr "Auteur"
 msgid "Built-in"
 msgstr "Ingebouwd"
 
-#: Projects/projects/ProjectPane.py:165
+#: Projects/projects/ProjectPane.py:169
 msgid "C File"
 msgstr "C bestand"
 
-#: Projects/projects/ProjectPane.py:1749
+#: Projects/projects/ProjectPane.py:1721
 msgid "Choose a Project Directory"
 msgstr "Kies een project map"
 
-#: Projects/projects/ModList.py:134 Projects/projects/ProjCmnDlg.py:61
+#: Projects/projects/ModList.py:135 Projects/projects/ProjCmnDlg.py:61
 msgid "Commit"
 msgstr "Vastleggen (commit)"
 
-#: Projects/projects/ModList.py:334 Projects/projects/ProjectPane.py:838
+#: Projects/projects/ModList.py:343 Projects/projects/ProjectPane.py:844
 msgid "Commit Dialog"
 msgstr "Vastleggen scherm"
 
-#: Projects/projects/ModList.py:499 Projects/projects/ProjectPane.py:1288
+#: Projects/projects/ModList.py:508 Projects/projects/ProjectPane.py:1294
 msgid "Commit changes"
 msgstr "Wijzigingen vastleggen (commit)"
 
@@ -85,15 +85,15 @@ msgstr "Vergelijk geselecteerde revisies"
 msgid "Compare to Selected Revision"
 msgstr "Vergelijk met geselecteerde revisie"
 
-#: Projects/projects/ModList.py:494 Projects/projects/ProjectPane.py:1284
+#: Projects/projects/ModList.py:503 Projects/projects/ProjectPane.py:1290
 msgid "Compare to previous version"
 msgstr "Vergelijk met vorige revisie"
 
-#: Projects/projects/ProjectPane.py:1672
+#: Projects/projects/ProjectPane.py:1683
 msgid "Configure"
 msgstr "Configureren"
 
-#: Projects/projects/ProjectPane.py:1275
+#: Projects/projects/ProjectPane.py:1281
 msgid "Copy"
 msgstr "Kopiëren"
 
@@ -101,11 +101,11 @@ msgstr "Kopiëren"
 msgid "Could not retrieve file"
 msgstr "Kon file niet ophalen"
 
-#: Projects/projects/ProjectPane.py:1274
+#: Projects/projects/ProjectPane.py:1280
 msgid "Cut"
 msgstr "Knippen"
 
-#: Projects/projects/HistWin.py:314
+#: Projects/projects/HistWin.py:313
 msgid "Date"
 msgstr "Datum"
 
@@ -113,7 +113,7 @@ msgstr "Datum"
 msgid "Diff Program"
 msgstr "Diff-programma"
 
-#: Projects/projects/ProjectPane.py:1269
+#: Projects/projects/ProjectPane.py:1275
 msgid "Edit"
 msgstr "Bewerk"
 
@@ -121,11 +121,11 @@ msgstr "Bewerk"
 msgid "Enter a command to be executed on all selected files and files in selected directories."
 msgstr "Geef een commando om uit te voeren op de geselecteerde bestanden en de bestanden in de geselecteerde directories"
 
-#: Projects/projects/ProjectPane.py:1389
+#: Projects/projects/ProjectPane.py:1396
 msgid "Enter command to execute on all files"
 msgstr "Geef een commando om uit te voeren op alle bestanden"
 
-#: Projects/projects/ModList.py:335 Projects/projects/ProjectPane.py:839
+#: Projects/projects/ModList.py:344 Projects/projects/ProjectPane.py:845
 msgid "Enter your commit message:"
 msgstr "Geef revisie omschrijving"
 
@@ -133,11 +133,11 @@ msgstr "Geef revisie omschrijving"
 msgid "Environment Variables"
 msgstr "Omgevingsvariabelen"
 
-#: Projects/projects/ProjectPane.py:1478 Projects/projects/ProjectPane.py:1486
+#: Projects/projects/ProjectPane.py:1485 Projects/projects/ProjectPane.py:1493
 msgid "Error occurred when copying/moving files"
 msgstr "Er deed zich een fout voor tijdens het kopiëren/verplaatsen van de bestanden"
 
-#: Projects/projects/ProjectPane.py:1512
+#: Projects/projects/ProjectPane.py:1520
 msgid "Error occurred when removing files"
 msgstr "Er deed zich een fout voor tijdens het verwijderen van de bestanden"
 
@@ -145,7 +145,7 @@ msgstr "Er deed zich een fout voor tijdens het verwijderen van de bestanden"
 msgid "Execute command on files"
 msgstr "Voer command uit op bestanden"
 
-#: Projects/projects/ProjectPane.py:1278
+#: Projects/projects/ProjectPane.py:1284
 msgid "Execute command..."
 msgstr "Voer command uit ..."
 
@@ -153,12 +153,12 @@ msgstr "Voer command uit ..."
 msgid "File Filters"
 msgstr "Bestandsfilters"
 
-#: Projects/projects/ModList.py:276
+#: Projects/projects/ModList.py:279
 #, fuzzy
 msgid "Filename"
 msgstr "Gebruikersnaam"
 
-#: Projects/projects/ProjectPane.py:1260
+#: Projects/projects/ProjectPane.py:1266
 msgid "Folder"
 msgstr "Map"
 
@@ -166,7 +166,7 @@ msgstr "Map"
 msgid "General"
 msgstr "Algemeen"
 
-#: Projects/projects/ProjectPane.py:166
+#: Projects/projects/ProjectPane.py:170
 msgid "HTML File"
 msgstr "HTML-bestand"
 
@@ -178,15 +178,15 @@ msgstr "historische informatie kon niet worden opgehaald"
 msgid "Keep project tree synchronized with editor notebook"
 msgstr "Synchroniseer project met gebruikers laptop"
 
-#: Projects/projects/HistWin.py:316
+#: Projects/projects/HistWin.py:315
 msgid "Log Message"
 msgstr "Log melding"
 
-#: Projects/projects/ProjectPane.py:1289
+#: Projects/projects/ProjectPane.py:1295
 msgid "Make Patch"
 msgstr "Maak patch"
 
-#: Projects/projects/ProjectPane.py:1294
+#: Projects/projects/ProjectPane.py:1300
 #, fuzzy, python-format
 msgid "Move to %(trash)s"
 msgstr "Verplaats naar "
@@ -195,19 +195,19 @@ msgstr "Verplaats naar "
 msgid "Name"
 msgstr "Naam"
 
-#: Projects/projects/ProjectPane.py:1272
+#: Projects/projects/ProjectPane.py:1278
 msgid "New..."
 msgstr "Nieuw..."
 
-#: Projects/projects/ProjectPane.py:1270
+#: Projects/projects/ProjectPane.py:1276
 msgid "Open"
 msgstr "Open"
 
-#: Projects/projects/ProjectPane.py:1643
+#: Projects/projects/ProjectPane.py:1651
 msgid "Open Projects Sidepanel"
 msgstr "Geef projectpaneel weer"
 
-#: Projects/projects/ProjectPane.py:1271
+#: Projects/projects/ProjectPane.py:1277
 msgid "Open enclosing folder"
 msgstr "Open bevattende folder"
 
@@ -219,11 +219,11 @@ msgstr ""
 msgid "Password"
 msgstr "Wachtwoord"
 
-#: Projects/projects/ProjectPane.py:1276
+#: Projects/projects/ProjectPane.py:1282
 msgid "Paste"
 msgstr "Plakken"
 
-#: Projects/projects/ProjectPane.py:167
+#: Projects/projects/ProjectPane.py:171
 msgid "Php File"
 msgstr "PHP-bestand"
 
@@ -231,7 +231,7 @@ msgstr "PHP-bestand"
 msgid "Please enter a repository path.  Partial paths may also be entered."
 msgstr "Geef een repository path op. Gedeeltelijk paden zijn ook toegestaan."
 
-#: Projects/projects/ProjectPane.py:1642 Projects/projects/__init__.py:52
+#: Projects/projects/ProjectPane.py:1650 Projects/projects/__init__.py:52
 msgid "Projects"
 msgstr "Projecten"
 
@@ -239,24 +239,24 @@ msgstr "Projecten"
 msgid "Projects Configuration"
 msgstr "Project configuratie"
 
-#: Projects/projects/ProjectPane.py:168
+#: Projects/projects/ProjectPane.py:172
 msgid "Python File"
 msgstr "Python bestand"
 
-#: Projects/projects/ModList.py:122
+#: Projects/projects/ModList.py:123
 #, fuzzy
 msgid "Refresh"
 msgstr "Ververs status"
 
-#: Projects/projects/ModList.py:491 Projects/projects/ProjectPane.py:1282
+#: Projects/projects/ModList.py:500 Projects/projects/ProjectPane.py:1288
 msgid "Refresh status"
 msgstr "Ververs status"
 
-#: Projects/projects/ProjectPane.py:1663
+#: Projects/projects/ProjectPane.py:1676
 msgid "Remove Project"
 msgstr "Verwijder project"
 
-#: Projects/projects/ProjectPane.py:1254
+#: Projects/projects/ProjectPane.py:1260
 msgid "Remove from repository"
 msgstr "Verwijder uit repository"
 
@@ -264,7 +264,7 @@ msgstr "Verwijder uit repository"
 msgid "Remove repository"
 msgstr "Verwijder repository"
 
-#: Projects/projects/ModList.py:110
+#: Projects/projects/ModList.py:111
 #, fuzzy
 msgid "Repository"
 msgstr "Verwijder repository"
@@ -277,16 +277,16 @@ msgstr "Repository Configuratie"
 msgid "Retrieving File History"
 msgstr "Bestands historie ophalen"
 
-#: Projects/projects/HistWin.py:313
+#: Projects/projects/HistWin.py:312
 msgid "Rev #"
 msgstr "Rev #"
 
-#: Projects/projects/ModList.py:140
+#: Projects/projects/ModList.py:141
 #, fuzzy
 msgid "Revert"
 msgstr "Verwijder project"
 
-#: Projects/projects/ModList.py:502 Projects/projects/ProjectPane.py:1290
+#: Projects/projects/ModList.py:511 Projects/projects/ProjectPane.py:1296
 msgid "Revert to repository version"
 msgstr "Herstel naar repository versie"
 
@@ -294,7 +294,7 @@ msgstr "Herstel naar repository versie"
 msgid "Revision History"
 msgstr "Revisie Historie"
 
-#: Projects/projects/HistWin.py:420
+#: Projects/projects/HistWin.py:419
 msgid "Search Log"
 msgstr "Doorzoek log"
 
@@ -306,11 +306,11 @@ msgstr "Selecteer diff programma"
 msgid "Select the repository path to remove"
 msgstr "Selecteer het repository pad om te verwijderen"
 
-#: Projects/projects/ProjectPane.py:890
+#: Projects/projects/ProjectPane.py:896
 msgid "Selected files are from multiple repositories"
 msgstr "Geselecteerde bestanden zijn van meerdere repositories"
 
-#: Projects/projects/ModList.py:497 Projects/projects/ProjectPane.py:1286
+#: Projects/projects/ModList.py:506 Projects/projects/ProjectPane.py:1292
 msgid "Show revision history"
 msgstr "Geef revisie historie weer"
 
@@ -326,15 +326,15 @@ msgstr ""
 "Spatie gescheiden lijst met patronen die niet worden weergegeven.\n"
 "het gebruik van vervanging  (*) is toegestaan"
 
-#: Projects/projects/ModList.py:274
+#: Projects/projects/ModList.py:277
 msgid "Status"
 msgstr ""
 
-#: Projects/projects/ProjectPane.py:164
+#: Projects/projects/ProjectPane.py:168
 msgid "Text File"
 msgstr "Tekstbestand"
 
-#: Projects/projects/ProjectPane.py:1387
+#: Projects/projects/ProjectPane.py:1394
 msgid ""
 "The following command will be executed on all selected\n"
 "files and files contained in selected directories."
@@ -348,21 +348,21 @@ msgstr "The historie informatie van het geselecteerde bestand kon niet worden op
 msgid "The requested file could not be retrieved from the source control system."
 msgstr "het geselecteerde bestand kon niet worden opgehaald van het bron controle systeem"
 
-#: Projects/projects/ProjectPane.py:1484
+#: Projects/projects/ProjectPane.py:1491
 #, fuzzy, python-format
 msgid "The system returned the following message when attempting to move/copy %(filename)s: %(errmsg)s."
 msgstr "Het systeem gaf de volgende melding terug tijdens het kopiëren/verplaatsen van %s: %s"
 
-#: Projects/projects/ProjectPane.py:1475
+#: Projects/projects/ProjectPane.py:1482
 #, fuzzy, python-format
 msgid "The system returned the following message when attempting to move/copy %(filename)s: %(errmsg)s. Do you wish to continue?"
 msgstr "Het systeem gaf de volgende melding terug tijdens het kopiëren/verplaatsen van %s: %s. Wil je doorgaan?"
 
-#: Projects/projects/ProjectPane.py:1331
+#: Projects/projects/ProjectPane.py:1337
 msgid "Untitled Folder"
 msgstr ""
 
-#: Projects/projects/ModList.py:128 Projects/projects/ProjectPane.py:1283
+#: Projects/projects/ModList.py:129 Projects/projects/ProjectPane.py:1289
 msgid "Update"
 msgstr "Verversen"
 
@@ -374,6 +374,6 @@ msgstr "Gebruikersnaam"
 msgid "Value"
 msgstr "Waarde"
 
-#: Projects/projects/ProjectPane.py:889
+#: Projects/projects/ProjectPane.py:895
 msgid "You can not execute source control commands across multiple repositories."
 msgstr "Je kan geen commando's uitvoeren op bestanden uit meerdere bron controle systemen"

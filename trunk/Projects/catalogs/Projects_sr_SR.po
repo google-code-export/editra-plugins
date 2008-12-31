@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: editra\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2008-11-18 20:35-0600\n"
+"POT-Creation-Date: 2008-12-30 19:28-0600\n"
 "PO-Revision-Date: 2008-03-20 04:42+0000\n"
 "Last-Translator: Vladimir Lazic <vlazic@gmail.com>\n"
 "Language-Team: Serbian <sr@li.org>\n"
@@ -25,11 +25,11 @@ msgstr "*ИМЕ*"
 msgid "*VALUE*"
 msgstr "*ВРЕДНОСТ*"
 
-#: Projects/projects/ProjectPane.py:1511
+#: Projects/projects/ProjectPane.py:1519
 msgid ". Do you wish to continue?"
 msgstr ". Да ли желите да наставите?"
 
-#: Projects/projects/ProjectPane.py:1659
+#: Projects/projects/ProjectPane.py:1669
 msgid "Add Project"
 msgstr "Додај пројекат"
 
@@ -37,15 +37,15 @@ msgstr "Додај пројекат"
 msgid "Add a New Repository Path"
 msgstr "Додај нову путању до сервера"
 
-#: Projects/projects/ProjectPane.py:1256
+#: Projects/projects/ProjectPane.py:1262
 msgid "Add to repository"
 msgstr "Додај на сервер"
 
-#: Projects/projects/ProjectPane.py:1510
+#: Projects/projects/ProjectPane.py:1518
 msgid "An error occurred when attempting to remove "
 msgstr "Дошло је до грешке при покушају уклањања "
 
-#: Projects/projects/HistWin.py:315
+#: Projects/projects/HistWin.py:314
 msgid "Author"
 msgstr "Аутор"
 
@@ -53,23 +53,23 @@ msgstr "Аутор"
 msgid "Built-in"
 msgstr "Уграђен"
 
-#: Projects/projects/ProjectPane.py:165
+#: Projects/projects/ProjectPane.py:169
 msgid "C File"
 msgstr "C датотека"
 
-#: Projects/projects/ProjectPane.py:1749
+#: Projects/projects/ProjectPane.py:1721
 msgid "Choose a Project Directory"
 msgstr "Изаберите директоријум пројекта"
 
-#: Projects/projects/ModList.py:134 Projects/projects/ProjCmnDlg.py:61
+#: Projects/projects/ModList.py:135 Projects/projects/ProjCmnDlg.py:61
 msgid "Commit"
 msgstr "Предај"
 
-#: Projects/projects/ModList.py:334 Projects/projects/ProjectPane.py:838
+#: Projects/projects/ModList.py:343 Projects/projects/ProjectPane.py:844
 msgid "Commit Dialog"
 msgstr "Предај дијалог"
 
-#: Projects/projects/ModList.py:499 Projects/projects/ProjectPane.py:1288
+#: Projects/projects/ModList.py:508 Projects/projects/ProjectPane.py:1294
 msgid "Commit changes"
 msgstr "Предај измене"
 
@@ -85,15 +85,15 @@ msgstr "Упореди селектоване ревизије"
 msgid "Compare to Selected Revision"
 msgstr "Упореди са селектованом ревизијом"
 
-#: Projects/projects/ModList.py:494 Projects/projects/ProjectPane.py:1284
+#: Projects/projects/ModList.py:503 Projects/projects/ProjectPane.py:1290
 msgid "Compare to previous version"
 msgstr "Упореди са претходном ревизијом"
 
-#: Projects/projects/ProjectPane.py:1672
+#: Projects/projects/ProjectPane.py:1683
 msgid "Configure"
 msgstr "Подеси"
 
-#: Projects/projects/ProjectPane.py:1275
+#: Projects/projects/ProjectPane.py:1281
 msgid "Copy"
 msgstr "Умножи"
 
@@ -101,11 +101,11 @@ msgstr "Умножи"
 msgid "Could not retrieve file"
 msgstr "Не могу да добавим датотеку"
 
-#: Projects/projects/ProjectPane.py:1274
+#: Projects/projects/ProjectPane.py:1280
 msgid "Cut"
 msgstr "Исеци"
 
-#: Projects/projects/HistWin.py:314
+#: Projects/projects/HistWin.py:313
 msgid "Date"
 msgstr "Датум"
 
@@ -113,7 +113,7 @@ msgstr "Датум"
 msgid "Diff Program"
 msgstr "Програм за разликовање"
 
-#: Projects/projects/ProjectPane.py:1269
+#: Projects/projects/ProjectPane.py:1275
 msgid "Edit"
 msgstr "Уређивање"
 
@@ -121,11 +121,11 @@ msgstr "Уређивање"
 msgid "Enter a command to be executed on all selected files and files in selected directories."
 msgstr "Унеси команду која ће бити извршена над свим селектованим датотекама и датотекама из селектованих директоријумима"
 
-#: Projects/projects/ProjectPane.py:1389
+#: Projects/projects/ProjectPane.py:1396
 msgid "Enter command to execute on all files"
 msgstr "Унеси команду која ће бити извршена над свим датотекама"
 
-#: Projects/projects/ModList.py:335 Projects/projects/ProjectPane.py:839
+#: Projects/projects/ModList.py:344 Projects/projects/ProjectPane.py:845
 msgid "Enter your commit message:"
 msgstr "Унеси твоју поруку при предаји:"
 
@@ -133,11 +133,11 @@ msgstr "Унеси твоју поруку при предаји:"
 msgid "Environment Variables"
 msgstr "Променљиве окружења"
 
-#: Projects/projects/ProjectPane.py:1478 Projects/projects/ProjectPane.py:1486
+#: Projects/projects/ProjectPane.py:1485 Projects/projects/ProjectPane.py:1493
 msgid "Error occurred when copying/moving files"
 msgstr "Дошло је до грешке при умножавању/премештању датотека"
 
-#: Projects/projects/ProjectPane.py:1512
+#: Projects/projects/ProjectPane.py:1520
 msgid "Error occurred when removing files"
 msgstr "Дошло је до грешке при уклањању датотека"
 
@@ -145,7 +145,7 @@ msgstr "Дошло је до грешке при уклањању датотек
 msgid "Execute command on files"
 msgstr "Изврши команде над датотекама"
 
-#: Projects/projects/ProjectPane.py:1278
+#: Projects/projects/ProjectPane.py:1284
 msgid "Execute command..."
 msgstr "Извтши команду..."
 
@@ -153,12 +153,12 @@ msgstr "Извтши команду..."
 msgid "File Filters"
 msgstr "Филтери датотека"
 
-#: Projects/projects/ModList.py:276
+#: Projects/projects/ModList.py:279
 #, fuzzy
 msgid "Filename"
 msgstr "Корисничко име"
 
-#: Projects/projects/ProjectPane.py:1260
+#: Projects/projects/ProjectPane.py:1266
 msgid "Folder"
 msgstr "Директоријум"
 
@@ -166,7 +166,7 @@ msgstr "Директоријум"
 msgid "General"
 msgstr "Опште"
 
-#: Projects/projects/ProjectPane.py:166
+#: Projects/projects/ProjectPane.py:170
 msgid "HTML File"
 msgstr "HTML фајл"
 
@@ -178,15 +178,15 @@ msgstr "Информација о претходним активностима 
 msgid "Keep project tree synchronized with editor notebook"
 msgstr "Одржавај пројектно стабло синхонизовано са уређивачем"
 
-#: Projects/projects/HistWin.py:316
+#: Projects/projects/HistWin.py:315
 msgid "Log Message"
 msgstr "Лог порука"
 
-#: Projects/projects/ProjectPane.py:1289
+#: Projects/projects/ProjectPane.py:1295
 msgid "Make Patch"
 msgstr "Направи закрпу"
 
-#: Projects/projects/ProjectPane.py:1294
+#: Projects/projects/ProjectPane.py:1300
 #, fuzzy, python-format
 msgid "Move to %(trash)s"
 msgstr "Премести у "
@@ -195,19 +195,19 @@ msgstr "Премести у "
 msgid "Name"
 msgstr "Назив"
 
-#: Projects/projects/ProjectPane.py:1272
+#: Projects/projects/ProjectPane.py:1278
 msgid "New..."
 msgstr "Нови..."
 
-#: Projects/projects/ProjectPane.py:1270
+#: Projects/projects/ProjectPane.py:1276
 msgid "Open"
 msgstr "Отвори"
 
-#: Projects/projects/ProjectPane.py:1643
+#: Projects/projects/ProjectPane.py:1651
 msgid "Open Projects Sidepanel"
 msgstr "Отвори панел пројеката у бочном панелу"
 
-#: Projects/projects/ProjectPane.py:1271
+#: Projects/projects/ProjectPane.py:1277
 msgid "Open enclosing folder"
 msgstr "Отвори директоријум"
 
@@ -219,11 +219,11 @@ msgstr ""
 msgid "Password"
 msgstr "Лозинка"
 
-#: Projects/projects/ProjectPane.py:1276
+#: Projects/projects/ProjectPane.py:1282
 msgid "Paste"
 msgstr "Убаци"
 
-#: Projects/projects/ProjectPane.py:167
+#: Projects/projects/ProjectPane.py:171
 msgid "Php File"
 msgstr "PHP датотека"
 
@@ -231,7 +231,7 @@ msgstr "PHP датотека"
 msgid "Please enter a repository path.  Partial paths may also be entered."
 msgstr "Молим унесите путању до сервера. И непотпуне путање такође могу бити унете."
 
-#: Projects/projects/ProjectPane.py:1642 Projects/projects/__init__.py:52
+#: Projects/projects/ProjectPane.py:1650 Projects/projects/__init__.py:52
 msgid "Projects"
 msgstr "Пројекти"
 
@@ -239,24 +239,24 @@ msgstr "Пројекти"
 msgid "Projects Configuration"
 msgstr "Подешавања пројеката"
 
-#: Projects/projects/ProjectPane.py:168
+#: Projects/projects/ProjectPane.py:172
 msgid "Python File"
 msgstr "Python датотека"
 
-#: Projects/projects/ModList.py:122
+#: Projects/projects/ModList.py:123
 #, fuzzy
 msgid "Refresh"
 msgstr "Освежи статус"
 
-#: Projects/projects/ModList.py:491 Projects/projects/ProjectPane.py:1282
+#: Projects/projects/ModList.py:500 Projects/projects/ProjectPane.py:1288
 msgid "Refresh status"
 msgstr "Освежи статус"
 
-#: Projects/projects/ProjectPane.py:1663
+#: Projects/projects/ProjectPane.py:1676
 msgid "Remove Project"
 msgstr "Уклони пројекат"
 
-#: Projects/projects/ProjectPane.py:1254
+#: Projects/projects/ProjectPane.py:1260
 msgid "Remove from repository"
 msgstr "Уклони са сервера"
 
@@ -264,7 +264,7 @@ msgstr "Уклони са сервера"
 msgid "Remove repository"
 msgstr "Уклони сервер"
 
-#: Projects/projects/ModList.py:110
+#: Projects/projects/ModList.py:111
 #, fuzzy
 msgid "Repository"
 msgstr "Уклони сервер"
@@ -277,16 +277,16 @@ msgstr "Подешавања сервера"
 msgid "Retrieving File History"
 msgstr "Добави информације о претходим активостима са датотеком"
 
-#: Projects/projects/HistWin.py:313
+#: Projects/projects/HistWin.py:312
 msgid "Rev #"
 msgstr "Рев #"
 
-#: Projects/projects/ModList.py:140
+#: Projects/projects/ModList.py:141
 #, fuzzy
 msgid "Revert"
 msgstr "Уклони пројекат"
 
-#: Projects/projects/ModList.py:502 Projects/projects/ProjectPane.py:1290
+#: Projects/projects/ModList.py:511 Projects/projects/ProjectPane.py:1296
 msgid "Revert to repository version"
 msgstr "Поврати на верзију са сервера"
 
@@ -294,7 +294,7 @@ msgstr "Поврати на верзију са сервера"
 msgid "Revision History"
 msgstr "Историјат издања"
 
-#: Projects/projects/HistWin.py:420
+#: Projects/projects/HistWin.py:419
 msgid "Search Log"
 msgstr "Лог претраживања"
 
@@ -306,11 +306,11 @@ msgstr "Изабери diff програм"
 msgid "Select the repository path to remove"
 msgstr "Селектуј путању до сервера коју желиш да уклониш"
 
-#: Projects/projects/ProjectPane.py:890
+#: Projects/projects/ProjectPane.py:896
 msgid "Selected files are from multiple repositories"
 msgstr "Селектоване датотеке су са више сервера"
 
-#: Projects/projects/ModList.py:497 Projects/projects/ProjectPane.py:1286
+#: Projects/projects/ModList.py:506 Projects/projects/ProjectPane.py:1292
 msgid "Show revision history"
 msgstr "Прикажи историју измена"
 
@@ -326,15 +326,15 @@ msgstr ""
 "Размаком одвојена листа датотека које не желите да буду приказане\n"
 "Коришћење џокера (*) је дозвољено."
 
-#: Projects/projects/ModList.py:274
+#: Projects/projects/ModList.py:277
 msgid "Status"
 msgstr ""
 
-#: Projects/projects/ProjectPane.py:164
+#: Projects/projects/ProjectPane.py:168
 msgid "Text File"
 msgstr "Текстуална датотека"
 
-#: Projects/projects/ProjectPane.py:1387
+#: Projects/projects/ProjectPane.py:1394
 msgid ""
 "The following command will be executed on all selected\n"
 "files and files contained in selected directories."
@@ -350,21 +350,21 @@ msgstr "Историја измена за одабрану датотеку н�
 msgid "The requested file could not be retrieved from the source control system."
 msgstr "Захтевана датотека не може да будде добављена са сервера."
 
-#: Projects/projects/ProjectPane.py:1484
+#: Projects/projects/ProjectPane.py:1491
 #, fuzzy, python-format
 msgid "The system returned the following message when attempting to move/copy %(filename)s: %(errmsg)s."
 msgstr "Сервер је вратио следећу поруку при покушају копирања/премештања %s: %s."
 
-#: Projects/projects/ProjectPane.py:1475
+#: Projects/projects/ProjectPane.py:1482
 #, fuzzy, python-format
 msgid "The system returned the following message when attempting to move/copy %(filename)s: %(errmsg)s. Do you wish to continue?"
 msgstr "Сервер је вратио следећу поруку при покушају копирања/премештања %s: %s. Да ли желите да наставите?"
 
-#: Projects/projects/ProjectPane.py:1331
+#: Projects/projects/ProjectPane.py:1337
 msgid "Untitled Folder"
 msgstr ""
 
-#: Projects/projects/ModList.py:128 Projects/projects/ProjectPane.py:1283
+#: Projects/projects/ModList.py:129 Projects/projects/ProjectPane.py:1289
 msgid "Update"
 msgstr "Освежи"
 
@@ -376,6 +376,6 @@ msgstr "Корисничко име"
 msgid "Value"
 msgstr "Вредност"
 
-#: Projects/projects/ProjectPane.py:889
+#: Projects/projects/ProjectPane.py:895
 msgid "You can not execute source control commands across multiple repositories."
 msgstr "Нисте у могућности да извршите команде на бише сервера."

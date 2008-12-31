@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: editra\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2008-11-18 20:35-0600\n"
+"POT-Creation-Date: 2008-12-30 19:28-0600\n"
 "PO-Revision-Date: 2008-11-18 10:37+0000\n"
 "Last-Translator: janis.sl <Unknown>\n"
 "Language-Team: Latvian <lv@li.org>\n"
@@ -25,11 +25,11 @@ msgstr "*NOSAUKUMS*"
 msgid "*VALUE*"
 msgstr "*VĒRTĪBA*"
 
-#: Projects/projects/ProjectPane.py:1511
+#: Projects/projects/ProjectPane.py:1519
 msgid ". Do you wish to continue?"
 msgstr ". Vai vēlaties turpināt?"
 
-#: Projects/projects/ProjectPane.py:1659
+#: Projects/projects/ProjectPane.py:1669
 msgid "Add Project"
 msgstr "Pievienot projektu"
 
@@ -37,15 +37,15 @@ msgstr "Pievienot projektu"
 msgid "Add a New Repository Path"
 msgstr "Pievienot jaunu repozitorija ceļu"
 
-#: Projects/projects/ProjectPane.py:1256
+#: Projects/projects/ProjectPane.py:1262
 msgid "Add to repository"
 msgstr "Pievienot repozitorijam"
 
-#: Projects/projects/ProjectPane.py:1510
+#: Projects/projects/ProjectPane.py:1518
 msgid "An error occurred when attempting to remove "
 msgstr "Radās kļūda, mēģinot noņemt "
 
-#: Projects/projects/HistWin.py:315
+#: Projects/projects/HistWin.py:314
 msgid "Author"
 msgstr "Autors"
 
@@ -53,23 +53,23 @@ msgstr "Autors"
 msgid "Built-in"
 msgstr "Iebūvētā"
 
-#: Projects/projects/ProjectPane.py:165
+#: Projects/projects/ProjectPane.py:169
 msgid "C File"
 msgstr "C fails"
 
-#: Projects/projects/ProjectPane.py:1749
+#: Projects/projects/ProjectPane.py:1721
 msgid "Choose a Project Directory"
 msgstr "Izvēlieties projekta direktoriju"
 
-#: Projects/projects/ModList.py:134 Projects/projects/ProjCmnDlg.py:61
+#: Projects/projects/ModList.py:135 Projects/projects/ProjCmnDlg.py:61
 msgid "Commit"
 msgstr "Iesniegt"
 
-#: Projects/projects/ModList.py:334 Projects/projects/ProjectPane.py:838
+#: Projects/projects/ModList.py:343 Projects/projects/ProjectPane.py:844
 msgid "Commit Dialog"
 msgstr "Iesniegšanas dialogs"
 
-#: Projects/projects/ModList.py:499 Projects/projects/ProjectPane.py:1288
+#: Projects/projects/ModList.py:508 Projects/projects/ProjectPane.py:1294
 msgid "Commit changes"
 msgstr "Iesniegt izmaiņas"
 
@@ -85,15 +85,15 @@ msgstr "Salīdzināt atlasītos pārskatus"
 msgid "Compare to Selected Revision"
 msgstr "Salidzināt ar atlasīto pārskatu"
 
-#: Projects/projects/ModList.py:494 Projects/projects/ProjectPane.py:1284
+#: Projects/projects/ModList.py:503 Projects/projects/ProjectPane.py:1290
 msgid "Compare to previous version"
 msgstr "Salīdzināt ar iepriekšējo versiju"
 
-#: Projects/projects/ProjectPane.py:1672
+#: Projects/projects/ProjectPane.py:1683
 msgid "Configure"
 msgstr "Konfigurēt"
 
-#: Projects/projects/ProjectPane.py:1275
+#: Projects/projects/ProjectPane.py:1281
 msgid "Copy"
 msgstr "Kopēt"
 
@@ -101,11 +101,11 @@ msgstr "Kopēt"
 msgid "Could not retrieve file"
 msgstr "Nevar iegūt failu"
 
-#: Projects/projects/ProjectPane.py:1274
+#: Projects/projects/ProjectPane.py:1280
 msgid "Cut"
 msgstr "Izgriezt"
 
-#: Projects/projects/HistWin.py:314
+#: Projects/projects/HistWin.py:313
 msgid "Date"
 msgstr "Datums"
 
@@ -113,7 +113,7 @@ msgstr "Datums"
 msgid "Diff Program"
 msgstr "Diff programma"
 
-#: Projects/projects/ProjectPane.py:1269
+#: Projects/projects/ProjectPane.py:1275
 msgid "Edit"
 msgstr "Rediģēt"
 
@@ -121,11 +121,11 @@ msgstr "Rediģēt"
 msgid "Enter a command to be executed on all selected files and files in selected directories."
 msgstr "Ievadiet komandu, kas jāizpilda attiecībā uz visiem atlasītajiem failiem un visiem atlasīto direktoriju failiem."
 
-#: Projects/projects/ProjectPane.py:1389
+#: Projects/projects/ProjectPane.py:1396
 msgid "Enter command to execute on all files"
 msgstr "Ievadiet komandu, kas jāizpilda attiecībā uz visiem failiem"
 
-#: Projects/projects/ModList.py:335 Projects/projects/ProjectPane.py:839
+#: Projects/projects/ModList.py:344 Projects/projects/ProjectPane.py:845
 msgid "Enter your commit message:"
 msgstr "Ievadiet iesniegšanas ziņojumu:"
 
@@ -133,11 +133,11 @@ msgstr "Ievadiet iesniegšanas ziņojumu:"
 msgid "Environment Variables"
 msgstr "Vides mainīgie"
 
-#: Projects/projects/ProjectPane.py:1478 Projects/projects/ProjectPane.py:1486
+#: Projects/projects/ProjectPane.py:1485 Projects/projects/ProjectPane.py:1493
 msgid "Error occurred when copying/moving files"
 msgstr "Failu kopēšanas/pārvietošanas laikā radās kļūda"
 
-#: Projects/projects/ProjectPane.py:1512
+#: Projects/projects/ProjectPane.py:1520
 msgid "Error occurred when removing files"
 msgstr "Failu pārvietošanas laikā radās kļūda"
 
@@ -145,7 +145,7 @@ msgstr "Failu pārvietošanas laikā radās kļūda"
 msgid "Execute command on files"
 msgstr "Izpildīt komandu attiecībā uz failiem"
 
-#: Projects/projects/ProjectPane.py:1278
+#: Projects/projects/ProjectPane.py:1284
 msgid "Execute command..."
 msgstr "Komandas izpilde..."
 
@@ -153,12 +153,12 @@ msgstr "Komandas izpilde..."
 msgid "File Filters"
 msgstr "Failu filtri"
 
-#: Projects/projects/ModList.py:276
+#: Projects/projects/ModList.py:279
 #, fuzzy
 msgid "Filename"
 msgstr "Lietotājvārds"
 
-#: Projects/projects/ProjectPane.py:1260
+#: Projects/projects/ProjectPane.py:1266
 msgid "Folder"
 msgstr "Mape"
 
@@ -166,7 +166,7 @@ msgstr "Mape"
 msgid "General"
 msgstr "Vispārīgi"
 
-#: Projects/projects/ProjectPane.py:166
+#: Projects/projects/ProjectPane.py:170
 msgid "HTML File"
 msgstr "HTML fails"
 
@@ -178,15 +178,15 @@ msgstr "Nevar iegūt informāciju par vēsturi"
 msgid "Keep project tree synchronized with editor notebook"
 msgstr "Uzturēt projektu koku sinhronizēti ar redaktora piezīmju grāmatiņu"
 
-#: Projects/projects/HistWin.py:316
+#: Projects/projects/HistWin.py:315
 msgid "Log Message"
 msgstr "Žurnāla ziņojums"
 
-#: Projects/projects/ProjectPane.py:1289
+#: Projects/projects/ProjectPane.py:1295
 msgid "Make Patch"
 msgstr "Izveidot ielāpu"
 
-#: Projects/projects/ProjectPane.py:1294
+#: Projects/projects/ProjectPane.py:1300
 #, fuzzy, python-format
 msgid "Move to %(trash)s"
 msgstr "Pārvietot uz "
@@ -195,19 +195,19 @@ msgstr "Pārvietot uz "
 msgid "Name"
 msgstr "Nosaukums"
 
-#: Projects/projects/ProjectPane.py:1272
+#: Projects/projects/ProjectPane.py:1278
 msgid "New..."
 msgstr "Jauns..."
 
-#: Projects/projects/ProjectPane.py:1270
+#: Projects/projects/ProjectPane.py:1276
 msgid "Open"
 msgstr "Atvērt"
 
-#: Projects/projects/ProjectPane.py:1643
+#: Projects/projects/ProjectPane.py:1651
 msgid "Open Projects Sidepanel"
 msgstr "Atvērt projektu sānu paneli"
 
-#: Projects/projects/ProjectPane.py:1271
+#: Projects/projects/ProjectPane.py:1277
 msgid "Open enclosing folder"
 msgstr "Atvērt ietverošo mapi"
 
@@ -219,11 +219,11 @@ msgstr ""
 msgid "Password"
 msgstr "Parole"
 
-#: Projects/projects/ProjectPane.py:1276
+#: Projects/projects/ProjectPane.py:1282
 msgid "Paste"
 msgstr "Ielīmēt"
 
-#: Projects/projects/ProjectPane.py:167
+#: Projects/projects/ProjectPane.py:171
 msgid "Php File"
 msgstr "PHP fails"
 
@@ -231,7 +231,7 @@ msgstr "PHP fails"
 msgid "Please enter a repository path.  Partial paths may also be entered."
 msgstr "Lūdzu, ievadiet repozitorija ceļu. Var ievadīt arī nepilnus ceļus."
 
-#: Projects/projects/ProjectPane.py:1642 Projects/projects/__init__.py:52
+#: Projects/projects/ProjectPane.py:1650 Projects/projects/__init__.py:52
 msgid "Projects"
 msgstr "Projekti"
 
@@ -239,24 +239,24 @@ msgstr "Projekti"
 msgid "Projects Configuration"
 msgstr "Projektu konfigurācija"
 
-#: Projects/projects/ProjectPane.py:168
+#: Projects/projects/ProjectPane.py:172
 msgid "Python File"
 msgstr "Python fails"
 
-#: Projects/projects/ModList.py:122
+#: Projects/projects/ModList.py:123
 #, fuzzy
 msgid "Refresh"
 msgstr "Atsvaidzināt statusu"
 
-#: Projects/projects/ModList.py:491 Projects/projects/ProjectPane.py:1282
+#: Projects/projects/ModList.py:500 Projects/projects/ProjectPane.py:1288
 msgid "Refresh status"
 msgstr "Atsvaidzināt statusu"
 
-#: Projects/projects/ProjectPane.py:1663
+#: Projects/projects/ProjectPane.py:1676
 msgid "Remove Project"
 msgstr "Noņemt projektu"
 
-#: Projects/projects/ProjectPane.py:1254
+#: Projects/projects/ProjectPane.py:1260
 msgid "Remove from repository"
 msgstr "Noņemt no repozitorija"
 
@@ -264,7 +264,7 @@ msgstr "Noņemt no repozitorija"
 msgid "Remove repository"
 msgstr "Noņemt repozitoriju"
 
-#: Projects/projects/ModList.py:110
+#: Projects/projects/ModList.py:111
 #, fuzzy
 msgid "Repository"
 msgstr "Noņemt repozitoriju"
@@ -277,16 +277,16 @@ msgstr "Repozitorija konfigurācija"
 msgid "Retrieving File History"
 msgstr "Faila vēstures iegūšana"
 
-#: Projects/projects/HistWin.py:313
+#: Projects/projects/HistWin.py:312
 msgid "Rev #"
 msgstr "Pārsk. nr."
 
-#: Projects/projects/ModList.py:140
+#: Projects/projects/ModList.py:141
 #, fuzzy
 msgid "Revert"
 msgstr "Noņemt projektu"
 
-#: Projects/projects/ModList.py:502 Projects/projects/ProjectPane.py:1290
+#: Projects/projects/ModList.py:511 Projects/projects/ProjectPane.py:1296
 msgid "Revert to repository version"
 msgstr "Atgriezties pie repozitorija versijas"
 
@@ -294,7 +294,7 @@ msgstr "Atgriezties pie repozitorija versijas"
 msgid "Revision History"
 msgstr "Pārskatīšanas vēsture"
 
-#: Projects/projects/HistWin.py:420
+#: Projects/projects/HistWin.py:419
 msgid "Search Log"
 msgstr "Meklēšanas žurnāls"
 
@@ -306,11 +306,11 @@ msgstr "Izvēlieties Diff programmu"
 msgid "Select the repository path to remove"
 msgstr "Atlasiet noņemšanai paredzēto repozitorija ceļu"
 
-#: Projects/projects/ProjectPane.py:890
+#: Projects/projects/ProjectPane.py:896
 msgid "Selected files are from multiple repositories"
 msgstr "Atlasītie faili ir iekļauti vairākos repozitorijos"
 
-#: Projects/projects/ModList.py:497 Projects/projects/ProjectPane.py:1286
+#: Projects/projects/ModList.py:506 Projects/projects/ProjectPane.py:1292
 msgid "Show revision history"
 msgstr "Rādīt pārskatīšanas vēsturi"
 
@@ -326,15 +326,15 @@ msgstr ""
 "Ar atstarpēm atdalītu failu paraugu saraksts, kas jāizslēdz\n"
 "no skata. Ir atļauta aizstājējzīmju (*) lietošana."
 
-#: Projects/projects/ModList.py:274
+#: Projects/projects/ModList.py:277
 msgid "Status"
 msgstr ""
 
-#: Projects/projects/ProjectPane.py:164
+#: Projects/projects/ProjectPane.py:168
 msgid "Text File"
 msgstr "Teksta fails"
 
-#: Projects/projects/ProjectPane.py:1387
+#: Projects/projects/ProjectPane.py:1394
 msgid ""
 "The following command will be executed on all selected\n"
 "files and files contained in selected directories."
@@ -350,21 +350,21 @@ msgstr "Nevar iegūt informāciju par pieprasītā faila vēsturi. Lūdzu, pārb
 msgid "The requested file could not be retrieved from the source control system."
 msgstr "Nevar iegūt pieprasīto failu no avota vadības sistēmas."
 
-#: Projects/projects/ProjectPane.py:1484
+#: Projects/projects/ProjectPane.py:1491
 #, fuzzy, python-format
 msgid "The system returned the following message when attempting to move/copy %(filename)s: %(errmsg)s."
 msgstr "%s pārvietošanas/kopēšanas mēģinājuma laikā tika saņemts šāds sistēmas ziņojums: %s."
 
-#: Projects/projects/ProjectPane.py:1475
+#: Projects/projects/ProjectPane.py:1482
 #, fuzzy, python-format
 msgid "The system returned the following message when attempting to move/copy %(filename)s: %(errmsg)s. Do you wish to continue?"
 msgstr "%s pārvietošanas/kopēšanas mēģinājuma laikā tika saņemts šāds sistēmas ziņojums: %s. Vai vēlaties turpināt?"
 
-#: Projects/projects/ProjectPane.py:1331
+#: Projects/projects/ProjectPane.py:1337
 msgid "Untitled Folder"
 msgstr ""
 
-#: Projects/projects/ModList.py:128 Projects/projects/ProjectPane.py:1283
+#: Projects/projects/ModList.py:129 Projects/projects/ProjectPane.py:1289
 msgid "Update"
 msgstr "Atjaunināt"
 
@@ -376,6 +376,6 @@ msgstr "Lietotājvārds"
 msgid "Value"
 msgstr "Vērtība"
 
-#: Projects/projects/ProjectPane.py:889
+#: Projects/projects/ProjectPane.py:895
 msgid "You can not execute source control commands across multiple repositories."
 msgstr "Avota vadības komandas nevar izpildīt attiecībā uz vairākiem repozitorijiem."

@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: editra\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2008-11-18 20:35-0600\n"
+"POT-Creation-Date: 2008-12-30 19:28-0600\n"
 "PO-Revision-Date: 2008-10-08 12:45+0000\n"
 "Last-Translator: snowman <Unknown>\n"
 "Language-Team: Korean <ko@li.org>\n"
@@ -25,11 +25,11 @@ msgstr "*이름*"
 msgid "*VALUE*"
 msgstr "*값*"
 
-#: Projects/projects/ProjectPane.py:1511
+#: Projects/projects/ProjectPane.py:1519
 msgid ". Do you wish to continue?"
 msgstr "계속 하시겠습니까?"
 
-#: Projects/projects/ProjectPane.py:1659
+#: Projects/projects/ProjectPane.py:1669
 msgid "Add Project"
 msgstr "프로젝트 추가"
 
@@ -37,15 +37,15 @@ msgstr "프로젝트 추가"
 msgid "Add a New Repository Path"
 msgstr "새로운 리포지토리 경로 추가"
 
-#: Projects/projects/ProjectPane.py:1256
+#: Projects/projects/ProjectPane.py:1262
 msgid "Add to repository"
 msgstr "리포지토리에 추가하기"
 
-#: Projects/projects/ProjectPane.py:1510
+#: Projects/projects/ProjectPane.py:1518
 msgid "An error occurred when attempting to remove "
 msgstr "삭제중 오류 발생 "
 
-#: Projects/projects/HistWin.py:315
+#: Projects/projects/HistWin.py:314
 msgid "Author"
 msgstr "작성자"
 
@@ -53,23 +53,23 @@ msgstr "작성자"
 msgid "Built-in"
 msgstr "내장"
 
-#: Projects/projects/ProjectPane.py:165
+#: Projects/projects/ProjectPane.py:169
 msgid "C File"
 msgstr "C 파일"
 
-#: Projects/projects/ProjectPane.py:1749
+#: Projects/projects/ProjectPane.py:1721
 msgid "Choose a Project Directory"
 msgstr "프로젝트 디렉토리 선택"
 
-#: Projects/projects/ModList.py:134 Projects/projects/ProjCmnDlg.py:61
+#: Projects/projects/ModList.py:135 Projects/projects/ProjCmnDlg.py:61
 msgid "Commit"
 msgstr "주석"
 
-#: Projects/projects/ModList.py:334 Projects/projects/ProjectPane.py:838
+#: Projects/projects/ModList.py:343 Projects/projects/ProjectPane.py:844
 msgid "Commit Dialog"
 msgstr "대화 확인"
 
-#: Projects/projects/ModList.py:499 Projects/projects/ProjectPane.py:1288
+#: Projects/projects/ModList.py:508 Projects/projects/ProjectPane.py:1294
 msgid "Commit changes"
 msgstr "변경 확인"
 
@@ -85,15 +85,15 @@ msgstr "선택한 개정판 비교"
 msgid "Compare to Selected Revision"
 msgstr "선택한 개정판과 비교"
 
-#: Projects/projects/ModList.py:494 Projects/projects/ProjectPane.py:1284
+#: Projects/projects/ModList.py:503 Projects/projects/ProjectPane.py:1290
 msgid "Compare to previous version"
 msgstr "이전 버전과 비교"
 
-#: Projects/projects/ProjectPane.py:1672
+#: Projects/projects/ProjectPane.py:1683
 msgid "Configure"
 msgstr "설정"
 
-#: Projects/projects/ProjectPane.py:1275
+#: Projects/projects/ProjectPane.py:1281
 msgid "Copy"
 msgstr "복사"
 
@@ -101,11 +101,11 @@ msgstr "복사"
 msgid "Could not retrieve file"
 msgstr "파일을 조회할 수 없습니다"
 
-#: Projects/projects/ProjectPane.py:1274
+#: Projects/projects/ProjectPane.py:1280
 msgid "Cut"
 msgstr "잘라내기"
 
-#: Projects/projects/HistWin.py:314
+#: Projects/projects/HistWin.py:313
 msgid "Date"
 msgstr "날짜"
 
@@ -113,7 +113,7 @@ msgstr "날짜"
 msgid "Diff Program"
 msgstr "Diff 프로그램"
 
-#: Projects/projects/ProjectPane.py:1269
+#: Projects/projects/ProjectPane.py:1275
 msgid "Edit"
 msgstr "편집"
 
@@ -121,11 +121,11 @@ msgstr "편집"
 msgid "Enter a command to be executed on all selected files and files in selected directories."
 msgstr "선택한 모든 파일 및 디렉토리 안에 있는 파일에 대한 실행명령을 입력하시오"
 
-#: Projects/projects/ProjectPane.py:1389
+#: Projects/projects/ProjectPane.py:1396
 msgid "Enter command to execute on all files"
 msgstr "모든 파일에 대한 실행명령을 입력하시오"
 
-#: Projects/projects/ModList.py:335 Projects/projects/ProjectPane.py:839
+#: Projects/projects/ModList.py:344 Projects/projects/ProjectPane.py:845
 msgid "Enter your commit message:"
 msgstr "확인 메시지를 입력하시오"
 
@@ -133,11 +133,11 @@ msgstr "확인 메시지를 입력하시오"
 msgid "Environment Variables"
 msgstr "환경 변수"
 
-#: Projects/projects/ProjectPane.py:1478 Projects/projects/ProjectPane.py:1486
+#: Projects/projects/ProjectPane.py:1485 Projects/projects/ProjectPane.py:1493
 msgid "Error occurred when copying/moving files"
 msgstr "파일 복사/이동에 오류 발생"
 
-#: Projects/projects/ProjectPane.py:1512
+#: Projects/projects/ProjectPane.py:1520
 msgid "Error occurred when removing files"
 msgstr "파일 삭제중 오류발생"
 
@@ -145,7 +145,7 @@ msgstr "파일 삭제중 오류발생"
 msgid "Execute command on files"
 msgstr "파일 실행명령"
 
-#: Projects/projects/ProjectPane.py:1278
+#: Projects/projects/ProjectPane.py:1284
 msgid "Execute command..."
 msgstr "실행 명령..."
 
@@ -153,12 +153,12 @@ msgstr "실행 명령..."
 msgid "File Filters"
 msgstr "파일 필터"
 
-#: Projects/projects/ModList.py:276
+#: Projects/projects/ModList.py:279
 #, fuzzy
 msgid "Filename"
 msgstr "사용자 이름"
 
-#: Projects/projects/ProjectPane.py:1260
+#: Projects/projects/ProjectPane.py:1266
 msgid "Folder"
 msgstr "폴더"
 
@@ -166,7 +166,7 @@ msgstr "폴더"
 msgid "General"
 msgstr "일반"
 
-#: Projects/projects/ProjectPane.py:166
+#: Projects/projects/ProjectPane.py:170
 msgid "HTML File"
 msgstr "HTML 파일"
 
@@ -178,15 +178,15 @@ msgstr "이력 정보를 조회할 수 없습니다"
 msgid "Keep project tree synchronized with editor notebook"
 msgstr "에디터 노트북과 동기화된 프로젝트 트리 유지"
 
-#: Projects/projects/HistWin.py:316
+#: Projects/projects/HistWin.py:315
 msgid "Log Message"
 msgstr "로그 메시지"
 
-#: Projects/projects/ProjectPane.py:1289
+#: Projects/projects/ProjectPane.py:1295
 msgid "Make Patch"
 msgstr "패치 작성"
 
-#: Projects/projects/ProjectPane.py:1294
+#: Projects/projects/ProjectPane.py:1300
 #, fuzzy, python-format
 msgid "Move to %(trash)s"
 msgstr "로 이동 "
@@ -195,19 +195,19 @@ msgstr "로 이동 "
 msgid "Name"
 msgstr "이름:"
 
-#: Projects/projects/ProjectPane.py:1272
+#: Projects/projects/ProjectPane.py:1278
 msgid "New..."
 msgstr "새로 만들기..."
 
-#: Projects/projects/ProjectPane.py:1270
+#: Projects/projects/ProjectPane.py:1276
 msgid "Open"
 msgstr "열기"
 
-#: Projects/projects/ProjectPane.py:1643
+#: Projects/projects/ProjectPane.py:1651
 msgid "Open Projects Sidepanel"
 msgstr "프로젝트 사이트패널 열기"
 
-#: Projects/projects/ProjectPane.py:1271
+#: Projects/projects/ProjectPane.py:1277
 msgid "Open enclosing folder"
 msgstr "닫혀있는 폴더 열기"
 
@@ -219,11 +219,11 @@ msgstr ""
 msgid "Password"
 msgstr "암호"
 
-#: Projects/projects/ProjectPane.py:1276
+#: Projects/projects/ProjectPane.py:1282
 msgid "Paste"
 msgstr "붙여넣기"
 
-#: Projects/projects/ProjectPane.py:167
+#: Projects/projects/ProjectPane.py:171
 msgid "Php File"
 msgstr "Php 파일"
 
@@ -231,7 +231,7 @@ msgstr "Php 파일"
 msgid "Please enter a repository path.  Partial paths may also be entered."
 msgstr "리포지토리 경로를 입력하시오. 부분 경로도 입력가능."
 
-#: Projects/projects/ProjectPane.py:1642 Projects/projects/__init__.py:52
+#: Projects/projects/ProjectPane.py:1650 Projects/projects/__init__.py:52
 msgid "Projects"
 msgstr "프로젝트"
 
@@ -239,23 +239,23 @@ msgstr "프로젝트"
 msgid "Projects Configuration"
 msgstr "프로젝트 설정"
 
-#: Projects/projects/ProjectPane.py:168
+#: Projects/projects/ProjectPane.py:172
 msgid "Python File"
 msgstr "프로젝트 파일"
 
-#: Projects/projects/ModList.py:122
+#: Projects/projects/ModList.py:123
 msgid "Refresh"
 msgstr ""
 
-#: Projects/projects/ModList.py:491 Projects/projects/ProjectPane.py:1282
+#: Projects/projects/ModList.py:500 Projects/projects/ProjectPane.py:1288
 msgid "Refresh status"
 msgstr ""
 
-#: Projects/projects/ProjectPane.py:1663
+#: Projects/projects/ProjectPane.py:1676
 msgid "Remove Project"
 msgstr "프로젝트 삭제"
 
-#: Projects/projects/ProjectPane.py:1254
+#: Projects/projects/ProjectPane.py:1260
 msgid "Remove from repository"
 msgstr "리포지토리에서 삭제"
 
@@ -263,7 +263,7 @@ msgstr "리포지토리에서 삭제"
 msgid "Remove repository"
 msgstr "리포지토리 삭제"
 
-#: Projects/projects/ModList.py:110
+#: Projects/projects/ModList.py:111
 #, fuzzy
 msgid "Repository"
 msgstr "리포지토리 삭제"
@@ -276,16 +276,16 @@ msgstr "리포지토리 구성"
 msgid "Retrieving File History"
 msgstr "파일 이력 조회"
 
-#: Projects/projects/HistWin.py:313
+#: Projects/projects/HistWin.py:312
 msgid "Rev #"
 msgstr "개정 #"
 
-#: Projects/projects/ModList.py:140
+#: Projects/projects/ModList.py:141
 #, fuzzy
 msgid "Revert"
 msgstr "프로젝트 삭제"
 
-#: Projects/projects/ModList.py:502 Projects/projects/ProjectPane.py:1290
+#: Projects/projects/ModList.py:511 Projects/projects/ProjectPane.py:1296
 msgid "Revert to repository version"
 msgstr "리포지토리 버전 뒤로하기"
 
@@ -293,7 +293,7 @@ msgstr "리포지토리 버전 뒤로하기"
 msgid "Revision History"
 msgstr "개정 이력"
 
-#: Projects/projects/HistWin.py:420
+#: Projects/projects/HistWin.py:419
 msgid "Search Log"
 msgstr "검색 로그"
 
@@ -305,11 +305,11 @@ msgstr "diff 프로그램 선택"
 msgid "Select the repository path to remove"
 msgstr "제거할 리포지토리 경로 선택"
 
-#: Projects/projects/ProjectPane.py:890
+#: Projects/projects/ProjectPane.py:896
 msgid "Selected files are from multiple repositories"
 msgstr "여러 리포지토리에서 선택된 파일"
 
-#: Projects/projects/ModList.py:497 Projects/projects/ProjectPane.py:1286
+#: Projects/projects/ModList.py:506 Projects/projects/ProjectPane.py:1292
 msgid "Show revision history"
 msgstr "개정 이력 보기"
 
@@ -323,15 +323,15 @@ msgid ""
 "The use of wildcards (*) are permitted."
 msgstr ""
 
-#: Projects/projects/ModList.py:274
+#: Projects/projects/ModList.py:277
 msgid "Status"
 msgstr ""
 
-#: Projects/projects/ProjectPane.py:164
+#: Projects/projects/ProjectPane.py:168
 msgid "Text File"
 msgstr "텍스트 파일"
 
-#: Projects/projects/ProjectPane.py:1387
+#: Projects/projects/ProjectPane.py:1394
 msgid ""
 "The following command will be executed on all selected\n"
 "files and files contained in selected directories."
@@ -345,21 +345,21 @@ msgstr "요청한 파일의 이력정보를 조회할 수 없습니다. 네트�
 msgid "The requested file could not be retrieved from the source control system."
 msgstr "요청한 파일을 소스제어 시스템에서 조회할 수 없습니다."
 
-#: Projects/projects/ProjectPane.py:1484
+#: Projects/projects/ProjectPane.py:1491
 #, fuzzy, python-format
 msgid "The system returned the following message when attempting to move/copy %(filename)s: %(errmsg)s."
 msgstr "%s 이동/복사시도에 대해 시스템에서 다음 메시지가 반환되었습니다. %s."
 
-#: Projects/projects/ProjectPane.py:1475
+#: Projects/projects/ProjectPane.py:1482
 #, fuzzy, python-format
 msgid "The system returned the following message when attempting to move/copy %(filename)s: %(errmsg)s. Do you wish to continue?"
 msgstr "%s 이동/복사시도에 대해 시스템에서 다음 메시지가 반환되었습니다. %s. 계속하시겠습니다."
 
-#: Projects/projects/ProjectPane.py:1331
+#: Projects/projects/ProjectPane.py:1337
 msgid "Untitled Folder"
 msgstr ""
 
-#: Projects/projects/ModList.py:128 Projects/projects/ProjectPane.py:1283
+#: Projects/projects/ModList.py:129 Projects/projects/ProjectPane.py:1289
 msgid "Update"
 msgstr "갱신"
 
@@ -371,6 +371,6 @@ msgstr "사용자 이름"
 msgid "Value"
 msgstr "값"
 
-#: Projects/projects/ProjectPane.py:889
+#: Projects/projects/ProjectPane.py:895
 msgid "You can not execute source control commands across multiple repositories."
 msgstr "여러 리포지토리에 걸친 소스제어명령은 실행할 수 없습니다."
