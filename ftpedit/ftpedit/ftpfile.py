@@ -42,6 +42,7 @@ class FtpFile(ed_txt.EdFile):
 
         # Attributes
         self._client = ftpclient.FtpClient(None)
+        self._ftp = True
         self.ftppath = ftppath
         self._site = sitedata   # dict(url, port, user, pword, path, enc)
 
@@ -50,7 +51,10 @@ class FtpFile(ed_txt.EdFile):
 
     def __del__(self):
         """Cleanup the temp file"""
-        os.remove(self.GetPath())
+        if self._ftp:
+            # Only remove if its the temp file
+            os.remove(self.GetPath())
+
         if self._client.IsActive():
             self._client.Disconnect()
 
@@ -85,6 +89,18 @@ class FtpFile(ed_txt.EdFile):
         """
         return self._site
 
+    def SetFilePath(self, path):
+        """Change the file path. Changing the path on an ftp file
+        will disassociate it with the ftp site turning it into a regular
+        file.
+        @param path: string
+
+        """
+        cpath = self.GetPath()
+        if path != cpath:
+            super(FtpFile, self).SetFilePath(path)
+            self._ftp = False
+
     def Write(self, value):
         """Override EdFile.Write to trigger an upload
         @param value: string
@@ -94,9 +110,10 @@ class FtpFile(ed_txt.EdFile):
         super(FtpFile, self).Write(value)
 
         # Upload the file to the server
-        t = ftpclient.FtpThread(None, self.DoFtpUpload,
-                                ftpclient.EVT_FTP_UPLOAD)
-        t.start()
+        if self._ftp:
+            t = ftpclient.FtpThread(None, self.DoFtpUpload,
+                                    ftpclient.EVT_FTP_UPLOAD)
+            t.start()
 
 #-----------------------------------------------------------------------------#
 
