@@ -245,8 +245,8 @@ class RepoModBox(ctrlbox.ControlBox):
 #--------------------------------------------------------------------------#
 
 class RepoModList(wx.ListCtrl,
-                  elistmix.ListRowHighlighter,
-                  listmix.ListCtrlAutoWidthMixin):
+                   elistmix.ListRowHighlighter,
+                   listmix.ListCtrlAutoWidthMixin):
     """List for managing and listing files under SourceControl.
     Specifically it displays the summary of modified files under a given
     repository.
@@ -257,7 +257,7 @@ class RepoModList(wx.ListCtrl,
     def __init__(self, parent, id=wx.ID_ANY):
         """Create the list control"""
         wx.ListCtrl.__init__(self, parent, id,
-                             style=wx.LC_REPORT | wx.LC_VRULES | wx.BORDER)
+                             style=wx.LC_REPORT|wx.LC_VRULES|wx.BORDER)
         listmix.ListCtrlAutoWidthMixin.__init__(self)
         elistmix.ListRowHighlighter.__init__(self)
 
@@ -553,12 +553,20 @@ class RepoModList(wx.ListCtrl,
         # Clear the display
         self.DeleteAllItems()
 
-        # Update the display
+        # Get the interesting items from the update dict
+        modlst = list()
         for fname, stat in status.iteritems():
             fstatus = stat.get('status', 'uptodate')
             if fstatus != 'uptodate':
-                self.AddFile(STATUS.get(fstatus, u'U'),
-                             os.path.join(path, fname))
+                modlst.append((STATUS.get(fstatus, u'U'),
+                               os.path.join(path, fname)))
+
+        # Sort the list
+        modlst.sort(key=lambda x: x[1])
+
+        # Update the display
+        for stat, fname in modlst:
+            self.AddFile(stat, fname)
 
         self.SetCommandRunning(False)
 

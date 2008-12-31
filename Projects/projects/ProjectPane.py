@@ -1658,9 +1658,16 @@ class ProjectPane(ctrlbox.ControlBox):
         # Layout Panes
         self.ctrlbar = ctrlbox.ControlBar(self, style=ctrlbox.CTRLBAR_STYLE_GRADIENT)
         if wx.Platform == '__WXGTK__':
-            ctrlbar.SetWindowStyle(ctrlbox.CTRLBAR_STYLE_DEFAULT)
+            self.ctrlbar.SetWindowStyle(ctrlbox.CTRLBAR_STYLE_DEFAULT)
         self.ctrlbar.SetToolSpacing(0)
         self.ctrlbar.AddSpacer(5, 5)
+
+        cfgbmp = wx.ArtProvider.GetBitmap(str(ed_glob.ID_PREF), wx.ART_MENU)
+        configbutton = platebtn.PlateButton(self.ctrlbar, self.ID_CONFIG,
+                                            bmp=cfgbmp,
+                                            style=platebtn.PB_STYLE_NOBG)
+        configbutton.SetToolTipString(_("Configure"))
+        self.ctrlbar.AddControl(configbutton, wx.ALIGN_LEFT)
 
         addbmp = self.projects.il.GetBitmap(self.projects.icons['project-add'])
         addbutton = platebtn.PlateButton(self.ctrlbar, self.ID_ADD_PROJECT,
@@ -1675,13 +1682,6 @@ class ProjectPane(ctrlbox.ControlBox):
                                             style=platebtn.PB_STYLE_NOBG)
         removebutton.SetToolTipString(_("Remove Project"))
         self.ctrlbar.AddControl(removebutton, wx.ALIGN_LEFT)
-
-        cfgbmp = wx.ArtProvider.GetBitmap(str(ed_glob.ID_PREF), wx.ART_MENU)
-        configbutton = platebtn.PlateButton(self.ctrlbar, self.ID_CONFIG,
-                                            bmp=cfgbmp,
-                                            style=platebtn.PB_STYLE_NOBG)
-        configbutton.SetToolTipString(_("Configure"))
-        self.ctrlbar.AddControl(configbutton, wx.ALIGN_LEFT)
 
         self.ctrlbar.AddStretchSpacer()
         self.busy = wx.Gauge(self, size=(50, 16), style=wx.GA_HORIZONTAL)
