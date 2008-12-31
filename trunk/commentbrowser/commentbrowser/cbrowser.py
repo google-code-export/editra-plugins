@@ -30,7 +30,6 @@ import ed_msg
 import profiler
 import eclib.ctrlbox as ctrlbox
 
-
 # Local
 from cbrowserlistctrl import CustomListCtrl
 
@@ -102,19 +101,19 @@ class CBrowserPane(ctrlbox.ControlBox):
         self._listctrl = CustomListCtrl(self)
         self.SetWindow(self._listctrl)
 
-        tasklbl = wx.StaticText(ctrlbar, label=_('Taskfilter: '))
+        tasklbl = wx.StaticText(ctrlbar, label=_("Taskfilter: "))
         ctrlbar.AddControl(tasklbl, wx.ALIGN_LEFT)
         self._taskFilter = wx.Choice(ctrlbar, choices=self._taskChoices)
         self._taskFilter.SetStringSelection(self._taskChoices[0])
         ctrlbar.AddControl(self._taskFilter, wx.ALIGN_LEFT)
         ctrlbar.AddStretchSpacer()
         self._checkBoxAllFiles = wx.CheckBox(ctrlbar,
-                                             label=_('All opened files'))
+                                             label=_("All opened files"))
         ctrlbar.AddControl(self._checkBoxAllFiles, wx.ALIGN_RIGHT)
-        self._chekcBoxAfterKey = wx.CheckBox(ctrlbar, label=_('After key'))
-        self._chekcBoxAfterKey.SetToolTipString(_("Update as you type"))
-        ctrlbar.AddControl(self._chekcBoxAfterKey, wx.ALIGN_RIGHT)
-        btn = wx.Button(ctrlbar, label=_('Update'))
+        self._checkBoxAfterKey = wx.CheckBox(ctrlbar, label=_("After key"))
+        self._checkBoxAfterKey.SetToolTipString(_("Update as you type"))
+        ctrlbar.AddControl(self._checkBoxAfterKey, wx.ALIGN_RIGHT)
+        btn = wx.Button(ctrlbar, wx.ID_REFRESH, label=_("Refresh"))
         ctrlbar.AddControl(btn, wx.ALIGN_RIGHT)
 
         #---- Bind events ----#
@@ -166,7 +165,7 @@ class CBrowserPane(ctrlbox.ControlBox):
         @param msg: message to write to the log
 
         """
-        self.__log('[commentbrowser] ' + str(msg))
+        self.__log(u"[commentbrowser]" + unicode(msg))
 
     def __del__(self):
         """
@@ -177,8 +176,9 @@ class CBrowserPane(ctrlbox.ControlBox):
         ed_msg.Unsubscribe(self.OnKey)
         ed_msg.Unsubscribe(self.OnPageClose)
         ed_msg.Unsubscribe(self.OnPageChange)
-        self._log('__del__(): stopping timer')
-        self._timer.Stop()
+        self._log("__del__(): stopping timer")
+        if self._timer.IsRunning():
+            self._timer.Stop()
 
     #---- Methods ----#
 
@@ -188,6 +188,7 @@ class CBrowserPane(ctrlbox.ControlBox):
         If textctrl is None then it trys to use the current page,
         otherwise it trys to use the passed in textctrl.
         @param intextctrl: textctrl to update (should be of type ed_stc)
+
         """
         # stop the timer if it is running
         if self._timer.IsRunning():
@@ -287,7 +288,6 @@ class CBrowserPane(ctrlbox.ControlBox):
         @param bufferpos: Zero based index of position in the buffer to check
 
         """
-
         style_id = stc.GetStyleAt(bufferpos)
         style_tag = stc.FindTagById(style_id)
         if 'comment' in style_tag.lower():
@@ -295,10 +295,9 @@ class CBrowserPane(ctrlbox.ControlBox):
         else:
 
             # Python is special: look if its is in a documentation string
-
             if stc.GetLangId() == syntax.synglob.ID_LANG_PYTHON:
-                if wx.stc.STC_P_TRIPLEDOUBLE == style_id or wx.stc.STC_P_TRIPLE\
-                     == style_id:
+                if wx.stc.STC_P_TRIPLEDOUBLE == style_id or \
+                   wx.stc.STC_P_TRIPLE == style_id:
                     return True
             return False
 
@@ -310,7 +309,7 @@ class CBrowserPane(ctrlbox.ControlBox):
         @param event: Message Object ((x, y), keycode)
 
         """
-        if not self.IsActive() or not self._chekcBoxAfterKey.GetValue():
+        if not self.IsActive() or not self._checkBoxAfterKey.GetValue():
             return
 
 #        self._log('OnKey')
@@ -355,6 +354,9 @@ class CBrowserPane(ctrlbox.ControlBox):
         """
         Callback when a page is closed.
         @param event: Message Object (notebook, page index)
+        @todo: may be unecessary I think that the PageChange messages
+               are sent as part of the close action. So this could lead
+               to double updates.
 
         """
         if not self.IsActive():
