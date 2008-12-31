@@ -539,6 +539,7 @@ class FtpList(listmix.ListCtrlAutoWidthMixin,
             return
 
         if self._menu is None:
+            # Lazy init menu
             self._menu = wx.Menu()
             item = self._menu.Append(ID_REFRESH, _("Refresh"))
             bmp = wx.ArtProvider.GetBitmap(str(ed_glob.ID_REFRESH), wx.ART_MENU)
@@ -562,9 +563,10 @@ class FtpList(listmix.ListCtrlAutoWidthMixin,
                 item.SetBitmap(bmp)
             self._menu.AppendSeparator()
             self._menu.Append(ID_COPY_URL, _("Copy URL"))
-            self._menu.AppendSeparator()
-            self._menu.Append(ID_DOWNLOAD, _("Download") + u"...")
-            self._menu.Append(ID_UPLOAD, _("Upload") + u"...")
+#   TODO: Add in Version 0.2
+#            self._menu.AppendSeparator()
+#            self._menu.Append(ID_DOWNLOAD, _("Download") + u"...")
+#            self._menu.Append(ID_UPLOAD, _("Upload") + u"...")
 
         # Update the menu state for the current selection
         self.UpdateMenuState()
