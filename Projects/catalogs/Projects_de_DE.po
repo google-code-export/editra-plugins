@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: editra\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2008-11-18 20:35-0600\n"
+"POT-Creation-Date: 2008-12-30 19:28-0600\n"
 "PO-Revision-Date: 2008-10-04 00:35+0000\n"
 "Last-Translator: Kartaiser <Unknown>\n"
 "Language-Team: German <de@li.org>\n"
@@ -25,11 +25,11 @@ msgstr "*NAME*"
 msgid "*VALUE*"
 msgstr "*WERT*"
 
-#: Projects/projects/ProjectPane.py:1511
+#: Projects/projects/ProjectPane.py:1519
 msgid ". Do you wish to continue?"
 msgstr "Wollen Sie fortfahren?"
 
-#: Projects/projects/ProjectPane.py:1659
+#: Projects/projects/ProjectPane.py:1669
 msgid "Add Project"
 msgstr "Projekt hinzufügen"
 
@@ -37,15 +37,15 @@ msgstr "Projekt hinzufügen"
 msgid "Add a New Repository Path"
 msgstr "Einen neuen Repository Pfad hinzufügen"
 
-#: Projects/projects/ProjectPane.py:1256
+#: Projects/projects/ProjectPane.py:1262
 msgid "Add to repository"
 msgstr "Repository hinzufügen"
 
-#: Projects/projects/ProjectPane.py:1510
+#: Projects/projects/ProjectPane.py:1518
 msgid "An error occurred when attempting to remove "
 msgstr "Beim Versuch %s zu entfernen ist ein Fehler aufgetreten. "
 
-#: Projects/projects/HistWin.py:315
+#: Projects/projects/HistWin.py:314
 msgid "Author"
 msgstr "Autor/in"
 
@@ -53,23 +53,23 @@ msgstr "Autor/in"
 msgid "Built-in"
 msgstr "Built-in"
 
-#: Projects/projects/ProjectPane.py:165
+#: Projects/projects/ProjectPane.py:169
 msgid "C File"
 msgstr "C Datei"
 
-#: Projects/projects/ProjectPane.py:1749
+#: Projects/projects/ProjectPane.py:1721
 msgid "Choose a Project Directory"
 msgstr "Wählen Sie einen Projekt ordner"
 
-#: Projects/projects/ModList.py:134 Projects/projects/ProjCmnDlg.py:61
+#: Projects/projects/ModList.py:135 Projects/projects/ProjCmnDlg.py:61
 msgid "Commit"
 msgstr "Commit"
 
-#: Projects/projects/ModList.py:334 Projects/projects/ProjectPane.py:838
+#: Projects/projects/ModList.py:343 Projects/projects/ProjectPane.py:844
 msgid "Commit Dialog"
 msgstr "Commit Dialog"
 
-#: Projects/projects/ModList.py:499 Projects/projects/ProjectPane.py:1288
+#: Projects/projects/ModList.py:508 Projects/projects/ProjectPane.py:1294
 msgid "Commit changes"
 msgstr "Commit Änderungen"
 
@@ -85,15 +85,15 @@ msgstr "Vergleiche ausgewählte Versionen"
 msgid "Compare to Selected Revision"
 msgstr "Vergleiche mit ausgewählter Version"
 
-#: Projects/projects/ModList.py:494 Projects/projects/ProjectPane.py:1284
+#: Projects/projects/ModList.py:503 Projects/projects/ProjectPane.py:1290
 msgid "Compare to previous version"
 msgstr "Vergleiche mit vorherigen Version"
 
-#: Projects/projects/ProjectPane.py:1672
+#: Projects/projects/ProjectPane.py:1683
 msgid "Configure"
 msgstr "Konfiguriere"
 
-#: Projects/projects/ProjectPane.py:1275
+#: Projects/projects/ProjectPane.py:1281
 msgid "Copy"
 msgstr "Kopieren"
 
@@ -101,11 +101,11 @@ msgstr "Kopieren"
 msgid "Could not retrieve file"
 msgstr "Konnte Datei nicht wiederfinden"
 
-#: Projects/projects/ProjectPane.py:1274
+#: Projects/projects/ProjectPane.py:1280
 msgid "Cut"
 msgstr "Ausschneiden"
 
-#: Projects/projects/HistWin.py:314
+#: Projects/projects/HistWin.py:313
 msgid "Date"
 msgstr "Datum"
 
@@ -113,7 +113,7 @@ msgstr "Datum"
 msgid "Diff Program"
 msgstr "Diff-Programm"
 
-#: Projects/projects/ProjectPane.py:1269
+#: Projects/projects/ProjectPane.py:1275
 msgid "Edit"
 msgstr "Bearbeiten"
 
@@ -121,11 +121,11 @@ msgstr "Bearbeiten"
 msgid "Enter a command to be executed on all selected files and files in selected directories."
 msgstr "Geben Sie einen Befehl ein der auf alle ausgewählten Dateien und Dateien in ausgewälten Ordnern ausgeführt wird."
 
-#: Projects/projects/ProjectPane.py:1389
+#: Projects/projects/ProjectPane.py:1396
 msgid "Enter command to execute on all files"
 msgstr "Geben Sie einen Befehl ein der auf all Dateien angewendet wird"
 
-#: Projects/projects/ModList.py:335 Projects/projects/ProjectPane.py:839
+#: Projects/projects/ModList.py:344 Projects/projects/ProjectPane.py:845
 msgid "Enter your commit message:"
 msgstr "Geben Sie die Commit Nachricht ein:"
 
@@ -133,11 +133,11 @@ msgstr "Geben Sie die Commit Nachricht ein:"
 msgid "Environment Variables"
 msgstr "Umgebungsvariablen"
 
-#: Projects/projects/ProjectPane.py:1478 Projects/projects/ProjectPane.py:1486
+#: Projects/projects/ProjectPane.py:1485 Projects/projects/ProjectPane.py:1493
 msgid "Error occurred when copying/moving files"
 msgstr "Ein Fehler ist aufgetreten während dem kopieren/verschiebend von Dateien"
 
-#: Projects/projects/ProjectPane.py:1512
+#: Projects/projects/ProjectPane.py:1520
 msgid "Error occurred when removing files"
 msgstr "Ein Fehler ist aufgetreten beim Entfernen von Dateien"
 
@@ -145,7 +145,7 @@ msgstr "Ein Fehler ist aufgetreten beim Entfernen von Dateien"
 msgid "Execute command on files"
 msgstr "Führe Befehl auf Dateien aus"
 
-#: Projects/projects/ProjectPane.py:1278
+#: Projects/projects/ProjectPane.py:1284
 msgid "Execute command..."
 msgstr "Führe Befehl aus..."
 
@@ -153,12 +153,12 @@ msgstr "Führe Befehl aus..."
 msgid "File Filters"
 msgstr "Datei Filter"
 
-#: Projects/projects/ModList.py:276
+#: Projects/projects/ModList.py:279
 #, fuzzy
 msgid "Filename"
 msgstr "Benutzername"
 
-#: Projects/projects/ProjectPane.py:1260
+#: Projects/projects/ProjectPane.py:1266
 msgid "Folder"
 msgstr "Verzeichnis"
 
@@ -166,7 +166,7 @@ msgstr "Verzeichnis"
 msgid "General"
 msgstr "Allgemein"
 
-#: Projects/projects/ProjectPane.py:166
+#: Projects/projects/ProjectPane.py:170
 msgid "HTML File"
 msgstr "HTML-Datei"
 
@@ -178,15 +178,15 @@ msgstr "Verlaufs-Information konnte nicht wiederhergestellt werden"
 msgid "Keep project tree synchronized with editor notebook"
 msgstr "Projekt Baum mit editor Seite synchron behalten"
 
-#: Projects/projects/HistWin.py:316
+#: Projects/projects/HistWin.py:315
 msgid "Log Message"
 msgstr "Protokollmeldung"
 
-#: Projects/projects/ProjectPane.py:1289
+#: Projects/projects/ProjectPane.py:1295
 msgid "Make Patch"
 msgstr "Patch erstellen"
 
-#: Projects/projects/ProjectPane.py:1294
+#: Projects/projects/ProjectPane.py:1300
 #, fuzzy, python-format
 msgid "Move to %(trash)s"
 msgstr "Verschieben nach "
@@ -195,19 +195,19 @@ msgstr "Verschieben nach "
 msgid "Name"
 msgstr "Name"
 
-#: Projects/projects/ProjectPane.py:1272
+#: Projects/projects/ProjectPane.py:1278
 msgid "New..."
 msgstr "Neu..."
 
-#: Projects/projects/ProjectPane.py:1270
+#: Projects/projects/ProjectPane.py:1276
 msgid "Open"
 msgstr "Öffnen"
 
-#: Projects/projects/ProjectPane.py:1643
+#: Projects/projects/ProjectPane.py:1651
 msgid "Open Projects Sidepanel"
 msgstr "Öffnet Projekt Seitenfenster"
 
-#: Projects/projects/ProjectPane.py:1271
+#: Projects/projects/ProjectPane.py:1277
 msgid "Open enclosing folder"
 msgstr "Überverzeichniss öffnen"
 
@@ -219,11 +219,11 @@ msgstr ""
 msgid "Password"
 msgstr "Passwort"
 
-#: Projects/projects/ProjectPane.py:1276
+#: Projects/projects/ProjectPane.py:1282
 msgid "Paste"
 msgstr "Einfügen"
 
-#: Projects/projects/ProjectPane.py:167
+#: Projects/projects/ProjectPane.py:171
 msgid "Php File"
 msgstr "PHP-Datei"
 
@@ -231,7 +231,7 @@ msgstr "PHP-Datei"
 msgid "Please enter a repository path.  Partial paths may also be entered."
 msgstr "Bitte geben Sie einen Pfad zu einem Repository ein. Relative Pfade können auch eingegeben werden."
 
-#: Projects/projects/ProjectPane.py:1642 Projects/projects/__init__.py:52
+#: Projects/projects/ProjectPane.py:1650 Projects/projects/__init__.py:52
 msgid "Projects"
 msgstr "Projekte"
 
@@ -239,24 +239,24 @@ msgstr "Projekte"
 msgid "Projects Configuration"
 msgstr "Projekt Konfiguration"
 
-#: Projects/projects/ProjectPane.py:168
+#: Projects/projects/ProjectPane.py:172
 msgid "Python File"
 msgstr "Python Datei"
 
-#: Projects/projects/ModList.py:122
+#: Projects/projects/ModList.py:123
 #, fuzzy
 msgid "Refresh"
 msgstr "Erneuerungs Status"
 
-#: Projects/projects/ModList.py:491 Projects/projects/ProjectPane.py:1282
+#: Projects/projects/ModList.py:500 Projects/projects/ProjectPane.py:1288
 msgid "Refresh status"
 msgstr "Erneuerungs Status"
 
-#: Projects/projects/ProjectPane.py:1663
+#: Projects/projects/ProjectPane.py:1676
 msgid "Remove Project"
 msgstr "Projekt entfernen"
 
-#: Projects/projects/ProjectPane.py:1254
+#: Projects/projects/ProjectPane.py:1260
 msgid "Remove from repository"
 msgstr "Aus Repository entfernen"
 
@@ -264,7 +264,7 @@ msgstr "Aus Repository entfernen"
 msgid "Remove repository"
 msgstr "Repository entfernen"
 
-#: Projects/projects/ModList.py:110
+#: Projects/projects/ModList.py:111
 #, fuzzy
 msgid "Repository"
 msgstr "Repository entfernen"
@@ -277,16 +277,16 @@ msgstr "Repository Konfiguration"
 msgid "Retrieving File History"
 msgstr "Datei Verlauf abrufen"
 
-#: Projects/projects/HistWin.py:313
+#: Projects/projects/HistWin.py:312
 msgid "Rev #"
 msgstr "Version #"
 
-#: Projects/projects/ModList.py:140
+#: Projects/projects/ModList.py:141
 #, fuzzy
 msgid "Revert"
 msgstr "Projekt entfernen"
 
-#: Projects/projects/ModList.py:502 Projects/projects/ProjectPane.py:1290
+#: Projects/projects/ModList.py:511 Projects/projects/ProjectPane.py:1296
 msgid "Revert to repository version"
 msgstr "Repository Version wiederherstellen"
 
@@ -294,7 +294,7 @@ msgstr "Repository Version wiederherstellen"
 msgid "Revision History"
 msgstr "Versionshistorie"
 
-#: Projects/projects/HistWin.py:420
+#: Projects/projects/HistWin.py:419
 msgid "Search Log"
 msgstr "Such log"
 
@@ -306,11 +306,11 @@ msgstr "Diff-Program auswählen"
 msgid "Select the repository path to remove"
 msgstr "Wählen Sie Repository Pfad zum entfernen aus"
 
-#: Projects/projects/ProjectPane.py:890
+#: Projects/projects/ProjectPane.py:896
 msgid "Selected files are from multiple repositories"
 msgstr "Die ausgewählten Dateien sind aus verschiedenen Repositories"
 
-#: Projects/projects/ModList.py:497 Projects/projects/ProjectPane.py:1286
+#: Projects/projects/ModList.py:506 Projects/projects/ProjectPane.py:1292
 msgid "Show revision history"
 msgstr "Zeige Versions Verlauf an"
 
@@ -326,15 +326,15 @@ msgstr ""
 "Leerzeichen getrennte Liste von Datei Mustern um in der Anzeige nicht anzuzeigen\n"
 "Der gebrauch von Wildcards (*) ist erlaubt."
 
-#: Projects/projects/ModList.py:274
+#: Projects/projects/ModList.py:277
 msgid "Status"
 msgstr ""
 
-#: Projects/projects/ProjectPane.py:164
+#: Projects/projects/ProjectPane.py:168
 msgid "Text File"
 msgstr "Textdatei"
 
-#: Projects/projects/ProjectPane.py:1387
+#: Projects/projects/ProjectPane.py:1394
 msgid ""
 "The following command will be executed on all selected\n"
 "files and files contained in selected directories."
@@ -350,21 +350,21 @@ msgstr "Der Verlauf der angeforderten Datei konnte nicht abgerufen werden. Verge
 msgid "The requested file could not be retrieved from the source control system."
 msgstr "Die angeforderte Datei konnte nicht im Quellcode Kontroll System gefunden werden."
 
-#: Projects/projects/ProjectPane.py:1484
+#: Projects/projects/ProjectPane.py:1491
 #, fuzzy, python-format
 msgid "The system returned the following message when attempting to move/copy %(filename)s: %(errmsg)s."
 msgstr "Das System antwortete mit folgender Nachricht beim Versuch %s zu verschieben/kopieren: %s."
 
-#: Projects/projects/ProjectPane.py:1475
+#: Projects/projects/ProjectPane.py:1482
 #, fuzzy, python-format
 msgid "The system returned the following message when attempting to move/copy %(filename)s: %(errmsg)s. Do you wish to continue?"
 msgstr "Das System antwortete mit folgender Nachricht beim Versuch %s zu verschieben/kopieren: %s. Möchten Sie Fortfahren?"
 
-#: Projects/projects/ProjectPane.py:1331
+#: Projects/projects/ProjectPane.py:1337
 msgid "Untitled Folder"
 msgstr ""
 
-#: Projects/projects/ModList.py:128 Projects/projects/ProjectPane.py:1283
+#: Projects/projects/ModList.py:129 Projects/projects/ProjectPane.py:1289
 msgid "Update"
 msgstr "Aktualisieren"
 
@@ -376,6 +376,6 @@ msgstr "Benutzername"
 msgid "Value"
 msgstr "Wert"
 
-#: Projects/projects/ProjectPane.py:889
+#: Projects/projects/ProjectPane.py:895
 msgid "You can not execute source control commands across multiple repositories."
 msgstr "Sie können keine Quellcode Kontroll System Befehle auf mehrere Repositories ausführen."
