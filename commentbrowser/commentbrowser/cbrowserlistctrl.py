@@ -24,6 +24,7 @@ import wx.lib.mixins.listctrl as listmix
 #Editra Library Modules
 import ed_glob
 import ed_msg
+from util import Log
 
 #------------------------------------------------------------------------------#
 # Globals
@@ -104,7 +105,7 @@ class CustomListCtrl(wx.ListCtrl,
         Private log method of this class
         @params msg: message to log
         """
-        wx.GetApp().GetLog()('[commentbrowser][listctr] ' + str(msg))
+        Log(u"[commentbrowser][listctr] " + unicode(msg))
 
     def _SetupImages(self, msg=None):
         """Setup the images and respond to theme change messages
@@ -142,8 +143,8 @@ class CustomListCtrl(wx.ListCtrl,
         self.itemIndexMap = self.itemDataMap.keys()
         self.SetItemCount(len(self.itemDataMap))
         try:
-            self._max_prio = max([item[0]
-                                  for item in self.itemDataMap.values()])
+            vals = [item[0] for item in self.itemDataMap.values()]
+            self._max_prio = max(vals)
         except Exception, msg:
             self._log("[err] %s" % msg)
 
@@ -160,7 +161,7 @@ class CustomListCtrl(wx.ListCtrl,
 
         """
         if itemIndex < 0 or itemIndex > len(self.itemDataMap):
-            self._log('[err] itemIndex out of range!')
+            self._log("[err] itemIndex out of range!")
             return
         
         key = self.itemIndexMap[itemIndex]
@@ -176,7 +177,7 @@ class CustomListCtrl(wx.ListCtrl,
                     ctrl.GotoLine(line-1)
                     break
         except Exception, excp:
-            self._log("[error] %s" % excp)
+            self._log("[err] %s" % excp)
 
     #---- special methods used by the mixinx classes ----#
     
