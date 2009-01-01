@@ -1,35 +1,36 @@
-# SOME DESCRIPTIVE TITLE.
-# Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
-# This file is distributed under the same license as the PACKAGE package.
-# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+# Japanese translation for editra
+# Copyright (c) 2008 Rosetta Contributors and Canonical Ltd 2008
+# This file is distributed under the same license as the editra package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, 2008.
 #
-#, fuzzy
 msgid ""
 msgstr ""
-"Project-Id-Version: PACKAGE VERSION\n"
+"Project-Id-Version: editra\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2008-12-31 18:19-0600\n"
-"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
-"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
-"Language-Team: LANGUAGE <LL@li.org>\n"
+"PO-Revision-Date: 2008-12-31 17:02+0000\n"
+"Last-Translator: Cody Precord <Unknown>\n"
+"Language-Team: Japanese <ja@li.org>\n"
 "MIME-Version: 1.0\n"
-"Content-Type: text/plain; charset=CHARSET\n"
+"Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
+"X-Launchpad-Export-Date: 2009-01-01 00:16+0000\n"
+"X-Generator: Launchpad (build Unknown)\n"
 
 #: ftpedit/ftpedit/ftpwindow.py:392
 #, python-format
 msgid "%s already exists"
-msgstr ""
+msgstr "既に %s があります"
 
 #: ftpedit/ftpedit/ftpconfig.py:282
 #, python-format
 msgid "%s already exists!"
-msgstr ""
+msgstr "既に %s があります!"
 
 #: ftpedit/ftpedit/ftpconfig.py:281 ftpedit/ftpedit/ftpwindow.py:391
 #, python-format
 msgid "%s already exists. Please enter a different name."
-msgstr ""
+msgstr "既に %s があります。別の名前を入力してください。"
 
 #: ftpedit/ftpedit/ftpwindow.py:349
 #, python-format
@@ -38,11 +39,11 @@ msgstr ""
 
 #: ftpedit/ftpedit/ftpwindow.py:115
 msgid "Configuration"
-msgstr ""
+msgstr "設定"
 
 #: ftpedit/ftpedit/ftpwindow.py:137 ftpedit/ftpedit/ftpwindow.py:208
 msgid "Connect"
-msgstr ""
+msgstr "接続する"
 
 #: ftpedit/ftpedit/ftpwindow.py:565
 msgid "Copy URL"
@@ -50,39 +51,40 @@ msgstr ""
 
 #: ftpedit/ftpedit/ftpconfig.py:510
 msgid "Default Path:"
-msgstr ""
+msgstr "デフォルトのパス"
 
 #: ftpedit/ftpedit/ftpconfig.py:360 ftpedit/ftpedit/ftpwindow.py:551
 msgid "Delete"
-msgstr ""
+msgstr "削除"
 
 #: ftpedit/ftpedit/ftpwindow.py:350
+#, fuzzy
 msgid "Delete File?"
-msgstr ""
+msgstr "削除"
 
 #: ftpedit/ftpedit/ftpwindow.py:231
 msgid "Disconnect"
-msgstr ""
+msgstr "切断"
 
 #: ftpedit/ftpedit/ftpwindow.py:549
 msgid "Edit"
-msgstr ""
+msgstr "編集"
 
 #: ftpedit/ftpedit/ftpconfig.py:513
 msgid "Encoding:"
-msgstr ""
+msgstr "エンコーディング:"
 
 #: ftpedit/ftpedit/ftpwindow.py:381
 msgid "Enter name for new directory."
-msgstr ""
+msgstr "新しいディレクトリの名前を入力してください。"
 
 #: ftpedit/ftpedit/ftpwindow.py:372
 msgid "Enter name for new file."
-msgstr ""
+msgstr "新しいファイルの名前を入力してください。"
 
 #: ftpedit/ftpedit/ftpwindow.py:338
 msgid "Enter the new name"
-msgstr ""
+msgstr "新しい名前を入力してください"
 
 #: ftpedit/ftpedit/ftpwindow.py:289
 #, python-format
@@ -94,11 +96,11 @@ msgstr ""
 
 #: ftpedit/ftpedit/ftpwindow.py:501
 msgid "Filename"
-msgstr ""
+msgstr "ファイル名"
 
 #: ftpedit/ftpedit/ftpwindow.py:244
 msgid "Ftp Configuration"
-msgstr ""
+msgstr "FTPの設定"
 
 #: ftpedit/ftpedit/ftpwindow.py:227
 msgid "Ftp Connection Error"
@@ -110,88 +112,94 @@ msgstr ""
 
 #: ftpedit/ftpedit/__init__.py:78
 msgid "Ftp File Window"
-msgstr ""
+msgstr "FTPのファイルウィンドウ"
 
 #: ftpedit/ftpedit/__init__.py:77
 msgid "Ftp Window"
-msgstr ""
+msgstr "FTPのウィンドウ"
 
 #: ftpedit/ftpedit/ftpconfig.py:495
 msgid "Host:"
-msgstr ""
+msgstr "ホスト:"
 
 #: ftpedit/ftpedit/ftpconfig.py:468
 msgid "Login Settings"
-msgstr ""
+msgstr "ログインの設定"
 
 #: ftpedit/ftpedit/ftpwindow.py:503
 msgid "Modified"
-msgstr ""
+msgstr "変更"
 
 #: ftpedit/ftpedit/ftpconfig.py:175
 msgid "My Sites"
-msgstr ""
+msgstr "マイサイト"
 
 #: ftpedit/ftpedit/ftpwindow.py:382
 msgid "New Directory"
-msgstr ""
+msgstr "新しいディレクトリ"
 
 #: ftpedit/ftpedit/ftpwindow.py:373 ftpedit/ftpedit/ftpwindow.py:556
 msgid "New File"
-msgstr ""
+msgstr "新しいファイル"
 
 #: ftpedit/ftpedit/ftpwindow.py:560
 msgid "New Folder"
-msgstr ""
+msgstr "新しいフォルダ"
 
 #: ftpedit/ftpedit/ftpconfig.py:359 ftpedit/ftpedit/ftpconfig.py:407
 msgid "New Site"
-msgstr ""
+msgstr "新しいサイト"
 
 #: ftpedit/ftpedit/ftpconfig.py:109
 msgid "Ok"
-msgstr ""
+msgstr "Ok"
 
 #: ftpedit/ftpedit/ftpconfig.py:504 ftpedit/ftpedit/ftpwindow.py:129
 msgid "Password:"
-msgstr ""
+msgstr "パスワード："
 
 #: ftpedit/ftpedit/ftpconfig.py:490
 msgid "Port:"
-msgstr ""
+msgstr "ポート:"
 
 #: ftpedit/ftpedit/ftpwindow.py:544
 msgid "Refresh"
-msgstr ""
+msgstr "更新"
 
 #: ftpedit/ftpedit/ftpwindow.py:550
 msgid "Rename"
-msgstr ""
+msgstr "名前の変更"
 
 #: ftpedit/ftpedit/ftpwindow.py:339
 msgid "Rename File"
-msgstr ""
+msgstr "ファイル名を変更する"
 
 #: ftpedit/ftpedit/ftpwindow.py:453
 msgid "Retrieving file"
-msgstr ""
+msgstr "ファイルを取得しています"
 
 #: ftpedit/ftpedit/ftpconfig.py:339
 msgid "Sites"
-msgstr ""
+msgstr "サイト"
 
 #: ftpedit/ftpedit/ftpwindow.py:119
 msgid "Sites:"
-msgstr ""
+msgstr "サイト:"
 
 #: ftpedit/ftpedit/ftpwindow.py:502
 msgid "Size"
-msgstr ""
+msgstr "サイズ"
 
 #: ftpedit/ftpedit/ftpconfig.py:501
 msgid "User:"
-msgstr ""
+msgstr "ユーザ"
 
 #: ftpedit/ftpedit/ftpwindow.py:124
 msgid "Username:"
-msgstr ""
+msgstr "ユーザ名:"
+
+#~ msgid "Download"
+#~ msgstr "ダウンロード"
+
+#~ msgid "Upload"
+#~ msgstr "アップロード"
