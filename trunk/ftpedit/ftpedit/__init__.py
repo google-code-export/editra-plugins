@@ -6,7 +6,7 @@
 # License: wxWindows License                                                  #
 ###############################################################################
 
-"""Edit files over Ftp in Editra"""
+"""Edit files over ftp (Editra > 0.4.28)"""
 
 __author__ = "Cody Precord <cprecord@editra.org>"
 __version__ = "0.1"
