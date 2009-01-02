@@ -21,7 +21,6 @@ import wx.lib.mixins.listctrl as listmix
 # Editra Libraries
 import ed_glob
 import ed_msg
-import ed_menu
 from profiler import Profile_Get, Profile_Set
 import util
 import eclib.ctrlbox as ctrlbox
@@ -71,6 +70,7 @@ class FtpWindow(ctrlbox.ControlBox):
         self._client = ftpclient.FtpClient(self)
         self._files = list()
         self._select = None
+        self._open = list()   # Open ftpfile objects
 
         # Ui controls
         self._cbar = None     # ControlBar
@@ -101,6 +101,17 @@ class FtpWindow(ctrlbox.ControlBox):
         """Cleanup"""
         ed_msg.Unsubscribe(self.OnThemeChanged)
         ed_msg.Unsubscribe(self.OnCfgUpdated)
+
+        # Cleanup file notifiers
+        self.__DisconnectFiles()
+
+    def __DisconnectFiles(self):
+        """Disconnect opened files"""
+        for fobj in self._open:
+            try:
+                fobj[1].ClearFtpStatus()
+            except:
+                pass
 
     def __DoLayout(self):
         """Layout the window"""
@@ -196,18 +207,42 @@ class FtpWindow(ctrlbox.ControlBox):
             if child.GetId() != ID_CONNECT:
                 child.Enable(enable)
 
+    def NotifyFtpFileDeleted(self, name):
+        """Callback from FtpFile's owned by this client.
+        @param name: name of file deleted
+
+        """
+        # Remove the file object from our watch
+        for idx, finfo in enumerate(list(self._open)):
+            if finfo[0] == name:
+                self._open.pop(idx)
+                break
+
     def OnButton(self, evt):
         """Handle Button click events"""
         e_id = evt.GetId()
         if e_id == ID_CONNECT:
             e_obj = evt.GetEventObject()
             if self._connected:
+                # Warn if any ftp files are open
+                num = len(self._open)
+                if num:
+                    # TODO: use custom dialog with list of files in it
+                    result = wx.MessageBox(_("There are currently %d ftp files open.\n"
+                                             "If you disconnect now you will be unable to upload any further changes to these files.\n"
+                                             "Disconnect from site?") % num,
+                                           _("Disconnect from Site?"),
+                                           style=wx.YES_NO|wx.ICON_WARNING)
+                    if result == wx.NO:
+                        return
+
                 # Disconnect from server
                 self._connected = False
                 self._client.Disconnect()
                 e_obj.SetLabel(_("Connect"))
                 e_obj.SetBitmap(IconFile.Connect.GetBitmap())
                 self._list.DeleteAllItems()
+                self.__DisconnectFiles()
                 self.EnableOptions(True)
             else:
                 # Connect to site
@@ -285,7 +320,7 @@ class FtpWindow(ctrlbox.ControlBox):
             if err is not None:
                 err = unicode(err)
             else:
-                err = u''
+                err = _("Unknown")
             wx.MessageBox(_("Failed to download %(file)s\nError:\n%(err)s") % \
                           dict(file=ftppath, err=err),
                           _("Ftp Download Failed"),
@@ -297,8 +332,10 @@ class FtpWindow(ctrlbox.ControlBox):
             data['user'] = self._username.GetValue().strip()
             data['pword'] = self._password.GetValue().strip()
             nb = self._mw.GetNotebook()
-            fobj = ftpfile.FtpFile(ftppath, data, path)
+            fobj = ftpfile.FtpFile(self._client, ftppath, data, path)
             nb.OpenFileObject(fobj)
+            self._open.append((path, fobj))
+            fobj.SetDisconnectNotifier(self.NotifyFtpFileDeleted)
 
     def OnItemActivated(self, evt):
         """Handle when items are activated in the list control
@@ -414,6 +451,16 @@ class FtpWindow(ctrlbox.ControlBox):
         @param evt: ftpclient.EVT_FTP_REFRESH
 
         """
+        # No selection was set so see if one is there now
+        if self._select is None:
+            sel = self._list.GetFirstSelected()
+            path = None
+            item = None
+            if sel > -1 and sel < len(self._files):
+                item = self._files[sel]
+                path = item['name']
+            self._select = path
+
         if self._list.GetItemCount():
             self._list.DeleteAllItems()
 

@@ -391,6 +391,13 @@ class FtpClient(ftplib.FTP):
         """
         return self._lastlogin
 
+    def GetParent(self):
+        """Get the clients parent window
+        @return: parent window or None
+
+        """
+        return self._parent
+
     def IsActive(self):
         """Does the client have an active connection
         @return: bool
