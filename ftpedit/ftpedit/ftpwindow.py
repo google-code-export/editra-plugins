@@ -668,3 +668,11 @@ class FtpList(listmix.ListCtrlAutoWidthMixin,
             for id_ in (ID_EDIT, ID_DELETE): # ID_DOWNLOAD
                 mitem = self._menu.FindItemById(id_)
                 mitem.Enable(item and not isdir)
+
+            if item is not None:
+                lbl = item.GetText()
+                mitem = self._menu.FindItemById(ID_RENAME)
+                if isdir and lbl == u"..":
+                    mitem.Enable(False)
+                else:
+                    mitem.Enable(True)
