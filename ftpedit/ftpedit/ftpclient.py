@@ -182,6 +182,7 @@ class FtpClient(ftplib.FTP):
         try:
             # First disconnect if there is an existing connection
             if self.IsActive():
+                Log("[ftpedit][warn] Doing disconnect on Connect")
                 self.Disconnect()
 
             # Connect to the server
@@ -201,15 +202,20 @@ class FtpClient(ftplib.FTP):
         return True
 
     def Disconnect(self):
-        """Disconnect from the site"""
+        """Disconnect from the site
+        @return: bool
+
+        """
         try:
             if self._active:
                 self.abort()
-            self.quit()
             self._active = False
+            self.quit()
         except Exception, msg:
             self._lasterr = msg
             Log("[ftpedit][err] Disconnect: %s" % msg)
+            return False
+        return True
 
     def DeleteFile(self, fname):
         """Delete the given file

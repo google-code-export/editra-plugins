@@ -232,13 +232,20 @@ class FtpWindow(ctrlbox.ControlBox):
                                              "If you disconnect now you will be unable to upload any further changes to these files.\n"
                                              "Disconnect from site?") % num,
                                            _("Disconnect from Site?"),
-                                           style=wx.YES_NO|wx.ICON_WARNING)
+                                           style=wx.YES_NO|wx.CENTER|wx.ICON_WARNING)
                     if result == wx.NO:
                         return
 
                 # Disconnect from server
+                result = self._client.Disconnect()
+                if not result:
+                    err = self._client.GetLastError()
+                    wx.MessageBox(_("Failed to disconnect:\nError:\n%s") % err,
+                                  _("Ftp Error"),
+                                  style=wx.OK|wx.CENTER|wx.ICON_ERROR)
+                    return
+
                 self._connected = False
-                self._client.Disconnect()
                 e_obj.SetLabel(_("Connect"))
                 e_obj.SetBitmap(IconFile.Connect.GetBitmap())
                 self._list.DeleteAllItems()
@@ -658,6 +665,6 @@ class FtpList(listmix.ListCtrlAutoWidthMixin,
                 item = self.GetItem(idx)
                 isdir = item.GetImage() == self._idx['folder']
 
-            for id_ in (ID_EDIT, ID_DOWNLOAD, ID_DELETE):
+            for id_ in (ID_EDIT, ID_DELETE): # ID_DOWNLOAD
                 mitem = self._menu.FindItemById(id_)
                 mitem.Enable(item and not isdir)
