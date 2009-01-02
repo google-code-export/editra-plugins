@@ -19,6 +19,7 @@ __revision__ = "$Revision$"
 #-----------------------------------------------------------------------------#
 # Imports
 import os
+import wx
 
 # Editra Libraries
 import ed_txt
@@ -30,7 +31,7 @@ import ftpclient
 #-----------------------------------------------------------------------------#
 
 class FtpFile(ed_txt.EdFile):
-    def __init__(self, ftppath, sitedata, path='', modtime=0):
+    def __init__(self, client, ftppath, sitedata, path='', modtime=0):
         """Create the FtpFile.
         Implementation Note: This file object is only associated with the
         ftppath as long as it is alive, if the on disk file's name is changed
@@ -40,6 +41,7 @@ class FtpFile(ed_txt.EdFile):
         pass in non temporary files for the path keyword or it will be DELETED 
         when this object is destroyed!
 
+        @param client: ftp client that opened the file
         @param ftppath: path to file on ftp server
         @param sitedata: site login data
         @keyword path: on disk path (used by EdFile)
@@ -49,25 +51,42 @@ class FtpFile(ed_txt.EdFile):
         ed_txt.EdFile.__init__(self, path, modtime)
 
         # Attributes
-        self._client = ftpclient.FtpClient(None)
+        self._client = client
         self._ftp = True
         self.ftppath = ftppath
         self._site = sitedata   # dict(url, port, user, pword, path, enc)
+        self._notifier = None
 
         # Setup
         self.SetEncoding(self._site['enc'])
 
     def __del__(self):
         """Cleanup the temp file"""
+        self.CleanUp()
+
+    def CleanUp(self):
+        """Cleanup the file object"""
+        path = self.GetPath()
         if self._ftp:
             # Only remove if its the temp file
-            os.remove(self.GetPath())
+            os.remove(path)
+            self._ftp = False
 
-        if self._client.IsActive():
-            self._client.Disconnect()
+        if self._notifier is not None:
+            self._notifier(path)
+            self._notifier = None
+
+    def ClearFtpStatus(self):
+        """Disassociate this file object with ftp callbacks"""
+        self.SetDisconnectNotifier(None)
+        self.SetClient(None)
+        self._ftp = False
 
     def DoFtpUpload(self):
         """Upload the contents of the on disk temp file to the server"""
+        if self._client is None:
+            return
+
         connected = self._client.IsActive()
         if not connected:
             self._client.SetHostname(self._site['url'])
@@ -80,15 +99,16 @@ class FtpFile(ed_txt.EdFile):
             err = self._client.GetLastError()
             Log("[ftpedit][err] DoFtpUpload: %s" % err)
         else:
-            # NOTE: Currently does a blocking upload possibly use the
-            # Async method to improve responsiveness.
             success = self._client.Upload(self.GetPath(), self.ftppath)
             if not success:
                 # TODO: notify of failure
                 err = self._client.GetLastError()
             else:
-                # TODO: update status text to reflect successful upload
-                pass
+                parent = self._client.GetParent()
+                if parent is not None:
+                    files = self._client.GetFileList()
+                    evt = ftpclient.FtpClientEvent(ftpclient.edEVT_FTP_REFRESH, files)
+                    wx.PostEvent(parent, evt)
 
     def GetFtpPath(self):
         """Get the ftp path
@@ -104,10 +124,23 @@ class FtpFile(ed_txt.EdFile):
         """
         return self._site
 
+    def SetClient(self, client):
+        """Set the ftp client this file uses for doing uploads.
+        @param client: instance of ftpclient or None
+
+        """
+        self._client = client
+
+    def SetDisconnectNotifier(self, notifier):
+        """Set the client callback notifier for when this object is
+        deleted or disassociated from the client.
+
+        """
+        self._notifier = notifier
+
     def SetFilePath(self, path):
-        """Change the file path. Changing the path on an ftp file
-        will disassociate it with the ftp site turning it into a regular
-        file.
+        """Change the file path. Changing the path on an ftp file will 
+        disassociate it with the ftp site turning it into a regular file.
         @param path: string
 
         """
@@ -115,7 +148,7 @@ class FtpFile(ed_txt.EdFile):
         if path != cpath:
             # Cleanup the tempfile now
             try:
-                os.remove(self.GetPath())
+                self.CleanUp()
             except OSError, msg:
                 Log("[ftpfile][err] SetFilePath: %s" % msg)
 
