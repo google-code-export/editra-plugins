@@ -15,6 +15,7 @@ __revision__ = "$Revision$"
 #-----------------------------------------------------------------------------#
 # Imports
 import os
+import encodings
 import wx
 
 # Editra Libraries
@@ -472,7 +473,11 @@ class FtpLoginPanel(wx.Panel):
         self._user = wx.TextCtrl(self)
         self._pass = wx.TextCtrl(self, style=wx.TE_PASSWORD)
         self._path = wx.TextCtrl(self)
-        self._enc = wx.Choice(self, choices=GetAllEncodings())
+        enclst = GetAllEncodings()
+        default = encodings.normalize_encoding('utf-8')
+        self._enc = wx.Choice(self, choices=enclst)
+        if default in enclst:
+            self._enc.SetStringSelection(default)
 
         # Layout
         self.__DoLayout()
