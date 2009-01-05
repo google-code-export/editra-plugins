@@ -238,11 +238,12 @@ class FtpWindow(ctrlbox.ControlBox):
 
                 # Disconnect from server
                 result = self._client.Disconnect()
-                if not result:
+                if result is not None:
                     err = self._client.GetLastError()
                     wx.MessageBox(_("Failed to disconnect:\nError:\n%s") % err,
                                   _("Ftp Error"),
                                   style=wx.OK|wx.CENTER|wx.ICON_ERROR)
+                    self._client.ClearLastError()
                     return
 
                 self._connected = False
@@ -251,6 +252,10 @@ class FtpWindow(ctrlbox.ControlBox):
                 self._list.DeleteAllItems()
                 self.__DisconnectFiles()
                 self.EnableOptions(True)
+
+#                # Need to create a new client
+#                del self._client
+#                self._client = ftpclient.FtpClient(self)
             else:
                 # Connect to site
                 user = self._username.GetValue().strip()
@@ -268,6 +273,7 @@ class FtpWindow(ctrlbox.ControlBox):
                     wx.MessageBox(unicode(self._client.GetLastError()),
                                   _("Ftp Connection Error"),
                                   style=wx.OK|wx.CENTER|wx.ICON_ERROR)
+                    self._client.ClearLastError()
                 else:
                     self._connected = True
                     e_obj.SetLabel(_("Disconnect"))
@@ -332,6 +338,7 @@ class FtpWindow(ctrlbox.ControlBox):
                           dict(file=ftppath, err=err),
                           _("Ftp Download Failed"),
                           style=wx.OK|wx.CENTER|wx.ICON_ERROR)
+            self._client.ClearLastError()
         else:
             # Open the downloaded file in the editor
             csel = self._sites.GetStringSelection()
@@ -471,6 +478,16 @@ class FtpWindow(ctrlbox.ControlBox):
         if self._list.GetItemCount():
             self._list.DeleteAllItems()
 
+        # Check for errors
+        err = self._client.GetLastError()
+        if err is not None:
+            wx.MessageBox(_("Error: %s") % err, _("Ftp Error"),
+                          style=wx.OK|wx.CENTER|wx.ICON_ERROR)
+            self._client.ClearLastError()
+            self._StartBusy(False)
+            return
+
+        # Refresh the file list
         self._files = evt.GetValue()
         for item in self._files:
             self._list.AddItem(item)

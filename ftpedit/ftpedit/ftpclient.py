@@ -166,9 +166,21 @@ class FtpClient(ftplib.FTP):
                       edEVT_FTP_REFRESH, args=[path,])
         t.start()
 
+    def CheckConnection(self):
+        """Check the connection to see if the client is still logged in.
+        @return: bool
+
+        """
+        try:
+            self.pwd()
+        except:
+            return False
+        else:
+            return True
+
     def ClearLastError(self):
         """Clear the last know error"""
-        self._busy.aquire()
+        self._busy.acquire()
         del self._lasterr
         self._lasterr = None
         self._busy.release()
@@ -411,6 +423,22 @@ class FtpClient(ftplib.FTP):
         """
         return self._active
 
+    def Login(self, user, password):
+        """Login to the server
+        @param user: username
+        @param password: password
+        @precondition: Connect has already been called
+        @return: bool
+
+        """
+        try:
+            self.login(user, password)
+        except ftplib.all_errors, msg:
+            self._lasterr = msg
+            Log("[ftplib][err] Login: %s" % msg)
+            return False
+        return True
+
     def MkDir(self, dname):
         """Make a new directory at the current path
         @param dname: string
@@ -469,7 +497,6 @@ class FtpClient(ftplib.FTP):
         t = FtpThread(self._parent, self._RefreshCommand,
                       edEVT_FTP_REFRESH, args=[self.NewFile, [fname,]])
         t.start()
-
 
     def RefreshPath(self):
         """Refresh the current working directory.
