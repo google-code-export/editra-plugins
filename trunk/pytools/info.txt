@@ -1,0 +1,4 @@
+Name=Pytools
+Author=Ofer Schwarz
+Description=Various Python related tools
+Version=0.1
