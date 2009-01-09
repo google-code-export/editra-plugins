@@ -68,7 +68,11 @@ class PyTools(plugin.Plugin):
         if evt.GetId() != ID_OPEN_MODULE:
             evt.Skip()
         
-        mdlg = OpenModuleDialog(self._mw)
+        mdlg = OpenModuleDialog(self._mw,
+                                message=_("Enter package/module name\n"
+                                          "(e.g 'pickle', 'wx.lib.pyshell')"),
+                                caption=_("Open module"))
+
         if mdlg.ShowModal() != wx.ID_OK:
             return
 
