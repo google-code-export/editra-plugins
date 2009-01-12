@@ -58,10 +58,24 @@ class FtpClientEvent(wx.PyCommandEvent):
     L{FtpClient} calls.
 
     """
-    def __init__(self, etype, value=''):
-        """Creates the event object"""
+    def __init__(self, etype, value='', path=''):
+        """Creates the event object
+        @keyword value: generic event data
+        @keyword path: current working directory
+
+        """
         wx.PyCommandEvent.__init__(self, etype)
+
+        # Attributes
         self._value = value
+        self._dir = path
+
+    def GetDirectory(self):
+        """Get the clients current directory
+        @return: string
+
+        """
+        return self._dir
 
     def GetValue(self):
         """Returns the value from the event.
@@ -184,6 +198,17 @@ class FtpClient(ftplib.FTP):
         del self._lasterr
         self._lasterr = None
         self._busy.release()
+
+    def Clone(self):
+        """Create a copy of this client"""
+        nclient = FtpClient(self._parent)
+        nclient._default = self._default
+        nclient._curdir = self._curdir
+        nclient._host = self._host
+        nclient._lastlogin = self._lastlogin
+        nclient._port = self._port
+        nclient_lasterr = self._lasterr
+        return nclient
 
     def Connect(self, user, password):
         """Connect to the site
@@ -595,7 +620,7 @@ class FtpThread(threading.Thread):
     def __init__(self, parent, funct, etype, args=list()):
         """Create the thread object
         @param parent: Parent window to recieve event(s) (can be None)
-        @param funct: method to run in the thread
+        @param funct: method to run in a thread
         @param etype: event type
         @keyword args: list of args to pass to funct
 
@@ -612,9 +637,12 @@ class FtpThread(threading.Thread):
         """Run the command"""
         result = self._funct(*self._args)
 
+        # HACK: too lazy to fix now...
+        cdir = self._funct.im_self.GetCurrentDirectory()
+
         # Fire a notification event if we have a parent
         if self._parent is not None:
-            evt = FtpClientEvent(self._etype, result)
+            evt = FtpClientEvent(self._etype, result, cdir)
             wx.PostEvent(self._parent, evt)
 
 #-----------------------------------------------------------------------------#

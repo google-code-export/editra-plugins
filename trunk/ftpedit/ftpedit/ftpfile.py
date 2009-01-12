@@ -87,12 +87,12 @@ class FtpFile(ed_txt.EdFile):
         if self._client is None:
             return
 
-        connected = self._client.IsActive()
-        if not connected:
-            self._client.SetHostname(self._site['url'])
-            self._client.SetPort(self._site['port'])
-            connected = self._client.Connect(self._site['user'],
-                                             self._site['pword'])
+        # Cant reuse ftp ojects...
+        self._client = self._client.Clone()
+        self._client.SetHostname(self._site['url'])
+        self._client.SetPort(self._site['port'])
+        connected = self._client.Connect(self._site['user'],
+                                         self._site['pword'])
 
         if not connected:
             # TODO: report error to upload in ui
@@ -109,6 +109,11 @@ class FtpFile(ed_txt.EdFile):
                     files = self._client.GetFileList()
                     evt = ftpclient.FtpClientEvent(ftpclient.edEVT_FTP_REFRESH, files)
                     wx.PostEvent(parent, evt)
+            self._client.Disconnect()
+
+    def GetCurrentDirectory(self):
+        """Hack for compatibility with FtpThread"""
+        return self._client.GetCurrentDirectory()
 
     def GetFtpPath(self):
         """Get the ftp path
