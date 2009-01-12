@@ -173,6 +173,21 @@ class FtpWindow(ctrlbox.ControlBox):
 
         return None
 
+    def _HandleDisconnect(self):
+        """Handle having to disconnect from the server"""
+        self._connected = False
+        btn = self.FindWindowById(ID_CONNECT)
+        btn.SetLabel(_("Connect"))
+        btn.SetBitmap(IconFile.Connect.GetBitmap())
+        self._list.DeleteAllItems()
+        self.__DisconnectFiles()
+        self.EnableOptions(True)
+
+        # Need to create a new client
+        tmp = self._client.Clone()
+        del self._client
+        self._client = tmp
+
     def _StartBusy(self, busy=True):
         """Start/Stop the main windows busy indicator
         @keyword busy: bool
@@ -240,22 +255,12 @@ class FtpWindow(ctrlbox.ControlBox):
                 result = self._client.Disconnect()
                 if result is not None:
                     err = self._client.GetLastError()
-                    wx.MessageBox(_("Failed to disconnect:\nError:\n%s") % err,
+                    wx.MessageBox(_("Error on disconnect:\nError:\n%s") % err,
                                   _("Ftp Error"),
                                   style=wx.OK|wx.CENTER|wx.ICON_ERROR)
                     self._client.ClearLastError()
-                    return
 
-                self._connected = False
-                e_obj.SetLabel(_("Connect"))
-                e_obj.SetBitmap(IconFile.Connect.GetBitmap())
-                self._list.DeleteAllItems()
-                self.__DisconnectFiles()
-                self.EnableOptions(True)
-
-#                # Need to create a new client
-#                del self._client
-#                self._client = ftpclient.FtpClient(self)
+                self._HandleDisconnect()
             else:
                 # Connect to site
                 user = self._username.GetValue().strip()
@@ -484,6 +489,16 @@ class FtpWindow(ctrlbox.ControlBox):
             wx.MessageBox(_("Error: %s") % err, _("Ftp Error"),
                           style=wx.OK|wx.CENTER|wx.ICON_ERROR)
             self._client.ClearLastError()
+            self._StartBusy(False)
+            self._client.Disconnect()
+            self._HandleDisconnect()
+            return
+
+        # Only update the list if the event came from an object of the same
+        # directory.
+        cwd = self._client.GetCurrentDirectory()
+        ecwd = evt.GetDirectory()
+        if cwd != ecwd:
             self._StartBusy(False)
             return
 
