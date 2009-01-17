@@ -455,6 +455,7 @@ class FtpWindow(ctrlbox.ControlBox):
                              path.lstrip(u"/")])
             util.SetClipboardText(url)
 
+        # TODO: add general upload and download functionality
         elif e_id == ID_DOWNLOAD:
             pass
 
