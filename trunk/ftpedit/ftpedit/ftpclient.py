@@ -129,6 +129,14 @@ class FtpClient(ftplib.FTP):
         # Setup
         self.set_pasv(True) # Use passive mode for now (configurable later)
 
+    def _ProcessException(self, msg):
+        """Process exceptions
+        @param msg: exception object
+
+        """
+        if len(str(msg)):
+            self._lasterr = msg
+
     def _ProcessInput(self, data):
         """Process incoming data
         @param data: string
@@ -230,7 +238,7 @@ class FtpClient(ftplib.FTP):
             self._curdir = self.pwd()
         except Exception, msg:
             Log("[ftpedit][err] Connect: %s" % msg)
-            self._lasterr = msg
+            self._ProcessException(msg)
             self._lastlogin = None
             return False
         else:
@@ -249,7 +257,7 @@ class FtpClient(ftplib.FTP):
             self._active = False
             self.quit()
         except Exception, msg:
-            self._lasterr = msg
+            self._ProcessException(msg)
             Log("[ftpedit][err] Disconnect: %s" % msg)
             return False
         return True
@@ -266,7 +274,7 @@ class FtpClient(ftplib.FTP):
         try:
             self.delete(fname)
         except Exception, msg:
-            self._lasterr = msg
+            self._ProcessException(msg)
             Log("[ftpedit][err] DeleteFile: %s" % msg)
             return False
         return True
@@ -308,7 +316,7 @@ class FtpClient(ftplib.FTP):
 
                 self.retrlines('RETR ' + fname, GetFileData)
             except Exception, msg:
-                self._lasterr = msg
+                self._ProcessException(msg)
                 Log("[ftpedit][err] Download: %s" % msg)
         finally:
             os.close(fid)
@@ -342,7 +350,7 @@ class FtpClient(ftplib.FTP):
                 f = open(dest, 'wb')
                 self.retrbinary('RETR ' + fname, lambda data: f.write(data))
             except Exception, msg:
-                self._lasterr = msg
+                self._ProcessException(msg)
                 Log("[ftpedit][err] DownloadTo: %s" % msg)
                 succeed = False
         finally:
@@ -381,7 +389,7 @@ class FtpClient(ftplib.FTP):
             code = self.retrlines('LIST', self._ProcessInput)
         except Exception, msg:
             Log("[ftpedit][err] GetFileList: %s" % msg)
-            self._lasterr = msg
+            self._ProcessException(msg)
 
         #-- Critical section --#
         self._busy.acquire()
@@ -459,7 +467,7 @@ class FtpClient(ftplib.FTP):
         try:
             self.login(user, password)
         except ftplib.all_errors, msg:
-            self._lasterr = msg
+            self._ProcessException(msg)
             Log("[ftplib][err] Login: %s" % msg)
             return False
         return True
@@ -482,7 +490,7 @@ class FtpClient(ftplib.FTP):
         try:
             self.mkd(dname)
         except Exception, msg:
-            self._lasterr = msg
+            self._ProcessException(msg)
             Log("[ftpedit][err] NewDir: %s" % msg)
             return False
         return True
@@ -508,7 +516,7 @@ class FtpClient(ftplib.FTP):
             buff = StringIO('')
             self.storlines('STOR ' + fname, buff)
         except Exception, msg:
-            self._lasterr = msg
+            self._ProcessException(msg)
             Log("[ftpedit][err] Upload: %s" % msg)
             return False
         return True
@@ -545,7 +553,7 @@ class FtpClient(ftplib.FTP):
         try:
             self.rename(old, new)
         except Exception, msg:
-            self._lasterr = msg
+            self._ProcessException(msg)
             Log("[ftpedit][err] Rename: %s" % msg)
             return False
         return True
@@ -597,7 +605,7 @@ class FtpClient(ftplib.FTP):
             f.close()
             self.storlines('STOR ' + dest, buff)
         except Exception, msg:
-            self._lasterr = msg
+            self._ProcessException(msg)
             Log("[ftpedit][err] Upload: %s" % msg)
             return False
         return True
