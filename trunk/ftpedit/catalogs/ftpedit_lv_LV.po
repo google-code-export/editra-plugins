@@ -1,16 +1,16 @@
-# Japanese translation for editra
-# Copyright (c) 2008 Rosetta Contributors and Canonical Ltd 2008
+# Latvian translation for editra
+# Copyright (c) 2009 Rosetta Contributors and Canonical Ltd 2009
 # This file is distributed under the same license as the editra package.
-# FIRST AUTHOR <EMAIL@ADDRESS>, 2008.
+# FIRST AUTHOR <EMAIL@ADDRESS>, 2009.
 #
 msgid ""
 msgstr ""
 "Project-Id-Version: editra\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2009-01-21 21:48-0600\n"
-"PO-Revision-Date: 2008-12-31 17:02+0000\n"
-"Last-Translator: Cody Precord <Unknown>\n"
-"Language-Team: Japanese <ja@li.org>\n"
+"PO-Revision-Date: 2009-01-06 20:55+0000\n"
+"Last-Translator: janis.sl <Unknown>\n"
+"Language-Team: Latvian <lv@li.org>\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
@@ -20,17 +20,17 @@ msgstr ""
 #: ftpedit/ftpedit/ftpwindow.py:448
 #, python-format
 msgid "%s already exists"
-msgstr "既に %s があります"
+msgstr "%s jau pastāv"
 
 #: ftpedit/ftpedit/ftpconfig.py:283
 #, python-format
 msgid "%s already exists!"
-msgstr "既に %s があります!"
+msgstr "%s jau pastāv!"
 
 #: ftpedit/ftpedit/ftpconfig.py:282 ftpedit/ftpedit/ftpwindow.py:447
 #, python-format
 msgid "%s already exists. Please enter a different name."
-msgstr "既に %s があります。別の名前を入力してください。"
+msgstr "%s jau pastāv. Lūdzu, ievadiet citu nosaukumu."
 
 #: ftpedit/ftpedit/ftpwindow.py:405
 #, python-format
@@ -39,11 +39,11 @@ msgstr ""
 
 #: ftpedit/ftpedit/ftpwindow.py:126
 msgid "Configuration"
-msgstr "設定"
+msgstr "Konfigurācija"
 
 #: ftpedit/ftpedit/ftpwindow.py:148 ftpedit/ftpedit/ftpwindow.py:180
 msgid "Connect"
-msgstr "接続する"
+msgstr "Izveidot savienojumu"
 
 #: ftpedit/ftpedit/ftpwindow.py:652
 msgid "Copy URL"
@@ -51,45 +51,45 @@ msgstr ""
 
 #: ftpedit/ftpedit/ftpconfig.py:515
 msgid "Default Path:"
-msgstr "デフォルトのパス"
+msgstr "Noklusējuma ceļš:"
 
 #: ftpedit/ftpedit/ftpconfig.py:361 ftpedit/ftpedit/ftpwindow.py:638
 msgid "Delete"
-msgstr "削除"
+msgstr "Dzēst"
 
 #: ftpedit/ftpedit/ftpwindow.py:406
 #, fuzzy
 msgid "Delete File?"
-msgstr "削除"
+msgstr "Dzēst"
 
 #: ftpedit/ftpedit/ftpwindow.py:284
 msgid "Disconnect"
-msgstr "切断"
+msgstr "Pārtraukt savienojumu"
 
 #: ftpedit/ftpedit/ftpwindow.py:249
 #, fuzzy
 msgid "Disconnect from Site?"
-msgstr "切断"
+msgstr "Pārtraukt savienojumu"
 
 #: ftpedit/ftpedit/ftpwindow.py:636
 msgid "Edit"
-msgstr "編集"
+msgstr "Rediģēt"
 
 #: ftpedit/ftpedit/ftpconfig.py:518
 msgid "Encoding:"
-msgstr "エンコーディング:"
+msgstr "Kodējums:"
 
 #: ftpedit/ftpedit/ftpwindow.py:437
 msgid "Enter name for new directory."
-msgstr "新しいディレクトリの名前を入力してください。"
+msgstr "Ievadiet jaunā direktorija nosaukumu."
 
 #: ftpedit/ftpedit/ftpwindow.py:428
 msgid "Enter name for new file."
-msgstr "新しいファイルの名前を入力してください。"
+msgstr "Ievadiet jaunā faila nosaukumu."
 
 #: ftpedit/ftpedit/ftpwindow.py:394
 msgid "Enter the new name"
-msgstr "新しい名前を入力してください"
+msgstr "Ievadiet jauno nosaukumu"
 
 #: ftpedit/ftpedit/ftpwindow.py:258
 #, python-format
@@ -114,11 +114,11 @@ msgstr ""
 
 #: ftpedit/ftpedit/ftpwindow.py:588
 msgid "Filename"
-msgstr "ファイル名"
+msgstr "Faila nosaukums"
 
 #: ftpedit/ftpedit/ftpwindow.py:297
 msgid "Ftp Configuration"
-msgstr "FTPの設定"
+msgstr "FTP konfigurācija"
 
 #: ftpedit/ftpedit/ftpwindow.py:279
 msgid "Ftp Connection Error"
@@ -134,83 +134,83 @@ msgstr ""
 
 #: ftpedit/ftpedit/__init__.py:78
 msgid "Ftp File Window"
-msgstr "FTPのファイルウィンドウ"
+msgstr "FTP failu logs"
 
 #: ftpedit/ftpedit/__init__.py:77
 msgid "Ftp Window"
-msgstr "FTPのウィンドウ"
+msgstr "FTP logs"
 
 #: ftpedit/ftpedit/ftpconfig.py:500
 msgid "Host:"
-msgstr "ホスト:"
+msgstr "Resursdators:"
 
 #: ftpedit/ftpedit/ftpconfig.py:469
 msgid "Login Settings"
-msgstr "ログインの設定"
+msgstr "Pieteikšanās iestatījumi"
 
 #: ftpedit/ftpedit/ftpwindow.py:590
 msgid "Modified"
-msgstr "変更"
+msgstr "Modificēts"
 
 #: ftpedit/ftpedit/ftpconfig.py:176
 msgid "My Sites"
-msgstr "マイサイト"
+msgstr "Manas vietnes"
 
 #: ftpedit/ftpedit/ftpwindow.py:438
 msgid "New Directory"
-msgstr "新しいディレクトリ"
+msgstr "Jauns direktorijs"
 
 #: ftpedit/ftpedit/ftpwindow.py:429 ftpedit/ftpedit/ftpwindow.py:643
 msgid "New File"
-msgstr "新しいファイル"
+msgstr "Jauns fails"
 
 #: ftpedit/ftpedit/ftpwindow.py:647
 msgid "New Folder"
-msgstr "新しいフォルダ"
+msgstr "Jauna mape"
 
 #: ftpedit/ftpedit/ftpconfig.py:360 ftpedit/ftpedit/ftpconfig.py:408
 msgid "New Site"
-msgstr "新しいサイト"
+msgstr "Jauna vietne"
 
 #: ftpedit/ftpedit/ftpconfig.py:110
 msgid "Ok"
-msgstr "Ok"
+msgstr "Labi"
 
 #: ftpedit/ftpedit/ftpconfig.py:509 ftpedit/ftpedit/ftpwindow.py:140
 msgid "Password:"
-msgstr "パスワード："
+msgstr "Parole:"
 
 #: ftpedit/ftpedit/ftpconfig.py:495
 msgid "Port:"
-msgstr "ポート:"
+msgstr "Ports:"
 
 #: ftpedit/ftpedit/ftpwindow.py:631
 msgid "Refresh"
-msgstr "更新"
+msgstr "Atsvaidzināt"
 
 #: ftpedit/ftpedit/ftpwindow.py:637
 msgid "Rename"
-msgstr "名前の変更"
+msgstr "Pārdēvēt"
 
 #: ftpedit/ftpedit/ftpwindow.py:395
 msgid "Rename File"
-msgstr "ファイル名を変更する"
+msgstr "Pārdēvēt failu"
 
 #: ftpedit/ftpedit/ftpwindow.py:540
 msgid "Retrieving file"
-msgstr "ファイルを取得しています"
+msgstr "Faila iegūšana"
 
 #: ftpedit/ftpedit/ftpconfig.py:340
 msgid "Sites"
-msgstr "サイト"
+msgstr "Vietnes"
 
 #: ftpedit/ftpedit/ftpwindow.py:130
 msgid "Sites:"
-msgstr "サイト:"
+msgstr "Vietnes:"
 
 #: ftpedit/ftpedit/ftpwindow.py:589
 msgid "Size"
-msgstr "サイズ"
+msgstr "Lielums"
 
 #: ftpedit/ftpedit/ftpwindow.py:246
 #, python-format
@@ -226,14 +226,14 @@ msgstr ""
 
 #: ftpedit/ftpedit/ftpconfig.py:506
 msgid "User:"
-msgstr "ユーザ"
+msgstr "Lietotājs:"
 
 #: ftpedit/ftpedit/ftpwindow.py:135
 msgid "Username:"
-msgstr "ユーザ名:"
+msgstr "Lietotājvārds:"
 
 #~ msgid "Download"
-#~ msgstr "ダウンロード"
+#~ msgstr "Lejupielādēt"
 
 #~ msgid "Upload"
-#~ msgstr "アップロード"
+#~ msgstr "Augšuplādēt"
