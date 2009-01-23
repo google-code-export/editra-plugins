@@ -24,6 +24,7 @@ import wx
 # Editra Libraries
 import ed_txt
 from util import Log
+from extern.decorlib import anythread
 
 # Local Imports
 import ftpclient
@@ -64,6 +65,14 @@ class FtpFile(ed_txt.EdFile):
         """Cleanup the temp file"""
         self.CleanUp()
 
+    @anythread
+    def _NotifyError(self):
+        """Notify of errors"""
+        if isinstance(window, wx.Frame):
+            msg = self._client.GetLastError()
+            dlg = wx.MessageBox(unicode(msg), _("Ftp Save Error"),
+                                wx.OK|wx.CENTER|wx.ICON_ERROR)
+
     def CleanUp(self):
         """Cleanup the file object"""
         path = self.GetPath()
@@ -96,13 +105,12 @@ class FtpFile(ed_txt.EdFile):
 
         if not connected:
             # TODO: report error to upload in ui
-            err = self._client.GetLastError()
             Log("[ftpedit][err] DoFtpUpload: %s" % err)
+            self._NotifyError()
         else:
             success = self._client.Upload(self.GetPath(), self.ftppath)
             if not success:
-                # TODO: notify of failure
-                err = self._client.GetLastError()
+                self._NotifyError()
             else:
                 parent = self._client.GetParent()
                 if parent is not None:
