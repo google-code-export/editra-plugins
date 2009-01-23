@@ -103,7 +103,7 @@ class FtpWindow(ctrlbox.ControlBox):
         ed_msg.Unsubscribe(self.OnCfgUpdated)
 
         # Cleanup file notifiers
-        self.__DisconnectFiles()
+#        self.__DisconnectFiles()
 
     def __DisconnectFiles(self):
         """Disconnect opened files"""
@@ -180,7 +180,7 @@ class FtpWindow(ctrlbox.ControlBox):
         btn.SetLabel(_("Connect"))
         btn.SetBitmap(IconFile.Connect.GetBitmap())
         self._list.DeleteAllItems()
-        self.__DisconnectFiles()
+#        self.__DisconnectFiles()
         self.EnableOptions(True)
 
         # Need to create a new client
@@ -240,20 +240,20 @@ class FtpWindow(ctrlbox.ControlBox):
             e_obj = evt.GetEventObject()
             if self._connected:
                 # Warn if any ftp files are open
-                num = len(self._open)
-                if num:
-                    # TODO: use custom dialog with list of files in it
-                    result = wx.MessageBox(_("There are currently %d ftp files open.\n"
-                                             "If you disconnect now you will be unable to upload any further changes to these files.\n"
-                                             "Disconnect from site?") % num,
-                                           _("Disconnect from Site?"),
-                                           style=wx.YES_NO|wx.CENTER|wx.ICON_WARNING)
-                    if result == wx.NO:
-                        return
+#                num = len(self._open)
+#                if num:
+#                    # TODO: use custom dialog with list of files in it
+#                    result = wx.MessageBox(_("There are currently %d ftp files open.\n"
+#                                             "If you disconnect now you will be unable to upload any further changes to these files.\n"
+#                                             "Disconnect from site?") % num,
+#                                           _("Disconnect from Site?"),
+#                                           style=wx.YES_NO|wx.CENTER|wx.ICON_WARNING)
+#                    if result == wx.NO:
+#                        return
 
                 # Disconnect from server
                 result = self._client.Disconnect()
-                if result is not None:
+                if not result:
                     err = self._client.GetLastError()
                     wx.MessageBox(_("Error on disconnect:\nError:\n%s") % err,
                                   _("Ftp Error"),
