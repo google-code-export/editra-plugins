@@ -19,6 +19,7 @@ Bug Fixes:
 on Windows.
 +Fix error in deleting files where node may not have any data.
 +Fix out of order files in Source Control list.
++Fix trash detection on Windows Vista
 
 #-----------------------------------------------------------------------------#
 Version 0.7
