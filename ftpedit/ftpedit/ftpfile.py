@@ -22,13 +22,15 @@ import os
 import wx
 
 # Editra Libraries
+import ed_glob
+import ed_msg
 import ed_txt
 from util import Log
-from extern.decorlib import anythread
 
 # Local Imports
 import ftpclient
 
+_ = wx.GetTranslation
 #-----------------------------------------------------------------------------#
 
 class FtpFile(ed_txt.EdFile):
@@ -57,6 +59,13 @@ class FtpFile(ed_txt.EdFile):
         self.ftppath = ftppath
         self._site = sitedata   # dict(url, port, user, pword, path, enc)
         self._notifier = None
+        self._window = None
+        self._pid = None
+
+        window = self._client.GetParent()
+        if isinstance(window, wx.Window):
+            self._window = window.GetTopLevelParent()
+            self._pid = self._window.GetId()
 
         # Setup
         self.SetEncoding(self._site['enc'])
@@ -65,13 +74,23 @@ class FtpFile(ed_txt.EdFile):
         """Cleanup the temp file"""
         self.CleanUp()
 
-    @anythread
+    def _Busy(self, busy=True):
+        if busy:
+            ed_msg.PostMessage(ed_msg.EDMSG_PROGRESS_SHOW, (self._pid, True))
+            ed_msg.PostMessage(ed_msg.EDMSG_PROGRESS_STATE, (self._pid, -1, -1))
+        else:
+            ed_msg.PostMessage(ed_msg.EDMSG_PROGRESS_SHOW, (self._pid, False))
+
     def _NotifyError(self):
         """Notify of errors"""
         if isinstance(window, wx.Frame):
             msg = self._client.GetLastError()
             dlg = wx.MessageBox(unicode(msg), _("Ftp Save Error"),
                                 wx.OK|wx.CENTER|wx.ICON_ERROR)
+
+    def _PostStatusMsg(self, msg):
+        """Post a message to update the status text to inform of file changes"""
+        ed_msg.PostMessage(ed_msg.EDMSG_UI_SB_TXT, (ed_glob.SB_INFO, msg))
 
     def CleanUp(self):
         """Cleanup the file object"""
@@ -106,18 +125,23 @@ class FtpFile(ed_txt.EdFile):
         if not connected:
             # TODO: report error to upload in ui
             Log("[ftpedit][err] DoFtpUpload: %s" % err)
-            self._NotifyError()
+            wx.CallAfter(self._NotifyError)
+            wx.CallAfter(self._PostStatusMsg, _("Ftp upload failed: %s") % self.ftppath)
         else:
+            wx.CallAfter(self._Busy, True)
             success = self._client.Upload(self.GetPath(), self.ftppath)
             if not success:
-                self._NotifyError()
+                wx.CallAfter(self._NotifyError)
+                wx.CallAfter(self._PostStatusMsg, _("Ftp upload failed: %s") % self.ftppath)
             else:
+                wx.CallAfter(self._PostStatusMsg, _("Ftp upload succeeded: %s") % self.ftppath)
                 parent = self._client.GetParent()
                 if parent is not None:
                     files = self._client.GetFileList()
                     evt = ftpclient.FtpClientEvent(ftpclient.edEVT_FTP_REFRESH, files)
                     wx.PostEvent(parent, evt)
             self._client.Disconnect()
+            wx.CallAfter(self._Busy, False)
 
     def GetCurrentDirectory(self):
         """Hack for compatibility with FtpThread"""
