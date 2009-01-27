@@ -22,8 +22,7 @@ __revision__ = "$Revision$"
 #-----------------------------------------------------------------------------#
 # Imports
 import wx
-import subprocess
-import re
+import wx.lib.mixins.listctrl as mixins
 
 # Editra imports
 import ed_glob
@@ -34,7 +33,12 @@ import util
 import syntax.synglob as synglob
 import syntax.synextreg as synextreg
 import eclib.ctrlbox as ctrlbox
+import eclib.elistmix as elistmix
 from ed_menu import EdMenuBar
+
+# Syntax checkers
+from PhpSyntaxChecker import PhpSyntaxChecker
+from PythonSyntaxChecker import PythonSyntaxChecker
 
 #-----------------------------------------------------------------------------#
 
@@ -44,68 +48,31 @@ _ = wx.GetTranslation
 # Globals
 
 class FreezeDrawer(object):
-    def __init__(self, listCtrl):
-        self._listCtrl = listCtrl
+    """To be used in 'with' statements. Upon enter freezes the drawing
+       and thaws upon exit
+    """
+    def __init__(self, wnd):
+        self._wnd = wnd
     def __enter__(self):
-        self._listCtrl.Freeze()
+        self._wnd.Freeze()
     def __exit__(self, eT, eV, tB):
-        self._listCtrl.Thaw()
+        self._wnd.Thaw()
 
 #-----------------------------------------------------------------------------#
-class AbstractSyntaxChecker(object):
-    @staticmethod
-    def Check(fileName):
-        """ Return a list of
-            [ (Type, error, line), ... ]
-        """
-        pass
 
-class PhpSyntaxChecker(AbstractSyntaxChecker):
-    reobj = re.compile('PHP\s+Parse\s+error:\s+(?P<type>.+?),\s*(?P<error>.+)\s+in\s+(?P<file>.+)\s+on line\s+(?P<line>\d+).*', re.I)
-    @staticmethod
-    def Check(fileName):
-        try:
-            pipe = subprocess.Popen(
-                "php -l %s" % fileName, shell=False, stdout=subprocess.PIPE, stdin=None, stderr=subprocess.PIPE
-            )
-            retcode = pipe.wait()
-        except OSError, e:
-            return [ ("PHP execution error", str(e), None) ]
-        except ValueError, e:
-            return [ ("Popen() invalid args", str(e), None) ]
-        except Exception, e:
-            return [ ("Unknown Error", str(e), None) ]
-
-        #No errors
-        if (retcode == 0):
-            return []
-        errors = []
-        for line in pipe.stderr:
-            mObj = PhpSyntaxChecker.reobj.match(line.strip())
-            if mObj is None:
-                continue
-            errors.append(
-                (mObj.group('type'), mObj.group('error'), mObj.group('line'))
-            )
-        return errors
-
-class PythonSyntaxChecker(AbstractSyntaxChecker):
-    @staticmethod
-    def Check(fileName):
-        try:
-            fd = open(fileName, 'r')
-            code = fd.read().replace('\r\n', '\n').replace('\r', '\n')
-            compile(code, fileName, 'exec')
-        except SyntaxError, e:
-            return [ ("Syntax Error", e.text.rstrip(), e.lineno) ]
-        except IndentationError, e:
-            return [ ("Indentation Error", e.text.rstrip(), e.lineno) ]
-        except TypeError, e:
-            return [ ("Type Error", "Source contains NULL bytes", None) ]
-        except Exception, e:
-            return [ ("Unknown Error", str(e), None) ]
-
-        return []
+class CheckResultsList(wx.ListCtrl, mixins.ListCtrlAutoWidthMixin, elistmix.ListRowHighlighter):
+    def __init__(self, *args, **kwargs):
+        wx.ListCtrl.__init__(self, *args, **kwargs)
+        mixins.ListCtrlAutoWidthMixin.__init__(self)
+        elistmix.ListRowHighlighter.__init__(self)
+        self.InsertColumn(0, _("Type"))
+        self.InsertColumn(1, _("Error"))
+        self.InsertColumn(2, _("File"))
+        self.InsertColumn(3, _("Line"))
+        self.setResizeColumn(0)
+        self.setResizeColumn(1)
+        self.setResizeColumn(2)
+        self.setResizeColumn(3)
 
 #-----------------------------------------------------------------------------#
 class SyntaxCheckWindow(wx.Panel):
@@ -119,15 +86,10 @@ class SyntaxCheckWindow(wx.Panel):
         ed_msg.Subscribe(self.OnFileSaved, ed_msg.EDMSG_FILE_SAVED)
         self._log = wx.GetApp().GetLog()
         vbox = wx.BoxSizer(wx.VERTICAL)
-        self._listCtrl = wx.ListCtrl(
+        self._listCtrl = CheckResultsList(
             self, style=wx.LC_REPORT | wx.BORDER_NONE | wx.LC_SORT_ASCENDING
         )
         vbox.Add(self._listCtrl, 1, wx.EXPAND|wx.ALL)
-
-        self._listCtrl.InsertColumn(0, _("Type"))
-        self._listCtrl.InsertColumn(1, _("Error"))
-        self._listCtrl.InsertColumn(2, _("File"))
-        self._listCtrl.InsertColumn(3, _("Line"))
         self.SetSizer(vbox)
         self.SetAutoLayout(True)
 
@@ -144,23 +106,20 @@ class SyntaxCheckWindow(wx.Panel):
             return
 
         data = syntaxChecker.Check(fileName)
-        fD = FreezeDrawer(self._listCtrl)
-        self._listCtrl.DeleteAllItems()
+        with FreezeDrawer(self._listCtrl):
+            self._listCtrl.DeleteAllItems()
 
-        if (len(data) == 0):
-            return
+            if (len(data) == 0):
+                return
 
-        index = 0
-        for (eType, eText, eLine) in data:
-            self._listCtrl.InsertStringItem(index, str(eType))
-            self._listCtrl.SetStringItem(index, 1, str(eText))
-            self._listCtrl.SetStringItem(index, 2, fileName)
-            self._listCtrl.SetStringItem(index, 3, str(eLine))
-            index += 1
-        self._listCtrl.SetColumnWidth(0, -1)
-        self._listCtrl.SetColumnWidth(1, -1)
-        self._listCtrl.SetColumnWidth(2, -1)
-        self._listCtrl.SetColumnWidth(3, -1)
+            index = 0
+            for (eType, eText, eLine) in data:
+                self._listCtrl.InsertStringItem(index, str(eType))
+                self._listCtrl.SetStringItem(index, 1, str(eText))
+                self._listCtrl.SetStringItem(index, 2, fileName)
+                self._listCtrl.SetStringItem(index, 3, str(eLine))
+                index += 1
+            self._listCtrl.RefreshRows()
 
 #-----------------------------------------------------------------------------#
 # Implementation
