@@ -41,24 +41,17 @@ class GIT(SourceControl):
 
     def __repr__(self):
         return 'GIT.GIT()'
-    
+
     def isControlled(self, path):
-        """ Is the path controlled by GIT? 
+        """ Is the path controlled by GIT?
         The repository directory is only kept in the root of the
         project so must check recursively from given path to root
         to make sure if it is controlled or not
 
         """
-        # First make sure path is under a directory controlled by git
-        tmp = path.split(os.path.sep)
-        # TODO test this on windows
-        if not sys.platform.startswith('win'):
-            tmp.insert(0, '/')
-        plen = len(tmp)
-        for piece in xrange(plen):
-            if checkDirectory(os.path.join(*tmp[:plen - piece])):
-                break
-        else:
+
+        root = self.findRoot(path)
+        if root is None:
             return False
 
         # Path is in repo path so now check if it is tracked or not
@@ -67,6 +60,15 @@ class GIT(SourceControl):
                 return False
         else:
             return True
+
+    def findRoot(self, path):
+        """Find the repository root for given path"""
+        root = searchBackwards(path, checkDirectory)
+
+        if root is None:
+            return None
+        else:
+            return root + os.path.sep
 
     def add(self, paths):
         """Add paths to repository"""
@@ -167,19 +169,6 @@ class GIT(SourceControl):
         year = int(parts[3])
         return datetime.datetime(year, month, day, *hms)
 
-    def findRoot(self, path):
-        """Find the repository root for given path"""
-        tmp = path.split(os.path.sep)
-        # TODO test this on windows
-        if not sys.platform.startswith("win"):
-            tmp.insert(0, '/')
-        plen = len(tmp)
-        for piece in xrange(plen):
-            root = os.path.join(*tmp[:plen - piece])
-            if os.path.exists(os.path.join(root, '.git', 'HEAD')):
-                return root + os.path.sep
-        return None
-
     def status(self, paths, recursive=False, status=None):
         """Get the status of all given paths """
         # NOTE: uptodate files are not listed in output of status
@@ -192,7 +181,9 @@ class GIT(SourceControl):
             return fname
 
         root, files = self.splitFiles(paths)
+        print "ROOT", root, "FILES", files
         out = self.run(root, ['status'] + files)
+        print "OUT", out
         repo = self.findRoot(root)
         relpath = root.replace(repo, '', 1).lstrip(os.sep)
         unknown = list()
@@ -201,6 +192,7 @@ class GIT(SourceControl):
                 self.log(line)
                 current = dict()
                 line = line.lstrip('#').strip()
+                print "LINE", line
                 if line.startswith('new file:'):
                     fname = line.replace('new file:', '', 1).strip()
                     status[modpath(fname)] = dict(status='added')
@@ -232,6 +224,7 @@ class GIT(SourceControl):
             if path not in unknown:
                 status[path] = dict(status='uptodate')
 
+        print "STATUS", status
         return status
 
     def untrackedFiles(self, path):
@@ -312,6 +305,27 @@ def checkDirectory(directory):
             return True
     else:
         return False
+
+def searchBackwards(path, callback):
+    """Walk the path backwards looking for the root"""
+    # Make sure there's no trailing slash, and the path is sane.
+    # TODO should we use os.realpath instead?
+    potentialRoot = os.path.normpath(path)
+    while 1:
+        if callback(potentialRoot):
+            # We found it.
+            return potentialRoot
+
+        head, tail = os.path.split(potentialRoot)
+
+        if not tail:
+            # We checked up to the drive and found nothing.
+            break
+
+        # Check back one level.
+        potentialRoot = head
+
+    return None
 
 #-----------------------------------------------------------------------------#
 
