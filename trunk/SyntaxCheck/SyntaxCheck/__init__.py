@@ -204,7 +204,7 @@ class SyntaxCheck(plugin.Plugin):
         return item
 
     def GetMinVersion(self):
-        return "4.39"
+        return "4.40"
 
     def GetName(self):
         """The name of this plugin"""
