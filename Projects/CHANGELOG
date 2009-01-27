@@ -33,6 +33,8 @@ status of the repository.
 Bug Fixes:
 +Fix more tree control related bugs on windows
 +Fix bug with refreshing status of SVN externals
++Fix crashes when closing the config dialog on some version of wx on OSX.
++Fix GIT not working on Windows
 
 #-----------------------------------------------------------------------------#
 Version: 0.6
