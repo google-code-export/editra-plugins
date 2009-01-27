@@ -11,10 +11,21 @@ __scid__ = "$Id$"
 
 #-----------------------------------------------------------------------------#
 # Imports
-import wx, sys, os, crypto
+import os
+import sys
+import wx
 import wx.lib.mixins.listctrl as listmix
+
+# Local Imports
 import FileIcons
-import SVN, CVS, GIT, BZR
+import SVN
+import CVS
+import GIT
+import BZR
+import crypto
+
+# Editra Libraries
+import util
 
 #-----------------------------------------------------------------------------#
 # Globals
@@ -45,11 +56,7 @@ class ConfigDialog(wx.Frame):
                           size=size, style=wx.DEFAULT_DIALOG_STYLE|wx.CLOSE_BOX)
 
         # Set title bar icon win/gtk
-        try:
-            import util
-            util.SetWindowIcon(self)
-        except ImportError:
-            pass
+        util.SetWindowIcon(self)
 
         # Attributes
         panel = wx.Panel(self, size=(1, 5))
@@ -77,6 +84,12 @@ class ConfigDialog(wx.Frame):
         wx.PostEvent(self.GetParent(), 
                      ConfigDialogEvent(cfgEVT_CONFIG_EXIT,
                                        self.GetId(), self._data))
+
+        # HACK: fix crashes related to picker control and focus
+        #       events on wxMac 2.8.9. Setting the focus away from
+        #       any of the picker controls avoids the crash.
+        self._notebook.SetFocus()
+
         evt.Skip()
 
 #-----------------------------------------------------------------------------#
