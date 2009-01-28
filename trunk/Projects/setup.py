@@ -6,7 +6,7 @@ __author__ = "Kevin D. Smith <Kevin.Smith@sixquickrun.com>"
 __revision__ = "$Revision$"
 __scid__ = "$Id$"
 __doc__ = "Projects"
-__version__ = "0.7"
+__version__ = "0.8"
 
 setup(
       name    = "Projects",
@@ -14,6 +14,8 @@ setup(
       description = __doc__,
       author = "Kevin D. Smith",
       author_email = "Kevin.Smith@theMorgue.org",
+      maintainer = "Cody Precord",
+      maintainer_email = "cprecord@editra.org",
       license = "wxWindows",
       package_data={'projects' : ['locale/*/LC_MESSAGES/*.mo']},
       packages = ['projects'],

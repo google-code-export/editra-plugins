@@ -5,7 +5,7 @@
 __author__ = "Kevin D. Smith <Kevin.Smith@sixquickrun.com>"
 __revision__ = "$Revision$"
 __scid__ = "$Id$"
-__version__ = "0.7"
+__version__ = "0.8"
 
 #-----------------------------------------------------------------------------#
 # Imports
