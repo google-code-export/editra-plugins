@@ -29,6 +29,7 @@ New:
 +New source control window that can be shown in the Shelf to summarize the
 status of the repository.
 +Add shortcut for dismissing History Window
++Commit dialog remebers recent messages for quick re-entry.
 
 Bug Fixes:
 +Fix more tree control related bugs on windows
