@@ -181,9 +181,7 @@ class GIT(SourceControl):
             return fname
 
         root, files = self.splitFiles(paths)
-        print "ROOT", root, "FILES", files
         out = self.run(root, ['status'] + files)
-        print "OUT", out
         repo = self.findRoot(root)
         relpath = root.replace(repo, '', 1).lstrip(os.sep)
         unknown = list()
@@ -192,7 +190,6 @@ class GIT(SourceControl):
                 self.log(line)
                 current = dict()
                 line = line.lstrip('#').strip()
-                print "LINE", line
                 if line.startswith('new file:'):
                     fname = line.replace('new file:', '', 1).strip()
                     status[modpath(fname)] = dict(status='added')
@@ -224,7 +221,6 @@ class GIT(SourceControl):
             if path not in unknown:
                 status[path] = dict(status='uptodate')
 
-        print "STATUS", status
         return status
 
     def untrackedFiles(self, path):
