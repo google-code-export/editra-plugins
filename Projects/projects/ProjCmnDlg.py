@@ -60,6 +60,8 @@ class CommitDialog(wx.Dialog):
         wx.Dialog.__init__(self, parent, title=title)
 
         # Attributes
+        self._msgbox = wx.StaticBox(self, label=_("Message") + u":")
+        self._mbxsizer = wx.StaticBoxSizer(self._msgbox)
         self._recent = wx.Choice(self, choices=CommitDialog._TEASER_LIST)
         self._commit = wx.Button(self, wx.ID_OK, _("Commit"))
         self._commit.SetDefault()
@@ -107,33 +109,44 @@ class CommitDialog(wx.Dialog):
 
     def _DoLayout(self):
         """ Used internally to layout dialog before being shown """
+        msizer = wx.BoxSizer(wx.VERTICAL)
         sizer = wx.BoxSizer(wx.VERTICAL)
         bsizer = wx.StdDialogButtonSizer()
         esizer = wx.BoxSizer(wx.HORIZONTAL)
         rsizer = wx.BoxSizer(wx.HORIZONTAL)
 
-        sizer.Add((10, 10), 0)
+        msizer.Add((10, 10), 0)
+
+        # Message section
         rtxt = wx.StaticText(self, label=_("Recent Messages") + u":")
-        rsizer.AddMany([((10, 10), 0),
+        rsizer.AddMany([((5, 5), 0),
                         (rtxt, 0, wx.ALIGN_CENTER_VERTICAL, 5),
                         ((5, 5), 0), (self._recent, 1, wx.EXPAND),
-                        ((10, 10), 0)])
+                        ((5, 5), 0)])
         self._recent.Enable(self._recent.GetCount() > 1)
         sizer.Add(rsizer, 0, wx.EXPAND)
         sizer.Add((10, 10), 0)
 
-        esizer.AddMany([((10, 10), 0),
+        esizer.AddMany([((5, 5), 0),
                         (self._entry, 1, wx.EXPAND),
-                        ((10, 10), 0)])
+                        ((5, 5), 0)])
         sizer.Add(esizer, 0, wx.EXPAND)
+        self._mbxsizer.Add(sizer, 0, wx.EXPAND)
 
+        # Buttons
         bsizer.AddButton(self._cancel)
         bsizer.AddButton(self._commit)
         bsizer.Realize()
-        sizer.Add((8, 8), 0)
-        sizer.Add(bsizer, 0, wx.ALIGN_RIGHT)
-        sizer.Add((8, 8), 0)
-        self.SetSizer(sizer)
+
+        # Final Layout
+        msizer.Add(self._mbxsizer, 0, wx.EXPAND, 5)
+        msizer.Add((8, 8), 0)
+        msizer.Add(bsizer, 0, wx.ALIGN_RIGHT)
+        msizer.Add((8, 8), 0)
+
+        hsizer = wx.BoxSizer(wx.HORIZONTAL)
+        hsizer.AddMany([((5, 5), 0), (msizer, 1, wx.EXPAND), ((5, 5), 0)])
+        self.SetSizer(hsizer)
         self.SetInitialSize()
 
     def GetValue(self):
