@@ -1,20 +1,23 @@
-#!/usr/bin/python
 # -*- coding: utf-8 -*-
+##############################################################################
 # Name: php.py
 # Purpose: Syntax Checker plugin
 # Author: Giuseppe "Cowo" Corbelli
 # Copyright: (c) 2009 Giuseppe "Cowo" Corbelli
 # License: wxWindows License
-# Plugin Metadata
-""" Syntax checker module for PHP data
-"""
-__version__ = "0.1"
+##############################################################################
+
+""" Syntax checker module for Python data """
 
 __author__ = "Giuseppe 'Cowo' Corbelli"
 __svnid__ = "$Id$"
 __revision__ = "$Revision$"
 
+#-----------------------------------------------------------------------------#
+# Imports
 import AbstractSyntaxChecker
+
+#-----------------------------------------------------------------------------#
 
 class PythonSyntaxChecker(AbstractSyntaxChecker.AbstractSyntaxChecker):
     @staticmethod
