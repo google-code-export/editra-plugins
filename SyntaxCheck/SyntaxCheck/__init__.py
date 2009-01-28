@@ -1,10 +1,12 @@
-#!/usr/bin/python
 # -*- coding: utf-8 -*-
-# Name: __init__.py
-# Purpose: Syntax Checker plugin
-# Author: Giuseppe "Cowo" Corbelli
-# Copyright: (c) 2009 Giuseppe "Cowo" Corbelli
-# License: wxWindows License
+###############################################################################
+# Name: __init__.py                                                           #
+# Purpose: Syntax Checker plugin                                              #
+# Author: Giuseppe "Cowo" Corbelli                                            #
+# Copyright: (c) 2009 Giuseppe "Cowo" Corbelli                                #
+# License: wxWindows License                                                  #
+###############################################################################
+
 # Plugin Metadata
 """ Syntax checker plugin.
 It's a simple Shelf window that can do syntax checking for some kind of files.
@@ -75,6 +77,7 @@ class CheckResultsList(wx.ListCtrl, mixins.ListCtrlAutoWidthMixin, elistmix.List
         self.setResizeColumn(3)
 
 #-----------------------------------------------------------------------------#
+
 class SyntaxCheckWindow(wx.Panel):
     __syntaxCheckers = {
         synextreg.ID_LANG_PYTHON: PythonSyntaxChecker,
