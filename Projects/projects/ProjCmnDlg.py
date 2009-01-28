@@ -114,7 +114,8 @@ class CommitDialog(wx.Dialog):
 
         sizer.Add((10, 10), 0)
         rtxt = wx.StaticText(self, label=_("Recent Messages") + u":")
-        rsizer.AddMany([((10, 10), 0), (rtxt, 0, wx.ALIGN_LEFT, 5),
+        rsizer.AddMany([((10, 10), 0),
+                        (rtxt, 0, wx.ALIGN_CENTER_VERTICAL, 5),
                         ((5, 5), 0), (self._recent, 1, wx.EXPAND),
                         ((10, 10), 0)])
         self._recent.Enable(self._recent.GetCount() > 1)
