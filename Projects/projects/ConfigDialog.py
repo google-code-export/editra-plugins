@@ -248,10 +248,12 @@ class SourceControlConfigTab(wx.Panel):
         sc_choice = wx.Choice(self, self.ID_SC_CHOICE,
                               choices=sorted([x for x in data.getSCSystems()]))
         sc_choice.SetSelection(0)
+        sc_choice.SetToolTipString(_("Source control system"))
         hsizer.AddF(sc_choice, flags.Border(wx.ALL, 5))
-        hsizer.Add(wx.FilePickerCtrl(self, self.ID_SC_COMMAND,
-                                     style=wx.FLP_USE_TEXTCTRL), 1,
-                                     wx.EXPAND|wx.ALIGN_CENTER_VERTICAL)        
+        exe_picker = wx.FilePickerCtrl(self, self.ID_SC_COMMAND,
+                                       style=wx.FLP_USE_TEXTCTRL)
+        exe_picker.SetToolTipString(_("Executable Path"))
+        hsizer.Add(exe_picker, 1, wx.EXPAND|wx.ALIGN_CENTER_VERTICAL)
         sizer.Add(hsizer, 0, wx.EXPAND)
         
         # Repository configuration box
