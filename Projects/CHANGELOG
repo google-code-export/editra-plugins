@@ -19,7 +19,7 @@ Bug Fixes:
 on Windows.
 +Fix error in deleting files where node may not have any data.
 +Fix out of order files in Source Control list.
-+Fix trash detection on Windows Vista
++Fix trash detection on Windows Vista.
 
 #-----------------------------------------------------------------------------#
 Version 0.7
@@ -29,7 +29,7 @@ New:
 +New source control window that can be shown in the Shelf to summarize the
 status of the repository.
 +Add shortcut for dismissing History Window
-+Commit dialog remebers recent messages for quick re-entry.
++Commit dialog remembers recent messages for quick re-entry.
 
 Bug Fixes:
 +Fix more tree control related bugs on windows
