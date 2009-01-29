@@ -15,6 +15,7 @@ __revision__ = "$Revision$"
 
 #-----------------------------------------------------------------------------#
 # Imports
+import os
 import re
 import subprocess
 
@@ -28,8 +29,10 @@ class PhpSyntaxChecker(AbstractSyntaxChecker.AbstractSyntaxChecker):
     @staticmethod
     def Check(fileName):
         try:
-            pipe = subprocess.Popen("php -l %s" % fileName,
+            path, fname = os.path.split(fname)
+            pipe = subprocess.Popen("php -l %s" % fname,
                                     shell=False,
+                                    cwd=path,
                                     stdout=subprocess.PIPE,
                                     stdin=None,
                                     stderr=subprocess.PIPE)
