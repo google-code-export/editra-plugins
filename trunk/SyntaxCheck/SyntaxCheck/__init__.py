@@ -14,6 +14,7 @@ Syntax checking is triggered by the Save action.
 Currently supported languages are:
   - python: check implemented by means of compile() function
   - php: check implemented by "php -l" execution
+
 """
 __version__ = "0.1"
 
@@ -24,105 +25,19 @@ __revision__ = "$Revision$"
 #-----------------------------------------------------------------------------#
 # Imports
 import wx
-import wx.lib.mixins.listctrl as mixins
 
 # Editra imports
 import ed_glob
 import iface
 import plugin
-import ed_msg
 import util
-import syntax.synglob as synglob
-import syntax.synextreg as synextreg
-import eclib.ctrlbox as ctrlbox
-import eclib.elistmix as elistmix
-from ed_menu import EdMenuBar
 
-# Syntax checkers
-from PhpSyntaxChecker import PhpSyntaxChecker
-from PythonSyntaxChecker import PythonSyntaxChecker
-
-#-----------------------------------------------------------------------------#
-
-_ = wx.GetTranslation
+# Local Imports
+from SyntaxWindow import SyntaxCheckWindow
 
 #-----------------------------------------------------------------------------#
 # Globals
-
-class FreezeDrawer(object):
-    """To be used in 'with' statements. Upon enter freezes the drawing
-       and thaws upon exit
-    """
-    def __init__(self, wnd):
-        self._wnd = wnd
-    def __enter__(self):
-        self._wnd.Freeze()
-    def __exit__(self, eT, eV, tB):
-        self._wnd.Thaw()
-
-#-----------------------------------------------------------------------------#
-
-class CheckResultsList(wx.ListCtrl, mixins.ListCtrlAutoWidthMixin, elistmix.ListRowHighlighter):
-    def __init__(self, *args, **kwargs):
-        wx.ListCtrl.__init__(self, *args, **kwargs)
-        mixins.ListCtrlAutoWidthMixin.__init__(self)
-        elistmix.ListRowHighlighter.__init__(self)
-        self.InsertColumn(0, _("Type"))
-        self.InsertColumn(1, _("Error"))
-        self.InsertColumn(2, _("File"))
-        self.InsertColumn(3, _("Line"))
-        self.setResizeColumn(0)
-        self.setResizeColumn(1)
-        self.setResizeColumn(2)
-        self.setResizeColumn(3)
-
-#-----------------------------------------------------------------------------#
-
-class SyntaxCheckWindow(wx.Panel):
-    __syntaxCheckers = {
-        synextreg.ID_LANG_PYTHON: PythonSyntaxChecker,
-        synextreg.ID_LANG_PHP: PhpSyntaxChecker
-    }
-
-    def __init__(self, parent):
-        wx.Panel.__init__(self, parent)
-        ed_msg.Subscribe(self.OnFileSaved, ed_msg.EDMSG_FILE_SAVED)
-        self._log = wx.GetApp().GetLog()
-        vbox = wx.BoxSizer(wx.VERTICAL)
-        self._listCtrl = CheckResultsList(
-            self, style=wx.LC_REPORT | wx.BORDER_NONE | wx.LC_SORT_ASCENDING
-        )
-        vbox.Add(self._listCtrl, 1, wx.EXPAND|wx.ALL)
-        self.SetSizer(vbox)
-        self.SetAutoLayout(True)
-
-    def __del__(self):
-        ed_msg.Unsubscribe(self.OnFileSaved, ed_msg.EDMSG_FILE_SAVED)
-
-    def OnFileSaved(self, arg):
-        (fileName, fileType) = arg.GetData()
-        util.Log("[SyntaxCheckWindow][info] fileName %s" % (fileName))
-        try:
-            syntaxChecker = self.__syntaxCheckers[fileType]
-        except Exception, e:
-            util.Log("[SyntaxCheckWindow][info] Error while checking %s: %s" % (fileName, str(e)))
-            return
-
-        data = syntaxChecker.Check(fileName)
-        with FreezeDrawer(self._listCtrl):
-            self._listCtrl.DeleteAllItems()
-
-            if (len(data) == 0):
-                return
-
-            index = 0
-            for (eType, eText, eLine) in data:
-                self._listCtrl.InsertStringItem(index, str(eType))
-                self._listCtrl.SetStringItem(index, 1, str(eText))
-                self._listCtrl.SetStringItem(index, 2, fileName)
-                self._listCtrl.SetStringItem(index, 3, str(eLine))
-                index += 1
-            self._listCtrl.RefreshRows()
+_ = wx.GetTranslation
 
 #-----------------------------------------------------------------------------#
 # Implementation
@@ -166,6 +81,7 @@ class SyntaxCheck(plugin.Plugin):
         return item
 
     def GetMinVersion(self):
+        """Minimum version of Editra this plugin is compatible with"""
         return "4.40"
 
     def GetName(self):
@@ -188,6 +104,7 @@ class SyntaxCheck(plugin.Plugin):
         return SyntaxCheck.INSTALLED
 
     def IsStockable(self):
+        """This item can be reloaded between sessions"""
         return True
 
 #-----------------------------------------------------------------------------#
