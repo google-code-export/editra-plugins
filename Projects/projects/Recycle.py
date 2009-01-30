@@ -317,7 +317,7 @@ recycle = base64.b64decode(
 
 # Embed the recycle program for windows into this module
 if __name__ == '__main__':
-    s = base64.b64encode(open('recycle.exe').read())
+    s = base64.b64encode(open('recycle.exe', 'rb').read())
     lines = list()
     for piece in xrange(0, (len(s)/77)):
         lines.append(s[(piece*77):(piece*77)+77])
@@ -325,7 +325,11 @@ if __name__ == '__main__':
     line = [ "\"%s\"" % x for x in lines ]
     prog = "\n".join(line)
     module = open('Recycle.py').read()
-    module = re.compile(r'^recycle = .+$\)', re.M).sub(r"recycle = base64.b64decode(\n%s)" % prog, module)
-    open('Recycle.py','w').write(module)
-    print "Embedding was ok?", ''.join(lines) == s
-
+    match = re.compile(r'^recycle = .+"\)', re.M | re.S).search(module)
+    if match == None:
+        print "Embedding failed. No match"
+    else:
+        subst = 'recycle = base64.b64decode(\n%s)' % prog
+        module = module[:match.start()] + subst + module[match.end():]
+        open('Recycle.py','w').write(module)
+        print "Embedding was ok?", ''.join(lines) == s
