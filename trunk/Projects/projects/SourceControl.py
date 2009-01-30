@@ -206,6 +206,7 @@ class SourceControl(object):
             for key, value in sorted(self.repositories.items()):
                 if key == 'Default':
                     continue
+
                 if repository.startswith(key):
                     recursiveupdate(settings, value)
         return settings
@@ -552,6 +553,29 @@ def recursiveupdate(dest, src):
         else:
             dest[key] = value
     return dest
+
+#-----------------------------------------------------------------------------#
+
+def searchBackwards(path, callback):
+    """Walk the path backwards looking for the root"""
+    # Make sure there's no trailing slash, and the path is sane.
+    # TODO should we use os.realpath instead?
+    potentialRoot = os.path.normpath(path)
+    while 1:
+        if callback(potentialRoot):
+            # We found it.
+            return potentialRoot
+
+        head, tail = os.path.split(potentialRoot)
+
+        if not tail:
+            # We checked up to the drive and found nothing.
+            break
+
+        # Check back one level.
+        potentialRoot = head
+
+    return None
 
 #-----------------------------------------------------------------------------#
 

@@ -22,11 +22,11 @@ import datetime
 
 # Local imports
 import crypto
-from SourceControl import SourceControl, DecodeString
+import SourceControl
 
 #-----------------------------------------------------------------------------#
 
-class HG(SourceControl):
+class HG(SourceControl.SourceControl):
     """ Mercurial source control class """
     name = 'Mercurial'
     command = 'hg'
@@ -45,49 +45,41 @@ class HG(SourceControl):
 #            output.append('--password')
 #            output.append(crypto.Decrypt(options['password'], self.salt))
 #        return output
-    
+
+    def findRoot(self, path):
+        """Find the repository root for given path"""
+        root = SourceControl.searchBackwards(path, checkDirectory)
+
+        if root is None:
+            return None
+        else:
+            return root + os.path.sep
+
     def getRepository(self, path):
         """ Get the repository of a given path """
         # Make sure path is under source control
-        if not self.isControlled(path):
-            return
-
-        # Get the directory of the given path
-        if not os.path.isdir(path):
-            path = os.path.dirname(path)
-
-        rline = u''
-        # TODO recurse back till .hg directory is found
-        #
-
-        return rline
+        root = self.findRoot(path)
+        if root is None:
+            return None
+        else:
+            return root
     
     def isControlled(self, path):
         """ Is the path controlled by HG?
         @param path: string
 
         """
-        # If a directory just check if it has a .hg directory
-        if os.path.isdir(path):
-            if os.path.isfile(os.path.join(path, '.hg', 'store')):
-                return True
-
-        # See if the path is in the store directory
-        base = self.findHg(path)
-        if base is None:
+        root = self.findRoot(path)
+        if root is None:
             return False
 
-        store = os.path.join(base, '.hg', 'store', 'data')
-        relpath = path.replace(base, u'', 1)
-        datapath = os.path.join(store, relpath)
-        if os.path.isfile(path):
-            datapath += '.i'
+        # Path is in repo path so now check if it is tracked or not
+#        for item in self.untrackedFiles(path):
+#            if path.startswith(item):
+#                return False
+#        else:
+        return True
 
-        if os.path.exists(datapath):
-            return True
-
-        return False
-        
     def add(self, paths):
         """ Add paths to the repository 
         @param paths: list of strings
@@ -132,31 +124,6 @@ class HG(SourceControl):
         out = self.run(root, ['diff',] + files)
         self.closeProcess(out)
 
-    def findHg(self, path):
-        """Walk the path until the .hg directory is found
-        @return: hg path or None
-
-        """
-        if not os.path.exists(path):
-            return None
-
-        if not os.path.isdir(path):
-            path = os.path.dirname(path)
-
-        tmp = path.split(os.path.sep)
-        # TODO test this on windows
-        if not sys.platform.startswith("win"):
-            tmp.insert(0, '/')
-
-        plen = len(tmp)
-        pjoin = os.path.join
-        for piece in xrange(plen):
-            root = pjoin(*tmp[:plen - piece])
-            if os.path.exists(pjoin(root, '.hg', 'store')):
-                return root + os.path.sep
-
-        return None
-
     def makePatch(self, paths):
         """ Make a patch of the given paths 
         @param paths: list of strings
@@ -176,7 +143,7 @@ class HG(SourceControl):
         @param paths: list of strings
         @keyword history: list to return history info in
 
-#        """
+        """
 #        if history is None:
 #            history = []
 
@@ -227,33 +194,30 @@ class HG(SourceControl):
         @keyword status: dict to return status in
 
         """
-        codes = {' ':'uptodate', 'A':'added', 'C':'conflict', 'R':'deleted',
+        codes = {' ':'uptodate', 'A':'added', 'C':'uptodate', 'R':'deleted',
                  'M':'modified'}
 
         # NOTE: HG status command lists all files status relative to the
         #       root of the repository!!
-        options = ['status', '-v']
-        if not recursive:
-            options.append('-N')
+        options = ['status', '-A']
 
         root, files = self.splitFiles(paths)
-        out = self.run(root, options + self.getAuthOptions(root) + files)
+        # self.getAuthOptions(root)
+        out = self.run(root, options + files)
         if out:
             for line in out.stdout:
                 self.log(line)
                 code = line[0]
+
+                # Unknown
                 if code in '!?':
                     continue
 
-                tmp = line[8:].strip().split(' ', 1)
-                # 
+                tmp = line.strip().split(' ', 1)
                 if len(tmp) != 2:
                     continue
+                name = tmp[1]
 
-                workrev, line = tmp
-                rev, line = line.strip().split(' ', 1)
-                author, line = line.strip().split(' ', 1)
-                name = line.strip()
                 current = status[name] = {}
 
                 try:
@@ -262,6 +226,7 @@ class HG(SourceControl):
                     pass
 
             self.logOutput(out)
+
         return status
 
     def update(self, paths):
@@ -293,6 +258,7 @@ class HG(SourceControl):
                 if rev[0] == 'r':
                     rev = rev[1:]
                 options.append(rev)
+
             if date:
                 options.append('-r')
                 options.append('{%s}' % date)
@@ -305,10 +271,34 @@ class HG(SourceControl):
             else:
                 output.append(None)
         return output
-        
+
+    def untrackedFiles(self, path):
+        """ Find the untracked files under the given path """
+        root = self.splitFiles(path)[0]
+        repo = self.findRoot(root)
+        out = self.run(root, ['status', '-u'], mergeerr=True)
+        unknown = list()
+        if out:
+            start_unknown = False
+            for line in out.stdout:
+                if line and line.startswith('?'):
+                    line = line.lstrip('?').strip()
+                    unknown.append(line)
+        return unknown
+
     def salt(self):
         return '"\x17\x9f/D\xcf'
     salt = property(salt)
+
+#-----------------------------------------------------------------------------#
+
+def checkDirectory(directory):
+    """Checks if a given directory is the hg head"""
+    if os.path.isdir(directory):
+        if os.path.exists(os.path.join(directory, '.hg')):
+            return True
+    else:
+        return False
 
 #-----------------------------------------------------------------------------#
 if __name__ == '__main__':

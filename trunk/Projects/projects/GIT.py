@@ -22,7 +22,8 @@ import datetime
 import re
 
 # Local imports
-from SourceControl import SourceControl, DecodeString
+import SourceControl
+DecodeString = SourceControl.DecodeString
 
 #-----------------------------------------------------------------------------#
 # Globals
@@ -31,7 +32,7 @@ COMPAT = re.compile('commit [a-z0-9]{40}') # Commit line in log
 
 #-----------------------------------------------------------------------------#
 
-class GIT(SourceControl):
+class GIT(SourceControl.SourceControl):
     """Source control implementation to add GIT support to the 
     Projects Plugin.
 
@@ -49,7 +50,6 @@ class GIT(SourceControl):
         to make sure if it is controlled or not
 
         """
-
         root = self.findRoot(path)
         if root is None:
             return False
@@ -63,7 +63,7 @@ class GIT(SourceControl):
 
     def findRoot(self, path):
         """Find the repository root for given path"""
-        root = searchBackwards(path, checkDirectory)
+        root = SourceControl.searchBackwards(path, checkDirectory)
 
         if root is None:
             return None
@@ -301,27 +301,6 @@ def checkDirectory(directory):
             return True
     else:
         return False
-
-def searchBackwards(path, callback):
-    """Walk the path backwards looking for the root"""
-    # Make sure there's no trailing slash, and the path is sane.
-    # TODO should we use os.realpath instead?
-    potentialRoot = os.path.normpath(path)
-    while 1:
-        if callback(potentialRoot):
-            # We found it.
-            return potentialRoot
-
-        head, tail = os.path.split(potentialRoot)
-
-        if not tail:
-            # We checked up to the drive and found nothing.
-            break
-
-        # Check back one level.
-        potentialRoot = head
-
-    return None
 
 #-----------------------------------------------------------------------------#
 
