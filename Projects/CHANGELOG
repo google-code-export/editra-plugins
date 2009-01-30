@@ -7,10 +7,11 @@ Changelog:
 
 #-----------------------------------------------------------------------------#
 Version 0.8
-Released: xx/xx/2008
+Released: 01/29/2008
 
 New:
-+Some UI improvements.
++Commit dialog remebers recent messages for quick re-entry.
++Some misc UI improvements.
 +Don't synchronize with notebook when the panel is not shown on screen. To improve
 efficiency.
 
@@ -20,6 +21,8 @@ on Windows.
 +Fix error in deleting files where node may not have any data.
 +Fix out of order files in Source Control list.
 +Fix trash detection on Windows Vista.
++Fix GIT not working on Windows
++Fix crashes when closing the config dialog on some version of wx on OSX.
 
 #-----------------------------------------------------------------------------#
 Version 0.7
@@ -29,13 +32,10 @@ New:
 +New source control window that can be shown in the Shelf to summarize the
 status of the repository.
 +Add shortcut for dismissing History Window
-+Commit dialog remembers recent messages for quick re-entry.
 
 Bug Fixes:
 +Fix more tree control related bugs on windows
 +Fix bug with refreshing status of SVN externals
-+Fix crashes when closing the config dialog on some version of wx on OSX.
-+Fix GIT not working on Windows
 
 #-----------------------------------------------------------------------------#
 Version: 0.6
