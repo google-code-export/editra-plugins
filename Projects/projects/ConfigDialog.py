@@ -22,6 +22,7 @@ import SVN
 import CVS
 import GIT
 import BZR
+import HG
 import crypto
 
 # Editra Libraries
@@ -576,7 +577,7 @@ class ConfigData(dict):
                                     '*~', '*.a', '*.o', '.poem', '.dll', '._*',
                                     '.localized', '.svn', '*.pyc', '*.bak', '#*',
                                     '*.pyo','*%*', '.git', '*.previous', '*.swp',
-                                    '.#*', '.bzr']))
+                                    '.#*', '.bzr', '.hg']))
             self.setBuiltinDiff(True)
             self.setDiffProgram('opendiff')
             self.setSyncWithNotebook(True)
@@ -585,6 +586,7 @@ class ConfigData(dict):
             self.addSCSystem(SVN.SVN())
             self.addSCSystem(GIT.GIT())
             self.addSCSystem(BZR.BZR())
+            self.addSCSystem(HG.HG())
             
             self.load()
             ConfigData._created = True
