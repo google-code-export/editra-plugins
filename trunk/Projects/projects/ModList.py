@@ -411,11 +411,9 @@ class RepoModList(wx.ListCtrl,
         self._busy = running
         self.GetParent().EnableCommandBar(not running)
         fid = self.GetTopLevelParent().GetId()
-        state = (fid, 0, 0)
         if running:
-            state = (fid, -1, -1)
             ed_msg.PostMessage(ed_msg.EDMSG_PROGRESS_SHOW, (fid, True))
-            ed_msg.PostMessage(ed_msg.EDMSG_PROGRESS_STATE, state)
+            ed_msg.PostMessage(ed_msg.EDMSG_PROGRESS_STATE, (fid, -1, -1))
         else:
             ed_msg.PostMessage(ed_msg.EDMSG_PROGRESS_SHOW, (fid, False))
 
