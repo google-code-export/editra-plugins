@@ -434,6 +434,7 @@ class ProjectTree(wx.Panel):
                 if 'watcher' in data:
                     del data['watcher']
                 del data['path']
+
                 self.config.addProject(path, options=data)
         self.config.save()
 
@@ -481,14 +482,37 @@ class ProjectTree(wx.Panel):
             self.tree.SetItemBackgroundColour(node, EVEN_PROJECT_COLOR)
         return node
 
-    def removeSelectedProject(self):
-        """ Remove the selected project """
+    def removeSelectedProject(self, save=True):
+        """ Remove the selected project.
+        @keyword save: save the config (bool)
+        @return: list of projects removed
+
+        """
+        rlist = list()
         projects = self.getChildren(self.root)
         for project in self.tree.GetSelections():
             if project in projects:
+                rlist.append(self.tree.GetPyData(project)['path'])
                 self.tree.CollapseAllChildren(project)
                 self.tree.Delete(project)
-        self.saveProjects()
+
+        if save:
+            self.saveProjects()
+
+        return rlist
+
+    def removeProjects(self, remove):
+        """ Remove the projects from the tree
+        @param remove: list of projects to remove
+
+        """
+        ids = list(self.getChildren(self.root))
+        projects = self.getProjectPaths()
+        for project in remove:
+            if project in projects:
+                item = ids[projects.index(project)]
+                self.tree.CollapseAllChildren(item)
+                self.tree.Delete(item)
 
     def getProjectPaths(self):
         """ Get the paths for all projects """
@@ -520,13 +544,16 @@ class ProjectTree(wx.Panel):
         child, cookie = self.tree.GetFirstChild(parent)
         if not child or not child.IsOk():
             return
+
         yield child
         while True:
             if not parent.IsOk():
                 return
+
             child, cookie = self.tree.GetNextChild(parent, cookie)
             if not child or not child.IsOk():
                 return
+
             yield child
 
     def OnSyncNode(self, evt):
@@ -1654,6 +1681,7 @@ class ProjectPane(ctrlbox.ControlBox):
         self.timer = wx.Timer(self)
         self.isBusy = 0
         self.projects = ProjectTree(self, None)
+        self._ignore = False # Toggle ignoring update notifications on/off
 
         # Layout Panes
         self.ctrlbar = ctrlbox.ControlBar(self, style=ctrlbox.CTRLBAR_STYLE_GRADIENT)
@@ -1697,8 +1725,13 @@ class ProjectPane(ctrlbox.ControlBox):
         self.Bind(wx.EVT_TIMER, self.OnTick)
         self.Bind(ConfigDialog.EVT_CONFIG_EXIT, self.OnCfgClose)
 
+        # Editra Message Handlers
+        ed_msg.Subscribe(self.OnProjectAdded, ConfigDialog.MSG_PROJ_ADDED)
+        ed_msg.Subscribe(self.OnProjectRemoved, ConfigDialog.MSG_PROJ_REMOVED)
+
     def __del__(self):
         """Make sure the timer is stopped"""
+        ed_msg.Unsubscribe(self.OnProjectAdded)
         if self.timer.IsRunning():
             self.timer.Stop()
 
@@ -1720,9 +1753,16 @@ class ProjectPane(ctrlbox.ControlBox):
         if e_id == self.ID_ADD_PROJECT:
             dialog = wx.DirDialog(self, _('Choose a Project Directory'))
             if dialog.ShowModal() == wx.ID_OK:
-                self.projects.addProject(dialog.GetPath())
+                path = dialog.GetPath()
+                self.projects.addProject(path)
+                self._ignore = True
+                ed_msg.PostMessage(ConfigDialog.MSG_PROJ_ADDED, (path,))
+                self._ignore = False
         elif e_id == self.ID_REMOVE_PROJECT:
-            self.projects.removeSelectedProject()
+            paths = self.projects.removeSelectedProject()
+            self._ignore = True
+            ed_msg.PostMessage(ConfigDialog.MSG_PROJ_REMOVED, (paths,))
+            self._ignore = False
         elif e_id == self.ID_CONFIG:
             if not self.FindWindowById(self.ID_CFGDLG):
                 cfg = ConfigDialog.ConfigDialog(self, self.ID_CFGDLG,
@@ -1732,6 +1772,21 @@ class ProjectPane(ctrlbox.ControlBox):
                 pass
         else:
             evt.Skip()
+
+    def OnProjectAdded(self, msg):
+        """Update project views for notifications from other views that
+        a project has been added.
+
+        """
+        if not self._ignore:
+            data = msg.GetData()
+            self.projects.addProject(data[0], save=False)
+
+    def OnProjectRemoved(self, msg):
+        """ Handle updates when projects are removed by other views """
+        if not self._ignore:
+            data = msg.GetData()
+            self.projects.removeProjects(data[0])
 
     def OnShowProjects(self, evt):
         """ Shows the projects """

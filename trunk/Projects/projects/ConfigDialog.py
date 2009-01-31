@@ -33,6 +33,11 @@ import util
 
 _ = wx.GetTranslation
 
+# Messages for syncronizing views
+# msgdata == path of project
+MSG_PROJ_ADDED = ('Projects', 'Added')
+MSG_PROJ_REMOVED = ('Projects', 'Removed')
+
 #-----------------------------------------------------------------------------#
 
 # ConfigDialogg Events
