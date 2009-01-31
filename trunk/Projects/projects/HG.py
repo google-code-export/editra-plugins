@@ -24,6 +24,8 @@ import datetime
 import crypto
 import SourceControl
 
+DecodeString = SourceControl.DecodeString
+
 #-----------------------------------------------------------------------------#
 
 class HG(SourceControl.SourceControl):
@@ -156,28 +158,61 @@ class HG(SourceControl.SourceControl):
                 for line in out.stdout:
                     self.log(line)
                     if line.strip().startswith('changeset:'):
-                        pophistory = True
                         current = {'path':fname}
                         history.append(current)
+                        rev = line.split(None, 1)[1].strip()
+                        current['revision'] = DecodeString(rev)
+
                         for data in out.stdout:
                             self.log(data)
-                            rev, author, date, lines = data.split(' | ')
-                            current['revision'] = DecodeString(rev)
-                            current['author'] = DecodeString(author)
-                            current['date'] = self.str2datetime(date)
-                            current['log'] = u''
-                            self.log(out.stdout.next())
-                            break
-                    else:
-                        current['log'] += DecodeString(line)
+                            if data.startswith('user'):
+                                auth = data.split(None, 1)[1].strip()
+                                current['author'] = DecodeString(auth)
+                            elif data.startswith('date'):
+                                date = data.split(None, 1)[1].strip()
+                                current['date'] = self.str2datetime(date)
+                            elif data.startswith('summary'):
+                                log = data.split(None, 1)[1].strip()
+                                current['log'] = DecodeString(log)
+                            elif data.isspace() or not data:
+                                break
             self.logOutput(out)
-            if pophistory:
-                history.pop()
         return history
     
     def str2datetime(self, s):
         """ Convert a timestamp string to a datetime object """
-#        return datetime.datetime(*[int(y) for y in [x for x in re.split(r'[\s+/:-]', s.strip()) if x][:6]])
+        # Thu Jan 29 22:49:11 2009 -0600
+        months =  ['jan', 'feb', 'mar', 'apr', 'may', 'jun', 
+                   'jul', 'aug', 'sep', 'oct', 'nov', 'dec']
+        parts = s.split()[1:]
+        if len(parts) == 5:
+            month, day, time, year, tmp = parts
+        else:
+            return datetime.datetime(1985, 1, 1)
+
+        # Not sure what to do if months are localized....
+        if month.lower() in months:
+            month = months.index(month.lower()) + 1
+        else:
+            month = 1
+
+        if day.isdigit():
+            day = int(day)
+        else:
+            day = 1
+
+        tparts = time.split(':')
+        if len(tparts) == 3:
+            hour, min, sec = [int(x) for x in tparts]
+        else:
+            hour, min, sec = 1, 1, 1
+
+        if year.isdigit():
+            year = int(year)
+        else:
+            year = 1985
+
+        return datetime.datetime(year, month, day, hour, min, sec)
         
     def remove(self, paths):
         """ Recursively remove paths from repository 
