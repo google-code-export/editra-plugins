@@ -273,12 +273,13 @@ class HG(SourceControl.SourceControl):
             
     def revert(self, paths):
         """ Recursively revert paths to repository version """
-#        root, files = self.splitFiles(paths)
-#        if not files:
-#            files = ['.']
+        root, files = self.splitFiles(paths)
+        if not files:
+            files = ['.']
 
-#        out = self.run(root, ['revert', '-R'] + files)
-#        self.logOutput(out)
+        # Using --no-backup option to be consistent with other scsystems.
+        out = self.run(root, ['revert', '--no-backup'] + files)
+        self.logOutput(out)
             
     def fetch(self, paths, rev=None, date=None):
         """ Fetch a copy of the paths' contents """
@@ -291,21 +292,20 @@ class HG(SourceControl.SourceControl):
             options = []
             if rev:
                 options.append('-r')
-                if rev[0] == 'r':
-                    rev = rev[1:]
                 options.append(rev)
 
-            if date:
-                options.append('-r')
-                options.append('{%s}' % date)
-            
-            out = self.run(root, ['cat', '--non-interactive'] + \
-                                  options + files)
+            # XXX: Not supported?
+#            if date:
+#                options.append('-r')
+#                options.append('{%s}' % date)
+
+            out = self.run(root, ['cat',] + options + files)
             if out:
                 output.append(out.stdout.read())
                 self.logOutput(out)
             else:
                 output.append(None)
+
         return output
 
     def untrackedFiles(self, path):
