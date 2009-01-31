@@ -240,10 +240,13 @@ def GetLines(fname):
 
     """
     reader = util.GetFileReader(fname)
-    try:
-        lines = reader.readlines()
-    except (AttributeError, IOError, OSError), msg:
-        print msg
-        return -1
-    reader.close()
+    if reader != -1:
+        try:
+            lines = reader.readlines()
+        except (AttributeError, IOError, OSError), msg:
+            print msg
+            return -1
+        reader.close()
+    else:
+        lines = ['',]
     return lines

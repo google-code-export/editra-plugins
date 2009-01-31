@@ -280,8 +280,10 @@ class SourceController(object):
         # Run comparison program
         if self.config.getBuiltinDiff() or not self.config.getDiffProgram():
             diffwin.GenerateDiff(path2, path1, html=True)
-        else:
+        elif isinstance(path2, basestring) and isinstance(path2, basestring):
             subprocess.call([self.config.getDiffProgram(), path2, path1])
+        else:
+            return (None, SC_ERROR_RETRIEVAL_FAIL)
 
         return (None, SC_ERROR_NONE)
 
