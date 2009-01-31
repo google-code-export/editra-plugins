@@ -12,12 +12,12 @@ AUTHOR: Rudi Pettazzi
 
 """
 
-from ctypes import *
-import sys
-
 __author__ = ""
 __svnid__ = "$Id$"
 __revision__ = "$Revision$"
+
+from ctypes import *
+import sys
 
 # from shellapi.h
 FO_DELETE = 0x003
