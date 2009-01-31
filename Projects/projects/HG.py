@@ -74,27 +74,28 @@ class HG(SourceControl.SourceControl):
             return False
 
         # Path is in repo path so now check if it is tracked or not
-#        for item in self.untrackedFiles(path):
-#            if path.startswith(item):
-#                return False
-#        else:
-        return True
+        for item in self.untrackedFiles(path):
+            if path.endswith(item):
+                return False
+        else:
+            return True
 
     def add(self, paths):
         """ Add paths to the repository 
         @param paths: list of strings
 
         """
-#        root, files = self.splitFiles(paths)
-#        if '.' in files:
-#            root, parent = os.path.split(root)
-#            if not parent:
-#                root, parent = os.path.split(root)
-#            for i, f in enumerate(files):
-#                files[i] = os.path.join(parent, f)
+        root, files = self.splitFiles(paths)
+        if '.' in files:
+            root, parent = os.path.split(root)
+            if not parent:
+                root, parent = os.path.split(root)
 
-#        out = self.run(root, ['add'] + files)
-#        self.logOutput(out)
+            for i, f in enumerate(files):
+                files[i] = os.path.join(parent, f)
+
+        out = self.run(root, ['add'] + files)
+        self.logOutput(out)
         
     def checkout(self, paths):
         """ Checkout files at the given path 
@@ -111,9 +112,9 @@ class HG(SourceControl.SourceControl):
         @keyword message: commit message string
 
         """
-#        root, files = self.splitFiles(paths)
-#        out = self.run(root, ['commit', '-m', message] + files)
-#        self.logOutput(out)
+        root, files = self.splitFiles(paths)
+        out = self.run(root, ['commit', '-m', message] + files)
+        self.logOutput(out)
                                    
     def diff(self, paths):
         """ Run the diff program on the given files 
@@ -144,35 +145,35 @@ class HG(SourceControl.SourceControl):
         @keyword history: list to return history info in
 
         """
-#        if history is None:
-#            history = []
+        if history is None:
+            history = []
 
-#        root, files = self.splitFiles(paths)
-#        for fname in files:
-#            out = self.run(root, ['log',] + + [fname])
-#            pophistory = False
-#            if out:
-#                for line in out.stdout:
-#                    self.log(line)
-#                    if line.strip().startswith('-----------'):
-#                        pophistory = True
-#                        current = {'path':fname}
-#                        history.append(current)
-#                        for data in out.stdout:
-#                            self.log(data)
-#                            rev, author, date, lines = data.split(' | ')
-#                            current['revision'] = DecodeString(rev)
-#                            current['author'] = DecodeString(author)
-#                            current['date'] = self.str2datetime(date)
-#                            current['log'] = u''
-#                            self.log(out.stdout.next())
-#                            break
-#                    else:
-#                        current['log'] += DecodeString(line)
-#            self.logOutput(out)
-#            if pophistory:
-#                history.pop()
-#        return history
+        root, files = self.splitFiles(paths)
+        for fname in files:
+            out = self.run(root, ['log',] + [fname])
+            pophistory = False
+            if out:
+                for line in out.stdout:
+                    self.log(line)
+                    if line.strip().startswith('changeset:'):
+                        pophistory = True
+                        current = {'path':fname}
+                        history.append(current)
+                        for data in out.stdout:
+                            self.log(data)
+                            rev, author, date, lines = data.split(' | ')
+                            current['revision'] = DecodeString(rev)
+                            current['author'] = DecodeString(author)
+                            current['date'] = self.str2datetime(date)
+                            current['log'] = u''
+                            self.log(out.stdout.next())
+                            break
+                    else:
+                        current['log'] += DecodeString(line)
+            self.logOutput(out)
+            if pophistory:
+                history.pop()
+        return history
     
     def str2datetime(self, s):
         """ Convert a timestamp string to a datetime object """
