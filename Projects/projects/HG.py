@@ -323,7 +323,7 @@ class HG(SourceControl.SourceControl):
         return unknown
 
     def salt(self):
-        return '"\x17\x9f/D\xcf'
+        return '4d\x86h\xc3\xaaR$'
     salt = property(salt)
 
 #-----------------------------------------------------------------------------#
@@ -337,6 +337,7 @@ def checkDirectory(directory):
         return False
 
 #-----------------------------------------------------------------------------#
+
 if __name__ == '__main__':
     hg = HG()
     hg.add([''])
