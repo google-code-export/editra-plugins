@@ -22,7 +22,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 
     len = wcslen(wargv[1]);
 
-    if (len > MAX_PATH)
+    if (len >= MAX_PATH)
         return 1;
 
     wcscpy(filename, wargv[1]);
