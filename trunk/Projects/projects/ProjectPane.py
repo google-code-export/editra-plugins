@@ -1732,6 +1732,7 @@ class ProjectPane(ctrlbox.ControlBox):
     def __del__(self):
         """Make sure the timer is stopped"""
         ed_msg.Unsubscribe(self.OnProjectAdded)
+        ed_msg.Unsubscribe(self.OnProjectRemoved)
         if self.timer.IsRunning():
             self.timer.Stop()
 
