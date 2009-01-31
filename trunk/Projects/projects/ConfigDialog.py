@@ -695,8 +695,9 @@ class ConfigData(dict):
     
     def newSCSystem(self, instance, repositories=None):
         """ Create config object for a new source control system """
-        system = {'command':instance.command, 'instance': instance, 
-                  'repositories': {'Default':self.newSCRepository()}}
+        system = {'command'  : instance.command,
+                  'instance' : instance, 
+                  'repositories': {'Default' : self.newSCRepository()}}
         if repositories is not None:
             system['repositories'].update(repositories)
         return system
