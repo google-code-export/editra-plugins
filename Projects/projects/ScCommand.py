@@ -21,6 +21,7 @@ __revision__ = "$Revision$"
 
 #--------------------------------------------------------------------------#
 # Imports
+import time
 import wx
 import os
 import shutil
@@ -116,6 +117,8 @@ class ScCommandThread(threading.Thread):
 
 class SourceController(object):
     """Source control command controller"""
+    CACHE = dict()
+
     def __init__(self, owner):
         """Create the SourceController
         @param owner: Owner window
@@ -293,8 +296,16 @@ class SourceController(object):
                and the systems the belong to in order to improve performance
 
         """
-        for key, value in self.config.getSCSystems().items():
+        # XXX: Experimental caching of paths to speed up commands.
+        #      Currently the improvements are quite mesurable, need
+        #      to monitor memory usage and end cases though.
+        systems = self.config.getSCSystems()
+        if path in SourceController.CACHE:
+            return systems[SourceController.CACHE[path]]
+
+        for key, value in systems.items():
             if value['instance'].isControlled(path):
+                SourceController.CACHE[path] = key
                 return value
 
     def IsSingleRepository(self, paths):
