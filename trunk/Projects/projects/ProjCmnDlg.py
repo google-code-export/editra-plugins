@@ -49,6 +49,7 @@ def RetrievalErrorDlg(parent):
 
 class CommitDialog(wx.Dialog):
     """Dialog for entering commit messages"""
+    MAX_MESSAGE = 20
     RECENT_MESSAGES = [u'',]
     _TEASER_LIST = [u'',]
 
@@ -175,6 +176,10 @@ class CommitDialog(wx.Dialog):
             else:
                 teaser = txt
             CommitDialog._TEASER_LIST.insert(1, teaser)
+
+            if len(CommitDialog.RECENT_MESSAGES) > CommitDialog.MAX_MESSAGE:
+                CommitDialog.RECENT_MESSAGES.pop()
+                CommitDialog._TEASER_LIST.pop()
         evt.Skip()
 
     def SetCommitMessage(self, msg):
