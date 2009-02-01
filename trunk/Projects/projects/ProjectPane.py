@@ -1120,8 +1120,8 @@ class ProjectTree(wx.Panel):
         flag = [1]
         data['watcher'] = threading.Thread(target=self.watchDirectory,
                                            args=(path,),
-                                           kwargs={'flag':flag,
-                                                   'data':node})
+                                           kwargs={'flag' : flag,
+                                                   'data' : node})
         data['watcher'].flag = flag
         data['watcher'].start()
         self.watchers[data['watcher']] = flag
@@ -1643,8 +1643,8 @@ class ProjectTree(wx.Panel):
 
             # Do callback if something changed
             if added or modified or deleted:
-                evt = SyncNodesEvent(ppEVT_SYNC_NODES, self.GetId(),
-                                       (added, modified, deleted, data))
+                evt = SyncNodesEvent(ppEVT_SYNC_NODES, -1,
+                                     (added, modified, deleted, data))
                 wx.CallAfter(wx.PostEvent, self, evt)
 
             # Check for the kill signal every second until the delay is finished
