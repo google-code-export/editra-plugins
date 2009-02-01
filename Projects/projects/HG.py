@@ -151,13 +151,18 @@ class HG(SourceControl.SourceControl):
             history = []
 
         root, files = self.splitFiles(paths)
+        msg = u''
         for fname in files:
-            out = self.run(root, ['log',] + [fname])
-            pophistory = False
+            out = self.run(root, ['-v', 'log',] + [fname])
+            collect_msg = False
             if out:
                 for line in out.stdout:
                     self.log(line)
                     if line.strip().startswith('changeset:'):
+                        if collect_msg:
+                            current['log'] = DecodeString(msg)
+                            msg = u''
+                        collect_msg = False
                         current = {'path':fname}
                         history.append(current)
                         rev = line.split(None, 1)[1].strip()
@@ -165,17 +170,21 @@ class HG(SourceControl.SourceControl):
 
                         for data in out.stdout:
                             self.log(data)
-                            if data.startswith('user'):
+                            if data.startswith('user:'):
                                 auth = data.split(None, 1)[1].strip()
                                 current['author'] = DecodeString(auth)
-                            elif data.startswith('date'):
+                            elif data.startswith('date:'):
                                 date = data.split(None, 1)[1].strip()
                                 current['date'] = self.str2datetime(date)
-                            elif data.startswith('summary'):
-                                log = data.split(None, 1)[1].strip()
-                                current['log'] = DecodeString(log)
-                            elif data.isspace() or not data:
+                            elif data.startswith('description:'):
+                                collect_msg = True
                                 break
+                    elif collect_msg:
+                        msg += line
+
+            if len(msg):
+                current['log'] = msg
+
             self.logOutput(out)
         return history
     
