@@ -248,7 +248,6 @@ class ProjectTree(wx.Panel):
         ODD_PROJECT_COLOR = EVEN_PROJECT_COLOR = color
         self.tree = MyTreeCtrl(self, tID, wx.DefaultPosition, wx.DefaultSize,
                                wx.TR_DEFAULT_STYLE
-                               #wx.TR_HAS_BUTTONS
                                | wx.TR_EDIT_LABELS
                                | wx.TR_MULTIPLE
                                | wx.TR_HIDE_ROOT
@@ -287,7 +286,6 @@ class ProjectTree(wx.Panel):
         self.Bind(wx.EVT_SIZE, self.OnSize)
         self.Bind(wx.EVT_TREE_ITEM_EXPANDING, self.OnItemExpanding, self.tree)
         self.Bind(wx.EVT_TREE_ITEM_COLLAPSED, self.OnItemCollapsed, self.tree)
-        #self.Bind(wx.EVT_TREE_SEL_CHANGED, self.OnSelChanged, self.tree)
         #self.Bind(wx.EVT_TREE_BEGIN_LABEL_EDIT, self.OnBeginEdit, self.tree)
         self.Bind(wx.EVT_TREE_END_LABEL_EDIT, self.OnEndEdit, self.tree)
         self.Bind(wx.EVT_TREE_ITEM_ACTIVATED, self.OnActivate, self.tree)
@@ -297,7 +295,6 @@ class ProjectTree(wx.Panel):
         self.Bind(ScCommand.EVT_CMD_COMPLETE, self.OnScCommandFinish)
 
         # Notebook syncronization
-        #self.Bind(fnb.EVT_FLATNOTEBOOK_PAGE_CHANGING,
         self._mainw = self.GetGrandParent()
         nbook = self._mainw.GetNotebook()
         nbook.Bind(FNB.EVT_FLATNOTEBOOK_PAGE_CHANGED, self.OnPageChanged)
@@ -351,12 +348,8 @@ class ProjectTree(wx.Panel):
         self.Bind(wx.EVT_MENU,
                   lambda evt: self.onPopupNewFolder(), id=ID_POPUP_NFOLDER)
 
-
         self.loadProjects()
 
-        #self.tree.Bind(wx.EVT_LEFT_DCLICK, self.OnLeftDClick)
-        #self.tree.Bind(wx.EVT_RIGHT_DOWN, self.OnRightDown)
-        #self.tree.Bind(wx.EVT_RIGHT_UP, self.OnRightUp)
 
     def __del__(self):
         """ Clean up resources """
@@ -713,26 +706,9 @@ class ProjectTree(wx.Panel):
                 self.tree.SelectItem(folder)
                 break
 
-    def OnRightDown(self, event):
-        """Select tree item on mouse button right down event"""
-        item  = self.tree.HitTest(event.GetPosition())[0]
-        if item:
-            self.log.WriteText("OnRightClick: %s, %s, %s\n" %
-                               (self.tree.GetItemText(item),
-                                type(item), item.__class__))
-            self.tree.SelectItem(item)
-
-    def OnRightUp(self, event):
-        """Enable label editing with right clicks"""
-        item = self.tree.HitTest(event.GetPosition())[0]
-        if item:
-            self.log.WriteText("OnRightUp: %s (manually starting label edit)\n"
-                               % self.tree.GetItemText(item))
-            self.tree.EditLabel(item)
-
     def OnBeginEdit(self, event):
         """Begin editing of tree item"""
-        self.log.WriteText("OnBeginEdit\n")
+        self.log.WriteText("OnBeginEdit")
         event.Skip()
 
     def OnEndEdit(self, event):
@@ -755,15 +731,6 @@ class ProjectTree(wx.Panel):
             except OSError:
                 pass
 
-    def OnLeftDClick(self, event):
-        """Handle mouse events and update tree"""
-        item  = self.tree.HitTest(event.GetPosition())[0]
-        if item:
-            parent = self.tree.GetItemParent(item)
-            if parent.IsOk():
-                self.tree.SortChildren(parent)
-        event.Skip()
-
     def OnSize(self, event):
         """Reset Tree dimensions"""
         UnusedArg(event)
@@ -771,10 +738,7 @@ class ProjectTree(wx.Panel):
         self.tree.SetDimensions(0, 0, width, height)
 
     def OnItemExpanding(self, event):
-        """
-        When an item is expanded, track the contents of that directory
-
-        """
+        """When an item is expanded, track the contents of that directory"""
         parent = event.GetItem()
         if not parent:
             return
@@ -786,6 +750,7 @@ class ProjectTree(wx.Panel):
         path = data['path']
         if not os.path.isdir(path):
             return
+
         try:
             for item in os.listdir(path):
                 self.addPath(parent, item)
@@ -815,10 +780,7 @@ class ProjectTree(wx.Panel):
         self.scCommand(nodes, 'add')
 
     def scRemove(self, nodes):
-        """
-        Send an remove from repository command to current control system
-
-        """
+        """ Send an remove from repository command to current control system """
         self.scCommand(nodes, 'remove')
 
     def scUpdate(self, nodes):
@@ -1223,10 +1185,7 @@ class ProjectTree(wx.Panel):
         return node
 
     def OnItemCollapsed(self, event):
-        """
-        When an item is collapsed, quit tracking the folder contents
-
-        """
+        """ When an item is collapsed, quit tracking the folder contents """
         item = event.GetItem()
         if not item:
             return
@@ -1243,19 +1202,6 @@ class ProjectTree(wx.Panel):
             data['watcher'].flag.pop()
             del self.watchers[data['watcher']]
             del data['watcher']
-
-    def OnSelChanged(self, event):
-        """Update what item is currently selected"""
-        self.item = event.GetItem()
-        if self.item:
-            self.log.WriteText("OnSelChanged: %s\n" % \
-                                self.tree.GetItemText(self.item))
-            if wx.Platform == '__WXMSW__':
-                self.log.WriteText("BoundingRect: %s\n" %
-                                   self.tree.GetBoundingRect(self.item, True))
-            #items = self.tree.GetSelections()
-            #print map(self.tree.GetItemText, items)
-        event.Skip()
 
     def OnContextMenu(self, event):
         """ Handle showing context menu to show the commands """
@@ -1645,7 +1591,7 @@ class ProjectTree(wx.Panel):
             if added or modified or deleted:
                 evt = SyncNodesEvent(ppEVT_SYNC_NODES, -1,
                                      (added, modified, deleted, data))
-                wx.CallAfter(wx.PostEvent, self, evt)
+                wx.PostEvent(self, evt)
 
             # Check for the kill signal every second until the delay is finished
             for i in xrange(delay):
@@ -1825,7 +1771,7 @@ class ProjectPane(ctrlbox.ControlBox):
         self.busy.Show()
         self.busy.Pulse()
         self.ctrlbar.Layout()
-        self.timer.Start(100)
+        self.timer.Start(120)
 
     def StopBusy(self):
         """Stop and then hide the busy indicator"""
@@ -1839,19 +1785,4 @@ class ProjectPane(ctrlbox.ControlBox):
 
         self.busy.SetValue(0)
         wx.CallLater(1200, self.busy.Hide)
-
-#-----------------------------------------------------------------------------#
-if __name__ == '__main__':
-    class MyApp(wx.App):
-        """ Test Application """
-        def OnInit(self):
-            """ Frame for showing and testing projects outside of Editra """
-            frame = wx.Frame(None, -1, "Hello from wxPython")
-            ProjectPane(frame)
-            frame.Show(True)
-            self.SetTopWindow(frame)
-            return True
-
-    APP = MyApp(0)
-    APP.MainLoop()
 
