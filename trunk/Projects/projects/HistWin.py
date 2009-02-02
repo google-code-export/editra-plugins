@@ -29,6 +29,7 @@ import sys
 import wx.lib.mixins.listctrl as listmix
 
 # Local Imports
+from SourceControl import DecodeString
 import ScCommand
 import ProjCmnDlg
 
@@ -339,23 +340,24 @@ class HistList(wx.ListCtrl,
             if 'shortlog' not in item:
                 item['shortlog'] = log = item['log'].strip()
                 if len(log) > 45:
-                    log = log[:45] + u'...'
+                    log = DecodeString(log[:45]) + u'...'
                     item['shortlog'] = log
 
             # Create a key for searching all fields
             if 'key' not in item:
+                unilog = DecodeString(item['log'])
                 item['key'] = ('%s %s %s %s' % (item['revision'],
                                                item['date'].strftime(DATE_FORMAT),
                                                item['author'],
-                                               re.sub(r'\s+', ' ', item['log']))).lower()
+                                               re.sub(r'\s+', u' ', unilog))).lower()
 
             if append:
-                index = self.InsertStringItem(sys.maxint, '')
+                index = self.InsertStringItem(sys.maxint, u'')
             else:
                 index = self.GetNextItem(index)
                 if index == -1:
                     append = True
-                    index = self.InsertStringItem(sys.maxint, '')
+                    index = self.InsertStringItem(sys.maxint, u'')
 
             if self.GetItemText(index).strip() != item['revision']:
                 self.SetStringItem(index, 0, item['revision'])
