@@ -159,12 +159,12 @@ class BZR(SourceControl):
                     if line.strip().startswith('-----------'):
                         logstart = False
                         current = dict(path=fname, revision=None, 
-                                       author=None, date=None, log='')
+                                       author=None, date=None, log=u'')
                         history.append(current)
                     elif line.startswith('message:'):
                         logstart = True
                     elif logstart:
-                        current['log'] += line
+                        current['log'] += DecodeString(line)
                     elif line.startswith('revno:'):
                         current['revision'] = DecodeString(line.split(None, 1)[-1].strip())
                     elif line.startswith('committer:'):
