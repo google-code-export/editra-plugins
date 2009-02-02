@@ -203,6 +203,68 @@ class SyncNodesEvent(SimpleEvent):
 
 #-----------------------------------------------------------------------------#
 
+class WatcherThread(threading.Thread):
+    """Thread class for monitoring directories for changes"""
+    def __init__(self, parent, path, flag=True, data=None, delay=2):
+        threading.Thread.__init__(self)
+
+        # Attributes
+        self.parent = parent
+        self.path = path
+        self.flag = flag
+        self.data = data
+        self.delay = max(1, int(delay))
+
+    def run(self):
+        """Start the watcher"""
+        # Continuously compare directory listings for
+        old = self.getMTime(self.path)
+        while True:
+            if not self.flag:
+                return
+
+            modified, added = [], []
+            new = self.getMTime(self.path)
+            for key, mtime in new.items():
+                if key not in old:
+                    added.append(key)
+                else:
+                    if mtime > old[key]:
+                        modified.append(key)
+                    del old[key]
+            deleted = old.keys()
+
+            # Set file list up for next pass
+            old = new
+
+            # Do callback if something changed
+            if added or modified or deleted:
+                evt = SyncNodesEvent(ppEVT_SYNC_NODES, -1,
+                                     (added, modified, deleted, self.data))
+                wx.PostEvent(self.parent, evt)
+
+            # Check for the kill signal every second until the delay is finished
+            for i in xrange(self.delay):
+                if not self.flag:
+                    return
+                time.sleep(1)
+
+    @staticmethod
+    def getMTime(path):
+        """ Get last modified times of all items in path """
+        fileinfo = {}
+        try:
+            for item in os.listdir(path):
+                try:
+                    fileinfo[item] = os.stat(os.path.join(path, item))[stat.ST_MTIME]
+                except OSError:
+                    pass
+        except OSError:
+            pass
+        return fileinfo
+
+#-----------------------------------------------------------------------------#
+
 class MyTreeCtrl(wx.TreeCtrl):
     """Base class used for displaying the project files"""
     def __init__(self, parent, id_, pos, size, style, log):
@@ -357,8 +419,8 @@ class ProjectTree(wx.Panel):
         ed_msg.Unsubscribe(self.OnUpdateFont)
 
         # Kill all watcher threads
-        for value in self.watchers.values():
-            value.pop()
+        for watcher in self.watchers.keys():
+            watcher.flag = False
 
     def _setupIcons(self):
         """ Setup the icons used by the tree and menus """
@@ -425,6 +487,7 @@ class ProjectTree(wx.Panel):
             if path not in projects:
                 data = data.copy()
                 if 'watcher' in data:
+                    data['watcher'].flag = False
                     del data['watcher']
                 del data['path']
 
@@ -1079,15 +1142,12 @@ class ProjectTree(wx.Panel):
         path = data['path']
         # Start a directory watcher to keep branch in sync.
         # When the flag variable is emptied, the thread stops.
-        flag = [1]
-        data['watcher'] = threading.Thread(target=self.watchDirectory,
-                                           args=(path,),
-                                           kwargs={'flag' : flag,
-                                                   'data' : node})
-        data['watcher'].flag = flag
+        data['watcher'] = WatcherThread(self, path, True, node)
         data['watcher'].start()
-        self.watchers[data['watcher']] = flag
-        #print 'WATCHING', path, self.tree.GetItemText(node)
+        # Store reference to the thread so it can be stopped later
+        # NOTE: the mapping points to None be cause we just need a
+        #       hash to make looking up the thread easier later.
+        self.watchers[data['watcher']] = None
 
     def addPath(self, parent, name):
         """
@@ -1105,6 +1165,7 @@ class ProjectTree(wx.Panel):
             filtered out.
 
         """
+        # XXX: what is this check all about?????
         if name.endswith('\r'):
             return
 
@@ -1130,6 +1191,7 @@ class ProjectTree(wx.Panel):
             node = self.addFolder(parent, name)
         else:
             node = self.addFile(parent, name)
+
         if self.tree.GetItemParent(parent) == self.root:
             if self.tree.GetItemBackgroundColour(parent) == ODD_PROJECT_COLOR:
                 self.tree.SetItemBackgroundColour(node, ODD_BACKGROUND_COLOR)
@@ -1199,7 +1261,7 @@ class ProjectTree(wx.Panel):
         # Kill the watcher thread
         data = self.tree.GetPyData(item)
         if data and 'watcher' in data:
-            data['watcher'].flag.pop()
+            data['watcher'].flag = False
             del self.watchers[data['watcher']]
             del data['watcher']
 
@@ -1540,64 +1602,6 @@ class ProjectTree(wx.Panel):
                         break
             else:
                 nbook.OnDrop([item])
-
-    def watchDirectory(self, path, data=None, flag=True, delay=2):
-        """
-        Watch a directory for changes
-
-        Required Arguments:
-        path -- the path to watch
-        func -- callback function with four arguments for added, modified,
-                and deleted files and the data passed in
-        data -- arbitrary data that will be passed to `func`
-        flag -- if flag evaluates to false, the function should exit
-        delay -- number of seconds between each poll
-
-        """
-        def getMTime(path):
-            """ Get last modified times of all items in path """
-            fileinfo = {}
-            try:
-                for item in os.listdir(path):
-                    try:
-                        fileinfo[item] = os.stat(os.path.join(path, item))[stat.ST_MTIME]
-                    except OSError:
-                        pass
-            except OSError:
-                pass
-            return fileinfo
-
-        # Continuously compare directory listings for
-        delay = max(1, int(delay))
-        old = getMTime(path)
-        while True:
-            if not flag:
-                return
-            modified, added = [], []
-            new = getMTime(path)
-            for key, mtime in new.items():
-                if key not in old:
-                    added.append(key)
-                else:
-                    if mtime > old[key]:
-                        modified.append(key)
-                    del old[key]
-            deleted = old.keys()
-
-            # Set file list up for next pass
-            old = new
-
-            # Do callback if something changed
-            if added or modified or deleted:
-                evt = SyncNodesEvent(ppEVT_SYNC_NODES, -1,
-                                     (added, modified, deleted, data))
-                wx.PostEvent(self, evt)
-
-            # Check for the kill signal every second until the delay is finished
-            for i in xrange(delay):
-                if not flag:
-                    return
-                time.sleep(1)
 
 #-----------------------------------------------------------------------------#
 
