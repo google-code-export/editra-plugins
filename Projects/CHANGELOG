@@ -15,6 +15,7 @@ New:
 
 Bug Fixes:
 +Fix some error handling in some end cases when doing diffs.
++Fix some Unicode handling issues in Bazaar implementation.
 
 #-----------------------------------------------------------------------------#
 Version 0.8

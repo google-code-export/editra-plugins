@@ -274,10 +274,20 @@ class MyTreeCtrl(wx.TreeCtrl):
 
     def OnCompareItems(self, item1, item2):
         """Compare the text of two tree items"""
-        tup1 = (int(not(os.path.isdir(self.GetPyData(item1)['path']))),
-              self.GetItemText(item1).lower())
-        tup2 = (int(not(os.path.isdir(self.GetPyData(item2)['path']))),
-              self.GetItemText(item2).lower())
+        data = self.GetPyData(item1)
+        if data is not None:
+            path1 = int(not os.path.isdir(data['path']))
+        else:
+            path1 = 0
+        tup1 = (path1, self.GetItemText(item1).lower())
+
+        data2 = self.GetPyData(item2)
+        if data2 is not None:
+            path2 = int(not os.path.isdir(data2['path']))
+        else:
+            path2 = 0
+        tup2 = (path2, self.GetItemText(item2).lower())
+
         #self.log.WriteText('compare: ' + t1 + ' <> ' + t2 + '\n')
         if tup1 < tup2:
             return -1
@@ -625,6 +635,9 @@ class ProjectTree(wx.Panel):
         """
         added, modified, deleted, parent = evt.GetValue()
         children = {}
+        if not parent.IsOk():
+            return
+
         for child in self.getChildren(parent):
             children[self.tree.GetItemText(child)] = child
 
@@ -643,7 +656,10 @@ class ProjectTree(wx.Panel):
                     if node.IsOk() and self.tree.IsExpanded(node) and \
                        os.path.isdir(self.tree.GetPyData(node)['path']):
                         self.tree.Collapse(node)
+
                     if node.IsOk():
+                        if self.tree.ItemHasChildren(node):
+                            self.tree.DeleteChildren(node)
                         self.tree.Delete(node)
 
             # Update status on modified files
