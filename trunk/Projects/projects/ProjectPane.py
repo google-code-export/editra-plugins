@@ -225,6 +225,7 @@ class WatcherThread(threading.Thread):
 
             modified, added = [], []
             new = self.getMTime(self.path)
+
             for key, mtime in new.items():
                 if key not in old:
                     added.append(key)
@@ -660,6 +661,11 @@ class ProjectTree(wx.Panel):
                     if node.IsOk():
                         if self.tree.ItemHasChildren(node):
                             self.tree.DeleteChildren(node)
+
+                        # NOTE: Need to deselect the node before deleting
+                        #       to stop crashes from happening on Vista
+                        #       see issue 89.
+                        self.tree.UnselectItem(node)
                         self.tree.Delete(node)
 
             # Update status on modified files
