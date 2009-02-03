@@ -37,14 +37,14 @@ class PyTools(plugin.Plugin):
             self.InstallOpenModule()
         else:
             self._log("[pytools][err] Failed to install pytools plugin")
-            
+
     def InstallOpenModule(self):
         self._log("[pytools][info] Installing module opener")
         file_menu = self._mw.GetMenuBar().GetMenuByName("file")
         # Insert the Open Module command before Open Recent
         # TODO: Find the 'open recent' position in a more generic way
         file_menu.Insert(4, ID_OPEN_MODULE,
-                _("Open Python &Module\tCtrl+Shift+M"), 
+                _("Open Python &Module\tCtrl+Shift+M"),
                 _("Open the source code of a Python module from sys.path"))
 
     def GetMenuHandlers(self):
@@ -63,19 +63,20 @@ class PyTools(plugin.Plugin):
 
         """
         return list()
-    
+
     def OnOpenModule(self, evt):
+
         if evt.GetId() != ID_OPEN_MODULE:
             evt.Skip()
-        
-        mdlg = OpenModuleDialog(self._mw,
-                                message=_("Enter package/module name\n"
-                                          "(e.g 'pickle', 'wx.lib.pyshell')"),
-                                caption=_("Open module"))
+
+        mdlg = OpenModuleDialog(self._mw, caption=_("Open module"))
 
         if mdlg.ShowModal() != wx.ID_OK:
+            mdlg.Destroy()
             return
 
         filename = mdlg.GetValue()
         if filename:
+            mdlg.Destroy()
             self._mw.DoOpen(evt, filename)
+
