@@ -18,6 +18,8 @@ import wx
 import sys
 import os.path
 
+ID_OPEN_MODULE = wx.NewId()
+
 #-----------------------------------------------------------------------------#
 # Globals
 _ = wx.GetTranslation
@@ -92,15 +94,18 @@ class OpenModuleDialog(wx.Dialog):
 
         self.SetSizer(mainsizer)
 
+    def GetValue(self):
+        return self.result
+
     def OnConfirm(self, evt):
-        # TODO open file in editor (readonly?)
         n = self.listBox.GetSelection()
-        if n:
-            filename = self.listBox.GetString(n)
-            print 'opening %s in editra' % filename
+        if n >= 0:
+            self.result = self.listBox.GetString(n)
+            self.EndModal(wx.ID_OK)
 
     def OnCancel(self, evt):
-        self.Destroy()
+        self.result = None
+        self.EndModal(wx.ID_CANCEL)
 
     def OnCancelSearch(self, evt):
         self.search.SetValue('')
@@ -157,8 +162,10 @@ class OpenModuleDialog(wx.Dialog):
 # Test
 class MyApp(wx.App):
     def OnInit(self):
-        dialog = OpenModuleDialog(None, "Find module")
-        dialog.ShowModal()
+        dialog = OpenModuleDialog(None, caption=_("Open module"))
+        filename = None
+        if dialog.ShowModal() == wx.ID_OK:
+            filename = dialog.GetValue()
         if dialog:
             dialog.Destroy()
         return True
