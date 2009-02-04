@@ -2,9 +2,10 @@
 # Name: win32shell.py                                                         #
 # Purpose: ctypes wrapper for moving files to recycle bin                     #
 # Author: Rudi Pettazzi <rudi.pettazzi@gmail.com>                             #
-# Copyright: (c) 2007 Cody Precord <staff@editra.org>                         #
+# Copyright: (c) 2008 Cody Precord <staff@editra.org>                         #
 # License: wxWindows License                                                  #
 ###############################################################################
+
 """
 FILE: win32shell.py
 AUTHOR: Rudi Pettazzi
@@ -16,8 +17,13 @@ __author__ = ""
 __svnid__ = "$Id$"
 __revision__ = "$Revision$"
 
+#-----------------------------------------------------------------------------#
+# Imports
 from ctypes import *
 import sys
+
+#-----------------------------------------------------------------------------#
+# Globals
 
 # from shellapi.h
 FO_DELETE = 0x003
@@ -28,6 +34,8 @@ FOF_NOCONFIRMMKDIR = 0x0200
 FOF_NOERRORUI = 0x0400
 FOF_NO_UI = (FOF_SILENT | FOF_NOCONFIRMATION | FOF_NOERRORUI | FOF_NOCONFIRMMKDIR)
 MAX_PATH = 260
+
+#-----------------------------------------------------------------------------#
 
 # see http://msdn.microsoft.com/en-us/library/bb759795(VS.85).aspx
 # XXX check if ctypes contains c defines (e.g. DWORD) for the win32 types.
@@ -70,6 +78,8 @@ def Win32Delete(abspath, errorui=False):
     op.lpszProgressTitle = None
     result = windll.shell32.SHFileOperationW(byref(op))
     return result
+
+#-----------------------------------------------------------------------------#
 
 if __name__ == '__main__':
     import sys
