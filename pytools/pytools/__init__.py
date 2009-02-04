@@ -10,12 +10,27 @@ Various Python tools for Editra
 """
 __author__ = "Ofer Schwarz"
 __version__ = "0.1"
-
+import os
+import re
+from StringIO import StringIO
 import wx
+
 import iface
 import plugin
+import ed_msg
 
+#------------ PyTools modules section ----------------------------------------#
 from openmodule import OpenModuleDialog, ID_OPEN_MODULE
+from varchecker import HighLight
+
+
+try:
+    from foxtrot import check_vars
+except ImportError, e:
+    raise ImportError('Please, install foxtrot package at first!')
+
+
+#-----------------------------------------------------------------------------#
 
 _ = wx.GetTranslation
 #-----------------------------------------------------------------------------#
@@ -34,6 +49,8 @@ class PyTools(plugin.Plugin):
             self._log = wx.GetApp().GetLog()
             self._log("[pytools][info] Installing Pytools")
             # Install all tools
+            self.lighter = HighLight(parent)
+            self.lighter.PlugIt()
             self.InstallOpenModule()
         else:
             self._log("[pytools][err] Failed to install pytools plugin")
