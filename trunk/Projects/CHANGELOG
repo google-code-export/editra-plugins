@@ -13,6 +13,7 @@ New:
 +Add support for Mercurial source control system.
 +Synchronize adding/removing of projects between different views.
 +Improved Windows move to recyle bin (patch from Rudi Pettazzi).
++Some performance improvements.
 
 Bug Fixes:
 +Fix some error handling in some end cases when doing diffs.
