@@ -471,6 +471,15 @@ class FtpWindow(ctrlbox.ControlBox):
         @param evt: ftpclient.EVT_FTP_REFRESH
 
         """
+        # Only update the list if the event came from an object of the same
+        # directory. The directory could be different if the event came
+        # from a clone of our client.
+        cwd = self._client.GetCurrentDirectory()
+        ecwd = evt.GetDirectory()
+        if cwd != ecwd:
+            self._StartBusy(False)
+            return
+
         # No selection was set so see if one is there now
         if self._select is None:
             sel = self._list.GetFirstSelected()
@@ -493,14 +502,6 @@ class FtpWindow(ctrlbox.ControlBox):
             self._StartBusy(False)
             self._client.Disconnect()
             self._HandleDisconnect()
-            return
-
-        # Only update the list if the event came from an object of the same
-        # directory.
-        cwd = self._client.GetCurrentDirectory()
-        ecwd = evt.GetDirectory()
-        if cwd != ecwd:
-            self._StartBusy(False)
             return
 
         # Refresh the file list

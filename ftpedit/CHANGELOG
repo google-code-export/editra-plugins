@@ -5,6 +5,12 @@ License: wxWindows
 Changelog:
 
 #-----------------------------------------------------------------------------#
+Version 0.2
+Released: 0x/xx/2009
+
++Fixed bug with view getting cleared when saving a file.
+
+#-----------------------------------------------------------------------------#
 Version 0.1
 Released: 01/24/2009
 
