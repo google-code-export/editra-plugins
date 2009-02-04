@@ -1,7 +1,10 @@
 # -*- coding: utf-8 -*-
 # Setup script to build the pytools plugin. To build the plugin
-# just run 'python setup.py bdist_egg'
+# put all the external libraries into pytools package and 
+# run 'python setup.py bdist_egg'
+
 """Various Python tools for Editra"""
+
 
 __author__ = "Ofer Schwarz"
 
@@ -13,7 +16,7 @@ except ImportError:
     setup = None
 
 if setup != None:
-    setup(name='PyTools',
+    setup(name='PyToolsWithExterns',
           version='0.1',
           description=__doc__,
           author=__author__,
@@ -21,8 +24,7 @@ if setup != None:
           license="wxWindows",
           url="http://editra.org",
           platforms=["Linux", "OS X", "Windows"],
-          packages=['pytools'],
-          install_requires = ['foxtrot'],
+          packages=['pytools', 'pytools.foxtrot'],
           entry_points='''
           [Editra.plugins]
           PyTools = pytools:PyTools
