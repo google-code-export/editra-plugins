@@ -648,16 +648,17 @@ class ProjectTree(wx.Panel):
         modified = list(reversed(sorted(modified)))
         deleted = list(reversed(sorted(deleted)))
 
-        updates = []
+        # Collapse all directory nodes so their watcher threads are cleaned up
+        for item in deleted:
+            node = children[item]
+            if node.IsOk() and self.tree.IsExpanded(node):
+                self.tree.Collapse(node)
 
+        updates = []
         if children:
             for item in deleted:
                 if item in children:
                     node = children[item]
-                    if node.IsOk() and self.tree.IsExpanded(node) and \
-                       os.path.isdir(self.tree.GetPyData(node)['path']):
-                        self.tree.Collapse(node)
-
                     if node.IsOk():
                         if self.tree.ItemHasChildren(node):
                             self.tree.DeleteChildren(node)
