@@ -28,20 +28,26 @@ import stat
 
 #-----------------------------------------------------------------------------#
 OSX = WIN = False
+PYTRASH = True
 
 # Determine platform, if it's not one of these assume UNIX/Linux
 if platform.system().lower() in ('windows', 'microsoft'):
     WIN = True
-    # Install recycle.exe binary
-    import Recycle
-    env = os.environ
-    recycleexe = os.path.join(env.get('TEMP', env.get('TMP', env.get('windir','.'))),'recycle.exe')
-    exe = open(recycleexe,'wb')
-    exe.write(Recycle.recycle)
-    exe.close()
-    del exe
-    del Recycle
-    
+    try:
+        # Requires ctypes (python2.5+)
+        import _win_trash
+    except ImportError:
+        # Install recycle.exe binary for python 2.4
+        PYTRASH = False
+        import Recycle
+        env = os.environ
+        recycleexe = os.path.join(env.get('TEMP', env.get('TMP', env.get('windir','.'))),'recycle.exe')
+        exe = open(recycleexe,'wb')
+        exe.write(Recycle.recycle)
+        exe.close()
+        del exe
+        del Recycle
+        
 elif platform.mac_ver()[0]:
     OSX = True
 
@@ -105,8 +111,13 @@ def _winTrash(paths):
         # See if we can even do this
         _ensurePermissions(path)
         try:
-            rc = os.spawnv(os.P_WAIT, recycleexe, 
-                          [os.path.basename(recycleexe)] + ['"%s"'%path])
+            if PYTRASH:
+                _win_trash.Win32Delete(path, True)
+                rc = True # use the builtin win32 error dialog
+            else:
+                rc = os.spawnv(os.P_WAIT, recycleexe, 
+                              [os.path.basename(recycleexe)] + ['"%s"'%path])
+
             if rc:
                 raise TrashMoveError, ('Could not move path', path, '%s' % rc)
         except (IOError, OSError), msg:
