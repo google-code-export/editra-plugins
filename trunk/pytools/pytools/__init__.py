@@ -5,49 +5,55 @@
 # Copyright: (c) 2008 Ofer Schwarz <os.urandom@gmail.com>                     #
 # Licence: wxWindows Licence                                                  #
 ###############################################################################
+
 """
 Various Python tools for Editra
+
 """
-__author__ = "Ofer Schwarz"
+
+# Plugin Meta Data
+__author__ = "Ofer Schwarz, Rudi Pettazzi, Alexey Zankevich"
 __version__ = "0.1"
+
+#-----------------------------------------------------------------------------#
+# Imports
 import os
 import re
 from StringIO import StringIO
 import wx
 
+# Editra Imports
 import iface
 import plugin
 import ed_msg
 
-#------------ PyTools modules section ----------------------------------------#
+# Local Imports
 from openmodule import OpenModuleDialog, ID_OPEN_MODULE
 from varchecker import HighLight
-
 
 try:
     from foxtrot import check_vars
 except ImportError, e:
     raise ImportError('Please, install foxtrot package at first!')
 
-
 #-----------------------------------------------------------------------------#
+# Globals
 
 _ = wx.GetTranslation
 #-----------------------------------------------------------------------------#
 
 class PyTools(plugin.Plugin):
-    """
-    Adds Python tools to the Editra menus
-    """
+    """ Adds Python tools to the Editra menus """
     plugin.Implements(iface.MainWindowI)
 
     def PlugIt(self, parent):
         """Add menu entries"""
         if parent:
             self._mw = parent
-            # Use Editra's loggin system
+            # Use Editra's logging system
             self._log = wx.GetApp().GetLog()
             self._log("[pytools][info] Installing Pytools")
+
             # Install all tools
             self.lighter = HighLight(parent)
             self.lighter.PlugIt()
@@ -60,6 +66,7 @@ class PyTools(plugin.Plugin):
         file_menu = self._mw.GetMenuBar().GetMenuByName("file")
         # Insert the Open Module command before Open Recent
         # TODO: Find the 'open recent' position in a more generic way
+        # NOTE:CJP you can use the FindById method of wxMenu to do this
         file_menu.Insert(4, ID_OPEN_MODULE,
                 _("Open Python &Module\tCtrl+Shift+M"),
                 _("Open the source code of a Python module from sys.path"))
@@ -82,10 +89,14 @@ class PyTools(plugin.Plugin):
         return list()
 
     def OnOpenModule(self, evt):
-
+        """Show the OpenModule dialog"""
         if evt.GetId() != ID_OPEN_MODULE:
             evt.Skip()
 
+        # TODO:CJP This could cause issues when there are Multiple windows open.
+        #       as this is a singleton object so self_mw will refer to the last
+        #       main window that was openend. It would probably be better to
+        #       use wx.GetApp().GetActiveWindow to the get current window instead.
         mdlg = OpenModuleDialog(self._mw, caption=_("Open module"))
 
         if mdlg.ShowModal() != wx.ID_OK:
@@ -96,4 +107,3 @@ class PyTools(plugin.Plugin):
         if filename:
             mdlg.Destroy()
             self._mw.DoOpen(evt, filename)
-
