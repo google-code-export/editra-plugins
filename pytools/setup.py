@@ -5,7 +5,7 @@
 """Various Python tools for Editra"""
 
 
-__author__ = "Ofer Schwarz"
+__author__ = "Ofer Schwarz, Rudi Pettazzi, Alexey Zankevich"
 
 import sys
 try:
