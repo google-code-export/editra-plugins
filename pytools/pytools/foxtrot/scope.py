@@ -306,7 +306,20 @@ class ClassScope(Scope):
         '''
         dic = self.get_layer_vars()
         dic.update(self.get_outer_vars())
-        dic.pop(self.node.name)
+        if self.node.name in dic:
+            """
+            >>> class A:
+            ...     print A #<- class A should not be visible inside
+            ...             #   class's definition
+            
+            But here there is no A inside class B:
+            >>> class B:
+            ...     class A:
+            ...         print A
+            
+            So, we have to check if variable exist. If yes, remove it
+            """
+            dic.pop(self.node.name)
         return dic
 
 
