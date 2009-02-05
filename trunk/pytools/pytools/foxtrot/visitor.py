@@ -22,7 +22,8 @@ class CheckVarVisitor:
     def __init__(self):
         self.msg_list = []
         self.internal_names = dir(__builtin__)
-        self.internal_names.extend(['__file__', '__name__', '__path__', '_'])
+        self.internal_names.extend(['__file__', '__name__',
+                                    '__path__', '_', '__doc__', '__builtins__'])
         self.visit_name_lock = 0
         
     def asquire_name(self):
