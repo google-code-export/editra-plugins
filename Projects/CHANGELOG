@@ -12,7 +12,7 @@ Released: 0x/xx/2008
 New:
 +Add support for Mercurial source control system.
 +Synchronize adding/removing of projects between different views.
-+Improved Windows move to recyle bin (patch from Rudi Pettazzi).
++Improved Windows move to recyle bin feature (patch from Rudi Pettazzi).
 +Some performance improvements.
 
 Bug Fixes:
