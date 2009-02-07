@@ -113,7 +113,7 @@ def _winTrash(paths):
         try:
             if PYTRASH:
                 _win_trash.Win32Delete(path, True)
-                rc = True # use the builtin win32 error dialog
+                rc = False # use the builtin win32 error dialog
             else:
                 rc = os.spawnv(os.P_WAIT, recycleexe, 
                               [os.path.basename(recycleexe)] + ['"%s"'%path])
