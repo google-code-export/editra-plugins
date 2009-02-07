@@ -165,9 +165,6 @@ def getUserEolPref():
 
     return eol
 
-ID_PROJECTPANE = wx.NewId()
-ID_PROJECTTREE = wx.NewId()
-
 def UnusedArg(*args):
     """Dummy method to signify unused arguments
     @param arg: anything
@@ -1635,9 +1632,10 @@ class ProjectPane(ctrlbox.ControlBox):
     ID_PROJECTS = wx.NewId()
     PANE_NAME = u'Projects'
 
-    def __init__(self, parent, id_=ID_PROJECTPANE, pos=wx.DefaultPosition,
+    def __init__(self, parent, id_=wx.ID_ANY, pos=wx.DefaultPosition,
                  size=wx.DefaultSize, style=wx.NO_BORDER):
-        ctrlbox.ControlBox.__init__(self, parent)#, id_, pos, size, style)
+        ctrlbox.ControlBox.__init__(self, parent, id_, pos, size)
+        UnusedArg(style)
 
         # Attributes
         self._mw = parent       # Save ref to owner window
