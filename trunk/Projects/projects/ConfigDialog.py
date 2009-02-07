@@ -1,4 +1,11 @@
-#!/usr/bin/env python
+###############################################################################
+# Name: ConfigDialog.py                                                       #
+# Purpose: Projects Configuration Dialgo                                      #
+# Author: Kevin D. Smith <Kevin.Smith@sixquickrun.com>                        #
+# Author: Cody Precord <cprecord@editra.org>                                  #
+# Copyright: (c) 2009 Cody Precord <staff@editra.org>                         #
+# License: wxWindows License                                                  #
+###############################################################################
 
 """
 Configuration Dialog for the Projects Plugin
@@ -13,6 +20,7 @@ __scid__ = "$Id$"
 # Imports
 import os
 import sys
+import stat
 import wx
 import wx.lib.mixins.listctrl as listmix
 
@@ -26,6 +34,7 @@ import HG
 import crypto
 
 # Editra Libraries
+import ed_glob
 import util
 
 #-----------------------------------------------------------------------------#
@@ -57,8 +66,8 @@ class ConfigDialogEvent(wx.PyCommandEvent):
 
 class ConfigDialog(wx.Frame):
     """Dialog for configuring the Projects plugin settings"""
-    def __init__(self, parent, id, data, size=wx.DefaultSize):
-        wx.Frame.__init__(self, parent, id, _("Projects Configuration"), 
+    def __init__(self, parent, id_, data, size=wx.DefaultSize):
+        wx.Frame.__init__(self, parent, id_, _("Projects Configuration"), 
                           size=size, style=wx.DEFAULT_DIALOG_STYLE|wx.CLOSE_BOX)
 
         # Set title bar icon win/gtk
@@ -102,9 +111,9 @@ class ConfigDialog(wx.Frame):
 
 class ConfigNotebook(wx.Notebook):
     """Main configuration dialog notebook"""
-    def __init__(self, parent, id, data):
+    def __init__(self, parent, id_, data):
         """Create the notebook and initialize the two pages"""
-        wx.Notebook.__init__(self, parent, id, 
+        wx.Notebook.__init__(self, parent, id_, 
                              size=(450, -1), style=wx.BK_DEFAULT )
         self.AddPage(GeneralConfigTab(self, -1, data), _("General"))
         self.AddPage(SourceControlConfigTab(self, -1, data),
@@ -120,9 +129,9 @@ class GeneralConfigTab(wx.Panel):
     ID_BUILTIN_DIFF = wx.NewId()
     ID_EXTERNAL_DIFF = wx.NewId()
 
-    def __init__(self, parent, id, data):
+    def __init__(self, parent, id_, data):
         """Create the General configuration page"""
-        wx.Panel.__init__(self, parent, id)
+        wx.Panel.__init__(self, parent, id_)
         self._data = data
         
         # Layout
@@ -140,6 +149,7 @@ class GeneralConfigTab(wx.Panel):
         filters.SetToolTipString(_("Space separated list of files patterns to "
                                    "exclude from view\nThe use of wildcards "
                                    "(*) are permitted."))
+
         sizer.AddF(wx.StaticLine(self, -1, size=(-1, 1)),
                    ceflags.Border(wx.TOP|wx.BOTTOM, 10))
         sync = wx.CheckBox(self, self.ID_SYNC_WITH_NOTEBOOK,
@@ -153,7 +163,6 @@ class GeneralConfigTab(wx.Panel):
         builtin.SetValue(data.getBuiltinDiff())
         sizer.AddF(builtin, flags.Border(wx.TOP|wx.LEFT, 6))
         sizer.Add((3, 3))
-
         
         # Radio button with file selector
         hsizer = wx.BoxSizer(wx.HORIZONTAL)
@@ -162,11 +171,13 @@ class GeneralConfigTab(wx.Panel):
         hsizer.AddF(external, wx.SizerFlags().Left().Border(wx.TOP|wx.BOTTOM|wx.LEFT, 6))
         if wx.Platform == '__WXMSW__':
             hsizer.Add((3, 3))
-        hsizer.AddF(wx.FilePickerCtrl(self, self.ID_DIFF_PROGRAM,
-                                      data.getDiffProgram(),
-                                      message=_("Select diff program"),
-                                      style=wx.FLP_USE_TEXTCTRL), 
-                                      wx.SizerFlags(1).Left().Expand())
+
+        diff_pkr = wx.FilePickerCtrl(self, self.ID_DIFF_PROGRAM,
+                                     data.getDiffProgram(),
+                                     message=_("Select diff program"),
+                                     style=wx.FLP_USE_TEXTCTRL)
+        diff_pkr.SetToolTipString(_("Use a specified diff program"))
+        hsizer.AddF(diff_pkr, wx.SizerFlags(1).Left().Expand())
         sizer.AddF(hsizer, wx.SizerFlags().Left().Expand())
         
         # Extra space at bottom of panel
@@ -240,9 +251,11 @@ class SourceControlConfigTab(wx.Panel):
     ID_SC_ADD_ENV = wx.NewId()
     ID_SC_REMOVE_ENV = wx.NewId()
 
-    def __init__(self, parent, id, data):
+    def __init__(self, parent, id_, data):
         """Create the Source control configuration page"""
-        wx.Panel.__init__(self, parent, id)
+        wx.Panel.__init__(self, parent, id_)
+
+        # Attributes
         self._data = data
         
         # Layout
@@ -460,7 +473,6 @@ class SourceControlConfigTab(wx.Panel):
         evars = self._data.getSCEnvVars(sc, rep)
         evars.clear()
         item = -1
-        save = True
         while True:
             item = env.GetNextItem(item)
             if item == -1:
@@ -470,6 +482,7 @@ class SourceControlConfigTab(wx.Panel):
             evars[name] = value
     
     def OnChoiceSelected(self, evt):
+        """Handle EVT_CHOICE"""
         obj, e_id = evt.GetEventObject(), evt.GetId()
         sc = self.currentSystem
         if e_id == self.ID_SC_CHOICE:
@@ -539,8 +552,8 @@ class AutoWidthListCtrl(listmix.TextEditMixin,
         if self.editor.IsShown():
             self.CloseEditor()
             
-        x, y = evt.GetPosition()
-        row = self.HitTest((x, y))[0]
+        xpos, ypos = evt.GetPosition()
+        row = self.HitTest((xpos, ypos))[0]
         if row != self.curRow: # self.curRow keeps track of the current row
             evt.Skip()
             return
@@ -561,7 +574,7 @@ class AutoWidthListCtrl(listmix.TextEditMixin,
             loc = loc + self.GetColumnWidth(n)
             self.col_locs.append(loc)
 
-        col = bisect(self.col_locs, x + self.GetScrollPos(wx.HORIZONTAL)) - 1
+        col = bisect(self.col_locs, xpos + self.GetScrollPos(wx.HORIZONTAL)) - 1
         self.OpenEditor(col, row)
 
 #-----------------------------------------------------------------------------#
@@ -574,6 +587,8 @@ class ConfigData(dict):
     def __init__(self, data=dict()):
         """ Create the config data object """
         if not ConfigData._created:
+            dict.__init__(self)
+
             self['source-control'] = {}
             self['general'] = {}
             self['projects'] = {}
@@ -584,7 +599,10 @@ class ConfigData(dict):
                                     '*.pyo','*%*', '.git', '*.previous', '*.swp',
                                     '.#*', '.bzr', '.hg']))
             self.setBuiltinDiff(True)
-            self.setDiffProgram('opendiff')
+            if wx.Platform == '__WXMAC__':
+                self.setDiffProgram('opendiff')
+            else:
+                self.setDiffProgram('')
             self.setSyncWithNotebook(True)
             
             self.addSCSystem(CVS.CVS())
@@ -611,7 +629,7 @@ class ConfigData(dict):
     def salt(self):
         return '"\x17\x9f/D\xcf'
         
-    def addProject(self, path, options={}):
+    def addProject(self, path, options=dict()):
         """ Add a project and its options to the data """
         self['projects'][path] = options
         
@@ -643,9 +661,12 @@ class ConfigData(dict):
         """ Get all filters """
         return self['general']['filters']
         
-    def setBuiltinDiff(self, bool=True):
-        """ Set whether to use builtin diff or not """
-        self['general']['built-in-diff'] = bool
+    def setBuiltinDiff(self, use_builtin=True):
+        """ Set whether to use builtin diff or not
+        @param use_builtin: bool
+
+        """
+        self['general']['built-in-diff'] = use_builtin
         
     def getBuiltinDiff(self):
         """ Use Projects builtin diff program """
@@ -659,9 +680,12 @@ class ConfigData(dict):
         """ Get path/name of diff program to use """
         return self['general']['diff-program']
         
-    def setSyncWithNotebook(self, bool=True):
-        """ Set whether to syncronize tree with notebook or not """
-        self['general']['sync-with-notebook'] = bool
+    def setSyncWithNotebook(self, do_sync=True):
+        """ Set whether to syncronize tree with notebook or not
+        @param do_sync: bool
+
+        """
+        self['general']['sync-with-notebook'] = do_sync
     
     def getSyncWithNotebook(self):
         """ Is the tree syncronized with the notebook """
@@ -679,9 +703,12 @@ class ConfigData(dict):
         
         """
         for key, value in self.getSCSystems().items():
-            value['instance'].filters = self.getFilters()
-            value['instance'].repositories = self.getSCRepositories(key)
-            value['instance'].command = self.getSCCommand(key)
+            try:
+                value['instance'].filters = self.getFilters()
+                value['instance'].repositories = self.getSCRepositories(key)
+                value['instance'].command = self.getSCCommand(key)
+            except:
+                pass
     
     def getSCSystems(self):
         """ Get all source control systems """
@@ -697,7 +724,7 @@ class ConfigData(dict):
             del self['source-control'][name]
         except:
             pass
-    
+
     def newSCSystem(self, instance, repositories=None):
         """ Create config object for a new source control system """
         system = {'command'  : instance.command,
@@ -705,9 +732,11 @@ class ConfigData(dict):
                   'repositories': {'Default' : self.newSCRepository()}}
         if repositories is not None:
             system['repositories'].update(repositories)
+
         return system
-    
-    def newSCRepository(self):
+
+    @staticmethod
+    def newSCRepository():
         """ New empty config for a source control repository """
         return {'username':'', 'password':'', 'env':{}}
     
@@ -796,7 +825,6 @@ class ConfigData(dict):
         """ Load the saved configuration data from on disk config file """
         data = {}
         try:
-            import ed_glob, util
             filename = ed_glob.CONFIG['CACHE_DIR'] + 'Projects.config'
             conf = util.GetFileReader(filename)
             if conf != -1:
@@ -806,8 +834,9 @@ class ConfigData(dict):
                 except:
                     conf.close()
                     os.remove(filename)
-        except (ImportError, OSError):
+        except OSError:
             pass
+
         recursiveupdate(self, data)
         self.updateSCSystems()
 
@@ -815,14 +844,13 @@ class ConfigData(dict):
         """ Write the data out to disk """
         #print repr(self)
         try:
-            import ed_glob, util, stat
             filename = ed_glob.CONFIG['CACHE_DIR'] + 'Projects.config'
             conf = util.GetFileWriter(filename)
             if conf != -1:
                 conf.write(repr(self))
                 conf.close()
             os.chmod(filename, stat.S_IRUSR|stat.S_IWUSR)
-        except (ImportError, OSError):
+        except OSError:
             pass
 
 #-----------------------------------------------------------------------------#
