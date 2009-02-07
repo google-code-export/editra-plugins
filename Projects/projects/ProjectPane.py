@@ -639,9 +639,10 @@ class ProjectTree(wx.Panel):
 
         # Collapse all directory nodes so their watcher threads are cleaned up
         for item in deleted:
-            node = children[item]
-            if node.IsOk() and self.tree.IsExpanded(node):
-                self.tree.Collapse(node)
+            if item in children:
+                node = children[item]
+                if node.IsOk() and self.tree.IsExpanded(node):
+                    self.tree.Collapse(node)
 
         updates = []
         if children:
