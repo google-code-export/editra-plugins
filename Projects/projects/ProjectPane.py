@@ -1,4 +1,11 @@
-#!/usr/bin/env python
+###############################################################################
+# Name: ProjectPane.py                                                        #
+# Purpose: Project Tree View                                                  #
+# Author: Kevin D. Smith <Kevin.Smith@sixquickrun.com>                        #
+# Author: Cody Precord <cprecord@editra.org>                                  #
+# Copyright: (c) 2009 Cody Precord <staff@editra.org>                         #
+# License: wxWindows License                                                  #
+###############################################################################
 
 """
 ProjectPane
@@ -88,38 +95,8 @@ import extern.flatnotebook as FNB
 import eclib.ctrlbox as ctrlbox
 import eclib.platebtn as platebtn
 
-try:
-    EOL = profiler.Profile_Get('EOL_MODE', default=ed_glob.EOL_MODE_UNIX)
-    if EOL == ed_glob.EOL_MODE_UNIX:
-        EOL = '\n'
-    elif EOL == ed_glob.EOL_MODE_CRLF:
-        EOL = '\r\n'
-    else:
-        EOL = '\r'
-except (ValueError, AttributeError):
-    EOL = '\n'
-
-# Configure Platform specific commands
-if wx.Platform == '__WXMAC__': # MAC
-    FILEMAN = 'Finder'
-    FILEMAN_CMD = 'open'
-    TRASH = 'Trash'
-    DIFF_CMD = 'opendiff'
-elif wx.Platform == '__WXMSW__': # Windows
-    FILEMAN = 'Explorer'
-    FILEMAN_CMD = 'explorer'
-    TRASH = 'Recycle Bin'
-    DIFF_CMD = None
-else: # Other/Linux
-    # TODO how to check what desktop environment is in use
-    # this will work for Gnome but not KDE
-    FILEMAN = 'Nautilus'
-    FILEMAN_CMD = 'nautilus'
-    TRASH = 'Trash'
-    DIFF_CMD = None
-    #FILEMAN = 'Konqueror'
-    #FILEMAN_CMD = 'konqueror'
-
+#-----------------------------------------------------------------------------#
+# Globals
 ODD_PROJECT_COLOR = wx.SystemSettings_GetColour(wx.SYS_COLOUR_3DLIGHT)
 EVEN_PROJECT_COLOR = wx.SystemSettings_GetColour(wx.SYS_COLOUR_3DLIGHT)
 ODD_BACKGROUND_COLOR = wx.SystemSettings_GetColour(wx.SYS_COLOUR_LISTBOX)
@@ -172,6 +149,21 @@ def getFileTypes():
         ID_PY_FILE : {'ext':'.py', 'lbl' : _('Python File'), 'template':'#!/usr/bin/env python\n\n'},
     }
     return file_types
+
+def getUserEolPref():
+    """Get the eol preference from the user preferences"""
+    try:
+        eol = profiler.Profile_Get('EOL_MODE', default=ed_glob.EOL_MODE_UNIX)
+        if eol == ed_glob.EOL_MODE_UNIX:
+            eol = '\n'
+        elif eol == ed_glob.EOL_MODE_CRLF:
+            eol = '\r\n'
+        else:
+            eol = '\r'
+    except (ValueError, AttributeError):
+        eol = '\n'
+
+    return eol
 
 ID_PROJECTPANE = wx.NewId()
 ID_PROJECTTREE = wx.NewId()
@@ -1328,6 +1320,11 @@ class ProjectTree(wx.Panel):
             self.Bind(wx.EVT_MENU, self.onPopupNewFile, id=menu_id)
 
         # make a menu
+        if wx.Platform == '__WXMSW__':
+            trash_str = _("Move to Recycle Bin")
+        else:
+            trash_str = _("Move to Trash")
+
         menu = wx.Menu()
         items = [
             (ID_POPUP_EDIT, _('Edit'), None, True),
@@ -1355,8 +1352,7 @@ class ProjectTree(wx.Panel):
              'sc-revert', scenabled),
             addremove,
             (None, None, None, None),
-            (ID_POPUP_DELETE, _("Move to %(trash)s") % dict(trash=TRASH),
-             'delete', True),
+            (ID_POPUP_DELETE, trash_str, 'delete', True),
         ]
         for menu_id, title, icon, enabled in items:
             if menu_id is None:
@@ -1438,7 +1434,7 @@ class ProjectTree(wx.Panel):
 
         # Write template info
         f_handle = open(newpath, 'w')
-        f_handle.write(info.get('template', '').replace('\n', EOL))
+        f_handle.write(info.get('template', '').replace('\n', getUserEolPref()))
         f_handle.close()
 
     def onPopupEdit(self, event):
@@ -1473,13 +1469,15 @@ class ProjectTree(wx.Panel):
 
     def onPopupOpen(self):
         """ Open the current file using Finder """
+        cmd = util.GetFileManagerCmd()
         for fname in self.getSelectedPaths():
-            subprocess.call([FILEMAN_CMD, fname])
+            subprocess.call([cmd, fname])
 
     def onPopupReveal(self):
         """ Open the Finder to the parent directory """
+        cmd = util.GetFileManagerCmd()
         for fname in self.getSelectedPaths():
-            subprocess.call([FILEMAN_CMD, os.path.dirname(fname)])
+            subprocess.call([cmd, os.path.dirname(fname)])
 
     def onPopupRename(self):
         """ Rename the current selection """
