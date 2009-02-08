@@ -20,6 +20,7 @@ __revision__ = "$Revision$"
 #-----------------------------------------------------------------------------#
 # Imports
 from ctypes import *
+from ctypes import wintypes
 import sys
 
 #-----------------------------------------------------------------------------#
@@ -33,21 +34,20 @@ FOF_ALLOWUNDO = 0x0040
 FOF_NOCONFIRMMKDIR = 0x0200
 FOF_NOERRORUI = 0x0400
 FOF_NO_UI = (FOF_SILENT | FOF_NOCONFIRMATION | FOF_NOERRORUI | FOF_NOCONFIRMMKDIR)
-MAX_PATH = 260
+FILEOP_FLAGS = wintypes.WORD
 
 #-----------------------------------------------------------------------------#
 
 # see http://msdn.microsoft.com/en-us/library/bb759795(VS.85).aspx
-# XXX check if ctypes contains c defines (e.g. DWORD) for the win32 types.
 class SHFILEOPSTRUCT(Structure):
-    _fields_ = [("hwnd", c_int),
-                ("wFunc", c_int),
-                ("pFrom", c_wchar_p),
-                ("pTo", c_wchar_p),
-                ("fFlags", c_int),
-                ("fAnyOperationsAborted", c_int),
-                ("hNameMappings", c_int),
-                ("lpszProgressTitle", c_wchar_p) ]
+    _fields_ = [("hwnd", wintypes.HWND),
+                ("wFunc", wintypes.UINT),
+                ("pFrom", wintypes.LPCWSTR),
+                ("pTo", wintypes.LPCWSTR),
+                ("fFlags", FILEOP_FLAGS),
+                ("fAnyOperationsAborted", wintypes.BOOL),
+                ("hNameMappings", c_void_p),
+                ("lpszProgressTitle", wintypes.LPCWSTR) ]
 
 def Win32Delete(abspath, errorui=False):
     """Move the file identified by the given path to the recyle bin
@@ -60,7 +60,7 @@ def Win32Delete(abspath, errorui=False):
     """
     # filename must be less than MAX_PATH because MAX_PATH includes the '\0'
     # terminator
-    if len(abspath) >= MAX_PATH:
+    if len(abspath) >= wintypes.MAX_PATH:
         return -1
 
     flags = FOF_NOCONFIRMATION | FOF_ALLOWUNDO
@@ -85,7 +85,7 @@ if __name__ == '__main__':
     import sys
     if len(sys.argv) > 1:
         filename = sys.argv[1]
-        result = Win32Delete(filename, False)
+        result = Win32Delete(filename, True)
         print result
     else:
         print 'filename required'
