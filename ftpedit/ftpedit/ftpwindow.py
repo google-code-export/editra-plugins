@@ -323,7 +323,14 @@ class FtpWindow(ctrlbox.ControlBox):
         Profile_Set(CONFIG_KEY, ftpconfig.ConfigData.GetData())
 
         # Update view for new data
-        self.RefreshControlBar()
+        # XXX: got an odd assertion error about an incorrect dc once
+        #      not sure how it could happen other then if the windows was
+        #      being deleted when this was called.
+        if not self.IsBeingDeleted():
+            try:
+                self.RefreshControlBar()
+            except wx.PyAssertionError:
+                pass
 
     def OnDownload(self, evt):
         """File download has completed
