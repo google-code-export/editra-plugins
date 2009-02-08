@@ -152,6 +152,9 @@ class VarFactory:
     def fromImport(self, node):
         varlist = []
         for name, asname in node.names:
+            #assign dotted names as ordinal names
+            #for example: import os.path will create variable os
+            name = name.strip('.').split('.')[0]
             if asname:
                 varlist.append(Var(asname))
             elif not name == '*':
