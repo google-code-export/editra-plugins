@@ -5,16 +5,15 @@
 # Copyright: (c) 2008 Cody Precord <staff@editra.org>                         #
 # License: wxWindows License                                                  #
 ###############################################################################
-
+# Plugin Metadata
 """Edit files over ftp (Editra > 0.4.28)"""
 
 __author__ = "Cody Precord <cprecord@editra.org>"
-__version__ = "0.1"
+__version__ = "0.2"
 __svnid__ = "$Id$"
 __revision__ = "$Revision$"
 
 #-----------------------------------------------------------------------------#
-
 # Imports
 import wx 
 
