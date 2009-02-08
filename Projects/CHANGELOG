@@ -14,6 +14,7 @@ New:
 +Synchronize adding/removing of projects between different views.
 +Improved Windows move to recyle bin feature (patch from Rudi Pettazzi).
 +Some performance improvements.
++Add Spanish and Polish translations.
 
 Bug Fixes:
 +Fix some error handling in some end cases when doing diffs.
