@@ -90,8 +90,17 @@ class RepoModBox(ctrlbox.ControlBox):
         self.Bind(wx.EVT_CHOICE, self.OnChoice, id=ID_REPO_CHOICE)
 #        self.Bind(wx.EVT_UPDATE_UI, self.OnUpdateUI)
 
+        # Handlers for projects messages sent over editra message bus
+        ed_msg.Subscribe(self.OnProjectAdded, ConfigDialog.MSG_PROJ_ADDED)
+        ed_msg.Subscribe(self.OnProjectRemoved, ConfigDialog.MSG_PROJ_REMOVED)
+
         # Do a refresh when first shown
         wx.CallLater(500, self.DoStatusRefresh)
+
+    def __del__(self):
+        """Destructor"""
+        ed_msg.Unsubscribe(self.OnProjectAdded)
+        ed_msg.Unsubscribe(self.OnProjectRemoved)
 
     def __DoLayout(self):
         """Layout and setup the results screen ui"""
@@ -99,20 +108,10 @@ class RepoModBox(ctrlbox.ControlBox):
         if wx.Platform == '__WXGTK__':
             ctrlbar.SetWindowStyle(ctrlbox.CTRLBAR_STYLE_DEFAULT)
 
-        def cmptup(x, y):
-            if x[1] < y[1]:
-                return -1
-            elif x[1] == y[1]:
-                return 0
-            else:
-                return 1
-
         # Repository
+        labels = self._RefreshRepos()
         ctrlbar.AddControl(wx.StaticText(ctrlbar, label=_("Repository") + u":"))
-        projects = sorted([(x, os.path.basename(x)) for x in self._repos], cmptup)
-        self._repos = [x[0] for x in projects]
-        self._repo_ch = wx.Choice(ctrlbar, ID_REPO_CHOICE,
-                                  choices=[x[1] for x in projects])
+        self._repo_ch = wx.Choice(ctrlbar, ID_REPO_CHOICE, choices=labels)
         if len(self._repos):
             self._repo_ch.SetToolTipString(self._repos[0])
         ctrlbar.AddControl(self._repo_ch)
@@ -146,6 +145,23 @@ class RepoModBox(ctrlbox.ControlBox):
         ctrlbar.SetVMargin(1, 1)
         self.SetControlBar(ctrlbar)
         self.SetWindow(self._list)
+
+    def _RefreshRepos(self):
+        """Refresh the list of repositories choices
+        @note: updates self._repos
+        @return: choice label list
+
+        """
+        def cmptup(x, y):
+            if x[1] < y[1]:
+                return -1
+            elif x[1] == y[1]:
+                return 0
+            else:
+                return 1
+        projects = sorted([(x, os.path.basename(x)) for x in self._repos], cmptup)
+        self._repos = [x[0] for x in projects]
+        return [x[1] for x in projects]
 
     def DoCommit(self):
         """Commit the selected files"""
@@ -224,6 +240,49 @@ class RepoModBox(ctrlbox.ControlBox):
             self.DoStatusRefresh()
         else:
             evt.Skip()
+
+    def OnProjectAdded(self, msg):
+        """Project added notifier"""
+        if self._repo_ch is not None:
+            data = msg.GetData()
+            repos = self.FindRepos([data[0],])
+            if len(repos):
+                for repo in repos:
+                    if repo not in self._repos:
+                        self._repos.append(repo)
+
+                labels = self._RefreshRepos()
+                csel = self._repo_ch.GetStringSelection()
+                self._repo_ch.SetItems(labels)
+                if csel in labels:
+                    self._repo_ch.SetStringSelection(csel)
+                else:
+                    self._repo_ch.SetSelection(0)
+
+            # Refresh the view
+            wx.CallLater(250, self.DoStatusRefresh)
+
+    def OnProjectRemoved(self, msg):
+        """Project removed notifier"""
+        if self._repo_ch is not None:
+            data = msg.GetData()
+            repo = data[0]
+
+            for repo in data[0]:
+                if repo in self._repos:
+                    self._repos.remove(repo)
+
+            # Update the choice list
+            labels = self._RefreshRepos()
+            csel = self._repo_ch.GetStringSelection()
+            self._repo_ch.SetItems(labels)
+            if csel in labels:
+                self._repo_ch.SetStringSelection(csel)
+            else:
+                self._repo_ch.SetSelection(0)
+
+            # Refresh the view
+            wx.CallLater(250, self.DoStatusRefresh)
 
     def OnUpdateUI(self, evt):
         """Update UI of buttons based on state of list
