@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2009-01-21 21:48-0600\n"
+"POT-Creation-Date: 2009-02-08 13:48-0600\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -16,7 +16,7 @@ msgstr ""
 "Content-Type: text/plain; charset=CHARSET\n"
 "Content-Transfer-Encoding: 8bit\n"
 
-#: ftpedit/ftpedit/ftpwindow.py:448
+#: ftpedit/ftpedit/ftpwindow.py:455
 #, python-format
 msgid "%s already exists"
 msgstr ""
@@ -26,12 +26,12 @@ msgstr ""
 msgid "%s already exists!"
 msgstr ""
 
-#: ftpedit/ftpedit/ftpconfig.py:282 ftpedit/ftpedit/ftpwindow.py:447
+#: ftpedit/ftpedit/ftpconfig.py:282 ftpedit/ftpedit/ftpwindow.py:454
 #, python-format
 msgid "%s already exists. Please enter a different name."
 msgstr ""
 
-#: ftpedit/ftpedit/ftpwindow.py:405
+#: ftpedit/ftpedit/ftpwindow.py:412
 #, python-format
 msgid "Are you sure you want to delete %s?"
 msgstr ""
@@ -44,7 +44,7 @@ msgstr ""
 msgid "Connect"
 msgstr ""
 
-#: ftpedit/ftpedit/ftpwindow.py:652
+#: ftpedit/ftpedit/ftpwindow.py:660
 msgid "Copy URL"
 msgstr ""
 
@@ -52,11 +52,11 @@ msgstr ""
 msgid "Default Path:"
 msgstr ""
 
-#: ftpedit/ftpedit/ftpconfig.py:361 ftpedit/ftpedit/ftpwindow.py:638
+#: ftpedit/ftpedit/ftpconfig.py:361 ftpedit/ftpedit/ftpwindow.py:646
 msgid "Delete"
 msgstr ""
 
-#: ftpedit/ftpedit/ftpwindow.py:406
+#: ftpedit/ftpedit/ftpwindow.py:413
 msgid "Delete File?"
 msgstr ""
 
@@ -64,11 +64,7 @@ msgstr ""
 msgid "Disconnect"
 msgstr ""
 
-#: ftpedit/ftpedit/ftpwindow.py:249
-msgid "Disconnect from Site?"
-msgstr ""
-
-#: ftpedit/ftpedit/ftpwindow.py:636
+#: ftpedit/ftpedit/ftpwindow.py:644
 msgid "Edit"
 msgstr ""
 
@@ -76,15 +72,15 @@ msgstr ""
 msgid "Encoding:"
 msgstr ""
 
-#: ftpedit/ftpedit/ftpwindow.py:437
+#: ftpedit/ftpedit/ftpwindow.py:444
 msgid "Enter name for new directory."
 msgstr ""
 
-#: ftpedit/ftpedit/ftpwindow.py:428
+#: ftpedit/ftpedit/ftpwindow.py:435
 msgid "Enter name for new file."
 msgstr ""
 
-#: ftpedit/ftpedit/ftpwindow.py:394
+#: ftpedit/ftpedit/ftpwindow.py:401
 msgid "Enter the new name"
 msgstr ""
 
@@ -96,12 +92,12 @@ msgid ""
 "%s"
 msgstr ""
 
-#: ftpedit/ftpedit/ftpwindow.py:490
+#: ftpedit/ftpedit/ftpwindow.py:506
 #, python-format
 msgid "Error: %s"
 msgstr ""
 
-#: ftpedit/ftpedit/ftpwindow.py:342
+#: ftpedit/ftpedit/ftpwindow.py:349
 #, python-format
 msgid ""
 "Failed to download %(file)s\n"
@@ -109,7 +105,7 @@ msgid ""
 "%(err)s"
 msgstr ""
 
-#: ftpedit/ftpedit/ftpwindow.py:588
+#: ftpedit/ftpedit/ftpwindow.py:596
 msgid "Filename"
 msgstr ""
 
@@ -121,20 +117,34 @@ msgstr ""
 msgid "Ftp Connection Error"
 msgstr ""
 
-#: ftpedit/ftpedit/ftpwindow.py:344
+#: ftpedit/ftpedit/ftpwindow.py:351
 msgid "Ftp Download Failed"
 msgstr ""
 
-#: ftpedit/ftpedit/ftpwindow.py:259 ftpedit/ftpedit/ftpwindow.py:490
+#: ftpedit/ftpedit/ftpwindow.py:259 ftpedit/ftpedit/ftpwindow.py:506
 msgid "Ftp Error"
 msgstr ""
 
-#: ftpedit/ftpedit/__init__.py:78
+#: ftpedit/ftpedit/__init__.py:77
 msgid "Ftp File Window"
 msgstr ""
 
-#: ftpedit/ftpedit/__init__.py:77
+#: ftpedit/ftpedit/ftpfile.py:88
+msgid "Ftp Save Error"
+msgstr ""
+
+#: ftpedit/ftpedit/__init__.py:76
 msgid "Ftp Window"
+msgstr ""
+
+#: ftpedit/ftpedit/ftpfile.py:129 ftpedit/ftpedit/ftpfile.py:135
+#, python-format
+msgid "Ftp upload failed: %s"
+msgstr ""
+
+#: ftpedit/ftpedit/ftpfile.py:137
+#, python-format
+msgid "Ftp upload succeeded: %s"
 msgstr ""
 
 #: ftpedit/ftpedit/ftpconfig.py:500
@@ -145,7 +155,7 @@ msgstr ""
 msgid "Login Settings"
 msgstr ""
 
-#: ftpedit/ftpedit/ftpwindow.py:590
+#: ftpedit/ftpedit/ftpwindow.py:598
 msgid "Modified"
 msgstr ""
 
@@ -153,15 +163,15 @@ msgstr ""
 msgid "My Sites"
 msgstr ""
 
-#: ftpedit/ftpedit/ftpwindow.py:438
+#: ftpedit/ftpedit/ftpwindow.py:445
 msgid "New Directory"
 msgstr ""
 
-#: ftpedit/ftpedit/ftpwindow.py:429 ftpedit/ftpedit/ftpwindow.py:643
+#: ftpedit/ftpedit/ftpwindow.py:436 ftpedit/ftpedit/ftpwindow.py:651
 msgid "New File"
 msgstr ""
 
-#: ftpedit/ftpedit/ftpwindow.py:647
+#: ftpedit/ftpedit/ftpwindow.py:655
 msgid "New Folder"
 msgstr ""
 
@@ -181,19 +191,19 @@ msgstr ""
 msgid "Port:"
 msgstr ""
 
-#: ftpedit/ftpedit/ftpwindow.py:631
+#: ftpedit/ftpedit/ftpwindow.py:639
 msgid "Refresh"
 msgstr ""
 
-#: ftpedit/ftpedit/ftpwindow.py:637
+#: ftpedit/ftpedit/ftpwindow.py:645
 msgid "Rename"
 msgstr ""
 
-#: ftpedit/ftpedit/ftpwindow.py:395
+#: ftpedit/ftpedit/ftpwindow.py:402
 msgid "Rename File"
 msgstr ""
 
-#: ftpedit/ftpedit/ftpwindow.py:540
+#: ftpedit/ftpedit/ftpwindow.py:548
 msgid "Retrieving file"
 msgstr ""
 
@@ -205,19 +215,11 @@ msgstr ""
 msgid "Sites:"
 msgstr ""
 
-#: ftpedit/ftpedit/ftpwindow.py:589
+#: ftpedit/ftpedit/ftpwindow.py:597
 msgid "Size"
 msgstr ""
 
-#: ftpedit/ftpedit/ftpwindow.py:246
-#, python-format
-msgid ""
-"There are currently %d ftp files open.\n"
-"If you disconnect now you will be unable to upload any further changes to these files.\n"
-"Disconnect from site?"
-msgstr ""
-
-#: ftpedit/ftpedit/ftpwindow.py:341
+#: ftpedit/ftpedit/ftpwindow.py:348
 msgid "Unknown"
 msgstr ""
 
