@@ -153,6 +153,7 @@ class CheckVarVisitor:
         imported by "*"
         '''
         for name, asname in node.names:
+            name = name.strip('.').split('.')[0]
             if asname:
                 use_name = asname
             else:
