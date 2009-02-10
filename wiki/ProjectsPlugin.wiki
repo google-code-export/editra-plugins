@@ -2,7 +2,7 @@
 
 = Introduction =
 
-The Projects plugin integrates the features of a file manager and source control into a self-contained, easy to use side panel.  Simplicity and transparency is the main focus of the Projects plugin.  It requires no "project files" and almost no configuration.  The Projects plugin treats directories as projects.  You simply add a directory as a project and the Projects plugin automatically tracks files in that directory.  If the files are under source control (currently either CVS or Subversion), the icons for those files will indicate the status of the files.  You can also do most source control operations using the right-click menu.
+The Projects plugin integrates the features of a file manager and source control into a self-contained, easy to use side panel.  Simplicity and transparency is the main focus of the Projects plugin.  It requires no "project files" and almost no configuration.  The Projects plugin treats directories as projects.  You simply add a directory as a project and the Projects plugin automatically tracks files in that directory.  If the files are under source control (currently CVS, Subversion, GIT, Bazaar, and Mercurial are supported), the icons for those files will indicate the status of the files.  You can also do most source control operations using the right-click menu.
 
 
 = Current Features =
@@ -23,7 +23,7 @@ This plugin is still in early development, but is quite useful in its current im
   * Progress indicator for long operations
   * Automatically display file from currently selected editor tab in project view (if file exists in a project)
   * Utilize system's Trash / Recycle Bin
-  * Seamless source control integration (Bazaar, CVS, GIT, Subversion)
+  * Seamless source control integration (Bazaar, CVS, GIT, Mercurial, Subversion)
   * Make Patch from diff of selected files and open it in the editor
 
 The following are the currently implemented source control features that are available for each of the supported systems that can be executed on either files or directories.  The status features are automatic.  Other features are accessed using the right-click menu.
@@ -34,7 +34,7 @@ The following are the currently implemented source control features that are ava
   * Compare to previous version using FileMerge or other file comparing tool
   * Revert to repository version
   * Commit changes (dialog for message entry)
-  * Configurable commands for Bazaar, CVS, Git, and Subversion
+  * Configurable commands for Bazaar, CVS, Git, Mercurial, and Subversion
   * Add to repository
   * Remove from repository
   * Revision history window with ability to compare playpen version to any previous version, as well being able to compare any two repository versions
