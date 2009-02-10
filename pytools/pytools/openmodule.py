@@ -17,6 +17,7 @@ __revision__ = "$Revision$"
 import wx
 import sys
 import os.path
+import finder
 
 ID_OPEN_MODULE = wx.NewId()
 
@@ -30,10 +31,6 @@ class OpenModuleDialog(wx.Dialog):
     """ A dialog to find the source file of a module and open it into the
     editor notebook
     """
-    # TODO: the extensions for source files could also be retrieved from
-    #       syntax.syntax.ExtensionRegister
-    _SRC_EXTENSIONS = '.py', '.pyw'
-    _BYTECODE_EXTENSIONS = '.pyc', '.pyo'
 
     def __init__(self, parent, caption=u'', *args, **kwargs):
         wx.Dialog.__init__(self, parent, wx.ID_ANY, caption,
@@ -41,12 +38,15 @@ class OpenModuleDialog(wx.Dialog):
                            size=(400, 230), *args, **kwargs)
 
         # Attributes
+        self.finder = finder.ModuleFinder(finder.getSearchPath())
         self.search = wx.SearchCtrl(self, style=wx.TE_PROCESS_ENTER)
         self.search.ShowCancelButton(True)
         self.btnOk = wx.Button(self, wx.ID_OK, label=_('Ok'))
         self.btnOk.Enable(False)
         self.btnCancel = wx.Button(self, wx.ID_CANCEL, label=_('Cancel'))
         self.listBox = wx.ListBox(self)
+        self.chkuseimport = wx.CheckBox(self, label=_('Use __import__'))
+        self.chkuseimport.SetValue(wx.CHK_CHECKED)
 
         # Layout
         self.__DoLayout()
@@ -75,6 +75,9 @@ class OpenModuleDialog(wx.Dialog):
         labsizer2 = wx.BoxSizer(wx.HORIZONTAL)
         labsizer2.Add(label2, 1, wx.ALL, 5)
 
+        chksizer = wx.BoxSizer(wx.HORIZONTAL)
+        chksizer.Add(self.chkuseimport, 1, wx.ALL, 5)
+
         lstsizer = wx.BoxSizer(wx.HORIZONTAL)
         lstsizer.Add(self.listBox, 1, wx.ALL|wx.EXPAND, 5)
         lstvsizer = wx.BoxSizer(wx.VERTICAL)
@@ -87,7 +90,8 @@ class OpenModuleDialog(wx.Dialog):
 
         mainsizer = wx.BoxSizer(wx.VERTICAL)
         mainsizer.AddMany([(labsizer1, 0), (txtsizer, 0, wx.EXPAND),
-                            ((5, 5), 0), (dsizer, 0, wx.EXPAND), ((5, 5), 0),
+                            ((5, 5), 0), (chksizer, 0),
+                            (dsizer, 0, wx.EXPAND), ((5, 5), 0),
                             (labsizer2, 0),
                             (lstvsizer, 2, wx.EXPAND), (bsizer, 0, wx.EXPAND),
                             ((5, 5), 0)])
@@ -113,50 +117,11 @@ class OpenModuleDialog(wx.Dialog):
 
     def OnSearch(self, evt):
         """Handle search events from the SearchCtrl"""
-        files = self.FindModule(self.search.GetValue())
-        if not files:
-            self.listBox.Set([])
-            return
+        files = self.finder.Find(self.search.GetValue(), self.chkuseimport.IsChecked())
         self.listBox.Set(files)
-        self.listBox.SetSelection(0)
-        self.btnOk.Enable(True)
-
-    def FindModule(self, text):
-        """Return a list with the names of the source files that matched the
-        the input line (actually,  an exact match at the moment, so a single
-        file at most)
-
-        """
-        if not text:
-            return None
-
-        # Import the module to find out its file
-        # fromlist needs to be non-empty to import inside packages
-        # (e.g. 'wx.lib', 'distutils.core')
-        try:
-            lst = text.split('.')
-            module = __import__(text, lst[:-1])
-        except ImportError:
-            return None
-
-        fname = getattr(module, '__file__', None)
-
-        # FIXME maybe unload (del) the module? (unless already loaded before search started)
-        if fname:
-            # Open source files instead of bytecode
-            root, ext = os.path.splitext(fname)
-            if ext in OpenModuleDialog._BYTECODE_EXTENSIONS:
-                for se in OpenModuleDialog._SRC_EXTENSIONS:
-                    if os.path.isfile(root + se):
-                        fname = root + se
-                        break
-                else:
-                    fname = None
-            elif ext not in OpenModuleDialog._SRC_EXTENSIONS:
-                # This is not a pure python module
-                fname = None
-
-        return [ fname ]
+        if len(files):
+            self.listBox.SetSelection(0)
+            self.btnOk.Enable(True)
 
 #-----------------------------------------------------------------------------#
 # Test
@@ -173,6 +138,3 @@ class MyApp(wx.App):
 if __name__ == '__main__':
     app = MyApp(0)
     app.MainLoop()
-
-
-
