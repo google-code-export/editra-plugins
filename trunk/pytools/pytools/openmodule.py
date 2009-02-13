@@ -38,15 +38,15 @@ class OpenModuleDialog(wx.Dialog):
                            size=(400, 230), *args, **kwargs)
 
         # Attributes
-        self.finder = finder.ModuleFinder(finder.getSearchPath())
+        self.finder = finder.ModuleFinder(finder.GetSearchPath())
         self.search = wx.SearchCtrl(self, style=wx.TE_PROCESS_ENTER)
         self.search.ShowCancelButton(True)
         self.btnOk = wx.Button(self, wx.ID_OK, label=_('Ok'))
         self.btnOk.Enable(False)
         self.btnCancel = wx.Button(self, wx.ID_CANCEL, label=_('Cancel'))
         self.listBox = wx.ListBox(self)
-        self.chkuseimport = wx.CheckBox(self, label=_('Use __import__'))
-        self.chkuseimport.SetValue(wx.CHK_CHECKED)
+        #self.chkuseimport = wx.CheckBox(self, label=_('Use __import__'))
+        #self.chkuseimport.SetValue(wx.CHK_CHECKED)
 
         # Layout
         self.__DoLayout()
@@ -75,8 +75,8 @@ class OpenModuleDialog(wx.Dialog):
         labsizer2 = wx.BoxSizer(wx.HORIZONTAL)
         labsizer2.Add(label2, 1, wx.ALL, 5)
 
-        chksizer = wx.BoxSizer(wx.HORIZONTAL)
-        chksizer.Add(self.chkuseimport, 1, wx.ALL, 5)
+        #chksizer = wx.BoxSizer(wx.HORIZONTAL)
+        #chksizer.Add(self.chkuseimport, 1, wx.ALL, 5)
 
         lstsizer = wx.BoxSizer(wx.HORIZONTAL)
         lstsizer.Add(self.listBox, 1, wx.ALL|wx.EXPAND, 5)
@@ -90,7 +90,7 @@ class OpenModuleDialog(wx.Dialog):
 
         mainsizer = wx.BoxSizer(wx.VERTICAL)
         mainsizer.AddMany([(labsizer1, 0), (txtsizer, 0, wx.EXPAND),
-                            ((5, 5), 0), (chksizer, 0),
+                            ((5, 5), 0), #(chksizer, 0),
                             (dsizer, 0, wx.EXPAND), ((5, 5), 0),
                             (labsizer2, 0),
                             (lstvsizer, 2, wx.EXPAND), (bsizer, 0, wx.EXPAND),
@@ -114,10 +114,12 @@ class OpenModuleDialog(wx.Dialog):
     def OnCancelSearch(self, evt):
         self.search.SetValue('')
         self.listBox.Set([])
+        self.btnOk.Enable(False)
 
     def OnSearch(self, evt):
         """Handle search events from the SearchCtrl"""
-        files = self.finder.Find(self.search.GetValue(), self.chkuseimport.IsChecked())
+        self.listBox.Set([])
+        files = self.finder.Find(self.search.GetValue())
         self.listBox.Set(files)
         if len(files):
             self.listBox.SetSelection(0)
