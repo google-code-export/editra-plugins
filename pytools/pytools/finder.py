@@ -26,6 +26,7 @@ import sys
 # FIXME: lib root should be 'lib' and not 'Lib' but on windows 'os.path' apis return 'Lib':
 # must do case insensitive compare in these cases.
 # FIXME: on MAC and Linux, must append lib/python|version| to sys.prefix
+# I should use '%s/lib/python%s' % (sys.prefix, sys.version[:3])
 def getSearchPath(prefix=sys.prefix):
     """ Build the modules search path for a given python installation.
     The path is a list containing:
