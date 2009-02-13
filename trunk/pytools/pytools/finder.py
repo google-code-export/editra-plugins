@@ -25,6 +25,7 @@ import sys
 # on demand, if changing the search path prefix.
 # FIXME: lib root should be 'lib' and not 'Lib' but on windows 'os.path' apis return 'Lib':
 # must do case insensitive compare in these cases.
+# FIXME: on MAC and Linux, must append lib/python|version| to sys.prefix
 def getSearchPath(prefix=sys.prefix):
     """ Build the modules search path for a given python installation.
     The path is a list containing:
@@ -33,7 +34,8 @@ def getSearchPath(prefix=sys.prefix):
      3) The PYTHONPATH elements, if any
      4) The paths defined into .pth files found into the above directories.
     By default, the installation is the one that is running this module.
-    Use the argument prefix to override (e.g.: prefix='C:\Python25')
+    Use the argument prefix to override (e.g.: prefix='C:\Python25' 
+    or prefix='/usr/lib/python2.5')
     """
     # installation-dependent default
     path = [ os.path.join(prefix, 'Lib'),
