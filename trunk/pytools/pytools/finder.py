@@ -22,15 +22,16 @@ import sys
 # Globals
 
 # TODO: this should be called once, at plugin initialization time, or
-# on demand, if changing the search path prefix
+# on demand, if changing the search path prefix.
+# FIXME: lib root should be 'lib' and not 'Lib' but on windows 'os.path' apis return 'Lib':
+# must do case insensitive compare in these cases.
 def getSearchPath(prefix=sys.prefix):
     """ Build the modules search path for a given python installation.
     The path is a list containing:
-     1) sys.prefix/Lib
-     2) sys.prefix/Lib/site-packages
+     1) sys.prefix/lib
+     2) sys.prefix/lib/site-packages
      3) The PYTHONPATH elements, if any
-     4) Not yet implemented: The paths defined into .pth files found into
-        the above directories.
+     4) The paths defined into .pth files found into the above directories.
     By default, the installation is the one that is running this module.
     Use the argument prefix to override (e.g.: prefix='C:\Python25')
     """
@@ -47,24 +48,27 @@ def getSearchPath(prefix=sys.prefix):
 
     spath = path
 
-    # TODO:
     # Parse '.pth' found on the search path and add their entries to search
-    # path. For example, on windows with wxPython installed, "site-packages/"
-    # contains 'wx.pth' that points to 'wx-<version>-mws-unicode'
-    #    for dir in path:
-    #        for f in os.listdir(dir):
-    #            if os.path.splitext(f)[1] == '.pth':
-    #               list = _ParsePth(os.path.join(dir, f))
-    #               if list: spath.extend(list)
+    # path. For example, on windows with wxPython installed, "site-packages/wx.pth"
+    # contains the line 'wx-<version>-mws-unicode' and 'wx-<version>-mws-unicode is 
+    # a subdirectory of site-packages.
+    for dir in path:
+        for f in os.listdir(dir):
+            if os.path.splitext(f)[1] == '.pth':
+                list = _ParsePth(dir, f)
+                if list: spath.extend(list)
 
     return spath
 
-def _ParsePth(filename):
+def _ParsePth(dirname, filename):
     lst = []
-    for line in open(filename).readlines():
+    for line in open(os.path.join(dirname, filename)).readlines():
         line = line.strip()
-        if line[0] != '#' and os.path.isdir(line):
-            lst.append(line)
+        if line[0] == '#' or line[0].startswith('import'):
+            continue
+        pth = os.path.join(dirname, line)
+        if os.path.isdir(pth):
+            lst.append(pth)
     return lst
 
 
@@ -75,10 +79,12 @@ class ModuleFinder(object):
     This component finds the source file of all the modules matching
     a given name, using one of the following strategies:
     1) loading the module with __import__ (0 or 1 results)
-    2) traversing a given search path (0 or N results)
+    2) traversing the filesystem starting at a given search path (0 or N results)
+       and matching files and packages using various criteria described below.
 
-    With a persistent index of the modules in place, in the future it
-    could use that.
+    For maximum execution and correctness performance, in the future, we could use persistent index 
+    to lookup the modules.
+
     """
 
     # TODO: the extensions for source files could also be retrieved from
@@ -102,6 +108,7 @@ class ModuleFinder(object):
         if useimport:
             return self._FindUseImport(text)
         else:
+            self.sources = []
             return self._Find(text);
 
     def _Find(self, text):
@@ -109,38 +116,37 @@ class ModuleFinder(object):
         @param text: the module name
         @return: a list with the module source path
         """
-        packages = text.split('.')[:-1]
-
+        parts = text.split('.')
+        
         for path in self._searchpath:
             if os.path.isdir(path):
                 # print 'Analysing search path %s' % path
-                self._Fill(text, packages[:], path)
+                self._Fill(path, parts[-1], parts[:-1])
 
         return self._sources
-
-    def _Fill(self, text, packages, path):
+    
+    # FIXME the algorithm implementation and description are both in-progress
+    def _Fill(self, path, text, pkgs=None):
         """ Traverse the given path looking for files or packages matching text
-        (the module name) or part of it (its package or its containing module)
-        @param text: the module name
-        @param packages: ...
-        @param path: the current directory
-        """
-        print packages
-        pkg = ''
-        if packages:
-            pkg = packages.pop(0)
+        (the module name) or part of it (its enclosing package).
+        - File F.py matches if any of the following is true:
+            1) 'F.startswith(text)'
+            2) 'F == text package' (ex: os.path => os.py)
+        - Dir D matches if any of the following is true:
+            3) 'D == text and D contains __init__.py' (ex: ctypes => ctypes/__init__.py)
 
+        @param path: the current directory absolute path 
+        @param text: the name to match (a module name, or part of it). 
+                     If the user entered a dotted module, text contains only the 
+                     last token.
+        @param pkgs: a list with the package parts of text, if any. For example, 
+                     if text is 'email.mime.audio', packages is [ 'email', 'mime' ]
         """
-        file F analysis:
-            1) text matches F name
-            2) text fragment matches F name (ex: os.path => os.py)
-        dir D analysis:
-            3) text matches D name and D contains __init__.py
-                (ex: ctypes => cttypes/__init__.py)
-            4) text fragment matches D name
-            4) expected package matches D: traverse D expecting F or the other
-            package name parts
-        """
+        
+        pkg = ''
+        if pkgs:
+            pkg = pkgs.pop(0)
+
         for fname in os.listdir(path):
             fqdn = os.path.join(path, fname)
             if os.path.isfile(fqdn) and self._FileMatches(fname, text, pkg):
@@ -153,12 +159,16 @@ class ModuleFinder(object):
                 elif fname == pkg:
                     # FIXME: if looking for a.b.c and b.c are defined into
                     # a/__init__.py I cannot find them this way
-                    self._Fill(text, packages, fqdn)
-
+                    self._Fill(fqdn, text, pkgs)
+                else: 
+                    # FIXME skip if the user specified the package and this directory does
+                    # not match
+                    self._Fill(fqdn, text)
+                    
     def _FileMatches(self, fname, text, pkg):
         parts = os.path.splitext(fname)
         return parts[1] in ModuleFinder._SRC_EXTENSIONS and \
-                (parts[0].find(text) != -1 or parts[0] == pkg)
+                (parts[0].find(text) == 0 or parts[0] == pkg)
 
 #--------------------------------------------------------------------------#
 # old algorithm
@@ -206,14 +216,19 @@ class ModuleFinder(object):
 
 if __name__ == '__main__':
     import time
+    
     t1 = time.clock()
     path = getSearchPath()
-    print 'Module search path: %s' % path
-    mf = ModuleFinder(path)
-    result = mf.Find('isapi.test.setup.py', False)
     t2 = time.clock()
-    print 'Elapsed %f seconds.' % (t2-t1)
+    print 'Module search path: %s' % path
+    print 'Path loading took %f seconds.' % (t2-t1)
+    
+    mf = ModuleFinder(path)
+    t1 = time.clock()
+    result = mf.Find('email.mime.audio', False)
+    t2 = time.clock()
     print 'Found %s' % result
+    print 'Find took %f seconds.' % (t2-t1)
 
 
 
