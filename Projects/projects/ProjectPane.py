@@ -126,6 +126,7 @@ ID_POPUP_ADD = wx.NewId()
 ID_POPUP_DELETE = wx.NewId()
 ID_POPUP_RENAME = wx.NewId()
 ID_POPUP_EXEC = wx.NewId()
+ID_POPUP_SCCOMM = wx.NewId()
 ID_POPUP_NFOLDER = wx.NewId()
 ID_POPUP_NMENU = wx.NewId()
 
@@ -402,6 +403,9 @@ class ProjectTree(wx.Panel):
         self.Bind(wx.EVT_MENU,
                   lambda evt: self.scAdd(self.getSelectedNodes()),
                   id=ID_POPUP_ADD)
+        self.Bind(wx.EVT_MENU,
+                  lambda evt: self.scExecuteCommand(self.getSelectedNodes()),
+                  id=ID_POPUP_SCCOMM)
         self.Bind(wx.EVT_MENU, self.onPopupDelete, id=ID_POPUP_DELETE)
         self.Bind(wx.EVT_MENU,
                   lambda evt: self.onPopupRename(), id=ID_POPUP_RENAME)
@@ -850,7 +854,21 @@ class ProjectTree(wx.Panel):
             # event as it causes the tree ctrl to become emptied on msw.
 #            self.tree.SetItemHasChildren(parent, False)
             event.Veto()
+    
+    def scExecuteCommand(self, nodes):
+        """ Execute a custom command with the current control system"""
 
+        ted = wx.TextEntryDialog(self,
+              _('The following source control command will be executed on all selected\n' \
+                'files and files contained in selected directories.\n' \
+                'e.g. bzr [command] filename.py'),
+              _('Enter command to execute on all files'))
+
+        if ted.ShowModal() != wx.ID_OK:
+            return
+            
+        self.scCommand(nodes, ted.GetValue().strip())
+        
     def scAdd(self, nodes):
         """ Send an add to repository command to current control system """
         self.scCommand(nodes, 'add')
@@ -1336,6 +1354,7 @@ class ProjectTree(wx.Panel):
             (None, None, None, None),
             (ID_POPUP_EXEC, _('Execute command...'), None, True),
             (None, None, None, None),
+            (ID_POPUP_SCCOMM, _('Source Control command...'), None, True),
             #(ID_POPUP_RENAME, _('Rename'), None, True),
             #(None, None, None, None),
             (ID_POPUP_REFRESH, _("Refresh status"), 'sc-status', scenabled),
