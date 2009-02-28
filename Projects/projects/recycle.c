@@ -1,14 +1,21 @@
-/** 
- * Compile with mingw32-gcc -Wall -Wl,--subsystem,windows -DUNICODE recycle.c -o recycle.exe 
+/**
+ * Compile with Visual C++ or with:
+ *  mingw32-gcc -Wall -Wl,--subsystem,windows -DUNICODE recycle.c -o recycle.exe
  *
  * Delete the given file or directory (an absolute path passed as argv[1]).
- * Returns 1 if the argument is invalid, or SHFileOperation return value (0 if successful, nonzero otherwise)
+ * Returns 1 if the argument is invalid, or SHFileOperation return value
+ * (0 if successful, nonzero otherwise)
+ *
+ * Author: Rudi Pettazzi
  */
 
 #include <windows.h>
+
+/* disable deprecated warning for wcscpy if compiled with Visual C++ */
 #pragma warning(disable : 4996)
 
-int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int nCmdShow)     
+int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance,
+                    LPSTR lpCmdLine, int nCmdShow)
 {
     wchar_t filename[MAX_PATH + 1] = { 0 };
     SHFILEOPSTRUCT sfo;
@@ -34,22 +41,23 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
     sfo.wFunc = FO_DELETE;
     sfo.pFrom = filename;
 
-    /* XXX maybe FOF_NOERRORUI should be off */
-    sfo.fFlags = FOF_SILENT | FOF_NOERRORUI | FOF_ALLOWUNDO | FOF_NOCONFIRMMKDIR | FOF_NOCONFIRMATION;
+    /* XXX FOF_NOERRORUI should be off to enable native error messages */
+    sfo.fFlags = FOF_SILENT | FOF_NOERRORUI | FOF_ALLOWUNDO
+                | FOF_NOCONFIRMMKDIR | FOF_NOCONFIRMATION;
 
     /* 0 if successful, nonzero otherwise. */
     ret = SHFileOperation(&sfo);
 
     LocalFree(wargv);
 
-    return ret;   
+    return ret;
 }
 
 
 //
 // Command-line utility to send a file or directory to the Recycle Bin
 //
-// This program only looks at the first command-line argument.  
+// This program only looks at the first command-line argument.
 // That argument must be a full path to the file.
 //
 
