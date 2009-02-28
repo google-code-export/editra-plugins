@@ -35,24 +35,35 @@ class TestModuleFinder(unittest.TestCase):
         pass
 
     def testFind1(self):
+        """Empty input"""
+        self.assertEquals(self.finder.Find(''), [])
+
+    def testFind2(self):
+        """None input"""
+        self.assertEquals(self.finder.Find(None), [])
+
+    def testFind3(self):
+        """Case insensitive input"""
+        res = self.finder.Find('stringio')
+        self.check(res, [ os.path.join(self.base, 'lib', 'StringIO.py') ])
+
+    def testFind4(self):
+        """Find module init"""
+        res = self.finder.Find('ctypes')
+        self.check(res, [ os.path.join(self.base, 'lib', 'ctypes', '__init__.py') ])
+
+    def testFind5(self):
+        """Multiple results"""
         res = self.finder.Find('string')
         self.assertTrue(
             res.index(os.path.join(self.base, 'lib', 'string.py')) > -1 and
             res.index(os.path.join(self.base, 'lib', 'StringIO.py')) > -1)
 
-    def testFind2(self):
-        res = self.finder.Find('ctypes')
-        self.check(res, [ os.path.join(self.base, 'lib', 'ctypes', '__init__.py') ])
-
-    def testFind3(self):
-        res = self.finder.Find('StringIO')
-        self.check(res, [ os.path.join(self.base, 'lib', 'StringIO.py') ])
-
-    def testFind4(self):
-        self.assertEquals(self.finder.Find(''), [])
-
-    def testFind5(self):
-        self.assertEquals(self.finder.Find(None), [])
+    def testFind6(self):
+        """Package defined into .pth file"""
+        res = self.finder.Find('wx.lib')
+        patt = os.path.join('wx', 'lib', '__init__.py')
+        self.assertTrue(res[0].endswith(patt))
 
     def testFindUseImport(self):
         res = self.finder.Find('string', True)
