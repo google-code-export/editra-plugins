@@ -32,21 +32,23 @@ class OpenModuleDialog(wx.Dialog):
     editor notebook
     """
 
-    def __init__(self, parent, caption=u'', *args, **kwargs):
-        wx.Dialog.__init__(self, parent, wx.ID_ANY, caption,
+    def __init__(self, parent, finder, *args, **kwargs):
+        """Open the dialog.
+        @param parent: the parent window
+        @param finder: an instance of finder.ModuleFinder
+        """
+        wx.Dialog.__init__(self, parent, wx.ID_ANY,
                            style=wx.DEFAULT_DIALOG_STYLE|wx.RESIZE_BORDER,
                            size=(400, 230), *args, **kwargs)
 
         # Attributes
-        self.finder = finder.ModuleFinder(finder.GetSearchPath())
+        self.finder = finder
         self.search = wx.SearchCtrl(self, style=wx.TE_PROCESS_ENTER)
         self.search.ShowCancelButton(True)
         self.btnOk = wx.Button(self, wx.ID_OK, label=_('Ok'))
         self.btnOk.Enable(False)
         self.btnCancel = wx.Button(self, wx.ID_CANCEL, label=_('Cancel'))
         self.listBox = wx.ListBox(self)
-        #self.chkuseimport = wx.CheckBox(self, label=_('Use __import__'))
-        #self.chkuseimport.SetValue(wx.CHK_CHECKED)
 
         # Layout
         self.__DoLayout()
@@ -75,9 +77,6 @@ class OpenModuleDialog(wx.Dialog):
         labsizer2 = wx.BoxSizer(wx.HORIZONTAL)
         labsizer2.Add(label2, 1, wx.ALL, 5)
 
-        #chksizer = wx.BoxSizer(wx.HORIZONTAL)
-        #chksizer.Add(self.chkuseimport, 1, wx.ALL, 5)
-
         lstsizer = wx.BoxSizer(wx.HORIZONTAL)
         lstsizer.Add(self.listBox, 1, wx.ALL|wx.EXPAND, 5)
         lstvsizer = wx.BoxSizer(wx.VERTICAL)
@@ -90,7 +89,7 @@ class OpenModuleDialog(wx.Dialog):
 
         mainsizer = wx.BoxSizer(wx.VERTICAL)
         mainsizer.AddMany([(labsizer1, 0), (txtsizer, 0, wx.EXPAND),
-                            ((5, 5), 0), #(chksizer, 0),
+                            ((5, 5), 0),
                             (dsizer, 0, wx.EXPAND), ((5, 5), 0),
                             (labsizer2, 0),
                             (lstvsizer, 2, wx.EXPAND), (bsizer, 0, wx.EXPAND),
@@ -129,7 +128,8 @@ class OpenModuleDialog(wx.Dialog):
 # Test
 class MyApp(wx.App):
     def OnInit(self):
-        dialog = OpenModuleDialog(None, caption=_("Open module"))
+        mf = finder.ModuleFinder(finder.GetSearchPath())
+        dialog = OpenModuleDialog(None, mf, title=_("Open module"))
         filename = None
         if dialog.ShowModal() == wx.ID_OK:
             filename = dialog.GetValue()
@@ -140,3 +140,4 @@ class MyApp(wx.App):
 if __name__ == '__main__':
     app = MyApp(0)
     app.MainLoop()
+
