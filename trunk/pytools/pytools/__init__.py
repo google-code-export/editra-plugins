@@ -1,7 +1,8 @@
 ###############################################################################
 # Name: __init__.py                                                           #
 # Purpose: Python Tools plugin                                                #
-# Author: Ofer Schwarz <os.urandom@gmail.com>                                 #
+# Author: Ofer Schwarz <os.urandom@gmail.com>,                                #
+#         Rudi Pettazzi <rudi.pettazzi@gmail.com>                             #
 # Copyright: (c) 2008 Ofer Schwarz <os.urandom@gmail.com>                     #
 # Licence: wxWindows Licence                                                  #
 ###############################################################################
@@ -26,10 +27,12 @@ import wx
 import iface
 import plugin
 import ed_msg
+from profiler import Profile_Get, Profile_Set
 
 # Local Imports
 from openmodule import OpenModuleDialog, ID_OPEN_MODULE
 from varchecker import HighLight
+import finder
 
 try:
     from foxtrot import check_vars
@@ -40,6 +43,8 @@ except ImportError, e:
 # Globals
 
 _ = wx.GetTranslation
+PYTOOLS_PREFS = 'PyTools.Prefs'
+
 #-----------------------------------------------------------------------------#
 
 class PyTools(plugin.Plugin):
@@ -49,21 +54,20 @@ class PyTools(plugin.Plugin):
     def PlugIt(self, parent):
         """Add menu entries"""
         if parent:
-            self._mw = parent
             # Use Editra's logging system
             self._log = wx.GetApp().GetLog()
             self._log("[pytools][info] Installing Pytools")
-
+            self._finder = None
             # Install all tools
             self.lighter = HighLight(parent)
             self.lighter.PlugIt()
-            self.InstallOpenModule()
+            self.InstallOpenModule(parent)
         else:
             self._log("[pytools][err] Failed to install pytools plugin")
 
-    def InstallOpenModule(self):
+    def InstallOpenModule(self, parent):
         self._log("[pytools][info] Installing module opener")
-        file_menu = self._mw.GetMenuBar().GetMenuByName("file")
+        file_menu = parent.GetMenuBar().GetMenuByName("file")
         # Insert the Open Module command before Open Recent
         # TODO: Find the 'open recent' position in a more generic way
         # NOTE:CJP you can use the FindById method of wxMenu to do this
@@ -93,11 +97,24 @@ class PyTools(plugin.Plugin):
         if evt.GetId() != ID_OPEN_MODULE:
             evt.Skip()
 
-        # TODO:CJP This could cause issues when there are Multiple windows open.
-        #       as this is a singleton object so self_mw will refer to the last
-        #       main window that was openend. It would probably be better to
-        #       use wx.GetApp().GetActiveWindow to the get current window instead.
-        mdlg = OpenModuleDialog(self._mw, caption=_("Open module"))
+        win = wx.GetApp().GetActiveWindow()
+
+        if self._finder == None:
+            prefs = Profile_Get(PYTOOLS_PREFS, default=dict())
+            base = prefs.get('module_base')
+            if not base or not os.path.isdir(base):
+                base = ChooseModuleBase(win)
+            if base:
+                prefs['module_base'] = base
+                self._log("[pytools][debug] Saving base search dir: %s" % base)
+                Profile_Set(PYTOOLS_PREFS, prefs)
+                path = finder.GetSearchPath(base)
+                self._log("[pytools][debug] search path: %s" % path)
+                self._finder = finder.ModuleFinder(path)
+            else:
+                return
+
+        mdlg = OpenModuleDialog(win, self._finder, title=_("Open module"))
 
         if mdlg.ShowModal() != wx.ID_OK:
             mdlg.Destroy()
@@ -106,4 +123,15 @@ class PyTools(plugin.Plugin):
         filename = mdlg.GetValue()
         if filename:
             mdlg.Destroy()
-            self._mw.DoOpen(evt, filename)
+            win.DoOpen(evt, filename)
+
+def ChooseModuleBase(parent):
+    value = None
+    title = _("Select python installation (ex: C:\Python25): ")
+    dlg = wx.DirDialog(parent, title,
+                       style=wx.DD_DEFAULT_STYLE | wx.DD_DIR_MUST_EXIST)
+    if dlg.ShowModal() == wx.ID_OK:
+        value = dlg.GetPath()
+    dlg.Destroy()
+    return value
+
