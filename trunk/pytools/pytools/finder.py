@@ -40,9 +40,12 @@ def GetSearchPath(base=None):
         else:
             base = '%s/lib/python%s' % (sys.prefix, sys.version[:3])
 
-    path = [ os.path.join(base, 'lib'),
-             os.path.join(base, 'lib', 'site-packages') ]
-
+    if sys.platform == 'win32':
+        path = [ os.path.join(base, 'lib'),
+                 os.path.join(base, 'lib', 'site-packages') ]
+    else:
+        path = [ base, os.path.join(base, 'site-packages') ]
+        
     # PYTHONPATH (if defined, it must prepend the default path)
     pythonpath = os.environ.get('PYTHONPATH')
     if pythonpath:
