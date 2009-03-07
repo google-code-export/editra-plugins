@@ -20,6 +20,8 @@ __version__ = "0.1"
 # Imports
 import os
 import re
+import sys
+import platform
 from StringIO import StringIO
 import wx
 
@@ -44,6 +46,9 @@ except ImportError, e:
 
 _ = wx.GetTranslation
 PYTOOLS_PREFS = 'PyTools.Prefs'
+PYTOOLS_BASE_PATH_CHOOSE_MSG  = _("Select Python library directory (ex: %s): ")
+PYTOOLS_BASE_PATH_INVALID_MSG = _("""%s doesn't appear to be valid. 
+The selected directory should contain the site-packages subdirectory""")
 
 #-----------------------------------------------------------------------------#
 
@@ -102,7 +107,7 @@ class PyTools(plugin.Plugin):
         if self._finder == None:
             prefs = Profile_Get(PYTOOLS_PREFS, default=dict())
             base = prefs.get('module_base')
-            if not base or not os.path.isdir(base):
+            if not base or not CheckModuleBase(base):
                 base = ChooseModuleBase(win)
             if base:
                 prefs['module_base'] = base
@@ -125,13 +130,40 @@ class PyTools(plugin.Plugin):
             mdlg.Destroy()
             win.DoOpen(evt, filename)
 
+def CheckModuleBase(base):
+    return os.path.exists(base) and os.path.isdir(base) \
+            and os.path.exists(os.path.join(base, 'site-packages'))
+
+# XXX investigate python installation layout on MacOSX ("apple python" vs. 
+# default python install
 def ChooseModuleBase(parent):
+    """Shows a dialog to choose the python libraries directory.
+    @return: the python installation libraries root (the directory containing, 
+             among the others, the site-packages dir) or None if the user
+             didn't make any choice or choose an invalid path
+    """
+    if sys.platform == 'win32':
+        ex = "C:\Python26"
+    elif platform.mac_ver()[0]:
+        ex = "/Library/Frameworks/Python.framework/2.6"
+    else:
+        ex = "/usr/lib/python-2.6"
+
+    title = PYTOOLS_BASE_PATH_CHOOSE_MSG % ex
     value = None
-    title = _("Select python installation (ex: C:\Python25): ")
     dlg = wx.DirDialog(parent, title,
                        style=wx.DD_DEFAULT_STYLE | wx.DD_DIR_MUST_EXIST)
     if dlg.ShowModal() == wx.ID_OK:
         value = dlg.GetPath()
+        
+    if not CheckModuleBase(value):
+        errmsg = PYTOOLS_BASE_PATH_INVALID_MSG % value
+        errdlg = wx.MessageDialog(dlg, errmsg, 
+                                _('Error'),  wx.OK | wx.ICON_ERROR)
+        if errdlg.ShowModal() == wx.ID_OK:
+            errdlg.Destroy()
+        value = None
+
     dlg.Destroy()
     return value
 
