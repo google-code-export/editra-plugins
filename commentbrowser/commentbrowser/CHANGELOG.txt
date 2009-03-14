@@ -5,8 +5,16 @@ License: wxWindows
 
 #-----------------------------------------------------------------------------#
 
+Version 0.4
+Released: 0x/0x/200x
+
++ Api compatibility changes
+
+
+#-----------------------------------------------------------------------------#
+
 Version 0.3
-Released: xx/xx/xxxx
+Released: 09/06/2008
 
 + Some ui improvements
 + Added Italian, Russian, and Serbian, Brazilian Portuguese, Ukrainian, and
