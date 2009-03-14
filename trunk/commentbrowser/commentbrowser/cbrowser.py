@@ -28,7 +28,7 @@ import wx
 import syntax
 import ed_msg
 import profiler
-import eclib.ctrlbox as ctrlbox
+import eclib
 
 # Local
 from cbrowserlistctrl import CustomListCtrl
@@ -73,12 +73,12 @@ for task in TASK_CHOICES:
 #---- examples ----#
 
 
-class CBrowserPane(ctrlbox.ControlBox):
+class CBrowserPane(eclib.ControlBox):
     """Creates a Commentbrowser panel"""
     def __init__(self, parent, id=wx.ID_ANY, pos=wx.DefaultPosition,
                  size=wx.DefaultSize, style=wx.NO_BORDER, menu=None):
         """ Initializes the CBrowserPane class"""
-        ctrlbox.ControlBox.__init__(self, parent, id, pos, size, style)
+        eclib.ControlBox.__init__(self, parent, id, pos, size, style)
 
         #---- private attr ----#
 
@@ -93,9 +93,9 @@ class CBrowserPane(ctrlbox.ControlBox):
 
         #---- Gui ----#
 
-        ctrlbar = ctrlbox.ControlBar(self, style=ctrlbox.CTRLBAR_STYLE_GRADIENT)
+        ctrlbar = eclib.ControlBar(self, style=eclib.CTRLBAR_STYLE_GRADIENT)
         if wx.Platform == '__WXGTK__':
-            ctrlbar.SetWindowStyle(ctrlbox.CTRLBAR_STYLE_DEFAULT)
+            ctrlbar.SetWindowStyle(eclib.CTRLBAR_STYLE_DEFAULT)
 
         self.SetControlBar(ctrlbar)
         self._listctrl = CustomListCtrl(self)

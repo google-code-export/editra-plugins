@@ -332,8 +332,8 @@ class CustomListCtrl(wx.ListCtrl,
         if prio in prionum and prio > 1:
             idx = prionum.index(prio)
             val = int( 255 - 255. / (2**idx) )
-            self._attr = wx.ListItemAttr(wx.NullColor,
-                                         wx.Color(255, 255, val),
+            self._attr = wx.ListItemAttr(wx.NullColour,
+                                         wx.Colour(255, 255, val),
                                          wx.NullFont)
             return self._attr
         return None
