@@ -36,9 +36,7 @@ from HistWin import HistoryWindow
 import ed_glob
 from profiler import Profile_Get
 import ed_msg
-import eclib.ctrlbox as ctrlbox
-import eclib.platebtn as platebtn
-import eclib.elistmix as elistmix
+import eclib
 
 #--------------------------------------------------------------------------#
 # Globals
@@ -64,10 +62,10 @@ _ = wx.GetTranslation
 
 #--------------------------------------------------------------------------#
 
-class RepoModBox(ctrlbox.ControlBox):
+class RepoModBox(eclib.ControlBox):
     """Repository modification list container window"""
     def __init__(self, parent):
-        ctrlbox.ControlBox.__init__(self, parent)
+        eclib.ControlBox.__init__(self, parent)
 
         # Attributes
         self._list = RepoModList(self)
@@ -104,9 +102,9 @@ class RepoModBox(ctrlbox.ControlBox):
 
     def __DoLayout(self):
         """Layout and setup the results screen ui"""
-        ctrlbar = ctrlbox.ControlBar(self, style=ctrlbox.CTRLBAR_STYLE_GRADIENT)
+        ctrlbar = eclib.ControlBar(self, style=eclib.CTRLBAR_STYLE_GRADIENT)
         if wx.Platform == '__WXGTK__':
-            ctrlbar.SetWindowStyle(ctrlbox.CTRLBAR_STYLE_DEFAULT)
+            ctrlbar.SetWindowStyle(eclib.CTRLBAR_STYLE_DEFAULT)
 
         # Repository
         labels = self._RefreshRepos()
@@ -119,27 +117,27 @@ class RepoModBox(ctrlbox.ControlBox):
         ctrlbar.AddStretchSpacer()
 
         # Refresh Button
-        refresh = platebtn.PlateButton(ctrlbar, wx.ID_REFRESH, _("Refresh"),
-                                       FileIcons.getScStatusBitmap(),
-                                       style=platebtn.PB_STYLE_NOBG)
+        refresh = eclib.PlateButton(ctrlbar, wx.ID_REFRESH, _("Refresh"),
+                                    FileIcons.getScStatusBitmap(),
+                                    style=eclib.PB_STYLE_NOBG)
         ctrlbar.AddControl(refresh, wx.ALIGN_RIGHT)
 
         # Update
-        update = platebtn.PlateButton(ctrlbar, ID_UPDATE, _("Update"),
-                                      FileIcons.getScUpdateBitmap(),
-                                      style=platebtn.PB_STYLE_NOBG)
+        update = eclib.PlateButton(ctrlbar, ID_UPDATE, _("Update"),
+                                   FileIcons.getScUpdateBitmap(),
+                                   style=eclib.PB_STYLE_NOBG)
         ctrlbar.AddControl(update, wx.ALIGN_RIGHT)
 
         # Commit
-        commit = platebtn.PlateButton(ctrlbar, ID_COMMIT, _("Commit"),
-                                      FileIcons.getScCommitBitmap(),
-                                      style=platebtn.PB_STYLE_NOBG)
+        commit = eclib.PlateButton(ctrlbar, ID_COMMIT, _("Commit"),
+                                   FileIcons.getScCommitBitmap(),
+                                   style=eclib.PB_STYLE_NOBG)
         ctrlbar.AddControl(commit, wx.ALIGN_RIGHT)
 
         # Clear Button
-        revert = platebtn.PlateButton(ctrlbar, ID_REVERT, _("Revert"),
-                                      FileIcons.getScRevertBitmap(),
-                                      style=platebtn.PB_STYLE_NOBG)
+        revert = eclib.PlateButton(ctrlbar, ID_REVERT, _("Revert"),
+                                   FileIcons.getScRevertBitmap(),
+                                   style=eclib.PB_STYLE_NOBG)
         ctrlbar.AddControl(revert, wx.ALIGN_RIGHT)
 
         ctrlbar.SetVMargin(1, 1)
@@ -190,6 +188,8 @@ class RepoModBox(ctrlbox.ControlBox):
         """
         ctrlb = self.GetControlBar()#.Enable(enable)
         # Workaround Enable not being overridable in by platebtn
+        # NOTE: this is fixed in wx2.8.9.2+
+        # TODO: Remove when some more wx releases are made
         for child in ctrlb.GetChildren():
             if hasattr(child, 'Enable'):
                 child.Enable(enable)
@@ -304,8 +304,8 @@ class RepoModBox(ctrlbox.ControlBox):
 #--------------------------------------------------------------------------#
 
 class RepoModList(wx.ListCtrl,
-                   elistmix.ListRowHighlighter,
-                   listmix.ListCtrlAutoWidthMixin):
+                  eclib.ListRowHighlighter,
+                  listmix.ListCtrlAutoWidthMixin):
     """List for managing and listing files under SourceControl.
     Specifically it displays the summary of modified files under a given
     repository.
@@ -318,7 +318,7 @@ class RepoModList(wx.ListCtrl,
         wx.ListCtrl.__init__(self, parent, id,
                              style=wx.LC_REPORT|wx.LC_VRULES|wx.BORDER)
         listmix.ListCtrlAutoWidthMixin.__init__(self)
-        elistmix.ListRowHighlighter.__init__(self)
+        eclib.ListRowHighlighter.__init__(self)
 
         # Attributes
         self._menu = None
