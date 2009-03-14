@@ -23,9 +23,7 @@ import ed_glob
 import ed_msg
 from profiler import Profile_Get, Profile_Set
 import util
-import eclib.ctrlbox as ctrlbox
-import eclib.platebtn as platebtn
-import eclib.elistmix as elistmix
+import eclib
 
 # Local Imports
 import IconFile
@@ -57,10 +55,10 @@ _ = wx.GetTranslation
 
 #-----------------------------------------------------------------------------#
 
-class FtpWindow(ctrlbox.ControlBox):
+class FtpWindow(eclib.ControlBox):
     """Ftp file window"""
     def __init__(self, parent, id=wx.ID_ANY):
-        ctrlbox.ControlBox.__init__(self, parent, id)
+        eclib.ControlBox.__init__(self, parent, id)
 
         # Attributes
         self._mw = self.__FindMainWindow()
@@ -115,14 +113,14 @@ class FtpWindow(ctrlbox.ControlBox):
 
     def __DoLayout(self):
         """Layout the window"""
-        self._cbar = ctrlbox.ControlBar(self, style=ctrlbox.CTRLBAR_STYLE_GRADIENT)
+        self._cbar = eclib.ControlBar(self, style=eclib.CTRLBAR_STYLE_GRADIENT)
         if wx.Platform == '__WXGTK__':
-            self._cbar.SetWindowStyle(ctrlbox.CTRLBAR_STYLE_DEFAULT)
+            self._cbar.SetWindowStyle(eclib.CTRLBAR_STYLE_DEFAULT)
 
         # Preferences
         bmp = wx.ArtProvider.GetBitmap(str(ed_glob.ID_PREF), wx.ART_MENU)
-        btn = platebtn.PlateButton(self._cbar, wx.ID_PREFERENCES,
-                                   bmp=bmp, style=platebtn.PB_STYLE_NOBG)
+        btn = eclib.PlateButton(self._cbar, wx.ID_PREFERENCES,
+                                bmp=bmp, style=eclib.PB_STYLE_NOBG)
         btn.SetToolTipString(_("Configuration"))
         self._cbar.AddControl(btn, wx.ALIGN_LEFT)
 
@@ -144,9 +142,8 @@ class FtpWindow(ctrlbox.ControlBox):
         # Connect
         self._cbar.AddStretchSpacer()
         bmp = IconFile.Connect.GetBitmap()
-        connect = platebtn.PlateButton(self._cbar, ID_CONNECT, bmp=bmp,
-                                       label=_("Connect"),
-                                       style=platebtn.PB_STYLE_NOBG)
+        connect = eclib.PlateButton(self._cbar, ID_CONNECT, bmp=bmp,
+                                    label=_("Connect"), style=eclib.PB_STYLE_NOBG)
         self._cbar.AddControl(connect, wx.ALIGN_RIGHT)
 
         # Setup Window
@@ -574,15 +571,15 @@ class FtpWindow(ctrlbox.ControlBox):
 #-----------------------------------------------------------------------------#
 
 class FtpList(listmix.ListCtrlAutoWidthMixin,
-               elistmix.ListRowHighlighter,
-               wx.ListCtrl):
+              eclib.ListRowHighlighter,
+              wx.ListCtrl):
     """Ftp File List
     Displays the list of files in the currently connected ftp site.
 
     """
     def __init__(self, parent, id=wx.ID_ANY):
         wx.ListCtrl.__init__(self, parent, id, style=wx.LC_REPORT|wx.LC_SINGLE_SEL) 
-        elistmix.ListRowHighlighter.__init__(self)
+        eclib.ListRowHighlighter.__init__(self)
 
         # Attributes
         self._il = wx.ImageList(16, 16)
