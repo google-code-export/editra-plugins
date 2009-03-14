@@ -92,8 +92,7 @@ import ed_msg
 import profiler
 import util
 import extern.flatnotebook as FNB
-import eclib.ctrlbox as ctrlbox
-import eclib.platebtn as platebtn
+import eclib
 
 #-----------------------------------------------------------------------------#
 # Globals
@@ -1643,7 +1642,7 @@ class ProjectTree(wx.Panel):
 
 #-----------------------------------------------------------------------------#
 
-class ProjectPane(ctrlbox.ControlBox):
+class ProjectPane(eclib.ControlBox):
     """Creates a project pane"""
     ID_REMOVE_PROJECT = wx.NewId()
     ID_ADD_PROJECT = wx.NewId()
@@ -1654,7 +1653,7 @@ class ProjectPane(ctrlbox.ControlBox):
 
     def __init__(self, parent, id_=wx.ID_ANY, pos=wx.DefaultPosition,
                  size=wx.DefaultSize, style=wx.NO_BORDER):
-        ctrlbox.ControlBox.__init__(self, parent, id_, pos, size)
+        eclib.ControlBox.__init__(self, parent, id_, pos, size)
         UnusedArg(style)
 
         # Attributes
@@ -1673,30 +1672,27 @@ class ProjectPane(ctrlbox.ControlBox):
         self._ignore = False # Toggle ignoring update notifications on/off
 
         # Layout Panes
-        self.ctrlbar = ctrlbox.ControlBar(self, style=ctrlbox.CTRLBAR_STYLE_GRADIENT)
+        self.ctrlbar = eclib.ControlBar(self, style=eclib.CTRLBAR_STYLE_GRADIENT)
         if wx.Platform == '__WXGTK__':
-            self.ctrlbar.SetWindowStyle(ctrlbox.CTRLBAR_STYLE_DEFAULT)
+            self.ctrlbar.SetWindowStyle(eclib.CTRLBAR_STYLE_DEFAULT)
         self.ctrlbar.SetToolSpacing(0)
         self.ctrlbar.AddSpacer(5, 5)
 
         cfgbmp = wx.ArtProvider.GetBitmap(str(ed_glob.ID_PREF), wx.ART_MENU)
-        configbutton = platebtn.PlateButton(self.ctrlbar, self.ID_CONFIG,
-                                            bmp=cfgbmp,
-                                            style=platebtn.PB_STYLE_NOBG)
+        configbutton = eclib.PlateButton(self.ctrlbar, self.ID_CONFIG,
+                                         bmp=cfgbmp, style=eclib.PB_STYLE_NOBG)
         configbutton.SetToolTipString(_("Configure"))
         self.ctrlbar.AddControl(configbutton, wx.ALIGN_LEFT)
 
         addbmp = self.projects.il.GetBitmap(self.projects.icons['project-add'])
-        addbutton = platebtn.PlateButton(self.ctrlbar, self.ID_ADD_PROJECT,
-                                         bmp=addbmp,
-                                         style=platebtn.PB_STYLE_NOBG)
+        addbutton = eclib.PlateButton(self.ctrlbar, self.ID_ADD_PROJECT,
+                                         bmp=addbmp, style=eclib.PB_STYLE_NOBG)
         addbutton.SetToolTipString(_("Add Project"))
         self.ctrlbar.AddControl(addbutton, wx.ALIGN_LEFT)
 
         rembmp = self.projects.il.GetBitmap(self.projects.icons['project-delete'])
-        removebutton = platebtn.PlateButton(self.ctrlbar, self.ID_REMOVE_PROJECT,
-                                            bmp=rembmp,
-                                            style=platebtn.PB_STYLE_NOBG)
+        removebutton = eclib.PlateButton(self.ctrlbar, self.ID_REMOVE_PROJECT,
+                                         bmp=rembmp, style=eclib.PB_STYLE_NOBG)
         removebutton.SetToolTipString(_("Remove Project"))
         self.ctrlbar.AddControl(removebutton, wx.ALIGN_LEFT)
 

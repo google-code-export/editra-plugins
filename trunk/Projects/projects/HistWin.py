@@ -35,8 +35,7 @@ import ProjCmnDlg
 
 # Editra Library Imports
 import util
-import eclib.pstatbar as pstatbar
-import eclib.elistmix as elistmix
+import eclib
 
 _ = wx.GetTranslation
 #--------------------------------------------------------------------------#
@@ -74,7 +73,7 @@ class HistoryWindow(wx.Frame):
         util.SetWindowIcon(self)
 
         # Attributes
-        statbar = pstatbar.ProgressStatusBar(self)
+        statbar = eclib.ProgressStatusBar(self)
         statbar.SetStatusWidths([-1, 125])
         self.SetStatusBar(statbar)
         self._ctrls = HistoryPane(self, node, data)
@@ -288,7 +287,7 @@ class HistoryPane(wx.Panel):
 
 class HistList(wx.ListCtrl,
                listmix.ListCtrlAutoWidthMixin,
-               elistmix.ListRowHighlighter):
+               eclib.ListRowHighlighter):
     """List for displaying a files revision history"""
     REV_COL  = 0
     DATE_COL = 1
@@ -300,7 +299,7 @@ class HistList(wx.ListCtrl,
                              style=wx.LC_REPORT | \
                                    wx.LC_SORT_ASCENDING | \
                                    wx.LC_VRULES)
-        elistmix.ListRowHighlighter.__init__(self)
+        eclib.ListRowHighlighter.__init__(self)
 
         # Attributes
         self._frame = parent.GetTopLevelParent()
