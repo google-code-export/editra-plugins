@@ -10,6 +10,7 @@ Version 1.0
 Released: 0x/0x/200x
 
 New:
++Enhanced command dialog for executing source control commands.
 +Api compatibility fixes.
 
 Bug Fixes:
