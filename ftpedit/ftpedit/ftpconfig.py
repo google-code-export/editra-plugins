@@ -23,7 +23,7 @@ import ed_glob
 import ed_crypt
 import ed_msg
 from profiler import Profile_Get
-from eclib.encdlg import GetAllEncodings
+from eclib import GetAllEncodings
 
 # Local Imports
 
