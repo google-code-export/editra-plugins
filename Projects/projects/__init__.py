@@ -19,6 +19,7 @@ import ed_menu
 import util
 
 # Local libraries
+import ConfigDialog
 from ProjectPane import ProjectPane
 from ModList import RepoModBox
 import FileIcons
@@ -118,3 +119,29 @@ class ProjectsModList(plugin.Plugin):
         """ModList can be saved in the shelf preference stack"""
         return True
 
+#-----------------------------------------------------------------------------#
+
+def GetConfigObject():
+    return ProjectsConfigObject()
+
+class ProjectsConfigObject(plugin.PluginConfigObject):
+    """Plugin configuration object. Plugins that wish to provide a
+    configuration panel should implement a subclass of this object
+    in their __init__ module.
+
+    """
+    def GetConfigPanel(self, parent):
+        """Get the configuration panel for this plugin
+        @param parent: parent window for the panel
+        @return: wxPanel
+
+        """
+        return ConfigDialog.ConfigNotebook(parent, wx.ID_ANY,
+                                           ConfigDialog.ConfigData())
+
+    def GetLabel(self):
+        """Get the label for this config panel
+        @return string
+
+        """
+        return _("Projects")

@@ -1708,7 +1708,6 @@ class ProjectPane(eclib.ControlBox):
         # Event Handlers
         self.Bind(wx.EVT_BUTTON, self.OnPress)
         self.Bind(wx.EVT_TIMER, self.OnTick)
-        self.Bind(ConfigDialog.EVT_CONFIG_EXIT, self.OnCfgClose)
 
         # Editra Message Handlers
         ed_msg.Subscribe(self.OnProjectAdded, ConfigDialog.MSG_PROJ_ADDED)
@@ -1724,14 +1723,6 @@ class ProjectPane(eclib.ControlBox):
     def GetOwnerWindow(self):
         """Return reference to mainwindow that created this panel"""
         return self._mw
-
-    def OnCfgClose(self, evt):
-        """Recieve configuration data when dialog is closed"""
-        e_id = evt.GetId()
-        if e_id == self.ID_CFGDLG:
-            self.projects.config.save()
-        else:
-            evt.Skip()
 
     def OnPress(self, evt):
         """ Add/Remove projects """
