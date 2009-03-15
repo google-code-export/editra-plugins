@@ -212,6 +212,7 @@ class BZR(SourceControl):
                 code, fname = txt.split(None, 1)
                 fname = fname.strip().rstrip(os.sep)
                 fname = fname.replace(relpath, '', 1).lstrip(os.sep)
+                code = code.rstrip('*')
 
                 # Skip unknown files
                 if code == '?':

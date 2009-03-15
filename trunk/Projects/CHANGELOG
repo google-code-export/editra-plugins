@@ -14,7 +14,7 @@ New:
 +Api compatibility fixes.
 
 Bug Fixes:
-
++Fix incorrect status of BZR files when execute bit is changed.
 
 #-----------------------------------------------------------------------------#
 Version 0.9
