@@ -36,6 +36,7 @@ import crypto
 # Editra Libraries
 import ed_glob
 import util
+import ed_msg
 
 #-----------------------------------------------------------------------------#
 # Globals
@@ -47,21 +48,6 @@ _ = wx.GetTranslation
 MSG_PROJ_ADDED = ('Projects', 'Added')
 MSG_PROJ_REMOVED = ('Projects', 'Removed')
 
-#-----------------------------------------------------------------------------#
-
-# ConfigDialogg Events
-cfgEVT_CONFIG_EXIT = wx.NewEventType()
-EVT_CONFIG_EXIT = wx.PyEventBinder(cfgEVT_CONFIG_EXIT, 1)
-class ConfigDialogEvent(wx.PyCommandEvent):
-    """ Config dialog closer event """
-    def __init__(self, etype, eid, value=None):
-        wx.PyCommandEvent.__init__(self, etype, eid)
-        self._value = value
-
-    def GetValue(self):
-        """ Returns the value from the event """
-        return self._value
-        
 #-----------------------------------------------------------------------------#
 
 class ConfigDialog(wx.Frame):
@@ -96,10 +82,6 @@ class ConfigDialog(wx.Frame):
 
     def OnClose(self, evt):
         """ Notify watchers that the config data has changed """
-        wx.PostEvent(self.GetParent(), 
-                     ConfigDialogEvent(cfgEVT_CONFIG_EXIT,
-                                       self.GetId(), self._data))
-
         # HACK: fix crashes related to picker control and focus
         #       events on wxMac 2.8.9. Setting the focus away from
         #       any of the picker controls avoids the crash.
@@ -118,6 +100,10 @@ class ConfigNotebook(wx.Notebook):
         self.AddPage(GeneralConfigTab(self, -1, data), _("General"))
         self.AddPage(SourceControlConfigTab(self, -1, data),
                      _("Source Control"))
+
+    def __del__(self):
+        """Notify of closer"""
+        data.save()
 
 #-----------------------------------------------------------------------------#
 
