@@ -48,8 +48,10 @@ class OpenModuleDialog(wx.Dialog):
         self.btnOk = wx.Button(self, wx.ID_OK, label=_('Ok'))
         self.btnOk.Enable(False)
         self.btnCancel = wx.Button(self, wx.ID_CANCEL, label=_('Cancel'))
-        self.listBox = wx.ListBox(self)
-
+        self.listCtrl = wx.ListCtrl(self, style=wx.LC_REPORT | wx.LC_NO_HEADER
+                                | wx.LC_SINGLE_SEL | wx.wx.BORDER_SUNKEN)
+        self.listCtrl.InsertColumn(0, '')
+        
         # Layout
         self.__DoLayout()
 
@@ -57,7 +59,6 @@ class OpenModuleDialog(wx.Dialog):
         self.Bind(wx.EVT_TEXT_ENTER, self.OnSearch, self.search)
         self.Bind(wx.EVT_SEARCHCTRL_CANCEL_BTN, self.OnCancelSearch, self.search)
         self.Bind(wx.EVT_BUTTON, self.OnConfirm, self.btnOk)
-        self.Bind(wx.EVT_LISTBOX_DCLICK, self.OnConfirm, self.listBox)
         self.Bind(wx.EVT_BUTTON, self.OnCancel, self.btnCancel)
 
     def __DoLayout(self):
@@ -78,7 +79,7 @@ class OpenModuleDialog(wx.Dialog):
         labsizer2.Add(label2, 1, wx.ALL, 5)
 
         lstsizer = wx.BoxSizer(wx.HORIZONTAL)
-        lstsizer.Add(self.listBox, 1, wx.ALL|wx.EXPAND, 5)
+        lstsizer.Add(self.listCtrl, 1, wx.ALL|wx.EXPAND, 5)
         lstvsizer = wx.BoxSizer(wx.VERTICAL)
         lstvsizer.Add(lstsizer, 1, wx.EXPAND)
 
@@ -101,9 +102,9 @@ class OpenModuleDialog(wx.Dialog):
         return self.result
 
     def OnConfirm(self, evt):
-        n = self.listBox.GetSelection()
+        n = self.listCtrl.GetFirstSelected()
         if n >= 0:
-            self.result = self.listBox.GetString(n)
+            self.result = self.listCtrl.GetItemText(n)
             self.EndModal(wx.ID_OK)
 
     def OnCancel(self, evt):
@@ -112,16 +113,17 @@ class OpenModuleDialog(wx.Dialog):
 
     def OnCancelSearch(self, evt):
         self.search.SetValue('')
-        self.listBox.Set([])
+        self.listCtrl.Set([])
         self.btnOk.Enable(False)
 
     def OnSearch(self, evt):
         """Handle search events from the SearchCtrl"""
-        self.listBox.Set([])
+        self.listCtrl.DeleteAllItems()
         files = self.finder.Find(self.search.GetValue())
-        self.listBox.Set(files)
+        for i, file in enumerate(files):
+            self.listCtrl.InsertStringItem(i, file)
+        self.listCtrl.SetColumnWidth(0, wx.LIST_AUTOSIZE)
         if len(files):
-            self.listBox.SetSelection(0)
             self.btnOk.Enable(True)
 
 #-----------------------------------------------------------------------------#
@@ -130,9 +132,8 @@ class MyApp(wx.App):
     def OnInit(self):
         mf = finder.ModuleFinder(finder.GetSearchPath())
         dialog = OpenModuleDialog(None, mf, title=_("Open module"))
-        filename = None
         if dialog.ShowModal() == wx.ID_OK:
-            filename = dialog.GetValue()
+            print dialog.GetValue()
         if dialog:
             dialog.Destroy()
         return True
