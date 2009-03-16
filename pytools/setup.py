@@ -3,8 +3,6 @@
 # just run 'python setup.py bdist_egg'
 
 """Various Python tools for Editra"""
-
-
 __author__ = "Ofer Schwarz, Rudi Pettazzi, Alexey Zankevich"
 
 import sys
