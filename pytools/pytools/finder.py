@@ -129,7 +129,16 @@ class ModuleFinder(object):
             return self._Find(text);
 
     def _Find(self, text):
-        """Find modules matching text by walking the search path
+        """Find modules matching text by walking the search path and doing
+        a prefix match (case insensitive). If text contains the package(s)
+        definitions, only modules matching those packages are returned,
+        otherwise the search looks everywhere. So, for example:
+            find compiler.ast => compiler/ast.py
+            find ast.py => compiler/ast.py
+            find string => string.py, StringIO.py, ...
+            find foobar.string => None
+            find mime => email/mime/__init__.py, mimetools.py, ...
+
         @param text: the module name
         @return: a list with the module source path
         """
@@ -146,7 +155,9 @@ class ModuleFinder(object):
 
         return self._sources
 
-    # FIXME the algorithm implementation and description are both in-progress
+    # FIXME if the user specify the packages, should search exactly
+    # by that path, that is if searching for email.mime mimetools.py
+    # should not be a candidate
     def _Fill(self, path, text, pkgs=None):
         """ Traverse the given path looking for files or packages matching text
         (the module name) or part of it (its enclosing package).
@@ -180,8 +191,6 @@ class ModuleFinder(object):
                     self._sources.append(pkgsource)
                     break
                 elif fname == pkg:
-                    # FIXME: if looking for a.b.c and b.c are defined into
-                    # a/__init__.py I cannot find them this way
                     self._Fill(fqdn, text, pkgs)
                 elif pkg == '' and not fqdn.endswith(ModuleFinder._WXLOCALE):
                     # no package specified, so search everywhere

@@ -64,8 +64,8 @@ class PyTools(plugin.Plugin):
             self._log("[pytools][info] Installing Pytools")
             self._finder = None
             # Install all tools
-            self.lighter = HighLight(parent)
-            self.lighter.PlugIt()
+            #self.lighter = HighLight(parent)
+            #self.lighter.PlugIt()
             self.InstallOpenModule(parent)
         else:
             self._log("[pytools][err] Failed to install pytools plugin")
@@ -131,8 +131,12 @@ class PyTools(plugin.Plugin):
             win.DoOpen(evt, filename)
 
 def CheckModuleBase(base):
-    return os.path.exists(base) and os.path.isdir(base) \
-            and os.path.exists(os.path.join(base, 'site-packages'))
+    if sys.platform == 'win32':
+        spkg = os.path.join(base, 'lib', 'site-packages')
+    else:
+        spkg = os.path.join(base, 'site-packages')
+    return base != None and os.path.exists(base) and os.path.isdir(base) \
+            and os.path.exists(spkg)
 
 # XXX investigate python installation layout on MacOSX ("apple python" vs. 
 # default python install
