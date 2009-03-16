@@ -113,7 +113,7 @@ class OpenModuleDialog(wx.Dialog):
 
     def OnCancelSearch(self, evt):
         self.search.SetValue('')
-        self.listCtrl.Set([])
+        self.listCtrl.DeleteAllItems()
         self.btnOk.Enable(False)
 
     def OnSearch(self, evt):
