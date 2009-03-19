@@ -7,10 +7,7 @@
 # Licence: wxWindows Licence                                                  #
 ###############################################################################
 
-"""
-Various Python tools for Editra
-
-"""
+"""Various Python tools for Editra"""
 
 # Plugin Meta Data
 __author__ = "Ofer Schwarz, Rudi Pettazzi, Alexey Zankevich"
