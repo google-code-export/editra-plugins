@@ -61,8 +61,8 @@ class PyTools(plugin.Plugin):
             self._log("[pytools][info] Installing Pytools")
             self._finder = None
             # Install all tools
-            #self.lighter = HighLight(parent)
-            #self.lighter.PlugIt()
+            self.lighter = HighLight(parent)
+            self.lighter.PlugIt()
             self.InstallOpenModule(parent)
         else:
             self._log("[pytools][err] Failed to install pytools plugin")
