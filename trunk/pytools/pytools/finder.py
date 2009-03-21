@@ -7,8 +7,8 @@
 ###############################################################################
 
 __author__ = "Rudi Pettazzi <rudi.pettazzi@gmail.com>"
-__svnid__ = "$Id: Exp $"
-__revision__ = "$Revision:  $"
+__svnid__ = "$Id$"
+__revision__ = "$Revision$"
 
 #--------------------------------------------------------------------------#
 # Dependancies
@@ -90,10 +90,13 @@ class ModuleFinder(object):
     """
     This component finds the source file of all the modules matching
     a given name, using one of the following strategies:
-    1) loading the module with __import__ (0 or 1 results)
+    1) loading the module with __import__ (0 or 1 results).
+    This strategy is limited because it doesn't work if Editra is 
+    run from the binary installer and it can search only within 
+    the same python version that is actually running the editor.
     2) traversing the filesystem starting at a given search path
     (0 or N results) and matching files and packages using various
-    criteria described below.
+    criteria described below. This is the default strategy.
 
     For maximum execution and correctness performance, in the future, we could
     use a persistent index to lookup the modules.
@@ -102,9 +105,10 @@ class ModuleFinder(object):
 
     # TODO: the extensions for source files could also be retrieved from
     #       syntax.syntax.ExtensionRegister
-    _SRC_EXTENSIONS = '.py', '.pyw'
-    _BYTECODE_EXTENSIONS = '.pyc', '.pyo'
+    _SRC_EXT = '.py', '.pyw'
+    _BYTECODE_EXT = '.pyc', '.pyo'
 
+    # a path we can safely skip for better performance
     _WXLOCALE = os.path.join('wx', 'locale')
 
     def __init__(self, searchpath):
@@ -113,7 +117,6 @@ class ModuleFinder(object):
         """
         self._searchpath = searchpath
         self._sources = []
-        self._pattern = None
 
     def Find(self, text, useimport=False):
         """ Find the source files of modules matching text.
@@ -129,77 +132,107 @@ class ModuleFinder(object):
             return self._Find(text);
 
     def _Find(self, text):
-        """Find modules matching text by walking the search path and doing
-        a prefix match (case insensitive). If text contains the package(s)
-        definitions, only modules matching those packages are returned,
-        otherwise the search looks everywhere. So, for example:
+        """Find pure python modules matching text by walking the search path 
+        and doing a prefix match (case insensitive). If text defines a package,
+        like in 'email.mime', search is narrowed to that package.
+        Examples:
             find compiler.ast => compiler/ast.py
             find ast.py => compiler/ast.py
             find string => string.py, StringIO.py, ...
-            find foobar.string => None
-            find mime => email/mime/__init__.py, mimetools.py, ...
+            find os.string => None
+            find email.mime => email/mime/__init__.py
+            find mime => email/mime/__init__.py, mimetools.py, ...            
 
         @param text: the module name
-        @return: a list with the module source path
+        @return: a list of source files matching text, an empty list if no 
+        source has been found.
         """
         parts = text.split('.')
         text = parts[-1]
+        pattern = re.compile(text, re.I)
 
         self._sources = []
-        self._pattern = re.compile(text, re.I)
 
         for path in self._searchpath:
             if os.path.isdir(path):
                 #print 'Analysing search path %s' % path
-                self._Fill(path, text, parts[:-1])
-
+                pkgs = parts[:-1]
+                if pkgs:
+                    self._MatchModulePackage(path, pattern, text, pkgs)
+                else:
+                    self._MatchModuleName(path, pattern, text)
         return self._sources
-
-    # FIXME if the user specify the packages, should search exactly
-    # by that path, that is if searching for email.mime mimetools.py
-    # should not be a candidate
-    def _Fill(self, path, text, pkgs=None):
-        """ Traverse the given path looking for files or packages matching text
-        (the module name) or part of it (its enclosing package).
-        - File F.py matches if any of the following is true:
-            1) 'F.startswith(text)'
-            2) 'F == text package' (ex: os.path => os.py)
-        - Dir D matches if any of the following is true:
-            3) 'D == text and D contains __init__.py'
-            (ex: ctypes => ctypes/__init__.py)
+    
+    def _MatchModuleName(self, path, pattern, text):
+        """Traverse the given path looking for a module matching text.
+        The possible matches are:
+        1) **/text*.py 
+        2) **/text/__init__.py (ex: ctypes => ctypes/__init__.py)
 
         @param path: the current directory absolute path
-        @param text: the name to match (a module name, or part of it).
-                     If the user entered a dotted module, text contains
-                     only the last token.
-        @param pkgs: a list with the package parts of text, if any.
-                     For example, if text is 'email.mime.audio', packages
-                     contains [ 'email', 'mime' ]
+        @param text: the module name to match
         """
-
-        pkg = ''
-        if pkgs:
-            pkg = pkgs.pop(0)
-
-        for fname in os.listdir(path):
-            fqdn = os.path.join(path, fname)
-            if os.path.isfile(fqdn) and self._FileMatches(fname, text, pkg):
+        for filename in os.listdir(path):
+            fqdn = os.path.join(path, filename)
+            if os.path.isfile(fqdn) and self._IsPatternMatch(filename, pattern):
                 self._sources.append(fqdn)
-            elif os.path.isdir(fqdn) and not fqdn in self._searchpath:
+            elif os.path.isdir(fqdn) and not self._Skip(fqdn):
                 pkgsource = os.path.join(fqdn, '__init__.py')
-                if fname == text and os.path.exists(pkgsource):
+                if filename == text and os.path.exists(pkgsource):
                     self._sources.append(pkgsource)
-                    break
-                elif fname == pkg:
-                    self._Fill(fqdn, text, pkgs)
-                elif pkg == '' and not fqdn.endswith(ModuleFinder._WXLOCALE):
-                    # no package specified, so search everywhere
-                    self._Fill(fqdn, text)
+                else:
+                    self._MatchModuleName(fqdn, pattern, text)
+    
+    def _MatchModulePackage(self, path, pattern, text, ns):
+        """ Traverse the given path looking for a module matching text 
+        into the namespace ns. The possible matches are:
+        1) ns.text*.py
+        2) ns.text/__init__.py
+        3) ns.py (ex: os.path => os.py)
+        4) ns/__init__.py
+        
+        XXX: maybe 3) and 4) should be added to the result only if nothing
+        matches 1) or 2)
 
-    def _FileMatches(self, fname, text, pkg):
-        parts = os.path.splitext(fname)
-        return parts[1] in ModuleFinder._SRC_EXTENSIONS and \
-                (self._pattern.match(parts[0]) or parts[0] == pkg)
+        @param path: the current directory absolute path
+        @param text: the module name to match (if the user entered a 
+                     dotted module, text contains only the last token).
+        @param ns:   a list with the namespace parts relative to current path
+                     For example, if text is 'email.mime.audio', ns should be
+                     [ 'email', 'mime' ]
+        """        
+        if ns:
+            pkg = ns.pop(0)
+        else:
+            pkg = None
+
+        for filename in os.listdir(path):
+            fqdn = os.path.join(path, filename)
+            if os.path.isfile(fqdn):
+                if not pkg and self._IsPatternMatch(filename, pattern) or self._IsExactMatch(filename, pkg):
+                    self._sources.append(fqdn)
+            elif os.path.isdir(fqdn) and not self._Skip(fqdn):
+                pkgsource = os.path.join(fqdn, '__init__.py')
+                if filename == text and os.path.exists(pkgsource):
+                    self._sources.append(pkgsource)
+                    break # definately looking for this
+                elif filename == pkg:
+                    self._MatchModulePackage(fqdn, pattern, text, ns)        
+
+    def _IsExactMatch(self, filename, text):
+        """ @return: true if filename is a source module and its name 
+        without extension is equals to text"""
+        parts = os.path.splitext(filename)
+        return parts[1] in ModuleFinder._SRC_EXT and text == parts[0]
+        
+    def _IsPatternMatch(self, filename, pattern):
+        """ @return: true if filename is a source module and its name
+        without extension matches pattern"""
+        parts = os.path.splitext(filename)
+        return parts[1] in ModuleFinder._SRC_EXT and pattern.match(parts[0])
+
+    def _Skip(self, path):
+        return path in self._searchpath or path.endswith(ModuleFinder._WXLOCALE)
 
 #--------------------------------------------------------------------------#
 # old algorithm
@@ -227,14 +260,14 @@ class ModuleFinder(object):
         if fname:
             # Open source files instead of bytecode
             root, ext = os.path.splitext(fname)
-            if ext in ModuleFinder._BYTECODE_EXTENSIONS:
-                for se in ModuleFinder._SRC_EXTENSIONS:
+            if ext in ModuleFinder._BYTECODE_EXT:
+                for se in ModuleFinder._SRC_EXT:
                     if os.path.isfile(root + se):
                         fname = root + se
                         break
                 else:
                     fname = None
-            elif ext not in ModuleFinder._SRC_EXTENSIONS:
+            elif ext not in ModuleFinder._SRC_EXT:
                 # This is not a pure python module
                 fname = None
 
@@ -256,10 +289,9 @@ if __name__ == '__main__':
 
     mf = ModuleFinder(path)
     t1 = time.clock()
-    result = mf.Find('ctypes', False)
+    result = mf.Find('mime', False)
     t2 = time.clock()
     print 'Found %s' % result
     print 'Find took %f seconds.' % (t2-t1)
-
 
 
