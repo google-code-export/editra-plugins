@@ -133,6 +133,7 @@ class MyApp(wx.App):
     def OnInit(self):
         mf = finder.ModuleFinder(finder.GetSearchPath())
         dialog = OpenModuleDialog(None, mf, title=_("Open module"))
+        dialog.SetFocus()
         if dialog.ShowModal() == wx.ID_OK:
             print dialog.GetValue()
         if dialog:
