@@ -117,7 +117,8 @@ class PyTools(plugin.Plugin):
                 return
 
         mdlg = OpenModuleDialog(win, self._finder, title=_("Open module"))
-
+        mdlg.SetFocus()
+        
         if mdlg.ShowModal() != wx.ID_OK:
             mdlg.Destroy()
             return

@@ -133,15 +133,19 @@ class ModuleFinder(object):
 
     def _Find(self, text):
         """Find pure python modules matching text by walking the search path 
-        and doing a prefix match (case insensitive). If text defines a package,
-        like in 'email.mime', search is narrowed to that package.
+        and doing a prefix match (case insensitive). 
+        If text contains the module package - for ex: 'compiler.ast' - the search
+        is narrowed to that package/subdirectory, otherwise a free search is
+        executed.
+        
         Examples:
             find compiler.ast => compiler/ast.py
             find ast.py => compiler/ast.py
-            find string => string.py, StringIO.py, ...
+            find compiler.email => no result
+            find string => string.py, StringIO.py, et al.
             find os.string => None
             find email.mime => email/mime/__init__.py
-            find mime => email/mime/__init__.py, mimetools.py, ...            
+            find mime => email/mime/__init__.py, mimetools.py, et al.
 
         @param text: the module name
         @return: a list of source files matching text, an empty list if no 
@@ -158,12 +162,12 @@ class ModuleFinder(object):
                 #print 'Analysing search path %s' % path
                 pkgs = parts[:-1]
                 if pkgs:
-                    self._MatchModulePackage(path, pattern, text, pkgs)
+                    self._PackageSearch(path, pattern, text, pkgs)
                 else:
-                    self._MatchModuleName(path, pattern, text)
+                    self._FreeSearch(path, pattern, text)
         return self._sources
     
-    def _MatchModuleName(self, path, pattern, text):
+    def _FreeSearch(self, path, pattern, text):
         """Traverse the given path looking for a module matching text.
         The possible matches are:
         1) **/text*.py 
@@ -181,9 +185,9 @@ class ModuleFinder(object):
                 if filename == text and os.path.exists(pkgsource):
                     self._sources.append(pkgsource)
                 else:
-                    self._MatchModuleName(fqdn, pattern, text)
+                    self._FreeSearch(fqdn, pattern, text)
     
-    def _MatchModulePackage(self, path, pattern, text, ns):
+    def _PackageSearch(self, path, pattern, text, ns):
         """ Traverse the given path looking for a module matching text 
         into the namespace ns. The possible matches are:
         1) ns.text*.py
@@ -217,7 +221,7 @@ class ModuleFinder(object):
                     self._sources.append(pkgsource)
                     break # definately looking for this
                 elif filename == pkg:
-                    self._MatchModulePackage(fqdn, pattern, text, ns)        
+                    self._PackageSearch(fqdn, pattern, text, ns)        
 
     def _IsExactMatch(self, filename, text):
         """ @return: true if filename is a source module and its name 
