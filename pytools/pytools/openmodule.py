@@ -63,7 +63,7 @@ class OpenModuleDialog(wx.Dialog):
 
     def __DoLayout(self):
         """Layout the dialog"""
-        label1 = wx.StaticText(self, label=_('Find and open a module by name'))
+        label1 = wx.StaticText(self, label=_('Enter module prefix'))
         labsizer1 = wx.BoxSizer(wx.HORIZONTAL)
         labsizer1.Add(label1, 1, wx.ALL, 5)
 
@@ -124,6 +124,7 @@ class OpenModuleDialog(wx.Dialog):
             self.listCtrl.InsertStringItem(i, file)
         self.listCtrl.SetColumnWidth(0, wx.LIST_AUTOSIZE)
         if len(files):
+            self.listCtrl.Select(0)
             self.btnOk.Enable(True)
 
 #-----------------------------------------------------------------------------#
