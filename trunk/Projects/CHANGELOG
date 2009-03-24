@@ -15,6 +15,7 @@ New:
 
 Bug Fixes:
 +Fix incorrect status of BZR files when execute bit is changed.
++Fix some incorrectly listed status of directories under a GIT repo.
 
 #-----------------------------------------------------------------------------#
 Version 0.9
