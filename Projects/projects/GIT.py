@@ -186,7 +186,18 @@ class GIT(SourceControl.SourceControl):
         relpath = root.replace(repo, '', 1).lstrip(os.sep)
         unknown = list()
         if out:
+            # Check to see that the directory is actually being managed by git.
+            # It is possible that the directory is below a git root but not
+            # under git's control (for example a build directory).
+            for line in out.stderr:
+                if "did not match any file" in line:
+                    return status
+            
+            save = []
             for line in out.stdout:
+                # save the stdout so it can be parsed again below
+                save.append(line)
+                
                 self.log(line)
                 current = dict()
                 line = line.lstrip('#').strip()
@@ -201,11 +212,19 @@ class GIT(SourceControl.SourceControl):
                     status[modpath(fname)] = dict(status='deleted')
                 else:
                     continue
+            
+            # Some untracked files are listed in the git output and don't show
+            # up in the git-ls-files below.  Note that the files are relative
+            # to the root directory and not the repository directory.
+            untracked = self.parseOutputForUntrackedFiles(root, save)
+            for fname in untracked:
+                relname = fname.replace(root, '', 1).lstrip(os.sep)
+                unknown.append(relname)
 
             self.logOutput(out)
             self.closeProcess(out)
 
-        # Find all untracked files
+        # Find other untracked files that don't show up in the git-status output
         out = self.run(root, ['ls-files', '--others', '-t'] + files)
         if out:
             for line in out.stdout:
@@ -230,18 +249,28 @@ class GIT(SourceControl.SourceControl):
         out = self.run(root, ['status'], mergeerr=True)
         unknown = list()
         if out:
-            start_unknown = False
-            for line in out.stdout:
-                if start_unknown:
-                    if re.search(UNKPAT, line):
-                        tmp = line.strip().split()
-                        tmp = os.path.normpath(os.path.join(repo, tmp[-1]))
-                        unknown.append(tmp)
-                    continue
-                elif line.startswith('# Untracked files:'):
-                    start_unknown = True
-                else:
-                    pass
+            unknown = self.parseOutputForUntrackedFiles(repo, out.stdout)
+        return unknown
+    
+    def parseOutputForUntrackedFiles(self, repo, output):
+        """Parse git-status output and return all untracked files"""
+        unknown = list()
+        start_unknown = False
+        for line in output:
+            if start_unknown:
+                if re.search(UNKPAT, line):
+                    tmp = line.strip().split(u"#")
+                    tmp = os.path.normpath(os.path.join(repo, tmp[-1].strip()))
+                    unknown.append(tmp)
+                # TODO: doesn't check for directories ./, ../../, etc..
+                #       This causes the isControlled to incorrectly return True
+                #       when in right clicking on an uncontrolled directory
+                #       or any of the items under it.
+                continue
+            elif line.startswith('# Untracked files:'):
+                start_unknown = True
+            else:
+                pass
         return unknown
 
     def update(self, paths):
