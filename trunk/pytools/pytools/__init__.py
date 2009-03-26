@@ -32,6 +32,7 @@ from profiler import Profile_Get, Profile_Set
 from openmodule import OpenModuleDialog, ID_OPEN_MODULE
 from varchecker import HighLight
 import finder
+import ptcfg
 
 try:
     from foxtrot import check_vars
@@ -168,4 +169,31 @@ def ChooseModuleBase(parent):
 
     dlg.Destroy()
     return value
+
+#-----------------------------------------------------------------------------#
+# Plugin Configuration Interface Implementation
+
+def GetConfigObject():
+    return PyToolsConfigObject()
+
+class PyToolsConfigObject(plugin.PluginConfigObject):
+    """Plugin configuration object. Plugins that wish to provide a
+    configuration panel should implement a subclass of this object
+    in their __init__ module.
+
+    """
+    def GetConfigPanel(self, parent):
+        """Get the configuration panel for this plugin
+        @param parent: parent window for the panel
+        @return: wxPanel
+
+        """
+        return ptcfg.PyToolsCfgPanel(parent)
+
+    def GetLabel(self):
+        """Get the label for this config panel
+        @return string
+
+        """
+        return _("PyTools")
 
