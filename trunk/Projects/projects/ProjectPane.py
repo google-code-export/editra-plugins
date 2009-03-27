@@ -1313,11 +1313,15 @@ class ProjectTree(wx.Panel):
             pastable = not (not (self.clipboard['files']))
 
         # Is directory controlled by source control
-        scenabled = False
-        for item in paths:
-            if self.srcCtrl.GetSCSystem(item):
-                scenabled = True
-                break
+        itemid = self.tree.GetSelection()
+        icon = self.tree.GetItemImage(itemid)
+        scenabled = icon not in (self.icons['file'],
+                                 self.icons['folder'],
+                                 self.icons['folder-open'])
+#        for item in paths:
+#            if self.srcCtrl.GetSCSystem(item):
+#                scenabled = True
+#                break
 
         # Add or remove
         if scenabled:
