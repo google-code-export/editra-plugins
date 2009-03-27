@@ -28,6 +28,7 @@ DecodeString = SourceControl.DecodeString
 #-----------------------------------------------------------------------------#
 # Globals
 UNKPAT = re.compile('#[ \t]+[a-zA-Z0-9]+') # hmmm
+RELPAT = re.compile('#[ \t]+\.{1,2}' + os.sep) # relative paths
 COMPAT = re.compile('commit [a-z0-9]{40}') # Commit line in log
 
 #-----------------------------------------------------------------------------#
@@ -216,9 +217,9 @@ class GIT(SourceControl.SourceControl):
             # Some untracked files are listed in the git output and don't show
             # up in the git-ls-files below.  Note that the files are relative
             # to the root directory and not the repository directory.
-            untracked = self.parseOutputForUntrackedFiles(root, save)
+            untracked = self.parseOutputForUntrackedFiles(repo, save)
             for fname in untracked:
-                relname = fname.replace(root, '', 1).lstrip(os.sep)
+                relname = fname.replace(repo, '', 1).lstrip(os.sep)
                 unknown.append(relname)
 
             self.logOutput(out)
@@ -258,14 +259,24 @@ class GIT(SourceControl.SourceControl):
         start_unknown = False
         for line in output:
             if start_unknown:
+                line = line.strip()
                 if re.search(UNKPAT, line):
-                    tmp = line.strip().split(u"#")
+                    tmp = line.split(u"#", 1)
                     tmp = os.path.normpath(os.path.join(repo, tmp[-1].strip()))
                     unknown.append(tmp)
-                # TODO: doesn't check for directories ./, ../../, etc..
-                #       This causes the isControlled to incorrectly return True
-                #       when in right clicking on an uncontrolled directory
-                #       or any of the items under it.
+                elif re.search(RELPAT, line):
+                    tmp = line.split(u"#", 1)[-1].strip()
+                    if tmp == u'.' + os.sep and repo not in unknown:
+                        unknown.append(repo)
+                    else:
+                        btrack = tmp.count(u"..")
+                        rpath = repo.rsplit(os.sep, btrack)[0]
+                        npath = tmp.split(os.sep, btrack)[-1]
+                        unknown.append(os.path.join(rpath, npath))
+                # TODO: There are still some bugs in this when the call
+                #       comes from the isControlled method. Workaround fix
+                #       in UI based on icon status. This still should/needs
+                #       to be fixed though...
                 continue
             elif line.startswith('# Untracked files:'):
                 start_unknown = True
