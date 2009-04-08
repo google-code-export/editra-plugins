@@ -36,6 +36,7 @@ _ = wx.GetTranslation
 #-----------------------------------------------------------------------------#
 
 class FtpConfigDialog(wx.Dialog):
+    """Ftp sites and accounts configuration dialog"""
     def __init__(self, parent, title=u''):
         wx.Dialog.__init__(self, parent, title=title)
 
@@ -492,7 +493,8 @@ class FtpLoginPanel(wx.Panel):
 
         host_sz = wx.BoxSizer(wx.HORIZONTAL)
         host_sz.AddMany([(self._host, 1, wx.EXPAND), ((5, 5)),
-                         (wx.StaticText(self, label=_("Port:")), 0, wx.ALIGN_CENTER_VERTICAL),
+                         (wx.StaticText(self, label=_("Port:")),
+                          0, wx.ALIGN_CENTER_VERTICAL),
                          ((5, 5)), (self._port, 0, wx.ALIGN_CENTER_VERTICAL)])
 
         fgrid = wx.FlexGridSizer(7, 2, 10, 5)

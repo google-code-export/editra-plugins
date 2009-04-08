@@ -24,7 +24,6 @@ __revision__ = "$Revision$"
 #-----------------------------------------------------------------------------#
 # Imports
 import os
-import re
 import threading
 import ftplib
 import tempfile
@@ -184,9 +183,9 @@ class FtpClient(ftplib.FTP):
         @note: Generates a refresh event when finished
 
         """
-        t = FtpThread(self._parent, self.ChangeDir,
-                      edEVT_FTP_REFRESH, args=[path,])
-        t.start()
+        ftp_t = FtpThread(self._parent, self.ChangeDir,
+                          edEVT_FTP_REFRESH, args=[path,])
+        ftp_t.start()
 
     def CheckConnection(self):
         """Check the connection to see if the client is still logged in.
@@ -215,7 +214,7 @@ class FtpClient(ftplib.FTP):
         nclient._host = self._host
         nclient._lastlogin = self._lastlogin
         nclient._port = self._port
-        nclient_lasterr = self._lasterr
+        nclient._lasterr = self._lasterr
         return nclient
 
     def Connect(self, user, password):
@@ -286,9 +285,9 @@ class FtpClient(ftplib.FTP):
         @note: fires EVT_FTP_REFRESH when complete
 
         """
-        t = FtpThread(self._parent, self._RefreshCommand,
-                      edEVT_FTP_REFRESH, args=[self.DeleteFile, [fname,]])
-        t.start()
+        ftp_t = FtpThread(self._parent, self._RefreshCommand,
+                          edEVT_FTP_REFRESH, args=[self.DeleteFile, [fname,]])
+        ftp_t.start()
 
     def Download(self, fname):
         """Download the file at the given path
@@ -330,9 +329,9 @@ class FtpClient(ftplib.FTP):
                location of the on disk file.
 
         """
-        t = FtpThread(self._parent, self.Download,
-                      edEVT_FTP_DOWNLOAD, args=[fname,])
-        t.start()
+        ftp_t = FtpThread(self._parent, self.Download,
+                          edEVT_FTP_DOWNLOAD, args=[fname,])
+        ftp_t.start()
 
     def DownloadTo(self, fname, dest):
         """Download the file from the server to the destination
@@ -347,14 +346,15 @@ class FtpClient(ftplib.FTP):
         succeed = True
         try:
             try:
-                f = open(dest, 'wb')
-                self.retrbinary('RETR ' + fname, lambda data: f.write(data))
+                fhandle = open(dest, 'wb')
+                self.retrbinary('RETR ' + fname,
+                                lambda data: fhandle.write(data))
             except Exception, msg:
                 self._ProcessException(msg)
                 Log("[ftpedit][err] DownloadTo: %s" % msg)
                 succeed = False
         finally:
-            f.close()
+            fhandle.close()
 
         return (ftppath, dest, succeed)
 
@@ -366,9 +366,9 @@ class FtpClient(ftplib.FTP):
                location of the on disk file.
 
         """
-        t = FtpThread(self._parent, self.DownloadTo,
-                      edEVT_FTP_DOWNLOAD_TO, args=[fname, dest])
-        t.start()
+        ftp_t = FtpThread(self._parent, self.DownloadTo,
+                          edEVT_FTP_DOWNLOAD_TO, args=[fname, dest])
+        ftp_t.start()
 
     def GetCurrentDirectory(self):
         """Get the current working directory
@@ -500,9 +500,9 @@ class FtpClient(ftplib.FTP):
         @param dname: string
 
         """
-        t = FtpThread(self._parent, self._RefreshCommand,
-                      edEVT_FTP_REFRESH, args=[self.NewDir, [dname,]])
-        t.start()
+        ftp_t = FtpThread(self._parent, self._RefreshCommand,
+                          edEVT_FTP_REFRESH, args=[self.NewDir, [dname,]])
+        ftp_t.start()
 
     def NewFile(self, fname):
         """Create a new file relative to the current path
@@ -527,9 +527,9 @@ class FtpClient(ftplib.FTP):
         @param fname: name of file.
 
         """
-        t = FtpThread(self._parent, self._RefreshCommand,
+        ftp_t = FtpThread(self._parent, self._RefreshCommand,
                       edEVT_FTP_REFRESH, args=[self.NewFile, [fname,]])
-        t.start()
+        ftp_t.start()
 
     def RefreshPath(self):
         """Refresh the current working directory.
@@ -537,8 +537,8 @@ class FtpClient(ftplib.FTP):
         in a EVT_FTP_REFRESH event.
 
         """
-        t = FtpThread(self._parent, self.GetFileList, edEVT_FTP_REFRESH)
-        t.start()
+        ftp_t = FtpThread(self._parent, self.GetFileList, edEVT_FTP_REFRESH)
+        ftp_t.start()
 
     def Rename(self, old, new):
         """Rename the file
@@ -564,9 +564,9 @@ class FtpClient(ftplib.FTP):
         @param new: new file name
 
         """
-        t = FtpThread(self._parent, self._RefreshCommand,
-                      edEVT_FTP_REFRESH, args=[self.Rename, [old, new]])
-        t.start()
+        ftp_t = FtpThread(self._parent, self._RefreshCommand,
+                          edEVT_FTP_REFRESH, args=[self.Rename, [old, new]])
+        ftp_t.start()
 
     def SetDefaultPath(self, dpath):
         """Set the default path
@@ -600,9 +600,9 @@ class FtpClient(ftplib.FTP):
             raise FtpClientNotConnected, "FtpClient is not connected"
 
         try:
-            f = open(src, 'r')
-            buff = StringIO(f.read())
-            f.close()
+            fhandle = open(src, 'r')
+            buff = StringIO(fhandle.read())
+            fhandle.close()
             self.storlines('STOR ' + dest, buff)
         except Exception, msg:
             self._ProcessException(msg)
@@ -617,9 +617,9 @@ class FtpClient(ftplib.FTP):
         @note: completion notified by EVT_FTP_UPLOAD
 
         """
-        t = FtpThread(self._parent, self.Upload,
-                      edEVT_FTP_UPLOAD, args=[src, dest])
-        t.start()
+        ftp_t = FtpThread(self._parent, self.Upload,
+                          edEVT_FTP_UPLOAD, args=[src, dest])
+        ftp_t.start()
 
 #-----------------------------------------------------------------------------#
 

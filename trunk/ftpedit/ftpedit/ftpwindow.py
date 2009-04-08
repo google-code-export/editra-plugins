@@ -57,8 +57,8 @@ _ = wx.GetTranslation
 
 class FtpWindow(eclib.ControlBox):
     """Ftp file window"""
-    def __init__(self, parent, id=wx.ID_ANY):
-        eclib.ControlBox.__init__(self, parent, id)
+    def __init__(self, parent, id_=wx.ID_ANY):
+        eclib.ControlBox.__init__(self, parent, id_)
 
         # Attributes
         self._mw = self.__FindMainWindow()
@@ -156,7 +156,7 @@ class FtpWindow(eclib.ControlBox):
         @return: MainWindow or None
 
         """
-        def IsMainWin(win):
+        def IsMainWin(tlw):
             """Check if the given window is a main window"""
             return getattr(tlw, '__name__', '') == 'MainWindow'
 
@@ -264,7 +264,6 @@ class FtpWindow(eclib.ControlBox):
                 password = self._password.GetValue().strip()
                 site = self._sites.GetStringSelection()
 
-                # TODO: Do connection asyncronously?
                 url = self._config.GetSiteHostname(site)
                 port = self._config.GetSitePort(site)
                 self._client.SetDefaultPath(self._config.GetSitePath(site))
@@ -577,8 +576,9 @@ class FtpList(listmix.ListCtrlAutoWidthMixin,
     Displays the list of files in the currently connected ftp site.
 
     """
-    def __init__(self, parent, id=wx.ID_ANY):
-        wx.ListCtrl.__init__(self, parent, id, style=wx.LC_REPORT|wx.LC_SINGLE_SEL) 
+    def __init__(self, parent, id_=wx.ID_ANY):
+        wx.ListCtrl.__init__(self, parent, id_,
+                             style=wx.LC_REPORT|wx.LC_SINGLE_SEL) 
         eclib.ListRowHighlighter.__init__(self)
 
         # Attributes
@@ -655,7 +655,7 @@ class FtpList(listmix.ListCtrlAutoWidthMixin,
                 item.SetBitmap(bmp)
             self._menu.AppendSeparator()
             self._menu.Append(ID_COPY_URL, _("Copy URL"))
-#   TODO: Add in Version 0.2
+#   TODO: Add in Version 0.3
 #            self._menu.AppendSeparator()
 #            self._menu.Append(ID_DOWNLOAD, _("Download") + u"...")
 #            self._menu.Append(ID_UPLOAD, _("Upload") + u"...")
