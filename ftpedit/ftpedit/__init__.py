@@ -9,7 +9,7 @@
 """Edit files over ftp (Editra > 0.4.28)"""
 
 __author__ = "Cody Precord <cprecord@editra.org>"
-__version__ = "0.2"
+__version__ = "0.3"
 __svnid__ = "$Id$"
 __revision__ = "$Revision$"
 

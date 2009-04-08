@@ -34,6 +34,10 @@ _ = wx.GetTranslation
 #-----------------------------------------------------------------------------#
 
 class FtpFile(ed_txt.EdFile):
+    """Editra file implementation that hooks uploading saves to the ftp
+    site the file was opened from.
+
+    """
     def __init__(self, client, ftppath, sitedata, path='', modtime=0):
         """Create the FtpFile.
         Implementation Note: This file object is only associated with the
@@ -75,6 +79,10 @@ class FtpFile(ed_txt.EdFile):
         self.CleanUp()
 
     def _Busy(self, busy=True):
+        """Start/stop the frames busy indicato
+        @keyword busy: bool
+
+        """
         if busy:
             ed_msg.PostMessage(ed_msg.EDMSG_PROGRESS_SHOW, (self._pid, True))
             ed_msg.PostMessage(ed_msg.EDMSG_PROGRESS_STATE, (self._pid, -1, -1))
@@ -83,12 +91,13 @@ class FtpFile(ed_txt.EdFile):
 
     def _NotifyError(self):
         """Notify of errors"""
-        if isinstance(window, wx.Frame):
+        if isinstance(self._window, wx.Frame):
             msg = self._client.GetLastError()
-            dlg = wx.MessageBox(unicode(msg), _("Ftp Save Error"),
-                                wx.OK|wx.CENTER|wx.ICON_ERROR)
+            wx.MessageBox(unicode(msg), _("Ftp Save Error"),
+                          wx.OK|wx.CENTER|wx.ICON_ERROR)
 
-    def _PostStatusMsg(self, msg):
+    @staticmethod
+    def _PostStatusMsg(msg):
         """Post a message to update the status text to inform of file changes"""
         ed_msg.PostMessage(ed_msg.EDMSG_UI_SB_TXT, (ed_glob.SB_INFO, msg))
 
@@ -124,6 +133,7 @@ class FtpFile(ed_txt.EdFile):
 
         if not connected:
             # TODO: report error to upload in ui
+            err = self._client.GetLastError()
             Log("[ftpedit][err] DoFtpUpload: %s" % err)
             wx.CallAfter(self._NotifyError)
             wx.CallAfter(self._PostStatusMsg, _("Ftp upload failed: %s") % self.ftppath)
@@ -202,9 +212,9 @@ class FtpFile(ed_txt.EdFile):
 
         # Upload the file to the server
         if self._ftp:
-            t = ftpclient.FtpThread(None, self.DoFtpUpload,
+            ftp_t = ftpclient.FtpThread(None, self.DoFtpUpload,
                                     ftpclient.EVT_FTP_UPLOAD)
-            t.start()
+            ftp_t.start()
 
 #-----------------------------------------------------------------------------#
 
