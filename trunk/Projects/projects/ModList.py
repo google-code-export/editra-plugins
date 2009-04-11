@@ -411,6 +411,7 @@ class RepoModList(wx.ListCtrl,
             if message:
                 break
 
+        self.SetCommandRunning(True)
         self._ctrl.ScCommand(nodes, 'commit', None, message=message)
 
     def GetSelectedPaths(self):
