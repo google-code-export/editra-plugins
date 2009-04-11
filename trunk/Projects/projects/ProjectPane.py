@@ -91,7 +91,6 @@ import ed_glob
 import ed_msg
 import profiler
 import util
-import extern.flatnotebook as FNB
 import eclib
 
 #-----------------------------------------------------------------------------#
@@ -359,8 +358,8 @@ class ProjectTree(wx.Panel):
         # Notebook syncronization
         self._mainw = self.GetGrandParent()
         nbook = self._mainw.GetNotebook()
-        nbook.Bind(FNB.EVT_FLATNOTEBOOK_PAGE_CHANGED, self.OnPageChanged)
-        nbook.Bind(FNB.EVT_FLATNOTEBOOK_PAGE_CLOSING, self.OnPageClosing)
+        ed_msg.Subscribe(self.OnPageChanged, ed_msg.EDMSG_UI_NB_CHANGED)
+        ed_msg.Subscribe(self.OnPageClosing, ed_msg.EDMSG_UI_NB_CLOSING)
         ed_msg.Subscribe(self.OnThemeChange, ed_msg.EDMSG_THEME_CHANGED)
         ed_msg.Subscribe(self.OnUpdateFont, ed_msg.EDMSG_DSP_FONT)
 
@@ -420,6 +419,8 @@ class ProjectTree(wx.Panel):
         """ Clean up resources """
         ed_msg.Unsubscribe(self.OnThemeChange)
         ed_msg.Unsubscribe(self.OnUpdateFont)
+        ed_msg.Unsubscribe(self.OnPageChanged)
+        ed_msg.Unsubscribe(self.OnPageClosing)
 
         # Kill all watcher threads
         for watcher in self.watchers.keys():
@@ -728,14 +729,19 @@ class ProjectTree(wx.Panel):
             # Default to True
             return True
 
-    def OnPageClosing(self, evt):
+    def OnPageClosing(self, msg):
         """ Notebook tab was closed """
-        self.isClosing = True
-        evt.Skip()
+        notebook = msg.GetData()[0]
+        if self._mainw and notebook == self._mainw.GetNotebook():
+            self.isClosing = True
 
-    def OnPageChanged(self, evt):
+    def OnPageChanged(self, msg):
         """ Notebook tab was changed """
-        evt.Skip()
+        notebook, pg_num = msg.GetData()
+
+        # Message from a different window
+        if self._mainw and notebook != self._mainw.GetNotebook():
+            return
 
         # Don't sync when a tab was just closed
         if self.isClosing:
@@ -746,8 +752,6 @@ class ProjectTree(wx.Panel):
         if not self.config.getSyncWithNotebook() or not self.PaneIsShown():
             return
 
-        notebook = evt.GetEventObject()
-        pg_num = evt.GetSelection()
         txt_ctrl = notebook.GetPage(pg_num)
 
         # With the text control (ed_stc.EditraStc) this will return the full
