@@ -45,7 +45,6 @@ import eclib
 ID_UPDATE              = wx.NewId()
 ID_COMPARE_TO_PREVIOUS = wx.NewId()
 ID_COMMIT              = wx.NewId()
-ID_REVERT              = wx.NewId()
 ID_REVISION_HIST       = wx.NewId()
 
 # Control Id's
@@ -135,7 +134,7 @@ class RepoModBox(eclib.ControlBox):
         ctrlbar.AddControl(commit, wx.ALIGN_RIGHT)
 
         # Clear Button
-        revert = eclib.PlateButton(ctrlbar, ID_REVERT, _("Revert"),
+        revert = eclib.PlateButton(ctrlbar, wx.ID_REVERT, _("Revert"),
                                    FileIcons.getScRevertBitmap(),
                                    style=eclib.PB_STYLE_NOBG)
         ctrlbar.AddControl(revert, wx.ALIGN_RIGHT)
@@ -292,7 +291,7 @@ class RepoModBox(eclib.ControlBox):
 
         """
         e_id = evt.GetId()
-        if e_id in (ID_REVERT, ID_COMMIT):
+        if e_id in (wx.ID_REVERT, ID_COMMIT):
             evt.Enable(self._list.GetSelectedItemCount())
         elif e_id == ID_REPO_CHOICE:
             evt.Enable(self._repo_ch.GetCount())
@@ -556,15 +555,18 @@ class RepoModList(wx.ListCtrl,
             self._menu = wx.Menu()
             item = self._menu.Append(wx.ID_REFRESH, _("Refresh status"))
             item.SetBitmap(FileIcons.getScStatusBitmap())
+            self._menu.AppendSeparator()
             item = self._menu.Append(ID_COMPARE_TO_PREVIOUS,
                                      _("Compare to previous version"))
             item.SetBitmap(FileIcons.getScDiffBitmap())
             item = self._menu.Append(ID_REVISION_HIST,
                                      _("Show revision history"))
             item.SetBitmap(FileIcons.getScHistoryBitmap())
+            self._menu.AppendSeparator()
             item = self._menu.Append(ID_COMMIT, _("Commit changes"))
             item.SetBitmap(FileIcons.getScCommitBitmap())
-            item = self._menu.Append(ID_REVERT,
+            self._menu.AppendSeparator()
+            item = self._menu.Append(wx.ID_REVERT,
                                      _("Revert to repository version"))
             item.SetBitmap(FileIcons.getScRevertBitmap())
 
@@ -579,7 +581,7 @@ class RepoModList(wx.ListCtrl,
         elif e_id == ID_COMMIT:
             # Checkin
             self.CommitSelectedFiles()
-        elif e_id == ID_REVERT:
+        elif e_id == wx.ID_REVERT:
             # Revert changes
             self.RevertSelectedFiles()
         elif e_id == ID_REVISION_HIST:
