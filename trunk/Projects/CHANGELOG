@@ -16,6 +16,7 @@ New:
 Bug Fixes:
 +Fix incorrect status of BZR files when execute bit is changed.
 +Fix some incorrectly listed status of directories under a GIT repo.
++Fix Source Control window's Revert button not working.
 
 #-----------------------------------------------------------------------------#
 Version 0.9
