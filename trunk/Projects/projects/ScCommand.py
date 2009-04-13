@@ -352,6 +352,7 @@ class SourceController(object):
         """Does the running of the command
         @param nodes: list [(node, data), (node2, data2), ...]
         @param command: command string
+        @param callback: callable or None
         @return: (command, None)
 
         """
@@ -406,9 +407,16 @@ class SourceController(object):
             if method:
                 # Run command (only if it isn't the status command)
                 if command != 'status':
+                    if 'outhook' in options:
+                        sc['instance'].setOutputHook(options['outhook'])
+                        del options['outhook']
+
                     rc = self._TimeoutCommand(callback, method,
                                               [x[DATA]['path'] for x in nodeinfo],
                                               **options)
+
+                    # Make sure the output hook has been cleared
+                    sc['instance'].clearOutputHook()
         finally:
             # Only update status if last command didn't time out
             if command not in ['history', 'revert', 'update'] and rc:

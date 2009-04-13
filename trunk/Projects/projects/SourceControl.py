@@ -84,7 +84,11 @@ class SourceControl(object):
 
     # Username, password, and environments for given repositories
     repositories = {}
-    
+
+    # Allow external user code to hook the output of a running command
+    # Must be a callable that accepts a string as an argument.
+    OUTPUT_HOOK = None
+
     def getRelativePaths(self, paths):
         """
         Find the common root to the given list of paths
@@ -212,7 +216,7 @@ class SourceControl(object):
         return settings
 
     def run(self, directory, options, env=dict(), mergeerr=False):
-        """ Run a CVS command in the given directory with given options """
+        """ Run a command in the given directory with given options """
         self.log('%s %s %s\n' % (directory, self.command, ' '.join(options)))
         environ = os.environ.copy()
         # Add repository settings        
@@ -302,26 +306,39 @@ class SourceControl(object):
             return
 
         flush = write = None
+        hooked = None
+
+        if SourceControl.OUTPUT_HOOK is not None:
+            hooked = SourceControl.OUTPUT_HOOK
+
         try: 
             write = wx.GetApp().GetLog()
         except:
             write = sys.stdout.write
-            try: flush = sys.stdout.flush
-            except AttributeError: pass
+            try:
+                flush = sys.stdout.flush
+            except AttributeError:
+                pass
 
         while write:
             err = out = None
             if p.stderr:
                 err = p.stderr.readline()
                 if err:
-                    write('[projects][err] ' + err)
+                    if hooked:
+                        hooked(error)
+
+                    write(u'[projects][err] ' + err)
                     if flush:
                         flush()
 
             if p.stdout:
                 out = p.stdout.readline()
                 if out:
-                    write('[projects][info] ' + out)
+                    if hooked:
+                        hooked(out)
+
+                    write(u'[projects][info] ' + out)
                     if flush:
                         flush()
 
@@ -333,16 +350,36 @@ class SourceControl(object):
 
     def closeProcess(self, p):
         """Close a processes pipes"""
-        try: p.stdout.close()
-        except: pass
-        try: p.stderr.close()
-        except: pass
-        try: p.stdin.close()
-        except: pass
+        try:
+            p.stdout.close()
+        except:
+            pass
+        try:
+            p.stderr.close()
+        except:
+            pass
+        try:
+            p.stdin.close()
+        except:
+            pass
 
-#
-# Methods that need to be overridden in subclasses        
-#
+    @staticmethod
+    def setOutputHook(hook):
+        """Hook the output from all logging commands
+        @param output: output hook method
+        @note: be sure to clear this by setting it back to None when complete
+
+        """
+        SourceControl.OUTPUT_HOOK = hook
+
+    @staticmethod
+    def clearOutputHook():
+        """Convience method for setOuputHook(None)"""
+        SourceControl.OUTPUT_HOOK = None
+
+############################################################
+#---- Methods that need to be overridden in subclasses ----#        
+############################################################
         
     def getRepository(self, path):
         """

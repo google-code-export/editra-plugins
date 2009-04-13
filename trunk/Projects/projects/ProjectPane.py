@@ -289,7 +289,6 @@ class MyTreeCtrl(wx.TreeCtrl):
 
 class ProjectTree(wx.Panel):
     """ Tree control for holding project nodes """
-
     def __init__(self, parent, log):
         # Use the WANTS_CHARS style so the panel doesn't eat the Return key.
         wx.Panel.__init__(self, parent, -1,
@@ -882,7 +881,20 @@ class ProjectTree(wx.Panel):
 
     def scUpdate(self, nodes):
         """ Send an update command to current control system """
-        self.scCommand(nodes, 'update')
+        if len(nodes):
+            item = self.tree.GetItemPyData(nodes[0])
+            if item is not None and 'path' in item:
+                path = item['path']
+        else:
+            path = u''
+            
+        dlg = ProjCmnDlg.UpdateStatusDialog(self._mainw,
+                                            _("Updating %s") % path)
+        dlg.CenterOnParent()
+        self.scCommand(nodes, 'update', outhook=dlg.OutputHook)
+        dlg.Show()
+        # TODO: do I need to keep reference to the dialog so that it can
+        #       be properly destroyed later?
 
     def scRevert(self, nodes):
         """ Send an revert command to current control system """

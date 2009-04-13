@@ -12,6 +12,7 @@ Released: 0x/0x/200x
 New:
 +Enhanced command dialog for executing source control commands.
 +Api compatibility fixes.
++Dialog to show output from a SourceControl update command.
 
 Bug Fixes:
 +Fix incorrect status of BZR files when execute bit is changed.
