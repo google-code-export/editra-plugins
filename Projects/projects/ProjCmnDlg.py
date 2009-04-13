@@ -22,6 +22,9 @@ __revision__ = "$Revision$"
 import wx
 import os
 
+# Editra Imports
+import eclib
+
 #-----------------------------------------------------------------------------#
 # Globals
 
@@ -194,6 +197,96 @@ class CommitDialog(wx.Dialog):
                                   if x.strip().startswith(':')])
         self._entry.SetValue(header + os.linesep + msg)
         self._entry.SetInsertionPoint(self._entry.GetLastPosition())
+
+#-----------------------------------------------------------------------------#
+
+class UpdateStatusDialog(wx.Frame):
+    """Dialog to show output status from a SourceControl.update command"""
+    def __init__(self, parent, title):
+        """Dialog constructor
+        @param parent: parent window
+        @param title: dialog title
+
+        """
+        wx.Frame.__init__(self, parent, wx.ID_ANY, title, size=(550, 350))
+
+        # Attributes
+        self._panel = _UpdateDialogPanel(self)
+        self.out = self._panel.OutputBuffer
+
+        # Event Handlers
+        self.Bind(wx.EVT_BUTTON, self.OnButton, id=wx.ID_CLOSE)
+
+    def __DoLayout(self):
+        """Layout the window"""
+        sizer = wx.BoxSizer(wx.HORIZONTAL)
+        sizer.Add(self._panel, 1, wx.EXPAND)
+        self.SetSizer(sizer)
+        self.SetInitialSize((300, 200))
+        self.SetAutoLayout(True)
+
+    def OnButton(self, evt):
+        """Handle button clicks"""
+        self.Close(True)
+
+    def OutputHook(self, line):
+        """Output hook to display output from a command
+        @param line: string or None to quit
+
+        """
+        self.out.AppendUpdate(line)
+
+    def Show(self, show=True):
+        """Show or hide the window
+        @keyword show: bool
+
+        """
+        super(UpdateStatusDialog, self).Show(show)
+        self.out.Start(200)
+
+class _UpdateDialogPanel(wx.Panel):
+    """Panel to show output status from a SourceControl.update command"""
+    def __init__(self, parent):
+        """Dialog constructor
+        @param parent: parent window
+        @param title: dialog title
+
+        """
+        wx.Panel.__init__(self, parent)
+
+        # Attributes
+        self._output = eclib.OutputBuffer(self)
+        self._output.SetWrapMode(wx.stc.STC_WRAP_WORD)
+
+        # Setup
+        self.__DoLayout()
+
+        # Event Handlers
+
+    def __DoLayout(self):
+        """Layout the window"""
+        sizer = wx.BoxSizer(wx.VERTICAL)
+
+        # Button Sizer
+        bsizer = wx.BoxSizer(wx.HORIZONTAL)
+        bsizer.AddMany([((-1, 5), 1, wx.EXPAND),
+                        (wx.Button(self, wx.ID_CLOSE, _("Close")), 0),
+                        ((12, 8), 0)])
+
+        # Output buffer
+        hsizer = wx.BoxSizer(wx.HORIZONTAL)
+        hsizer.AddMany([((5, 5), 0), (self._output, 1, wx.EXPAND), ((5, 5), 0)])
+
+        # Final layout
+        sizer.AddMany([((5, 5), 0), (hsizer, 1, wx.EXPAND), ((5, 5), 0),
+                      (bsizer, 0, wx.EXPAND), ((5, 5), 0)])
+
+        self.SetSizer(sizer)
+        self.SetAutoLayout(True)
+
+    @property
+    def OutputBuffer(self):
+        return self._output
 
 #-----------------------------------------------------------------------------#
 
