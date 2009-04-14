@@ -127,6 +127,7 @@ ID_POPUP_EXEC = wx.NewId()
 ID_POPUP_SCCOMM = wx.NewId()
 ID_POPUP_NFOLDER = wx.NewId()
 ID_POPUP_NMENU = wx.NewId()
+ID_POPUP_SEARCH = wx.NewId()
 
 # New File Menu Id's
 ID_TXT_FILE = wx.NewId()
@@ -363,6 +364,7 @@ class ProjectTree(wx.Panel):
         ed_msg.Subscribe(self.OnUpdateFont, ed_msg.EDMSG_DSP_FONT)
 
         # Setup Context Menu Handlers
+        self.Bind(wx.EVT_MENU, self.onPopupFind, id=ID_POPUP_SEARCH)
         self.Bind(wx.EVT_MENU, self.onPopupEdit, id=ID_POPUP_EDIT)
         self.Bind(wx.EVT_MENU,
                   lambda evt: self.onPopupOpen(), id=ID_POPUP_OPEN)
@@ -447,6 +449,7 @@ class ProjectTree(wx.Panel):
         self.menuicons['sc-status'] = FileIcons.getScStatusBitmap()
         self.menuicons['sc-update'] = FileIcons.getScUpdateBitmap()
         self.menuicons['sc-revert'] = FileIcons.getScRevertBitmap()
+        self.menuicons['find'] = wx.ArtProvider.GetBitmap(str(ed_glob.ID_FIND), wx.ART_MENU)
 
         self.icons['file'] = il.Add(FileIcons.getFileBitmap())
 
@@ -1325,7 +1328,8 @@ class ProjectTree(wx.Panel):
 
         # Do we have something to paste
         pastable = False
-        if len(paths) == 1 and os.path.isdir(paths[0]):
+        isdir = len(paths) and os.path.isdir(paths[0])
+        if len(paths) == 1 and isdir:
             pastable = not (not (self.clipboard['files']))
 
         # Is directory controlled by source control
@@ -1372,8 +1376,10 @@ class ProjectTree(wx.Panel):
             (ID_POPUP_PASTE, _('Paste'), 'paste', pastable),
             (None, None, None, None),
             (ID_POPUP_EXEC, _('Execute command...'), None, True),
-            (None, None, None, None),
             (ID_POPUP_SCCOMM, _('Source Control command...'), None, True),
+            (None, None, None, None),
+            (ID_POPUP_SEARCH, _("Search in directory"), 'find', True),
+            (None, None, None, None),
             #(ID_POPUP_RENAME, _('Rename'), None, True),
             #(None, None, None, None),
             (ID_POPUP_REFRESH, _("Refresh status"), 'sc-status', scenabled),
@@ -1476,6 +1482,16 @@ class ProjectTree(wx.Panel):
     def onPopupEdit(self, event):
         """ Open the current file in the editor """
         return self.OnActivate(event)
+
+    def onPopupFind(self, event):
+        """Handle search in directory popup menu"""
+        paths = self.getSelectedPaths()
+        if len(paths):
+            path = paths[0] # the first directory
+            if not os.path.isdir(path):
+                path = os.path.dirname(path)
+            mdata = dict(mainw=self._mainw, lookin=path)
+            ed_msg.PostMessage(ed_msg.EDMSG_FIND_SHOW_DLG, mdata) 
 
     def onPopupExecuteCommand(self):
         """ Execute commands on file system tree """
