@@ -302,7 +302,7 @@ class ProjectTree(wx.Panel):
         global ODD_PROJECT_COLOR
         global EVEN_PROJECT_COLOR
         if wx.Platform == '__WXMAC__':
-            color = util.AdjustColour(wx.SystemSettings_GetColour(wx.SYS_COLOUR_3DHIGHLIGHT), 15)
+            color = eclib.AdjustColour(wx.SystemSettings_GetColour(wx.SYS_COLOUR_3DHIGHLIGHT), 15)
         else:
             color = wx.SystemSettings_GetColour(wx.SYS_COLOUR_3DLIGHT)
 
