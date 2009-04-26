@@ -6,7 +6,7 @@ __author__ = "Cody Precord <cprecord@editra.org>"
 __revision__ = "$Revision$"
 __scid__ = "$Id$"
 __doc__ = "FtpEdit"
-__version__ = "0.2"
+__version__ = "0.3"
 
 setup(
       name    = "FtpEdit",
