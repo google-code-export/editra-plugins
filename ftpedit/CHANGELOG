@@ -5,8 +5,8 @@ License: wxWindows
 Changelog:
 
 #-----------------------------------------------------------------------------#
-Version 0.2
-Released: 0x/xx/2009
+Version 0.3
+Released: 04/26/2009
 
 +Fix some bugs in error handling of FtpFile class.
 
