@@ -28,7 +28,7 @@ DecodeString = SourceControl.DecodeString
 #-----------------------------------------------------------------------------#
 # Globals
 UNKPAT = re.compile('#[ \t]+[a-zA-Z0-9]+') # hmmm
-RELPAT = re.compile('#[ \t]+\.{1,2}' + os.sep) # relative paths
+RELPAT = re.compile('#[ \t]+\.{1,2}' + re.escape(os.sep)) # relative paths
 COMPAT = re.compile('commit [a-z0-9]{40}') # Commit line in log
 
 #-----------------------------------------------------------------------------#
