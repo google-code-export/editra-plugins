@@ -174,7 +174,7 @@ class SourceController(object):
             t._Thread__stop()
             return False
 
-        if callback is not None:
+        if callback is not None and len(results):
             callback(result[0])
 
         return True

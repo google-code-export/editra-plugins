@@ -180,7 +180,7 @@ class HG(SourceControl.SourceControl):
                                 collect_msg = True
                                 break
                     elif collect_msg:
-                        msg += line
+                        msg += DecodeString(line)
 
             if len(msg):
                 current['log'] = msg
