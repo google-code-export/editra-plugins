@@ -250,7 +250,8 @@ class CalcPanel(wx.PyPanel):
 
         if label == "=":
             # Process Values
-            if self._disp.GetOperator() == u'=':
+            cop = self._disp.GetOperator().strip()
+            if cop == u'=' or not len(cop):
                 return
             self.Compute()
             self._disp.SetOperator("=")
@@ -462,13 +463,15 @@ class Display(wx.PyPanel):
         """
         val = self._val
         if u'.' in val:
-            tmp = val.split(u'.')
+            tmp = [ x for x in val.split(u'.') if len(x) ]
+            print tmp
             if len(tmp) > 1:
                 fval = int(tmp[0])
-                if int(tmp[1]) >= 5:
+                if not tmp[1].startswith('0') and int(tmp[1]) >= 5:
                     fval = fval + 1
             else:
-                if int(tmp[0]) >= 5:
+                # Round up for decimal point conversion
+                if not tmp[0].startswith('0') and int(tmp[0]) >= 5:
                     fval = 1
                 else:
                     fval = 0

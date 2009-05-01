@@ -7,21 +7,21 @@ msgid ""
 msgstr ""
 "Project-Id-Version: editra\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2008-11-18 20:35-0600\n"
-"PO-Revision-Date: 2008-11-18 10:26+0000\n"
+"POT-Creation-Date: 2009-04-30 19:22-0500\n"
+"PO-Revision-Date: 2009-02-20 19:13+0000\n"
 "Last-Translator: janis.sl <Unknown>\n"
 "Language-Team: Latvian <lv@li.org>\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"X-Launchpad-Export-Date: 2008-11-19 01:01+0000\n"
+"X-Launchpad-Export-Date: 2009-05-01 00:00+0000\n"
 "X-Generator: Launchpad (build Unknown)\n"
 
 #: calculator/calculator/calc.py:146
 msgid "Ascii"
 msgstr "ASCII"
 
-#: calculator/calculator/__init__.py:41 calculator/calculator/calc.py:640
+#: calculator/calculator/__init__.py:44 calculator/calculator/calc.py:643
 msgid "Calculator"
 msgstr "Kalkulators"
 
@@ -37,16 +37,16 @@ msgstr "Dec."
 msgid "Editra | Calculator"
 msgstr "Editra | kalkulators"
 
-#: calculator/calculator/calc.py:184 calculator/calculator/calc.py:520
+#: calculator/calculator/calc.py:184 calculator/calculator/calc.py:523
 msgid "Error"
 msgstr "Kļūda"
 
-#: calculator/calculator/calc.py:518
+#: calculator/calculator/calc.py:521
 #, python-format
 msgid "Error: %s"
 msgstr "Kļūda: %s"
 
-#: calculator/calculator/calc.py:387
+#: calculator/calculator/calc.py:388
 msgid "Error: Display Overflow"
 msgstr "Kļūda: ekrāna pārpilde"
 
@@ -66,12 +66,12 @@ msgstr "Okt."
 msgid "Unicode"
 msgstr "Unikods"
 
-#: calculator/calculator/calc.py:425
+#: calculator/calculator/calc.py:426
 #, python-format
 msgid "ascii: %s"
 msgstr "ASCII: %s"
 
-#: calculator/calculator/calc.py:431
+#: calculator/calculator/calc.py:432
 #, python-format
 msgid "unicode: %s"
 msgstr "Unikods: %s"

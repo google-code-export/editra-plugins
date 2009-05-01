@@ -7,7 +7,7 @@
 ###############################################################################
 """Simple Programmer's Calculator"""
 __author__ = "Cody Precord"
-__version__ = "0.5"
+__version__ = "0.6"
 
 #-----------------------------------------------------------------------------#
 # Imports
@@ -19,6 +19,9 @@ import util
 
 # Local imports
 import calc
+
+#-----------------------------------------------------------------------------#
+
 _ = wx.GetTranslation
 
 # Try and add this plugins message catalogs to the app

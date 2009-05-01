@@ -7,21 +7,21 @@ msgid ""
 msgstr ""
 "Project-Id-Version: editra\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2008-11-18 20:35-0600\n"
-"PO-Revision-Date: 2008-04-06 19:44+0000\n"
-"Last-Translator: Angelo <angeloballabio@gmail.com>\n"
+"POT-Creation-Date: 2009-04-30 19:22-0500\n"
+"PO-Revision-Date: 2009-02-10 11:40+0000\n"
+"Last-Translator: rudi pettazzi <Unknown>\n"
 "Language-Team: Italian <it@li.org>\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"X-Launchpad-Export-Date: 2008-10-20 02:28+0000\n"
+"X-Launchpad-Export-Date: 2009-05-01 00:00+0000\n"
 "X-Generator: Launchpad (build Unknown)\n"
 
 #: calculator/calculator/calc.py:146
 msgid "Ascii"
 msgstr "Ascii"
 
-#: calculator/calculator/__init__.py:41 calculator/calculator/calc.py:640
+#: calculator/calculator/__init__.py:44 calculator/calculator/calc.py:643
 msgid "Calculator"
 msgstr "Calcolatrice"
 
@@ -37,16 +37,16 @@ msgstr "Dec"
 msgid "Editra | Calculator"
 msgstr "Editra | calcolatrice"
 
-#: calculator/calculator/calc.py:184 calculator/calculator/calc.py:520
+#: calculator/calculator/calc.py:184 calculator/calculator/calc.py:523
 msgid "Error"
 msgstr "Errore"
 
-#: calculator/calculator/calc.py:518
+#: calculator/calculator/calc.py:521
 #, python-format
 msgid "Error: %s"
 msgstr "Errore: %s"
 
-#: calculator/calculator/calc.py:387
+#: calculator/calculator/calc.py:388
 msgid "Error: Display Overflow"
 msgstr "Errore: Visualizza eccesso"
 
@@ -66,12 +66,12 @@ msgstr "Ott"
 msgid "Unicode"
 msgstr "Unicode"
 
-#: calculator/calculator/calc.py:425
+#: calculator/calculator/calc.py:426
 #, python-format
 msgid "ascii: %s"
 msgstr "ascii: %s"
 
-#: calculator/calculator/calc.py:431
+#: calculator/calculator/calc.py:432
 #, python-format
 msgid "unicode: %s"
 msgstr "unicode: %s"
