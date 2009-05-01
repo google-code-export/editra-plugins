@@ -6,6 +6,13 @@ License: wxWindows
 Changelog:
 
 #-----------------------------------------------------------------------------#
+Version 1.2
+Released: 0x/xx/2009
+
+Bug Fixes:
++Fix decoding error in HG history command.
+
+#-----------------------------------------------------------------------------#
 Version 1.1
 Released: 04/27/2009
 
