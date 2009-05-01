@@ -2,10 +2,7 @@
 # Setup script to build the calculator plugin. To build the plugin
 # just run 'python setup.py' and an egg will be built and put into 
 # the plugin directory
-"""The calculator plugin creates a simple calculator that can be docked
-anywhere in the mainwindow by implementing the MainWindowI.
-
-"""
+"""The calculator plugin creates a simple calculator"""
 
 import sys
 try:
@@ -19,7 +16,7 @@ __author__ = "Cody Precord"
 if setup != None:
     setup(
         name='Calculator',
-        version='0.5',
+        version='0.6',
         description=__doc__,
         author=__author__,
         author_email="cprecord@editra.org",

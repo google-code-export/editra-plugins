@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: editra\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2008-11-18 20:35-0600\n"
+"POT-Creation-Date: 2009-04-30 19:22-0500\n"
 "PO-Revision-Date: 2008-09-27 03:57+0000\n"
 "Last-Translator: వీవెన్ (Veeven) <Unknown>\n"
 "Language-Team: Telugu <te@li.org>\n"
@@ -21,7 +21,7 @@ msgstr ""
 msgid "Ascii"
 msgstr ""
 
-#: calculator/calculator/__init__.py:41 calculator/calculator/calc.py:640
+#: calculator/calculator/__init__.py:44 calculator/calculator/calc.py:643
 msgid "Calculator"
 msgstr ""
 
@@ -37,16 +37,16 @@ msgstr ""
 msgid "Editra | Calculator"
 msgstr ""
 
-#: calculator/calculator/calc.py:184 calculator/calculator/calc.py:520
+#: calculator/calculator/calc.py:184 calculator/calculator/calc.py:523
 msgid "Error"
 msgstr "పొరపాటు"
 
-#: calculator/calculator/calc.py:518
+#: calculator/calculator/calc.py:521
 #, python-format
 msgid "Error: %s"
 msgstr "పొరపాటు: %s"
 
-#: calculator/calculator/calc.py:387
+#: calculator/calculator/calc.py:388
 msgid "Error: Display Overflow"
 msgstr ""
 
@@ -66,12 +66,12 @@ msgstr ""
 msgid "Unicode"
 msgstr "యూనీకోడ్"
 
-#: calculator/calculator/calc.py:425
+#: calculator/calculator/calc.py:426
 #, python-format
 msgid "ascii: %s"
 msgstr ""
 
-#: calculator/calculator/calc.py:431
+#: calculator/calculator/calc.py:432
 #, python-format
 msgid "unicode: %s"
 msgstr ""

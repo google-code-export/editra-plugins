@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: editra\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2008-11-18 20:35-0600\n"
+"POT-Creation-Date: 2009-04-30 19:22-0500\n"
 "PO-Revision-Date: 2008-07-16 16:51+0000\n"
 "Last-Translator: صقر بن عبدالله <Unknown>\n"
 "Language-Team: Arabic <ar@li.org>\n"
@@ -21,7 +21,7 @@ msgstr ""
 msgid "Ascii"
 msgstr "Ascii"
 
-#: calculator/calculator/__init__.py:41 calculator/calculator/calc.py:640
+#: calculator/calculator/__init__.py:44 calculator/calculator/calc.py:643
 msgid "Calculator"
 msgstr "آلة حاسبة"
 
@@ -37,16 +37,16 @@ msgstr "ديسمبر"
 msgid "Editra | Calculator"
 msgstr "Editra | آلة حاسبة"
 
-#: calculator/calculator/calc.py:184 calculator/calculator/calc.py:520
+#: calculator/calculator/calc.py:184 calculator/calculator/calc.py:523
 msgid "Error"
 msgstr "خطأ"
 
-#: calculator/calculator/calc.py:518
+#: calculator/calculator/calc.py:521
 #, python-format
 msgid "Error: %s"
 msgstr "خطأ: %s"
 
-#: calculator/calculator/calc.py:387
+#: calculator/calculator/calc.py:388
 msgid "Error: Display Overflow"
 msgstr ""
 
@@ -66,12 +66,12 @@ msgstr "أكتوبر"
 msgid "Unicode"
 msgstr "يونيكود"
 
-#: calculator/calculator/calc.py:425
+#: calculator/calculator/calc.py:426
 #, python-format
 msgid "ascii: %s"
 msgstr "ascii: %s"
 
-#: calculator/calculator/calc.py:431
+#: calculator/calculator/calc.py:432
 #, python-format
 msgid "unicode: %s"
 msgstr "يونيكود: %s"
