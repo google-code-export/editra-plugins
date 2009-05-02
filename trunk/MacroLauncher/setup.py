@@ -16,7 +16,7 @@ except ImportError:
 if setup != None:
     setup(
         name='MacroLauncher',
-        version='0.2',
+        version='0.1',
         description=__doc__,
         author=__author__,
         author_email="roman.chyla@gmail.com",

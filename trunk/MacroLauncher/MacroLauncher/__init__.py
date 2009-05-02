@@ -9,7 +9,7 @@
 # Plugin Meta
 """Create and control running of python scripts from inside Editra"""
 __author__ = "rca"
-__version__ = "0.2"
+__version__ = "0.1"
 
 #-----------------------------------------------------------------------------#
 # Imports
