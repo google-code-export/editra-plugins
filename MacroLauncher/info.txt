@@ -1,0 +1,4 @@
+Name=MacroLauncher
+Author=rca
+Description=Macro Launcher
+Version=0.2
