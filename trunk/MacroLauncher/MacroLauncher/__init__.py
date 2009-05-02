@@ -184,8 +184,8 @@ class MacroLauncher(plugin.Plugin):
         if hasattr(mbrowser, 'reload'):
             mbrowser.doreload()
         self._mbrowser = mbrowser.MacroLauncherPane(self._mainwin, 
-                                                         mbrowser.ID_MLAUNCHERPANE,
-                                                         menu=self._menuitem)
+                                                    mbrowser.ID_MLAUNCHERPANE,
+                                                    menu=self._menuitem)
         mgr = self._mainwin.GetFrameManager()
         pane = mgr.GetPane(mbrowser.PANE_NAME)
         pane.DestroyOnClose(True)
@@ -193,10 +193,10 @@ class MacroLauncher(plugin.Plugin):
         pane.window.Destroy()
     
         mgr.AddPane(self._mbrowser, 
-                        wx.aui.AuiPaneInfo().Name(mbrowser.PANE_NAME).\
-                        Caption(_("Macro Launcher")).Right().Layer(1).\
-                        CloseButton(True).MaximizeButton(True).\
-                        BestSize(wx.Size(200, 200)))
+                    wx.aui.AuiPaneInfo().Name(mbrowser.PANE_NAME).\
+                    Caption(_("Macro Launcher")).Right().Layer(1).\
+                    CloseButton(True).MaximizeButton(True).\
+                    BestSize(wx.Size(200, 200)))
 
         # Get settings from profile
         if Profile_Get(mbrowser.ML_KEY, 'bool', False):
