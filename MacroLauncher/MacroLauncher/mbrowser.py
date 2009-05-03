@@ -133,48 +133,35 @@ class MacroLauncherPane(ctrlbox.ControlBox):
         
                 
         #------ second row ------#
-        img_w = 16
-        img_h = 16
-        bord_w = 16
-        bord_h = 16
-        space = 0
-        bmp = wx.EmptyBitmap(img_h, img_w)
-        
-        
+
         #wx.ART_REPORT_VIEW
-        btn_update = eclib.PlateButton(ctrlbar, 
-                                       bmp =  wx.ArtProvider.GetBitmap(str(wx.ID_REFRESH), wx.ART_MENU, (img_h,img_w)), 
-                                       style=eclib.PB_STYLE_NOBG,
-                                       size = (bmp.GetWidth()+space, bmp.GetHeight()+space))
+        btn_update = eclib.PlateButton(ctrlbar,
+                                       bmp=wx.ArtProvider.GetBitmap(str(wx.ID_REFRESH), wx.ART_MENU),
+                                       style=eclib.PB_STYLE_NOBG)
         btn_update.SetToolTipString(_("Refresh list, reload macros if necessary"))
         
         #wx.ART_NORMAL_FILE, wx.ART_TOOLBAR
-        btn_edit = eclib.PlateButton(ctrlbar, 
-                                       bmp =  wx.ArtProvider.GetBitmap(str(ed_glob.ID_FILE), wx.ART_MENU, (img_h,img_w)), 
-                                       style=eclib.PB_STYLE_NOBG,
-                                       size = (bmp.GetWidth()+space, bmp.GetHeight()+space))
+        btn_edit = eclib.PlateButton(ctrlbar,
+                                     bmp=wx.ArtProvider.GetBitmap(str(ed_glob.ID_FILE), wx.ART_MENU),
+                                     style=eclib.PB_STYLE_NOBG)
         btn_edit.SetToolTipString(_("Edit macro"))
         
         #wx.ART_NEW, wx.ART_TOOLBAR
-        btn_new = eclib.PlateButton(ctrlbar, 
-                                       bmp =  wx.ArtProvider.GetBitmap(str(ed_glob.ID_NEW), wx.ART_MENU, (img_h,img_w)), 
-                                       style=eclib.PB_STYLE_NOBG,
-                                       size = (bmp.GetWidth()+space, bmp.GetHeight()+space)
-                                       )
+        btn_new = eclib.PlateButton(ctrlbar,
+                                    bmp=wx.ArtProvider.GetBitmap(str(ed_glob.ID_NEW), wx.ART_MENU),
+                                    style=eclib.PB_STYLE_NOBG)
         btn_new.SetToolTipString(_("New macro"))
         
         #wx.ART_EXECUTABLE_FILE
-        btn_run = eclib.PlateButton(ctrlbar, 
-                                       bmp =  wx.ArtProvider.GetBitmap(str(ed_glob.ID_INDENT), wx.ART_MENU, (img_h,img_w)), 
-                                       style=eclib.PB_STYLE_NOBG,
-                                       size = (bmp.GetWidth()+space, bmp.GetHeight()+space))
+        btn_run = eclib.PlateButton(ctrlbar,
+                                    bmp=wx.ArtProvider.GetBitmap(str(ed_glob.ID_INDENT), wx.ART_MENU),
+                                    style=eclib.PB_STYLE_NOBG)
         btn_run.SetToolTipString(_("Run macro"))
         
         #wx.ART_DELETE, wx.ART_TOOLBAR
-        btn_del = eclib.PlateButton(ctrlbar, 
-                                       bmp =  wx.ArtProvider.GetBitmap(str(ed_glob.ID_STOP), wx.ART_MENU, (img_h,img_w)), 
-                                       style=eclib.PB_STYLE_NOBG,
-                                       size = (bmp.GetWidth()+space, bmp.GetHeight()+space))
+        btn_del = eclib.PlateButton(ctrlbar,
+                                    bmp=wx.ArtProvider.GetBitmap(str(ed_glob.ID_DELETE), wx.ART_MENU),
+                                    style=eclib.PB_STYLE_NOBG)
         btn_del.SetToolTipString(_("Delete macro"))
         
         
@@ -222,9 +209,8 @@ class MacroLauncherPane(ctrlbox.ControlBox):
         self.UpdateMacroBrowser()
         
 
-
     #---- Methods ----#
-        
+
     def template(self):
         template = '''
 # -*- coding: utf-8 -*-
@@ -679,7 +665,8 @@ def run(txtctrl=None, **kwargs):
             if '#' in macro['Name']:
                 dlg = wx.MessageDialog(self, 
                         _("Sorry, the macro '%s' is protected" % macro['Name']),
-                        _('Sorry'), wx.OK)
+                        _('Sorry'),
+                        wx.OK|wx.ICON_WARNING)
                 dlg.ShowModal()
                 dlg.Destroy()
                 continue
