@@ -182,7 +182,7 @@ class MacroLauncherPane(ctrlbox.ControlBox):
         status_sizer.Add(self._statusMsgBox, 0, wx.ALL, 1)
         self._statusMsgBox.SetToolTipString(_("R: running, F: finished, C: cancelled or failed"))
         self.SetStatusMsg('MLauncher Initialized')
-        wx.CallAfter(wx.CallLater, 1000, self.SetStatusMsg, '')
+        wx.CallLater(1000, self.SetStatusMsg, '')
         statusctrl.Layout()
         
 
@@ -221,16 +221,16 @@ desc = u'%(desc)s'
 
 """
 Example:
-def run(txtctrl=None, **kwargs):
-  rows = split(txtctrl.GetText())
-  txtctrl.SetText("\n".join(rows)) #this will be inserted into the txtctrl
+def run(txtctrl=None, log=None, **kwargs):
+    rows = split(txtctrl.GetText())
+    txtctrl.SetText("\n".join(rows)) #this will be inserted into the txtctrl
   
 If you want to start macro in a separate thread, put it inside
 run_thread() - but be careful not to call some operations from the
 thread. Use wx.CallAfter() for that purpose
 
 def run_thread(txtctrl, **kwargs):
-  rows ....
+    rows ....
   
 Current arguments are:
   txtctrl: wx.stc current editor-
@@ -240,8 +240,8 @@ Current arguments are:
   mlauncher: macro launcher instance (plugin)
 """
 
-def run(txtctrl=None, **kwargs):
-  pass
+def run(txtctrl=None, log=None, **kwargs):
+    pass
 '''
         return template
     
@@ -274,6 +274,68 @@ def run(txtctrl=None, **kwargs):
                 except:
                     pass
         return contents
+    
+    def GetMacroByID(self, fname):
+        """
+        Returns macro item searching by macro id
+        this can return at max 1 item (or None)
+        @param fname: the filename (the base) fo the macro
+        """
+        if fname in self._macros:
+            try:
+                return self._macros[fname]['module']
+            except:
+                pass
+            
+        
+    
+    def GetMacrosByName(self, name):
+        """
+        Returns list of tuples of (name, macro) from the registry.
+        Name is coming from the macros themselves, so this method can return
+        1>n items or []
+        If nothing is found, returns empty tuple ('', '')
+        """
+        ret = list()
+        for key, macro in self._macros.items():
+            try:
+                module = macro['module']
+                if module.name == name:
+                    ret.append( (key, module) )
+            except:
+                pass
+        return ret
+
+    def GetMacrosByType(self, type):
+        """
+        Returns list of tuples of (name, macro) from the registry.
+        Name is coming from the macros themselves, so this method can return
+        1>n items or []
+        """
+        ret = list()
+        for key, macro in self._macros.items():
+            try:
+                module = macro['module']
+                if module.type == type:
+                    ret.append( (key, module) )
+            except:
+                pass
+        return ret
+        
+    def GetMacroByFullPath(self, fullpath):
+        """
+        Returns tuple (name, macro) searching by macro's fullpath
+        this can return at max 1 item (or None)
+        @param fname: the filename (the base) fo the macro
+        """
+        fullpath = os.path.normpath(fullpath)
+        for key, macro in self._macros.items():
+            if macro['fullpath'] == fullpath:
+                try:
+                    return (key, macro['module'])
+                    break
+                except:
+                    pass
     
     def LoadMacro(self, fname, name):
         """
