@@ -1337,11 +1337,15 @@ class ProjectTree(wx.Panel):
         if not len(items):
             return
 
-        itemid = items[0]
-        icon = self.tree.GetItemImage(itemid)
-        scenabled = icon not in (self.icons['file'],
-                                 self.icons['folder'],
-                                 self.icons['folder-open'])
+        scenabled = False
+        for itemid in items:
+            icon = self.tree.GetItemImage(itemid)
+            scenabled = icon not in (self.icons['file'],
+                                     self.icons['folder'],
+                                     self.icons['folder-open'])
+            if not scenabled:
+                break
+
 #        for item in paths:
 #            if self.srcCtrl.GetSCSystem(item):
 #                scenabled = True
