@@ -1333,7 +1333,11 @@ class ProjectTree(wx.Panel):
             pastable = not (not (self.clipboard['files']))
 
         # Is directory controlled by source control
-        itemid = self.tree.GetSelection()
+        items = self.tree.GetSelections()
+        if not len(items):
+            return
+
+        itemid = items[0]
         icon = self.tree.GetItemImage(itemid)
         scenabled = icon not in (self.icons['file'],
                                  self.icons['folder'],
