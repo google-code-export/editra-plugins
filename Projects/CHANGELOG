@@ -6,6 +6,15 @@ License: wxWindows
 Changelog:
 
 #-----------------------------------------------------------------------------#
+Version 1.3
+Released: 0x/0x/2009
+
+New:
+
+Bug Fixes:
++Fix Bazaar status bug. (patch from idcollins).
+
+#-----------------------------------------------------------------------------#
 Version 1.2
 Released: 05/05/2009
 
