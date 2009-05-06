@@ -210,7 +210,8 @@ class BZR(SourceControl):
 
                 # Split the status code and relative file path
                 code, fname = txt.split(None, 1)
-                fname = fname.strip().rstrip(os.sep)
+                fname = fname.replace(u'/', os.sep).strip().rstrip(os.sep)
+#                fname = fname.strip().rstrip(os.sep)
                 fname = fname.replace(relpath, '', 1).lstrip(os.sep)
                 code = code.rstrip('*')
 
