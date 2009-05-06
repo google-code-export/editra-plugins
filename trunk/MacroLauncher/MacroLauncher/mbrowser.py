@@ -113,7 +113,7 @@ class MacroLauncherPane(ctrlbox.ControlBox):
         
         main_sizer = wx.BoxSizer(wx.HORIZONTAL)
         tools_sizer = wx.BoxSizer(wx.VERTICAL)
-        button_sizer = wx.GridSizer(3, 5, 1, 1)  # rows, cols, vgap, hgap
+        button_sizer = wx.GridSizer(3, 6, 1, 1)  # rows, cols, vgap, hgap
         
         ctrlbar.AddControl(main_sizer, wx.ALIGN_LEFT)
         main_sizer.Add(tools_sizer)
@@ -125,6 +125,8 @@ class MacroLauncherPane(ctrlbox.ControlBox):
         self._taskFilter = wx.Choice(ctrlbar, choices=self._filterChoices, style = wx.EXPAND | wx.ADJUST_MINSIZE)
         self._taskFilter.SetStringSelection(self._filterChoices[0])
         self._taskFilter.SetToolTipString(_("Filter macros by their type"))
+        self._taskRelaxedCheckBox = wx.CheckBox(ctrlbar, -1)
+        self._taskRelaxedCheckBox.SetToolTipString(_("Relaxed filtering - will list also partial matches"))
         
         
         #tools_sizer.Add(tasklbl, 0, wx.EXPAND|wx.ADJUST_MINSIZE | wx.ALL, 1)
@@ -166,6 +168,7 @@ class MacroLauncherPane(ctrlbox.ControlBox):
         
         
         a = (1, wx.TOP, 2)
+        button_sizer.Add(self._taskRelaxedCheckBox, 1, wx.TOP, 5)
         button_sizer.Add(btn_update, *a)
         button_sizer.Add(btn_run, *a)
         button_sizer.Add(btn_new, *a)
@@ -191,6 +194,7 @@ class MacroLauncherPane(ctrlbox.ControlBox):
         self.Bind(wx.EVT_TIMER, lambda evt: self.UpdateMacroBrowser(), self._timer)
         self.Bind(wx.EVT_CHOICE, lambda evt: self.UpdateMacroBrowser(), self._taskFilter)
         self.Bind(wx.EVT_BUTTON, lambda evt: self.UpdateMacroBrowser(show_everything = True), btn_update)
+        self.Bind(wx.EVT_CHECKBOX, lambda evt: self.UpdateMacroBrowser(), self._taskRelaxedCheckBox)
         
         self.Bind(wx.EVT_BUTTON, lambda evt: self.OnNewMacro(), btn_new)
         self.Bind(wx.EVT_BUTTON, lambda evt: self.OnEditMacro(), btn_edit)        
@@ -521,6 +525,8 @@ def run(txtctrl=None, log=None, **kwargs):
         Repaints the ListCtrl with new values
         @var macrodata: the same tuple as for AddEntries 
         """
+        relaxed_filtering = self._taskRelaxedCheckBox.GetValue()
+        
         if macrodata == None:
             macrodata = self.GetMacroData()
             if not len(macrodata): #no macros at all
@@ -534,11 +540,16 @@ def run(txtctrl=None, log=None, **kwargs):
         all_filters.sort()
         
         # remove some entries
+        if relaxed_filtering:
+            compare_func = lambda x,y: x in y
+        else:
+            compare_func = lambda x,y: x == y
+            
         if filter:
             tmp = {}
             for k, v in macrodata.items():
-                if v[1] == filter:
-                   tmp[k] = v 
+                if compare_func(filter, v[1]):
+                    tmp[k] = v 
             macrodata = tmp
         
         
