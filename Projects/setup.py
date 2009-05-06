@@ -6,7 +6,7 @@ __author__ = "Kevin D. Smith <Kevin.Smith@sixquickrun.com>"
 __revision__ = "$Revision$"
 __scid__ = "$Id$"
 __doc__ = "Projects"
-__version__ = "1.1"
+__version__ = "1.2"
 
 setup(
       name    = "Projects",

@@ -1,11 +1,19 @@
 # -*- coding: utf-8 -*-
+###############################################################################
+# Name: __int__.py                                                            #
+# Purpose: Project Tree View                                                  #
+# Author: Kevin D. Smith <Kevin.Smith@sixquickrun.com>                        #
+# Author: Cody Precord <cprecord@editra.org>                                  #
+# Copyright: (c) 2009 Cody Precord <staff@editra.org>                         #
+# License: wxWindows License                                                  #
+###############################################################################
 
 """ Adds a sidepanel that incorporates file management and source control """
 
 __author__ = "Kevin D. Smith <Kevin.Smith@sixquickrun.com>"
 __revision__ = "$Revision$"
 __scid__ = "$Id$"
-__version__ = "1.1"
+__version__ = "1.2"
 
 #-----------------------------------------------------------------------------#
 # Imports
