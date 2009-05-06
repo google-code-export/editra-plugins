@@ -654,7 +654,7 @@ def run(txtctrl=None, log=None, **kwargs):
         else:
             self.OpenFiles([fname])
             self._register_macro(fname)
-            self.UpdateList()
+            self.UpdateList(filter = type)
     
     def OnViewMacro(self):
         """Shows the macro in a quick view"""   
@@ -753,8 +753,9 @@ def run(txtctrl=None, log=None, **kwargs):
                 del self._macros[macro['File']]
             except Exception, excp:
                 self._log("[error] %s" % excp)
-                
-        self.UpdateList()       
+        
+        filter_value = self._taskFilter.GetStringSelection()
+        self.UpdateList(filter = filter_value)       
     
     def OnStopMacro(self, macro_id):
         for thread in self.GetAllThreadsByMacro(macro_id):
