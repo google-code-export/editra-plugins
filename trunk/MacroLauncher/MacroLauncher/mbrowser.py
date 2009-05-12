@@ -310,17 +310,22 @@ def run(txtctrl=None, log=None, **kwargs):
                 pass
         return ret
 
-    def GetMacrosByType(self, type):
+    def GetMacrosByType(self, type, relaxed_matching = False):
         """
         Returns list of tuples of (name, macro) from the registry.
         Name is coming from the macros themselves, so this method can return
         1>n items or []
         """
         ret = list()
+        if relaxed_matching:
+            match_function = lambda t1, t2: t1.lower() in t2.lower()
+        else:
+            match_function = lambda t1, t2: t1 == t2
+            
         for key, macro in self._macros.items():
             try:
                 module = macro['module']
-                if module.type == type:
+                if match_function(type, module.type):
                     ret.append( (key, module) )
             except:
                 pass
@@ -451,7 +456,12 @@ def run(txtctrl=None, log=None, **kwargs):
             mtime = self.IsModifiedMacro(self._macros[macro_name]['fullpath'])
             if mtime:
                 self._register_macro(self._macros[macro_name]['fullpath'], mtime)
-        
+    
+    def ForceMacroReload(self, macro_name = ''):
+        """Reloads macro without checking for mtime, called from context menu
+        usually from user-driven action"""
+        if macro_name in self._macros:
+            self._register_macro(self._macros[macro_name]['fullpath'])
         
     def UpdateMacroBrowserByOne(self, fullpath, show_everything = False):
         """
@@ -1141,7 +1151,7 @@ class CustomListCtrl(wx.ListCtrl,
             self.OnNew = wx.NewId()
             self.OnEdit = wx.NewId()
             self.OnDelete = wx.NewId()
-            self.OnUpdate = wx.NewId()
+            self.OnReload = wx.NewId()
             self.OnRun = wx.NewId()
             self.OnStop = wx.NewId()
             self.OnView = wx.NewId()
@@ -1150,7 +1160,7 @@ class CustomListCtrl(wx.ListCtrl,
             self.Bind(wx.EVT_MENU, lambda evt: self.GetParent().OnEditMacro(), id=self.OnEdit)
             self.Bind(wx.EVT_MENU, lambda evt: self.GetParent().OnRunMacro(), id=self.OnRun)
             self.Bind(wx.EVT_MENU, lambda evt: self.GetParent().OnDelMacro(), id=self.OnDelete)
-            self.Bind(wx.EVT_MENU, lambda evt: self.GetParent().ReloadMacroIfChanged(), id=self.OnUpdate)
+            self.Bind(wx.EVT_MENU, self.OnForceReloadMacro, id=self.OnReload)
             self.Bind(wx.EVT_MENU, self.OnStopMacro, id=self.OnStop)
             self.Bind(wx.EVT_MENU, lambda evt: self.GetParent().OnViewMacro(), id=self.OnView)
             
@@ -1166,7 +1176,7 @@ class CustomListCtrl(wx.ListCtrl,
         menu.Append(self.OnEdit, _("Edit"))
         menu.Append(self.OnNew, _("New"))
         menu.Append(self.OnDelete, _("Delete"))
-        menu.Append(self.OnUpdate, _("Reload this macro"))
+        menu.Append(self.OnReload, _("Force reload"))
         menu.Append(self.OnView, _("Quick View"))
 
         self.PopupMenu(menu)
@@ -1176,6 +1186,11 @@ class CustomListCtrl(wx.ListCtrl,
     def OnStopMacro(self, evt):
         if self._selectedMacro:
             self.GetParent().OnStopMacro(self._selectedMacro)
+        self._selectedMacro = None
+
+    def OnForceReloadMacro(self, evt):
+        if self._selectedMacro:
+            self.GetParent().ForceMacroReload(self._selectedMacro)
         self._selectedMacro = None
 
     def _SetupImages(self, msg=None):
