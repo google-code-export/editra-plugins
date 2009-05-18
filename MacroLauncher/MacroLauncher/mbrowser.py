@@ -1082,7 +1082,7 @@ class CustomListCtrl(wx.ListCtrl,
         for i in range(len(self.col_names)):
             self.InsertColumn(i, _(self.col_names[i]))
 
-        self.SetColumnWidth(0, 69)
+        self.SetColumnWidth(0, 130)
         self.SetColumnWidth(1, 69)
         self.SetColumnWidth(2, 429)
         self.SetColumnWidth(3, 117)
