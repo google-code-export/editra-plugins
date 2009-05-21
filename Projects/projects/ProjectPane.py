@@ -88,6 +88,7 @@ import ProjCmnDlg
 
 # Editra Imports
 import ed_glob
+import ed_event
 import ed_msg
 import profiler
 import util
@@ -1752,6 +1753,7 @@ class ProjectPane(eclib.ControlBox):
         # Event Handlers
         self.Bind(wx.EVT_BUTTON, self.OnPress)
         self.Bind(wx.EVT_TIMER, self.OnTick)
+        self.Bind(ed_event.EVT_MAINWINDOW_EXIT, self.OnMainExit)
 
         # Editra Message Handlers
         ed_msg.Subscribe(self.OnProjectAdded, ConfigDialog.MSG_PROJ_ADDED)
@@ -1767,6 +1769,12 @@ class ProjectPane(eclib.ControlBox):
     def GetOwnerWindow(self):
         """Return reference to mainwindow that created this panel"""
         return self._mw
+
+    def OnMainExit(self, evt):
+        """Notifier for when main window is closing"""
+        # Make sure config has been saved
+        config = ConfigDialog.ConfigData()
+        config.save()
 
     def OnPress(self, evt):
         """ Add/Remove projects """
