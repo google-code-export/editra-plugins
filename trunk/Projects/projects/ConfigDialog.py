@@ -100,10 +100,11 @@ class ConfigNotebook(wx.Notebook):
         self.AddPage(GeneralConfigTab(self, -1, data), _("General"))
         self.AddPage(SourceControlConfigTab(self, -1, data),
                      _("Source Control"))
+        self.data = data
 
     def __del__(self):
         """Notify of closer"""
-        data.save()
+        self.data.save()
 
 #-----------------------------------------------------------------------------#
 
