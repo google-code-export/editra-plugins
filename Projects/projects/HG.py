@@ -5,10 +5,8 @@
 # Copyright: (c) 2008 Cody Precord <staff@editra.org>                         #
 # License: wxWindows License                                                  #
 ###############################################################################
-"""Mercurial implementation of the SourceControl object
-@note: Just a stub, not usable nor functional (yet)
 
-"""
+"""Mercurial implementation of the SourceControl object"""
 
 __author__ = "Cody Precord <cprecord@editra.org>"
 __revision__ = "$Revision$"
