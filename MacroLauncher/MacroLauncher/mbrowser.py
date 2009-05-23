@@ -1119,10 +1119,10 @@ class CustomListCtrl(wx.ListCtrl,
 
         # Make the menu
         menu = wx.Menu()
-        item = menu.Append(ID_STOP, _("Stop"))
-        SetMenuBitmap(item, ed_glob.ID_STOP)
         item = menu.Append(ID_RUN,  _("Run"))
         SetMenuBitmap(item, ed_glob.ID_BIN_FILE)
+        item = menu.Append(ID_STOP, _("Stop"))
+        SetMenuBitmap(item, ed_glob.ID_STOP)
         menu.AppendSeparator()
         item = menu.Append(ID_EDIT, _("Edit"))
         SetMenuBitmap(item, ed_glob.ID_FILE)
