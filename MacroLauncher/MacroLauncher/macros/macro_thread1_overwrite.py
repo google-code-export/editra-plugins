@@ -1,4 +1,3 @@
-
 # -*- coding: utf-8 -*-
 
 name = u'thread1'
@@ -10,5 +9,6 @@ import time
 def run_thread(log=None, **kwargs):
   for x in range(50):
       time.sleep(.1)
-      log('thread1 printing')
+      if callable(log):
+        log('thread1 printing')
       yield 
