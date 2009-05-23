@@ -737,7 +737,9 @@ def run(txtctrl=None, log=None, **kwargs):
                     nbook = self.GetMainWindow().GetNotebook()
 
                 # TODO:CJP what are you trying to do here? I am sure there is
-                #          a better way.
+                # Cycle through the opened pages and see if the macro is there
+                # If yes, I would like to set its modify status to False so that
+                # Editra is not warning user, Perhaps I better save&close it?
                 ctrls = nbook.GetTextControls()
                 for ctrl in ctrls:
                     if source == ctrl.GetFileName():
@@ -748,7 +750,7 @@ def run(txtctrl=None, log=None, **kwargs):
                             self.GetTopLevelParent().OnSave(evt)
                         nbook.SetSelection(index)
                         nbook.ClosePage()
-                        break
+                        
                 os.remove(source)
                 del self._macros[macro['File']]
             except Exception, excp:
