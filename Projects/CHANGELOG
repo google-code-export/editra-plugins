@@ -6,8 +6,17 @@ License: wxWindows
 Changelog:
 
 #-----------------------------------------------------------------------------#
+Version 1.4
+Released: 05/20/2009
+
+New:
+
+Bug Fixes:
++Fix settings not being saved between sessions.
+
+#-----------------------------------------------------------------------------#
 Version 1.3
-Released: 0x/0x/2009
+Released: 05/06/2009
 
 New:
 
