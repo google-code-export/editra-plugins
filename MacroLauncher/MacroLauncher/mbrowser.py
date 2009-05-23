@@ -128,53 +128,57 @@ class MacroLauncherPane(ctrlbox.ControlBox):
         self._listctrl = CustomListCtrl(self)
         self.SetWindow(self._listctrl)
 
-        tasklbl = wx.StaticText(ctrlbar, label=_('Filter: '))
-        self._taskFilter = wx.Choice(ctrlbar, choices=self._filterChoices,
-                                     style=wx.EXPAND|wx.ADJUST_MINSIZE)
+        # ----- Elements layout -----#
+        main_sizer = wx.BoxSizer(wx.HORIZONTAL)
+        tools_sizer = wx.BoxSizer(wx.VERTICAL)
+        button_sizer = wx.GridSizer(3, 6, 1, 1)  # rows, cols, vgap, hgap
+        
+        ctrlbar.AddControl(main_sizer, wx.ALIGN_LEFT)
+        main_sizer.Add(tools_sizer)
+        main_sizer.Add(button_sizer)
+        
+
+        # ---- Filter toolbox ----#
+        self._taskFilter = wx.Choice(ctrlbar, choices=self._filterChoices, style = wx.EXPAND | wx.ADJUST_MINSIZE)
         self._taskFilter.SetStringSelection(self._filterChoices[0])
         self._taskFilter.SetToolTipString(_("Filter macros by their type"))
-
         self._taskRelaxedCheckBox = wx.CheckBox(ctrlbar, -1)
         self._taskRelaxedCheckBox.SetToolTipString(_("Relaxed filtering - will list also partial matches"))
-        ctrlbar.AddControl(tasklbl)
-        ctrlbar.AddControl(self._taskFilter)
-        ctrlbar.AddControl(self._taskRelaxedCheckBox)
+        
+        tools_sizer.Add(self._taskFilter, 1, wx.EXPAND|wx.ADJUST_MINSIZE|wx.ALL, 3)
+        
+                
+        #------ Buttons ------#
 
-        #------ second row ------#
-
-        #wx.ART_REPORT_VIEW
         btn_update = eclib.PlateButton(ctrlbar,
                                        bmp=wx.ArtProvider.GetBitmap(str(wx.ID_REFRESH), wx.ART_MENU),
                                        style=eclib.PB_STYLE_NOBG)
         btn_update.SetToolTipString(_("Refresh list, reload macros if necessary"))
 
-        #wx.ART_NORMAL_FILE, wx.ART_TOOLBAR
         btn_edit = eclib.PlateButton(ctrlbar,
                                      bmp=wx.ArtProvider.GetBitmap(str(ed_glob.ID_FILE), wx.ART_MENU),
                                      style=eclib.PB_STYLE_NOBG)
         btn_edit.SetToolTipString(_("Edit macro"))
 
-        #wx.ART_NEW, wx.ART_TOOLBAR
         btn_new = eclib.PlateButton(ctrlbar,
                                     bmp=wx.ArtProvider.GetBitmap(str(ed_glob.ID_NEW), wx.ART_MENU),
                                     style=eclib.PB_STYLE_NOBG)
         btn_new.SetToolTipString(_("New macro"))
 
-        #wx.ART_EXECUTABLE_FILE
         btn_run = eclib.PlateButton(ctrlbar,
                                     bmp=wx.ArtProvider.GetBitmap(str(ed_glob.ID_BIN_FILE), wx.ART_MENU),
                                     style=eclib.PB_STYLE_NOBG)
         btn_run.SetToolTipString(_("Run macro"))
 
-        #wx.ART_DELETE, wx.ART_TOOLBAR
         btn_del = eclib.PlateButton(ctrlbar,
                                     bmp=wx.ArtProvider.GetBitmap(str(ed_glob.ID_DELETE), wx.ART_MENU),
                                     style=eclib.PB_STYLE_NOBG)
         btn_del.SetToolTipString(_("Delete macro"))
-
-        ctrlbar.AddStretchSpacer()
+                
+        button_sizer.Add(self._taskRelaxedCheckBox, 1, wx.TOP, 5)
+        a = (1, wx.TOP, 2)
         for btn in (btn_update, btn_run, btn_new, btn_edit, btn_del):
-            ctrlbar.AddControl(btn, wx.ALIGN_RIGHT)
+            button_sizer.Add(btn, *a)
 
         #---- Status Bar -----#
 
@@ -184,7 +188,7 @@ class MacroLauncherPane(ctrlbox.ControlBox):
         self._statusMsgBox = wx.StaticText(statusctrl, label='')
         self._statusMsgBox.SetToolTipString(_("R: running, F: finished, C: cancelled or failed"))
         statusctrl.AddControl(self._statusMsgBox)
-        self.SetStatusMsg('MLauncher Initialized')
+        self.SetStatusMsg(_('MLauncher Initialized'))
         wx.CallLater(1000, self.SetStatusMsg, '')
         statusctrl.Layout()
 
@@ -210,7 +214,7 @@ class MacroLauncherPane(ctrlbox.ControlBox):
 
         self.UpdateMacroBrowser()
 
-    #---- Methods ----#
+    #-------------------------- Methods -------------------------#
 
     def template(self):
         template = '''
