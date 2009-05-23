@@ -12,7 +12,7 @@
 Provides a macro browser panel and other UI components for Editra's
 MacroBrowser Plugin.
 
-The list and panel side of this moduel was inspired by commentbrowser plugin 
+The list and panel side of this moduel was inspired by commentbrowser plugin
 by DR0ID <dr0iddr0id@googlemail.com> (do I need to add, that I have taken
 its code, or is it obvious? ;-))
 
@@ -66,14 +66,31 @@ ID_MACROLAUNCHER = wx.NewId()  #menu item
 ID_ML_SHELF = wx.NewId() # Shelf interface id
 ID_TIMER = wx.NewId()
 
+ID_RUN = wx.NewId()
+ID_STOP = wx.NewId()
+ID_NEW = wx.NewId()
+ID_EDIT = wx.NewId()
+ID_DELETE = wx.NewId()
+ID_RELOAD = wx.NewId()
+ID_VIEW = wx.NewId()
+
 # Event for notifying that a macro task was interrupted (error)
 edEVT_TASK_ERROR = wx.NewEventType()
 EVT_TASK_ERROR = wx.PyEventBinder(edEVT_TASK_ERROR, 1)
 
+#-----------------------------------------------------------------------------#
+
+def SetMenuBitmap(item, id_):
+    bmp = wx.ArtProvider.GetBitmap(str(id_), wx.ART_MENU)
+    if not bmp.IsNull():
+        item.SetBitmap(bmp)
+
 def doreload():
     """Used for development, reloads modules"""
     pass
-    
+
+#-----------------------------------------------------------------------------#
+
 class MacroLauncherPane(ctrlbox.ControlBox):
     """Creates a Macro Launcher panel"""
     def __init__(self, parent, id=wx.ID_ANY, pos=wx.DefaultPosition,
@@ -110,30 +127,19 @@ class MacroLauncherPane(ctrlbox.ControlBox):
         self.SetControlBar(ctrlbar)
         self._listctrl = CustomListCtrl(self)
         self.SetWindow(self._listctrl)
-        
-        main_sizer = wx.BoxSizer(wx.HORIZONTAL)
-        tools_sizer = wx.BoxSizer(wx.VERTICAL)
-        button_sizer = wx.GridSizer(3, 6, 1, 1)  # rows, cols, vgap, hgap
-        
-        ctrlbar.AddControl(main_sizer, wx.ALIGN_LEFT)
-        main_sizer.Add(tools_sizer)
-        main_sizer.Add(button_sizer)
-        
-        
-        #tasklbl = wx.StaticText(ctrlbar, label=_('Filter: '))
-        #tasklbl.SetBackgroundColour(ctrlbar.GetBackgroundColour())
-        self._taskFilter = wx.Choice(ctrlbar, choices=self._filterChoices, style = wx.EXPAND | wx.ADJUST_MINSIZE)
+
+        tasklbl = wx.StaticText(ctrlbar, label=_('Filter: '))
+        self._taskFilter = wx.Choice(ctrlbar, choices=self._filterChoices,
+                                     style=wx.EXPAND|wx.ADJUST_MINSIZE)
         self._taskFilter.SetStringSelection(self._filterChoices[0])
         self._taskFilter.SetToolTipString(_("Filter macros by their type"))
+
         self._taskRelaxedCheckBox = wx.CheckBox(ctrlbar, -1)
         self._taskRelaxedCheckBox.SetToolTipString(_("Relaxed filtering - will list also partial matches"))
-        
-        
-        #tools_sizer.Add(tasklbl, 0, wx.EXPAND|wx.ADJUST_MINSIZE | wx.ALL, 1)
-        tools_sizer.Add(self._taskFilter, 1, wx.EXPAND|wx.ADJUST_MINSIZE|wx.ALL, 3)
-        #tools_sizer.AddStretchSpacer()
-        
-                
+        ctrlbar.AddControl(tasklbl)
+        ctrlbar.AddControl(self._taskFilter)
+        ctrlbar.AddControl(self._taskRelaxedCheckBox)
+
         #------ second row ------#
 
         #wx.ART_REPORT_VIEW
@@ -141,53 +147,46 @@ class MacroLauncherPane(ctrlbox.ControlBox):
                                        bmp=wx.ArtProvider.GetBitmap(str(wx.ID_REFRESH), wx.ART_MENU),
                                        style=eclib.PB_STYLE_NOBG)
         btn_update.SetToolTipString(_("Refresh list, reload macros if necessary"))
-        
+
         #wx.ART_NORMAL_FILE, wx.ART_TOOLBAR
         btn_edit = eclib.PlateButton(ctrlbar,
                                      bmp=wx.ArtProvider.GetBitmap(str(ed_glob.ID_FILE), wx.ART_MENU),
                                      style=eclib.PB_STYLE_NOBG)
         btn_edit.SetToolTipString(_("Edit macro"))
-        
+
         #wx.ART_NEW, wx.ART_TOOLBAR
         btn_new = eclib.PlateButton(ctrlbar,
                                     bmp=wx.ArtProvider.GetBitmap(str(ed_glob.ID_NEW), wx.ART_MENU),
                                     style=eclib.PB_STYLE_NOBG)
         btn_new.SetToolTipString(_("New macro"))
-        
+
         #wx.ART_EXECUTABLE_FILE
         btn_run = eclib.PlateButton(ctrlbar,
-                                    bmp=wx.ArtProvider.GetBitmap(str(ed_glob.ID_INDENT), wx.ART_MENU),
+                                    bmp=wx.ArtProvider.GetBitmap(str(ed_glob.ID_BIN_FILE), wx.ART_MENU),
                                     style=eclib.PB_STYLE_NOBG)
         btn_run.SetToolTipString(_("Run macro"))
-        
+
         #wx.ART_DELETE, wx.ART_TOOLBAR
         btn_del = eclib.PlateButton(ctrlbar,
                                     bmp=wx.ArtProvider.GetBitmap(str(ed_glob.ID_DELETE), wx.ART_MENU),
                                     style=eclib.PB_STYLE_NOBG)
         btn_del.SetToolTipString(_("Delete macro"))
-        
-        
-        a = (1, wx.TOP, 2)
-        button_sizer.Add(self._taskRelaxedCheckBox, 1, wx.TOP, 5)
-        button_sizer.Add(btn_update, *a)
-        button_sizer.Add(btn_run, *a)
-        button_sizer.Add(btn_new, *a)
-        button_sizer.Add(btn_edit, *a)
-        button_sizer.Add(btn_del, *a)
+
+        ctrlbar.AddStretchSpacer()
+        for btn in (btn_update, btn_run, btn_new, btn_edit, btn_del):
+            ctrlbar.AddControl(btn, wx.ALIGN_RIGHT)
 
         #---- Status Bar -----#
-        
+
         statusctrl = ctrlbox.ControlBar(self, style=ctrlbox.CTRLBAR_STYLE_GRADIENT)
-        self.SetControlBar(statusctrl, pos = wx.BOTTOM)
-        status_sizer = wx.BoxSizer(wx.HORIZONTAL)
-        statusctrl.AddControl(status_sizer, wx.ALIGN_LEFT)
+        statusctrl.SetVMargin(2, 2)
+        self.SetControlBar(statusctrl, pos=wx.BOTTOM)
         self._statusMsgBox = wx.StaticText(statusctrl, label='')
-        status_sizer.Add(self._statusMsgBox, 0, wx.ALL, 1)
         self._statusMsgBox.SetToolTipString(_("R: running, F: finished, C: cancelled or failed"))
+        statusctrl.AddControl(self._statusMsgBox)
         self.SetStatusMsg('MLauncher Initialized')
         wx.CallLater(1000, self.SetStatusMsg, '')
         statusctrl.Layout()
-        
 
         #---- Bind events ----#
 
@@ -195,23 +194,21 @@ class MacroLauncherPane(ctrlbox.ControlBox):
         self.Bind(wx.EVT_CHOICE, lambda evt: self.UpdateMacroBrowser(), self._taskFilter)
         self.Bind(wx.EVT_BUTTON, lambda evt: self.UpdateMacroBrowser(show_everything = True), btn_update)
         self.Bind(wx.EVT_CHECKBOX, lambda evt: self.UpdateMacroBrowser(), self._taskRelaxedCheckBox)
-        
+
         self.Bind(wx.EVT_BUTTON, lambda evt: self.OnNewMacro(), btn_new)
-        self.Bind(wx.EVT_BUTTON, lambda evt: self.OnEditMacro(), btn_edit)        
+        self.Bind(wx.EVT_BUTTON, lambda evt: self.OnEditMacro(), btn_edit)
         self.Bind(wx.EVT_BUTTON, lambda evt: self.OnDelMacro(), btn_del)
         self.Bind(wx.EVT_BUTTON, lambda evt: self.OnRunMacro(), btn_run)
-        
+
         #threads (started macros)
         self.Bind(outbuff.EVT_TASK_START, self._OnTaskStart)
         self.Bind(EVT_TASK_ERROR, self._OnTaskError)
         self.Bind(outbuff.EVT_TASK_COMPLETE, self._OnTaskComplete)
-        
-        
+
         # File action messages
         ed_msg.Subscribe(self.OnFileSave, ed_msg.EDMSG_FILE_SAVED)
-        
+
         self.UpdateMacroBrowser()
-        
 
     #---- Methods ----#
 
@@ -228,14 +225,14 @@ Example:
 def run(txtctrl=None, log=None, **kwargs):
     rows = split(txtctrl.GetText())
     txtctrl.SetText("\n".join(rows)) #this will be inserted into the txtctrl
-  
+
 If you want to start macro in a separate thread, put it inside
 run_thread() - but be careful not to call some operations from the
 thread. Use wx.CallAfter() for that purpose
 
 def run_thread(txtctrl, **kwargs):
     rows ....
-  
+
 Current arguments are:
   txtctrl: wx.stc current editor-
   nbook: notebook instance
@@ -248,20 +245,18 @@ def run(txtctrl=None, log=None, **kwargs):
     pass
 '''
         return template
-    
+
     def GetMacroModTime(self, fullpath):
-        """
-        Return mtime of the macro file
-        """
+        """ Return mtime of the macro file """
         if hasattr(util, 'GetFileModTime'):
             return util.GetFileModTime(fullpath)
         else:
             return ebmlib.GetFileModTime(fullpath)
-        
+
     def GetMacroContents(self, macro_name):
-        """
-        Returns the contents of the macro file, loading it directly from the file system
-        But the macro must be already registered
+        """Returns the contents of the macro file, loading it directly
+        from the file system but the macro must be already registered
+
         """
         contents = u''
         if macro_name in self._macros:
@@ -278,27 +273,25 @@ def run(txtctrl=None, log=None, **kwargs):
                 except:
                     pass
         return contents
-    
+
     def GetMacroByID(self, fname):
-        """
-        Returns macro item searching by macro id
+        """Returns macro item searching by macro id
         this can return at max 1 item (or None)
         @param fname: the filename (the base) fo the macro
+
         """
         if fname in self._macros:
             try:
                 return self._macros[fname]['module']
             except:
                 pass
-            
-        
-    
+
     def GetMacrosByName(self, name):
-        """
-        Returns list of tuples of (name, macro) from the registry.
+        """Returns list of tuples of (name, macro) from the registry.
         Name is coming from the macros themselves, so this method can return
         1>n items or []
         If nothing is found, returns empty tuple ('', '')
+
         """
         ret = list()
         for key, macro in self._macros.items():
@@ -311,17 +304,17 @@ def run(txtctrl=None, log=None, **kwargs):
         return ret
 
     def GetMacrosByType(self, type, relaxed_matching = False):
-        """
-        Returns list of tuples of (name, macro) from the registry.
+        """Returns list of tuples of (name, macro) from the registry.
         Name is coming from the macros themselves, so this method can return
         1>n items or []
+
         """
         ret = list()
         if relaxed_matching:
             match_function = lambda t1, t2: t1.lower() in t2.lower()
         else:
             match_function = lambda t1, t2: t1 == t2
-            
+
         for key, macro in self._macros.items():
             try:
                 module = macro['module']
@@ -330,12 +323,12 @@ def run(txtctrl=None, log=None, **kwargs):
             except:
                 pass
         return ret
-        
+
     def GetMacroByFullPath(self, fullpath):
-        """
-        Returns tuple (name, macro) searching by macro's fullpath
+        """Returns tuple (name, macro) searching by macro's fullpath
         this can return at max 1 item (or None)
         @param fname: the filename (the base) fo the macro
+
         """
         fullpath = os.path.normpath(fullpath)
         for key, macro in self._macros.items():
@@ -345,25 +338,21 @@ def run(txtctrl=None, log=None, **kwargs):
                     break
                 except:
                     pass
-    
+
     def LoadMacro(self, fname, name):
-        """
-        Initializes module into a separate object (not included in sys)
-        """
+        """ Initializes module into a separate object (not included in sys) """
         x = imp.new_module(name)
         x.__file__ = fname
         x.__name__ = name
         x.__builtins__ = __builtins__
-        
+
         old_cwd = os.getcwd()
         try:
-            
             #execfile(fname, x.__dict__) #problems if filepath contains accents
-            
             filedir, filename = os.path.split(fname)
             os.chdir(filedir)
             execfile(filename, x.__dict__)
-            
+
             for a in ['name', 'desc', 'type']:
                 if not hasattr(x, a):
                     setattr(x, a, '')
@@ -376,14 +365,14 @@ def run(txtctrl=None, log=None, **kwargs):
             x.successful_load = False
         finally:
             os.chdir(old_cwd)
-                            
+
         return x
 
-
     def UpdateMacroBrowser(self, show_everything = False):
-        """
-        Updates the entries of the current page in the macro list.
-        @param show_everything: if True, will display all the macros, otherwise will honour the filter 
+        """ Updates the entries of the current page in the macro list.
+        @param show_everything: if True, will display all the macros,
+                                otherwise will honour the filter
+
         """
         # stop the timer if it is running
         if self._timer.IsRunning():
@@ -393,7 +382,7 @@ def run(txtctrl=None, log=None, **kwargs):
         filter_value = ''
         if not show_everything:
             filter_value = self._taskFilter.GetStringSelection()
-            
+
         # get all the macros
         try:
             macro_files = os.listdir(self.macropath)
@@ -404,19 +393,19 @@ def run(txtctrl=None, log=None, **kwargs):
             if (file.endswith('.py') or file.endswith('.pyw')):
                 name, ext = file.rsplit('.', 1)
                 full_path = os.path.normpath(os.path.join(self.macropath, file))
-                
+
                 try:
                     mtime = self.GetMacroModTime(full_path)
                 except Exception, excp:
                     self._log('[error] ' + str(excp.message))
                     continue
-                
+
                 if file in self._macros and self._macros[file]['mtime'] == mtime:
                     #the file hasn't changed
                     continue
-                
+
                 self._register_macro(full_path, mtime)
-                
+
         # remove the deleted files
         present_macros = dict.fromkeys(macro_files, 1)
         for k in self._macros.keys():
@@ -424,67 +413,68 @@ def run(txtctrl=None, log=None, **kwargs):
                 del self._macros[k]
 
         self.UpdateList(filter = filter_value)
-        
 
     def _register_macro(self, fullpath, mtime = None):
-        """
-        Loads and registers macro
+        """Loads and registers macro
         @param fullpath: path to the file .py(w) to be loaded
         @param mtime: if present, will be set as the modified time for this macro
                       if not present, mtime will be get for the file
         @return: True on successful load
+
         """
-        
+
         file = os.path.split(fullpath)[-1]
         name, ext = file.rsplit('.', 1)
-        
+
         if mtime == None:
             mtime = self.GetMacroModTime(fullpath)
-        
+
         module = self.LoadMacro(fullpath, name)
         self._macros[file] = {'mtime': mtime,
                               'module': module,
                               'fullpath':fullpath}
-        return bool(module.successful_load) 
-    
-    def ReloadMacroIfChanged(self, macro_name = ''):
+        return bool(module.successful_load)
+
+    def ReloadMacroIfChanged(self, macro_name=u''):
         """Checks if the macro is registered, is modified
         if yes, then reloads it
         @param macro_name: name of the macro (its base filename)
+
         """
         if macro_name in self._macros:
             mtime = self.IsModifiedMacro(self._macros[macro_name]['fullpath'])
             if mtime:
                 self._register_macro(self._macros[macro_name]['fullpath'], mtime)
-    
-    def ForceMacroReload(self, macro_name = ''):
+
+    def ForceMacroReload(self, macro_name=u''):
         """Reloads macro without checking for mtime, called from context menu
-        usually from user-driven action"""
+        usually from user-driven action
+
+        """
         if macro_name in self._macros:
             self._register_macro(self._macros[macro_name]['fullpath'])
-        
+
     def UpdateMacroBrowserByOne(self, fullpath, show_everything = False):
-        """
-        Updates the macro list adding one entry, but only if the macro
+        """Updates the macro list adding one entry, but only if the macro
         is already registered and the mtime has changed
         @param fullpath: path to the file (possible macro)
         @param show_everything: if true, will force show of all the macros
+
         """
         filter_value = None
         if not show_everything:
             filter_value = self._taskFilter.GetStringSelection()
-            
+
         mtime = self.IsModifiedMacro(fullpath)
         if mtime:
             self._register_macro(fullpath, mtime)
             self.UpdateList(filter = filter_value)
-        
 
     def IsModifiedMacro(self, fullpath):
-        """
-        Checks whether the fullpath points to the existing registered macro
+        """Checks whether the fullpath points to the existing registered macro
         and if it has been modified since last load
         @return: last modified value if the file is modified and is macro
+
         """
         name = os.path.split(fullpath)[-1]
         mtime = self.GetMacroModTime(fullpath)
@@ -492,9 +482,7 @@ def run(txtctrl=None, log=None, **kwargs):
             return mtime
 
     def GetMacroData(self):
-        """
-        Constructs the structure to register macros in the CtrlList
-        """ 
+        """ Constructs the structure to register macros in the CtrlList """
         macrodata = {}
         for key, value in self._macros.items():
             m = value['module']
@@ -509,15 +497,15 @@ def run(txtctrl=None, log=None, **kwargs):
         return macrodata
 
     def RefreshFilterChoices(self, choices):
-        """
-        Replaces the filter with new values, and selects the old previously
-        selected value. Makes sure that the "select all" ie an empty string 
+        """Replaces the filter with new values, and selects the old previously
+        selected value. Makes sure that the "select all" ie an empty string
         is there too
-        @param choices: list of text values 
+        @param choices: list of text values
+
         """
         if not isinstance(choices, list):
             choices = ['']
-            
+
         if choices[0] != '':
             choices.insert(0, '')
         old_choice = self._taskFilter.GetStringSelection()
@@ -528,41 +516,41 @@ def run(txtctrl=None, log=None, **kwargs):
         if old_choice in choices:
             self._taskFilter.SetStringSelection(old_choice)
         else:
-            self._taskFilter.SetStringSelection(self._filterChoices[0]) 
-    
-    def UpdateList(self, macrodata = None, filter = ''):
-        """
-        Repaints the ListCtrl with new values
-        @var macrodata: the same tuple as for AddEntries 
+            self._taskFilter.SetStringSelection(self._filterChoices[0])
+
+    def UpdateList(self, macrodata=None, filter=u''):
+        """Repaints the ListCtrl with new values
+        @keyword macrodata: the same tuple as for AddEntries
+
         """
         relaxed_filtering = self._taskRelaxedCheckBox.GetValue()
-        
+
         if macrodata == None:
             macrodata = self.GetMacroData()
             if not len(macrodata): #no macros at all
                 self._listctrl.ClearEntries()
                 self._listctrl.Refresh()
                 self.RefreshFilterChoices([''])
-        
+
         if not len(macrodata):
             return
+
         all_filters = dict.fromkeys(map(lambda x: x[1], macrodata.values())).keys()
         all_filters.sort()
-        
+
         # remove some entries
         if relaxed_filtering:
             compare_func = lambda x,y: x in y
         else:
             compare_func = lambda x,y: x == y
-            
+
         if filter:
             tmp = {}
             for k, v in macrodata.items():
                 if compare_func(filter, v[1]):
-                    tmp[k] = v 
+                    tmp[k] = v
             macrodata = tmp
-        
-        
+
         # Update the list
         self._listctrl.Freeze()
         self._listctrl.ClearEntries()
@@ -571,12 +559,10 @@ def run(txtctrl=None, log=None, **kwargs):
         self._listctrl.Thaw()
         self._listctrl.SortItems() # SortItems() calls Refresh()
         self._taskFilter.SetStringSelection(filter)
-        
-        
+
     @staticmethod
     def __getNewKey():
-        """
-        key generator method for the list entries
+        """Key generator method for the list entries
         @returns: integer
 
         """
@@ -586,20 +572,15 @@ def run(txtctrl=None, log=None, **kwargs):
             z += 1
 
     def GetMainWindow(self):
-        """
-        Get them main window that owns this instance
-
-        """
+        """ Get them main window that owns this instance """
         return self._mainwin
 
     def IsActive(self):
         """Check whether this browser is active or not"""
         return self._mainwin.IsActive()
 
-
     def OnListUpdate(self, event):
-        """
-        Callback if EVT_TIMER, EVT_BUTTON or EVT_CHOICE is fired.
+        """Callback if EVT_TIMER, EVT_BUTTON or EVT_CHOICE is fired.
         @param event: wxEvent
 
         """
@@ -611,8 +592,7 @@ def run(txtctrl=None, log=None, **kwargs):
         self.UpdateMacroBrowser()
 
     def OnFileSave(self, msg):
-        """
-        Callback when a page is saved.
+        """Callback when a page is saved.
         @param event: Message Object (notebook, page index)
 
         """
@@ -622,11 +602,8 @@ def run(txtctrl=None, log=None, **kwargs):
         nbook, page = msg.GetData()
         wx.CallAfter(self.UpdateMacroBrowserByOne, nbook)
 
-
-
     def OnShow(self, evt):
-        """
-        Shows the Macro Browser
+        """Shows the Macro Browser
         @param event: wxEvent
 
         """
@@ -651,21 +628,20 @@ def run(txtctrl=None, log=None, **kwargs):
         """
         pane = self._mainwin.GetFrameManager().GetPane(PANE_NAME)
         evt.Check(pane.IsShown())
-        
+
     #   -------- Macros -------#
-    
-    
+
+
     def OnNewMacro(self):
-        """
-        Creates a new macro file and opens it in the editor
-        """
+        """ Creates a new macro file and opens it in the editor """
         template = self.template()
-        
+
         type = self._taskFilter.GetStringSelection()
-        fname = os.path.join(self.macropath, 'macro_%i_%i.py'%(int(time.time()), random.randrange(65536)))
-        
+        fname = os.path.join(self.macropath,
+                             'macro_%i_%i.py' % (int(time.time()), random.randrange(65536)))
+
         template = template % {'name':'', 'type':type, 'desc':''}
-        
+
         try:
             f = open(fname, 'w')
             f.write(template)
@@ -676,28 +652,31 @@ def run(txtctrl=None, log=None, **kwargs):
             self.OpenFiles([fname])
             self._register_macro(fname)
             self.UpdateList(filter = type)
-    
+
     def OnViewMacro(self):
-        """Shows the macro in a quick view"""   
+        """Shows the macro in a quick view"""
         macros = self._listctrl.GetSelectedMacros()
         if not len(macros):
             return
         for macro in macros:
-            dlg = wx.lib.dialogs.ScrolledMessageDialog(self, self.GetMacroContents(macro['File']), _("Quick view: %s" % macro['File']))
+            contents = self.GetMacroContents(macro['File'])
+            dlg = wx.lib.dialogs.ScrolledMessageDialog(self, contents,
+                                                       _("Quick view: %s" % macro['File']))
             dlg.ShowModal()
             dlg.Destroy()
-            
+
     def OnEditMacro(self):
-        """
-        Opens the selected macro into the editor
-        """
+        """ Opens the selected macro into the editor """
         macros = self._listctrl.GetSelectedMacros()
         if not len(macros):
             return
+
         to_open = []
         for macro in macros:
             if '#' in macro['Name']:
-                dlg = wx.lib.dialogs.ScrolledMessageDialog(self, self.GetMacroContents(macro['File']), _("This macro is protected, you can view it only"))
+                contents = self.GetMacroContents(macro['File'])
+                dlg = wx.lib.dialogs.ScrolledMessageDialog(self, contents,
+                                                            _("This macro is protected, you can view it only"))
                 dlg.ShowModal()
                 dlg.Destroy()
                 #dlg = wx.MessageDialog(self,
@@ -708,6 +687,7 @@ def run(txtctrl=None, log=None, **kwargs):
                 #dlg.Destroy()
                 continue
             source = os.path.normpath(os.path.join(self.macropath, macro['File']))
+
             try:
                 win = wx.GetApp().GetActiveWindow()
                 if win:
@@ -721,52 +701,59 @@ def run(txtctrl=None, log=None, **kwargs):
                 else:
                      to_open.append(source)
             except Exception, excp:
-                self._log("[error] %s" % excp)        
+                self._log("[error] %s" % excp)
+
         if to_open:
             self.OpenFiles(to_open)
-    
+
     def OnDelMacro(self):
-        """
-        Deletes the selected macro from the filesystem. Asks for confirmation
-        """
+        """ Deletes the selected macro from the filesystem. Asks for confirmation """
         macros = self._listctrl.GetSelectedMacros()
         if not len(macros):
             return
 
-        dlg = wx.MessageDialog(self, _('''\
-            Are you sure you want to delete the selected macros?
-            ''').replace(16*' ', ''),
-            _("Are you sure?"), wx.OK|wx.CANCEL)
+        dlg = wx.MessageDialog(self,
+                               _("Are you sure you want to delete the selected macros?"),
+                               _("Are you sure?"),
+                               wx.OK|wx.CANCEL|wx.ICON_INFORMATION)
         retr = dlg.ShowModal()
         dlg.Destroy()
+
         if retr != wx.ID_OK:
-            self.GetTopLevelParent().SetStatusText(_('Macro deletion cancelled'))
+            mainw = self.GetMainWindow()
+            mainw.SetStatusText(_("Macro deletion cancelled"))
             return
 
-        
         for macro in macros:
             if '#' in macro['Name']:
-                dlg = wx.MessageDialog(self, 
+                dlg = wx.MessageDialog(self,
                         _("Sorry, the macro '%s' is protected" % macro['Name']),
-                        _('Sorry'),
+                        _("Sorry"),
                         wx.OK|wx.ICON_WARNING)
                 dlg.ShowModal()
                 dlg.Destroy()
                 continue
+
             source = os.path.normpath(os.path.join(self.macropath, macro['File']))
             try:
                 win = wx.GetApp().GetActiveWindow()
                 if win:
                     nbook = win.GetNotebook()
                 else:
+                    # TODO:CJP This is an error, the parent of this control
+                    #          is a notebook and has no GetNotebook method!!
                     nbook = self.GetParent().GetNotebook()
+
+                # TODO:CJP what are you trying to do here? I am sure there is
+                #          a better way.
                 ctrls = nbook.GetTextControls()
                 for ctrl in ctrls:
                     if source == ctrl.GetFileName():
                         index = nbook.GetPageIndex(ctrl)
                         #HACK I dont know how to set Modify = False for the stc_ctrl
                         if ctrl.GetModify():
-                            self.GetTopLevelParent().OnSave(wx.MenuEvent(wx.wxEVT_COMMAND_MENU_SELECTED, ed_glob.ID_SAVE))
+                            evt = wx.MenuEvent(wx.wxEVT_COMMAND_MENU_SELECTED, ed_glob.ID_SAVE)
+                            self.GetTopLevelParent().OnSave(evt)
                         nbook.SetSelection(index)
                         nbook.ClosePage()
                         break
@@ -774,35 +761,33 @@ def run(txtctrl=None, log=None, **kwargs):
                 del self._macros[macro['File']]
             except Exception, excp:
                 self._log("[error] %s" % excp)
-        
+
         filter_value = self._taskFilter.GetStringSelection()
-        self.UpdateList(filter = filter_value)       
-    
+        self.UpdateList(filter = filter_value)
+
     def OnStopMacro(self, macro_id):
         for thread in self.GetAllThreadsByMacro(macro_id):
             thread.Cancel()
- 
+
     def OnRunMacro(self):
-        """
-        Fires up the selected macro
-        """
+        """ Fires up the selected macro """
         macros = self._listctrl.GetSelectedMacros()
         if not len(macros):
             return
-        
+
         if not self.SomethingIsRunning():
             self.ResetTaskCounter()
             wx.CallAfter(self.SetStatusMsg, '')
-            
+
         win = wx.GetApp().GetActiveWindow()
         nbook = txtctrl = None
         if win:
             nbook = win.GetNotebook()
             txtctrl = nbook.GetCurrentCtrl()
-        
+
         #if not txtctrl:
         #    return
-        
+
         kwargs = {
                   'log' : self.__log,
                   'txtctrl': txtctrl,
@@ -810,14 +795,15 @@ def run(txtctrl=None, log=None, **kwargs):
                   'win' : win,
                   'mlauncher': self,
                   }
-        
-        for macro in macros: 
+
+        for macro in macros:
             self.ReloadMacroIfChanged(macro['File'])
-            try:  
+            try:
                 module = self._macros[macro['File']]['module']
             except:
                 self.SetStatusMsg(msg = 'Macro %s not properly loaded' % macro['File'])
                 continue
+
             if hasattr(module, 'run'):
                 dlg = None
                 try:
@@ -829,22 +815,22 @@ def run(txtctrl=None, log=None, **kwargs):
                                maximum = 500,
                                parent=self.GetMainWindow(),
                                )
-                    
+
                     dlg.AppendUpdate = lambda s: dlg.Pulse()
                     updater = ProgressBarUpdater(self.GetMainWindow(), dlg)
                     controller = TaskThread(dlg, updater.run, timeout=0.1)
                     controller.start()
                     dlg.Show()
                     """
-                    
+
                     self.RegisterThread(module, macro['File'])
                     self.TaskCounter(1)
                     self.SetStatusMsg(msg = 'Macro %s is running' % macro['File'])
-                    
+
                     busy = wx.BusyInfo(_("Wait please..."))
                     module.run(**kwargs)
                     del busy
-                    
+
                     self.TaskCounter(-1, 1, 0)
                     self.SetStatusMsg(msg = 'Macro %s finished' % macro['File'])
                     #controller.Cancel()
@@ -855,12 +841,12 @@ def run(txtctrl=None, log=None, **kwargs):
                     self.TaskCounter(-1, 0, 1)
                     self.SetStatusMsg(msg = 'Macro %s crashed' % macro['File'])
                 finally:
-                    
                     self.UnRegisterThread(module)
+
             elif hasattr(module, 'run_thread'):
                 try:
-                    #TODO - the consumer should be in a separate thread probably 
-                    #not self as now
+                    #TODO - the consumer should be in a separate thread probably
+                    #       not self as now
                     task = MacroTaskThread(self, module.run_thread, **kwargs)
                     self.RegisterThread(task, macro['File'])
                     wx.CallAfter(task.start)
@@ -870,91 +856,86 @@ def run(txtctrl=None, log=None, **kwargs):
             else:
                 self._log('[err] Macro "%s" does not have function run or run_thread' % macro['File'])
 
-    
     def _OnTaskStart(self, evt):
-        """
-        Called from the MacroTaskThread when the worker is starting
-        """
+        """ Called from the MacroTaskThread when the worker is starting """
         self.TaskCounter(1)
         thread = evt.GetClientObject()
         macro_id = self.GetMacroIdByThread(thread)
-        self.SetStatusMsg('Starting: %s' % macro_id)
+        self.SetStatusMsg(u"Starting: %s" % macro_id)
         self._listctrl.RefreshListDisplay()
-        wx.CallAfter(wx.CallLater, 500, self.SetStatusMsg, '%s is running' % macro_id)
-    
+        wx.CallAfter(wx.CallLater, 500, self.SetStatusMsg,
+                     u"%s is running" % macro_id)
+
     def _OnTaskError(self, evt):
-        """
-        Called after the thread finished (with error)
-        """
+        """ Called after the thread finished (with error) """
         thread, exception_msg = evt.GetClientData()
         macro_id = self.GetMacroIdByThread(thread)
-        
+
         self._log("[err] %s" % traceback.format_exc())
         self._log("[err] %s" % str(exception_msg))
-        
+
         self.UnRegisterThread(thread)
         self.TaskCounter(-1, 0, 1)
         self._listctrl.RefreshListDisplay()
         self.SetStatusMsg('%s failed' % macro_id)
-        wx.CallAfter(wx.CallLater, 500, self.SetStatusMsg, '%s failed' % macro_id)
-        
+        wx.CallAfter(wx.CallLater, 500, self.SetStatusMsg, u"%s failed" % macro_id)
+
     def _OnTaskComplete(self, evt):
-        """-
-        Called after the thread finished (either killed or finished)
-        """
+        """ Called after the thread finished (either killed or finished) """
         thread = evt.GetClientObject()
         macro_id = self.GetMacroIdByThread(thread)
-        
+
         self.UnRegisterThread(thread)
         self.TaskCounter(-1, 1)
         self._listctrl.RefreshListDisplay()
-        self.SetStatusMsg('%s finished' % macro_id)
-        wx.CallAfter(wx.CallLater, 3000, self.SetStatusMsg, '')
-    
+        self.SetStatusMsg(u"%s finished" % macro_id)
+        wx.CallAfter(wx.CallLater, 3000, self.SetStatusMsg, u'')
+
     def MacroIsRunning(self, idx):
-        """
-        Finds out whether the macro in question is in a running state
+        """Finds out whether the macro in question is in a running state
         @param ids: id of the macro (filename with suffix)
         @return: thread object
+
         """
         for thread, macro_id in self.GetAllThreads():
             if macro_id == idx:
                 return thread
         return False
-    
+
     def GetMacroIdByThread(self, thread):
         """Returns the macro_id for this thread instance, if thre is one"""
         for t, macro_id in self.GetAllThreads():
             if t is thread:
                 return macro_id
-            
+
     def GetAllThreadsByMacro(self, macro_id):
-        """Returns all thread instances 
+        """Returns all thread instances
         @param macro_id: filename of the macro
         @return: iterator
+
         """
         for thread, m_id in self.GetAllThreads():
             if macro_id == m_id:
                 yield thread
-    
+
     def GetAllThreads(self):
         """Returns dictionary with all registered (started) threads"""
         for thread_id, macro_id in self._threadsIdx.items():
             yield self._threads[thread_id], macro_id
-            
+
     def SomethingIsRunning(self):
         """Just helper function, returns true if some threads are there"""
         return self._running
-            
-    
+
     def RegisterThread(self, thread, macro_id):
         """registers thread id and macro_id in the dictionary
         @param thread: thread instance
         @param macro_id: id of the macro (its filename)
+
         """
         self._threadsIdx[id(thread)] = macro_id
         self._threads[id(thread)] = thread
-        
+
     def UnRegisterThread(self, thread):
         """Unregisters thread from the registry, returns the removed macro object"""
         try:
@@ -962,29 +943,27 @@ def run(txtctrl=None, log=None, **kwargs):
             return self._threads.pop(id(thread))
         except:
             return None
-    
-    
+
     def TaskCounter(self, running = 0, completed = 0, cancelled = 0):
         """Keeps track of number of task running, finished, cancelled"""
         self._running += running
         self._completed += completed
         self._cancelled += cancelled
-    
+
     def ResetTaskCounter(self):
         self._running = 0
         self._completed = 0
         self._cancelled = 0
-        
+
     def Consume(self, thread, result):
-        """
-        Receives results from the thread
+        """Receives results from the thread
         @param thread: thread that is working
         @param result: anything that the macro is returning
+
         """
         #print thread, result
         pass
-        
-    
+
     @staticmethod
     def OpenFiles(files):
         """Open the list of files in Editra for editing
@@ -1008,11 +987,10 @@ def run(txtctrl=None, log=None, **kwargs):
         if msg:
             msg = '"%s"' % msg
         txt = u'R: % 2d, F: % 2d, C: % 2d  %s' % (self._running, self._completed, self._cancelled, msg)
-        
+
         self._statusMsgBox.SetLabel(txt)
         self._statusMsgBox.Update()
-        
-        
+
     #---- Private Methods ----#
 
     def __FindMainWindow(self):
@@ -1037,21 +1015,21 @@ def run(txtctrl=None, log=None, **kwargs):
         return None
 
     def _log(self, msg):
-        """
-        Writes a log message to the app log
+        """Writes a log message to the app log
         @param msg: message to write to the log
 
         """
         self.__log('[mlauncher] ' + str(msg))
 
     def __del__(self):
-        """
-        Stops the timer when the object gets deleted if it is still running
+        """Stops the timer when the object gets deleted 
+        if it is still running
 
         """
         ed_msg.Unsubscribe(self.OnFileSave)
         self._log('__del__(): stopping timer')
         self._timer.Stop()
+
 #---------------------------------------------------------------------------- #
 
 class CustomListCtrl(wx.ListCtrl,
@@ -1059,25 +1037,25 @@ class CustomListCtrl(wx.ListCtrl,
                      listmix.ColumnSorterMixin):
     """The list ctrl used for the list"""
 
-    def __init__(self, parent, id_=wx.ID_ANY, pos=wx.DefaultPosition,
+    def __init__(self, parent, id_=wx.ID_ANY,
+                 pos=wx.DefaultPosition,
                  size=wx.DefaultSize,
                  style=wx.BORDER_NONE|wx.LC_REPORT|wx.LC_HRULES|wx.LC_VRULES|
-                       wx.LC_VIRTUAL|wx.LC_SORT_DESCENDING): #wx.LC_SINGLE_SEL|
+                       wx.LC_VIRTUAL|wx.LC_SORT_DESCENDING):
         """Init the CustomListCtrl"""
-
         wx.ListCtrl.__init__(self, parent, id_, pos, size, style)
-        
+
         #---- Images used by the list ----#
+        self._menu = None
         self._img_list = None
         self.sm_up = None
         self.sm_dn = None
         self._SetupImages()
-        
+
         self._colSort = 0
         self._ascending = True
 
         #---- Set Columns Headers ----#
-        #self.col_names = ["!", "Type", "Description", "File", "Line"]
         self.col_names = ["Name", "Type", "Description", "File"]
         for i in range(len(self.col_names)):
             self.InsertColumn(i, _(self.col_names[i]))
@@ -1088,35 +1066,36 @@ class CustomListCtrl(wx.ListCtrl,
         self.SetColumnWidth(3, 117)
 
         #---- data ----#
-        #this attribute ist required by listmix.ColumnSorterMixin
-        #{1:(prio, task, description, file, line, fullname), etc.}
+        # This attribute ist required by listmix.ColumnSorterMixin
+        # {1:(prio, task, description, file, line, fullname), etc.}
         self.itemDataMap = {}
+
         # [key1, key2, key3, ...]
         self.itemIndexMap = self.itemDataMap.keys()
         self.SetItemCount(len(self.itemDataMap))
 
-        # holds last selected macro_id
+        # Holds last selected macro_id
         self._selectedMacro = None
-        
-        # needed to hold a reference (otherwise it would be 
+
+        # Needed to hold a reference (otherwise it would be
         # garbagecollected too soon causing a crash)
         self._attr = None
         self._max_prio = 0
 
         #---- init base classes ----#
-        # hast to be after self.itemDataMap has been initialized and the
-        # setup of the columns, but befor sorting
+        # Hast to be after self.itemDataMap has been initialized and the
+        # setup of the columns, but before sorting
         listmix.ListCtrlAutoWidthMixin.__init__(self)
         listmix.ColumnSorterMixin.__init__(self, 5)
 
         #---- Events ----#
-        self.Bind(wx.EVT_LIST_ITEM_RIGHT_CLICK, self.OnItemRightClick, self)
-        self.Bind(wx.EVT_LIST_ITEM_ACTIVATED, self.OnItemActivated, self)
-        
-        
+        self.Bind(wx.EVT_LIST_ITEM_RIGHT_CLICK, self.OnItemRightClick)
+        self.Bind(wx.EVT_LIST_ITEM_ACTIVATED,
+                  lambda evt: self.GetParent().OnRunMacro())
+
         ed_msg.Subscribe(self._SetupImages, ed_msg.EDMSG_THEME_CHANGED)
 
-        # set initial sort order
+        # Set initial sort order
         # sort by prio (column 0), descending order (0)
         self.SortListItems(0, 1)
 
@@ -1124,65 +1103,63 @@ class CustomListCtrl(wx.ListCtrl,
         ed_msg.Unsubscribe(self._SetupImages)
         super(CustomListCtrl, self).__del__()
 
+    def _MakeMenu(self):
+        """Make the context menu"""
+        if self._menu is not None:
+            self._menu.Destroy()
+        else:
+            parent = self.GetParent()
+            self.Bind(wx.EVT_MENU, lambda evt: parent.OnNewMacro(), id=ID_NEW)
+            self.Bind(wx.EVT_MENU, lambda evt: parent.OnEditMacro(), id=ID_EDIT)
+            self.Bind(wx.EVT_MENU, lambda evt: parent.OnRunMacro(), id=ID_RUN)
+            self.Bind(wx.EVT_MENU, lambda evt: parent.OnDelMacro(), id=ID_DELETE)
+            self.Bind(wx.EVT_MENU, self.OnForceReloadMacro, id=ID_RELOAD)
+            self.Bind(wx.EVT_MENU, self.OnStopMacro, id=ID_STOP)
+            self.Bind(wx.EVT_MENU, lambda evt: parent.OnViewMacro(), id=ID_VIEW)
+
+        # Make the menu
+        menu = wx.Menu()
+        item = menu.Append(ID_STOP, _("Stop"))
+        SetMenuBitmap(item, ed_glob.ID_STOP)
+        item = menu.Append(ID_RUN,  _("Run"))
+        SetMenuBitmap(item, ed_glob.ID_BIN_FILE)
+        menu.AppendSeparator()
+        item = menu.Append(ID_EDIT, _("Edit"))
+        SetMenuBitmap(item, ed_glob.ID_FILE)
+        item = menu.Append(ID_NEW, _("New"))
+        SetMenuBitmap(item, ed_glob.ID_NEW)
+        item = menu.Append(ID_DELETE, _("Delete"))
+        SetMenuBitmap(item, ed_glob.ID_DELETE)
+        menu.AppendSeparator()
+        menu.Append(ID_RELOAD, _("Force reload"))
+        menu.Append(ID_VIEW, _("Quick View"))
+        self._menu = menu
+
     #---- Eventhandler ----#
 
-    def OnItemActivated(self, event):
-        """
-        Callback when an item of the list has been activated (double click)
-        @param event: wx.Event
-        """
-        self.GetParent().OnRunMacro()
-
-        
-    def OnItemRightClick(self, event):
-        """
-        Callback when an item of the list has been clicked with the right 
+    def OnItemRightClick(self, evt):
+        """Callback when an item of the list has been clicked with the right
         mouse button.
         @param event: wx.Event
+
         """
+        # If the menu has not been created yet do it now.
+        self._selectedMacro = self.itemIndexMap[evt.m_itemIndex]
 
+        if self._menu is None:
+            self._MakeMenu()
 
-        # only do this part the first time so the events are only bound once
-        #
-        # Yet another anternate way to do IDs. Some prefer them up top to
-        # avoid clutter, some prefer them close to the object of interest
-        # for clarity. 
-        if not hasattr(self, "OnNew"):
-            self.OnNew = wx.NewId()
-            self.OnEdit = wx.NewId()
-            self.OnDelete = wx.NewId()
-            self.OnReload = wx.NewId()
-            self.OnRun = wx.NewId()
-            self.OnStop = wx.NewId()
-            self.OnView = wx.NewId()
-
-            self.Bind(wx.EVT_MENU, lambda evt: self.GetParent().OnNewMacro(), id=self.OnNew)
-            self.Bind(wx.EVT_MENU, lambda evt: self.GetParent().OnEditMacro(), id=self.OnEdit)
-            self.Bind(wx.EVT_MENU, lambda evt: self.GetParent().OnRunMacro(), id=self.OnRun)
-            self.Bind(wx.EVT_MENU, lambda evt: self.GetParent().OnDelMacro(), id=self.OnDelete)
-            self.Bind(wx.EVT_MENU, self.OnForceReloadMacro, id=self.OnReload)
-            self.Bind(wx.EVT_MENU, self.OnStopMacro, id=self.OnStop)
-            self.Bind(wx.EVT_MENU, lambda evt: self.GetParent().OnViewMacro(), id=self.OnView)
-            
-        # make a menu
-        menu = wx.Menu()
-        macro_id = self.itemIndexMap[event.m_itemIndex]
-        self._selectedMacro = macro_id
-        if self.GetParent().MacroIsRunning(macro_id):
-            menu.Append(self.OnStop, _("Stop"))
-            menu.Append(self.OnRun, _("Run another"))
+        # Update Menu State
+        if self.GetParent().MacroIsRunning(self._selectedMacro):
+            self._menu.Enable(ID_RUN, True) # Enable the stop item
+            self._menu.SetLabel(ID_STOP, _("Run another"))
         else:
-            menu.Append(self.OnRun, _("Run"))
-        menu.Append(self.OnEdit, _("Edit"))
-        menu.Append(self.OnNew, _("New"))
-        menu.Append(self.OnDelete, _("Delete"))
-        menu.Append(self.OnReload, _("Force reload"))
-        menu.Append(self.OnView, _("Quick View"))
+            self._menu.Enable(ID_STOP, False) # Enable the stop item
+            self._menu.SetLabel(ID_RUN, _("Run"))
 
-        self.PopupMenu(menu)
-        menu.Destroy()        
-        event.Skip()
-    
+        self.PopupMenu(self._menu)
+        evt.Skip()
+
     def OnStopMacro(self, evt):
         if self._selectedMacro:
             self.GetParent().OnStopMacro(self._selectedMacro)
@@ -1212,14 +1189,18 @@ class CustomListCtrl(wx.ListCtrl,
             down = wx.ArtProvider_GetBitmap(wx.ART_GO_DOWN,
                                             wx.ART_TOOLBAR, isize)
         self.sm_dn = self._img_list.Add(down)
-
         self.SetImageList(self._img_list, wx.IMAGE_LIST_SMALL)
+
+        # Recreate menu if need be
+        if self._menu is not None:
+            self._MakeMenu()
+
         self.Refresh()
 
     def GetSelectedMacros(self):
-        """
-        Get all the ids of the selected rows
+        """Get all the ids of the selected rows
         @return: list (perhaps empty)
+
         """
         item = -1
         selected = []
@@ -1230,12 +1211,12 @@ class CustomListCtrl(wx.ListCtrl,
             else:
                 selected.append(item)
         return self.ParseItemIntoDict(selected)
-        
+
     def ParseItemIntoDict(self, ids):
-        """
-        For all the ids gets their values into the dict
+        """For all the ids gets their values into the dict
         @param ids: list of ids
         @return: list with dictionary of values
+
         """
         ret = []
         for id in ids:
@@ -1246,9 +1227,8 @@ class CustomListCtrl(wx.ListCtrl,
         return ret
 
     def AddEntries(self, entrydict):
-        """
-        Adds all entries from the entrydict. The entries must be a tuple
-        containing 
+        """Adds all entries from the entrydict. The entries must be a tuple
+        containing
         entrytuple = (prio, tasktype, description, file, line, fullname)
         Refresh is not called.
         @param entrydict: a dictionary containing {key:entrytuple}
@@ -1271,7 +1251,6 @@ class CustomListCtrl(wx.ListCtrl,
 
     def RefreshListDisplay(self):
         """Rechecks all the items' graphical features"""
-        
         for idx in range(len(self.itemIndexMap)):
             macro_id = self.itemIndexMap[idx]
             data = self.itemDataMap[macro_id]
@@ -1282,11 +1261,11 @@ class CustomListCtrl(wx.ListCtrl,
                 item.SetBackgroundColour(wx.GREEN)
             else:
                 item.SetBackgroundColour(wx.WHITE)
-                
+
         self.Refresh()
 
     #---- special methods used by the mixinx classes ----#
-    
+
     #Used by the ColumnSorterMixin, see wx/lib/mixins/listctrl.py
     def GetListCtrl(self):
         """ this method is required by listmix.ColumnSorterMixin"""
@@ -1295,12 +1274,11 @@ class CustomListCtrl(wx.ListCtrl,
     #---------------------------------------------------
     #Matt C, 2006/02/22
     #Here's a better SortItems() method --
-    #the ColumnSorterMixin.__ColumnSorter() method already handles the 
-    #ascending/descending, and it knows to sort on another column if the chosen 
+    #the ColumnSorterMixin.__ColumnSorter() method already handles the
+    #ascending/descending, and it knows to sort on another column if the chosen
     #columns have the same value.
     def SortItems(self, sorter=cmp):
-        """
-        This method is required by the 
+        """This method is required by the
         wx.lib.mixins.listctrl.ColumnSorterMixin, for internal usage only
 
         """
@@ -1311,20 +1289,18 @@ class CustomListCtrl(wx.ListCtrl,
 
         #redraw the list
         self.Refresh()
-        
+
     def GetColumnSorter(self):
-        """
-        Overwrites the default GetColumnSorter of the mixin.
-        @returns: a compare function object that takes two arguments: 
+        """Overwrites the default GetColumnSorter of the mixin.
+        @returns: a compare function object that takes two arguments:
         func(key1, key2)
 
         """
         return self.SpecialSorter
 
     def GetSecondarySortValues(self, col, key1, key2):
-        """
-        Overwrites the default GetSecondarySortValues. It uses the SpecialSorter
-        to return a result.
+        """Overwrites the default GetSecondarySortValues. It uses the
+        SpecialSorter to return a result.
         @param col: column index
         @param key1: first item index to compare
         @param key2: second item index to compare
@@ -1335,12 +1311,10 @@ class CustomListCtrl(wx.ListCtrl,
         if 0 < cval:
             return (key2, key1)
         return (key1, key2)
-        
-        
+
     def SpecialSorter(self, key1, key2):
-        """
-        SpecialSorter sorts the list depending on which column should be sorted.
-        It sorts automatically also by other columns.
+        """SpecialSorter sorts the list depending on which column should be
+        sorted. It sorts automatically also by other columns.
         @param key1: first key to compare
         @param key2: second key to compare
         @returns: -1, 0 or 1 like the compare function
@@ -1359,7 +1333,7 @@ class CustomListCtrl(wx.ListCtrl,
             _sortorder = [col, 0, 4]
         elif 4 == col: # line number -> sortorder: file, line
             _sortorder = [3, 4]
-            
+
         cmpval = 0
         _idx = 0
         while( 0 == cmpval and _idx < len(_sortorder) ):
@@ -1380,7 +1354,7 @@ class CustomListCtrl(wx.ListCtrl,
             ascending = 1
         elif 3 == _sortorder[_idx-1] and 4 == col: # filename
             ascending = 1
-            
+
         if ascending:
             return cmpval
         else:
@@ -1388,20 +1362,18 @@ class CustomListCtrl(wx.ListCtrl,
 
     #Used by the ColumnSorterMixin, see wx/lib/mixins/listctrl.py
     def GetSortImages(self):
-        """
-        This method is required by the 
+        """This method is required by the
         wx.lib.mixins.listctrl.ColumnSorterMixin, for internal usage only
 
         """
         return (self.sm_dn, self.sm_up)
-        
+
     #---- special listctrl eventhandlers ----#
         # These methods are callbacks for implementing the
         # "virtualness" of the list...
 
     def OnGetItemText(self, idx, col):
-        """
-        Virtual ListCtrl have to define this method, returns the text of the
+        """Virtual ListCtrl have to define this method, returns the text of the
         requested item.
         @param itemIdx: a int defining the item
         @param col: column
@@ -1414,8 +1386,7 @@ class CustomListCtrl(wx.ListCtrl,
 
     @staticmethod
     def OnGetItemImage(item):
-        """
-        Virtual ListCtrl have to define this method, should return an image
+        """Virtual ListCtrl have to define this method, should return an image
         for the item, but since we have no images it always returns -1.
         @param item: itemindex (not used)
         @returns: always -1 because we have no images for the items.
@@ -1424,16 +1395,15 @@ class CustomListCtrl(wx.ListCtrl,
         return -1
 
     def OnGetItemAttr(self, idx):
-        """
-        Virtual ListCtrl have to define this method, should return item 
+        """Virtual ListCtrl have to define this method, should return item
         attributes
         @param itemIdx: index of an item for which we want the attributes
-        @returns: a wx.ListItemAttr if the prio of the item is high enough, 
+        @returns: a wx.ListItemAttr if the prio of the item is high enough,
         None otherwise
 
         """
         #return None
-        
+
         #TODO - could use this to set colour for types
         idx = self.itemIndexMap[idx]
         type = self.itemDataMap[idx][1]
@@ -1449,17 +1419,17 @@ class CustomListCtrl(wx.ListCtrl,
             return self._attr
         return None
 
+#-----------------------------------------------------------------------------#
 
 class MacroTaskThread(outbuff.TaskThread):
     """Run a task in its own thread.
-    
     This is a slighty modified version of the src.eclib.outbuff.TaskThread
-    I needed to know which thread was returning results """
-    
+    I needed to know which thread was returning results
+
+    """
     def __init__(self, *args, **kwargs):
         """Initialize the TaskThread. All *args and **kwargs are passed
         to the task.
-
         @param parent: Parent Window/EventHandler to recieve the events
                        generated by the process.
         @param task: callable should be a generator object and must be iterable
@@ -1496,15 +1466,18 @@ class MacroTaskThread(outbuff.TaskThread):
             evt.SetClientObject(self)
             wx.PostEvent(self._parent, evt)
 
+#-----------------------------------------------------------------------------#
+
+#TODO:CJP DOCUMENT this class
 class ProgressBarUpdater(object):
     def __init__(self, parent, dialog):
         object.__init__(self)
         self._parent = parent
         self._dialog = dialog
-    
+
     def GetId(self):
         return self._parent.GetId()
-        
+
     def run(self, timeout = 0.5):
         while 1:
             time.sleep(timeout)

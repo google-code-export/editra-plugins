@@ -1,4 +1,3 @@
-
 # -*- coding: utf-8 -*-
 
 name = u'documentation#'
@@ -44,7 +43,7 @@ What you need to do:
    - by double-clicking it
    - by clicking on the icon "Run"
    - by pressing Enter
-   
+
 
 Macro types:
 ----------------
@@ -54,35 +53,35 @@ There are two types of macros:
  2. threaded macro (started by call to run_thread())
 
 Threaded calls are started in a new thread (yes, you guessed it) which
-means that editor remains responsive even if the macro is running - 
+means that editor remains responsive even if the macro is running -
 and it can do some very complicated calculations, database queries etc.
 
-If you use run_thread() for tasks that interact with Editra, a lot of 
+If you use run_thread() for tasks that interact with Editra, a lot of
 caution is needed. Because some operations are allowed only from the main
-thread. For instances if you do this, Editra will crash (and you won't 
+thread. For instances if you do this, Editra will crash (and you won't
 even have time to blink):
 
 This will kill your editor:
 
     def run_thread(nbook = None, **kwargs):
       nbook.AddPage()
-  
+
 This will be fine (call from main thread):
 
     import wx
-    
+
     def run_thread(nbook = None, **kwargs):
       wx.CallAfter(nbook.AddPage)
 
 For the best performance, the function run_thread() should periodically
 return by yield():
-    
+
     import time
     def run_thread(**kwargs):
         for x in range(5):
             time.sleep(.5)
             yield x
-            
+
 Look at the supplied macros to see examples. Try to select all macros
 of type 'thread', right-click and choose run. You can start threaded
 and non-threaded macros together. If the threaded macros are first on
@@ -113,11 +112,11 @@ Example macros:
     Together with the plugin, you will find some example macros. This help is
     one of them. They are installed automatically (and may be overwritten by
     new versions, so do not save your work in them!)
-    
+
 Macro filenames
     The automatically created macro have special filename, but it is not important
     to follow any conventions. Except for one. The macros that have in its name
-    '_overwrite.' may get overwritten by future updates. 
+    '_overwrite.' may get overwritten by future updates.
 
 
 About - credits:
@@ -127,13 +126,11 @@ About - credits:
 - Of course, MLauncher is using Editra codebase
 - The little what is left is by me, rca (http://www.roman-chyla.net)
 
-  
+
 TODO:
 -----
 - repository of downloadable macros?
-  
-  
-  
+
+
+
   '''
-      
-        

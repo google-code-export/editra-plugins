@@ -1,10 +1,8 @@
-
 # -*- coding: utf-8 -*-
 
 name = u'\u017elut\xfd \u010dern\xfd k\u016f\u0148'
 type = u'example'
 desc = u'Example of macro that contains accented chars and writes utf-8'
-
 
 def run(txtctrl=None, nbook=None, log=None,**kwargs):
   global name
@@ -16,10 +14,10 @@ def run(txtctrl=None, nbook=None, log=None,**kwargs):
       #set some encoded string
       test = u'\u017elut\xfd \u010dern\xfd k\u016f\u0148'
       page.SetText(test)
-      
+
       #then get the text back
       txt = page.GetText().strip()
-      
+
       #write results back
       res = u''
       res += u'This macro: %s\n' % name
@@ -31,5 +29,4 @@ def run(txtctrl=None, nbook=None, log=None,**kwargs):
       res += u'Repr: %s == %s\n' % (repr(txt), r"u'\u017elut\xfd \u010dern\xfd k\u016f\u0148'")
       res += u'Test succeeded: %s\n' % (txt == test)
       page.SetText(res)
-      
-      
+
