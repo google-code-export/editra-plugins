@@ -66,6 +66,7 @@ ID_MACROLAUNCHER = wx.NewId()  #menu item
 ID_ML_SHELF = wx.NewId() # Shelf interface id
 ID_TIMER = wx.NewId()
 
+# RightClick actions/buttons
 ID_RUN = wx.NewId()
 ID_STOP = wx.NewId()
 ID_NEW = wx.NewId()
@@ -564,16 +565,6 @@ def run(txtctrl=None, log=None, **kwargs):
         self._listctrl.SortItems() # SortItems() calls Refresh()
         self._taskFilter.SetStringSelection(filter)
 
-    @staticmethod
-    def __getNewKey():
-        """Key generator method for the list entries
-        @returns: integer
-
-        """
-        z = 0
-        while 1:
-            yield z
-            z += 1
 
     def GetMainWindow(self):
         """ Get them main window that owns this instance """
@@ -588,8 +579,6 @@ def run(txtctrl=None, log=None, **kwargs):
         @param event: wxEvent
 
         """
-        #called on: ed_msg.EDMSG_FILE_SAVED
-#        self._log('OnListUpdate')
         if not self.IsActive():
             return
 
@@ -633,7 +622,8 @@ def run(txtctrl=None, log=None, **kwargs):
         pane = self._mainwin.GetFrameManager().GetPane(PANE_NAME)
         evt.Check(pane.IsShown())
 
-    #   -------- Macros -------#
+
+    #   ----------------- Macros -------------------#
 
 
     def OnNewMacro(self):
@@ -703,7 +693,7 @@ def run(txtctrl=None, log=None, **kwargs):
                     if source == ctrl.GetFileName():
                         nbook.SetSelection(nbook.GetPageIndex(ctrl))
                 else:
-                     to_open.append(source)
+                    to_open.append(source)
             except Exception, excp:
                 self._log("[error] %s" % excp)
 
@@ -744,9 +734,7 @@ def run(txtctrl=None, log=None, **kwargs):
                 if win:
                     nbook = win.GetNotebook()
                 else:
-                    # TODO:CJP This is an error, the parent of this control
-                    #          is a notebook and has no GetNotebook method!!
-                    nbook = self.GetParent().GetNotebook()
+                    nbook = self.GetMainWindow().GetNotebook()
 
                 # TODO:CJP what are you trying to do here? I am sure there is
                 #          a better way.
@@ -770,6 +758,7 @@ def run(txtctrl=None, log=None, **kwargs):
         self.UpdateList(filter = filter_value)
 
     def OnStopMacro(self, macro_id):
+        """Stops the running macro"""
         for thread in self.GetAllThreadsByMacro(macro_id):
             thread.Cancel()
 
@@ -988,6 +977,9 @@ def run(txtctrl=None, log=None, **kwargs):
             win.GetNotebook().OnDrop(to_open)
 
     def SetStatusMsg(self, msg = ''):
+        """Sets the status msg in the statusbar of the panel along with
+        the counter of R: , F: C:
+        """
         if msg:
             msg = '"%s"' % msg
         txt = u'R: % 2d, F: % 2d, C: % 2d  %s' % (self._running, self._completed, self._cancelled, msg)
@@ -1154,11 +1146,13 @@ class CustomListCtrl(wx.ListCtrl,
             self._MakeMenu()
 
         # Update Menu State
+        macro_id = self.itemIndexMap[evt.m_itemIndex]
+        self._selectedMacro = macro_id
         if self.GetParent().MacroIsRunning(self._selectedMacro):
-            self._menu.Enable(ID_RUN, True) # Enable the stop item
-            self._menu.SetLabel(ID_STOP, _("Run another"))
+            self._menu.Enable(ID_STOP, True) # Enable the stop item
+            self._menu.SetLabel(ID_RUN, _("Run another"))
         else:
-            self._menu.Enable(ID_STOP, False) # Enable the stop item
+            self._menu.Enable(ID_STOP, False) # Disable the stop item
             self._menu.SetLabel(ID_RUN, _("Run"))
 
         self.PopupMenu(self._menu)
@@ -1472,8 +1466,11 @@ class MacroTaskThread(outbuff.TaskThread):
 
 #-----------------------------------------------------------------------------#
 
-#TODO:CJP DOCUMENT this class
+
 class ProgressBarUpdater(object):
+    """Class that handles the progress dialog Gauge.
+    It is just used to move the gauge periodically 
+    step further"""
     def __init__(self, parent, dialog):
         object.__init__(self)
         self._parent = parent
@@ -1483,6 +1480,7 @@ class ProgressBarUpdater(object):
         return self._parent.GetId()
 
     def run(self, timeout = 0.5):
+        """Iterator that just sends signals back to the ProgressBarDialog"""
         while 1:
             time.sleep(timeout)
             yield 1
