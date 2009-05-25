@@ -222,8 +222,7 @@ class MacroLauncherPane(ctrlbox.ControlBox):
     #-------------------------- Methods -------------------------#
 
     def template(self):
-        template = '''
-# -*- coding: utf-8 -*-
+        template = '''# -*- coding: utf-8 -*-
 
 name = u'%(name)s'
 type = u'%(type)s'
