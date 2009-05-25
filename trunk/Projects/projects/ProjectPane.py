@@ -953,6 +953,7 @@ class ProjectTree(wx.Panel):
             else:
                 return
 
+            ted.Hide()
             ted.Destroy()
             if message:
                 break

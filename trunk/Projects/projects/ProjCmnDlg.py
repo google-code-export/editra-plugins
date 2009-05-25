@@ -183,6 +183,7 @@ class CommitDialog(wx.Dialog):
             if len(CommitDialog.RECENT_MESSAGES) > CommitDialog.MAX_MESSAGE:
                 CommitDialog.RECENT_MESSAGES.pop()
                 CommitDialog._TEASER_LIST.pop()
+
         evt.Skip()
 
     def SetCommitMessage(self, msg):
