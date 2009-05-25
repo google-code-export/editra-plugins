@@ -133,11 +133,11 @@ class MacroLauncherPane(ctrlbox.ControlBox):
         main_sizer = wx.BoxSizer(wx.HORIZONTAL)
         tools_sizer = wx.BoxSizer(wx.VERTICAL)
         button_sizer = wx.GridSizer(3, 6, 1, 1)  # rows, cols, vgap, hgap
-        
+
         ctrlbar.AddControl(main_sizer, wx.ALIGN_LEFT)
         main_sizer.Add(tools_sizer)
         main_sizer.Add(button_sizer)
-        
+
 
         # ---- Filter toolbox ----#
         self._taskFilter = wx.Choice(ctrlbar, choices=self._filterChoices, style = wx.EXPAND | wx.ADJUST_MINSIZE)
@@ -145,10 +145,14 @@ class MacroLauncherPane(ctrlbox.ControlBox):
         self._taskFilter.SetToolTipString(_("Filter macros by their type"))
         self._taskRelaxedCheckBox = wx.CheckBox(ctrlbar, -1)
         self._taskRelaxedCheckBox.SetToolTipString(_("Relaxed filtering - will list also partial matches"))
-        
+
+        if wx.Platform == '__WXMAC__':
+            self._taskFilter.SetWindowVariant(wx.WINDOW_VARIANT_SMALL)
+            self._taskRelaxedCheckBox.SetWindowVariant(wx.WINDOW_VARIANT_SMALL)
+
         tools_sizer.Add(self._taskFilter, 1, wx.EXPAND|wx.ADJUST_MINSIZE|wx.ALL, 3)
-        
-                
+
+
         #------ Buttons ------#
 
         btn_update = eclib.PlateButton(ctrlbar,
@@ -175,7 +179,7 @@ class MacroLauncherPane(ctrlbox.ControlBox):
                                     bmp=wx.ArtProvider.GetBitmap(str(ed_glob.ID_DELETE), wx.ART_MENU),
                                     style=eclib.PB_STYLE_NOBG)
         btn_del.SetToolTipString(_("Delete macro"))
-                
+
         button_sizer.Add(self._taskRelaxedCheckBox, 1, wx.TOP, 5)
         a = (1, wx.TOP, 2)
         for btn in (btn_update, btn_run, btn_new, btn_edit, btn_del):
@@ -750,7 +754,7 @@ def run(txtctrl=None, log=None, **kwargs):
                             self.GetTopLevelParent().OnSave(evt)
                         nbook.SetSelection(index)
                         nbook.ClosePage()
-                        
+
                 os.remove(source)
                 del self._macros[macro['File']]
             except Exception, excp:
@@ -1020,7 +1024,7 @@ def run(txtctrl=None, log=None, **kwargs):
         self.__log('[mlauncher] ' + str(msg))
 
     def __del__(self):
-        """Stops the timer when the object gets deleted 
+        """Stops the timer when the object gets deleted
         if it is still running
 
         """
@@ -1471,7 +1475,7 @@ class MacroTaskThread(outbuff.TaskThread):
 
 class ProgressBarUpdater(object):
     """Class that handles the progress dialog Gauge.
-    It is just used to move the gauge periodically 
+    It is just used to move the gauge periodically
     step further"""
     def __init__(self, parent, dialog):
         object.__init__(self)
