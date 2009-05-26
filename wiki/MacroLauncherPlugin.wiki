@@ -2,6 +2,11 @@ Description of the MacroLauncher plugin.
 
 = Introduction =
 
+http://editra-plugins.googlecode.com/svn/wiki/images/MacroLauncher/mlauncher_example.png
+
+_Above is the screenshot of the Editra with MacroLauncher enabled - the two green lines are two macros currently running (you can see their output in the log window), and I am about to start the third macro._
+
+
 
 Macro Launcher (MLauncher) helps you to write and *execute* short (or long) python
 scripts. The scripts can do variety of tasks, basically, in Editra you will have a nice graphical interface for controlling them. 
@@ -17,6 +22,15 @@ Here are some ideas where MacroLauncher helps me:
 
 As a short note: I am calling the scripts inside MLauncher "macros" but
 they are just normal python code (that you have to write or download)
+
+Basic features of the plugin:
+
+ * Create new macro / Edit existing macro directly in Editra
+ * Control macro execution (Start/Stop) 
+ * Filter macros by type
+ * Automatic reloads on edits / Forced reload (user requested)
+ * Quick view of the macros
+ * Protect macros against changes
 
 == Installation ==
 
@@ -39,7 +53,7 @@ Very simple: download or create macro - execute - wait/work on something else
 
 
 === New Macro ===
-
+ {{{
  1. Click on New Macro button (new editor with a basic template will open)
  2. Write your code
    * when you hit Ctrl+Save, the code of the plugin is automatically
@@ -47,17 +61,71 @@ Very simple: download or create macro - execute - wait/work on something else
  3. Run the macro
    * by double-clicking its entry in the panel
    * by selecting and clicking on the icon "Run"
-   * by selecting and pressing Enter
+   * by selecting and pressing Enter 
+ }}}
 
-If there is a syntax error, macro will be highlighted with red in the list. The error message will be shown in the Editra log (so activate the Editra log window, if you want to see something).
+Here is the example of a basic macro:
 
-The macro has a separate namespace, basically you cannot change the Editra environment by, for instance, loading its modules and manipulating some classes. What you share with Editra is just __builtins__ and the passed in instances.   
+{{{
+
+# -*- coding: utf-8 -*-
+
+name = 'sort-example'
+type = 'example'
+desc = 'Sort lines by Czech locale'
+
+import locale
+locale.setlocale(locale.LC_ALL,"cz")
+
+def run(txtctrl = None, **kwargs):
+  if txtctrl:
+    lines = txtctrl.GetText().splitlines()
+    lines.sort(cmp=locale.strcoll)
+    txtctrl.SetText(txtctrl.GetEOLChar().join(lines))
+
+}}}
+
+This macro will take the text from the current buffer, split it into lines, sort it alphabetically (using cz locale) and replace the contents of the current buffer with the results.
+
+Few things to note:
+
+ * name is the name of the macro as shown in the left-most column in the panel
+ * type is the way to group macros (you can filter macros by type)
+ * desc is a description, is displayed in the right most column
+ * when you execute macro, the run() function is called
+ * whenever you edit macro in Editra, the macro is reloaded after save
+
+If there is a syntax error, macro will be highlighted with red line. The error message will be shown in the Editra log (so activate the Editra log window, if you want to see something).
+
+The macro has a separate namespace, basically you cannot change the Editra environment by, for instance, loading its modules and manipulating some classes.  This will not work:
+
+{{{
+from Editra.src.profiler import TheProfile #TheProfile is singleton
+TheProfile.DeleteItem('something') # will not work with Editra's current profile
+}}}
+
+What you share with Editra is just __builtins__ and the passed in instances. So if you want to do some funcy stuff, either you have to get reference for the instance from the passed in arguments available to your macro, or you have to do hacks like this
+
+{{{
+import sys
+module = sys.modules['src.profiler'] #you have to find out the name of the module yourself
+profile = module.TheProfile
+profile.DeleteItem('something')
+}}}
+
+Keyword arguments available to your macros are these:
+ *  txtctrl: wx.stc current editor
+ *  nbook: notebook instance
+ *  win: the main window
+ *  log: log method for writing into the Editra log
+ *  mlauncher: macro launcher instance (plugin itself)
+
 
 === Macro types ===
 
 There are two types of macros:
- 1. blocking macro (started by call run())
- 2. threaded macro (started by call to run_thread())
+ # blocking macro (started by call run())
+ # threaded macro (started by call to run_thread())
 
 Threaded calls are started in a new thread (yes, you guessed it) which
 means that editor remains responsive even if the macro is running - 
@@ -67,42 +135,36 @@ If you use run_thread() for tasks that interact with Editra, a lot of
 caution is needed. Because some operations are allowed only from the main
 thread. For instances if you do this, Editra will crash (and you won't 
 even have time to blink):
-
-This will kill your editor:
-
+{{{
     def run_thread(nbook = None, **kwargs):
       nbook.AddPage()
-  
-This will be fine (call from main thread):
+}}}  
 
+This will be fine (call from the main thread):
+
+{{{
     import wx
-    
     def run_thread(nbook = None, **kwargs):
       wx.CallAfter(nbook.AddPage)
+}}}
 
 For the best performance, the function run_thread() should periodically
 return by yield():
-    
+
+{{{    
     import time
     def run_thread(**kwargs):
         for x in range(5):
             time.sleep(.5)
             yield x
-            
-Look at the supplied macros to see examples. Try to select all macros
+}}} 
+           
+Look at the supplied macros for examples. Try to select all macros
 of type 'thread', right-click and choose run. You can start threaded
 and non-threaded macros together. If the threaded macros are first on
-the list, you will not wait.
+the list, you will not wait. 
 
 
-Macro Arguments:
-----------------
-These are the keyword arguments available to your macros:
-  txtctrl: wx.stc current editor
-  nbook: notebook instance
-  win: the main window
-  log: log method for writing into the Editra log
-  mlauncher: macro launcher instance (plugin)
 
 
 Interesting (perhaps) info:
@@ -126,25 +188,16 @@ Macro filenames
     '_overwrite.' may get overwritten by future updates. 
 
 
-About - credits:
-----------------
-- The idea of the Macro Launcher comes from the Pype editor.
-- Parts of the code from the commentbrowser by DR0ID (dr0iddr0id at googlemail com)
-- Of course, MLauncher is using Editra codebase
-- The little what is left is by me, rca (http://www.roman-chyla.net)
+== About - credits ==
+
+ * The idea of the Macro Launcher comes from the Pype editor.
+ * Parts of the code from the commentbrowser by DR0ID (dr0iddr0id at googlemail com)
+ * Of course, MLauncher is using Editra codebase and Cody Precord helped fixing a few issues
+ * The little what is left is by me, rca (http://www.roman-chyla.net)
 
   
-TODO:
------
-- repository of downloadable macros?
-  
-  
-  
-  
+== TODO ==
 
-= Details =
-
-Add your content here.  Format your content with:
-  * Text in *bold* or _italic_
-  * Headings, paragraphs, and lists
-  * Automatic links to other wiki pages
+ # repository of downloadable macros?
+ # select macros and run the all in one-after-another mode (chained)
+  
