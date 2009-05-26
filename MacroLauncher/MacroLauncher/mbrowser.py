@@ -13,8 +13,10 @@ Provides a macro browser panel and other UI components for Editra's
 MacroBrowser Plugin.
 
 The list and panel side of this moduel was inspired by commentbrowser plugin
-by DR0ID <dr0iddr0id@googlemail.com> (do I need to add, that I have taken
-its code, or is it obvious? ;-))
+by DR0ID <dr0iddr0id@googlemail.com>, mainly the CustomListCtrl and stup for the plugin
+(do I need to add, that I have taken its code, or is it obvious? ;-))
+
+Cody Precord, Editra master, fixed or helped me to fix quite some parts of the module
 
 """
 
@@ -747,10 +749,8 @@ def run(txtctrl=None, log=None, **kwargs):
                 for ctrl in ctrls:
                     if source == ctrl.GetFileName():
                         index = nbook.GetPageIndex(ctrl)
-                        #HACK I dont know how to set Modify = False for the stc_ctrl
                         if ctrl.GetModify():
-                            evt = wx.MenuEvent(wx.wxEVT_COMMAND_MENU_SELECTED, ed_glob.ID_SAVE)
-                            self.GetTopLevelParent().OnSave(evt)
+                            ctrl.SetSavePoint()
                         nbook.SetSelection(index)
                         nbook.ClosePage()
 
@@ -787,7 +787,7 @@ def run(txtctrl=None, log=None, **kwargs):
         #    return
 
         kwargs = {
-                  'log' : self.__log,
+                  'log' : self._log,
                   'txtctrl': txtctrl,
                   'nbook': nbook,
                   'win' : win,
@@ -1046,6 +1046,8 @@ class CustomListCtrl(wx.ListCtrl,
         """Init the CustomListCtrl"""
         wx.ListCtrl.__init__(self, parent, id_, pos, size, style)
 
+        self.__log = wx.GetApp().GetLog()
+        
         #---- Images used by the list ----#
         self._menu = None
         self._img_list = None
@@ -1103,7 +1105,14 @@ class CustomListCtrl(wx.ListCtrl,
     def __del__(self):
         ed_msg.Unsubscribe(self._SetupImages)
         super(CustomListCtrl, self).__del__()
+        
+    def _log(self, msg):
+        """Writes a log message to the app log
+        @param msg: message to write to the log
 
+        """
+        self.__log('[mlauncher] ' + str(msg))
+        
     def _MakeMenu(self):
         """Make the context menu"""
         if self._menu is not None:
