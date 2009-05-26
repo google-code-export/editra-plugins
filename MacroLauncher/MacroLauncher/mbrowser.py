@@ -48,6 +48,7 @@ import util
 import ed_glob
 import eclib
 import eclib.outbuff as outbuff
+import ed_basestc
 #Editra v.0.85
 try:
     import ebmlib
@@ -659,8 +660,14 @@ def run(txtctrl=None, log=None, **kwargs):
             return
         for macro in macros:
             contents = self.GetMacroContents(macro['File'])
-            dlg = wx.lib.dialogs.ScrolledMessageDialog(self, contents,
-                                                       _("Quick view: %s" % macro['File']))
+            
+            dlg = QuickViewDialog(self, -1, _("Quick view: %s" % macro['File']), size=(650, 350),
+                   style=wx.DEFAULT_DIALOG_STYLE | wx.CLOSE_BOX | wx.THICK_FRAME,
+                   contents = contents )
+                             
+            #dlg = wx.lib.dialogs.ScrolledMessageDialog(self, contents,
+            #                                           _("Quick view: %s" % macro['File']))
+            
             dlg.ShowModal()
             dlg.Destroy()
 
@@ -1498,3 +1505,45 @@ class ProgressBarUpdater(object):
         while 1:
             time.sleep(timeout)
             yield 1
+
+class QuickViewDialog(wx.Dialog):
+    def __init__(
+            self, parent, ID, title, size=wx.DefaultSize, pos=wx.DefaultPosition, 
+            style=wx.DEFAULT_DIALOG_STYLE,
+            useMetal=False,
+            contents=''
+            ):
+        """
+        Dialog for QuickView instead of src.lib.ScrolledMessage which is not available
+        in the binary Editra version
+        """
+
+        wx.Dialog.__init__(self, parent, ID, title, pos, size, style)
+
+        # layout
+        mainSizer = wx.BoxSizer(wx.VERTICAL)
+        btnsizer = wx.StdDialogButtonSizer()
+        txtsizer = wx.BoxSizer(wx.VERTICAL)
+        
+        txt = ed_basestc.EditraBaseStc(self, -1, pos, size, style)
+        txt.SetText(contents)
+        txt.SetReadOnly(True)
+        txt.SetLexer(wx.stc.STC_LEX_PYTHON)
+        #txt.UpdateAllStyles()
+        txt.FindLexer(set_ext=u'py')
+        txtsizer.Add(txt, 1, wx.GROW|wx.ALIGN_CENTER_VERTICAL|wx.ALL, 1)
+        
+        
+        mainSizer.Add(txtsizer, 1, wx.GROW|wx.ALIGN_CENTER_VERTICAL|wx.ALL, 5)
+        mainSizer.Add(btnsizer, 0, wx.ALIGN_CENTER_VERTICAL | wx.ALIGN_RIGHT |wx.ALL, 5)
+        
+        
+        btn = wx.Button(self, wx.ID_OK)
+        btn.SetDefault()
+        btnsizer.AddButton(btn)
+        btnsizer.Realize()
+
+        self.SetSizer(mainSizer)
+        mainSizer.Fit(self)
+
+        self.CenterOnScreen()
