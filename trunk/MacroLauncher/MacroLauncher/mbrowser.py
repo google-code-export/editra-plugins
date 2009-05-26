@@ -35,7 +35,6 @@ import time
 import random
 import traceback
 import wx.lib.mixins.listctrl as listmix
-import wx.lib.dialogs
 import locale
 import codecs
 
@@ -661,13 +660,9 @@ def run(txtctrl=None, log=None, **kwargs):
         for macro in macros:
             contents = self.GetMacroContents(macro['File'])
             
-            dlg = QuickViewDialog(self, -1, _("Quick view: %s" % macro['File']), size=(650, 350),
+            dlg = QuickViewDialog(self, -1, _("Quick view: %s") % macro['File'], size=(650, 350),
                    style=wx.DEFAULT_DIALOG_STYLE | wx.CLOSE_BOX | wx.THICK_FRAME,
                    contents = contents )
-                             
-            #dlg = wx.lib.dialogs.ScrolledMessageDialog(self, contents,
-            #                                           _("Quick view: %s" % macro['File']))
-            
             dlg.ShowModal()
             dlg.Destroy()
 
@@ -681,16 +676,12 @@ def run(txtctrl=None, log=None, **kwargs):
         for macro in macros:
             if '#' in macro['Name']:
                 contents = self.GetMacroContents(macro['File'])
-                dlg = wx.lib.dialogs.ScrolledMessageDialog(self, contents,
-                                                            _("This macro is protected, you can view it only"))
+                dlg = QuickViewDialog(self, -1, _("The macro is protected, you can view it only: %s") % macro['File'], size=(650, 350),
+                   style=wx.DEFAULT_DIALOG_STYLE | wx.CLOSE_BOX | wx.THICK_FRAME,
+                   contents = contents )
+                
                 dlg.ShowModal()
                 dlg.Destroy()
-                #dlg = wx.MessageDialog(self,
-                #    _("Sorry, this macro is protected"),
-                #    _('Sorry'),
-                #    wx.OK)
-                #dlg.ShowModal()
-                #dlg.Destroy()
                 continue
             source = os.path.normpath(os.path.join(self.macropath, macro['File']))
 
