@@ -167,8 +167,8 @@ the list, you will not wait.
 
 
 
-Interesting (perhaps) info:
----------------------------
+== Additional info ==
+
 Where are the macros saved?
     They are saved inside the .Editra configuration directory (.Editra/macros)
     Where you can edit them, delete, copy etc. (But use the plugin interface
