@@ -78,6 +78,9 @@ class SyntaxCheckWindow(wx.Panel):
     def __del__(self):
         ed_msg.Unsubscribe(self.OnFileSaved, ed_msg.EDMSG_FILE_SAVED)
 
+    def GetMainWindow(self):
+        return self._mw
+
     @ed_msg.mwcontext
     def OnFileSaved(self, arg):
         """File Saved message"""
