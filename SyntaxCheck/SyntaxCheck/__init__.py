@@ -82,7 +82,7 @@ class SyntaxCheck(plugin.Plugin):
 
     def GetMinVersion(self):
         """Minimum version of Editra this plugin is compatible with"""
-        return "4.40"
+        return "4.89"
 
     def GetName(self):
         """The name of this plugin"""
