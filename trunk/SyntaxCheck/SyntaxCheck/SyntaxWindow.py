@@ -60,19 +60,25 @@ class SyntaxCheckWindow(wx.Panel):
     def __init__(self, parent):
         """Initialize the window"""
         wx.Panel.__init__(self, parent)
-        ed_msg.Subscribe(self.OnFileSaved, ed_msg.EDMSG_FILE_SAVED)
+
+        # Attributes
+        self._mw = parent
         self._log = wx.GetApp().GetLog()
-        vbox = wx.BoxSizer(wx.VERTICAL)
         self._listCtrl = CheckResultsList(
             self, style=wx.LC_REPORT | wx.BORDER_NONE | wx.LC_SORT_ASCENDING
         )
+
+        vbox = wx.BoxSizer(wx.VERTICAL)
         vbox.Add(self._listCtrl, 1, wx.EXPAND|wx.ALL)
         self.SetSizer(vbox)
         self.SetAutoLayout(True)
 
+        ed_msg.Subscribe(self.OnFileSaved, ed_msg.EDMSG_FILE_SAVED)
+
     def __del__(self):
         ed_msg.Unsubscribe(self.OnFileSaved, ed_msg.EDMSG_FILE_SAVED)
 
+    @ed_msg.mwcontext
     def OnFileSaved(self, arg):
         """File Saved message"""
         (fileName, fileType) = arg.GetData()
