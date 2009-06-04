@@ -41,22 +41,10 @@ import types
 import fnmatch
 import subprocess
 import sys
-try: import wx
-except: pass
-
-try: sorted
+try:
+    import wx
 except:
-    def sorted(arr):
-        arr = list(arr)
-        arr.sort()
-        return arr
-
-try: reversed
-except:
-    def reversed(arr):
-        arr = list(arr)
-        arr.reverse()
-        return arr
+    pass
 
 #-----------------------------------------------------------------------------#
 
@@ -326,7 +314,7 @@ class SourceControl(object):
                 err = p.stderr.readline()
                 if err:
                     if hooked:
-                        hooked(error)
+                        hooked(err)
 
                     write(u'[projects][err] ' + err)
                     if flush:

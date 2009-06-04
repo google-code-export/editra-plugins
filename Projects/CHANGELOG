@@ -6,6 +6,16 @@ License: wxWindows
 Changelog:
 
 #-----------------------------------------------------------------------------#
+Version 1.4
+Released: 0x/xx/2009
+
+New:
+
+Bug Fixes:
++Fix number of small typos (patch from kevinsmithc)
++Fix error in doing diff when retrieval of file fails
+
+#-----------------------------------------------------------------------------#
 Version 1.3
 Released: 05/25/2009
 
