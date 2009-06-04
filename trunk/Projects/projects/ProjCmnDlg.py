@@ -39,7 +39,7 @@ def RetrievalErrorDlg(parent):
     @return: ID_OK
 
     """
-    dlg = wx.MessageDialog(self,
+    dlg = wx.MessageDialog(parent,
                             _('The requested file could not be retrieved from '
                               'the source control system.'),
                             _('Could not retrieve file'),
@@ -53,8 +53,8 @@ def RetrievalErrorDlg(parent):
 class CommitDialog(wx.Dialog):
     """Dialog for entering commit messages"""
     MAX_MESSAGE = 20
-    RECENT_MESSAGES = [u'',]
-    _TEASER_LIST = [u'',]
+    RECENT_MESSAGES = [u'', ]
+    _TEASER_LIST = [u'', ]
 
     def __init__(self, parent, title=u'', caption=u'', default=list()):
         """Create the Commit Dialog
@@ -287,6 +287,7 @@ class _UpdateDialogPanel(wx.Panel):
 
     @property
     def OutputBuffer(self):
+        """Windows OutputBuffer"""
         return self._output
 
 #-----------------------------------------------------------------------------#

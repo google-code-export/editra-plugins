@@ -174,7 +174,7 @@ class SourceController(object):
             t._Thread__stop()
             return False
 
-        if callback is not None and len(results):
+        if callback is not None and len(result):
             callback(result[0])
 
         return True
@@ -202,6 +202,7 @@ class SourceController(object):
         to be compared to the appropriate diff program.
 
         @return: tuple (None, err_code)
+        @todo: cleanup and simplify this method
 
         """
         # Only do files
@@ -222,7 +223,7 @@ class SourceController(object):
         if rev1 or date1:
             content1 = sc['instance'].fetch([path], rev=rev1, date=date1)
             if content1 and content1[0] is None:
-                return None, SC_ERROR_RETRIEVAL_FAIL
+                return (None, SC_ERROR_RETRIEVAL_FAIL)
             else:
                 content1 = content1[0]
                 if rev1:
@@ -234,7 +235,7 @@ class SourceController(object):
         if rev2 or date2:
             content2 = sc['instance'].fetch([path], rev=rev2, date=date2)
             if content2 and content2[0] is None:
-                return None, SC_ERROR_RETRIEVAL_FAIL
+                return (None, SC_ERROR_RETRIEVAL_FAIL)
             else:
                 content2 = content2[0]
                 if rev2:
@@ -245,7 +246,7 @@ class SourceController(object):
         if not (rev1 or date1 or rev2 or date2):
             content1 = sc['instance'].fetch([path])
             if content1 and content1[0] is None:
-                return None, SC_ERROR_RETRIEVAL_FAIL
+                return (None, SC_ERROR_RETRIEVAL_FAIL)
             else:
                 content1 = content1[0]
                 ext1 = 'previous'
@@ -279,6 +280,10 @@ class SourceController(object):
             tfile2 = open(path2, 'w')
             tfile2.write(content2)
             tfile2.close()
+
+        # If both content retrieval failed exit with error
+        if None in (path2, path1):
+            return (None, SC_ERROR_RETRIEVAL_FAIL)
 
         # Run comparison program
         if self.config.getBuiltinDiff() or not self.config.getDiffProgram():
