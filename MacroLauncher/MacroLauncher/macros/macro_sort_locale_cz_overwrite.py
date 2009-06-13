@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
 
-name = 'sort-example'
-type = 'example'
-desc = 'Sort lines by Czech locale'
+__name__ = 'sort-example'
+__type__ = 'example'
+__desc__ = 'Sort lines by Czech locale'
 
 import locale
 

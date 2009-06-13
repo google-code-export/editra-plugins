@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
 
-name = u'\u017elut\xfd \u010dern\xfd k\u016f\u0148'
-type = u'example'
-desc = u'Example of macro that contains accented chars and writes utf-8'
+__name__ = u'\u017elut\xfd \u010dern\xfd k\u016f\u0148'
+__type__ = u'example'
+__desc__ = u'Example of macro that contains accented chars and writes utf-8'
 
 def run(txtctrl=None, nbook=None, log=None,**kwargs):
   global name

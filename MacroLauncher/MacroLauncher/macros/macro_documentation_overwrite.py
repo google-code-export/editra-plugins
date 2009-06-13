@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
 
-name = u'documentation#'
-type = u'help'
-desc = u'Gives you help on how to use the Macro Launcher'
+__name__ = u'documentation#'
+__type__ = u'help'
+__desc__ = u'Gives you help on how to use the Macro Launcher'
 
 
 def run(txtctrl=None, nbook=None, log=None,**kwargs):

@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
 
-name = u'thread2'
-type = u'example'
-desc = u'Slower thread that prints into log - select both and right-click to run'
+__name__ = u'thread2'
+__type__ = u'example'
+__desc__ = u'Slower thread that prints into log - select both and right-click to run'
 
 import time
 

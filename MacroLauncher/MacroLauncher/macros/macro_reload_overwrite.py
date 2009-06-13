@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
 
-name = 'reload#'
-type = 'plugin'
-desc = 'reloads all plugins that have the doreload() method'
+__name__ = 'reload#'
+__type__ = 'plugin'
+__desc__ = 'reloads all plugins that have the doreload() method'
 
 import wx
 import os
