@@ -1,4 +1,4 @@
-MacroLauncher plugin gives you a nice GUI for control of your Python scripts.
+#summary Write and execute Python scripts from inside Editra.
 
 = Introduction =
 
