@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
 
-name = 'progressbar'
-type = 'example'
-desc = 'Shows a progressbar'
+__name__ = 'progressbar'
+__type__ = 'example'
+__desc__ = 'Shows a progressbar'
 
 import  wx
 
