@@ -76,6 +76,7 @@ ID_EDIT = wx.NewId()
 ID_DELETE = wx.NewId()
 ID_RELOAD = wx.NewId()
 ID_VIEW = wx.NewId()
+ID_RENAME = wx.NewId()
 
 # Event for notifying that a macro task was interrupted (error)
 edEVT_TASK_ERROR = wx.NewEventType()
@@ -226,9 +227,9 @@ class MacroLauncherPane(ctrlbox.ControlBox):
     def template(self):
         template = r'''# -*- coding: utf-8 -*-
 
-name = u'%(name)s'
-type = u'%(type)s'
-desc = u'%(desc)s'
+__name__ = u'%(__name__)s'
+__type__ = u'%(__type__)s'
+__desc__ = u'%(__desc__)s'
 
 """
 Example:
@@ -307,7 +308,7 @@ def run(txtctrl=None, log=None, **kwargs):
         for key, macro in self._macros.items():
             try:
                 module = macro['module']
-                if module.name == name:
+                if module.__name__ == name:
                     ret.append( (key, module) )
             except:
                 pass
@@ -328,7 +329,7 @@ def run(txtctrl=None, log=None, **kwargs):
         for key, macro in self._macros.items():
             try:
                 module = macro['module']
-                if match_function(type, module.type):
+                if match_function(type, module.__type__):
                     ret.append( (key, module) )
             except:
                 pass
@@ -353,7 +354,7 @@ def run(txtctrl=None, log=None, **kwargs):
         """ Initializes module into a separate object (not included in sys) """
         x = imp.new_module(name)
         x.__file__ = fname
-        x.__name__ = name
+        x.__id__ = name
         x.__builtins__ = __builtins__
 
         old_cwd = os.getcwd()
@@ -363,16 +364,16 @@ def run(txtctrl=None, log=None, **kwargs):
             os.chdir(filedir)
             execfile(filename, x.__dict__)
 
-            for a in ['name', 'desc', 'type']:
+            for a in ['__name__', '__desc__', '__type__']:
                 if not hasattr(x, a):
                     setattr(x, a, '')
-            x.successful_load = True
+            x.__successful_load__ = True
         except Exception, excp:
             self._log('[error] ' + str(excp.message))
             self._log(traceback.format_exc())
-            x.desc = str(excp.message)
-            x.type = 'error'
-            x.successful_load = False
+            x.__desc__ = str(excp.message)
+            x.__type__ = 'error'
+            x.__successful_load__ = False
         finally:
             os.chdir(old_cwd)
 
@@ -443,7 +444,7 @@ def run(txtctrl=None, log=None, **kwargs):
         self._macros[file] = {'mtime': mtime,
                               'module': module,
                               'fullpath':fullpath}
-        return bool(module.successful_load)
+        return bool(module.__successful_load__)
 
     def ReloadMacroIfChanged(self, macro_name=u''):
         """Checks if the macro is registered, is modified
@@ -498,7 +499,7 @@ def run(txtctrl=None, log=None, **kwargs):
             m = value['module']
             macro = []
             macrodata[key] = macro
-            for k in ['name', 'type', 'desc']:
+            for k in ['__name__', '__type__', '__desc__']:
                 if hasattr(m, k):
                     macro.append(getattr(m, k))
                 else:
@@ -636,10 +637,15 @@ def run(txtctrl=None, log=None, **kwargs):
         template = self.template()
 
         type = self._taskFilter.GetStringSelection()
-        fname = os.path.join(self.macropath,
+        
+        try:
+            fname = ebmlib.GetUniqueName(self.macropath, 'macro.py')
+        except:
+            fname = os.path.join(self.macropath,
                              'macro_%i_%i.py' % (int(time.time()), random.randrange(65536)))
-
-        template = template % {'name':'', 'type':type, 'desc':''}
+        
+        
+        template = template % {'__name__':'', '__type__':type, '__desc__':''}
 
         try:
             f = open(fname, 'w')
@@ -739,10 +745,6 @@ def run(txtctrl=None, log=None, **kwargs):
                 else:
                     nbook = self.GetMainWindow().GetNotebook()
 
-                # TODO:CJP what are you trying to do here? I am sure there is
-                # Cycle through the opened pages and see if the macro is there
-                # If yes, I would like to set its modify status to False so that
-                # Editra is not warning user, Perhaps I better save&close it?
                 ctrls = nbook.GetTextControls()
                 for ctrl in ctrls:
                     if source == ctrl.GetFileName():
@@ -760,6 +762,68 @@ def run(txtctrl=None, log=None, **kwargs):
         filter_value = self._taskFilter.GetStringSelection()
         self.UpdateList(filter = filter_value)
 
+    def OnRenameMacro(self):
+        """ Rename the selected macro from the filesystem. Asks for confirmation """
+        macros = self._listctrl.GetSelectedMacros()
+        if not len(macros):
+            return
+        for macro in macros:
+            if '#' in macro['Name']:
+                dlg = wx.MessageDialog(self,
+                        _("Sorry, the macro '%s' is protected" % macro['Name']),
+                        _("Sorry"),
+                        wx.OK|wx.ICON_WARNING)
+                dlg.ShowModal()
+                dlg.Destroy()
+                continue
+
+            source = os.path.normpath(os.path.join(self.macropath, macro['File']))
+            base, file = os.path.split(source)
+            new_filename = ''
+            
+            dlg = wx.TextEntryDialog(
+                self, _('Rename %s to:') % file,
+                _('Rename macro'), file)
+
+            if dlg.ShowModal() == wx.ID_OK:
+                new_filename = dlg.GetValue()
+                if file == new_filename: # no change
+                    dlg.Destroy()
+                    continue
+                dlg.Destroy()
+            else:
+                dlg.Destroy()
+                continue
+            
+
+            try:
+                win = wx.GetApp().GetActiveWindow()
+                if win:
+                    nbook = win.GetNotebook()
+                else:
+                    nbook = self.GetMainWindow().GetNotebook()
+
+                ctrls = nbook.GetTextControls()
+                for ctrl in ctrls:
+                    if source == ctrl.GetFileName():
+                        index = nbook.GetPageIndex(ctrl)
+                        if ctrl.GetModify():
+                            ctrl.SetSavePoint()
+                        self._log("[info] closing macro before rename operation")
+                        nbook.SetSelection(index)
+                        nbook.ClosePage()
+
+                target = os.path.normpath(os.path.join(base, new_filename))
+                os.rename(source, target)
+                del self._macros[macro['File']]
+                self._register_macro(target)
+            except Exception, excp:
+                self._log("[error] %s" % excp)
+
+        filter_value = self._taskFilter.GetStringSelection()
+        self.UpdateList(filter = filter_value)
+        
+        
     def OnStopMacro(self, macro_id):
         """Stops the running macro"""
         for thread in self.GetAllThreadsByMacro(macro_id):
@@ -1121,6 +1185,7 @@ class CustomListCtrl(wx.ListCtrl,
             self.Bind(wx.EVT_MENU, lambda evt: parent.OnEditMacro(), id=ID_EDIT)
             self.Bind(wx.EVT_MENU, lambda evt: parent.OnRunMacro(), id=ID_RUN)
             self.Bind(wx.EVT_MENU, lambda evt: parent.OnDelMacro(), id=ID_DELETE)
+            self.Bind(wx.EVT_MENU, lambda evt: parent.OnRenameMacro(), id=ID_RENAME)
             self.Bind(wx.EVT_MENU, self.OnForceReloadMacro, id=ID_RELOAD)
             self.Bind(wx.EVT_MENU, self.OnStopMacro, id=ID_STOP)
             self.Bind(wx.EVT_MENU, lambda evt: parent.OnViewMacro(), id=ID_VIEW)
@@ -1139,6 +1204,7 @@ class CustomListCtrl(wx.ListCtrl,
         item = menu.Append(ID_DELETE, _("Delete"))
         SetMenuBitmap(item, ed_glob.ID_DELETE)
         menu.AppendSeparator()
+        menu.Append(ID_RENAME, _("Rename"))
         menu.Append(ID_RELOAD, _("Force reload"))
         menu.Append(ID_VIEW, _("Quick View"))
         self._menu = menu
