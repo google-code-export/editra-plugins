@@ -63,13 +63,17 @@ Because Eclipse cannot check-out multiple resources into one project, here is wh
 Thus I have this inside my workspace:
 {{{
 c:/dev/workspace/
-   Editra/  #Editra project
+   Editra/  # Eclipse project
    Editra-plugins/ # folder
-      plugins/ # Plugins Eclipse project
+      plugins/ # Eclipse project
 }}}
 
-If you have this, you can debug/develop inside Eclipse starting Editra. Open Run/Debug dialog and in the "arguments" tab set this:
+If you have this, you can debug/develop inside Eclipse starting Editra. Open Run/Debug dialog:
 
-{{{ --confdir c:/dev/workspace/editra-plugins }}}
+ * On the Main tab 
+   * set project "Editra"
+   * Main Module is: ${workspace_loc:Editra/Editra.pyw}
+ * On the "arguments" tab
+   * insert into Program Arguments: {{{ --confdir c:/dev/workspace/editra-plugins }}}
 
 This will tell Editra to use c:/dev/workspace/editra-plugins as a homedir. Editra will  load plugins' eggs from the plugins directory automatically. (Note, that some folders with configuration data are created in the folder as well)
