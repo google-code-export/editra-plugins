@@ -49,3 +49,27 @@ In order to make this more efficient when developing a plugin you can build it i
 This command will create a folder in Editra/plugins that is a link to your source code in Editra/plugins/myplugin, removing the need to rebuild the egg in between each test run.
 
 2) More info coming soon...
+
+= How to develop a plugin with Eclipse =
+
+Because Eclipse cannot check-out multiple resources into one project, here is what I do to set my environment:
+
+*1)* Checkout Editra from svn using Eclipse SVN tools - create a new project called "Editra"
+
+*2)* Create a new folder called Editra-plugins inside your workspace
+
+*3)* Checkout EditraPlugins from svn. You will create a new project. Set it to live inside "Editra-plugins/plugins" (in the folder you created above)
+
+Thus I have this inside my workspace:
+{{{
+c:/dev/workspace/
+   Editra/  #Editra project
+   Editra-plugins/ # folder
+      plugins/ # Plugins Eclipse project
+}}}
+
+If you have this, you can debug/develop inside Eclipse starting Editra. Open Run/Debug dialog and in the "arguments" tab set this:
+
+{{{ --confdir c:/dev/workspace/editra-plugins }}}
+
+This will tell Editra to use c:/dev/workspace/editra-plugins as a homedir. Editra will  load plugins' eggs from the plugins directory automatically. (Note, that some folders with configuration data are created in the folder as well)
