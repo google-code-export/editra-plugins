@@ -465,7 +465,7 @@ def run(txtctrl=None, log=None, **kwargs):
         if macro_name in self._macros:
             self._register_macro(self._macros[macro_name]['fullpath'])
 
-    def UpdateMacroBrowserByOne(self, fullpath, show_everything = False):
+    def UpdateMacroBrowserByOne(self, fullpath, show_everything=False):
         """Updates the macro list adding one entry, but only if the macro
         is already registered and the mtime has changed
         @param fullpath: path to the file (possible macro)
@@ -637,14 +637,14 @@ def run(txtctrl=None, log=None, **kwargs):
         template = self.template()
 
         type = self._taskFilter.GetStringSelection()
-        
+
         try:
             fname = ebmlib.GetUniqueName(self.macropath, 'macro.py')
         except:
             fname = os.path.join(self.macropath,
                              'macro_%i_%i.py' % (int(time.time()), random.randrange(65536)))
-        
-        
+
+
         template = template % {'__name__':'', '__type__':type, '__desc__':''}
 
         try:
@@ -663,12 +663,13 @@ def run(txtctrl=None, log=None, **kwargs):
         macros = self._listctrl.GetSelectedMacros()
         if not len(macros):
             return
+
         for macro in macros:
             contents = self.GetMacroContents(macro['File'])
-            
-            dlg = QuickViewDialog(self, -1, _("Quick view: %s") % macro['File'], size=(650, 350),
-                   style=wx.DEFAULT_DIALOG_STYLE | wx.CLOSE_BOX | wx.THICK_FRAME,
-                   contents = contents )
+
+            dlg = QuickViewDialog(self, wx.ID_ANY,
+                                  _("Quick view: %s") % macro['File'],
+                                  contents=contents)
             dlg.ShowModal()
             dlg.Destroy()
 
@@ -682,13 +683,14 @@ def run(txtctrl=None, log=None, **kwargs):
         for macro in macros:
             if '#' in macro['Name']:
                 contents = self.GetMacroContents(macro['File'])
-                dlg = QuickViewDialog(self, -1, _("The macro is protected, you can view it only: %s") % macro['File'], size=(650, 350),
-                   style=wx.DEFAULT_DIALOG_STYLE | wx.CLOSE_BOX | wx.THICK_FRAME,
-                   contents = contents )
-                
+                dlg = QuickViewDialog(self, wx.ID_ANY,
+                                      _("The macro is protected, you can view it only: %s") % macro['File'],
+                                      contents=contents)
+
                 dlg.ShowModal()
                 dlg.Destroy()
                 continue
+
             source = os.path.normpath(os.path.join(self.macropath, macro['File']))
 
             try:
@@ -767,6 +769,7 @@ def run(txtctrl=None, log=None, **kwargs):
         macros = self._listctrl.GetSelectedMacros()
         if not len(macros):
             return
+
         for macro in macros:
             if '#' in macro['Name']:
                 dlg = wx.MessageDialog(self,
@@ -780,21 +783,21 @@ def run(txtctrl=None, log=None, **kwargs):
             source = os.path.normpath(os.path.join(self.macropath, macro['File']))
             base, file = os.path.split(source)
             new_filename = ''
-            
-            dlg = wx.TextEntryDialog(
-                self, _('Rename %s to:') % file,
-                _('Rename macro'), file)
+
+            dlg = wx.TextEntryDialog(self,
+                                     _("Rename %s to:") % file,
+                                     _("Rename macro"), file)
 
             if dlg.ShowModal() == wx.ID_OK:
                 new_filename = dlg.GetValue()
                 if file == new_filename: # no change
                     dlg.Destroy()
                     continue
+
                 dlg.Destroy()
             else:
                 dlg.Destroy()
                 continue
-            
 
             try:
                 win = wx.GetApp().GetActiveWindow()
@@ -822,8 +825,7 @@ def run(txtctrl=None, log=None, **kwargs):
 
         filter_value = self._taskFilter.GetStringSelection()
         self.UpdateList(filter = filter_value)
-        
-        
+
     def OnStopMacro(self, macro_id):
         """Stops the running macro"""
         for thread in self.GetAllThreadsByMacro(macro_id):
@@ -1109,7 +1111,7 @@ class CustomListCtrl(wx.ListCtrl,
         wx.ListCtrl.__init__(self, parent, id_, pos, size, style)
 
         self.__log = wx.GetApp().GetLog()
-        
+
         #---- Images used by the list ----#
         self._menu = None
         self._img_list = None
@@ -1167,14 +1169,14 @@ class CustomListCtrl(wx.ListCtrl,
     def __del__(self):
         ed_msg.Unsubscribe(self._SetupImages)
         super(CustomListCtrl, self).__del__()
-        
+
     def _log(self, msg):
         """Writes a log message to the app log
         @param msg: message to write to the log
 
         """
         self.__log('[mlauncher] ' + str(msg))
-        
+
     def _MakeMenu(self):
         """Make the context menu"""
         if self._menu is not None:
@@ -1565,42 +1567,39 @@ class ProgressBarUpdater(object):
 
 class QuickViewDialog(wx.Dialog):
     def __init__(
-            self, parent, ID, title, size=wx.DefaultSize, pos=wx.DefaultPosition, 
-            style=wx.DEFAULT_DIALOG_STYLE,
-            useMetal=False,
+            self, parent, ID, title,
+            size=wx.DefaultSize,
+            pos=wx.DefaultPosition,
+            style=wx.DEFAULT_DIALOG_STYLE|wx.CLOSE_BOX|wx.THICK_FRAME,
             contents=''
             ):
         """
         Dialog for QuickView instead of src.lib.ScrolledMessage which is not available
-        in the binary Editra version
-        """
+        in the binary Editra version.
 
+        """
         wx.Dialog.__init__(self, parent, ID, title, pos, size, style)
 
         # layout
         mainSizer = wx.BoxSizer(wx.VERTICAL)
         btnsizer = wx.StdDialogButtonSizer()
-        txtsizer = wx.BoxSizer(wx.VERTICAL)
-        
-        txt = ed_basestc.EditraBaseStc(self, -1, pos, size, style)
+
+        txt = ed_basestc.EditraBaseStc(self, -1)
         txt.SetText(contents)
         txt.SetReadOnly(True)
         txt.SetLexer(wx.stc.STC_LEX_PYTHON)
         #txt.UpdateAllStyles()
         txt.FindLexer(set_ext=u'py')
-        txtsizer.Add(txt, 1, wx.GROW|wx.ALIGN_CENTER_VERTICAL|wx.ALL, 1)
-        
-        
-        mainSizer.Add(txtsizer, 1, wx.GROW|wx.ALIGN_CENTER_VERTICAL|wx.ALL, 5)
-        mainSizer.Add(btnsizer, 0, wx.ALIGN_CENTER_VERTICAL | wx.ALIGN_RIGHT |wx.ALL, 5)
-        
-        
+
+        mainSizer.Add(txt, 1, wx.EXPAND|wx.ALL, 5)
+        mainSizer.Add(btnsizer, 0, wx.ALIGN_CENTER_VERTICAL|wx.ALIGN_RIGHT|wx.ALL, 5)
+
         btn = wx.Button(self, wx.ID_OK)
         btn.SetDefault()
         btnsizer.AddButton(btn)
         btnsizer.Realize()
 
         self.SetSizer(mainSizer)
-        mainSizer.Fit(self)
+        self.SetInitialSize((650, 350))
 
         self.CenterOnScreen()
