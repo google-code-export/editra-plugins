@@ -870,39 +870,40 @@ def run(txtctrl=None, log=None, **kwargs):
             if hasattr(module, 'run'):
                 dlg = None
                 try:
-                    #this is useless if the run_blocking is not in separate thread
-                    #and besides it is crashing threads
-                    """
-                    dlg = wx.ProgressDialog(u"%s" % macro['File'],
-                               "Please wait...",
-                               maximum = 500,
-                               parent=self.GetMainWindow(),
-                               )
+                    try:
+                        #this is useless if the run_blocking is not in separate thread
+                        #and besides it is crashing threads
+                        """
+                        dlg = wx.ProgressDialog(u"%s" % macro['File'],
+                                   "Please wait...",
+                                   maximum = 500,
+                                   parent=self.GetMainWindow(),
+                                   )
 
-                    dlg.AppendUpdate = lambda s: dlg.Pulse()
-                    updater = ProgressBarUpdater(self.GetMainWindow(), dlg)
-                    controller = TaskThread(dlg, updater.run, timeout=0.1)
-                    controller.start()
-                    dlg.Show()
-                    """
+                        dlg.AppendUpdate = lambda s: dlg.Pulse()
+                        updater = ProgressBarUpdater(self.GetMainWindow(), dlg)
+                        controller = TaskThread(dlg, updater.run, timeout=0.1)
+                        controller.start()
+                        dlg.Show()
+                        """
 
-                    self.RegisterThread(module, macro['File'])
-                    self.TaskCounter(1)
-                    self.SetStatusMsg(msg = 'Macro %s is running' % macro['File'])
+                        self.RegisterThread(module, macro['File'])
+                        self.TaskCounter(1)
+                        self.SetStatusMsg(msg=_("Macro %s is running") % macro['File'])
 
-                    busy = wx.BusyInfo(_("Wait please..."))
-                    module.run(**kwargs)
-                    del busy
+                        busy = wx.BusyInfo(_("Wait please..."))
+                        module.run(**kwargs)
+                        del busy
 
-                    self.TaskCounter(-1, 1, 0)
-                    self.SetStatusMsg(msg = 'Macro %s finished' % macro['File'])
-                    #controller.Cancel()
-                    #dlg.Destroy()
-                except Exception, msg:
-                    self._log("[err] %s" % str(msg))
-                    self._log(traceback.format_exc())
-                    self.TaskCounter(-1, 0, 1)
-                    self.SetStatusMsg(msg = 'Macro %s crashed' % macro['File'])
+                        self.TaskCounter(-1, 1, 0)
+                        self.SetStatusMsg(msg=_("Macro %s finished") % macro['File'])
+                        #controller.Cancel()
+                        #dlg.Destroy()
+                    except Exception, msg:
+                        self._log("[err] %s" % str(msg))
+                        self._log(traceback.format_exc())
+                        self.TaskCounter(-1, 0, 1)
+                        self.SetStatusMsg(msg=_("Macro %s crashed") % macro['File'])
                 finally:
                     self.UnRegisterThread(module)
 
