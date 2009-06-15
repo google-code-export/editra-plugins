@@ -359,21 +359,22 @@ def run(txtctrl=None, log=None, **kwargs):
 
         old_cwd = os.getcwd()
         try:
-            #execfile(fname, x.__dict__) #problems if filepath contains accents
-            filedir, filename = os.path.split(fname)
-            os.chdir(filedir)
-            execfile(filename, x.__dict__)
+            try:
+                #execfile(fname, x.__dict__) #problems if filepath contains accents
+                filedir, filename = os.path.split(fname)
+                os.chdir(filedir)
+                execfile(filename, x.__dict__)
 
-            for a in ['__name__', '__desc__', '__type__']:
-                if not hasattr(x, a):
-                    setattr(x, a, '')
-            x.__successful_load__ = True
-        except Exception, excp:
-            self._log('[error] ' + str(excp.message))
-            self._log(traceback.format_exc())
-            x.__desc__ = str(excp.message)
-            x.__type__ = 'error'
-            x.__successful_load__ = False
+                for a in ['__name__', '__desc__', '__type__']:
+                    if not hasattr(x, a):
+                        setattr(x, a, '')
+                x.__successful_load__ = True
+            except Exception, excp:
+                self._log('[error] ' + str(excp.message))
+                self._log(traceback.format_exc())
+                x.__desc__ = str(excp.message)
+                x.__type__ = 'error'
+                x.__successful_load__ = False
         finally:
             os.chdir(old_cwd)
 
