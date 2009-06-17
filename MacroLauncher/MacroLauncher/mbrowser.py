@@ -1536,7 +1536,7 @@ class MacroTaskThread(outbuff.TaskThread):
             else:
                 self._parent.Consume(self, m_iterator)
         except Exception, msg:
-            evt = outbuff.OutputBufferEvent(outbuff.edEVT_TASK_ERROR, self._parent.GetId())
+            evt = outbuff.OutputBufferEvent(edEVT_TASK_ERROR, self._parent.GetId())
             #evt.SetClientObject(self)
             evt.SetClientData((self, msg))
             wx.PostEvent(self._parent, evt)
