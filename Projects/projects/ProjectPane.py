@@ -1676,15 +1676,21 @@ class ProjectTree(wx.Panel):
 
         nbook = self.GetParent().GetOwnerWindow().GetNotebook()
 
+        tbuff = None
         for item in files:
             if nbook.HasFileOpen(item):
                 for page in xrange(nbook.GetPageCount()):
                     ctrl = nbook.GetPage(page)
                     if item == ctrl.GetFileName():
                         nbook.ChangePage(page)
+                        tbuff = nbook.GetCurrentCtrl()
                         break
             else:
                 nbook.OnDrop([item])
+                tbuff = nbook.GetCurrentCtrl()
+
+        if tbuff is not None:
+            wx.CallAfter(tbuff.SetFocus)
 
 #-----------------------------------------------------------------------------#
 
