@@ -932,10 +932,10 @@ def run(txtctrl=None, log=None, **kwargs):
 
     def _OnTaskError(self, evt):
         """ Called after the thread finished (with error) """
-        thread, exception_msg = evt.GetClientData()
+        thread, exception_msg, tracbk = evt.GetClientData()
         macro_id = self.GetMacroIdByThread(thread)
 
-        self._log("[err] %s" % traceback.format_exc())
+        self._log("[err] %s" % tracbk)
         self._log("[err] %s" % str(exception_msg))
 
         self.UnRegisterThread(thread)
@@ -1538,7 +1538,7 @@ class MacroTaskThread(outbuff.TaskThread):
         except Exception, msg:
             evt = outbuff.OutputBufferEvent(edEVT_TASK_ERROR, self._parent.GetId())
             #evt.SetClientObject(self)
-            evt.SetClientData((self, msg))
+            evt.SetClientData((self, msg, traceback.format_exc()))
             wx.PostEvent(self._parent, evt)
         else:
             # Notify that the task is finished
