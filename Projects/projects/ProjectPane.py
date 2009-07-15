@@ -308,6 +308,7 @@ class ProjectTree(wx.Panel):
             color = wx.SystemSettings_GetColour(wx.SYS_COLOUR_3DLIGHT)
 
         ODD_PROJECT_COLOR = EVEN_PROJECT_COLOR = color
+        sizer = wx.BoxSizer(wx.VERTICAL)
         self.tree = MyTreeCtrl(self, tID, wx.DefaultPosition, wx.DefaultSize,
                                wx.TR_DEFAULT_STYLE
                                | wx.TR_EDIT_LABELS
@@ -315,6 +316,8 @@ class ProjectTree(wx.Panel):
                                | wx.TR_HIDE_ROOT
                                | wx.TR_FULL_ROW_HIGHLIGHT
                                , self.log)
+        sizer.Add(self.tree, 1, wx.EXPAND)
+        self.SetSizer(sizer)
 
         # Load icons for use later
         self.icons = {}
@@ -345,7 +348,6 @@ class ProjectTree(wx.Panel):
                                 wx.TreeItemIcon_Expanded)
 
         # Bind events
-        self.Bind(wx.EVT_SIZE, self.OnSize)
         self.Bind(wx.EVT_TREE_ITEM_EXPANDING, self.OnItemExpanding, self.tree)
         self.Bind(wx.EVT_TREE_ITEM_COLLAPSED, self.OnItemCollapsed, self.tree)
         #self.Bind(wx.EVT_TREE_BEGIN_LABEL_EDIT, self.OnBeginEdit, self.tree)
@@ -816,12 +818,6 @@ class ProjectTree(wx.Panel):
                 data['path'] = newpath
             except OSError:
                 pass
-
-    def OnSize(self, event):
-        """Reset Tree dimensions"""
-        UnusedArg(event)
-        width, height = self.GetClientSizeTuple()
-        self.tree.SetDimensions(0, 0, width, height)
 
     def OnItemExpanding(self, event):
         """When an item is expanded, track the contents of that directory"""
