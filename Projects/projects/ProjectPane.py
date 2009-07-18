@@ -1491,13 +1491,14 @@ class ProjectTree(wx.Panel):
 
     def onPopupFind(self, event):
         """Handle search in directory popup menu"""
+        self.log("[projects][evt] onPopupFind called")
         paths = self.getSelectedPaths()
         if len(paths):
             path = paths[0] # the first directory
             if not os.path.isdir(path):
                 path = os.path.dirname(path)
             mdata = dict(mainw=self._mainw, lookin=path)
-            ed_msg.PostMessage(ed_msg.EDMSG_FIND_SHOW_DLG, mdata) 
+            ed_msg.PostMessage(ed_msg.EDMSG_FIND_SHOW_DLG, mdata)
 
     def onPopupExecuteCommand(self):
         """ Execute commands on file system tree """
@@ -1716,7 +1717,7 @@ class ProjectPane(eclib.ControlBox):
 
         self.timer = wx.Timer(self)
         self.isBusy = 0
-        self.projects = ProjectTree(self, None)
+        self.projects = ProjectTree(self, wx.GetApp().GetLog())
         self._ignore = False # Toggle ignoring update notifications on/off
 
         # Layout Panes
