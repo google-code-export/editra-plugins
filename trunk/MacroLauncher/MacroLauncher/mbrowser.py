@@ -818,6 +818,17 @@ def run(txtctrl=None, log=None, **kwargs):
                         nbook.ClosePage()
 
                 target = os.path.normpath(os.path.join(base, new_filename))
+                
+                if os.path.exists(target):
+                    dlg = wx.MessageDialog(self,
+                        _("The file '%s' already exists. Do you want to overwrite it?") % target,
+                        _("Overwrite?"),
+                        wx.YES_NO|wx.ICON_WARNING)
+                    answ = dlg.ShowModal()
+                    dlg.Destroy()
+                    if answ != wx.ID_YES:
+                        return
+                
                 os.rename(source, target)
                 del self._macros[macro['File']]
                 self._register_macro(target)
