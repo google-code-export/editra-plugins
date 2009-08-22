@@ -83,6 +83,7 @@ class GIT(SourceControl.SourceControl):
             for d in dirs:
                 out = self.run(root, ['add', '-n', d])
                 self.logOutput(out)
+
             # Add all files
             if files:
                 out = self.run(root, ['add'] + files)
@@ -125,6 +126,7 @@ class GIT(SourceControl.SourceControl):
         """ Get history of the given paths """
         if history is None:
             history = list()
+
         for path in paths:
             root, files = self.splitFiles(path)
             for fname in files:
@@ -143,6 +145,7 @@ class GIT(SourceControl.SourceControl):
                             current['date'] = self.str2datetime(line.split(' ', 1)[-1].strip())
                         else:
                             current['log'] += DecodeString(line)
+                self.logOutput(out)
 
         # Cleanup log formatting
         for item in history:
@@ -186,12 +189,13 @@ class GIT(SourceControl.SourceControl):
         repo = self.findRoot(root)
         relpath = root.replace(repo, '', 1).lstrip(os.sep)
         unknown = list()
-        if out:
+        if out is not None:
             # Check to see that the directory is actually being managed by git.
             # It is possible that the directory is below a git root but not
             # under git's control (for example a build directory).
             for line in out.stderr:
                 if "did not match any file" in line:
+                    self.logOutput(out)
                     return status
             
             save = []
@@ -222,8 +226,8 @@ class GIT(SourceControl.SourceControl):
                 relname = fname.replace(repo, '', 1).lstrip(os.sep)
                 unknown.append(relname)
 
+        if out is not None:
             self.logOutput(out)
-            self.closeProcess(out)
 
         # Find other untracked files that don't show up in the git-status output
         out = self.run(root, ['ls-files', '--others', '-t'] + files)
@@ -233,6 +237,8 @@ class GIT(SourceControl.SourceControl):
                 if len(line):
                     fname = line.lstrip('?').strip()
                     unknown.append(modpath(fname))
+
+        if out is not None:
             self.logOutput(out)
 
         # Find up to date files
@@ -251,6 +257,7 @@ class GIT(SourceControl.SourceControl):
         unknown = list()
         if out:
             unknown = self.parseOutputForUntrackedFiles(repo, out.stdout)
+            self.closeProcess(out)
         return unknown
     
     def parseOutputForUntrackedFiles(self, repo, output):
