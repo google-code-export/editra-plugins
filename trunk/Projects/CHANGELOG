@@ -15,6 +15,7 @@ Bug Fixes:
 +Focus behavior on windows
 +Fix number of small typos (patch from kevinsmithc)
 +Fix error in doing diff when retrieval of file fails
++Fix some threading issues
 
 #-----------------------------------------------------------------------------#
 Version 1.3
