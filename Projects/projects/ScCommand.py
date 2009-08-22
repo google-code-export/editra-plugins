@@ -144,8 +144,7 @@ class SourceController(object):
         diffwin.CleanupTempFiles()
 
         # Stop any currently running source control threads
-        for t in self.scThreads:
-            t._Thread__stop()
+        self.CleanupThreads(False)
 
     def _TimeoutCommand(self, callback, *args, **kwargs):
         """ Run command, but kill it if it takes longer than `timeout` secs
@@ -168,18 +167,39 @@ class SourceController(object):
         t.start()
 
         # Wait up till timeout for thread to exit
-        self.scThreads[t] = True
+        self.scThreads[t] = False
         t.join(self.scTimeout)
-        del self.scThreads[t]
 
         if t.isAlive():
             # Timed out
             return False
+        else:
+            del self.scThreads[t]
+            del t
 
         if callback is not None and len(result):
             callback(result[0])
 
         return True
+
+    def CleanupThreads(self, deadonly=True):
+        """Cleanup worker threads
+        @keyword deadonly: only cleanup dead threads
+        @return: number of threads that are still alive
+
+        """
+        if not deadonly:
+            for t in self.scThreads.keys():
+                del self.scThreads[t]
+        else:
+            dead = list()
+            for t in self.scThreads:
+                if not t.isAlive():
+                    dead.append(t)
+            for t in dead:
+                del self.scThreads[t]
+
+        return len(self.scThreads)
 
     def CompareRevisions(self, path, rev1=None, date1=None, rev2=None, date2=None):
         """
@@ -198,6 +218,7 @@ class SourceController(object):
                                args=(path, rev1, date1, rev2, date2))
         djob.setDaemon(True)
         djob.start()
+        self.scThreads[djob] = False
 
     def Diff(self, path, rev1, date1, rev2, date2):
         """ Do the actual diff of two files by sending the files
@@ -354,6 +375,7 @@ class SourceController(object):
                                kwargs=options)
         cjob.setDaemon(True)
         cjob.start()
+        self.scThreads[cjob] = False
 
     def RunScCommand(self, nodes, command, callback, **options):
         """Does the running of the command
