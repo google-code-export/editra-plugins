@@ -41,10 +41,7 @@ import types
 import fnmatch
 import subprocess
 import sys
-try:
-    import wx
-except:
-    pass
+import wx
 
 #-----------------------------------------------------------------------------#
 
@@ -76,6 +73,12 @@ class SourceControl(object):
     # Allow external user code to hook the output of a running command
     # Must be a callable that accepts a string as an argument.
     OUTPUT_HOOK = None
+
+    def __init__(self):
+        object.__init__(self)
+
+        # Attribute
+        self._log = wx.GetApp().GetLog()
 
     def getRelativePaths(self, paths):
         """
@@ -283,10 +286,7 @@ class SourceControl(object):
 
     def log(self, s):
         """Log output either to Editra's log or stdout"""
-        try:
-            wx.GetApp().GetLog()('[projects]' + s)
-        except:
-            sys.stdout.write(s)
+        self._log('[projects]' + s)
 
     def logOutput(self, p, close=True):
         """ Read and print stdout/stderr """
@@ -299,15 +299,6 @@ class SourceControl(object):
         if SourceControl.OUTPUT_HOOK is not None:
             hooked = SourceControl.OUTPUT_HOOK
 
-        try: 
-            write = wx.GetApp().GetLog()
-        except:
-            write = sys.stdout.write
-            try:
-                flush = sys.stdout.flush
-            except AttributeError:
-                pass
-
         while write:
             err = out = None
             if p.stderr:
@@ -316,9 +307,7 @@ class SourceControl(object):
                     if hooked:
                         hooked(err)
 
-                    write(u'[projects][err] ' + err)
-                    if flush:
-                        flush()
+                    self._log(u'[projects][err] ' + err)
 
             if p.stdout:
                 out = p.stdout.readline()
@@ -326,9 +315,7 @@ class SourceControl(object):
                     if hooked:
                         hooked(out)
 
-                    write(u'[projects][info] ' + out)
-                    if flush:
-                        flush()
+                    self._log(u'[projects][info] ' + out)
 
                 if not err and not out:
                     return
