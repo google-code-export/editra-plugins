@@ -331,6 +331,7 @@ class ProjectTree(wx.Panel):
         self.srcCtrl = ScCommand.SourceController(self)
 
         # Threads that watch directories corresponding to open folders
+        self._ttimer = wx.Timer(self) # Thread cleanup timer
         self.watchers = {}
 
         # Information for copy/cut/paste of files
@@ -354,6 +355,9 @@ class ProjectTree(wx.Panel):
         self.Bind(wx.EVT_TREE_END_LABEL_EDIT, self.OnEndEdit, self.tree)
         self.Bind(wx.EVT_TREE_ITEM_ACTIVATED, self.OnActivate, self.tree)
         self.Bind(wx.EVT_CONTEXT_MENU, self.OnContextMenu)
+
+        self.Bind(wx.EVT_TIMER, self.OnThreadCleanup)
+
         self.Bind(EVT_SYNC_NODES, self.OnSyncNode)
         self.Bind(ScCommand.EVT_STATUS, self.OnUpdateStatus)
         self.Bind(ScCommand.EVT_CMD_COMPLETE, self.OnScCommandFinish)
@@ -701,6 +705,28 @@ class ProjectTree(wx.Panel):
         UnusedArg(msg)
         self._setupIcons()
         self.tree.Refresh()
+
+    def OnThreadCleanup(self, evt):
+        """Cleanup watcher threads"""
+        anyalive = False
+        to_del = list()
+        for t, needjoin in self.watchers.iteritems():
+            if needjoin:
+                if t.isAlive():
+                    t.join(.1)
+
+                if t.isAlive():
+                    anyalive = True
+                else:
+                    to_del.append(t)
+
+        # Cleanup the map of dead threads
+        for t in to_del:
+            del self.watchers[t]
+
+        # If still alive wait another second and check again
+        if anyalive:
+            self._ttimer.Start(1000, True)
 
     def OnUpdateFont(self, msg):
         """Update the ui font when a message comes saying to do so."""
@@ -1192,9 +1218,9 @@ class ProjectTree(wx.Panel):
         data['watcher'] = WatcherThread(self, path, True, node)
         data['watcher'].start()
         # Store reference to the thread so it can be stopped later
-        # NOTE: the mapping points to None be cause we just need a
-        #       hash to make looking up the thread easier later.
-        self.watchers[data['watcher']] = None
+        # NOTE: Mapping points to false and will be set to True if
+        #       the thread should be joined.
+        self.watchers[data['watcher']] = False
 
     def addPath(self, parent, name):
         """
@@ -1309,8 +1335,9 @@ class ProjectTree(wx.Panel):
         data = self.tree.GetPyData(item)
         if data and 'watcher' in data:
             data['watcher'].flag = False
-            del self.watchers[data['watcher']]
-            del data['watcher']
+            self.watchers[data['watcher']] = True
+            if not self._ttimer.IsRunning():
+                self._ttimer.Start(1000, True)
 
     def OnContextMenu(self, event):
         """ Handle showing context menu to show the commands """

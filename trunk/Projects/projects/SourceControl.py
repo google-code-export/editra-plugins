@@ -224,6 +224,7 @@ class SourceControl(object):
                                     stdin=subprocess.PIPE,
                                     stdout=subprocess.PIPE,
                                     stderr=stderr,
+                                    close_fds=True,
                                     env=environ,
                                     startupinfo=STARTUPINFO)
         except OSError: 
@@ -290,17 +291,17 @@ class SourceControl(object):
 
     def logOutput(self, p, close=True):
         """ Read and print stdout/stderr """
-        if not p:
+        if p is None:
             return
 
-        flush = write = None
         hooked = None
-
         if SourceControl.OUTPUT_HOOK is not None:
             hooked = SourceControl.OUTPUT_HOOK
 
-        while write:
+        while True:
             err = out = None
+
+            # Check for errors
             if p.stderr:
                 err = p.stderr.readline()
                 if err:
@@ -309,6 +310,7 @@ class SourceControl(object):
 
                     self._log(u'[projects][err] ' + err)
 
+            # Check for other output
             if p.stdout:
                 out = p.stdout.readline()
                 if out:
@@ -317,8 +319,8 @@ class SourceControl(object):
 
                     self._log(u'[projects][info] ' + out)
 
-                if not err and not out:
-                    return
+            if not err and not out:
+                break
 
         if close:
             self.closeProcess(p)
@@ -335,6 +337,11 @@ class SourceControl(object):
             pass
         try:
             p.stdin.close()
+        except:
+            pass
+
+        try:
+            p.wait()
         except:
             pass
 

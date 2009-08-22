@@ -166,12 +166,14 @@ class SourceController(object):
         # Start thread
         t = threading.Thread(target=resultWrapper, args=args, kwargs=kwargs)
         t.start()
+
+        # Wait up till timeout for thread to exit
         self.scThreads[t] = True
         t.join(self.scTimeout)
         del self.scThreads[t]
 
         if t.isAlive():
-            t._Thread__stop()
+            # Timed out
             return False
 
         if callback is not None and len(result):
@@ -409,7 +411,7 @@ class SourceController(object):
         try:
             # Find correct method
             method = getattr(sc['instance'], command, None)
-            if method:
+            if method is not None:
                 # Run command (only if it isn't the status command)
                 if command != 'status':
                     if 'outhook' in options:
@@ -449,6 +451,7 @@ class SourceController(object):
                                         recursive=recursive,
                                         status=status)
         except Exception, msg:
+            # TODO: needs logging
             print "ERROR:", msg
 
         evt = SourceControlEvent(ppEVT_STATUS, self._pid,
