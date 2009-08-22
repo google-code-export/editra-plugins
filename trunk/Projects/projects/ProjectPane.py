@@ -724,8 +724,11 @@ class ProjectTree(wx.Panel):
         for t in to_del:
             del self.watchers[t]
 
+        # Cleanup SourceController threads
+        scthreads = self.srcCtrl.CleanupThreads()
+
         # If still alive wait another second and check again
-        if anyalive:
+        if anyalive or bool(scthreads):
             self._ttimer.Start(1000, True)
 
     def OnUpdateFont(self, msg):
