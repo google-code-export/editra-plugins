@@ -10,7 +10,7 @@
 
 """ Adds a sidepanel that incorporates file management and source control """
 
-__author__ = "Kevin D. Smith <Kevin.Smith@sixquickrun.com>"
+__author__ = "Kevin D. Smith, Cody Precord"
 __revision__ = "$Revision$"
 __scid__ = "$Id$"
 
