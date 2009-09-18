@@ -121,30 +121,36 @@ class CodeTemplaterConfig(plugin.PluginConfigObject):
         @return string
  
         """
-        return _('Code Templater Configuration')
+        return _("CodeTemplater")
 
 ID_POPUP_SHORTCUT = wx.NewId()
 
 class CodeTemplaterConfigPanel(wx.Panel):
     def __init__(self,parent, *args, **kwargs):
         wx.Panel.__init__(self,parent, *args, **kwargs)
-        return
-        
-        basesizer = wx.BoxSizer(wx.VERTICAL)
-        
-        label = wx.StaticText(self, -1, _("Template Popup shortcut (requires restart):"))
-        basesizer.Add(label, 0, wx.ALL, 5)
-        
-        
         
         profshortcut = Profile_Get(PROFILE_KEY_POPUP)
         if profshortcut is None:
             profshortcut = 'Ctrl+Alt+Space'
-        self.shortcuttxt = wx.TextCtrl(self,ID_POPUP_SHORTCUT,profshortcut)
-        basesizer.Add(shortcuttxt,1,wx.GROW|wx.ALL, 5)
-        
+        self.shortcuttxt = wx.TextCtrl(self, ID_POPUP_SHORTCUT, profshortcut)
+
+        self.__DoLayout()
+
         self.Bind(wx.EVT_TEXT, self.OnTextChange)
-        
+
+    def __DoLayout(self):
+        basesizer = wx.BoxSizer(wx.VERTICAL)
+        hsizer = wx.BoxSizer(wx.HORIZONTAL)
+
+        label = wx.StaticText(self, -1, _("Template Popup shortcut (requires restart):"))
+        hsizer.Add((5, 5), 0)
+        hsizer.Add(label, 0, wx.ALIGN_CENTER_VERTICAL)
+        hsizer.Add((5, 5), 0)
+        hsizer.Add(self.shortcuttxt, 1, wx.EXPAND|wx.ALL, 5)
+
+        basesizer.Add(hsizer, 0, wx.EXPAND|wx.ALIGN_CENTER)
+        self.SetSizer(basesizer)
+
     def OnTextChange(self,evt):
         if evt.GetId() == ID_POPUP_SHORTCUT:
             text = self.shortcuttxt.GetValue()
