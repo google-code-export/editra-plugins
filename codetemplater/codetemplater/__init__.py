@@ -32,6 +32,7 @@ class CodeTemplater(plugin.Plugin):
     def PlugIt(self, parent):
         """Implements MainWindowI's PlugIt Method"""
         self.mw = parent
+        
         self._log = wx.GetApp().GetLog()
         self._log("[CodeTemplater][info] Starting codetemplater")
         
@@ -46,24 +47,21 @@ class CodeTemplater(plugin.Plugin):
                        
         toolmenu = self.mw.GetMenuBar().GetMenuByName("tools")
         toolmenu.AppendSubMenu(submenu,'Code Templates',_('Insert Code Templates into Document'))
- 
+        
+        self.mw.Bind(EVT_STC_USERLISTSELECTION,self.OnTemplate)
+        
     def GetMenuHandlers(self):
-        return [(ID_EDIT_TEMPLATES,self.OnEdit),(ID_SHOW_TEMPLATES,self.OnShow)]
+        return [(ID_EDIT_TEMPLATES,self.OnEdit),
+                (ID_SHOW_TEMPLATES,self.OnShow)]
     
     def GetUIHandlers(self):
         return []
             
     def OnShow(self, evt):
         if evt.GetId() == ID_SHOW_TEMPLATES:
-            
-            current_buffer = wx.GetApp().GetCurrentBuffer()
-            
-            #TODO: bind somewhere less repeated?
-            current_buffer.Bind(EVT_STC_USERLISTSELECTION,self.OnTemplate)
-            
             lst = self.templates.keys()
             lst.sort()
-            current_buffer.UserListShow(1, u' '.join(lst))
+            wx.GetApp().GetCurrentBuffer().UserListShow(1, u' '.join(lst))
         else:
             evt.skip()
             
