@@ -149,14 +149,8 @@ class RepoModBox(eclib.ControlBox):
         @return: choice label list
 
         """
-        def cmptup(x, y):
-            if x[1] < y[1]:
-                return -1
-            elif x[1] == y[1]:
-                return 0
-            else:
-                return 1
-        projects = sorted([(x, os.path.basename(x)) for x in self._repos], cmptup)
+        projects = [(x, os.path.basename(x)) for x in self._repos]
+        projects.sort(key=lambda x: x[1].lower())
         self._repos = [x[0] for x in projects]
         return [x[1] for x in projects]
 
