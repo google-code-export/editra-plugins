@@ -38,6 +38,7 @@ import util
 import eclib
 
 _ = wx.GetTranslation
+
 #--------------------------------------------------------------------------#
 
 DATE_FORMAT = '%Y-%m-%d %I:%M %p'
@@ -133,8 +134,8 @@ class HistoryPane(wx.Panel):
         # Attributes
         self.srcCtrl = ScCommand.SourceController(self)
 
-        sbox = wx.StaticBox(self, label=_("Revision History"))
         # Note box sizer must be created before its siblings
+        sbox = wx.StaticBox(self, label=_("Revision History"))
         self.boxsz = wx.StaticBoxSizer(sbox, wx.VERTICAL)
         self._search = LogSearch(self, size=(150, -1))
         self._split = wx.SplitterWindow(self,
