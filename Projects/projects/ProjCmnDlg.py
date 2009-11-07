@@ -58,10 +58,11 @@ class CommitDialog(wx.Dialog):
 
     def __init__(self, parent, title=u'', caption=u'', default=list()):
         """Create the Commit Dialog
-        @keyword default: list of file names that are being commited
+        @keyword default: list of file names that are being committed
 
         """
-        wx.Dialog.__init__(self, parent, title=title)
+        wx.Dialog.__init__(self, parent, title=title,
+                           style=wx.DEFAULT_DIALOG_STYLE)
 
         # Attributes
         self._msgbox = wx.StaticBox(self, label=_("Message") + u":")
@@ -128,14 +129,14 @@ class CommitDialog(wx.Dialog):
                         ((5, 5), 0), (self._recent, 1, wx.EXPAND),
                         ((5, 5), 0)])
         self._recent.Enable(self._recent.GetCount() > 1)
-        sizer.Add(rsizer, 0, wx.EXPAND)
+        sizer.Add(rsizer, 1, wx.EXPAND)
         sizer.Add((10, 10), 0)
 
         esizer.AddMany([((5, 5), 0),
                         (self._entry, 1, wx.EXPAND),
                         ((5, 5), 0)])
         sizer.Add(esizer, 0, wx.EXPAND)
-        self._mbxsizer.Add(sizer, 0, wx.EXPAND)
+        self._mbxsizer.Add(sizer, 1, wx.EXPAND)
 
         # Buttons
         bsizer.AddButton(self._cancel)
@@ -144,7 +145,7 @@ class CommitDialog(wx.Dialog):
 
         # Final Layout
         msizer.Add(self._mbxsizer, 0, wx.EXPAND, 5)
-        msizer.Add((8, 8), 0)
+        msizer.Add((8, 8), 1, wx.EXPAND)
         msizer.Add(bsizer, 0, wx.ALIGN_RIGHT)
         msizer.Add((8, 8), 0)
 
