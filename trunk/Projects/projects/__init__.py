@@ -92,7 +92,7 @@ class ProjectsModList(plugin.Plugin):
         return True
 
     def CreateItem(self, parent):
-        """Returns a log viewr panel"""
+        """Returns a log viewer panel"""
         modbox = RepoModBox(parent)
         modbox.SetFileOpenerHook(wx.GetApp().MacOpenFile)
         return modbox
