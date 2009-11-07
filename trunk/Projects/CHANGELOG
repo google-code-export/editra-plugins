@@ -16,6 +16,7 @@ Bug Fixes:
 +Fix number of small typos (patch from kevinsmithc)
 +Fix error in doing diff when retrieval of file fails
 +Fix some threading issues
++Fix error that could happen when retrieving node data for a commit action.
 
 #-----------------------------------------------------------------------------#
 Version 1.3

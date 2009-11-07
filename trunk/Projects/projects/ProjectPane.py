@@ -959,7 +959,7 @@ class ProjectTree(wx.Panel):
             except:
                 data = {}
 
-            if data.get('sclock', None):
+            if data is None or data.get('sclock', None):
                 continue
 
             if 'path' not in data:
