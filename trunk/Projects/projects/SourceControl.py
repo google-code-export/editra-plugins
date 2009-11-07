@@ -218,6 +218,7 @@ class SourceControl(object):
             stderr = subprocess.PIPE
             if mergeerr:
                 stderr = subprocess.STDOUT
+
             return subprocess.Popen([self.command] +
                                     self.addRootOption(directory, options),
                                     cwd=directory,
