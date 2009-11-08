@@ -6,6 +6,13 @@ License: wxWindows
 Changelog:
 
 #-----------------------------------------------------------------------------#
+Version 1.5
+Released: 11/08/2009
+
+Bug Fixes:
++Fix some windows specific errors related to subprocess creation
+
+#-----------------------------------------------------------------------------#
 Version 1.4
 Released: 11/07/2009
 
