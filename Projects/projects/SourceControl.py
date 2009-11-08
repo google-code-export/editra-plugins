@@ -41,6 +41,7 @@ import types
 import fnmatch
 import subprocess
 import sys
+import types
 import wx
 
 #-----------------------------------------------------------------------------#
@@ -212,12 +213,26 @@ class SourceControl(object):
         environ = os.environ.copy()
         # Add repository settings        
         environ.update(self.getRepositorySettings(directory).get('env', {}))
+
         # Merge passed in environment
         environ.update(env)
+        for k,v in environ.iteritems():
+            if isinstance(v, types.UnicodeType):
+                try:
+                    environ[k] = v.encode(sys.getfilesystemencoding())
+                except:
+                    self.log(u"[err] bad environment: %s" % repr(environ[k]))
+                    del environ[k]
+
         try:
             stderr = subprocess.PIPE
             if mergeerr:
                 stderr = subprocess.STDOUT
+
+            if subprocess.mswindows:
+                cfds = False
+            else:
+                cfds = True
 
             return subprocess.Popen([self.command] +
                                     self.addRootOption(directory, options),
@@ -225,11 +240,11 @@ class SourceControl(object):
                                     stdin=subprocess.PIPE,
                                     stdout=subprocess.PIPE,
                                     stderr=stderr,
-                                    close_fds=True,
+                                    close_fds=cfds,
                                     env=environ,
                                     startupinfo=STARTUPINFO)
-        except OSError: 
-            pass
+        except OSError, msg: 
+            self.log(u"[err] run error: %s" % msg)
         
     def filterPaths(self, paths):
         """" Filter out paths based on class filters """
