@@ -806,7 +806,8 @@ def run(txtctrl=None, log=None, **kwargs):
                     nbook = win.GetNotebook()
                 else:
                     nbook = self.GetMainWindow().GetNotebook()
-
+                
+                page_closed = False
                 ctrls = nbook.GetTextControls()
                 for ctrl in ctrls:
                     if source == ctrl.GetFileName():
@@ -816,6 +817,7 @@ def run(txtctrl=None, log=None, **kwargs):
                         self._log("[info] closing macro before rename operation")
                         nbook.SetSelection(index)
                         nbook.ClosePage()
+                        page_closed = True
 
                 target = os.path.normpath(os.path.join(base, new_filename))
                 
@@ -832,6 +834,11 @@ def run(txtctrl=None, log=None, **kwargs):
                 os.rename(source, target)
                 del self._macros[macro['File']]
                 self._register_macro(target)
+                
+                # reopen the macro if it was opened before
+                if page_closed:
+                    self.OpenFiles([target])
+                    
             except Exception, excp:
                 self._log("[error] %s" % excp)
 
@@ -848,7 +855,13 @@ def run(txtctrl=None, log=None, **kwargs):
         macros = self._listctrl.GetSelectedMacros()
         if not len(macros):
             return
-
+        self.RunMacros(macros)
+        
+    def RunMacros(self, macros):
+        """Runs all the macros in the list
+        @var macros: list of macro objects
+        @return: nothing
+        """
         if not self.SomethingIsRunning():
             self.ResetTaskCounter()
             wx.CallAfter(self.SetStatusMsg, '')
