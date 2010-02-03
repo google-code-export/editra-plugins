@@ -33,7 +33,7 @@ import difflib
 # Editra libs
 import ed_stc
 import util
-from extern import flatnotebook as FNB
+
 #--------------------------------------------------------------------------#
 
 class DiffWindow(wx.Frame):
@@ -45,8 +45,8 @@ class DiffWindow(wx.Frame):
         self.CreateStatusBar()
 
         sizer = wx.BoxSizer(wx.VERTICAL)
-        self._book = DiffBook(self, files)
-        sizer.Add(self._book, 1, wx.EXPAND)
+#        self._book = DiffBook(self, files)
+#        sizer.Add(self._book, 1, wx.EXPAND)
         self.SetSizer(sizer)
 
     def OpenDiffs(self, flist):
@@ -57,35 +57,6 @@ class DiffWindow(wx.Frame):
         """
         self._book.OpenFiles(flist)
 
-#--------------------------------------------------------------------------#
-
-class DiffBook(FNB.FlatNotebook):
-    """Notebook for holding multiple diff panels"""
-    def __init__(self, parent, files=list()):
-        """Initialize the book"""
-        FNB.FlatNotebook.__init__(self, parent,
-                                  style=FNB.FNB_FF2 | \
-                                        FNB.FNB_HIDE_ON_SINGLE_TAB | \
-                                        FNB.FNB_X_ON_TAB)
-
-        # ?wxBug? must open files during init to avoid errors
-        self.OpenFiles(files)
-
-        # Attributes
-        self.log = wx.GetApp().GetLog()
-        
-    def OpenFiles(self, flist):
-        """Open a list of files is separate pages
-        @param flist: list of tuples containing file paths
-        @type flist: [(path2left, path2right), (p2l, p2r), ...]
-
-        """
-        for pair in flist:
-            panel = DisplayPanel(self, pair[0], pair[1])
-            FNB.FlatNotebook.AddPage(self, panel, os.path.basename(pair[0]))
-
-    def OpenDiffTxt(self, txtlst):
-        """Open a list of diff results in separate pages"""
 #--------------------------------------------------------------------------#
 
 class DisplayPanel(wx.Panel):
