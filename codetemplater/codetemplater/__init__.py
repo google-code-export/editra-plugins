@@ -10,45 +10,52 @@ from os import path
 from wx.stc import EVT_STC_USERLISTSELECTION
 from ed_glob import CONFIG,SB_INFO,ID_RELOAD_ENC
 from ed_menu import EdMenu
+from ed_msg import Subscribe,EDMSG_UI_STC_USERLIST_SEL,EDMSG_UI_STC_LEXER,EDMSG_UI_NB_CHANGED
+from syntax import synglob
 from profiler import Profile_Get, Profile_Set
 _ = wx.GetTranslation
 
-from templates import TemplateEditorDialog,load_default_templates,PROFILE_KEY_TEMPLATES
-PROFILE_KEY_POPUP = 'CodeTemplater.Popupshortcut'
+from templates import TemplateEditorDialog,load_templates
+from cfgdlg import CodeTemplaterConfig,PROFILE_KEY_POPUP,PROFILE_KEY_FOLLOW_LANG
 
 ID_EDIT_TEMPLATES  = wx.NewId()
 ID_SHOW_TEMPLATES = wx.NewId()
 
-
- 
 class CodeTemplater(plugin.Plugin):
-    """Adds a Save/Load Session Menu Item to the MainWindow File Menu"""
+    """Adds an interface to add Code Templates"""
     plugin.Implements(iface.MainWindowI)  
     
     def __init__(self,*args,**kwargs):
         plugin.Plugin.__init__(self,*args,**kwargs)
-        self.templates = dict([(t.name,t) for t in load_default_templates()])
+        self.templates = load_templates()
+        self.currentlang = synglob.ID_LANG_TXT
         
     def PlugIt(self, parent):
         """Implements MainWindowI's PlugIt Method"""
         self.mw = parent
         
         self._log = wx.GetApp().GetLog()
-        self._log("[CodeTemplater][info] Starting codetemplater")
+        self._log("[codetemplater][info] Starting codetemplater")
+        
         
         self.templatemenu = submenu = EdMenu()
+        
         popupshortcut = Profile_Get(PROFILE_KEY_POPUP)
-        if popupshortcut is None:
-            popupshortcut = 'Ctrl+Alt+Space'
+          
         submenu.Append(ID_SHOW_TEMPLATES,_('Show Code Templates')+'\t'+popupshortcut)
         submenu.AppendSeparator()    
         submenu.Append(ID_EDIT_TEMPLATES,_('Edit Templates...'),
                  _('Open a Dialog to Edit the Templates Currently in Use'))
-                       
+                    
         toolmenu = self.mw.GetMenuBar().GetMenuByName("tools")
         toolmenu.AppendSubMenu(submenu,'Code Templates',_('Insert Code Templates into Document'))
         
-        self.mw.Bind(EVT_STC_USERLISTSELECTION,self.OnTemplate)
+        #self.mw.Bind(EVT_STC_USERLISTSELECTION,self.OnTemplate)
+        Subscribe(self.OnTemplate,EDMSG_UI_STC_USERLIST_SEL)
+        Subscribe(self.OnLexerChange,EDMSG_UI_STC_LEXER)
+        Subscribe(self.OnPageChange,EDMSG_UI_NB_CHANGED)
+        
+    
         
     def GetMenuHandlers(self):
         return [(ID_EDIT_TEMPLATES,self.OnEdit),
@@ -59,103 +66,71 @@ class CodeTemplater(plugin.Plugin):
             
     def OnShow(self, evt):
         if evt.GetId() == ID_SHOW_TEMPLATES:
-            lst = self.templates.keys()
+            current_buffer = wx.GetApp().GetCurrentBuffer()
+            lst = self.templates[self.currentlang].keys()
+            #lst = self.templates[current_buffer.GetLangId()].keys()
             lst.sort()
             wx.GetApp().GetCurrentBuffer().UserListShow(1, u' '.join(lst))
         else:
             evt.skip()
-            
-    def OnTemplate(self,evt):
+        
+    #def OnTemplate(self,evt): #from before when binding directly to event
+    def OnTemplate(self,msg):
         current_buffer = wx.GetApp().GetCurrentBuffer()
-        res = self.templates[evt.GetText()].DoTemplate(current_buffer)
+        #text = evt.GetText()
+        text = msg.GetData()['text']
+        self.templates[self.currentlang][text].DoTemplate(current_buffer)
+        #self.templates[current_buffer.GetLangId()][text].DoTemplate(current_buffer)
+        
+    def OnLexerChange(self,msg):
+        fn,ftype = msg.GetData()
+        if Profile_Get(PROFILE_KEY_FOLLOW_LANG):
+            self._log("[codetemplater][info] changing to language %s for file %s due to lexer change"%(ftype,fn))
+            self.currentlang = ftype
+    
+    def OnPageChange(self,msg):
+        current_buffer = wx.GetApp().GetCurrentBuffer()
+        if Profile_Get(PROFILE_KEY_FOLLOW_LANG):
+            lid = current_buffer.GetLangId()
+            self._log("[codetemplater][info] changing to language %s due to page change"%lid)
+            self.currentlang = lid
             
     def OnEdit(self, evt):
         if evt.GetId() == ID_EDIT_TEMPLATES:
-            self._log("[CodeTemplater][info] Loading Editor Dialog")
+            self._log("[codetemplater][info] Loading Editor Dialog")
             
-            dlg = TemplateEditorDialog(self.mw,self,-1,_('Code Template Editor'))
+            current_buffer = wx.GetApp().GetCurrentBuffer()
+            
+            ilang = self.currentlang
+            #ilang = current_buffer.GetLangId()
+            
+            dlg = TemplateEditorDialog(self.mw,self,-1,_('Code Template Editor'),initiallang=ilang)
             
             dlg.ShowModal()
-            dlg.edpanel.applyTemplateInfo()
+            dlg.edpanel.ApplyTemplateInfo()
             dlg.Destroy()
-            self._log("[CodeTemplater][info] Completed Editing")
+            self._log("[codetemplater][info] Completed Editing")
         else:
             evt.Skip()
             
-    def AddTemplate(self,templateobj):
-        """
-        if template is already present, it will be overwritten
-        """
-        self.templates[templateobj.name] = templateobj
-    def RemoveTemplate(self,templateobjorkey):
-        if isinstance(templateobjorkey,basestring):
-            delk = templateobjorkey
-        else:
-            delk = None
-            for k,v in self.templates.iteritems():
-                if v is templateobjorkey:
-                    delk = k
-                    break
-            if delk is None:
-                raise KeyError('template '+str(templateobjorkey)+' not found')
-        del self.templates[delk]
-                
-
-
+#    def AddTemplate(self,templateobj):
+#        """
+#        if template is already present, it will be overwritten
+#        """
+#        self.templates[templateobj.name] = templateobj
+#    def RemoveTemplate(self,templateobjorkey):
+#        if isinstance(templateobjorkey,basestring):
+#            delk = templateobjorkey
+#        else:
+#            delk = None
+#            for k,v in self.templates.iteritems():
+#                if v is templateobjorkey:
+#                    delk = k
+#                    break
+#            if delk is None:
+#                raise KeyError('template '+str(templateobjorkey)+' not found')
+#        del self.templates[delk]
 
 def GetConfigObject():
     return CodeTemplaterConfig()
- 
-class CodeTemplaterConfig(plugin.PluginConfigObject):
-    """Plugin configuration object."""
-    def GetConfigPanel(self, parent):
-        """Get the configuration panel for this plugin
-        @param parent: parent window for the panel
-        @return: wxPanel
- 
-        """
-        return CodeTemplaterConfigPanel(parent)
- 
-    def GetLabel(self):
-        """Get the label for this config panel
-        @return string
- 
-        """
-        return _("CodeTemplater")
-
-ID_POPUP_SHORTCUT = wx.NewId()
-
-class CodeTemplaterConfigPanel(wx.Panel):
-    def __init__(self,parent, *args, **kwargs):
-        wx.Panel.__init__(self,parent, *args, **kwargs)
-        
-        profshortcut = Profile_Get(PROFILE_KEY_POPUP)
-        if profshortcut is None:
-            profshortcut = 'Ctrl+Alt+Space'
-        self.shortcuttxt = wx.TextCtrl(self, ID_POPUP_SHORTCUT, profshortcut)
-
-        self.__DoLayout()
-
-        self.Bind(wx.EVT_TEXT, self.OnTextChange)
-
-    def __DoLayout(self):
-        basesizer = wx.BoxSizer(wx.VERTICAL)
-        hsizer = wx.BoxSizer(wx.HORIZONTAL)
-
-        label = wx.StaticText(self, -1, _("Template Popup shortcut (requires restart):"))
-        hsizer.Add((5, 5), 0)
-        hsizer.Add(label, 0, wx.ALIGN_CENTER_VERTICAL)
-        hsizer.Add((5, 5), 0)
-        hsizer.Add(self.shortcuttxt, 1, wx.EXPAND|wx.ALL, 5)
-
-        basesizer.Add(hsizer, 0, wx.EXPAND|wx.ALIGN_CENTER)
-        self.SetSizer(basesizer)
-
-    def OnTextChange(self,evt):
-        if evt.GetId() == ID_POPUP_SHORTCUT:
-            text = self.shortcuttxt.GetValue()
-            Profile_Set(PROFILE_KEY_POPUP,text)
-        else:
-            evt.Skip()
- 
 

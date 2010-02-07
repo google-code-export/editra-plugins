@@ -4,9 +4,9 @@ import plugin
 from os import path
 from string import Template
 
-from wx.stc import EVT_STC_USERLISTSELECTION
 from ed_glob import CONFIG,SB_INFO,ID_RELOAD_ENC
 from ed_menu import EdMenu
+from syntax import synglob
 from profiler import Profile_Get, Profile_Set
 _ = wx.GetTranslation
 
@@ -25,6 +25,7 @@ class CodeTemplate(object):
         self.description = description
         self.indent = indent
     
+        
     def DoTemplate(self, page):
         seltext = page.GetSelectedText().strip()
         
@@ -65,7 +66,8 @@ class CodeTemplate(object):
 
 class TemplateEditorDialog(wx.Dialog):
     def __init__(self, parent, plugin, ID, title, pos=wx.DefaultPosition,
-                 size=wx.DefaultSize, style=wx.DEFAULT_DIALOG_STYLE):
+                 size=wx.DefaultSize, style=wx.DEFAULT_DIALOG_STYLE,
+                 initiallang=None):
             
         #pre = wx.PreDialog()
         #pre.SetExtraStyle(wx.DIALOG_EX_CONTEXTHELP)
@@ -75,7 +77,7 @@ class TemplateEditorDialog(wx.Dialog):
         
         basesizer = wx.BoxSizer(wx.VERTICAL)
         
-        self.edpanel = TemplateEditorPanel(self,plugin,-1)
+        self.edpanel = TemplateEditorPanel(self,plugin,initiallang,-1)
         basesizer.Add(self.edpanel,0)
         
         line = wx.StaticLine(self, -1, size=(20,-1), style=wx.LI_HORIZONTAL)
@@ -99,21 +101,25 @@ class TemplateEditorDialog(wx.Dialog):
         basesizer.Fit(self)
     
     def OnSaveProfile(self,reset=False):
-        Profile_Set(PROFILE_KEY_TEMPLATES,self.edpanel.plugin.templates.values())
+        tempd = self.edpanel.plugin.templates
+        #profile key should be in language name
+        d = dict([(synglob.GetDescriptionFromId(k),v) for k,v in tempd.iteritems()])
+        Profile_Set(PROFILE_KEY_TEMPLATES,d)
     
     def OnResetProfile(self,evt):
         Profile_Set(PROFILE_KEY_TEMPLATES,None)
-        self.edpanel.plugin.templates = dict([(t.name,t) for t in load_default_templates()])
-        self.edpanel.listbox.SetItems(self.edpanel.getTemplateNames())
+        self.edpanel.plugin.templates = load_templates()
+        self.edpanel.listbox.SetItems(self.edpanel.GetTemplateNames())
         
         
         
 class TemplateEditorPanel(wx.Panel):
-    def __init__(self,parent,plugin, *args, **kwargs):
+    def __init__(self,parent,plugin,initiallang=None, *args, **kwargs):
         wx.Panel.__init__(self,parent, *args, **kwargs)
         self.plugin = plugin
         self.removing = False
         self.lastind = None
+        self.lastname = ''
         
         basesizer = wx.BoxSizer(wx.HORIZONTAL)
         
@@ -123,7 +129,26 @@ class TemplateEditorPanel(wx.Panel):
         label = wx.StaticText(self, -1, _("Code Templates"))
         listsizer.Add(label, 0, wx.ALIGN_CENTRE|wx.ALL, 5)
         
-        self.listbox = wx.ListBox(self, -1,size=(150,300), choices=self.getTemplateNames(), style=wx.LB_SINGLE)
+        langchoices = get_language_list()
+        
+        if isinstance(initiallang,basestring):
+            id = synglob.GetIdFromDescription(initiallang)
+        else:
+            id = initiallang
+            initiallang = synglob.GetDescriptionFromId(initiallang)
+        
+        if initiallang is None or initiallang not in langchoices:
+            initiallang = langchoices[0]
+            
+        self.lastlangstr = initiallang
+        
+        self.langcombo = wx.ComboBox(self, -1, initiallang, #size=(150,30),
+                                     choices=langchoices,style=wx.CB_DROPDOWN)
+        self.Bind(wx.EVT_COMBOBOX, self.OnLangChange, self.langcombo)
+        listsizer.Add(self.langcombo,0,wx.ALIGN_CENTRE|wx.ALL, 5)
+        
+        
+        self.listbox = wx.ListBox(self, -1,size=(150,300), choices=self.GetTemplateNames(), style=wx.LB_SINGLE)
         self.Bind(wx.EVT_LISTBOX, self.OnListChange, self.listbox)
         listsizer.Add(self.listbox, 1, wx.ALIGN_CENTRE|wx.ALL, 5)
         
@@ -182,12 +207,18 @@ class TemplateEditorPanel(wx.Panel):
         self.SetSizer(basesizer)
         basesizer.Fit(self)
         
-    def getTemplateNames(self):
-        return self.plugin.templates.keys()
+    def GetLangTemplateDict(self,lastlangstr=False):
+        if lastlangstr:
+            return self.plugin.templates[synglob.GetIdFromDescription(self.lastlangstr)]
+        else:
+            return self.plugin.templates[synglob.GetIdFromDescription(self.langcombo.GetValue())]
+        
+    def GetTemplateNames(self):
+        return self.GetLangTemplateDict().keys()
     
-    def updateTemplateinfoUI(self,name):
+    def UpdateTemplateinfoUI(self,name):
         try:
-            templ = self.plugin.templates[name]
+            templ = self.GetLangTemplateDict()[name]
         except KeyError:
             templ = None
             
@@ -203,7 +234,9 @@ class TemplateEditorPanel(wx.Panel):
             self.helptxt.SetValue(templ.description)
             self.indentcb.SetValue(templ.indent)
             
-    def applyTemplateInfo(self,updatelistind=None):
+        self.lastname = name
+            
+    def ApplyTemplateInfo(self,updatelistind=None,lastlangstr=False):
         name = self.nametxt.GetValue()
         if name.startswith('<') or name.endswith('>') or name.strip()=='':
             return #don't apply initial names
@@ -212,7 +245,15 @@ class TemplateEditorPanel(wx.Panel):
         tempstr = self.temptxt.GetValue()
         obeyind = self.indentcb.GetValue()
         
-        self.plugin.AddTemplate(CodeTemplate(name,tempstr,help,obeyind))
+        ct = CodeTemplate(name,tempstr,help,obeyind)
+        templates = self.GetLangTemplateDict(lastlangstr)
+        templates[name] = ct
+        
+        if name != self.lastname:
+            if self.lastname in templates:
+                del templates[self.lastname]
+            self.lastname = name
+        
         if updatelistind is not None:
             self.listbox.SetString(updatelistind,name)
         
@@ -225,34 +266,73 @@ class TemplateEditorPanel(wx.Panel):
         name = self.listbox.GetStringSelection()
         self.listbox.Delete(self.listbox.GetSelection())
         try:
-            self.plugin.RemoveTemplate(name)
+            del self.GetLangTemplateDict()[name]
         except KeyError:
             pass #ignore removal of non-existant template
         self.lastind = None
-        self.updateTemplateinfoUI(None)
+        self.UpdateTemplateinfoUI(None)
         self.removing = False
         
     def OnListChange(self,evt):
         if not self.removing:
-            self.applyTemplateInfo(updatelistind=self.lastind)
-        self.updateTemplateinfoUI(evt.GetString())
+            self.ApplyTemplateInfo(updatelistind=self.lastind)
+        self.UpdateTemplateinfoUI(evt.GetString())
         self.lastind = evt.GetSelection()
+        
+    def OnLangChange(self,evt):
+        self.ApplyTemplateInfo(lastlangstr=True)
+        self.UpdateTemplateinfoUI(None)
+        self.listbox.SetItems(self.GetTemplateNames())
+        self.plugin._log('[codetemplater][info]setting %s to %s'%(self.lastlangstr,self.langcombo.GetValue()))
+        self.plugin.currentlang = synglob.GetIdFromDescription(self.langcombo.GetValue())
+        self.lastlangstr = self.langcombo.GetValue()
 
-def load_default_templates(checkprofile=True):
-    if checkprofile and (Profile_Get(PROFILE_KEY_TEMPLATES) is not None):
-        return Profile_Get(PROFILE_KEY_TEMPLATES)
+def get_language_list():
+    ids = [v[0] for v in synglob.LANG_MAP.values()]
+    names = [synglob.GetDescriptionFromId(id) for id in ids]
+    names.sort()
+    return names
+        
+def load_templates():
+    """
+    returns a dictionary mapping template names to template objects for the
+    requested lexer type 
+    """
+    from collections import defaultdict
+    
+    
+    temps = Profile_Get(PROFILE_KEY_TEMPLATES)
+    if temps is None:
+        dct = load_default_templates()
     else:
-        temps = []
-        proptemp = """
+        if len(temps)>0 and not isinstance(temps.values()[0],CodeTemplate):
+            dct = temps
+        else:
+            #if values are templates, assume we're loading an old version of the
+            #profile where all the values are python templates
+            dct = {'python':temps}
+    
+    #saved profile/default has text name keys instead of IDs like the plugin wants
+    dd = defaultdict(lambda:dict())
+    for k,v in dct.iteritems():
+        dd[synglob.GetIdFromDescription(k)] = v
+    return dd
+
+def load_default_templates():
+    """
+    loads the default set of templates (as a defaultdict) 
+    """
+    pytemps = []
+    proptemp = """
 def _get${upper}(self):
 \t#CUR
 def _set${upper}(self,val):
 \traise NotImplementedError
 ${same} = property(_get${upper},_set${upper},doc=None)
 """[1:] #remove first EOL
-        temps.append(CodeTemplate('Property',proptemp,_('Convert Selection to Get/Set Property'),True))
-        
-        delproptemp = """
+    pytemps.append(CodeTemplate('Property',proptemp,_('Convert Selection to Get/Set Property'),True))
+    
+    delproptemp = """
 def _get${upper}(self):
 \t#CUR
 def _set${upper}(self,val):
@@ -261,27 +341,30 @@ def _del${upper}(self):
 \traise NotImplementedError
 ${same} = property(_get${upper},_set${upper},_del${upper},doc=None)
 """[1:] #remove first EOL
-        temps.append(CodeTemplate('DelProperty',delproptemp,_('Convert Selection to Get/Set/Del Property'),True))
-        
-        getproptemp = """
+    pytemps.append(CodeTemplate('DelProperty',delproptemp,_('Convert Selection to Get/Set/Del Property'),True))
+    
+    getproptemp = """
 @property
 def ${same}(self):
 \t#CUR
 """[1:] #remove first EOL
-        temps.append(CodeTemplate('ROProperty',getproptemp,_('Convert Selection to read-only Property'),True))
-        
-        iteritemstemp = """
+    pytemps.append(CodeTemplate('ROProperty',getproptemp,_('Convert Selection to read-only Property'),True))
+    
+    iteritemstemp = """
 for k,v in ${same}.iteritems():
 \t#CUR
 """[1:] #remove first EOL
-        temps.append(CodeTemplate('Iterdict',iteritemstemp,_('Iterate over items of selected dictionary'),True))
-        
-        methodtemp = """
+    pytemps.append(CodeTemplate('Iterdict',iteritemstemp,_('Iterate over items of selected dictionary'),True))
+    
+    methodtemp = """
 def ${same}(self):
 \t#CUR
 """[1:] #remove first EOL
-        temps.append(CodeTemplate('Method',methodtemp,_('Convert selection into a method'),True))
-        
-        nietemp = 'raise NotImplementedError'
-        temps.append(CodeTemplate('NotImplementedError',nietemp,u'',True))
-    return temps
+    pytemps.append(CodeTemplate('Method',methodtemp,_('Convert selection into a method'),True))
+    
+    nietemp = 'raise NotImplementedError'
+    pytemps.append(CodeTemplate('NotImplementedError',nietemp,u'',True))
+    
+    pytemps = dict([(t.name,t) for t in pytemps])
+    
+    return {'python':pytemps}
