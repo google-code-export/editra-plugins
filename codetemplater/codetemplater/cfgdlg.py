@@ -41,7 +41,8 @@ class CodeTemplaterConfigPanel(wx.Panel):
         profshortcut = Profile_Get(PROFILE_KEY_POPUP)
         self.shortcuttxt = wx.TextCtrl(self, ID_POPUP_SHORTCUT, profshortcut)
         #self.edtempbutton = wx.Button(self, -1,_("Edit Templates"))
-        self.followlangcheckbox = wx.CheckBox(self,-1,_('Follow Editor Language?'))
+        self.followlangcheckbox = wx.CheckBox(self,-1,_('Synchronize language with file type?'))
+        self.followlangcheckbox.SetToolTipString(_('Causes the language type used for templates to adjust to the file type whenever a new tab is selected'))
         self.followlangcheckbox.SetValue(Profile_Get(PROFILE_KEY_FOLLOW_LANG))
 
         self.__DoLayout()

@@ -84,10 +84,10 @@ class TemplateEditorDialog(wx.Dialog):
         basesizer.Add(line, 0, wx.GROW|wx.ALIGN_CENTER_VERTICAL|wx.RIGHT|wx.TOP, 5)
         
         btnsizer = wx.BoxSizer(wx.HORIZONTAL)
-        okbtn = wx.Button(self, wx.ID_OK)
+        okbtn = wx.Button(self, wx.ID_OK,_('Close'))
         okbtn.SetDefault()
         btnsizer.Add(okbtn, 0, wx.ALIGN_CENTER|wx.ALIGN_CENTER_VERTICAL|wx.ALL, 5)
-        profbtn = wx.Button(self, ID_SAVE_TO_PROF,_('Save to Profile'))
+        profbtn = wx.Button(self, ID_SAVE_TO_PROF,_('Save'))
         profbtn.SetToolTipString(_('Save to the Profile to be reloaded on next Startup'))
         profbtn.Bind(wx.EVT_BUTTON, self.OnSaveProfile)
         btnsizer.Add(profbtn, 0, wx.ALIGN_CENTER|wx.ALIGN_CENTER_VERTICAL|wx.ALL, 5)
@@ -142,10 +142,10 @@ class TemplateEditorPanel(wx.Panel):
             
         self.lastlangstr = initiallang
         
-        self.langcombo = wx.ComboBox(self, -1, initiallang, #size=(150,30),
-                                     choices=langchoices,style=wx.CB_DROPDOWN)
-        self.Bind(wx.EVT_COMBOBOX, self.OnLangChange, self.langcombo)
-        listsizer.Add(self.langcombo,0,wx.ALIGN_CENTRE|wx.ALL, 5)
+        self.langchoice = wx.Choice(self, -1, choices=langchoices)
+        self.langchoice.SetSelection(self.langchoice.FindString(initiallang))
+        self.Bind(wx.EVT_CHOICE, self.OnLangChange, self.langchoice)
+        listsizer.Add(self.langchoice,0,wx.ALIGN_CENTRE|wx.ALL, 5)
         
         
         self.listbox = wx.ListBox(self, -1,size=(150,300), choices=self.GetTemplateNames(), style=wx.LB_SINGLE)
@@ -157,10 +157,11 @@ class TemplateEditorPanel(wx.Panel):
         addbutton.SetToolTipString(_('Add a New Template'))
         self.Bind(wx.EVT_BUTTON, self.OnAdd, addbutton)
         buttonsizer.Add(addbutton,1,wx.ALIGN_CENTRE|wx.ALL, 5)
-        rembutton = wx.Button(self,wx.ID_DELETE)
-        rembutton.SetToolTipString(_('Remove the selected Template'))
-        self.Bind(wx.EVT_BUTTON, self.OnRemove, rembutton)
-        buttonsizer.Add(rembutton,1,wx.ALIGN_CENTRE|wx.ALL, 5)
+        self.rembutton = wx.Button(self,wx.ID_DELETE)
+        self.rembutton.SetToolTipString(_('Remove the selected Template'))
+        self.Bind(wx.EVT_BUTTON, self.OnRemove, self.rembutton)
+        self.rembutton.Enable(False)
+        buttonsizer.Add(self.rembutton,1,wx.ALIGN_CENTRE|wx.ALL, 5)
         listsizer.Add(buttonsizer, 0, wx.ALIGN_CENTRE|wx.ALL, 2)
         
         basesizer.Add(listsizer, 0, wx.GROW|wx.ALIGN_CENTER_VERTICAL|wx.ALL, 5)
@@ -175,6 +176,7 @@ class TemplateEditorPanel(wx.Panel):
         self.nametxt = wx.TextCtrl(self,-1)
         namesizer.Add(self.nametxt,1,wx.GROW|wx.ALIGN_CENTRE|wx.ALL, 2)
         templateinfo.Add(namesizer, 0, wx.GROW|wx.ALIGN_CENTER_VERTICAL|wx.ALL, 2)
+        self.nametxt.Enable(False)
         
         helpsizer = wx.BoxSizer(wx.HORIZONTAL)
         helplabel = wx.StaticText(self, -1, _("Help Text:"))
@@ -182,13 +184,14 @@ class TemplateEditorPanel(wx.Panel):
         self.helptxt = wx.TextCtrl(self,-1)
         helpsizer.Add(self.helptxt,1,wx.GROW|wx.ALIGN_CENTRE|wx.ALL, 2)
         templateinfo.Add(helpsizer, 0, wx.GROW|wx.ALIGN_CENTER_VERTICAL|wx.ALL, 2)
+        self.helptxt.Enable(False)
         
         indsizer = wx.BoxSizer(wx.HORIZONTAL)
-        indlabel = wx.StaticText(self, -1, _("Obey Indentation?"))
-        indsizer.Add(indlabel,0,wx.ALIGN_CENTER|wx.ALL, 2)
-        self.indentcb = wx.CheckBox(self)
+        self.indentcb = wx.CheckBox(self,label=_("Obey Indentation?"))
+        self.indentcb.SetToolTipString(_('Check to have all lines of the template be indented to match the indentation at which the template is inserted'))
         indsizer.Add(self.indentcb,0,wx.ALIGN_CENTRE|wx.ALL, 2)
         templateinfo.Add(indsizer, 0, wx.ALIGN_CENTER|wx.ALL, 2)
+        self.indentcb.Enable(False)
         
         templabel = wx.StaticText(self, -1, _('Template Codes:\n')+
                 '"${same}": '+_('Replace with selected text.\n"')+
@@ -201,6 +204,7 @@ class TemplateEditorPanel(wx.Panel):
         templateinfo.Add(templabel, 0, wx.ALIGN_CENTER|wx.ALL, 2)
         self.temptxt = wx.TextCtrl(self,-1,size=(400,300),style = wx.TE_MULTILINE)
         templateinfo.Add(self.temptxt, 1, wx.GROW|wx.ALL, 2)
+        self.temptxt.Enable(False)
         
         basesizer.Add(templateinfo, 1, wx.GROW|wx.ALIGN_CENTER|wx.ALL, 5)
         
@@ -211,7 +215,7 @@ class TemplateEditorPanel(wx.Panel):
         if lastlangstr:
             return self.plugin.templates[synglob.GetIdFromDescription(self.lastlangstr)]
         else:
-            return self.plugin.templates[synglob.GetIdFromDescription(self.langcombo.GetValue())]
+            return self.plugin.templates[synglob.GetIdFromDescription(self.langchoice.GetStringSelection())]
         
     def GetTemplateNames(self):
         return self.GetLangTemplateDict().keys()
@@ -233,6 +237,12 @@ class TemplateEditorPanel(wx.Panel):
             self.temptxt.SetValue(templ.templ.template)
             self.helptxt.SetValue(templ.description)
             self.indentcb.SetValue(templ.indent)
+            
+        enabled = name is not None
+        self.nametxt.Enable(enabled)
+        self.temptxt.Enable(enabled)
+        self.helptxt.Enable(enabled)
+        self.indentcb.Enable(enabled)
             
         self.lastname = name
             
@@ -259,7 +269,12 @@ class TemplateEditorPanel(wx.Panel):
         
             
     def OnAdd(self,evt):
-        items = self.listbox.Append('<'+_('New Template')+'>')
+        ntstr = '<'+_('New Template')
+        i = 1
+        for s in self.listbox.GetStrings():
+            if s.startswith(ntstr):
+                i+=1
+        self.listbox.Append(ntstr+'%i>'%i)
     
     def OnRemove(self,evt):
         self.removing = True
@@ -278,14 +293,15 @@ class TemplateEditorPanel(wx.Panel):
             self.ApplyTemplateInfo(updatelistind=self.lastind)
         self.UpdateTemplateinfoUI(evt.GetString())
         self.lastind = evt.GetSelection()
+        self.rembutton.Enable(evt.GetSelection() != -1)
         
     def OnLangChange(self,evt):
         self.ApplyTemplateInfo(lastlangstr=True)
-        self.UpdateTemplateinfoUI(None)
         self.listbox.SetItems(self.GetTemplateNames())
-        self.plugin._log('[codetemplater][info]setting %s to %s'%(self.lastlangstr,self.langcombo.GetValue()))
-        self.plugin.currentlang = synglob.GetIdFromDescription(self.langcombo.GetValue())
-        self.lastlangstr = self.langcombo.GetValue()
+        self.plugin._log('[codetemplater][info]setting %s to %s'%(self.lastlangstr,self.langchoice.GetStringSelection()))
+        self.UpdateTemplateinfoUI(None) 
+        self.plugin.currentlang = synglob.GetIdFromDescription(self.langchoice.GetStringSelection())
+        self.lastlangstr = self.langchoice.GetStringSelection()
 
 def get_language_list():
     ids = [v[0] for v in synglob.LANG_MAP.values()]
