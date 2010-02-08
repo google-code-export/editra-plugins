@@ -48,9 +48,8 @@ class CodeTemplater(plugin.Plugin):
                  _('Open a Dialog to Edit the Templates Currently in Use'))
                     
         toolmenu = self.mw.GetMenuBar().GetMenuByName("tools")
-        toolmenu.AppendSubMenu(submenu,'Code Templates',_('Insert Code Templates into Document'))
+        toolmenu.AppendSubMenu(submenu,_('Code Templates'),_('Insert Code Templates into Document'))
         
-        #self.mw.Bind(EVT_STC_USERLISTSELECTION,self.OnTemplate)
         Subscribe(self.OnTemplate,EDMSG_UI_STC_USERLIST_SEL)
         Subscribe(self.OnLexerChange,EDMSG_UI_STC_LEXER)
         Subscribe(self.OnPageChange,EDMSG_UI_NB_CHANGED)
@@ -68,19 +67,15 @@ class CodeTemplater(plugin.Plugin):
         if evt.GetId() == ID_SHOW_TEMPLATES:
             current_buffer = wx.GetApp().GetCurrentBuffer()
             lst = self.templates[self.currentlang].keys()
-            #lst = self.templates[current_buffer.GetLangId()].keys()
             lst.sort()
             wx.GetApp().GetCurrentBuffer().UserListShow(1, u' '.join(lst))
         else:
             evt.skip()
         
-    #def OnTemplate(self,evt): #from before when binding directly to event
     def OnTemplate(self,msg):
         current_buffer = wx.GetApp().GetCurrentBuffer()
-        #text = evt.GetText()
         text = msg.GetData()['text']
         self.templates[self.currentlang][text].DoTemplate(current_buffer)
-        #self.templates[current_buffer.GetLangId()][text].DoTemplate(current_buffer)
         
     def OnLexerChange(self,msg):
         fn,ftype = msg.GetData()
@@ -102,7 +97,6 @@ class CodeTemplater(plugin.Plugin):
             current_buffer = wx.GetApp().GetCurrentBuffer()
             
             ilang = self.currentlang
-            #ilang = current_buffer.GetLangId()
             
             dlg = TemplateEditorDialog(self.mw,self,-1,_('Code Template Editor'),initiallang=ilang)
             
@@ -112,24 +106,6 @@ class CodeTemplater(plugin.Plugin):
             self._log("[codetemplater][info] Completed Editing")
         else:
             evt.Skip()
-            
-#    def AddTemplate(self,templateobj):
-#        """
-#        if template is already present, it will be overwritten
-#        """
-#        self.templates[templateobj.name] = templateobj
-#    def RemoveTemplate(self,templateobjorkey):
-#        if isinstance(templateobjorkey,basestring):
-#            delk = templateobjorkey
-#        else:
-#            delk = None
-#            for k,v in self.templates.iteritems():
-#                if v is templateobjorkey:
-#                    delk = k
-#                    break
-#            if delk is None:
-#                raise KeyError('template '+str(templateobjorkey)+' not found')
-#        del self.templates[delk]
 
 def GetConfigObject():
     return CodeTemplaterConfig()

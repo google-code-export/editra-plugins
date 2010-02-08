@@ -40,8 +40,8 @@ class CodeTemplaterConfigPanel(wx.Panel):
         
         profshortcut = Profile_Get(PROFILE_KEY_POPUP)
         self.shortcuttxt = wx.TextCtrl(self, ID_POPUP_SHORTCUT, profshortcut)
-        #self.edtempbutton = wx.Button(self, -1, "Edit Templates")
-        self.followlangcheckbox = wx.CheckBox(self,-1,'Follow Editor Language?')
+        #self.edtempbutton = wx.Button(self, -1,_("Edit Templates"))
+        self.followlangcheckbox = wx.CheckBox(self,-1,_('Follow Editor Language?'))
         self.followlangcheckbox.SetValue(Profile_Get(PROFILE_KEY_FOLLOW_LANG))
 
         self.__DoLayout()
