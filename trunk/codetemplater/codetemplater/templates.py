@@ -59,8 +59,8 @@ class CodeTemplate(object):
             indentstr = page.GetIndentChar()*indentcount
         else:
             indentstr = u''
-        
-        page.DeleteBack()
+        if seltext != '':
+            page.DeleteBack()
         propstring = self.templ.safe_substitute(submap)
         propstring = propstring.replace('\t',page.GetIndentChar())
         fullstring = propstring.replace('\n',page.GetEOLChar()+indentstr)
