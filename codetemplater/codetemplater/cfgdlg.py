@@ -1,3 +1,17 @@
+###############################################################################
+# Name: cfgdlg.py                                                             #
+# Purpose: Configuration Panel for codetemplater                              #
+# Author: Erik Tollerud <erik.tollerud@gmail.com>                             #
+# Copyright: (c) 2010 Erik Tollerud <erik.tollerud@gmail.com>                 #
+# License: wxWindows License                                                  #
+###############################################################################
+
+"""codetemplater Configuration Panel"""
+__author__ = "Erik Tollerud"
+__version__ = "0.1"
+
+#-----------------------------------------------------------------------------#
+
 import wx       
 import plugin
 from os import path

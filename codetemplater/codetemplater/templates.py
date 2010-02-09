@@ -1,3 +1,17 @@
+###############################################################################
+# Name: templates.py                                                          #
+# Purpose: User interface and template classes for CodeTemplater              #
+# Author: Erik Tollerud <erik.tollerud@gmail.com>                             #
+# Copyright: (c) 2010 Erik Tollerud <erik.tollerud@gmail.com>                 #
+# License: wxWindows License                                                  #
+###############################################################################
+
+"""CodeTemplater UI and CodeTemplate class"""
+__author__ = "Erik Tollerud"
+__version__ = "0.1"
+
+#-----------------------------------------------------------------------------#
+
 import wx                   
 import iface
 import plugin
@@ -9,8 +23,6 @@ from ed_menu import EdMenu
 from syntax import synglob
 from profiler import Profile_Get, Profile_Set
 _ = wx.GetTranslation
-
-ID_SAVE_TO_PROF = wx.NewId()
 
 PROFILE_KEY_TEMPLATES = 'CodeTemplater.Templates'
 
@@ -68,11 +80,6 @@ class TemplateEditorDialog(wx.Dialog):
     def __init__(self, parent, plugin, ID, title, pos=wx.DefaultPosition,
                  size=wx.DefaultSize, style=wx.DEFAULT_DIALOG_STYLE,
                  initiallang=None):
-            
-        #pre = wx.PreDialog()
-        #pre.SetExtraStyle(wx.DIALOG_EX_CONTEXTHELP)
-        #pre.Create(parent, ID, title, pos, size, style)
-        #self.PostCreate(pre)
         wx.Dialog.__init__(self, parent, ID, title, pos, size, style)
         
         basesizer = wx.BoxSizer(wx.VERTICAL)
@@ -84,14 +91,14 @@ class TemplateEditorDialog(wx.Dialog):
         basesizer.Add(line, 0, wx.GROW|wx.ALIGN_CENTER_VERTICAL|wx.RIGHT|wx.TOP, 5)
         
         btnsizer = wx.BoxSizer(wx.HORIZONTAL)
-        okbtn = wx.Button(self, wx.ID_OK,_('Close'))
-        okbtn.SetDefault()
+        okbtn = wx.Button(self, wx.ID_CLOSE)
+        okbtn.Bind(wx.EVT_BUTTON, self.OnClose)
         btnsizer.Add(okbtn, 0, wx.ALIGN_CENTER|wx.ALIGN_CENTER_VERTICAL|wx.ALL, 5)
-        profbtn = wx.Button(self, ID_SAVE_TO_PROF,_('Save'))
+        profbtn = wx.Button(self, wx.ID_SAVE,_('Save'))
         profbtn.SetToolTipString(_('Save to the Profile to be reloaded on next Startup'))
         profbtn.Bind(wx.EVT_BUTTON, self.OnSaveProfile)
         btnsizer.Add(profbtn, 0, wx.ALIGN_CENTER|wx.ALIGN_CENTER_VERTICAL|wx.ALL, 5)
-        resetbtn = wx.Button(self, ID_SAVE_TO_PROF,_('Reset to defaults'))
+        resetbtn = wx.Button(self, wx.ID_RESET,_('Reset to defaults'))
         resetbtn.SetToolTipString(_('Resets the Profile to default as well as the Current Setup'))
         resetbtn.Bind(wx.EVT_BUTTON, self.OnResetProfile)
         btnsizer.Add(resetbtn, 0, wx.ALIGN_CENTER|wx.ALIGN_CENTER_VERTICAL|wx.ALL, 5)
@@ -110,6 +117,9 @@ class TemplateEditorDialog(wx.Dialog):
         Profile_Set(PROFILE_KEY_TEMPLATES,None)
         self.edpanel.plugin.templates = load_templates()
         self.edpanel.listbox.SetItems(self.edpanel.GetTemplateNames())
+        
+    def OnClose(self,evt):
+        self.Destroy()
         
         
         

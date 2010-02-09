@@ -1,7 +1,16 @@
-#from __future__ import with_statement #avoiding with statement for 2.4 compatibility
+###############################################################################
+# Name: __init__.py                                                           #
+# Purpose: CodeTemplater plugin                                               #
+# Author: Erik Tollerud <erik.tollerud@gmail.com>                             #
+# Copyright: (c) 2010 Erik Tollerud <erik.tollerud@gmail.com>                 #
+# License: wxWindows License                                                  #
+###############################################################################
+
 """Applies Code Templates for regularly-used design patterns."""
 __author__ = "Erik Tollerud"
 __version__ = "0.1"
+
+#-----------------------------------------------------------------------------#
 
 import wx                   
 import iface
@@ -25,18 +34,16 @@ class CodeTemplater(plugin.Plugin):
     """Adds an interface to add Code Templates"""
     plugin.Implements(iface.MainWindowI)  
     
-    def __init__(self,*args,**kwargs):
-        plugin.Plugin.__init__(self,*args,**kwargs)
-        self.templates = load_templates()
-        self.currentlang = synglob.ID_LANG_TXT
+    templates = {}
+    currentlang = synglob.ID_LANG_TXT
         
     def PlugIt(self, parent):
         """Implements MainWindowI's PlugIt Method"""
-        self.mw = parent
-        
         self._log = wx.GetApp().GetLog()
         self._log("[codetemplater][info] Starting codetemplater")
         
+        self.templates = load_templates()
+        self.currentlang = synglob.ID_LANG_TXT
         
         self.templatemenu = submenu = EdMenu()
         
@@ -47,7 +54,7 @@ class CodeTemplater(plugin.Plugin):
         submenu.Append(ID_EDIT_TEMPLATES,_('Edit Templates...'),
                  _('Open a Dialog to Edit the Templates Currently in Use'))
                     
-        toolmenu = self.mw.GetMenuBar().GetMenuByName("tools")
+        toolmenu = parent.GetMenuBar().GetMenuByName("tools")
         toolmenu.AppendSubMenu(submenu,_('Code Templates'),_('Insert Code Templates into Document'))
         
         Subscribe(self.OnTemplate,EDMSG_UI_STC_USERLIST_SEL)
@@ -98,7 +105,7 @@ class CodeTemplater(plugin.Plugin):
             
             ilang = self.currentlang
             
-            dlg = TemplateEditorDialog(self.mw,self,-1,_('Code Template Editor'),initiallang=ilang)
+            dlg = TemplateEditorDialog(wx.GetApp().GetActiveWindow(),self,-1,_('Code Template Editor'),initiallang=ilang)
             
             dlg.ShowModal()
             dlg.edpanel.ApplyTemplateInfo()
