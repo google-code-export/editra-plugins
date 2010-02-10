@@ -15,6 +15,8 @@ Code Templates are added by choosing the Tools > Code Templates > Show Code Temp
 
 (image before and after nie)
 
+[http://editra-plugins.googlecode.com/svn/wiki/images/CodeTemplater/niebefore.png]
+
 
 Some Templates also use the currently selected text for content.  In the below example, the 'property' template uses the currently selected text as the name of the property it creates, as well as for the getter and setter method names.
 
