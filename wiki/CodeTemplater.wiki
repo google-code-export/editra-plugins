@@ -13,19 +13,22 @@ CodeTemplater requires Editra v???
 
 Code Templates are added by choosing the Tools > Code Templates > Show Code Templates, or the appropriately bound key (default Ctrl+Alt+space).  This triggers the pop-up for the appropriate language and allows a code template to be selected with arrows keys for insertion at the location of the current cursor when the user hits enter (deleting any text that is selected).  Esc will cancel the pop-up.
 
-(image before and after nie)
 
 [http://editra-plugins.googlecode.com/svn/wiki/images/CodeTemplater/niebefore.png]
+
+[http://editra-plugins.googlecode.com/svn/wiki/images/CodeTemplater/nieafter.png]
 
 
 Some Templates also use the currently selected text for content.  In the below example, the 'property' template uses the currently selected text as the name of the property it creates, as well as for the getter and setter method names.
 
-(before and after silly)
+[http://editra-plugins.googlecode.com/svn/wiki/images/CodeTemplater/sillybefore.png]
+
+[http://editra-plugins.googlecode.com/svn/wiki/images/CodeTemplater/sillyafter.png]
 
 
 To add new templates, open the dialog at Tools > Code Templates > Edit Templates.
 
-(Edit Templates dialog)
+[http://editra-plugins.googlecode.com/svn/wiki/images/CodeTemplater/editdiag.png]
 
 ...
 
@@ -34,7 +37,7 @@ The configuration dialog has two options:
   * The command key used to trigger the "Show Code Templates" action.
   * A "Synchronize language with file type?" checkbox indicating if the language used for the code templates should be changed to match whatever file is selected.  The Edit Templates dialog sets the language if this is not checked.
 
-(Image of cfgdlg)
+[http://editra-plugins.googlecode.com/svn/wiki/images/CodeTemplater/cfgdlg.png]
 
 = Submitting Default Templates =
 Currently, the only templates in the default collection are for Python.  Users are encouraged to submit templates for other languages either on this wiki or via e-mail to the author of this plugin, and they will be included in the default collection at a later date.
