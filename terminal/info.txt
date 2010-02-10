@@ -1,4 +1,0 @@
-Name=Terminal
-Author=Cody Precord
-Description=Adds a Terminal to the Shelf Menu
-Version=0.1

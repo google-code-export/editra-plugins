@@ -1,6 +1,0 @@
-This file is a general list of planned features and ideas for PyTools plugin.
-
-- Documentation viewer
-- sys.path browser (like in IDLE)
-- Debugger (*should this be part of a general Editra feature?)
-- Highlighting for syntax/name errors (similar to the existing highlighting for indentation errors)

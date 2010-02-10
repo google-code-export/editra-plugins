@@ -1,4 +1,0 @@
-Name=Calculator
-Author=Cody Precord
-Description=Simple Programmer's Calculator
-Version=0.6
