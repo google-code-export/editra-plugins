@@ -1,5 +1,5 @@
-#summary One-sentence summary of this page.
-Add Code Templates/Snippets In Context
+#summary Add Code Templates/Snippets In Context
+
 
 
 = Introduction =
@@ -36,5 +36,3 @@ The configuration dialog has two options:
 
 = Submitting Default Templates =
 Currently, the only templates in the default collection are for Python.  Users are encouraged to submit templates for other languages either on this wiki or via e-mail to the author of this plugin, and they will be included in the default collection at a later date.
-
-
