@@ -6,7 +6,7 @@
 
 CodeTemplater is an Editra plugin for adding commonly-used templates to your code quickly and efficiently.  This makes consistent use of common design patterns and pythonic idioms much simpler. 
 
-CodeTemplater requires Editra v???
+CodeTemplater requires Editra v0.5.15
 
 
 = Using Templates =
