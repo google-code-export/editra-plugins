@@ -21,7 +21,7 @@ from string import Template
 from ed_glob import CONFIG,SB_INFO,ID_RELOAD_ENC
 from ed_menu import EdMenu
 from syntax import synglob
-from profiler import Profile_Get, Profile_Set
+from profiler import Profile_Get, Profile_Set, Profile_Del
 _ = wx.GetTranslation
 
 PROFILE_KEY_TEMPLATES = 'CodeTemplater.Templates'
@@ -108,10 +108,21 @@ class TemplateEditorDialog(wx.Dialog):
         basesizer.Fit(self)
     
     def OnSaveProfile(self,reset=False):
-        tempd = self.edpanel.plugin.templates
         #profile key should be in language name
-        d = dict([(synglob.GetDescriptionFromId(k),v) for k,v in tempd.iteritems()])
-        Profile_Set(PROFILE_KEY_TEMPLATES,d)
+        #d = dict([(synglob.GetDescriptionFromId(k),v) for k,v in tempd.iteritems()])
+        #translate template objects into their dict instead of CodeTemplate objects
+        self.edpanel.ApplyTemplateInfo(updatelistind=self.edpanel.lastind)
+        
+        newd = {}
+        
+        for lang,ld in self.edpanel.plugin.templates.iteritems():
+            newld = {}
+            for k,v in ld.iteritems():
+                newld[k] = v.__dict__.copy()
+                newld[k]['templ'] = newld[k]['templ'].template
+            newd[synglob.GetDescriptionFromId(lang)] = newld
+        
+        Profile_Set(PROFILE_KEY_TEMPLATES,newd)
     
     def OnResetProfile(self,evt):
         Profile_Set(PROFILE_KEY_TEMPLATES,None)
@@ -326,23 +337,47 @@ def load_templates():
     """
     from collections import defaultdict
     
-    
+    wx.GetApp().GetLog()('[codetemplater][info]hetting %s'%PROFILE_KEY_TEMPLATES)      
     temps = Profile_Get(PROFILE_KEY_TEMPLATES)
-    if temps is None:
-        dct = load_default_templates()
-    else:
-        if len(temps)>0 and not isinstance(temps.values()[0],CodeTemplate):
-            dct = temps
-        else:
-            #if values are templates, assume we're loading an old version of the
-            #profile where all the values are python templates
-            dct = {'python':temps}
     
-    #saved profile/default has text name keys instead of IDs like the plugin wants
-    dd = defaultdict(lambda:dict())
-    for k,v in dct.iteritems():
-        dd[synglob.GetIdFromDescription(k)] = v
-    return dd
+    templd = defaultdict(lambda:dict())
+    try:
+        if temps is None:
+            dct = load_default_templates()
+            #default templates have text name keys instead of IDs like the plugin wants
+            
+            for k,v in dct.iteritems():
+                templd[synglob.GetIdFromDescription(k)] = v
+        else:
+            #saved templates store the dict instead of objcets, and use language names instead of IDs
+            for langname,ld in temps.iteritems():
+                newld = {}
+                for tempname,d in ld.iteritems():
+                    wx.GetApp().GetLog()('[codetemplater][info]dkeys %s'%d.keys())
+                    wx.GetApp().GetLog()('[codetemplater][info]dname %s'%d['name'])
+                    wx.GetApp().GetLog()('[codetemplater][info]templ %s'%d['templ'])
+                    wx.GetApp().GetLog()('[codetemplater][info]description %s'%d['description'])
+                    wx.GetApp().GetLog()('[codetemplater][info]indent %s'%d['indent'])
+                    newld[tempname] = CodeTemplate(d['name'],d['templ'],
+                                                   d['description'],d['indent'])
+                templd[synglob.GetIdFromDescription(langname)] = newld
+                
+        return templd
+    except:
+        Profile_Del(PROFILE_KEY_TEMPLATES)
+        raise
+#        if len(temps)>0 and not isinstance(temps.values()[0],CodeTemplate):
+#            dct = temps
+#        else:
+#            #if values are templates, assume we're loading an old version of the
+#            #profile where all the values are python templates
+#            dct = {'python':temps}
+    
+#    #saved profile/default has text name keys instead of IDs like the plugin wants
+#    dd = defaultdict(lambda:dict())
+#    for k,v in dct.iteritems():
+#        dd[synglob.GetIdFromDescription(k)] = v
+#    return dd
 
 def load_default_templates():
     """
