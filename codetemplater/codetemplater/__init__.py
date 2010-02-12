@@ -43,6 +43,7 @@ class CodeTemplater(plugin.Plugin):
         self._log("[codetemplater][info] Starting codetemplater")
         
         self.templates = load_templates()
+
         self.currentlang = synglob.ID_LANG_TXT
         
         self.templatemenu = submenu = EdMenu()
@@ -60,6 +61,8 @@ class CodeTemplater(plugin.Plugin):
         Subscribe(self.OnTemplate,EDMSG_UI_STC_USERLIST_SEL)
         Subscribe(self.OnLexerChange,EDMSG_UI_STC_LEXER)
         Subscribe(self.OnPageChange,EDMSG_UI_NB_CHANGED)
+        
+        self._log("[codetemplater][info] Finished loading codetemplater")
         
     
         
