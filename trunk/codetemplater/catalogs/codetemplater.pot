@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2009-10-03 10:39-0500\n"
+"POT-Creation-Date: 2010-02-12 19:06-0600\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -16,124 +16,137 @@ msgstr ""
 "Content-Type: text/plain; charset=CHARSET\n"
 "Content-Transfer-Encoding: 8bit\n"
 
-#: codetemplater/codetemplater/templates.py:132
+#: codetemplater/codetemplater/templates.py:167
 msgid "Add a New Template"
 msgstr ""
 
-#: codetemplater/codetemplater/templates.py:172
+#: codetemplater/codetemplater/templates.py:210
 msgid "An \"$\" character."
 msgstr ""
 
-#: codetemplater/codetemplater/__init__.py:76
+#: codetemplater/codetemplater/cfgdlg.py:59
+msgid "Causes the language type used for templates to adjust to the file type whenever a new tab is selected"
+msgstr ""
+
+#: codetemplater/codetemplater/templates.py:201
+msgid "Check to have all lines of the template be indented to match the indentation at which the template is inserted"
+msgstr ""
+
+#: codetemplater/codetemplater/__init__.py:108
 msgid "Code Template Editor"
 msgstr ""
 
-#: codetemplater/codetemplater/templates.py:123
+#: codetemplater/codetemplater/__init__.py:58
+#: codetemplater/codetemplater/templates.py:139
 msgid "Code Templates"
 msgstr ""
 
-#: codetemplater/codetemplater/__init__.py:124
+#: codetemplater/codetemplater/cfgdlg.py:47
 msgid "CodeTemplater"
 msgstr ""
 
-#: codetemplater/codetemplater/templates.py:253
+#: codetemplater/codetemplater/templates.py:359
 msgid "Convert Selection to Get/Set Property"
 msgstr ""
 
-#: codetemplater/codetemplater/templates.py:264
+#: codetemplater/codetemplater/templates.py:370
 msgid "Convert Selection to Get/Set/Del Property"
 msgstr ""
 
-#: codetemplater/codetemplater/templates.py:271
+#: codetemplater/codetemplater/templates.py:377
 msgid "Convert Selection to read-only Property"
 msgstr ""
 
-#: codetemplater/codetemplater/templates.py:283
+#: codetemplater/codetemplater/templates.py:389
 msgid "Convert selection into a method"
 msgstr ""
 
-#: codetemplater/codetemplater/__init__.py:45
+#: codetemplater/codetemplater/__init__.py:54
 msgid "Edit Templates..."
 msgstr ""
 
-#: codetemplater/codetemplater/templates.py:155
+#: codetemplater/codetemplater/templates.py:192
 msgid "Help Text:"
 msgstr ""
 
-#: codetemplater/codetemplater/__init__.py:49
+#: codetemplater/codetemplater/__init__.py:58
 msgid "Insert Code Templates into Document"
 msgstr ""
 
-#: codetemplater/codetemplater/templates.py:277
+#: codetemplater/codetemplater/templates.py:383
 msgid "Iterate over items of selected dictionary"
 msgstr ""
 
-#: codetemplater/codetemplater/templates.py:173
+#: codetemplater/codetemplater/templates.py:211
 msgid "Move cursor to this location after inserting template."
 msgstr ""
 
-#: codetemplater/codetemplater/templates.py:148
+#: codetemplater/codetemplater/templates.py:184
 msgid "Name:"
 msgstr ""
 
-#: codetemplater/codetemplater/templates.py:221
+#: codetemplater/codetemplater/templates.py:282
 msgid "New Template"
 msgstr ""
 
-#: codetemplater/codetemplater/templates.py:162
+#: codetemplater/codetemplater/templates.py:200
 msgid "Obey Indentation?"
 msgstr ""
 
-#: codetemplater/codetemplater/__init__.py:46
+#: codetemplater/codetemplater/__init__.py:55
 msgid "Open a Dialog to Edit the Templates Currently in Use"
 msgstr ""
 
-#: codetemplater/codetemplater/templates.py:136
+#: codetemplater/codetemplater/templates.py:171
 msgid "Remove the selected Template"
 msgstr ""
 
-#: codetemplater/codetemplater/templates.py:169
+#: codetemplater/codetemplater/templates.py:207
 msgid ""
 "Replace with selected text.\n"
 "\""
 msgstr ""
 
-#: codetemplater/codetemplater/templates.py:171
+#: codetemplater/codetemplater/templates.py:209
 msgid "Replace with selected, first character lower case.\n"
 msgstr ""
 
-#: codetemplater/codetemplater/templates.py:170
+#: codetemplater/codetemplater/templates.py:208
 msgid "Replace with selected, first character upper case.\n"
 msgstr ""
 
-#: codetemplater/codetemplater/templates.py:92
+#: codetemplater/codetemplater/templates.py:101
 msgid "Reset to defaults"
 msgstr ""
 
-#: codetemplater/codetemplater/templates.py:93
+#: codetemplater/codetemplater/templates.py:102
 msgid "Resets the Profile to default as well as the Current Setup"
 msgstr ""
 
-#: codetemplater/codetemplater/templates.py:88
-msgid "Save to Profile"
+#: codetemplater/codetemplater/templates.py:97
+msgid "Save"
 msgstr ""
 
-#: codetemplater/codetemplater/templates.py:89
+#: codetemplater/codetemplater/templates.py:98
 msgid "Save to the Profile to be reloaded on next Startup"
 msgstr ""
 
-#: codetemplater/codetemplater/__init__.py:43
+#: codetemplater/codetemplater/__init__.py:52
 msgid "Show Code Templates"
 msgstr ""
 
-#: codetemplater/codetemplater/templates.py:168
+#: codetemplater/codetemplater/cfgdlg.py:58
+msgid "Synchronize language with file type?"
+msgstr ""
+
+#: codetemplater/codetemplater/templates.py:206
 msgid "Template Codes:\n"
 msgstr ""
 
-#: codetemplater/codetemplater/__init__.py:145
+#: codetemplater/codetemplater/cfgdlg.py:72
 msgid "Template Popup shortcut (requires restart):"
 msgstr ""
 
-#: codetemplater/codetemplater/templates.py:174
+#: codetemplater/codetemplater/templates.py:212
 msgid "tabs will be replaced by the appropriate indent."
 msgstr ""
