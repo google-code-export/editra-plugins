@@ -8,7 +8,7 @@
 
 """Applies Code Templates for regularly-used design patterns."""
 __author__ = "Erik Tollerud"
-__version__ = "0.1"
+__version__ = "0.2"
 
 #-----------------------------------------------------------------------------#
 
