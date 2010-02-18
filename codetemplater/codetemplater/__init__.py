@@ -78,6 +78,7 @@ class CodeTemplater(plugin.Plugin):
             current_buffer = wx.GetApp().GetCurrentBuffer()
             lst = self.templates[self.currentlang].keys()
             lst.sort()
+            self._log("[codetemplater][info] Showing user list "+u' '.join(lst))
             wx.GetApp().GetCurrentBuffer().UserListShow(1, u' '.join(lst))
         else:
             evt.skip()
