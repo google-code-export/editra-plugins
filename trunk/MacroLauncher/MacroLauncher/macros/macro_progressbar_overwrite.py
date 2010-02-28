@@ -20,8 +20,8 @@ class TestPanel(wx.Panel):
 
     def OnButton(self, evt):
         max = 100
-        dlg = wx.ProgressDialog("Macro: %s" % name,
-                               "%s" % desc,
+        dlg = wx.ProgressDialog("Macro: %s" % __name__,
+                               "%s" % __desc__,
                                maximum=max,
                                parent=self,
                                style = wx.PD_CAN_ABORT
