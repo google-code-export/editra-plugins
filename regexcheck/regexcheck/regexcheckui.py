@@ -31,100 +31,105 @@ class RegexCheckPanel(wx.Panel):
     def __init__(self,parent,*args,**kwargs):
         wx.Panel.__init__(self,parent,*args,**kwargs)
         
-        basesizer = wx.BoxSizer(wx.VERTICAL)
-        
-        topsizer = wx.BoxSizer(wx.HORIZONTAL)
-        
+        #build UI elements
         toplabel = wx.StaticText(self, -1, _("Regular Expression:"))
-        self.regextextctrl = wx.TextCtrl(self,-1,'')     
-        topsizer.Add(toplabel, 0, wx.ALIGN_LEFT|wx.ALL|wx.ALIGN_CENTER_VERTICAL)
-        topsizer.Add(self.regextextctrl, 1, wx.ALIGN_LEFT|wx.ALL,border=5)
-        basesizer.Add(topsizer, 0, wx.GROW|wx.ALIGN_CENTRE|wx.ALL)
+        self.regextextctrl = wx.TextCtrl(self,-1,"")  
         
-        midsizer = wx.BoxSizer(wx.HORIZONTAL)
         
-        testbutton = wx.Button(self,-1,_('Test on Sample'))
-        self.matchchoices = wx.Choice(self,-1,choices=[_(u'Findall'),_(u'Search'),_(u'Match')])
-        insertbutton = wx.Button(self,-1,_('Insert Expression at Cursor'))
-        self.rawcheckbox = wx.CheckBox(self,-1,_('Raw string?'))
+        insertbutton = wx.Button(self,-1,_("Insert Expression at Cursor"))
+        self.rawcheckbox = wx.CheckBox(self,-1,_("Raw string?"))
         self.rawcheckbox.SetValue(True)
+        self.strcharsingle = wx.CheckBox(self,-1,_("Use ' instead of \"?"))
+        self.strcharsingle.SetValue(True)
         
-        flagsizer = wx.BoxSizer(wx.HORIZONTAL)
-        flaglabel = wx.StaticText(self, -1, _("Regex Flags:"))
+        testbutton = wx.Button(self,-1,_("Test regex on selected text"))
+        self.matchchoices = wx.Choice(self,-1,choices=[_("Findall"),_("Search"),_("Match")])
+        flagbutton = wx.Button(self,-1,_("Regex Flags..."))
+        
+        #flaglabel = wx.StaticText(self, -1, _("Compilation Flags:"))
         flags = [
-        'IGNORECASE(I)',
-        'LOCALE(L)',
-        'MULTILINE(M)',
-        'DOTALL(S)',
-        'UNICODE(U)',
-        'VERBOSE(X)']
-        self.flagcheckboxes = [wx.CheckBox(self,-1,f) for f in flags]  
-        
-        midsizer.Add(testbutton, 0, wx.ALIGN_LEFT|wx.ALL,border=5)
-        midsizer.Add(self.matchchoices, 0, wx.ALL|wx.ALIGN_CENTER)
-        midsizer.Add(insertbutton, 0, wx.ALIGN_LEFT|wx.ALL,border=5)
-        midsizer.Add(self.rawcheckbox, 0, wx.ALL|wx.ALIGN_CENTER)
-        midsizer.Add(flaglabel, 0, wx.ALIGN_CENTRE|wx.ALL,border=5)      
-        for cb in self.flagcheckboxes:
-            midsizer.Add(cb,0,wx.ALIGN_CENTER|wx.ALL)
-        basesizer.Add(midsizer, 0, wx.GROW|wx.ALIGN_CENTRE|wx.ALL)
-        
-        
-        
-        textsizer = wx.BoxSizer(wx.HORIZONTAL)
-        
-        textlabel = wx.StaticText(self, -1, _("Sample Text:"))
-        self.sampletextctrl = wx.TextCtrl(self,-1,'',style=wx.TE_MULTILINE)
-        textsizer.Add(textlabel, 0, wx.ALIGN_CENTRE|wx.ALL)
-        textsizer.Add(self.sampletextctrl, 1, wx.GROW|wx.ALIGN_CENTRE|wx.ALL,border=2)
-        basesizer.Add(textsizer, 4, wx.GROW|wx.ALIGN_CENTRE|wx.ALL)
-        
-        bottomsizer = wx.BoxSizer(wx.HORIZONTAL)
+        "IGNORECASE(I)",
+        "LOCALE(L)",
+        "MULTILINE(M)",
+        "DOTALL(S)",
+        "UNICODE(U)",
+        "VERBOSE(X)"]
+        self.flags = dict([(s,False) for s in flags])
+        #self.flagcheckboxes = [wx.CheckBox(self,-1,f) for f in flags]
         
         outlabel = wx.StaticText(self, -1, _("Output:"))
-        self.outputtextctrl = wx.TextCtrl(self,-1,'',style=wx.TE_MULTILINE)
+        self.outputtextctrl = wx.TextCtrl(self,-1,"",style=wx.TE_MULTILINE)
         self.outputtextctrl.SetEditable(False)
         self.outputtextctrl.SetBackgroundColour(outlabel.GetBackgroundColour())
         
-        bottomsizer.Add(outlabel, 0, wx.ALIGN_CENTRE|wx.ALL,border=2)
-        bottomsizer.Add(self.outputtextctrl, 1,  wx.GROW|wx.ALIGN_CENTRE|wx.ALL,border=2)
-        basesizer.Add(bottomsizer, 5, wx.GROW|wx.ALIGN_CENTRE|wx.ALL)
+        #bind events
+        testbutton.Bind(wx.EVT_BUTTON, self.OnTest)
+        insertbutton.Bind(wx.EVT_BUTTON, self.OnInsert)
+        flagbutton.Bind(wx.EVT_BUTTON, self.OnFlag)
+        
+        #build sizers and add elements
+        
+        basesizer = wx.BoxSizer(wx.VERTICAL)
+        
+        resizer = wx.BoxSizer(wx.HORIZONTAL)
+        resizer.Add(toplabel, 0, wx.ALIGN_CENTRE|wx.ALL,border=2)
+        resizer.Add(self.regextextctrl, 1, wx.ALIGN_LEFT|wx.ALL,border=2)
+        basesizer.Add(resizer, 0, wx.GROW|wx.ALIGN_CENTRE|wx.ALL)
+        
+        testsizer = wx.BoxSizer(wx.HORIZONTAL)
+        testsizer.Add(testbutton, 0, wx.ALIGN_LEFT|wx.ALL,border=2)
+        testsizer.Add(self.matchchoices, 0, wx.ALIGN_LEFT|wx.ALL,border=2)
+        testsizer.Add(flagbutton, 0, wx.ALIGN_LEFT|wx.ALL,border=2)
+        basesizer.Add(testsizer, 0, wx.GROW|wx.ALIGN_CENTRE|wx.ALL)
+        
+        outsizer = wx.BoxSizer(wx.HORIZONTAL)
+        outsizer.Add(outlabel, 0, wx.ALIGN_CENTRE|wx.ALL,border=2)
+        outsizer.Add(self.outputtextctrl, 1, wx.ALIGN_LEFT|wx.ALL,border=2)
+        basesizer.Add(outsizer, 1, wx.GROW|wx.ALIGN_CENTRE|wx.ALL)
+        
+        insertsizer = wx.BoxSizer(wx.HORIZONTAL)
+        insertsizer.Add(insertbutton, 0, wx.ALIGN_LEFT|wx.ALL,border=2)
+        insertsizer.Add(self.rawcheckbox, 0, wx.ALIGN_LEFT|wx.ALL,border=2)
+        insertsizer.Add(self.strcharsingle, 0, wx.ALIGN_LEFT|wx.ALL,border=2)
+        basesizer.Add(insertsizer, 0, wx.GROW|wx.ALIGN_CENTRE|wx.ALL)
         
         self.SetSizer(basesizer)
         basesizer.Fit(self)
         
         
-        self.infobox = None
         
+    def GetStringChar(self):
+        return "'" if self.strcharsingle else '"'
         
-        testbutton.Bind(wx.EVT_BUTTON, self.OnTest)
-        insertbutton.Bind(wx.EVT_BUTTON, self.OnInsert)
         
     def GetFormattedRegex(self):
         text = self.regextextctrl.GetValue()
+        strchar = self.GetStringChar()
         if self.rawcheckbox.GetValue():
-            text = "r'%s'"%text
+            text = "r" + strchar + text + strchar
         else:
-            text = "'%s'"%text.replace('\\','\\\\')
+            text = strchar + text.replace("\\","\\\\") + strchar
         return text
         
     def OnTest(self,evt):
         import re
         retext = self.regextextctrl.GetValue()
-        wx.GetApp().GetLog()('[regexcheck][info]trying re '+retext)
+        wx.GetApp().GetLog()("[regexcheck][info]trying re "+retext)
         
         flags = 0
-        for cb in self.flagcheckboxes:
-            if cb.GetValue():
-                flagname = cb.GetLabel().split('(')[0].strip()
+        for cb,b in self.flags.iteritems():
+            if b:
+                flagname = cb.GetLabel().split("(")[0].strip()
                 flagval = getattr(re,flagname)
                 flags = flags|flagval
-        wx.GetApp().GetLog()('[regexcheck][info]re flags '+str(flags))
-        if retext.strip() == '':
-            self.outputtextctrl.SetValue(_(u'No regex Entered'))
+        wx.GetApp().GetLog()("[regexcheck][info]re flags "+str(flags))
+        if retext.strip() == "":
+            self.outputtextctrl.SetValue(_("No regex Entered"))
         else:
             try:
-                matchtext = self.sampletextctrl.GetValue()
+                current_buffer = wx.GetApp().GetCurrentBuffer()
+                matchtext = current_buffer.GetSelectedText()
+                
                 sel = self.matchchoices.GetSelection()
                 if sel == 0: #find all
                     matchlocs = []
@@ -135,7 +140,7 @@ class RegexCheckPanel(wx.Panel):
                     if sel == 1: #search
                         match = re.search(retext,matchtext,flags)
                     else: #match
-                        assert sel==2,'invalid choice option index %i'%sel
+                        assert sel==2,"invalid choice option index %i"%sel
                         match = re.match(retext,matchtext,flags)
                     if match is None:
                         matchlocs = []
@@ -144,14 +149,14 @@ class RegexCheckPanel(wx.Panel):
                     self.ApplyOutput(matchlocs,matchtext)
                         
             except re.error,e:
-                self.outputtextctrl.SetValue(_(u'Regex compilation error: %s'%e.args))
+                self.outputtextctrl.SetValue(_("Regex compilation error: %s"%e.args))
                 
     def FindMatchGroups(self,matchobj,text):
         """
         returns a sequence of tuples of (groupname,groupstartind,groupendind)
         """
         grps = []
-        grps.append(('0',matchobj.start(),matchobj.end()))
+        grps.append(("0",matchobj.start(),matchobj.end()))
         
         #create (grpnum,start,end) sequence
         for i,match in enumerate(matchobj.groups()):
@@ -175,13 +180,13 @@ class RegexCheckPanel(wx.Panel):
         import operator
         
         if len(matchlocs)==0:
-            self.outputtextctrl.SetValue(_(u'No matches'))
+            self.outputtextctrl.SetValue(_("No matches"))
         else:
             indstrs = []
             colori = 0
             for name,start,end in matchlocs[::-1]:
-                indstrs.append((start,'(',colori))
-                indstrs.append((end,')'+name,colori))
+                indstrs.append((start,"(",colori))
+                indstrs.append((end,")"+name,colori))
                 colori += 1
             indstrs.sort(key=operator.itemgetter(0))
             
@@ -199,7 +204,7 @@ class RegexCheckPanel(wx.Panel):
             colors = [None if c is None else maxc-c for c in colors]
                 
             strlist.append(matchtext[curri:])
-            self.outputtextctrl.SetValue(''.join(strlist))
+            self.outputtextctrl.SetValue("".join(strlist))
             
             curri = 0
             oldfont = self.outputtextctrl.GetFont()
@@ -224,11 +229,32 @@ class RegexCheckPanel(wx.Panel):
         return COLORS[colori%len(COLORS)]
     
     def OnInsert(self,evt):
-        wx.GetApp().GetLog()('[regexcheck][info]inserting '+retext)
+        retext = self.GetFormattedRegex()
+        wx.GetApp().GetLog()("[regexcheck][info]inserting "+retext)
+        
         current_buffer = wx.GetApp().GetCurrentBuffer()
         seltext = current_buffer.GetSelectedText()
-        if seltext != '':
+        if seltext != "":
             current_buffer.DeleteBack()
-        retext = self.GetFormattedRegex()
-        if retext.strip() != '':
+        
+        if retext.strip() != "":
             current_buffer.AddText(retext)
+            
+    def OnFlag(self,evt):
+        dlg = wx.MultiChoiceDialog(self,_("Regex Compilation Flags"),
+                                  _("Regex Compilation Flags"),
+                                  self.flags.keys(),style=wx.OK|wx.CANCEL)
+        dlg.SetSelections([i for i,b in enumerate(self.flags.values()) if b])
+        
+        
+        if (dlg.ShowModal() == wx.ID_OK):
+            selections = dlg.GetSelections()
+            ks = self.flags.keys()
+            for k in ks:
+                self.flags[k] = False
+            for s in selections:
+                self.flags[ks[s]] = True
+
+        dlg.Destroy()
+        
+        
