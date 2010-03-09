@@ -84,7 +84,7 @@ class RegexCheckPanel(wx.Panel):
         
         outsizer = wx.BoxSizer(wx.HORIZONTAL)
         outsizer.Add(outlabel, 0, wx.ALIGN_CENTRE|wx.ALL,border=2)
-        outsizer.Add(self.outputtextctrl, 1, wx.ALIGN_LEFT|wx.ALL,border=2)
+        outsizer.Add(self.outputtextctrl, 1, wx.GROW|wx.ALIGN_LEFT|wx.ALL,border=2)
         basesizer.Add(outsizer, 1, wx.GROW|wx.ALIGN_CENTRE|wx.ALL)
         
         insertsizer = wx.BoxSizer(wx.HORIZONTAL)
@@ -243,7 +243,7 @@ class RegexCheckPanel(wx.Panel):
     def OnFlag(self,evt):
         dlg = wx.MultiChoiceDialog(self,_("Regex Compilation Flags"),
                                   _("Regex Compilation Flags"),
-                                  self.flags.keys(),style=wx.OK|wx.CANCEL)
+                                  self.flags.keys())
         dlg.SetSelections([i for i,b in enumerate(self.flags.values()) if b])
         
         
