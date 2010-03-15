@@ -107,7 +107,7 @@ class RegexCheckPanel(wx.Panel):
         text = self.regextextctrl.GetValue()
         strchar = self.GetStringChar()
         if self.rawcheckbox.GetValue():
-            text = "r" + strchar + text + strchar
+            text = "r" + strchar + text.replace(strchar,'\\'+strchar) + strchar
         else:
             text = strchar + text.replace("\\","\\\\") + strchar
         return text
