@@ -43,7 +43,8 @@ class RegexCheckPanel(wx.Panel):
         self.strcharsingle.SetValue(True)
         
         testbutton = wx.Button(self,-1,_("Test regex on selected text"))
-        self.matchchoices = wx.Choice(self,-1,choices=[_("Findall"),_("Search"),_("Match")])
+        #self.matchchoices = wx.Choice(self,-1,choices=[_("Match"),_("Search"),_("Findall")])
+        self.matchchoices = wx.Choice(self,-1,choices=[_("Match",_("Search"))])
         flagbutton = wx.Button(self,-1,_("Regex Flags..."))
         
         #flaglabel = wx.StaticText(self, -1, _("Compilation Flags:"))
@@ -131,16 +132,18 @@ class RegexCheckPanel(wx.Panel):
                 matchtext = current_buffer.GetSelectedText()
                 
                 sel = self.matchchoices.GetSelection()
-                if sel == 0: #find all
+                if sel == 2: #find all
                     matchlocs = []
                     for m in re.finditer(retext,matchtext,flags):
                         matchlocs.extend(self.FindMatchGroups(m,matchtext[m.start():m.end()]))
+                    if len(matchlocs)>1: #remove final end
+                        del matchlocs[-1]
                     self.ApplyOutput(matchlocs,matchtext)
                 else:
                     if sel == 1: #search
                         match = re.search(retext,matchtext,flags)
                     else: #match
-                        assert sel==2,"invalid choice option index %i"%sel
+                        assert sel==0,"invalid choice option index %i"%sel
                         match = re.match(retext,matchtext,flags)
                     if match is None:
                         matchlocs = []
@@ -188,7 +191,9 @@ class RegexCheckPanel(wx.Panel):
                 indstrs.append((start,"(",colori))
                 indstrs.append((end,")"+name,colori))
                 colori += 1
-            indstrs.sort(key=operator.itemgetter(0))
+            
+            #see _str_3tuple_cmp for description of sort
+            indstrs.sort(cmp=_str_3tuple_cmp)
             
             curri = 0
             strlist = []
@@ -257,4 +262,22 @@ class RegexCheckPanel(wx.Panel):
 
         dlg.Destroy()
         
+def _str_3tuple_cmp(e1,e2):
+    """
+    compares two 3-tuples, and return sorting order such that sort is by the
+    first element or if the first elemnt matches, by the 3rd element in 
+    reversed order, unless the second element contains closing parentheses
+    """
+    if e1[0]>e2[0]:
+        return 1
+    elif e1[0]<e2[0]:
+        return -1
+    else:
+        swap =  ')' in e1[1] and ')' in e2[1]
         
+        if e1[2]>e2[2]:
+            return 1 if swap else -1
+        elif e1[2]<e2[2]:
+            return -1 if swap else 1 
+        else:
+            return 0
