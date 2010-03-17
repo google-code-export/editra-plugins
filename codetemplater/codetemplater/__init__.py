@@ -77,9 +77,12 @@ class CodeTemplater(plugin.Plugin):
         if evt.GetId() == ID_SHOW_TEMPLATES:
             current_buffer = wx.GetApp().GetCurrentBuffer()
             lst = self.templates[self.currentlang].keys()
-            lst.sort()
-            self._log("[codetemplater][info] Showing user list "+u' '.join(lst))
-            wx.GetApp().GetCurrentBuffer().UserListShow(1, u' '.join(lst))
+            if len(lst) == 0:
+                self._log("[codetemplater][info] Tried to show template list, but no templates present")
+            else:
+                lst.sort()
+                self._log("[codetemplater][info] Showing template list: "+u' '.join(lst))
+                wx.GetApp().GetCurrentBuffer().UserListShow(1, u' '.join(lst))
         else:
             evt.skip()
         
