@@ -6,10 +6,10 @@ License: wxWindows
 #-----------------------------------------------------------------------------#
 
 Version 0.4
-Released: 0x/0x/200x
+Released: 03/30/2010
 
 + Api compatibility changes
-
++ Fix Unicode handling issue
 
 #-----------------------------------------------------------------------------#
 

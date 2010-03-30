@@ -24,6 +24,8 @@ import wx.lib.mixins.listctrl as listmix
 #Editra Library Modules
 import ed_glob
 import ed_msg
+import ebmlib
+import ed_txt
 from util import Log
 
 #------------------------------------------------------------------------------#
@@ -165,7 +167,9 @@ class CustomListCtrl(wx.ListCtrl,
             return
         
         key = self.itemIndexMap[itemIndex]
-        source = str(self.itemDataMap[key][-1])
+        source = self.itemDataMap[key][-1]
+        if not ebmlib.IsUnicode(source):
+            source = ed_txt.DecodeString(source)
         line = self.itemDataMap[key][-2]
         try:
             nbook = self.GetParent().GetMainWindow().GetNotebook()
@@ -179,7 +183,7 @@ class CustomListCtrl(wx.ListCtrl,
         except Exception, excp:
             self._log("[err] %s" % excp)
 
-    #---- special methods used by the mixinx classes ----#
+    #---- special methods used by the mixin classes ----#
     
     #Used by the ColumnSorterMixin, see wx/lib/mixins/listctrl.py
     def GetListCtrl(self):
