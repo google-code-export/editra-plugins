@@ -75,14 +75,22 @@ class CodeTemplater(plugin.Plugin):
             
     def OnShow(self, evt):
         if evt.GetId() == ID_SHOW_TEMPLATES:
-            current_buffer = wx.GetApp().GetCurrentBuffer()
+            
             lst = self.templates[self.currentlang].keys()
+            
             if len(lst) == 0:
                 self._log("[codetemplater][info] Tried to show template list, but no templates present")
             else:
                 lst.sort()
-                self._log("[codetemplater][info] Showing template list: "+u' '.join(lst))
-                wx.GetApp().GetCurrentBuffer().UserListShow(1, u' '.join(lst))
+                self._log("[codetemplater][info] Showing template list: "+u','.join(lst))
+                #wx.GetApp().GetCurrentBuffer().UserListShow(1, u' '.join(lst))
+                cbuff = wx.GetApp().GetCurrentBuffer()
+                oldsep = cbuff.AutoCompGetSeparator()
+                try:
+                    cbuff.AutoCompSetSeparator(ord(u'\n'))
+                    cbuff.UserListShow(1, u'\n'.join(lst))
+                finally:
+                    cbuff.AutoCompSetSeparator(oldsep)
         else:
             evt.skip()
         
