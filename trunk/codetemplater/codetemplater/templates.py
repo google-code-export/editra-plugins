@@ -20,7 +20,7 @@ from string import Template
 
 from ed_glob import CONFIG,SB_INFO,ID_RELOAD_ENC
 from ed_menu import EdMenu
-from syntax import synglob
+from syntax import synglob,syntax
 from profiler import Profile_Get, Profile_Set, Profile_Del
 _ = wx.GetTranslation
 
@@ -325,7 +325,8 @@ class TemplateEditorPanel(wx.Panel):
         self.lastlangstr = self.langchoice.GetStringSelection()
 
 def get_language_list():
-    ids = [v[0] for v in synglob.LANG_MAP.values()]
+    #ids = [v[0] for v in synglob.LANG_MAP.values()]
+    ids = syntax.SyntaxIds()
     names = [synglob.GetDescriptionFromId(id) for id in ids]
     names.sort()
     return names
