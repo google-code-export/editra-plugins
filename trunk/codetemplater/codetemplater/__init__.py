@@ -97,7 +97,11 @@ class CodeTemplater(plugin.Plugin):
     def OnTemplate(self,msg):
         current_buffer = wx.GetApp().GetCurrentBuffer()
         text = msg.GetData()['text']
-        self.templates[self.currentlang][text].DoTemplate(current_buffer)
+        langtemp = self.templates[self.currentlang]
+        if text in langtemp:
+            langtemp[text].DoTemplate(current_buffer)
+        else:
+            self._log("[codetemplater][info] tried to find tempate %s, but none could be found for language %s"%(text,self.currentlang))
         
     def OnLexerChange(self,msg):
         fn,ftype = msg.GetData()
