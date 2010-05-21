@@ -16,8 +16,7 @@ Currently supported languages are:
   - php: check implemented by "php -l" execution
 
 """
-__version__ = "0.1"
-
+__version__ = "0.2"
 __author__ = "Giuseppe 'Cowo' Corbelli"
 __svnid__ = "$Id$"
 __revision__ = "$Revision$"
