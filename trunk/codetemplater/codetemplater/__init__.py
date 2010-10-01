@@ -111,7 +111,7 @@ class CodeTemplater(plugin.Plugin):
     
     def OnPageChange(self,msg):
         current_buffer = wx.GetApp().GetCurrentBuffer()
-        if Profile_Get(PROFILE_KEY_FOLLOW_LANG):
+        if current_buffer and Profile_Get(PROFILE_KEY_FOLLOW_LANG):
             lid = current_buffer.GetLangId()
             self._log("[codetemplater][info] changing to language %s due to page change"%lid)
             self.currentlang = lid
