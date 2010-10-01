@@ -1,4 +1,4 @@
 Name=CodeTemplater
 Author=Erik Tollerud
 Description=Simple Code Template Manager
-Version=0.2
+Version=0.3
