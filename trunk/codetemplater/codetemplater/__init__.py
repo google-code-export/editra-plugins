@@ -83,12 +83,13 @@ class CodeTemplater(plugin.Plugin):
             else:
                 lst.sort()
                 self._log("[codetemplater][info] Showing template list: "+u','.join(lst))
-                #wx.GetApp().GetCurrentBuffer().UserListShow(1, u' '.join(lst))
                 cbuff = wx.GetApp().GetCurrentBuffer()
                 oldsep = cbuff.AutoCompGetSeparator()
                 try:
                     cbuff.AutoCompSetSeparator(ord(u'\n'))
                     cbuff.UserListShow(1, u'\n'.join(lst))
+                except wx.PyAssertionError, msg:
+                    self._log("[codetemplater][err] Fail to show user list: %s" % str(msg))
                 finally:
                     cbuff.AutoCompSetSeparator(oldsep)
         else:
