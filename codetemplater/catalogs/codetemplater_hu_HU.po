@@ -1,28 +1,29 @@
-# SOME DESCRIPTIVE TITLE.
-# Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
-# This file is distributed under the same license as the PACKAGE package.
-# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+# Hungarian translation for editra
+# Copyright (c) 2010 Rosetta Contributors and Canonical Ltd 2010
+# This file is distributed under the same license as the editra package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, 2010.
 #
-#, fuzzy
 msgid ""
 msgstr ""
-"Project-Id-Version: PACKAGE VERSION\n"
+"Project-Id-Version: editra\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2010-10-02 10:44-0500\n"
-"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
-"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
-"Language-Team: LANGUAGE <LL@li.org>\n"
+"PO-Revision-Date: 2010-05-23 10:57+0000\n"
+"Last-Translator: Gergely Szarka <szarka.honved@gmail.com>\n"
+"Language-Team: Hungarian <hu@li.org>\n"
 "MIME-Version: 1.0\n"
-"Content-Type: text/plain; charset=CHARSET\n"
+"Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
+"X-Launchpad-Export-Date: 2010-10-02 15:37+0000\n"
+"X-Generator: Launchpad (build Unknown)\n"
 
 #: codetemplater/codetemplater/templates.py:178
 msgid "Add a New Template"
-msgstr ""
+msgstr "Új sablon hozzáadása"
 
 #: codetemplater/codetemplater/templates.py:221
 msgid "An \"$\" character."
-msgstr ""
+msgstr "\"$\" karakter"
 
 #: codetemplater/codetemplater/cfgdlg.py:59
 msgid "Causes the language type used for templates to adjust to the file type whenever a new tab is selected"
@@ -34,12 +35,12 @@ msgstr ""
 
 #: codetemplater/codetemplater/__init__.py:128
 msgid "Code Template Editor"
-msgstr ""
+msgstr "Kód sablon szerkesztő"
 
 #: codetemplater/codetemplater/__init__.py:59
 #: codetemplater/codetemplater/templates.py:150
 msgid "Code Templates"
-msgstr ""
+msgstr "Kód sablonok"
 
 #: codetemplater/codetemplater/cfgdlg.py:47
 msgid "CodeTemplater"
@@ -63,7 +64,7 @@ msgstr ""
 
 #: codetemplater/codetemplater/__init__.py:55
 msgid "Edit Templates..."
-msgstr ""
+msgstr "Sablonok szerkesztése"
 
 #: codetemplater/codetemplater/templates.py:203
 msgid "Help Text:"
@@ -83,11 +84,11 @@ msgstr ""
 
 #: codetemplater/codetemplater/templates.py:195
 msgid "Name:"
-msgstr ""
+msgstr "Név:"
 
 #: codetemplater/codetemplater/templates.py:293
 msgid "New Template"
-msgstr ""
+msgstr "Új sablon"
 
 #: codetemplater/codetemplater/templates.py:211
 msgid "Obey Indentation?"
@@ -117,7 +118,7 @@ msgstr ""
 
 #: codetemplater/codetemplater/templates.py:101
 msgid "Reset to defaults"
-msgstr ""
+msgstr "Az alapértelmezés visszaállítása"
 
 #: codetemplater/codetemplater/templates.py:102
 msgid "Resets the Profile to default as well as the Current Setup"
@@ -125,7 +126,7 @@ msgstr ""
 
 #: codetemplater/codetemplater/templates.py:97
 msgid "Save"
-msgstr ""
+msgstr "Mentés"
 
 #: codetemplater/codetemplater/templates.py:98
 msgid "Save to the Profile to be reloaded on next Startup"
