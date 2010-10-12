@@ -6,8 +6,8 @@ License: wxWindows
 Changelog:
 
 #-----------------------------------------------------------------------------#
-Version 1.9
-Released: 10/11/2010
+Version 1.6
+Released: 10/12/2010
 
 Bug Fixes:
 +Fix compatibility issue with python 2.6.6 on Windows
