@@ -48,7 +48,15 @@ import wx
 
 if sys.platform.lower().startswith('win'):            
     STARTUPINFO = subprocess.STARTUPINFO()
-    STARTUPINFO.dwFlags |= subprocess.STARTF_USESHOWWINDOW
+    if hasattr(subprocess, 'STARTF_USESHOWWINDOW'):
+        STARTUPINFO.dwFlags |= subprocess.STARTF_USESHOWWINDOW
+    else:
+        try:
+            from win32process import STARTF_USESHOWWINDOW
+            STARTUPINFO.dwFlags |= STARTF_USESHOWWINDOW
+        except ImportError:
+            # Give up and try hard coded value from Windows.h
+            STARTUPINFO.dwFlags |= 0x00000001
 else:
     STARTUPINFO = None
 
