@@ -7,14 +7,14 @@ msgid ""
 msgstr ""
 "Project-Id-Version: editra\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2009-11-07 11:48-0600\n"
-"PO-Revision-Date: 2009-05-19 19:18+0000\n"
-"Last-Translator: Julian Jacques Maurer <mail@julianjmaurer.de>\n"
+"POT-Creation-Date: 2010-10-12 20:21-0500\n"
+"PO-Revision-Date: 2010-01-03 04:34+0000\n"
+"Last-Translator: Philipp Kleinhenz <Unknown>\n"
 "Language-Team: German <de@li.org>\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"X-Launchpad-Export-Date: 2009-11-07 17:36+0000\n"
+"X-Launchpad-Export-Date: 2010-10-02 15:37+0000\n"
 "X-Generator: Launchpad (build Unknown)\n"
 
 #: Projects/projects/ConfigDialog.py:434
@@ -414,7 +414,7 @@ msgstr ""
 
 #: Projects/projects/ConfigDialog.py:166
 msgid "Use a specified diff program"
-msgstr ""
+msgstr "Nutze ein angegebenes Vergleichs Programm"
 
 #: Projects/projects/ConfigDialog.py:275
 msgid "Username"

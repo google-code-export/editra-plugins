@@ -8,14 +8,14 @@ msgid ""
 msgstr ""
 "Project-Id-Version: _projects-cs\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2009-11-07 11:48-0600\n"
-"PO-Revision-Date: 2009-11-04 20:52+0000\n"
-"Last-Translator: punkrtekk <Unknown>\n"
+"POT-Creation-Date: 2010-10-12 20:21-0500\n"
+"PO-Revision-Date: 2010-01-28 14:25+0000\n"
+"Last-Translator: Konki <pavel.konkol@seznam.cz>\n"
 "Language-Team: <cs@li.org>\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"X-Launchpad-Export-Date: 2009-11-07 17:36+0000\n"
+"X-Launchpad-Export-Date: 2010-10-02 15:37+0000\n"
 "X-Generator: Launchpad (build Unknown)\n"
 
 #: Projects/projects/ConfigDialog.py:434
@@ -52,7 +52,7 @@ msgstr "Autor"
 
 #: Projects/projects/ConfigDialog.py:149
 msgid "Built-in"
-msgstr ""
+msgstr "Zabudovaný"
 
 #: Projects/projects/ProjectPane.py:147
 msgid "C File"
@@ -68,15 +68,15 @@ msgstr ""
 
 #: Projects/projects/ModList.py:131 Projects/projects/ProjCmnDlg.py:71
 msgid "Commit"
-msgstr ""
+msgstr "Potvrdit"
 
 #: Projects/projects/ModList.py:395 Projects/projects/ProjectPane.py:971
 msgid "Commit Dialog"
-msgstr ""
+msgstr "Potvrdit dialog"
 
 #: Projects/projects/ModList.py:561 Projects/projects/ProjectPane.py:1427
 msgid "Commit changes"
-msgstr ""
+msgstr "Potvrdit změny"
 
 #: Projects/projects/HistWin.py:146 Projects/projects/HistWin.py:277
 msgid "Compare Revisions"
@@ -124,15 +124,15 @@ msgstr "Upravit"
 
 #: Projects/projects/ProjCmnDlg.py:306
 msgid "Enter a command to be executed on all selected files and files in selected directories."
-msgstr ""
+msgstr "Zadejte příkaz, který bude spuštěn na všech vybraných souborech a souborech ve vybraných adresářích."
 
 #: Projects/projects/ProjectPane.py:896 Projects/projects/ProjectPane.py:1539
 msgid "Enter command to execute on all files"
-msgstr ""
+msgstr "Zadejte příkaz, který bude spuštěn na všech souborech"
 
 #: Projects/projects/ModList.py:396 Projects/projects/ProjectPane.py:972
 msgid "Enter your commit message:"
-msgstr ""
+msgstr "Zadejte svou potvrzovací zprávu:"
 
 #: Projects/projects/ConfigDialog.py:285
 msgid "Environment Variables"
@@ -140,31 +140,31 @@ msgstr "Proměnné prostředí"
 
 #: Projects/projects/ProjectPane.py:1630 Projects/projects/ProjectPane.py:1638
 msgid "Error occurred when copying/moving files"
-msgstr ""
+msgstr "Vyskytla se chyba při kopírování/přesouvání souborů"
 
 #: Projects/projects/ProjectPane.py:1665
 msgid "Error occurred when removing files"
-msgstr ""
+msgstr "Vyskytla se chyba při mazání souborů"
 
 #: Projects/projects/ConfigDialog.py:261
 msgid "Executable Path"
-msgstr ""
+msgstr "Spustitelná cesta"
 
 #: Projects/projects/ProjCmnDlg.py:300
 msgid "Execute command on files"
-msgstr ""
+msgstr "Spustit příkaz na souborech"
 
 #: Projects/projects/ProjectPane.py:1414
 msgid "Execute command..."
-msgstr ""
+msgstr "Spustit příkaz..."
 
 #: Projects/projects/ConfigDialog.py:129
 msgid "File Filters"
-msgstr ""
+msgstr "Filtry souborů"
 
 #: Projects/projects/ModList.py:331
 msgid "Filename"
-msgstr ""
+msgstr "Název souboru"
 
 #: Projects/projects/ProjectPane.py:1391
 msgid "Folder"
@@ -180,31 +180,31 @@ msgstr "HTML soubor"
 
 #: Projects/projects/HistWin.py:328
 msgid "History information could not be retrieved"
-msgstr ""
+msgstr "Informace o historie nemůže být získána"
 
 #: Projects/projects/ConfigDialog.py:143
 msgid "Keep project tree synchronized with editor notebook"
-msgstr ""
+msgstr "Udržet strom projektu synchronizovaný s editorským poznámkovým blokem"
 
 #: Projects/projects/HistWin.py:316
 msgid "Log Message"
-msgstr ""
+msgstr "Zpráva záznamu"
 
 #: Projects/projects/ProjectPane.py:1428
 msgid "Make Patch"
-msgstr ""
+msgstr "Vytvořit záplatu"
 
 #: Projects/projects/ProjCmnDlg.py:68
 msgid "Message"
-msgstr ""
+msgstr "Zpráva"
 
 #: Projects/projects/ProjectPane.py:1399
 msgid "Move to Recycle Bin"
-msgstr ""
+msgstr "Přesunout do koše"
 
 #: Projects/projects/ProjectPane.py:1401
 msgid "Move to Trash"
-msgstr ""
+msgstr "Přesunout do koše"
 
 #: Projects/projects/ConfigDialog.py:289
 msgid "Name"
@@ -220,15 +220,15 @@ msgstr "Otevřít"
 
 #: Projects/projects/ProjectPane.py:1745
 msgid "Open Projects Sidepanel"
-msgstr ""
+msgstr "Otevřít boční panel projektu"
 
 #: Projects/projects/ProjectPane.py:1407
 msgid "Open enclosing folder"
-msgstr ""
+msgstr "Otevřít přiloženou složku"
 
 #: Projects/projects/__init__.py:117
 msgid "Open the Projects source control summary list"
-msgstr ""
+msgstr "Otevřít kontrolní shrnující seznam kódu projektu"
 
 #: Projects/projects/ConfigDialog.py:277
 msgid "Password"
@@ -244,7 +244,7 @@ msgstr "PHP soubor"
 
 #: Projects/projects/ConfigDialog.py:498
 msgid "Please enter a repository path.  Partial paths may also be entered."
-msgstr ""
+msgstr "Prosím zadejte cestu k repozitáři. Mohou být zadány i částečné cesty."
 
 #: Projects/projects/ProjectPane.py:1744 Projects/projects/__init__.py:60
 #: Projects/projects/__init__.py:154
@@ -261,7 +261,7 @@ msgstr "Python soubor"
 
 #: Projects/projects/ProjCmnDlg.py:126
 msgid "Recent Messages"
-msgstr ""
+msgstr "Nedávné zprávy"
 
 #: Projects/projects/ModList.py:119
 msgid "Refresh"
@@ -293,7 +293,7 @@ msgstr "Konfigurace repozitárů"
 
 #: Projects/projects/HistWin.py:119
 msgid "Retrieving File History"
-msgstr ""
+msgstr "Získávání historie souboru"
 
 #: Projects/projects/HistWin.py:313
 msgid "Rev #"
@@ -301,11 +301,11 @@ msgstr "Revize č."
 
 #: Projects/projects/ModList.py:137
 msgid "Revert"
-msgstr ""
+msgstr "Vrátit"
 
 #: Projects/projects/ModList.py:565 Projects/projects/ProjectPane.py:1429
 msgid "Revert to repository version"
-msgstr ""
+msgstr "Vrátit zpět na verzi repozitáře"
 
 #: Projects/projects/HistWin.py:138
 msgid "Revision History"
@@ -313,7 +313,7 @@ msgstr "Historie revizí"
 
 #: Projects/projects/HistWin.py:421
 msgid "Search Log"
-msgstr ""
+msgstr "Log vyhledávání"
 
 #: Projects/projects/ProjectPane.py:1417
 msgid "Search in directory"
@@ -325,7 +325,7 @@ msgstr "Vyberte diff program"
 
 #: Projects/projects/ConfigDialog.py:489
 msgid "Select the repository path to remove"
-msgstr ""
+msgstr "Vyberte cestu k repozitáři pro odstranění"
 
 #: Projects/projects/ProjectPane.py:1024
 msgid "Selected files are from multiple repositories"
@@ -337,25 +337,28 @@ msgstr "Ukázat historii revizí"
 
 #: Projects/projects/ConfigDialog.py:102 Projects/projects/__init__.py:116
 msgid "Source Control"
-msgstr ""
+msgstr "Kontrola zdroje"
 
 #: Projects/projects/ProjectPane.py:1415
+#, fuzzy
 msgid "Source Control command..."
-msgstr ""
+msgstr "Kontrola zdroje"
 
 #: Projects/projects/ConfigDialog.py:257
 msgid "Source control system"
-msgstr ""
+msgstr "Kontrolní systém zdroje"
 
 #: Projects/projects/ConfigDialog.py:136
 msgid ""
 "Space separated list of files patterns to exclude from view\n"
 "The use of wildcards (*) are permitted."
 msgstr ""
+"Mezera oddělila seznam předloh k vyloučení ze zobrazení\n"
+"Použití divokých karet (*) je dovoleno."
 
 #: Projects/projects/ModList.py:329
 msgid "Status"
-msgstr ""
+msgstr "Stav"
 
 #: Projects/projects/ProjectPane.py:146
 msgid "Text File"
@@ -366,35 +369,40 @@ msgid ""
 "The following command will be executed on all selected\n"
 "files and files contained in selected directories."
 msgstr ""
+"Následující příkaz bude spuštěn na všech vybraných\n"
+"souborech a souborech ve vybraných adresářích"
 
 #: Projects/projects/ProjectPane.py:893
+#, fuzzy
 msgid ""
 "The following source control command will be executed on all selected\n"
 "files and files contained in selected directories.\n"
 "e.g. bzr [command] filename.py"
 msgstr ""
+"Následující příkaz bude spuštěn na všech vybraných\n"
+"souborech a souborech ve vybraných adresářích"
 
 #: Projects/projects/HistWin.py:325
 msgid "The history information for the requested file could not be retrieved.  Please make sure that you have network access."
-msgstr ""
+msgstr "Informace o historii vybraného souboru nemůže být získána. Prosím ujistěte se, že máte přístup k síti."
 
 #: Projects/projects/ProjCmnDlg.py:43
 msgid "The requested file could not be retrieved from the source control system."
-msgstr ""
+msgstr "Požadovaný soubor nemohl být získán z kontrolního systémového zdroje."
 
 #: Projects/projects/ProjectPane.py:1636
 #, python-format
 msgid "The system returned the following message when attempting to move/copy %(filename)s: %(errmsg)s."
-msgstr ""
+msgstr "Systém vrítil následující zprávu při pokusu kopírovat/přesunout %(filename)s: %(errmsg)s."
 
 #: Projects/projects/ProjectPane.py:1627
 #, python-format
 msgid "The system returned the following message when attempting to move/copy %(filename)s: %(errmsg)s. Do you wish to continue?"
-msgstr ""
+msgstr "Systém vrítil následující zprávu při pokusu kopírovat/přesunout %(filename)s: %(errmsg)s. Přejete si pokračovat_"
 
 #: Projects/projects/ProjectPane.py:1469
 msgid "Untitled Folder"
-msgstr ""
+msgstr "Neoznačená složka"
 
 #: Projects/projects/ModList.py:125 Projects/projects/ProjectPane.py:1422
 msgid "Update"
@@ -407,7 +415,7 @@ msgstr ""
 
 #: Projects/projects/ConfigDialog.py:166
 msgid "Use a specified diff program"
-msgstr ""
+msgstr "Použijte specifikovaný diff program"
 
 #: Projects/projects/ConfigDialog.py:275
 msgid "Username"
@@ -419,4 +427,4 @@ msgstr "Hodnota"
 
 #: Projects/projects/ProjectPane.py:1023
 msgid "You can not execute source control commands across multiple repositories."
-msgstr ""
+msgstr "Nemůžete spustit zdrojové kontrolní příkazy napříč rozmanitými repozitáři."
