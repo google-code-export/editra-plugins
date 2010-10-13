@@ -7,14 +7,14 @@ msgid ""
 msgstr ""
 "Project-Id-Version: editra\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2009-11-07 11:48-0600\n"
+"POT-Creation-Date: 2010-10-12 20:21-0500\n"
 "PO-Revision-Date: 2008-10-08 12:45+0000\n"
 "Last-Translator: snowman <Unknown>\n"
 "Language-Team: Korean <ko@li.org>\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"X-Launchpad-Export-Date: 2008-10-20 02:20+0000\n"
+"X-Launchpad-Export-Date: 2010-10-02 15:37+0000\n"
 "X-Generator: Launchpad (build Unknown)\n"
 
 #: Projects/projects/ConfigDialog.py:434
@@ -162,9 +162,8 @@ msgid "File Filters"
 msgstr "파일 필터"
 
 #: Projects/projects/ModList.py:331
-#, fuzzy
 msgid "Filename"
-msgstr "사용자 이름"
+msgstr ""
 
 #: Projects/projects/ProjectPane.py:1391
 msgid "Folder"
@@ -195,18 +194,16 @@ msgid "Make Patch"
 msgstr "패치 작성"
 
 #: Projects/projects/ProjCmnDlg.py:68
-#, fuzzy
 msgid "Message"
-msgstr "로그 메시지"
+msgstr ""
 
 #: Projects/projects/ProjectPane.py:1399
 msgid "Move to Recycle Bin"
 msgstr ""
 
 #: Projects/projects/ProjectPane.py:1401
-#, fuzzy
 msgid "Move to Trash"
-msgstr "로 이동 "
+msgstr ""
 
 #: Projects/projects/ConfigDialog.py:289
 msgid "Name"
@@ -262,9 +259,8 @@ msgid "Python File"
 msgstr "프로젝트 파일"
 
 #: Projects/projects/ProjCmnDlg.py:126
-#, fuzzy
 msgid "Recent Messages"
-msgstr "로그 메시지"
+msgstr ""
 
 #: Projects/projects/ModList.py:119
 msgid "Refresh"
@@ -287,9 +283,8 @@ msgid "Remove repository"
 msgstr "리포지토리 삭제"
 
 #: Projects/projects/ModList.py:110
-#, fuzzy
 msgid "Repository"
-msgstr "리포지토리 삭제"
+msgstr ""
 
 #: Projects/projects/ConfigDialog.py:266
 msgid "Repository Configuration"
@@ -304,9 +299,8 @@ msgid "Rev #"
 msgstr "개정 #"
 
 #: Projects/projects/ModList.py:137
-#, fuzzy
 msgid "Revert"
-msgstr "프로젝트 삭제"
+msgstr ""
 
 #: Projects/projects/ModList.py:565 Projects/projects/ProjectPane.py:1429
 msgid "Revert to repository version"
@@ -350,9 +344,8 @@ msgid "Source Control command..."
 msgstr "소스 제어"
 
 #: Projects/projects/ConfigDialog.py:257
-#, fuzzy
 msgid "Source control system"
-msgstr "소스 제어"
+msgstr ""
 
 #: Projects/projects/ConfigDialog.py:136
 msgid ""
@@ -391,14 +384,14 @@ msgid "The requested file could not be retrieved from the source control system.
 msgstr "요청한 파일을 소스제어 시스템에서 조회할 수 없습니다."
 
 #: Projects/projects/ProjectPane.py:1636
-#, fuzzy, python-format
+#, python-format
 msgid "The system returned the following message when attempting to move/copy %(filename)s: %(errmsg)s."
-msgstr "%s 이동/복사시도에 대해 시스템에서 다음 메시지가 반환되었습니다. %s."
+msgstr ""
 
 #: Projects/projects/ProjectPane.py:1627
-#, fuzzy, python-format
+#, python-format
 msgid "The system returned the following message when attempting to move/copy %(filename)s: %(errmsg)s. Do you wish to continue?"
-msgstr "%s 이동/복사시도에 대해 시스템에서 다음 메시지가 반환되었습니다. %s. 계속하시겠습니다."
+msgstr ""
 
 #: Projects/projects/ProjectPane.py:1469
 msgid "Untitled Folder"
@@ -414,9 +407,8 @@ msgid "Updating %s"
 msgstr ""
 
 #: Projects/projects/ConfigDialog.py:166
-#, fuzzy
 msgid "Use a specified diff program"
-msgstr "diff 프로그램 선택"
+msgstr ""
 
 #: Projects/projects/ConfigDialog.py:275
 msgid "Username"

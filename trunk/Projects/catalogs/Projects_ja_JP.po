@@ -7,14 +7,14 @@ msgid ""
 msgstr ""
 "Project-Id-Version: editra\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2009-11-07 11:48-0600\n"
-"PO-Revision-Date: 2008-03-02 09:44+0000\n"
+"POT-Creation-Date: 2010-10-12 20:21-0500\n"
+"PO-Revision-Date: 2008-12-31 21:44+0000\n"
 "Last-Translator: Cody Precord <Unknown>\n"
 "Language-Team: Japanese <ja@li.org>\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"X-Launchpad-Export-Date: 2008-03-05 12:36+0000\n"
+"X-Launchpad-Export-Date: 2010-10-02 15:37+0000\n"
 "X-Generator: Launchpad (build Unknown)\n"
 
 #: Projects/projects/ConfigDialog.py:434
@@ -83,15 +83,15 @@ msgstr "リビジョンを比較する"
 
 #: Projects/projects/HistWin.py:281
 msgid "Compare Selected Revisions"
-msgstr ""
+msgstr "選択したリビジョンを比較する"
 
 #: Projects/projects/HistWin.py:279
 msgid "Compare to Selected Revision"
-msgstr ""
+msgstr "選択したリビジョンに比較する"
 
 #: Projects/projects/ModList.py:555 Projects/projects/ProjectPane.py:1423
 msgid "Compare to previous version"
-msgstr ""
+msgstr "以前のバージョンに比較する"
 
 #: Projects/projects/ProjectPane.py:1763
 msgid "Configure"
@@ -131,7 +131,7 @@ msgstr ""
 
 #: Projects/projects/ModList.py:396 Projects/projects/ProjectPane.py:972
 msgid "Enter your commit message:"
-msgstr ""
+msgstr "コミットメッセージを入力してください："
 
 #: Projects/projects/ConfigDialog.py:285
 msgid "Environment Variables"
@@ -162,9 +162,8 @@ msgid "File Filters"
 msgstr "ファイルフィルタ"
 
 #: Projects/projects/ModList.py:331
-#, fuzzy
 msgid "Filename"
-msgstr "ユーザー名"
+msgstr "ファイル名"
 
 #: Projects/projects/ProjectPane.py:1391
 msgid "Folder"
@@ -195,9 +194,8 @@ msgid "Make Patch"
 msgstr "パッチを作る"
 
 #: Projects/projects/ProjCmnDlg.py:68
-#, fuzzy
 msgid "Message"
-msgstr "ログメッセージ"
+msgstr ""
 
 #: Projects/projects/ProjectPane.py:1399
 msgid "Move to Recycle Bin"
@@ -225,7 +223,7 @@ msgstr ""
 
 #: Projects/projects/ProjectPane.py:1407
 msgid "Open enclosing folder"
-msgstr ""
+msgstr "入っているフォルダを開く"
 
 #: Projects/projects/__init__.py:117
 msgid "Open the Projects source control summary list"
@@ -261,14 +259,12 @@ msgid "Python File"
 msgstr "Pythonファイル"
 
 #: Projects/projects/ProjCmnDlg.py:126
-#, fuzzy
 msgid "Recent Messages"
-msgstr "ログメッセージ"
+msgstr ""
 
 #: Projects/projects/ModList.py:119
-#, fuzzy
 msgid "Refresh"
-msgstr "リフレッシュステータス"
+msgstr "更新"
 
 #: Projects/projects/ModList.py:551 Projects/projects/ProjectPane.py:1421
 msgid "Refresh status"
@@ -280,16 +276,15 @@ msgstr "プロジェクトを削除する"
 
 #: Projects/projects/ProjectPane.py:1385
 msgid "Remove from repository"
-msgstr ""
+msgstr "リポジトリから削除する"
 
 #: Projects/projects/ConfigDialog.py:490
 msgid "Remove repository"
-msgstr ""
+msgstr "リポジトリを削除する"
 
 #: Projects/projects/ModList.py:110
-#, fuzzy
 msgid "Repository"
-msgstr "リポジトリに追加する"
+msgstr "リポジトリ"
 
 #: Projects/projects/ConfigDialog.py:266
 msgid "Repository Configuration"
@@ -304,9 +299,8 @@ msgid "Rev #"
 msgstr "改正号"
 
 #: Projects/projects/ModList.py:137
-#, fuzzy
 msgid "Revert"
-msgstr "プロジェクトを削除する"
+msgstr "戻す"
 
 #: Projects/projects/ModList.py:565 Projects/projects/ProjectPane.py:1429
 msgid "Revert to repository version"
@@ -350,9 +344,8 @@ msgid "Source Control command..."
 msgstr "ソース コントロール"
 
 #: Projects/projects/ConfigDialog.py:257
-#, fuzzy
 msgid "Source control system"
-msgstr "ソース コントロール"
+msgstr ""
 
 #: Projects/projects/ConfigDialog.py:136
 msgid ""
@@ -362,7 +355,7 @@ msgstr ""
 
 #: Projects/projects/ModList.py:329
 msgid "Status"
-msgstr ""
+msgstr "ステータス"
 
 #: Projects/projects/ProjectPane.py:146
 msgid "Text File"
@@ -401,7 +394,7 @@ msgstr ""
 
 #: Projects/projects/ProjectPane.py:1469
 msgid "Untitled Folder"
-msgstr ""
+msgstr "無題フォルダ"
 
 #: Projects/projects/ModList.py:125 Projects/projects/ProjectPane.py:1422
 msgid "Update"

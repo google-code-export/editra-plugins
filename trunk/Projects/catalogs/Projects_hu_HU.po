@@ -1,36 +1,37 @@
-# SOME DESCRIPTIVE TITLE.
-# Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
-# This file is distributed under the same license as the PACKAGE package.
-# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+# Hungarian translation for editra
+# Copyright (c) 2009 Rosetta Contributors and Canonical Ltd 2009
+# This file is distributed under the same license as the editra package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, 2009.
 #
-#, fuzzy
 msgid ""
 msgstr ""
-"Project-Id-Version: PACKAGE VERSION\n"
+"Project-Id-Version: editra\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2010-10-12 20:21-0500\n"
-"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
-"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
-"Language-Team: LANGUAGE <LL@li.org>\n"
+"PO-Revision-Date: 2010-02-26 22:20+0000\n"
+"Last-Translator: Gergely Szarka <szarka.honved@gmail.com>\n"
+"Language-Team: Hungarian <hu@li.org>\n"
 "MIME-Version: 1.0\n"
-"Content-Type: text/plain; charset=CHARSET\n"
+"Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
+"X-Launchpad-Export-Date: 2010-10-02 15:37+0000\n"
+"X-Generator: Launchpad (build Unknown)\n"
 
 #: Projects/projects/ConfigDialog.py:434
 msgid "*NAME*"
-msgstr ""
+msgstr "*NÉV*"
 
 #: Projects/projects/ConfigDialog.py:435
 msgid "*VALUE*"
-msgstr ""
+msgstr "*ÉRTÉK*"
 
 #: Projects/projects/ProjectPane.py:1664
 msgid ". Do you wish to continue?"
-msgstr ""
+msgstr ". Szeretné folytatni?"
 
 #: Projects/projects/ProjectPane.py:1769
 msgid "Add Project"
-msgstr ""
+msgstr "Projekt hozzáadása"
 
 #: Projects/projects/ConfigDialog.py:499
 msgid "Add a New Repository Path"
@@ -38,7 +39,7 @@ msgstr ""
 
 #: Projects/projects/ProjectPane.py:1387
 msgid "Add to repository"
-msgstr ""
+msgstr "Hozzáadás a tárolóhoz"
 
 #: Projects/projects/ProjectPane.py:1663
 msgid "An error occurred when attempting to remove "
@@ -46,19 +47,19 @@ msgstr ""
 
 #: Projects/projects/HistWin.py:315
 msgid "Author"
-msgstr ""
+msgstr "Szerző"
 
 #: Projects/projects/ConfigDialog.py:149
 msgid "Built-in"
-msgstr ""
+msgstr "Beépített"
 
 #: Projects/projects/ProjectPane.py:147
 msgid "C File"
-msgstr ""
+msgstr "C fájl"
 
 #: Projects/projects/ProjectPane.py:1817
 msgid "Choose a Project Directory"
-msgstr ""
+msgstr "Projekt könyvtár kiválasztása"
 
 #: Projects/projects/ProjCmnDlg.py:275
 msgid "Close"
@@ -66,7 +67,7 @@ msgstr ""
 
 #: Projects/projects/ModList.py:131 Projects/projects/ProjCmnDlg.py:71
 msgid "Commit"
-msgstr ""
+msgstr "Eltárolás"
 
 #: Projects/projects/ModList.py:395 Projects/projects/ProjectPane.py:971
 msgid "Commit Dialog"
@@ -74,7 +75,7 @@ msgstr ""
 
 #: Projects/projects/ModList.py:561 Projects/projects/ProjectPane.py:1427
 msgid "Commit changes"
-msgstr ""
+msgstr "Változások eltárolása"
 
 #: Projects/projects/HistWin.py:146 Projects/projects/HistWin.py:277
 msgid "Compare Revisions"
@@ -94,31 +95,31 @@ msgstr ""
 
 #: Projects/projects/ProjectPane.py:1763
 msgid "Configure"
-msgstr ""
+msgstr "Beállítások"
 
 #: Projects/projects/ProjectPane.py:1411
 msgid "Copy"
-msgstr ""
+msgstr "Másolás"
 
 #: Projects/projects/ProjCmnDlg.py:45
 msgid "Could not retrieve file"
-msgstr ""
+msgstr "Fájl nem elérhető"
 
 #: Projects/projects/ProjectPane.py:1410
 msgid "Cut"
-msgstr ""
+msgstr "Kivágás"
 
 #: Projects/projects/HistWin.py:314
 msgid "Date"
-msgstr ""
+msgstr "Dátum"
 
 #: Projects/projects/ConfigDialog.py:148
 msgid "Diff Program"
-msgstr ""
+msgstr "Diff program"
 
 #: Projects/projects/ProjectPane.py:1405
 msgid "Edit"
-msgstr ""
+msgstr "Szerkesztés"
 
 #: Projects/projects/ProjCmnDlg.py:306
 msgid "Enter a command to be executed on all selected files and files in selected directories."
@@ -134,15 +135,15 @@ msgstr ""
 
 #: Projects/projects/ConfigDialog.py:285
 msgid "Environment Variables"
-msgstr ""
+msgstr "Környezeti változók"
 
 #: Projects/projects/ProjectPane.py:1630 Projects/projects/ProjectPane.py:1638
 msgid "Error occurred when copying/moving files"
-msgstr ""
+msgstr "Hiba a fájlok másolása/áthelyezése közben"
 
 #: Projects/projects/ProjectPane.py:1665
 msgid "Error occurred when removing files"
-msgstr ""
+msgstr "Hiba a fájlok eltávolítása közben"
 
 #: Projects/projects/ConfigDialog.py:261
 msgid "Executable Path"
@@ -150,11 +151,11 @@ msgstr ""
 
 #: Projects/projects/ProjCmnDlg.py:300
 msgid "Execute command on files"
-msgstr ""
+msgstr "Parancs végrehajtása a fájlokon"
 
 #: Projects/projects/ProjectPane.py:1414
 msgid "Execute command..."
-msgstr ""
+msgstr "Parancs végrehajtása"
 
 #: Projects/projects/ConfigDialog.py:129
 msgid "File Filters"
@@ -162,19 +163,19 @@ msgstr ""
 
 #: Projects/projects/ModList.py:331
 msgid "Filename"
-msgstr ""
+msgstr "Fájlnév"
 
 #: Projects/projects/ProjectPane.py:1391
 msgid "Folder"
-msgstr ""
+msgstr "Mappa"
 
 #: Projects/projects/ConfigDialog.py:100
 msgid "General"
-msgstr ""
+msgstr "Általános"
 
 #: Projects/projects/ProjectPane.py:148
 msgid "HTML File"
-msgstr ""
+msgstr "HTML-fájl"
 
 #: Projects/projects/HistWin.py:328
 msgid "History information could not be retrieved"
@@ -186,7 +187,7 @@ msgstr ""
 
 #: Projects/projects/HistWin.py:316
 msgid "Log Message"
-msgstr ""
+msgstr "Naplóüzenet"
 
 #: Projects/projects/ProjectPane.py:1428
 msgid "Make Patch"
@@ -194,27 +195,27 @@ msgstr ""
 
 #: Projects/projects/ProjCmnDlg.py:68
 msgid "Message"
-msgstr ""
+msgstr "Üzenet"
 
 #: Projects/projects/ProjectPane.py:1399
 msgid "Move to Recycle Bin"
-msgstr ""
+msgstr "Áthelyezés a kukába"
 
 #: Projects/projects/ProjectPane.py:1401
 msgid "Move to Trash"
-msgstr ""
+msgstr "Áthelyezés a kukába"
 
 #: Projects/projects/ConfigDialog.py:289
 msgid "Name"
-msgstr ""
+msgstr "Név"
 
 #: Projects/projects/ProjectPane.py:1408
 msgid "New..."
-msgstr ""
+msgstr "Új..."
 
 #: Projects/projects/ProjectPane.py:1406
 msgid "Open"
-msgstr ""
+msgstr "Megnyitás"
 
 #: Projects/projects/ProjectPane.py:1745
 msgid "Open Projects Sidepanel"
@@ -230,15 +231,15 @@ msgstr ""
 
 #: Projects/projects/ConfigDialog.py:277
 msgid "Password"
-msgstr ""
+msgstr "Jelszó"
 
 #: Projects/projects/ProjectPane.py:1412
 msgid "Paste"
-msgstr ""
+msgstr "Beillesztés"
 
 #: Projects/projects/ProjectPane.py:149
 msgid "Php File"
-msgstr ""
+msgstr "Php fájl"
 
 #: Projects/projects/ConfigDialog.py:498
 msgid "Please enter a repository path.  Partial paths may also be entered."
@@ -247,7 +248,7 @@ msgstr ""
 #: Projects/projects/ProjectPane.py:1744 Projects/projects/__init__.py:60
 #: Projects/projects/__init__.py:154
 msgid "Projects"
-msgstr ""
+msgstr "Projektek"
 
 #: Projects/projects/ConfigDialog.py:56
 msgid "Projects Configuration"
@@ -255,39 +256,39 @@ msgstr ""
 
 #: Projects/projects/ProjectPane.py:150
 msgid "Python File"
-msgstr ""
+msgstr "Python fájl"
 
 #: Projects/projects/ProjCmnDlg.py:126
 msgid "Recent Messages"
-msgstr ""
+msgstr "Legutóbbi üzenetek"
 
 #: Projects/projects/ModList.py:119
 msgid "Refresh"
-msgstr ""
+msgstr "Frissítés"
 
 #: Projects/projects/ModList.py:551 Projects/projects/ProjectPane.py:1421
 msgid "Refresh status"
-msgstr ""
+msgstr "Frissítés állapota"
 
 #: Projects/projects/ProjectPane.py:1775
 msgid "Remove Project"
-msgstr ""
+msgstr "Projekt eltávolítása"
 
 #: Projects/projects/ProjectPane.py:1385
 msgid "Remove from repository"
-msgstr ""
+msgstr "Eltávolítás a tárolóból"
 
 #: Projects/projects/ConfigDialog.py:490
 msgid "Remove repository"
-msgstr ""
+msgstr "Tároló eltávolítása"
 
 #: Projects/projects/ModList.py:110
 msgid "Repository"
-msgstr ""
+msgstr "Tároló"
 
 #: Projects/projects/ConfigDialog.py:266
 msgid "Repository Configuration"
-msgstr ""
+msgstr "Tároló beállítása"
 
 #: Projects/projects/HistWin.py:119
 msgid "Retrieving File History"
@@ -299,7 +300,7 @@ msgstr ""
 
 #: Projects/projects/ModList.py:137
 msgid "Revert"
-msgstr ""
+msgstr "Visszaállítás"
 
 #: Projects/projects/ModList.py:565 Projects/projects/ProjectPane.py:1429
 msgid "Revert to repository version"
@@ -307,11 +308,11 @@ msgstr ""
 
 #: Projects/projects/HistWin.py:138
 msgid "Revision History"
-msgstr ""
+msgstr "Változások története"
 
 #: Projects/projects/HistWin.py:421
 msgid "Search Log"
-msgstr ""
+msgstr "Keresési napló"
 
 #: Projects/projects/ProjectPane.py:1417
 msgid "Search in directory"
@@ -331,15 +332,16 @@ msgstr ""
 
 #: Projects/projects/ModList.py:558 Projects/projects/ProjectPane.py:1425
 msgid "Show revision history"
-msgstr ""
+msgstr "Változtatások történetének mutatása"
 
 #: Projects/projects/ConfigDialog.py:102 Projects/projects/__init__.py:116
 msgid "Source Control"
 msgstr ""
 
 #: Projects/projects/ProjectPane.py:1415
+#, fuzzy
 msgid "Source Control command..."
-msgstr ""
+msgstr "Parancs végrehajtása"
 
 #: Projects/projects/ConfigDialog.py:257
 msgid "Source control system"
@@ -353,11 +355,11 @@ msgstr ""
 
 #: Projects/projects/ModList.py:329
 msgid "Status"
-msgstr ""
+msgstr "Állapot"
 
 #: Projects/projects/ProjectPane.py:146
 msgid "Text File"
-msgstr ""
+msgstr "Szöveges fájl"
 
 #: Projects/projects/ProjectPane.py:1537
 msgid ""
@@ -392,11 +394,11 @@ msgstr ""
 
 #: Projects/projects/ProjectPane.py:1469
 msgid "Untitled Folder"
-msgstr ""
+msgstr "Névtelen mappa"
 
 #: Projects/projects/ModList.py:125 Projects/projects/ProjectPane.py:1422
 msgid "Update"
-msgstr ""
+msgstr "Frissítés"
 
 #: Projects/projects/ProjectPane.py:921
 #, python-format
@@ -409,11 +411,11 @@ msgstr ""
 
 #: Projects/projects/ConfigDialog.py:275
 msgid "Username"
-msgstr ""
+msgstr "Felhasználónév"
 
 #: Projects/projects/ConfigDialog.py:290
 msgid "Value"
-msgstr ""
+msgstr "Érték"
 
 #: Projects/projects/ProjectPane.py:1023
 msgid "You can not execute source control commands across multiple repositories."

@@ -7,14 +7,14 @@ msgid ""
 msgstr ""
 "Project-Id-Version: editra\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2009-11-07 11:48-0600\n"
-"PO-Revision-Date: 2008-07-08 21:30+0200\n"
-"Last-Translator: Igor Chomko <igorchomko@gmail.com>\n"
+"POT-Creation-Date: 2010-10-12 20:21-0500\n"
+"PO-Revision-Date: 2010-07-05 15:13+0000\n"
+"Last-Translator: Sergiy Gavrylov <sergiovana@bigmir.net>\n"
 "Language-Team: Ukrainian <uk@li.org>\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"X-Launchpad-Export-Date: 2008-07-08 16:44+0000\n"
+"X-Launchpad-Export-Date: 2010-10-02 15:37+0000\n"
 "X-Generator: Launchpad (build Unknown)\n"
 
 #: Projects/projects/ConfigDialog.py:434
@@ -147,7 +147,7 @@ msgstr "При  видаленні файлів виникла помилка"
 
 #: Projects/projects/ConfigDialog.py:261
 msgid "Executable Path"
-msgstr ""
+msgstr "Виконуваний шлях"
 
 #: Projects/projects/ProjCmnDlg.py:300
 msgid "Execute command on files"
@@ -162,9 +162,8 @@ msgid "File Filters"
 msgstr "Фільтри файлу"
 
 #: Projects/projects/ModList.py:331
-#, fuzzy
 msgid "Filename"
-msgstr "Ім'я користувача"
+msgstr "Назва файла"
 
 #: Projects/projects/ProjectPane.py:1391
 msgid "Folder"
@@ -195,18 +194,16 @@ msgid "Make Patch"
 msgstr "Здійснити виправлення"
 
 #: Projects/projects/ProjCmnDlg.py:68
-#, fuzzy
 msgid "Message"
-msgstr "Повідомлення Журналу"
+msgstr "Повідомлення"
 
 #: Projects/projects/ProjectPane.py:1399
 msgid "Move to Recycle Bin"
-msgstr ""
+msgstr "Перемістити до кошика"
 
 #: Projects/projects/ProjectPane.py:1401
-#, fuzzy
 msgid "Move to Trash"
-msgstr "Перемістити до "
+msgstr "Перемістити у смітник"
 
 #: Projects/projects/ConfigDialog.py:289
 msgid "Name"
@@ -230,7 +227,7 @@ msgstr "Відкрити вміщену папку"
 
 #: Projects/projects/__init__.py:117
 msgid "Open the Projects source control summary list"
-msgstr ""
+msgstr "Відкрити висновки керування джерелами проектів"
 
 #: Projects/projects/ConfigDialog.py:277
 msgid "Password"
@@ -262,14 +259,12 @@ msgid "Python File"
 msgstr "Файл Python"
 
 #: Projects/projects/ProjCmnDlg.py:126
-#, fuzzy
 msgid "Recent Messages"
-msgstr "Повідомлення Журналу"
+msgstr "Недавні повідомлення"
 
 #: Projects/projects/ModList.py:119
-#, fuzzy
 msgid "Refresh"
-msgstr "Поновити статус"
+msgstr "Оновити"
 
 #: Projects/projects/ModList.py:551 Projects/projects/ProjectPane.py:1421
 msgid "Refresh status"
@@ -288,9 +283,8 @@ msgid "Remove repository"
 msgstr "Видалити архів"
 
 #: Projects/projects/ModList.py:110
-#, fuzzy
 msgid "Repository"
-msgstr "Видалити архів"
+msgstr "Репозиторій"
 
 #: Projects/projects/ConfigDialog.py:266
 msgid "Repository Configuration"
@@ -305,9 +299,8 @@ msgid "Rev #"
 msgstr "Реверс #"
 
 #: Projects/projects/ModList.py:137
-#, fuzzy
 msgid "Revert"
-msgstr "Видалити проект"
+msgstr "Повернути"
 
 #: Projects/projects/ModList.py:565 Projects/projects/ProjectPane.py:1429
 msgid "Revert to repository version"
@@ -351,9 +344,8 @@ msgid "Source Control command..."
 msgstr "Контроль джерела"
 
 #: Projects/projects/ConfigDialog.py:257
-#, fuzzy
 msgid "Source control system"
-msgstr "Контроль джерела"
+msgstr "Система керування джерелами"
 
 #: Projects/projects/ConfigDialog.py:136
 msgid ""
@@ -365,7 +357,7 @@ msgstr ""
 
 #: Projects/projects/ModList.py:329
 msgid "Status"
-msgstr ""
+msgstr "Статус"
 
 #: Projects/projects/ProjectPane.py:146
 msgid "Text File"
@@ -398,18 +390,18 @@ msgid "The requested file could not be retrieved from the source control system.
 msgstr "Неможливо знайти  пошукуваний файл в системі контролю джерела."
 
 #: Projects/projects/ProjectPane.py:1636
-#, fuzzy, python-format
+#, python-format
 msgid "The system returned the following message when attempting to move/copy %(filename)s: %(errmsg)s."
-msgstr "Система повернула дане повідомлення при спробі переміщення/копіювання %s: %s."
+msgstr "Під час намагання переміщення чи копіювання %(filename)s, система повернула таке повідомлення: %(errmsg)s."
 
 #: Projects/projects/ProjectPane.py:1627
-#, fuzzy, python-format
+#, python-format
 msgid "The system returned the following message when attempting to move/copy %(filename)s: %(errmsg)s. Do you wish to continue?"
-msgstr "Система повернула дане повідомлення при спробі переміщення/копіювання %s: %s. Бажаєте продовжити?"
+msgstr "Під час намагання переміщення чи копіювання %(filename)s, система повернула таке повідомлення: %(errmsg)s. Хочете продовжити?"
 
 #: Projects/projects/ProjectPane.py:1469
 msgid "Untitled Folder"
-msgstr ""
+msgstr "Неназвана тека"
 
 #: Projects/projects/ModList.py:125 Projects/projects/ProjectPane.py:1422
 msgid "Update"
@@ -421,9 +413,8 @@ msgid "Updating %s"
 msgstr ""
 
 #: Projects/projects/ConfigDialog.py:166
-#, fuzzy
 msgid "Use a specified diff program"
-msgstr "Обрати прирощену програму"
+msgstr "Використовувати вказані розбіжності програми"
 
 #: Projects/projects/ConfigDialog.py:275
 msgid "Username"
