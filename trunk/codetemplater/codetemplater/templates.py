@@ -32,7 +32,7 @@ class CodeTemplate(object):
     a template for use with the CodeTemplater editra plugin
     """
 
-    def __init__(self,name,templatestr,description=u'',indent=True):
+    def __init__(self, name, templatestr, description=u'', indent=True):
         super(CodeTemplate, self).__init__()
 
         self.name = name
@@ -93,8 +93,10 @@ class TemplateEditorDialog(wx.Dialog):
         self.edpanel = TemplateEditorPanel(self,plugin,initiallang,-1)
         basesizer.Add(self.edpanel,0)
 
-        line = wx.StaticLine(self, -1, size=(20,-1), style=wx.LI_HORIZONTAL)
-        basesizer.Add(line, 0, wx.GROW|wx.ALIGN_CENTER_VERTICAL|wx.RIGHT|wx.TOP, 5)
+        line = wx.StaticLine(self, wx.ID_ANY,
+                             size=(20,-1), style=wx.LI_HORIZONTAL)
+        basesizer.Add(line, 0,
+                      wx.GROW|wx.ALIGN_CENTER_VERTICAL|wx.RIGHT|wx.TOP, 5)
 
         btnsizer = wx.BoxSizer(wx.HORIZONTAL)
         okbtn = wx.Button(self, wx.ID_CLOSE)
@@ -120,7 +122,6 @@ class TemplateEditorDialog(wx.Dialog):
         self.edpanel.ApplyTemplateInfo(updatelistind=self.edpanel.lastind)
 
         newd = {}
-
         for lang,ld in self.edpanel.plugin.templates.iteritems():
             newld = {}
             for k,v in ld.iteritems():
@@ -150,16 +151,13 @@ class TemplateEditorPanel(wx.Panel):
         self.lastind = None
         self.lastname = ''
 
+        # Layout left side of panel to display and alter list of templates
         basesizer = wx.BoxSizer(wx.HORIZONTAL)
-
-        #left side of panel to display and alter list of templates
         listsizer = wx.BoxSizer(wx.VERTICAL)
-
-        label = wx.StaticText(self, -1, _("Code Templates"))
-        listsizer.Add(label, 0, wx.ALIGN_CENTRE|wx.ALL, 5)
+        staticbox = wx.StaticBox(self, label=_("Code Templates"))
+        boxsz = wx.StaticBoxSizer(staticbox, wx.VERTICAL)
 
         langchoices = get_language_list()
-
         if isinstance(initiallang,basestring):
             id = synglob.GetIdFromDescription(initiallang)
         else:
@@ -171,30 +169,31 @@ class TemplateEditorPanel(wx.Panel):
 
         self.lastlangstr = initiallang
 
-        self.langchoice = wx.Choice(self, -1, choices=langchoices)
+        self.langchoice = wx.Choice(self, wx.ID_ANY, choices=langchoices)
         self.langchoice.SetSelection(self.langchoice.FindString(initiallang))
         self.Bind(wx.EVT_CHOICE, self.OnLangChange, self.langchoice)
         listsizer.Add(self.langchoice,0,wx.ALIGN_CENTRE|wx.ALL, 5)
 
-        self.listbox = wx.ListBox(self, -1,size=(150,300),
+        self.listbox = wx.ListBox(self, wx.ID_ANY, size=(150,300),
                                   choices=self.GetTemplateNames(),
                                   style=wx.LB_SINGLE)
         self.Bind(wx.EVT_LISTBOX, self.OnListChange, self.listbox)
         listsizer.Add(self.listbox, 1, wx.ALIGN_CENTRE|wx.ALL, 5)
 
         buttonsizer = wx.BoxSizer(wx.HORIZONTAL)
-        addbutton = wx.Button(self,wx.ID_ADD)
-        addbutton.SetToolTipString(_('Add a New Template'))
+        addbutton = wx.Button(self, wx.ID_ADD)
+        addbutton.SetToolTipString(_("Add a New Template"))
         self.Bind(wx.EVT_BUTTON, self.OnAdd, addbutton)
-        buttonsizer.Add(addbutton,1,wx.ALIGN_CENTRE|wx.ALL, 5)
+        buttonsizer.Add(addbutton, 1, wx.ALIGN_CENTRE|wx.ALL, 5)
         self.rembutton = wx.Button(self,wx.ID_DELETE)
-        self.rembutton.SetToolTipString(_('Remove the selected Template'))
+        self.rembutton.SetToolTipString(_("Remove the selected Template"))
         self.Bind(wx.EVT_BUTTON, self.OnRemove, self.rembutton)
         self.rembutton.Enable(False)
         buttonsizer.Add(self.rembutton,1,wx.ALIGN_CENTRE|wx.ALL, 5)
         listsizer.Add(buttonsizer, 0, wx.ALIGN_CENTRE|wx.ALL, 2)
+        boxsz.Add(listsizer, 1, wx.EXPAND)
 
-        basesizer.Add(listsizer, 0, wx.GROW|wx.ALIGN_CENTER_VERTICAL|wx.ALL, 5)
+        basesizer.Add(boxsz, 0, wx.EXPAND|wx.ALIGN_CENTER_VERTICAL|wx.ALL, 5)
 
         #right side of panel to display the selected template
         templateinfo = wx.BoxSizer(wx.VERTICAL)
@@ -231,14 +230,14 @@ class TemplateEditorPanel(wx.Panel):
                 _('tabs will be replaced by the appropriate indent.')
                 )
         templateinfo.Add(templabel, 0, wx.ALIGN_CENTER|wx.ALL, 2)
-        self.temptxt = wx.TextCtrl(self,-1,size=(400,300),style = wx.TE_MULTILINE)
+        self.temptxt = wx.TextCtrl(self, wx.ID_ANY, size=(400,300),
+                                   style=wx.TE_MULTILINE)
         templateinfo.Add(self.temptxt, 1, wx.GROW|wx.ALL, 2)
         self.temptxt.Enable(False)
 
         basesizer.Add(templateinfo, 1, wx.GROW|wx.ALIGN_CENTER|wx.ALL, 5)
 
         self.SetSizer(basesizer)
-        basesizer.Fit(self)
 
     def GetLangTemplateDict(self, lastlangstr=False):
         if lastlangstr:
