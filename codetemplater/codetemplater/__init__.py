@@ -30,6 +30,8 @@ from cfgdlg import CodeTemplaterConfig,PROFILE_KEY_POPUP,PROFILE_KEY_FOLLOW_LANG
 ID_EDIT_TEMPLATES  = wx.NewId()
 ID_SHOW_TEMPLATES = wx.NewId()
 
+#-----------------------------------------------------------------------------#
+
 class CodeTemplater(plugin.Plugin):
     """Adds an interface to add Code Templates"""
     plugin.Implements(iface.MainWindowI)  
@@ -50,21 +52,22 @@ class CodeTemplater(plugin.Plugin):
         
         popupshortcut = Profile_Get(PROFILE_KEY_POPUP)
           
-        submenu.Append(ID_SHOW_TEMPLATES,_('Show Code Templates')+'\t'+popupshortcut)
+        submenu.Append(ID_SHOW_TEMPLATES,
+                       _('Show Code Templates') + u'\t' + popupshortcut)
         submenu.AppendSeparator()    
         submenu.Append(ID_EDIT_TEMPLATES,_('Edit Templates...'),
                  _('Open a Dialog to Edit the Templates Currently in Use'))
                     
         toolmenu = parent.GetMenuBar().GetMenuByName("tools")
-        toolmenu.AppendSubMenu(submenu,_('Code Templates'),_('Insert Code Templates into Document'))
+        toolmenu.AppendSubMenu(submenu,
+                               _('Code Templates'),
+                               _('Insert Code Templates into Document'))
         
         Subscribe(self.OnTemplate,EDMSG_UI_STC_USERLIST_SEL)
         Subscribe(self.OnLexerChange,EDMSG_UI_STC_LEXER)
         Subscribe(self.OnPageChange,EDMSG_UI_NB_CHANGED)
         
         self._log("[codetemplater][info] Finished loading codetemplater")
-        
-    
         
     def GetMenuHandlers(self):
         return [(ID_EDIT_TEMPLATES,self.OnEdit),
@@ -120,13 +123,14 @@ class CodeTemplater(plugin.Plugin):
     def OnEdit(self, evt):
         if evt.GetId() == ID_EDIT_TEMPLATES:
             self._log("[codetemplater][info] Loading Editor Dialog")
-            
             current_buffer = wx.GetApp().GetCurrentBuffer()
-            
             ilang = self.currentlang
-            
-            dlg = TemplateEditorDialog(wx.GetApp().GetActiveWindow(),self,-1,_('Code Template Editor'),initiallang=ilang)
-            
+            dlg = TemplateEditorDialog(wx.GetApp().GetActiveWindow(),
+                                       self,
+                                       wx.ID_ANY,
+                                       _("Code Template Editor"),
+                                       initiallang=ilang)
+            dlg.CenterOnParent()
             dlg.ShowModal()
             dlg.edpanel.ApplyTemplateInfo()
             dlg.Destroy()
@@ -134,6 +138,6 @@ class CodeTemplater(plugin.Plugin):
         else:
             evt.Skip()
 
+# Editra Plugin Configuration Interface
 def GetConfigObject():
     return CodeTemplaterConfig()
-
