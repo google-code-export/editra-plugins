@@ -69,14 +69,14 @@ class CodeTemplate(object):
         fullstring = propstring.replace('\n',page.GetEOLChar()+indentstr)
         if '#CUR' in fullstring:
             curind = fullstring.index('#CUR')
-            curoffset = len(fullstring)-4-curind
+            curoffset = len(fullstring) - 4 - curind
             fullstring = fullstring.replace('#CUR','',1)
         else:
             curoffset = None
 
         page.AddText(fullstring)
         if curoffset is not None:
-            newpos = page.GetCurrentPos()-curoffset
+            newpos = page.GetCurrentPos() - curoffset
             page.SetCurrentPos(newpos)
             page.SetSelection(newpos,newpos)
 
@@ -84,33 +84,39 @@ class CodeTemplate(object):
 
 class TemplateEditorDialog(wx.Dialog):
     def __init__(self, parent, plugin, ID, title, pos=wx.DefaultPosition,
-                 size=wx.DefaultSize, style=wx.DEFAULT_DIALOG_STYLE,
+                 size=wx.DefaultSize,
+                 style=wx.DEFAULT_DIALOG_STYLE|wx.RESIZE_BORDER,
                  initiallang=None):
         super(TemplateEditorDialog, self).__init__(parent, ID, title, pos,
                                                    size, style)
 
         basesizer = wx.BoxSizer(wx.VERTICAL)
-        self.edpanel = TemplateEditorPanel(self,plugin,initiallang,-1)
-        basesizer.Add(self.edpanel,0)
+        self.edpanel = TemplateEditorPanel(self, plugin, initiallang, -1)
+        basesizer.Add(self.edpanel, 1, wx.EXPAND)
 
         line = wx.StaticLine(self, wx.ID_ANY,
                              size=(20,-1), style=wx.LI_HORIZONTAL)
         basesizer.Add(line, 0,
-                      wx.GROW|wx.ALIGN_CENTER_VERTICAL|wx.RIGHT|wx.TOP, 5)
+                      wx.EXPAND|wx.ALIGN_CENTER_VERTICAL|wx.ALL, 5)
 
+        # Layout buttons
         btnsizer = wx.BoxSizer(wx.HORIZONTAL)
+        btnsizer.AddStretchSpacer()
         okbtn = wx.Button(self, wx.ID_CLOSE)
         okbtn.Bind(wx.EVT_BUTTON, self.OnClose)
-        btnsizer.Add(okbtn, 0, wx.ALIGN_CENTER|wx.ALIGN_CENTER_VERTICAL|wx.ALL, 5)
-        profbtn = wx.Button(self, wx.ID_SAVE,_('Save'))
-        profbtn.SetToolTipString(_('Save to the Profile to be reloaded on next Startup'))
+        btnsizer.Add(okbtn, 0, wx.ALIGN_CENTER_VERTICAL|wx.ALL, 5)
+        profbtn = wx.Button(self, wx.ID_SAVE,_("Save"))
+        tooltip = _("Save to the Profile to be reloaded on next Startup")
+        profbtn.SetToolTipString(tooltip)
         profbtn.Bind(wx.EVT_BUTTON, self.OnSaveProfile)
-        btnsizer.Add(profbtn, 0, wx.ALIGN_CENTER|wx.ALIGN_CENTER_VERTICAL|wx.ALL, 5)
-        resetbtn = wx.Button(self, wx.ID_RESET,_('Reset to defaults'))
-        resetbtn.SetToolTipString(_('Resets the Profile to default as well as the Current Setup'))
+        btnsizer.Add(profbtn, 0, wx.ALIGN_CENTER_VERTICAL|wx.ALL, 5)
+        resetbtn = wx.Button(self, wx.ID_RESET, _("Reset to defaults"))
+        tooltip = _("Resets the Profile to default as well as the Current Setup")
+        resetbtn.SetToolTipString(tooltip)
         resetbtn.Bind(wx.EVT_BUTTON, self.OnResetProfile)
-        btnsizer.Add(resetbtn, 0, wx.ALIGN_CENTER|wx.ALIGN_CENTER_VERTICAL|wx.ALL, 5)
-        basesizer.Add(btnsizer,0, wx.ALIGN_CENTER|wx.ALIGN_CENTER_VERTICAL)
+        btnsizer.Add(resetbtn, 0, wx.ALIGN_CENTER_VERTICAL|wx.ALL, 5)
+        btnsizer.AddStretchSpacer()
+        basesizer.Add(btnsizer, 0, wx.EXPAND|wx.ALIGN_CENTER)
 
         self.SetSizer(basesizer)
         self.SetInitialSize()
@@ -192,58 +198,60 @@ class TemplateEditorPanel(wx.Panel):
         buttonsizer.Add(self.rembutton,1,wx.ALIGN_CENTRE|wx.ALL, 5)
         listsizer.Add(buttonsizer, 0, wx.ALIGN_CENTRE|wx.ALL, 2)
         boxsz.Add(listsizer, 1, wx.EXPAND)
-
         basesizer.Add(boxsz, 0, wx.EXPAND|wx.ALIGN_CENTER_VERTICAL|wx.ALL, 5)
 
-        #right side of panel to display the selected template
+        # Layout right side of panel to display the selected template
         templateinfo = wx.BoxSizer(wx.VERTICAL)
 
         namesizer = wx.BoxSizer(wx.HORIZONTAL)
-        helplabel = wx.StaticText(self, -1, _("Name:"))
+        helplabel = wx.StaticText(self, wx.ID_ANY, _("Name:"))
         namesizer.Add(helplabel,0,wx.ALIGN_CENTRE|wx.ALL, 2)
-        self.nametxt = wx.TextCtrl(self,-1)
+        self.nametxt = wx.TextCtrl(self, wx.ID_ANY)
         namesizer.Add(self.nametxt,1,wx.GROW|wx.ALIGN_CENTRE|wx.ALL, 2)
         templateinfo.Add(namesizer, 0, wx.GROW|wx.ALIGN_CENTER_VERTICAL|wx.ALL, 2)
         self.nametxt.Enable(False)
 
         helpsizer = wx.BoxSizer(wx.HORIZONTAL)
-        helplabel = wx.StaticText(self, -1, _("Help Text:"))
+        helplabel = wx.StaticText(self, wx.ID_ANY, _("Help Text:"))
         helpsizer.Add(helplabel,0,wx.ALIGN_CENTRE|wx.ALL, 2)
-        self.helptxt = wx.TextCtrl(self,-1)
-        helpsizer.Add(self.helptxt,1,wx.GROW|wx.ALIGN_CENTRE|wx.ALL, 2)
+        self.helptxt = wx.TextCtrl(self, wx.ID_ANY)
+        helpsizer.Add(self.helptxt, 1, wx.GROW|wx.ALIGN_CENTRE|wx.ALL, 2)
         templateinfo.Add(helpsizer, 0, wx.GROW|wx.ALIGN_CENTER_VERTICAL|wx.ALL, 2)
         self.helptxt.Enable(False)
 
         indsizer = wx.BoxSizer(wx.HORIZONTAL)
         self.indentcb = wx.CheckBox(self,label=_("Obey Indentation?"))
-        self.indentcb.SetToolTipString(_('Check to have all lines of the template be indented to match the indentation at which the template is inserted'))
+        tooltip = _("Check to have all lines of the template be indented to match the indentation at which the template is inserted")
+        self.indentcb.SetToolTipString(tooltip)
         indsizer.Add(self.indentcb,0,wx.ALIGN_CENTRE|wx.ALL, 2)
         templateinfo.Add(indsizer, 0, wx.ALIGN_CENTER|wx.ALL, 2)
         self.indentcb.Enable(False)
 
-        templabel = wx.StaticText(self, -1, _('Template Codes:\n')+
+        templabel = wx.StaticText(self, wx.ID_ANY, _("Template Codes:\n")+
                 '"${same}": '+_('Replace with selected text.\n"')+
                 '${upper}":'+_('Replace with selected, first character upper case.\n')+
                 '"${lower}":'+_('Replace with selected, first character lower case.\n')+
-                '"$$":'+_('An "$" character.')+'\n'+
+                '"$$":'+_('An "$" character.') + u'\n' +
                 '"#CUR":'+_('Move cursor to this location after inserting template.')+'\n'+
                 _('tabs will be replaced by the appropriate indent.')
                 )
         templateinfo.Add(templabel, 0, wx.ALIGN_CENTER|wx.ALL, 2)
-        self.temptxt = wx.TextCtrl(self, wx.ID_ANY, size=(400,300),
+        self.temptxt = wx.TextCtrl(self, wx.ID_ANY, size=(300,200),
                                    style=wx.TE_MULTILINE)
-        templateinfo.Add(self.temptxt, 1, wx.GROW|wx.ALL, 2)
+        templateinfo.Add(self.temptxt, 1, wx.EXPAND|wx.ALL, 2)
         self.temptxt.Enable(False)
 
-        basesizer.Add(templateinfo, 1, wx.GROW|wx.ALIGN_CENTER|wx.ALL, 5)
+        basesizer.Add(templateinfo, 1, wx.EXPAND|wx.ALIGN_CENTER|wx.ALL, 5)
 
         self.SetSizer(basesizer)
 
     def GetLangTemplateDict(self, lastlangstr=False):
         if lastlangstr:
-            return self.plugin.templates[synglob.GetIdFromDescription(self.lastlangstr)]
+            langId = synglob.GetIdFromDescription(self.lastlangstr)
         else:
-            return self.plugin.templates[synglob.GetIdFromDescription(self.langchoice.GetStringSelection())]
+            csel = self.langchoice.GetStringSelection()
+            langId = synglob.GetIdFromDescription(csel)
+        return self.plugin.templates[langId]
 
     def GetTemplateNames(self):
         return self.GetLangTemplateDict().keys()
@@ -256,7 +264,7 @@ class TemplateEditorPanel(wx.Panel):
 
         if templ is None:
             #starts out blank
-            self.nametxt.SetValue(unicode(name) if name is not None else '')
+            self.nametxt.SetValue(unicode(name) if name is not None else u'')
             self.temptxt.SetValue(u'')
             self.helptxt.SetValue(u'')
             self.indentcb.SetValue(False)
@@ -276,8 +284,8 @@ class TemplateEditorPanel(wx.Panel):
 
     def ApplyTemplateInfo(self, updatelistind=None, lastlangstr=False):
         name = self.nametxt.GetValue()
-        if name.startswith('<') or name.endswith('>') or name.strip()=='':
-            return #don't apply initial names
+        if name.startswith(u'<') or name.endswith(u'>') or name.strip() == u'':
+            return # don't apply initial names
 
         help = self.helptxt.GetValue()
         tempstr = self.temptxt.GetValue()
@@ -296,7 +304,7 @@ class TemplateEditorPanel(wx.Panel):
             self.listbox.SetString(updatelistind,name)
 
     def OnAdd(self,evt):
-        ntstr = u'<' + _('New Template')
+        ntstr = u'<' + _("New Template")
         i = 1
         for s in self.listbox.GetStrings():
             if s.startswith(ntstr):
@@ -310,7 +318,7 @@ class TemplateEditorPanel(wx.Panel):
         try:
             del self.GetLangTemplateDict()[name]
         except KeyError:
-            pass #ignore removal of non-existant template
+            pass # ignore removal of non-existent template
         self.lastind = None
         self.UpdateTemplateinfoUI(None)
         self.removing = False
@@ -325,7 +333,8 @@ class TemplateEditorPanel(wx.Panel):
     def OnLangChange(self,evt):
         self.ApplyTemplateInfo(lastlangstr=True)
         self.listbox.SetItems(self.GetTemplateNames())
-        self.plugin._log('[codetemplater][info]setting %s to %s'%(self.lastlangstr,self.langchoice.GetStringSelection()))
+        self.plugin._log("[codetemplater][info]setting %s to %s" % \
+                         (self.lastlangstr,self.langchoice.GetStringSelection()))
         self.UpdateTemplateinfoUI(None)
         self.plugin.currentlang = synglob.GetIdFromDescription(self.langchoice.GetStringSelection())
         self.lastlangstr = self.langchoice.GetStringSelection()
@@ -344,7 +353,7 @@ def load_templates():
     """
     from collections import defaultdict
 
-    wx.GetApp().GetLog()('[codetemplater][info]hetting %s'%PROFILE_KEY_TEMPLATES)
+    wx.GetApp().GetLog()('[codetemplater][info]getting %s' % PROFILE_KEY_TEMPLATES)
     temps = Profile_Get(PROFILE_KEY_TEMPLATES)
 
     templd = defaultdict(lambda:dict())

@@ -4,7 +4,7 @@ from setuptools import setup
  
 __author__ = "Erik Tollerud"
 __doc__ = """A plugin to allow customized code templates for commonly-used patterns"""
-__version__ = "0.3"
+__version__ = "0.4"
  
 setup(
       name    = "CodeTemplater",    # Plugin Name

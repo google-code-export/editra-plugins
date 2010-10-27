@@ -8,7 +8,7 @@
 
 """Applies Code Templates for regularly-used design patterns."""
 __author__ = "Erik Tollerud"
-__version__ = "0.3"
+__version__ = "0.4"
 
 #-----------------------------------------------------------------------------#
 
@@ -24,7 +24,7 @@ from syntax import synglob
 from profiler import Profile_Get, Profile_Set
 _ = wx.GetTranslation
 
-from templates import TemplateEditorDialog,load_templates
+from templates import TemplateEditorDialog, load_templates
 from cfgdlg import CodeTemplaterConfig,PROFILE_KEY_POPUP,PROFILE_KEY_FOLLOW_LANG
 
 ID_EDIT_TEMPLATES  = wx.NewId()
@@ -35,7 +35,6 @@ ID_SHOW_TEMPLATES = wx.NewId()
 class CodeTemplater(plugin.Plugin):
     """Adds an interface to add Code Templates"""
     plugin.Implements(iface.MainWindowI)  
-    
     templates = {}
     currentlang = synglob.ID_LANG_TXT
         
@@ -53,15 +52,15 @@ class CodeTemplater(plugin.Plugin):
         popupshortcut = Profile_Get(PROFILE_KEY_POPUP)
           
         submenu.Append(ID_SHOW_TEMPLATES,
-                       _('Show Code Templates') + u'\t' + popupshortcut)
+                       _("Show Code Templates") + u'\t' + popupshortcut)
         submenu.AppendSeparator()    
-        submenu.Append(ID_EDIT_TEMPLATES,_('Edit Templates...'),
-                 _('Open a Dialog to Edit the Templates Currently in Use'))
+        submenu.Append(ID_EDIT_TEMPLATES,_("Edit Templates..."),
+                 _("Open a Dialog to Edit the Templates Currently in Use"))
                     
         toolmenu = parent.GetMenuBar().GetMenuByName("tools")
         toolmenu.AppendSubMenu(submenu,
-                               _('Code Templates'),
-                               _('Insert Code Templates into Document'))
+                               _("Code Templates"),
+                               _("Insert Code Templates into Document"))
         
         Subscribe(self.OnTemplate,EDMSG_UI_STC_USERLIST_SEL)
         Subscribe(self.OnLexerChange,EDMSG_UI_STC_LEXER)
@@ -78,7 +77,6 @@ class CodeTemplater(plugin.Plugin):
             
     def OnShow(self, evt):
         if evt.GetId() == ID_SHOW_TEMPLATES:
-            
             lst = self.templates[self.currentlang].keys()
             
             if len(lst) == 0:
@@ -105,7 +103,7 @@ class CodeTemplater(plugin.Plugin):
         if text in langtemp:
             langtemp[text].DoTemplate(current_buffer)
         else:
-            self._log("[codetemplater][info] tried to find tempate %s, but none could be found for language %s"%(text,self.currentlang))
+            self._log("[codetemplater][info] tried to find template %s, but none could be found for language %s"%(text,self.currentlang))
         
     def OnLexerChange(self,msg):
         fn,ftype = msg.GetData()
