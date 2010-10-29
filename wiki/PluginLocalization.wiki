@@ -32,12 +32,12 @@ This will create all the mo files and put them in PLUGIN_NAME/PLUGIN_NAME/locale
 
 = Code  =
 
-The following code should be put in the plugins `__init__.py` module. The only part that needs to be changed is to replace MOFILE_NAME with the name of the generated locale file found under `locale/xx_XX/LC_MESSAGES/xxxx.mo` without the mo extension. The name of the mo file should be the same as that of the given plugins top level directory in the project.
+The following code should be put in the plugins `__init__.py` module. The only part that needs to be changed is to replace MOFILE_NAME with the name of the generated locale file found under `locale/xx_XX/LC_MESSAGES/xxxx.mo` without the mo extension. The name of the mo file should be the same as that of the given plugins top level directory in the project. So for example the Projects plugin would use the following code since its mo files are called "Projects.mo".
 
 {{{
 # Try and add this plugins message catalogs to the app
 try:
-    wx.GetApp().AddMessageCatalog('MOFILE_NAME', __name__)
+    wx.GetApp().AddMessageCatalog('Projects', __name__)
 except:
     pass
 }}}
