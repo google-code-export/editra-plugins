@@ -68,11 +68,20 @@ class SyntaxCheckWindow(wx.Panel):
         self._listCtrl = CheckResultsList(
             self, style=wx.LC_REPORT | wx.BORDER_NONE | wx.LC_SORT_ASCENDING
         )
+        self._jobtimer = wx.Timer(self)
+        self._checker = None
+        self._curfile = u""
 
+        # Setup
         self._listCtrl.set_mainwindow(self._mw)
+
+        # Layout
         vbox = wx.BoxSizer(wx.VERTICAL)
         vbox.Add(self._listCtrl, 1, wx.EXPAND|wx.ALL)
         self.SetSizer(vbox)
+
+        # Event Handlers
+        self.Bind(wx.EVT_TIMER, self.OnJobTimer, self._jobtimer)
 
         # Editra Message Handlers
         ed_msg.Subscribe(self.OnFileLoad, ed_msg.EDMSG_FILE_OPENED)
@@ -82,6 +91,7 @@ class SyntaxCheckWindow(wx.Panel):
         ed_msg.Subscribe(self.OnChange, ed_msg.EDMSG_UI_STC_CHANGED)
         
     def __del__(self):
+        self._StopTimer()
         ed_msg.Unsubscribe(self.OnFileLoad, ed_msg.EDMSG_FILE_OPENED)
         ed_msg.Unsubscribe(self.OnFileSave, ed_msg.EDMSG_FILE_SAVED)
         ed_msg.Unsubscribe(self.OnPosChange, ed_msg.EDMSG_UI_STC_POS_CHANGED)
@@ -90,6 +100,10 @@ class SyntaxCheckWindow(wx.Panel):
 
     def GetMainWindow(self):
         return self._mw
+
+    def _StopTimer(self):
+        if self._jobtimer.IsRunning():
+            self._jobtimer.Stop()
 
     def __FindMainWindow(self):
         """Find the mainwindow of this control
@@ -173,21 +187,31 @@ class SyntaxCheckWindow(wx.Panel):
         syntaxchecker = self.get_syntax_checker(filetype, vardict, filename)
         if not syntaxchecker:
             return
-        util.Log("[PyLint][info] fileName %s" % (filename))
-        mwid = self.GetMainWindow().GetId()
-        ed_msg.PostMessage(ed_msg.EDMSG_PROGRESS_SHOW, (mwid, True))
-        ed_msg.PostMessage(ed_msg.EDMSG_PROGRESS_STATE, (mwid, -1, -1))
+        self._checker = syntaxchecker
+        self._curfile = filename
         
-        #Something like [('Syntax Error', '__all__ = ["CSVSMonitorThread"]', 7)]
-        syntaxchecker.Check(self._OnSyntaxData)
+        # Start job timer
+        self._StopTimer()
+        self._jobtimer.Start(250, True)
 
     def _OnSyntaxData(self, data):
+        # Data is something like 
+        # [('Syntax Error', '__all__ = ["CSVSMonitorThread"]', 7)]
         with FreezeDrawer(self._listCtrl):
             if len(data) != 0:
                 self._listCtrl.PopulateRows(data)
                 self._listCtrl.RefreshRows()
         mwid = self.GetMainWindow().GetId()
         ed_msg.PostMessage(ed_msg.EDMSG_PROGRESS_SHOW, (mwid, False))
+
+    def OnJobTimer(self, evt):
+        """Start a syntax check job"""
+        if self._checker:
+            util.Log("[PyLint][info] fileName %s" % (self._curfile))
+            mwid = self.GetMainWindow().GetId()
+            ed_msg.PostMessage(ed_msg.EDMSG_PROGRESS_SHOW, (mwid, True))
+            ed_msg.PostMessage(ed_msg.EDMSG_PROGRESS_STATE, (mwid, -1, -1))
+            self._checker.Check(self._OnSyntaxData)
 
     def OnChange(self, posdict):
         wx.CallAfter(self.delete_rows)
