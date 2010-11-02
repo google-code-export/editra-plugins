@@ -8,16 +8,23 @@
 
 """Editra Shelf display window"""
 
-__version__ = "0.2"
 __author__ = "Mike Rans"
 __svnid__ = "$Id$"
 __revision__ = "$Revision$"
 
+#----------------------------------------------------------------------------#
+# Imports
 import wx
 import wx.lib.mixins.listctrl as mixins
 from wx.stc import STC_INDIC_SQUIGGLE, STC_INDIC2_MASK
+
+# Editra Imports
 import eclib.elistmix as elistmix
+
+# Globals
 _ = wx.GetTranslation
+
+#----------------------------------------------------------------------------#
 
 class CheckResultsList(wx.ListCtrl,
                        mixins.ListCtrlAutoWidthMixin,
@@ -29,20 +36,17 @@ class CheckResultsList(wx.ListCtrl,
         elistmix.ListRowHighlighter.__init__(self)
 
         # Attributes
-        self._charWidth = self.GetCharWidth()
+        self.editor = None
+        self.errorlines = {}
 
         # Setup
         self.InsertColumn(0, _("Type"))
         self.InsertColumn(1, _("Line"))
         self.InsertColumn(2, _("Error"))
-        # Auto-resize col
-
         self.SetColumnWidth(1, wx.LIST_AUTOSIZE_USEHEADER)
 
         # Event Handlers
         self.Bind(wx.EVT_LIST_ITEM_ACTIVATED, self.OnItemActivate)
-        self.editor = None
-        self.errorlines = {}
 
     def set_mainwindow(self, mw):
         self._mainw = mw
