@@ -22,7 +22,9 @@ from subprocess import Popen, PIPE
 
 class PythonSyntaxChecker(AbstractSyntaxChecker):
     def __init__(self, variabledict, filename):
-        AbstractSyntaxChecker.__init__(self, variabledict, filename)
+        super(PythonSyntaxChecker, self).__init__(variabledict, filename)
+
+        # Attributes
         self.dirvarfile = variabledict.get("DIRVARFILE")
         self.runpylint = "pylint -f parseable -r n "
         pylintrc = variabledict.get("PYLINTRC")
@@ -49,7 +51,8 @@ class PythonSyntaxChecker(AbstractSyntaxChecker):
                     return exe_file        
         return None
 
-    def Check(self):
+    def DoCheck(self):
+        """Run pylint"""
         res = self.which("pylint")
         if not res:
             return (("No Pylint", self.nopylinterror, "NA"),)
@@ -60,6 +63,7 @@ class PythonSyntaxChecker(AbstractSyntaxChecker):
         while parentPath != "/" and os.path.exists(os.path.join(parentPath, '__init__.py')):
             childPath = os.path.join(os.path.basename(parentPath), childPath)
             parentPath = os.path.dirname(parentPath)
+
         # Start pylint
         process = Popen("%s%s" % (self.runpylint, childPath),
                         shell=True, stdout=PIPE, stderr=PIPE,

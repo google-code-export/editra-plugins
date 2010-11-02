@@ -12,6 +12,7 @@ Adds Python syntax checking using Pylint with results in a Shelf window.
 Syntax checking is triggered by the Load, Save and Change Tab actions.
 
 """
+
 __version__ = "0.1"
 __author__ = "Mike Rans"
 __svnid__ = "$Id$"
@@ -91,7 +92,7 @@ class Pylint(plugin.Plugin):
         pass
 
     def IsInstalled(self):
-        """Check whether launch has been installed yet or not
+        """Check whether PyLint has been installed yet or not
         @note: overridden from Plugin
         @return bool
 

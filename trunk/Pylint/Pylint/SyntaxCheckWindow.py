@@ -8,7 +8,6 @@
 
 """Editra Shelf display window"""
 
-__version__ = "0.2"
 __author__ = "Mike Rans"
 __svnid__ = "$Id $"
 __revision__ = "$Revision $"
@@ -22,10 +21,10 @@ import wx
 import util
 import ed_msg
 from syntax import syntax
-from CheckResultsList import CheckResultsList
-
-# should return syntax.ID_LANG_PYTHON
 import syntax.synglob as synglob
+
+# Local imports
+from CheckResultsList import CheckResultsList
 
 # Syntax checkers
 from PythonSyntaxChecker import PythonSyntaxChecker
@@ -60,7 +59,7 @@ class SyntaxCheckWindow(wx.Panel):
     }
     def __init__(self, parent):
         """Initialize the window"""
-        wx.Panel.__init__(self, parent)
+        super(SyntaxCheckWindow, self).__init__(parent)
 
         # Attributes
         # Parent is ed_shelf.EdShelfBook
@@ -74,8 +73,8 @@ class SyntaxCheckWindow(wx.Panel):
         vbox = wx.BoxSizer(wx.VERTICAL)
         vbox.Add(self._listCtrl, 1, wx.EXPAND|wx.ALL)
         self.SetSizer(vbox)
-        self.SetAutoLayout(True)
 
+        # Editra Message Handlers
         ed_msg.Subscribe(self.OnFileLoad, ed_msg.EDMSG_FILE_OPENED)
         ed_msg.Subscribe(self.OnFileSave, ed_msg.EDMSG_FILE_SAVED)
         ed_msg.Subscribe(self.OnPosChange, ed_msg.EDMSG_UI_STC_POS_CHANGED)
@@ -117,22 +116,24 @@ class SyntaxCheckWindow(wx.Panel):
         # an on disk file
         filename = editor.GetFileName()
         self._listCtrl.set_editor(editor)
-        self._listCtrl.Freeze()
-        self._listCtrl.DeleteOldRows()
-        self._listCtrl.Thaw()
+        with FreezeDrawer(self._listCtrl):
+            self._listCtrl.DeleteOldRows()
 
         if not filename:
             return
+
         filename = os.path.abspath(filename)
         fileext = os.path.splitext(filename)[1]
-        if fileext == "":
+        if fileext == u"":
             return
+
         filetype = syntax.GetIdFromExt(fileext[1:]) # pass in file extension
         directoryvariables = self.get_directory_variables(filetype)
         if directoryvariables:
             vardict = directoryvariables.read_dirvarfile(filename)
         else:
             vardict = {}
+
         self._checksyntax(filetype, vardict, filename)
         if directoryvariables:
             directoryvariables.close()
@@ -175,22 +176,20 @@ class SyntaxCheckWindow(wx.Panel):
         util.Log("[PyLint][info] fileName %s" % (filename))
         
         #Something like [('Syntax Error', '__all__ = ["CSVSMonitorThread"]', 7)]
-        data = syntaxchecker.Check()
-        
-#        with FreezeDrawer(self._listCtrl):
-        self._listCtrl.Freeze()
-        if len(data) != 0:
-            self._listCtrl.PopulateRows(data)
-            self._listCtrl.RefreshRows()
-        self._listCtrl.Thaw()
+        syntaxchecker.Check(self._OnSyntaxData)
+
+    def _OnSyntaxData(self, data):
+        with FreezeDrawer(self._listCtrl):
+            if len(data) != 0:
+                self._listCtrl.PopulateRows(data)
+                self._listCtrl.RefreshRows()
 
     def OnChange(self, posdict):
         wx.CallAfter(self.delete_rows)
         
     def delete_rows(self):
-        self._listCtrl.Freeze()
-        self._listCtrl.DeleteOldRows()
-        self._listCtrl.Thaw()
+        with FreezeDrawer(self._listCtrl):
+            self._listCtrl.DeleteOldRows()
             
     def OnPosChange(self, msg):
         lineno = msg.GetData()["lnum"]
