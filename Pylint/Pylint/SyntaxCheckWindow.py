@@ -174,6 +174,9 @@ class SyntaxCheckWindow(wx.Panel):
         if not syntaxchecker:
             return
         util.Log("[PyLint][info] fileName %s" % (filename))
+        mwid = self.GetMainWindow().GetId()
+        ed_msg.PostMessage(ed_msg.EDMSG_PROGRESS_SHOW, (mwid, True))
+        ed_msg.PostMessage(ed_msg.EDMSG_PROGRESS_STATE, (mwid, -1, -1))
         
         #Something like [('Syntax Error', '__all__ = ["CSVSMonitorThread"]', 7)]
         syntaxchecker.Check(self._OnSyntaxData)
@@ -183,6 +186,8 @@ class SyntaxCheckWindow(wx.Panel):
             if len(data) != 0:
                 self._listCtrl.PopulateRows(data)
                 self._listCtrl.RefreshRows()
+        mwid = self.GetMainWindow().GetId()
+        ed_msg.PostMessage(ed_msg.EDMSG_PROGRESS_SHOW, (mwid, False))
 
     def OnChange(self, posdict):
         wx.CallAfter(self.delete_rows)
