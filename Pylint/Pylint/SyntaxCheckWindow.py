@@ -65,9 +65,9 @@ class SyntaxCheckWindow(wx.Panel):
         # Parent is ed_shelf.EdShelfBook
         self._mw = self.__FindMainWindow()
         self._log = wx.GetApp().GetLog()
-        self._listCtrl = CheckResultsList(
-            self, style=wx.LC_REPORT | wx.BORDER_NONE | wx.LC_SORT_ASCENDING
-        )
+        self._listCtrl = CheckResultsList(self,
+                                          style=wx.LC_REPORT|wx.BORDER_NONE|\
+                                                wx.LC_SORT_ASCENDING )
         self._jobtimer = wx.Timer(self)
         self._checker = None
         self._curfile = u""

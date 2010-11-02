@@ -63,3 +63,9 @@ class AbstractSyntaxChecker(object):
         """
         worker = SyntaxCheckThread(self, callback)
         worker.start()
+
+    def _getFileName(self):
+        return self.filename
+    def _setFileName(self, fname):
+        self.filename = fname
+    FileName = property(_getFileName, _setFileName)
