@@ -8,23 +8,58 @@
 
 """ Abstract syntax checker module """
 
-__version__ = "0.2"
 __author__ = "Mike Rans"
 __svnid__ = "$Id$"
 __revision__ = "$Revision$"
 
 #-----------------------------------------------------------------------------#
+# Imports
+import wx
+import threading
+
+#-----------------------------------------------------------------------------#
+
+class SyntaxCheckThread(threading.Thread):
+    """Background thread to run checker task in"""
+    def __init__(self, checker, target):
+        """@param checker: SyntaxChecker object instance
+        @param target: callable(data) To receive output data
+        """
+        super(SyntaxCheckThread, self).__init__()
+
+        # Attributes
+        self.checker = checker
+        self.target = target
+
+    def run(self):
+        data = self.checker.DoCheck()
+        wx.CallAfter(self.target, data)
+
+#-----------------------------------------------------------------------------#
 
 class AbstractSyntaxChecker(object):
     def __init__(self, variabledict, filename):
-        """ Process dictionary of variables that might be useful to syntax checker
+        """ Process dictionary of variables that might be 
+        useful to syntax checker.
         """
+        super(AbstractSyntaxChecker, self).__init__()
+
+        # Attributes
         self.filename = filename
         self.variabledict = variabledict
-        
-    def Check(self):
-        """ Return a list of
-            [ (Type, error, line), ... ]
-            Type is 'Error' or 'Warning'
+
+    def DoCheck(self):
+        """Interface method override to perform the syntax check
+        and return a list of tuples.
+        @return: [ (Type, Error, Line), ]
+
         """
-        pass
+        raise NotImplementedError
+
+    def Check(self, callback):
+        """Asynchronous method to perform syntax check
+        @param callback: callable(data) callback to receive data
+
+        """
+        worker = SyntaxCheckThread(self, callback)
+        worker.start()
