@@ -18,7 +18,9 @@ import os
 import wx
 
 # Editra Libraries
+import ed_glob
 import util
+import eclib
 import ed_msg
 from syntax import syntax
 import syntax.synglob as synglob
@@ -31,6 +33,11 @@ from PythonSyntaxChecker import PythonSyntaxChecker
 
 # Directory Variables
 from PythonDirectoryVariables import PythonDirectoryVariables
+
+#-----------------------------------------------------------------------------#
+
+_ = wx.GetTranslation
+#-----------------------------------------------------------------------------#
 
 class FreezeDrawer(object):
     """To be used in 'with' statements. Upon enter freezes the drawing
@@ -48,7 +55,7 @@ class FreezeDrawer(object):
 
 #-----------------------------------------------------------------------------#
 
-class SyntaxCheckWindow(wx.Panel):
+class SyntaxCheckWindow(eclib.ControlBox):
     """Syntax Check Results Window"""
     __syntaxCheckers = {
         synglob.ID_LANG_PYTHON: PythonSyntaxChecker
@@ -74,14 +81,25 @@ class SyntaxCheckWindow(wx.Panel):
 
         # Setup
         self._listCtrl.set_mainwindow(self._mw)
+        ctrlbar = eclib.ControlBar(self, style=eclib.CTRLBAR_STYLE_GRADIENT)
+        ctrlbar.SetVMargin(2, 2)
+        if wx.Platform == '__WXGTK__':
+            ctrlbar.SetWindowStyle(eclib.CTRLBAR_STYLE_DEFAULT)
+        ctrlbar.AddStretchSpacer()
+        rbmp = wx.ArtProvider.GetBitmap(str(ed_glob.ID_BIN_FILE), wx.ART_MENU)
+        if rbmp.IsNull() or not rbmp.IsOk():
+            rbmp = None
+        self.runbtn = eclib.PlateButton(ctrlbar, wx.ID_ANY, _("Lint"), rbmp,
+                                        style=eclib.PB_STYLE_NOBG)
+        ctrlbar.AddControl(self.runbtn, wx.ALIGN_RIGHT)
 
         # Layout
-        vbox = wx.BoxSizer(wx.VERTICAL)
-        vbox.Add(self._listCtrl, 1, wx.EXPAND|wx.ALL)
-        self.SetSizer(vbox)
+        self.SetWindow(self._listCtrl)
+        self.SetControlBar(ctrlbar, wx.TOP)
 
         # Event Handlers
         self.Bind(wx.EVT_TIMER, self.OnJobTimer, self._jobtimer)
+        self.Bind(wx.EVT_BUTTON, self.OnRunLint, self.runbtn)
 
         # Editra Message Handlers
         ed_msg.Subscribe(self.OnFileLoad, ed_msg.EDMSG_FILE_OPENED)
@@ -168,6 +186,11 @@ class SyntaxCheckWindow(wx.Panel):
         filename, _ = msg.GetData()
         editor = self._GetEditorForFile(filename)
         wx.CallAfter(self._onfileaccess, editor)
+
+    def OnRunLint(self, event):
+        editor = wx.GetApp().GetCurrentBuffer()
+        if editor:
+            wx.CallAfter(self._onfileaccess, editor)
 
     def get_syntax_checker(self, filetype, vardict, filename):
         try:
