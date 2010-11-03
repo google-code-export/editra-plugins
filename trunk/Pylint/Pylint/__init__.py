@@ -30,6 +30,7 @@ import util
 
 # Local Imports
 from SyntaxCheckWindow import SyntaxCheckWindow
+import LintConfig
 
 #-----------------------------------------------------------------------------#
 # Globals
@@ -104,3 +105,27 @@ class Pylint(plugin.Plugin):
         return True
 
 #-----------------------------------------------------------------------------#
+# Configuration Interface
+
+def GetConfigObject():
+    return ConfigObject()
+
+class ConfigObject(plugin.PluginConfigObject):
+    """Plugin configuration object for PyLint
+    Provides configuration panel for plugin dialog.
+
+    """
+    def GetConfigPanel(self, parent):
+        """Get the configuration panel for this plugin
+        @param parent: parent window for the panel
+        @return: wxPanel
+
+        """
+        return LintConfig.LintConfigPanel(parent)
+
+    def GetLabel(self):
+        """Get the label for this config panel
+        @return string
+
+        """
+        return _("PyLint")

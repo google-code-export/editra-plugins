@@ -22,13 +22,13 @@ import ed_glob
 import util
 import eclib
 import ed_msg
+from profiler import Profile_Get
 from syntax import syntax
 import syntax.synglob as synglob
 
 # Local imports
+import LintConfig
 from CheckResultsList import CheckResultsList
-
-# Syntax checkers
 from PythonSyntaxChecker import PythonSyntaxChecker
 
 # Directory Variables
@@ -78,6 +78,7 @@ class SyntaxCheckWindow(eclib.ControlBox):
         self._jobtimer = wx.Timer(self)
         self._checker = None
         self._curfile = u""
+        self._hasrun = False
 
         # Setup
         self._listCtrl.set_mainwindow(self._mw)
@@ -85,6 +86,8 @@ class SyntaxCheckWindow(eclib.ControlBox):
         ctrlbar.SetVMargin(2, 2)
         if wx.Platform == '__WXGTK__':
             ctrlbar.SetWindowStyle(eclib.CTRLBAR_STYLE_DEFAULT)
+        self._lbl = wx.StaticText(ctrlbar)
+        ctrlbar.AddControl(self._lbl)
         ctrlbar.AddStretchSpacer()
         rbmp = wx.ArtProvider.GetBitmap(str(ed_glob.ID_BIN_FILE), wx.ART_MENU)
         if rbmp.IsNull() or not rbmp.IsOk():
@@ -106,7 +109,6 @@ class SyntaxCheckWindow(eclib.ControlBox):
         ed_msg.Subscribe(self.OnFileSave, ed_msg.EDMSG_FILE_SAVED)
         ed_msg.Subscribe(self.OnPosChange, ed_msg.EDMSG_UI_STC_POS_CHANGED)
         ed_msg.Subscribe(self.OnPageChanged, ed_msg.EDMSG_UI_NB_CHANGED)
-        ed_msg.Subscribe(self.OnChange, ed_msg.EDMSG_UI_STC_CHANGED)
         
     def __del__(self):
         self._StopTimer()
@@ -114,7 +116,6 @@ class SyntaxCheckWindow(eclib.ControlBox):
         ed_msg.Unsubscribe(self.OnFileSave, ed_msg.EDMSG_FILE_SAVED)
         ed_msg.Unsubscribe(self.OnPosChange, ed_msg.EDMSG_UI_STC_POS_CHANGED)
         ed_msg.Unsubscribe(self.OnPageChanged, ed_msg.EDMSG_UI_NB_CHANGED)
-        ed_msg.Unsubscribe(self.OnChange, ed_msg.EDMSG_UI_STC_CHANGED)
 
     def GetMainWindow(self):
         return self._mw
@@ -167,25 +168,51 @@ class SyntaxCheckWindow(eclib.ControlBox):
             vardict = {}
 
         self._checksyntax(filetype, vardict, filename)
+        self._hasrun = True
         if directoryvariables:
             directoryvariables.close()
-        
+
+    def UpdateForEditor(self, editor, force=False):
+        langid = getattr(editor, 'GetLangId', lambda: -1)()
+        ispython = langid == synglob.ID_LANG_PYTHON
+        self.runbtn.Enable(ispython)
+        if force or not self._hasrun:
+            fname = getattr(editor, 'GetFileName', lambda: u"")()
+            if ispython:
+                self._lbl.SetLabel(fname)
+            else:
+                self._lbl.SetLabel(u"")
+            ctrlbar = self.GetControlBar(wx.TOP)
+            ctrlbar.Layout()
+
     def OnPageChanged(self, msg):
         """ Notebook tab was changed """
         notebook, pg_num = msg.GetData()
         editor = notebook.GetPage(pg_num)
-        wx.CallAfter(self._onfileaccess, editor)
+        if LintConfig.GetConfigValue(LintConfig.PLC_AUTO_RUN):
+            wx.CallAfter(self._onfileaccess, editor)
+            self.UpdateForEditor(editor, True)
+        else:
+            self.UpdateForEditor(editor)
 
     def OnFileLoad(self, msg):
         """Load File message"""
         editor = self._GetEditorForFile(msg.GetData())
-        wx.CallAfter(self._onfileaccess, editor)
-        
+        if LintConfig.GetConfigValue(LintConfig.PLC_AUTO_RUN):
+            wx.CallAfter(self._onfileaccess, editor)
+            self.UpdateForEditor(editor, True)
+        else:
+            self.UpdateForEditor(editor)
+
     def OnFileSave(self, msg):
         """Load File message"""
         filename, _ = msg.GetData()
         editor = self._GetEditorForFile(filename)
-        wx.CallAfter(self._onfileaccess, editor)
+        if LintConfig.GetConfigValue(LintConfig.PLC_AUTO_RUN):
+            wx.CallAfter(self._onfileaccess, editor)
+            self.UpdateForEditor(editor, True)
+        else:
+            self.UpdateForEditor(editor)
 
     def OnRunLint(self, event):
         editor = wx.GetApp().GetCurrentBuffer()
@@ -236,9 +263,6 @@ class SyntaxCheckWindow(eclib.ControlBox):
             ed_msg.PostMessage(ed_msg.EDMSG_PROGRESS_STATE, (mwid, -1, -1))
             self._checker.Check(self._OnSyntaxData)
 
-    def OnChange(self, posdict):
-        wx.CallAfter(self.delete_rows)
-        
     def delete_rows(self):
         with FreezeDrawer(self._listCtrl):
             self._listCtrl.DeleteOldRows()
