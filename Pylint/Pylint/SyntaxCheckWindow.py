@@ -109,7 +109,7 @@ class SyntaxCheckWindow(eclib.ControlBox):
         ed_msg.Subscribe(self.OnFileSave, ed_msg.EDMSG_FILE_SAVED)
         ed_msg.Subscribe(self.OnPosChange, ed_msg.EDMSG_UI_STC_POS_CHANGED)
         ed_msg.Subscribe(self.OnPageChanged, ed_msg.EDMSG_UI_NB_CHANGED)
-        
+
     def __del__(self):
         self._StopTimer()
         ed_msg.Unsubscribe(self.OnFileLoad, ed_msg.EDMSG_FILE_OPENED)
@@ -206,7 +206,7 @@ class SyntaxCheckWindow(eclib.ControlBox):
 
     def OnFileSave(self, msg):
         """Load File message"""
-        filename, _ = msg.GetData()
+        filename, tmp = msg.GetData()
         editor = self._GetEditorForFile(filename)
         if LintConfig.GetConfigValue(LintConfig.PLC_AUTO_RUN):
             wx.CallAfter(self._onfileaccess, editor)
