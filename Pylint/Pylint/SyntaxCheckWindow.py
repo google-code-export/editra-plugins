@@ -109,13 +109,15 @@ class SyntaxCheckWindow(eclib.ControlBox):
         ed_msg.Subscribe(self.OnFileSave, ed_msg.EDMSG_FILE_SAVED)
         ed_msg.Subscribe(self.OnPosChange, ed_msg.EDMSG_UI_STC_POS_CHANGED)
         ed_msg.Subscribe(self.OnPageChanged, ed_msg.EDMSG_UI_NB_CHANGED)
+        ed_msg.Subscribe(self.OnThemeChanged, ed_msg.EDMSG_THEME_CHANGED)
 
     def __del__(self):
         self._StopTimer()
-        ed_msg.Unsubscribe(self.OnFileLoad, ed_msg.EDMSG_FILE_OPENED)
-        ed_msg.Unsubscribe(self.OnFileSave, ed_msg.EDMSG_FILE_SAVED)
-        ed_msg.Unsubscribe(self.OnPosChange, ed_msg.EDMSG_UI_STC_POS_CHANGED)
-        ed_msg.Unsubscribe(self.OnPageChanged, ed_msg.EDMSG_UI_NB_CHANGED)
+        ed_msg.Unsubscribe(self.OnFileLoad)
+        ed_msg.Unsubscribe(self.OnFileSave)
+        ed_msg.Unsubscribe(self.OnPosChange)
+        ed_msg.Unsubscribe(self.OnPageChanged)
+        ed_msg.Unsubscribe(self.OnThemeChanged)
 
     def GetMainWindow(self):
         return self._mw
@@ -213,6 +215,15 @@ class SyntaxCheckWindow(eclib.ControlBox):
             self.UpdateForEditor(editor, True)
         else:
             self.UpdateForEditor(editor)
+
+    def OnThemeChanged(self, msg):
+        """Icon theme has changed so update button"""
+        rbmp = wx.ArtProvider.GetBitmap(str(ed_glob.ID_BIN_FILE), wx.ART_MENU)
+        if rbmp.IsNull() or not rbmp.IsOk():
+            return
+        else:
+            self.runbtn.SetBitmap(rbmp)
+            self.runbtn.Refresh()
 
     def OnRunLint(self, event):
         editor = wx.GetApp().GetCurrentBuffer()
