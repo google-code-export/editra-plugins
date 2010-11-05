@@ -40,11 +40,18 @@ class LintConfigPanel(wx.Panel):
         super(LintConfigPanel, self).__init__(parent)
 
         # Attributes
+        modebox = wx.StaticBox(self, label=_("Run Mode"))
+        self._modesz = wx.StaticBoxSizer(modebox, wx.VERTICAL)
         self._config = Profile_Get(PYLINT_CONFIG, default=dict())
-        self._updatecb = wx.CheckBox(self, label=_("Automatic Mode"))
+        self._autorb = wx.RadioButton(self, label=_("Automatic"))
         tooltip = _("Automatically rerun on save, document change, and file load")
-        self._updatecb.SetToolTipString(tooltip)
-        self._updatecb.SetValue(self._config.get(PLC_AUTO_RUN, False))
+        self._autorb.SetToolTipString(tooltip)
+        self._manualrb = wx.RadioButton(self, label=_("Manual"))
+        tooltip = _("Only run when requested")
+        self._manualrb.SetToolTipString(tooltip)
+        mode = self._config.get(PLC_AUTO_RUN, False)
+        self._autorb.SetValue(mode)
+        self._manualrb.SetValue(not mode)
 
         # Setup
         
@@ -52,20 +59,22 @@ class LintConfigPanel(wx.Panel):
         self.__DoLayout()
 
         # Event Handlers
-        self.Bind(wx.EVT_CHECKBOX, self.OnCheckBox, self._updatecb)
+        self.Bind(wx.EVT_RADIOBUTTON, self.OnCheckBox, self._autorb)
+        self.Bind(wx.EVT_RADIOBUTTON, self.OnCheckBox, self._manualrb)
 
     def __DoLayout(self):
         sizer = wx.BoxSizer(wx.VERTICAL)
 
-        sizer.Add(self._updatecb, 0, wx.ALL, 5)
+        self._modesz.Add(self._autorb, 0, wx.ALL, 5)
+        self._modesz.Add(self._manualrb, 0, wx.ALL, 5)
+        sizer.Add(self._modesz, 0, wx.ALL|wx.EXPAND, 10)
 
         self.SetSizer(sizer)
 
     def OnCheckBox(self, evt):
         evt_obj = evt.GetEventObject()
-        value = evt_obj.GetValue()
-        if evt_obj == self._updatecb:
-            self._config[PLC_AUTO_RUN] = value
+        if evt_obj in (self._autorb, self._manualrb):
+            self._config[PLC_AUTO_RUN] = self._autorb.GetValue()
         else:
             evt.Skip()
             return
