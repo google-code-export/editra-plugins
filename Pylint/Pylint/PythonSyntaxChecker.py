@@ -17,6 +17,9 @@ from AbstractSyntaxChecker import AbstractSyntaxChecker
 import os, re
 from subprocess import Popen, PIPE
 
+# Editra Imports
+import ebmlib
+
 #-----------------------------------------------------------------------------#
 
 class PythonSyntaxChecker(AbstractSyntaxChecker):
@@ -30,31 +33,14 @@ class PythonSyntaxChecker(AbstractSyntaxChecker):
         if pylintrc:
             self.runpylint = "%s--rcfile=%s " % (self.runpylint, pylintrc)
         self.addedpythonpaths = variabledict.get("ADDEDPYTHONPATHS")
-        self.nopylinterror = "***  FATAL ERROR: Pylint is not installed"
-        self.nopylinterror += " or is not in path!!! ***"
-
-    @staticmethod
-    def is_exe(fpath):
-        return os.path.isfile(fpath) and os.access(fpath, os.X_OK)
-    
-    @staticmethod
-    def which(program):    
-        fpath, _ = os.path.split(program)
-        if fpath:
-            if PythonSyntaxChecker.is_exe(program):
-                return program
-        else:
-            for path in os.environ["PATH"].split(os.pathsep):
-                exe_file = os.path.join(path, program)
-                if PythonSyntaxChecker.is_exe(exe_file):
-                    return exe_file        
-        return None
+        self.nopylinterror = u"***  FATAL ERROR: Pylint is not installed"
+        self.nopylinterror += u" or is not in path!!! ***"
 
     def DoCheck(self):
         """Run pylint"""
-        res = self.which("pylint")
+        res = ebmlib.Which("pylint")
         if not res:
-            return (("No Pylint", self.nopylinterror, "NA"),)
+            return ((u"No Pylint", self.nopylinterror, u"NA"),)
         # traverse downwards until we are out of a python package
         fullPath = os.path.abspath(self.filename)
         parentPath, childPath = os.path.dirname(fullPath), os.path.basename(fullPath)
@@ -74,13 +60,13 @@ class PythonSyntaxChecker(AbstractSyntaxChecker):
         regex = re.compile(r"(.*):(.*): \[([A-Z])[, ]*(.*)\] (.*)")
         rows = []
         if self.addedpythonpaths:
-            rows.append(("***", "Using PYTHONPATH + %s"\
-                          % ", ".join(self.addedpythonpaths), "NA"))
-        rows.append(("***", "Pylint command line: %s" % self.runpylint, "NA"))
-        rows.append(("***", "Directory Variables file: %s" % self.dirvarfile, "NA"))
+            rows.append((u"***", u"Using PYTHONPATH + %s"\
+                          % u", ".join(self.addedpythonpaths), u"NA"))
+        rows.append((u"***", u"Pylint command line: %s" % self.runpylint, u"NA"))
+        rows.append((u"***", u"Directory Variables file: %s" % self.dirvarfile, u"NA"))
         for line in p:
             # remove pylintrc warning
-            if line.startswith("No config file found"):
+            if line.startswith(u"No config file found"):
                 continue
             matcher = regex.match(line)
             if matcher is None:
@@ -89,13 +75,13 @@ class PythonSyntaxChecker(AbstractSyntaxChecker):
             lineno = matcher.group(2)
             classmethod = matcher.group(4)
             mtext = matcher.group(5)
-            if mtypeabr == "E" or mtypeabr == "F":
-                mtype = "Error"
+            if mtypeabr == u"E" or mtypeabr == u"F":
+                mtype = u"Error"
             else:
-                mtype = "Warning"
+                mtype = u"Warning"
             outtext = mtext
             if classmethod:
-                outtext = "[%s] %s" % (classmethod, outtext)
+                outtext = u"[%s] %s" % (classmethod, outtext)
             rows.append((mtype, outtext, lineno))
  
         p.close()
