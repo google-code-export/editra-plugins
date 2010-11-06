@@ -107,7 +107,6 @@ class SyntaxCheckWindow(eclib.ControlBox):
         # Editra Message Handlers
         ed_msg.Subscribe(self.OnFileLoad, ed_msg.EDMSG_FILE_OPENED)
         ed_msg.Subscribe(self.OnFileSave, ed_msg.EDMSG_FILE_SAVED)
-        ed_msg.Subscribe(self.OnPosChange, ed_msg.EDMSG_UI_STC_POS_CHANGED)
         ed_msg.Subscribe(self.OnPageChanged, ed_msg.EDMSG_UI_NB_CHANGED)
         ed_msg.Subscribe(self.OnThemeChanged, ed_msg.EDMSG_THEME_CHANGED)
 
@@ -115,7 +114,6 @@ class SyntaxCheckWindow(eclib.ControlBox):
         self._StopTimer()
         ed_msg.Unsubscribe(self.OnFileLoad)
         ed_msg.Unsubscribe(self.OnFileSave)
-        ed_msg.Unsubscribe(self.OnPosChange)
         ed_msg.Unsubscribe(self.OnPageChanged)
         ed_msg.Unsubscribe(self.OnThemeChanged)
 
@@ -278,10 +276,6 @@ class SyntaxCheckWindow(eclib.ControlBox):
         with FreezeDrawer(self._listCtrl):
             self._listCtrl.DeleteOldRows()
             
-    def OnPosChange(self, msg):
-        lineno = msg.GetData()["lnum"]
-        wx.CallAfter(self._listCtrl.show_calltip, lineno)
-
     def _GetEditorForFile(self, fname):
         """Return the EdEditorView that's managing the file, if available
         @param fname: File name to open

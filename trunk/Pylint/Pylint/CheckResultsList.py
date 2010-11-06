@@ -19,6 +19,7 @@ import wx.lib.mixins.listctrl as mixins
 from wx.stc import STC_INDIC_SQUIGGLE, STC_INDIC2_MASK
 
 # Editra Imports
+import ed_msg
 import eclib.elistmix as elistmix
 
 # Globals
@@ -37,6 +38,7 @@ class CheckResultsList(wx.ListCtrl,
 
         # Attributes
         self.editor = None
+        self.showedtip = False
         self.errorlines = {}
 
         # Setup
@@ -48,11 +50,26 @@ class CheckResultsList(wx.ListCtrl,
         # Event Handlers
         self.Bind(wx.EVT_LIST_ITEM_ACTIVATED, self.OnItemActivate)
 
+        # Message Handler
+        ed_msg.Subscribe(self.OnDwellStart, ed_msg.EDMSG_UI_STC_DWELL_START)
+
+    def __del__(self):
+        ed_msg.Unsubscribe(self.OnDwellStart)
+
     def set_mainwindow(self, mw):
         self._mainw = mw
         
     def set_editor(self, editor):
         self.editor = editor
+
+    def OnDwellStart(self, msg):
+        """Show calltips for the error if dwelling over a line"""
+        data = msg.GetData()
+        buf = data.get('stc', None)
+        if buf and buf == self.editor:
+            lineno = data.get('line', -1)
+            if lineno in self.errorlines:
+                data['rdata'] = self.errorlines[lineno]
 
     def OnItemActivate(self, evt):
         """Go to the error in the file"""
@@ -100,20 +117,12 @@ class CheckResultsList(wx.ListCtrl,
                 self.SetStringItem(lineNo, col, txt)
             try:
                 lineNo = int(eLine)
-                if CheckResultsList.set_indic(lineNo - 1, eType, self.editor):
-                    self.errorlines[lineNo] = eText
+                self.errorlines[lineNo] = eText
+                CheckResultsList.set_indic(lineNo - 1, eType, self.editor)
             except ValueError:
                 pass
         self.SetColumnWidth(0, minLType)
         self.SetColumnWidth(2, minLText)
-
-    def show_calltip(self, lineno):
-        if not self.editor:
-            return
-        if lineno in self.errorlines:
-            self.editor.CallTipShow(lineno, self.errorlines[lineno])
-        else:
-            self.editor.CallTipCancel()
         
     @staticmethod
     def set_indic(lineNo, eType, editor):
