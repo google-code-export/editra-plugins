@@ -14,6 +14,7 @@ __revision__ = "$Revision$"
 #-----------------------------------------------------------------------------#
 # Imports
 from AbstractSyntaxChecker import AbstractSyntaxChecker
+import LintConfig
 import os, re
 from subprocess import Popen, PIPE
 
@@ -32,6 +33,15 @@ class PythonSyntaxChecker(AbstractSyntaxChecker):
         pylintrc = variabledict.get("PYLINTRC")
         if pylintrc:
             self.runpylint = "%s--rcfile=%s " % (self.runpylint, pylintrc)
+        else:
+            # Use built-in configuration
+            dlist = LintConfig.GetConfigValue(LintConfig.PLC_DISABLED_CHK)
+            if dlist is not None and len(dlist):
+                if len(dlist) > 1:
+                    disable = ",".join(dlist)
+                else:
+                    disable = dlist[0]
+                self.runpylint += ("-d %s " % disable)
         self.addedpythonpaths = variabledict.get("ADDEDPYTHONPATHS")
         self.nopylinterror = u"***  FATAL ERROR: Pylint is not installed"
         self.nopylinterror += u" or is not in path!!! ***"
