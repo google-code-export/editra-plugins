@@ -39,7 +39,7 @@ class CheckResultsList(wx.ListCtrl,
         # Attributes
         self.editor = None
         self.showedtip = False
-        self.errorlines = {}
+        self.errorlines = dict()
 
         # Setup
         self.InsertColumn(0, _("Type"))
@@ -107,14 +107,17 @@ class CheckResultsList(wx.ListCtrl,
         minLType = max(self.GetTextExtent(typeText)[0], self.GetColumnWidth(0))
         minLText = max(self.GetTextExtent(errorText)[0], self.GetColumnWidth(2))
         self.errorlines = {}
+        self._data = {}
+        idx = 0
         for (eType, eText, eLine) in data:
+            eText = unicode(eText).rstrip()
+            self._data[idx] = (unicode(eType), unicode(eLine), eText)
             minLType = max(minLType, self.GetTextExtent(eType)[0])
             minLText = max(minLText, self.GetTextExtent(eText)[0])
-            #For some reason a simple Append() does not seem to work...
-            lineNo = self.GetItemCount()
-            lineNo = self.InsertStringItem(lineNo, unicode(eType))
-            for (col, txt) in [ (1, unicode(eLine)), (2, unicode(eText)) ]:
-                self.SetStringItem(lineNo, col, txt)
+            self.Append(self._data[idx])
+            self.SetItemData(idx, idx)
+            idx += 1
+
             try:
                 lineNo = int(eLine)
                 self.errorlines[lineNo] = eText
