@@ -9,8 +9,8 @@
 
 """Launch User Interface"""
 __author__ = "Cody Precord <cprecord@editra.org>"
-__svnid__ = "$Id: $"
-__revision__ = "$Revision: $"
+__svnid__ = "$Id$"
+__revision__ = "$Revision$"
 
 #-----------------------------------------------------------------------------#
 # Imports
@@ -215,7 +215,7 @@ def Conventions():
 
 def Refactor():
     rmsg = {"R0001" : _("Messages by category"),
-            "R0002" : _("errors / warnings by module"),
+            "R0002" : _("Errors / warnings by module"),
             "R0003" : _("Messages"),
             "R0004" : _("Global evaluation"),
             "R0101" : _("Statistics by type"),
@@ -236,7 +236,7 @@ def Refactor():
             "R0914" : _("Too many local variables"),
             "R0915" : _("Too many statements"),
             "R0921" : _("Abstract class not referenced"),
-            "R0922" : _("Abstract class is only referenced %s times"),
+            "R0922" : _("Abstract class is only referenced a few times"),
             "R0923" : _("Interface not implemented")}
     return rmsg
 
@@ -273,7 +273,7 @@ def Warnings():
             "W0410" : _("__future__ import is not the first non docstring statement"),
             "W0511" : _("(warning notes in code comments)"),
             "W0601" : _("Global variable undefined at the module level"),
-            "W0602" : _("global statement used but no assignment is done"),
+            "W0602" : _("Global statement used but no assignment is done"),
             "W0603" : _("Using the global statement"),
             "W0604" : _("Using the global statement at the module level"),
             "W0611" : _("Unused import"),
