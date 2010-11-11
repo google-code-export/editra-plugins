@@ -19,6 +19,7 @@ import iface
 import plugin
 import ed_msg
 import eclib
+import ebmlib
 
 #-----------------------------------------------------------------------------#
 # Globals
@@ -37,21 +38,23 @@ WTFICON = PyEmbeddedImage(
     "XV29FeswXfk98eFEtzLlV/IYv1agvnjjmdT52x3fvo8snXoxPpYtxJhhBOfSp4WH5b+xH00Y"
     "yGgfiPHs3zbyJ27AfbbT4s3EAAAAAElFTkSuQmCC")
 
-SUBMIT_TPL = """<?xml version=\"1.0\" encoding=\"utf-8\"?>
-<soap12:Envelope xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xmlns:xsd=\"http://www.w3.org/2001/XMLSchema\" xmlns:soap12=\"http://www.w3.org/2003/05/soap-envelope\">
-<soap12:Body>
-    <Submit xmlns=\"http://thedailywtf.com/\">
-        <name>%s</name>
-        <emailAddress>%s</emailAddress>
-        <subject>%s</subject>
-        <comments>%s</comments>
-        <codeSubmission>%s</codeSubmission>
-        <doNotPublish>False</doNotPublish>
-    </Submit>
-</soap12:Body>
-</soap12:Envelope>"""
+SUBMIT_TPL = """<Submit xmlns=\"http://thedailywtf.com/\">
+<name>%s</name>
+<emailAddress>%s</emailAddress>
+<subject>%s</subject>
+<comments>%s</comments>
+<codeSubmission>%s</codeSubmission>
+<doNotPublish>False</doNotPublish>
+"""
 
 _ = wx.GetTranslation
+
+# Register Plugin Translation Catalogs
+try:
+    wx.GetApp().AddMessageCatalog('dailywtf', __name__)
+except:
+    pass
+
 #-----------------------------------------------------------------------------#
 
 ID_TDWTF = wx.NewId()
@@ -91,7 +94,8 @@ class TheDailyWtf(plugin.Plugin):
 #-----------------------------------------------------------------------------#
 
 def OnSubmit(buff, evt):
-    """Opens the submission dialog
+    """Callback for buffer context menu event.
+    Opens the submission dialog
     @param buff: EditraStc
     @param evt: MenuEvent
 
@@ -107,7 +111,14 @@ def OnSubmit(buff, evt):
         if dlg.ShowModal() == wx.ID_OK:
             # send it
             info = dlg.GetSubmissionInfo()
-            print info
+            # Need to encode as UTF-8
+            try:
+                info = [data.encode('utf-8') for data in info]
+            except UnicodeEncodeError:
+                return # FAIL TODO: report error to user
+            host = "http://thedailywtf.com/SubmitWTF.asmx"
+            bodytxt = SUBMIT_TPL % tuple(info)
+            message = ebmlib.SOAPMessage(host, bodytxt)
         else:
             pass # Canceled
     else:
@@ -192,9 +203,12 @@ class SubmitPanel(wx.Panel):
 
     @eclib.expose(SubmitDialog)
     def GetSubmissionInfo(self):
-        """Get the submission string"""
+        """Get the submission info
+        @return: tuple(name, email, subject, msg, code)
+
+        """
         values = [ctrl.GetValue() for ctrl in self._ctrls]
-        return SUBMIT_TPL % tuple(values)
+        return tuple(values)
 
     @eclib.expose(SubmitDialog)
     def SetSnippetField(self, snippet):
