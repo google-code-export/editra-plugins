@@ -1,4 +1,4 @@
-#summary Page for the TheDailyWTF plugin
+#summary TheDailyWTF context menu plugin
 
 = Introduction =
 
@@ -8,7 +8,6 @@ This plugin was created just for fun in response to the October 27, 2010 article
 
 This plugin is compatible with Editra > 0.5.86
 
-= Details =
+= Usage =
 
 To use the plugin it must have first been enabled in the PluginManager dialog. Then simply select the snippet of "interesting" code that you have found in the editor that may have had you think "WTF?!".
-
