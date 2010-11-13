@@ -44,7 +44,7 @@ SUBMIT_TPL = """<Submit xmlns=\"http://thedailywtf.com/\">
 <subject>%s</subject>
 <comments>%s</comments>
 <codeSubmission>%s</codeSubmission>
-<doNotPublish>false</doNotPublish>
+<doNotPublish>%s</doNotPublish>
 </Submit>
 """
 
@@ -90,6 +90,12 @@ class TheDailyWtf(plugin.Plugin):
             menu.AppendSeparator()
             item = menu.Append(ID_TDWTF, _("Submit to TDWTF"))
             item.SetBitmap(WTFICON.GetBitmap())
+            buf = menumgr.GetUserData('buffer')
+            if buf:
+                # Only enable the menu item if there is a selection in the
+                # buffer.
+                hassel = buf.HasSelection()
+                item.Enable(hassel)
             menumgr.AddHandler(ID_TDWTF, OnSubmit)
 
 #-----------------------------------------------------------------------------#
@@ -122,6 +128,7 @@ def OnSubmit(buff, evt):
             message = ebmlib.SOAP12Message(host, "/SubmitWTF.asmx", bodytxt,
                                            "http://thedailywtf.com/Submit")
             message.Send()
+            # TODO check return code to make sure it was submitted
         else:
             pass # Canceled
     else:
@@ -158,6 +165,12 @@ class SubmitPanel(wx.Panel):
         self._msg = wx.TextCtrl(self, style=wx.TE_MULTILINE)
         self._snippet = wx.TextCtrl(self, style=wx.TE_MULTILINE)
         self._submit = wx.Button(self, wx.ID_OK, label=_("Submit"))
+        self._nopubcb = wx.CheckBox(self, label=_("Please Don't Publish"))
+        tip = _("Even though I'm sure you'd do a fine job of anonymizing,\n"
+                "I just wanted to be able to say that I sent code to\n"
+                "The Daily WTF. Yes, I realize this hardly counts,\n"
+                "but it's better than wallowing in my own misery.")
+        self._nopubcb.SetToolTipString(tip)
         self._ctrls = (self._name, self._email, self._subject,
                        self._msg, self._snippet)
 
@@ -188,7 +201,12 @@ class SubmitPanel(wx.Panel):
         sizer.Add(wx.StaticText(self, label=_("Code Snippet:")),
                   0, wx.TOP|wx.LEFT, 5)
         sizer.Add(self._snippet, 1, wx.EXPAND|wx.ALL, 5)
-        sizer.Add(self._submit, 0, wx.ALIGN_RIGHT|wx.ALL, 8)
+        # Layout the bottom row and button
+        hsizer = wx.BoxSizer(wx.HORIZONTAL)
+        hsizer.Add(self._nopubcb, 0, wx.ALIGN_LEFT|wx.ALL, 5)
+        hsizer.AddStretchSpacer()
+        hsizer.Add(self._submit, 0, wx.ALIGN_RIGHT|wx.ALL, 5)
+        sizer.Add(hsizer, 0, wx.EXPAND|wx.ALL, 3)
 
         self.SetSizer(sizer)
 
@@ -207,10 +225,17 @@ class SubmitPanel(wx.Panel):
     @eclib.expose(SubmitDialog)
     def GetSubmissionInfo(self):
         """Get the submission info
-        @return: tuple(name, email, subject, msg, code)
+        @return: tuple(name, email, subject, msg, code, dontPublish)
 
         """
-        values = [ctrl.GetValue() for ctrl in self._ctrls]
+        values = list()
+        for ctrl in self._ctrls:
+            value = ctrl.GetValue()
+            if isinstance(value, bool):
+                value = str(value).lower()
+            values.append(value)
+        pub = self._nopubcb.GetValue()
+        values.append(str(pub).lower())
         return tuple(values)
 
     @eclib.expose(SubmitDialog)
