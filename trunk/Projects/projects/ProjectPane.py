@@ -1688,7 +1688,13 @@ class ProjectTree(wx.Panel):
 
         files = []
         for node in self.getSelectedNodes():
-            fname = self.tree.GetPyData(node)['path']
+            data = self.tree.GetPyData(node)
+            fname = None
+            if data:
+                fname = data.get('path', None)
+            if fname is None:
+                continue
+
             try:
                 status = os.stat(fname)[0]
                 if stat.S_ISDIR(status):
@@ -1706,7 +1712,7 @@ class ProjectTree(wx.Panel):
         tbuff = None
         for item in files:
             if nbook.HasFileOpen(item):
-                for page in xrange(nbook.GetPageCount()):
+                for page in range(nbook.GetPageCount()):
                     ctrl = nbook.GetPage(page)
                     if item == ctrl.GetFileName():
                         nbook.ChangePage(page)

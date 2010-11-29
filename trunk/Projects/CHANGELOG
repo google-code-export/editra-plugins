@@ -6,6 +6,13 @@ License: wxWindows
 Changelog:
 
 #-----------------------------------------------------------------------------#
+Version 1.7
+Released:
+
+Bug Fixes:
++Fix crash that could occur when activating an invalid tree ctrl item
+
+#-----------------------------------------------------------------------------#
 Version 1.6
 Released: 10/12/2010
 
