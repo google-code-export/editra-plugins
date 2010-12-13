@@ -168,8 +168,6 @@ class SyntaxCheckWindow(eclib.ControlBox):
 
         self._checksyntax(filetype, vardict, filename)
         self._hasrun = True
-        if directoryvariables:
-            directoryvariables.close()
 
     def UpdateForEditor(self, editor, force=False):
         langid = getattr(editor, 'GetLangId', lambda: -1)()
@@ -205,7 +203,7 @@ class SyntaxCheckWindow(eclib.ControlBox):
 
     def OnFileSave(self, msg):
         """Load File message"""
-        filename, tmp = msg.GetData()
+        filename, _ = msg.GetData()
         editor = self._GetEditorForFile(filename)
         if LintConfig.GetConfigValue(LintConfig.PLC_AUTO_RUN):
             wx.CallAfter(self._onfileaccess, editor)

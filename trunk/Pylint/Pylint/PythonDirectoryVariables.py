@@ -50,7 +50,6 @@ class PythonDirectoryVariables(AbstractDirectoryVariables):
         return self.recurseup(dir)
 
     def read_dirvarfile(self, filepath):
-        paths = self.get_pythonpaths()
         dirvarfile = self.recurseup(filepath)
         if not dirvarfile:
             return {}
@@ -68,13 +67,17 @@ class PythonDirectoryVariables(AbstractDirectoryVariables):
                 for path in allnewpaths:
                     self.addedpythonpaths.add(self.get_abspath(dirvarfile, path))
             elif key == "PYLINTRC":
-                vardict["PYLINTRC"] = self.get_abspath(dirvarfile, val)
-            
-        paths.update(self.addedpythonpaths)
+                vardict["PYLINTRC"] = self.get_abspath(dirvarfile, val)            
         vardict["ADDEDPYTHONPATHS"] = self.addedpythonpaths
-        os.environ["PYTHONPATH"] = os.pathsep.join(paths)
+        vardict["STARTCALL"] = self.set_envvars
+        vardict["ENDCALL"] = self.restore_envvars
         return vardict
-    
-    def close(self):
+
+    def set_envvars(self):
+        paths = self.get_pythonpaths()
+        paths.update(self.addedpythonpaths)
+        os.environ["PYTHONPATH"] = os.pathsep.join(paths)
+        
+    def restore_envvars(self):
         paths = self.get_pythonpaths() # restore old python path
         os.environ["PYTHONPATH"] = os.pathsep.join(paths)

@@ -19,6 +19,7 @@ import os, re
 from subprocess import Popen, PIPE
 
 # Editra Imports
+import util
 import ebmlib
 
 #-----------------------------------------------------------------------------#
@@ -29,7 +30,8 @@ class PythonSyntaxChecker(AbstractSyntaxChecker):
 
         # Attributes
         self.dirvarfile = variabledict.get("DIRVARFILE")
-        self.runpylint = "pylint -f parseable -r n "
+        inithook = "--init-hook=\"import os; print 'PYTHONPATH=%s' % os.getenv('PYTHONPATH');\""
+        self.runpylint = "pylint -f parseable -r n %s " % inithook
         pylintrc = variabledict.get("PYLINTRC")
         if pylintrc:
             self.runpylint = "%s--rcfile=%s " % (self.runpylint, pylintrc)
@@ -45,9 +47,18 @@ class PythonSyntaxChecker(AbstractSyntaxChecker):
         self.addedpythonpaths = variabledict.get("ADDEDPYTHONPATHS")
         self.nopylinterror = u"***  FATAL ERROR: Pylint is not installed"
         self.nopylinterror += u" or is not in path!!! ***"
+        self.startcall = variabledict.get("STARTCALL")
+		def do_nothing():
+			pass
+		if not self.startcall:
+			self.startcall = do_nothing
+        self.endcall = variabledict.get("ENDCALL")
+		if not self.endcall:
+			self.endcall = do_nothing
 
     def DoCheck(self):
         """Run pylint"""
+		self.startcall()
         res = ebmlib.Which("pylint")
         if not res:
             return ((u"No Pylint", self.nopylinterror, u"NA"),)
@@ -76,6 +87,9 @@ class PythonSyntaxChecker(AbstractSyntaxChecker):
         rows.append((u"***", u"Directory Variables file: %s" % self.dirvarfile, u"NA"))
         for line in p:
             # remove pylintrc warning
+            if line.startswith(u"PYTHONPATH"):
+                util.Log(line)
+                continue
             if line.startswith(u"No config file found"):
                 continue
             matcher = regex.match(line)
@@ -95,4 +109,5 @@ class PythonSyntaxChecker(AbstractSyntaxChecker):
             rows.append((mtype, outtext, lineno))
  
         p.close()
+		self.endcall()
         return rows

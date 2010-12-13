@@ -23,6 +23,11 @@ class AbstractDirectoryVariables(object):
         """
         return {}
     
-    def close(self):
-        """ anything to remove or shut down """
+    def set_envvars(self, filepath):
+        """ Set any environment variables eg. PYTHONPATH
+        """
+        pass
+        
+    def restore_envvars(self):
+        """ Restore changed environment variables """
         pass
