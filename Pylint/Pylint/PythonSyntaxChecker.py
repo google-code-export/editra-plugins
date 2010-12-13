@@ -47,25 +47,26 @@ class PythonSyntaxChecker(AbstractSyntaxChecker):
         self.addedpythonpaths = variabledict.get("ADDEDPYTHONPATHS")
         self.nopylinterror = u"***  FATAL ERROR: Pylint is not installed"
         self.nopylinterror += u" or is not in path!!! ***"
+
+        def do_nothing():
+            pass
         self.startcall = variabledict.get("STARTCALL")
-		def do_nothing():
-			pass
-		if not self.startcall:
-			self.startcall = do_nothing
+        if not self.startcall:
+            self.startcall = do_nothing
         self.endcall = variabledict.get("ENDCALL")
-		if not self.endcall:
-			self.endcall = do_nothing
+        if not self.endcall:
+            self.endcall = do_nothing
 
     def DoCheck(self):
         """Run pylint"""
-		self.startcall()
+        self.startcall()
         res = ebmlib.Which("pylint")
         if not res:
             return ((u"No Pylint", self.nopylinterror, u"NA"),)
         # traverse downwards until we are out of a python package
         fullPath = os.path.abspath(self.filename)
         parentPath, childPath = os.path.dirname(fullPath), os.path.basename(fullPath)
-    
+
         while parentPath != "/" and os.path.exists(os.path.join(parentPath, '__init__.py')):
             childPath = os.path.join(os.path.basename(parentPath), childPath)
             parentPath = os.path.dirname(parentPath)
@@ -107,7 +108,7 @@ class PythonSyntaxChecker(AbstractSyntaxChecker):
             if classmethod:
                 outtext = u"[%s] %s" % (classmethod, outtext)
             rows.append((mtype, outtext, lineno))
- 
+
         p.close()
-		self.endcall()
+        self.endcall()
         return rows
