@@ -16,18 +16,18 @@ This is available from the Editra Plugin Manager by clicking on Configure for th
 
 == Configuration File ==
 
-The configuration file (sometimes called a directory variables file) must be named: __dirvar_py__.cfg
+The configuration file (sometimes called a directory variables file) must be named: {{{__dirvar_py__.cfg}}}
 
 When the syntax checker is activated, it looks for this file automatically (without user intervention) in the Python script's current directory, its parent, its parent's parent and so on up the directory tree. Hence, __dirvar_py__.cfg could, for example, be put in a project's src folder so that the settings apply to all scripts in src and its subfolders.
 
-Currently, 2 parameters are supported in __dirvar_py__.cfg:
+Currently, 2 parameters are supported in {{{__dirvar_py__.cfg}}}:
 
   * PYTHONPATH, a comma separated list of paths to add to the PYTHONPATH for Pylint to use
   * PYLINTRC, the path to a Pylint configuration file
 
 Relative paths are allowed, for example: . or ..
 
-An example __dirvar_py__.cfg might be:
+An example {{{__dirvar_py__.cfg}}} might be:
 {{{
 PYTHONPATH=../test4,.
 PYLINTRC=./pylintcfg/pylintrc
