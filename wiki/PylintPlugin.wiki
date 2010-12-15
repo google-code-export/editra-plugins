@@ -17,7 +17,7 @@ This is available from the Editra Plugin Manager by clicking on Configure for th
 
 The configuration file (sometimes called a directory variables file) must be named: __dirvar_py__.cfg
 
-The syntax checker looks for this file in the Python script's current directory, its parent, its parent's parent and so on up the directory tree. Hence, __dirvar_py__.cfg could, for example, be put in a project's src folder so that the settings apply to all scripts in src and its subfolders.
+When the syntax checker is activated, it looks for this file automatically (without user intervention) in the Python script's current directory, its parent, its parent's parent and so on up the directory tree. Hence, __dirvar_py__.cfg could, for example, be put in a project's src folder so that the settings apply to all scripts in src and its subfolders.
 
 Currently, 2 parameters are supported in __dirvar_py__.cfg:
 
