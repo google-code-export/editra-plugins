@@ -4,8 +4,9 @@
 
 The purpose of this plugin is to enable the syntax of Python source code to be checked. It can be configured to perform checking automatically on file open/save and change tab or manually by clicking a button. Messages such as Warnings and Errors can be turned on or off in the graphical configuration. Alternatively, there is an optional configuration file in which new paths can be appended to the PYTHONPATH and in which the path to a Pylint configuration file can be specified. 
 
+= Detail =
 
-= Graphical Configuration =
+== Graphical Configuration ==
 
 This is available from the Editra Plugin Manager by clicking on Configure for the Pylint plugin.
  
@@ -13,7 +14,7 @@ This is available from the Editra Plugin Manager by clicking on Configure for th
   * Messages from the following categories can be individually turned on or off: Convention, Refactor, Warning, Error, Fatal
 
 
-= Configuration File =
+== Configuration File ==
 
 The configuration file (sometimes called a directory variables file) must be named: __dirvar_py__.cfg
 
@@ -27,5 +28,7 @@ Currently, 2 parameters are supported in __dirvar_py__.cfg:
 Relative paths are allowed, for example: . or ..
 
 An example __dirvar_py__.cfg might be:
+{{{
 PYTHONPATH=../test4,.
 PYLINTRC=./pylintcfg/pylintrc
+}}}
