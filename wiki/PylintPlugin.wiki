@@ -22,7 +22,7 @@ The syntax checker looks for this file in the Python script's current directory,
 Currently, 2 parameters are supported in __dirvar_py__.cfg:
 
   * PYTHONPATH, a comma separated list of paths to add to the PYTHONPATH for Pylint to use
-  * PYLINTRC, the path to a Pylitn configuration file
+  * PYLINTRC, the path to a Pylint configuration file
 
 Relative paths are allowed, for example: . or ..
 
