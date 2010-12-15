@@ -1,0 +1,31 @@
+#summary Syntax Checker for Python using Pylint
+
+= Introduction =
+
+The purpose of this plugin is to enable the syntax of Python source code to be checked. It can be configured to perform checking automatically on file open/save and change tab or manually by clicking a button. Messages such as Warnings and Errors can be turned on or off in the graphical configuration. Alternatively, there is an optional configuration file in which new paths can be appended to the PYTHONPATH and in which the path to a Pylint configuration file can be specified. 
+
+
+= Graphical Configuration =
+
+This is available from the Editra Plugin Manager by clicking on Configure for the Pylint plugin.
+ 
+  * The Run Mode is Manual for user activated syntax checking only or Automatic for checking on file open/save and change tab.
+  * Messages from the following categories can be indivdually turned on or off: Convention, Refactor, Warning, Error, Fatal
+
+
+= Configuration File =
+
+The configuration file (sometimes called a directory variables file) must be named: __dirvar_py__.cfg
+
+The syntax checker looks for this file in the Python script's current directory, its parent, its parent's parent and so on up the directory tree. Hence, __dirvar_py__.cfg could, for example, be put in a project's src folder so that the settings apply to all scripts in src and its subfolders.
+
+Currently, 2 parameters are supported in __dirvar_py__.cfg:
+
+  * PYTHONPATH, a comma separated list of paths to add to the PYTHONPATH for Pylint to use
+  * PYLINTRC, the path to a Pylitn configuration file
+
+Relative paths are allowed, for example: . or ..
+
+An example __dirvar_py__.cfg might be:
+PYTHONPATH=../test4,.
+PYLINTRC=./pylintcfg/pylintrc
