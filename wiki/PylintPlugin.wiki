@@ -10,7 +10,7 @@ The purpose of this plugin is to enable the syntax of Python source code to be c
 This is available from the Editra Plugin Manager by clicking on Configure for the Pylint plugin.
  
   * The Run Mode is Manual for user activated syntax checking only or Automatic for checking on file open/save and change tab.
-  * Messages from the following categories can be indivdually turned on or off: Convention, Refactor, Warning, Error, Fatal
+  * Messages from the following categories can be individually turned on or off: Convention, Refactor, Warning, Error, Fatal
 
 
 = Configuration File =
