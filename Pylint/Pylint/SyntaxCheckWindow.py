@@ -252,10 +252,9 @@ class SyntaxCheckWindow(eclib.ControlBox):
     def _OnSyntaxData(self, data):
         # Data is something like 
         # [('Syntax Error', '__all__ = ["CSVSMonitorThread"]', 7)]
-        with FreezeDrawer(self._listCtrl):
-            if len(data) != 0:
-                self._listCtrl.PopulateRows(data)
-                self._listCtrl.RefreshRows()
+        if len(data) != 0:
+            self._listCtrl.PopulateRows(data)
+            self._listCtrl.RefreshRows()
         mwid = self.GetMainWindow().GetId()
         ed_msg.PostMessage(ed_msg.EDMSG_PROGRESS_SHOW, (mwid, False))
 
@@ -271,8 +270,7 @@ class SyntaxCheckWindow(eclib.ControlBox):
             self._checker.Check(self._OnSyntaxData)
 
     def delete_rows(self):
-        with FreezeDrawer(self._listCtrl):
-            self._listCtrl.DeleteOldRows()
+        self._listCtrl.DeleteOldRows()
             
     def _GetEditorForFile(self, fname):
         """Return the EdEditorView that's managing the file, if available
