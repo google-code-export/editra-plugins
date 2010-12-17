@@ -174,11 +174,11 @@ class SyntaxCheckWindow(eclib.ControlBox):
         ispython = langid == synglob.ID_LANG_PYTHON
         self.runbtn.Enable(ispython)
         if force or not self._hasrun:
-            fname = getattr(editor, 'GetFileName', lambda: u"")()
-            if ispython:
-                self._lbl.SetLabel(fname)
-            else:
-                self._lbl.SetLabel(u"")
+#            fname = getattr(editor, 'GetFileName', lambda: u"")()
+#            if ispython:
+#                self._lbl.SetLabel(fname)
+#            else:
+#                self._lbl.SetLabel(u"")
             ctrlbar = self.GetControlBar(wx.TOP)
             ctrlbar.Layout()
 
@@ -203,7 +203,7 @@ class SyntaxCheckWindow(eclib.ControlBox):
 
     def OnFileSave(self, msg):
         """Load File message"""
-        filename, _ = msg.GetData()
+        filename, tmp = msg.GetData()
         editor = self._GetEditorForFile(filename)
         if LintConfig.GetConfigValue(LintConfig.PLC_AUTO_RUN):
             wx.CallAfter(self._onfileaccess, editor)
@@ -267,6 +267,8 @@ class SyntaxCheckWindow(eclib.ControlBox):
             mwid = self.GetMainWindow().GetId()
             ed_msg.PostMessage(ed_msg.EDMSG_PROGRESS_SHOW, (mwid, True))
             ed_msg.PostMessage(ed_msg.EDMSG_PROGRESS_STATE, (mwid, -1, -1))
+            # Update the label to show what file the results are for
+            self._lbl.SetLabel(self._curfile)
             self._checker.Check(self._OnSyntaxData)
 
     def delete_rows(self):
