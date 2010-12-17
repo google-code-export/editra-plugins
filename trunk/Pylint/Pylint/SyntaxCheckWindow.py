@@ -148,8 +148,7 @@ class SyntaxCheckWindow(eclib.ControlBox):
         # an on disk file
         filename = editor.GetFileName()
         self._listCtrl.set_editor(editor)
-        with FreezeDrawer(self._listCtrl):
-            self._listCtrl.DeleteOldRows()
+        self._listCtrl.DeleteOldRows()
 
         if not filename:
             return
