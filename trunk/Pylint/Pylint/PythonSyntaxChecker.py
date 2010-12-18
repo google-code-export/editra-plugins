@@ -31,10 +31,11 @@ class PythonSyntaxChecker(AbstractSyntaxChecker):
         # Attributes
         self.dirvarfile = variabledict.get("DIRVARFILE")
         inithook = "--init-hook=\"import os; print 'PYTHONPATH=%s' % os.getenv('PYTHONPATH');\""
-        self.runpylint = "pylint -f parseable -r n %s " % inithook
+        self.runpylint = " -f parseable -r n %s " % inithook
         pylintrc = variabledict.get("PYLINTRC")
         if pylintrc:
-            self.runpylint = "%s--rcfile=%s " % (self.runpylint, pylintrc)
+            pylintrc = "--rcfile=%s " % pylintrc
+            self.runpylint = self.runpylint + pylintrc
         else:
             # Use built-in configuration
             dlist = LintConfig.GetConfigValue(LintConfig.PLC_DISABLED_CHK)
@@ -60,9 +61,21 @@ class PythonSyntaxChecker(AbstractSyntaxChecker):
     def DoCheck(self):
         """Run pylint"""
         self.startcall()
-        res = ebmlib.Which("pylint")
-        if not res:
+
+        # Figure out what Pylint to use
+        # 1) First check configuration
+        # 2) Second check for it on the path
+        lintpath = LintConfig.GetConfigValue(LintConfig.PLC_LINT_PATH)
+        if lintpath is None or not os.path.exists(lintpath):
+            lintpath = None
+            res = ebmlib.Which("pylint")
+            if res is not None:
+                lintpath = "pylint"
+
+        # No configured pylint and its not on the PATH
+        if lintpath is None:
             return ((u"No Pylint", self.nopylinterror, u"NA"),)
+
         # traverse downwards until we are out of a python package
         fullPath = os.path.abspath(self.filename)
         parentPath, childPath = os.path.dirname(fullPath), os.path.basename(fullPath)
@@ -72,7 +85,8 @@ class PythonSyntaxChecker(AbstractSyntaxChecker):
             parentPath = os.path.dirname(parentPath)
 
         # Start pylint
-        process = Popen("%s%s" % (self.runpylint, childPath),
+        cmdline = lintpath + self.runpylint
+        process = Popen("%s%s" % (cmdline, childPath),
                         shell=True, stdout=PIPE, stderr=PIPE,
                         cwd=parentPath)
         p = process.stdout
@@ -84,7 +98,7 @@ class PythonSyntaxChecker(AbstractSyntaxChecker):
         if self.addedpythonpaths:
             rows.append((u"***", u"Using PYTHONPATH + %s"\
                           % u", ".join(self.addedpythonpaths), u"NA"))
-        rows.append((u"***", u"Pylint command line: %s" % self.runpylint, u"NA"))
+        rows.append((u"***", u"Pylint command line: %s" % cmdline, u"NA"))
         rows.append((u"***", u"Directory Variables file: %s" % self.dirvarfile, u"NA"))
         for line in p:
             # remove pylintrc warning

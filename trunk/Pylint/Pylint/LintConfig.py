@@ -14,16 +14,19 @@ __revision__ = "$Revision$"
 
 #-----------------------------------------------------------------------------#
 # Imports
+import os
 import wx
 import wx.lib.mixins.listctrl as listmix
 
 # Editra Imports
 from profiler import Profile_Get, Profile_Set
+import ebmlib
 import eclib
 
 #-----------------------------------------------------------------------------#
 # Configuration Keys
 PYLINT_CONFIG = "Pylint.Config"
+PLC_LINT_PATH = "PylintPath"
 PLC_AUTO_RUN = "AutoRun"
 PLC_DISABLED_CHK = "DisabledCheckers"
 
@@ -39,13 +42,27 @@ def GetConfigValue(key):
 #-----------------------------------------------------------------------------#
 
 class LintConfigPanel(wx.Panel):
+    """Configuration panel for PyLint configuration in the
+    PluginManager dialog.
+
+    """
     def __init__(self, parent):
         super(LintConfigPanel, self).__init__(parent)
 
         # Attributes
+        self._config = Profile_Get(PYLINT_CONFIG, default=dict())
+        path = self._config.get(PLC_LINT_PATH, None)
+        if path is None:
+            path = ebmlib.Which('pylint')
+        if path is None:
+            path = u""
+        self._path_pk = wx.FilePickerCtrl(self, path=path,
+                                          style=wx.FLP_USE_TEXTCTRL|\
+                                                wx.FLP_CHANGE_DIR|\
+                                                wx.FLP_FILE_MUST_EXIST)
+        self._path_pk.SetPickerCtrlGrowable(True)
         modebox = wx.StaticBox(self, label=_("Run Mode"))
         self._modesz = wx.StaticBoxSizer(modebox, wx.VERTICAL)
-        self._config = Profile_Get(PYLINT_CONFIG, default=dict())
         self._autorb = wx.RadioButton(self, label=_("Automatic"))
         tooltip = _("Automatically rerun on save, document change, and file load")
         self._autorb.SetToolTipString(tooltip)
@@ -74,9 +91,17 @@ class LintConfigPanel(wx.Panel):
         self.Bind(wx.EVT_RADIOBUTTON, self.OnCheckBox, self._autorb)
         self.Bind(wx.EVT_RADIOBUTTON, self.OnCheckBox, self._manualrb)
         self.Bind(wx.EVT_CHOICE, self.OnChoice, self._msgtype)
+        self.Bind(wx.EVT_FILEPICKER_CHANGED, self.OnPathChanged, self._path_pk)
 
     def __DoLayout(self):
         sizer = wx.BoxSizer(wx.VERTICAL)
+
+        # PyLint Path
+        pathsz = wx.BoxSizer(wx.HORIZONTAL)
+        pathsz.Add(wx.StaticText(self, label=_("PyLint Path:")),
+                   0, wx.ALIGN_CENTER_VERTICAL)
+        pathsz.Add(self._path_pk, 1, wx.EXPAND|wx.LEFT, 5)
+        sizer.Add(pathsz, 0, wx.EXPAND|wx.LEFT|wx.RIGHT|wx.TOP, 10)
 
         # Run mode configuration
         self._modesz.Add(self._autorb, 0, wx.ALL, 5)
@@ -112,6 +137,13 @@ class LintConfigPanel(wx.Panel):
             self.UpdateListCtrl()
         else:
             evt.Skip()
+
+    def OnPathChanged(self, event):
+        """Update the configured pylint path"""
+        path = self._path_pk.GetPath()
+        if path and os.path.exists(path):
+            self._config[PLC_LINT_PATH] = path
+            Profile_Set(PYLINT_CONFIG, self._config)
 
     def UpdateListCtrl(self):
         """Update the list control for the selected message type"""
