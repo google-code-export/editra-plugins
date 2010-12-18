@@ -9,7 +9,6 @@
 # Plugin Metadata
 """
 Adds Python syntax checking using Pylint with results in a Shelf window.
-Syntax checking is triggered by the Load, Save and Change Tab actions.
 
 """
 
