@@ -66,8 +66,10 @@ class PythonDirectoryVariables(AbstractDirectoryVariables):
                 allnewpaths = val.split(",")
                 for path in allnewpaths:
                     self.addedpythonpaths.add(self.get_abspath(dirvarfile, path))
-            elif key == "PYLINTRC":
-                vardict["PYLINTRC"] = self.get_abspath(dirvarfile, val)            
+            elif key == "PYLINTRC" or key == "WINPDBARGS":
+                vardict[key] = self.get_abspath(dirvarfile, val)            
+            else:
+                vardict[key] = val            
         vardict["ADDEDPYTHONPATHS"] = self.addedpythonpaths
         vardict["STARTCALL"] = self.set_envvars
         vardict["ENDCALL"] = self.restore_envvars
