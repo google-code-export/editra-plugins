@@ -27,10 +27,9 @@ from syntax import syntax
 import syntax.synglob as synglob
 
 # Local imports
-import ToolConfig
+import LintConfig
 from CheckResultsList import CheckResultsList
 from PythonSyntaxChecker import PythonSyntaxChecker
-from PythonDebugger import PythonDebugger
 
 # Directory Variables
 from PythonDirectoryVariables import PythonDirectoryVariables
@@ -62,10 +61,6 @@ class SyntaxCheckWindow(eclib.ControlBox):
         synglob.ID_LANG_PYTHON: PythonSyntaxChecker
     }
 
-    __debuggers = {
-        synglob.ID_LANG_PYTHON: PythonDebugger
-    }
-
     __directoryVariables = {
         synglob.ID_LANG_PYTHON: PythonDirectoryVariables
     }
@@ -82,9 +77,7 @@ class SyntaxCheckWindow(eclib.ControlBox):
         self._jobtimer = wx.Timer(self)
         self._checker = None
         self._curfile = u""
-        self._lintrun = False
-        self._debugrun = False
-        self._debugargs = ""
+        self._hasrun = False
 
         # Setup
         self._listCtrl.set_mainwindow(self._mw)
@@ -98,21 +91,9 @@ class SyntaxCheckWindow(eclib.ControlBox):
         rbmp = wx.ArtProvider.GetBitmap(str(ed_glob.ID_BIN_FILE), wx.ART_MENU)
         if rbmp.IsNull() or not rbmp.IsOk():
             rbmp = None
-        self.lintbtn = eclib.PlateButton(ctrlbar, wx.ID_ANY, _("Lint"), rbmp,
+        self.runbtn = eclib.PlateButton(ctrlbar, wx.ID_ANY, _("Lint"), rbmp,
                                         style=eclib.PB_STYLE_NOBG)
-        ctrlbar.AddControl(self.lintbtn, wx.ALIGN_RIGHT)
-        ctrlbar.AddSpacer(20,10)
-        self.debugbtn = eclib.PlateButton(ctrlbar, wx.ID_ANY, _("Debug"), rbmp,
-                                        style=eclib.PB_STYLE_NOBG)
-        ctrlbar.AddControl(self.debugbtn, wx.ALIGN_RIGHT)
-        caption = wx.StaticText(ctrlbar, label="Debug Args:",
-                                style=eclib.PB_STYLE_NOBG)
-        ctrlbar.AddControl(caption, wx.ALIGN_RIGHT)
-        txtentrysize = wx.Size(512, wx.DefaultSize.GetHeight())
-        self.debugtxtentry = eclib.CommandEntryBase(ctrlbar, wx.ID_ANY, 
-                                        _(""), size=txtentrysize, 
-                                        style=eclib.PB_STYLE_NOBG)
-        ctrlbar.AddControl(self.debugtxtentry, wx.ALIGN_RIGHT)
+        ctrlbar.AddControl(self.runbtn, wx.ALIGN_RIGHT)
 
         # Layout
         self.SetWindow(self._listCtrl)
@@ -120,8 +101,7 @@ class SyntaxCheckWindow(eclib.ControlBox):
 
         # Event Handlers
         self.Bind(wx.EVT_TIMER, self.OnJobTimer, self._jobtimer)
-        self.Bind(wx.EVT_BUTTON, self.OnRunLint, self.lintbtn)
-        self.Bind(wx.EVT_BUTTON, self.OnRunDebug, self.debugbtn)
+        self.Bind(wx.EVT_BUTTON, self.OnRunLint, self.runbtn)
 
         # Editra Message Handlers
         ed_msg.Subscribe(self.OnFileLoad, ed_msg.EDMSG_FILE_OPENED)
@@ -186,41 +166,13 @@ class SyntaxCheckWindow(eclib.ControlBox):
             vardict = {}
 
         self._checksyntax(filetype, vardict, filename)
-        self._lintrun = True
-
-    def _launchdebugger(self, editor):
-        # With the text control (ed_stc.EditraStc) this will return the full
-        # path of the file or a wx.EmptyString if the buffer does not contain
-        # an on disk file
-        filename = editor.GetFileName()
-        self._listCtrl.set_editor(editor)
-        self._listCtrl.DeleteOldRows()
-        
-        if not filename:
-            return
-
-        filename = os.path.abspath(filename)
-        fileext = os.path.splitext(filename)[1]
-        if fileext == u"":
-            return
-
-        filetype = syntax.GetIdFromExt(fileext[1:]) # pass in file extension
-        directoryvariables = self.get_directory_variables(filetype)
-        if directoryvariables:
-            vardict = directoryvariables.read_dirvarfile(filename)
-        else:
-            vardict = {}
-
-        rows = self._debug(filetype, vardict, filename)
-        self._OnListRows(rows)
-        self._debugrun = True
+        self._hasrun = True
 
     def UpdateForEditor(self, editor, force=False):
         langid = getattr(editor, 'GetLangId', lambda: -1)()
         ispython = langid == synglob.ID_LANG_PYTHON
-        self.lintbtn.Enable(ispython)
-        self.debugbtn.Enable(ispython)
-        if force or (not self._lintrun and not self._debugrun):
+        self.runbtn.Enable(ispython)
+        if force or not self._hasrun:
 #            fname = getattr(editor, 'GetFileName', lambda: u"")()
 #            if ispython:
 #                self._lbl.SetLabel(fname)
@@ -233,7 +185,7 @@ class SyntaxCheckWindow(eclib.ControlBox):
         """ Notebook tab was changed """
         notebook, pg_num = msg.GetData()
         editor = notebook.GetPage(pg_num)
-        if ToolConfig.GetConfigValue(ToolConfig.TLC_AUTO_RUN):
+        if LintConfig.GetConfigValue(LintConfig.PLC_AUTO_RUN):
             wx.CallAfter(self._onfileaccess, editor)
             self.UpdateForEditor(editor, True)
         else:
@@ -242,7 +194,7 @@ class SyntaxCheckWindow(eclib.ControlBox):
     def OnFileLoad(self, msg):
         """Load File message"""
         editor = self._GetEditorForFile(msg.GetData())
-        if ToolConfig.GetConfigValue(ToolConfig.TLC_AUTO_RUN):
+        if LintConfig.GetConfigValue(LintConfig.PLC_AUTO_RUN):
             wx.CallAfter(self._onfileaccess, editor)
             self.UpdateForEditor(editor, True)
         else:
@@ -252,7 +204,7 @@ class SyntaxCheckWindow(eclib.ControlBox):
         """Load File message"""
         filename, tmp = msg.GetData()
         editor = self._GetEditorForFile(filename)
-        if ToolConfig.GetConfigValue(ToolConfig.TLC_AUTO_RUN):
+        if LintConfig.GetConfigValue(LintConfig.PLC_AUTO_RUN):
             wx.CallAfter(self._onfileaccess, editor)
             self.UpdateForEditor(editor, True)
         else:
@@ -264,31 +216,17 @@ class SyntaxCheckWindow(eclib.ControlBox):
         if rbmp.IsNull() or not rbmp.IsOk():
             return
         else:
-            self.lintbtn.SetBitmap(rbmp)
-            self.lintbtn.Refresh()
-            self.debugbtn.SetBitmap(rbmp)
-            self.debugbtn.Refresh()
+            self.runbtn.SetBitmap(rbmp)
+            self.runbtn.Refresh()
 
     def OnRunLint(self, event):
         editor = wx.GetApp().GetCurrentBuffer()
         if editor:
             wx.CallAfter(self._onfileaccess, editor)
 
-    def OnRunDebug(self, event):
-        editor = wx.GetApp().GetCurrentBuffer()
-        if editor:
-            wx.CallAfter(self._launchdebugger, editor)
-
     def get_syntax_checker(self, filetype, vardict, filename):
         try:
             return self.__syntaxCheckers[filetype](vardict, filename)
-        except Exception:
-            pass
-        return None
-        
-    def get_debugger(self, filetype, vardict, filename):
-        try:
-            return self.__debuggers[filetype](vardict, filename)
         except Exception:
             pass
         return None
@@ -311,14 +249,7 @@ class SyntaxCheckWindow(eclib.ControlBox):
         self._StopTimer()
         self._jobtimer.Start(250, True)
 
-    def _debug(self, filetype, vardict, filename):
-        debugger = self.get_debugger(filetype, vardict, filename)
-        if not debugger:
-            return []
-        debugargs = self.debugtxtentry.GetTextControl().GetValue()
-        return debugger.Debug(debugargs)
-
-    def _OnListRows(self, data):
+    def _OnSyntaxData(self, data):
         # Data is something like 
         # [('Syntax Error', '__all__ = ["CSVSMonitorThread"]', 7)]
         if len(data) != 0:
@@ -336,7 +267,7 @@ class SyntaxCheckWindow(eclib.ControlBox):
             ed_msg.PostMessage(ed_msg.EDMSG_PROGRESS_STATE, (mwid, -1, -1))
             # Update the label to show what file the results are for
             self._lbl.SetLabel(self._curfile)
-            self._checker.Check(self._OnListRows)
+            self._checker.Check(self._OnSyntaxData)
 
     def delete_rows(self):
         self._listCtrl.DeleteOldRows()

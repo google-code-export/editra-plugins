@@ -29,7 +29,7 @@ import util
 
 # Local Imports
 from SyntaxCheckWindow import SyntaxCheckWindow
-import ToolConfig
+import LintConfig
 
 #-----------------------------------------------------------------------------#
 # Globals
@@ -120,7 +120,7 @@ class ConfigObject(plugin.PluginConfigObject):
         @return: wxPanel
 
         """
-        return ToolConfig.ToolConfigPanel(parent)
+        return LintConfig.LintConfigPanel(parent)
 
     def GetLabel(self):
         """Get the label for this config panel
