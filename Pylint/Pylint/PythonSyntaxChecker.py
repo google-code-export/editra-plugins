@@ -14,8 +14,7 @@ __revision__ = "$Revision$"
 #-----------------------------------------------------------------------------#
 # Imports
 from AbstractSyntaxChecker import AbstractSyntaxChecker
-import ToolConfig
-import ebmlib
+import LintConfig
 import os, re
 from subprocess import Popen, PIPE
 
@@ -32,20 +31,20 @@ class PythonSyntaxChecker(AbstractSyntaxChecker):
         # Attributes
         self.dirvarfile = variabledict.get("DIRVARFILE")
         inithook = "--init-hook=\"import os; print 'PYTHONPATH=%s' % os.getenv('PYTHONPATH');\""
-        self.pylintargs = "-f parseable -r n %s " % inithook
+        self.runpylint = " -f parseable -r n %s " % inithook
         pylintrc = variabledict.get("PYLINTRC")
         if pylintrc:
             pylintrc = "--rcfile=%s " % pylintrc
-            self.pylintargs = self.pylintargs + pylintrc
+            self.runpylint = self.runpylint + pylintrc
         else:
             # Use built-in configuration
-            dlist = ToolConfig.GetConfigValue(ToolConfig.TLC_DISABLED_CHK)
+            dlist = LintConfig.GetConfigValue(LintConfig.PLC_DISABLED_CHK)
             if dlist is not None and len(dlist):
                 if len(dlist) > 1:
                     disable = ",".join(dlist)
                 else:
                     disable = dlist[0]
-                self.pylintargs += ("-d %s " % disable)
+                self.runpylint += ("-d %s " % disable)
         self.addedpythonpaths = variabledict.get("ADDEDPYTHONPATHS")
         self.nopylinterror = u"***  FATAL ERROR: Pylint is not installed"
         self.nopylinterror += u" or is not in path!!! ***"
@@ -66,11 +65,12 @@ class PythonSyntaxChecker(AbstractSyntaxChecker):
         # Figure out what Pylint to use
         # 1) First check configuration
         # 2) Second check for it on the path
-        lintpath = ToolConfig.GetConfigValue(ToolConfig.TLC_LINT_PATH)
+        lintpath = LintConfig.GetConfigValue(LintConfig.PLC_LINT_PATH)
         if lintpath is None or not os.path.exists(lintpath):
-            lintpath = ebmlib.Which("pylint.bat")
-            if lintpath is None:
-                lintpath = ebmlib.Which("pylint")
+            lintpath = None
+            res = ebmlib.Which("pylint")
+            if res is not None:
+                lintpath = "pylint"
 
         # No configured pylint and its not on the PATH
         if lintpath is None:
@@ -85,8 +85,8 @@ class PythonSyntaxChecker(AbstractSyntaxChecker):
             parentPath = os.path.dirname(parentPath)
 
         # Start pylint
-        cmdline = "%s %s" % (lintpath, self.pylintargs)
-        process = Popen("%s %s" % (cmdline, childPath),
+        cmdline = lintpath + self.runpylint
+        process = Popen("%s%s" % (cmdline, childPath),
                         shell=True, stdout=PIPE, stderr=PIPE,
                         cwd=parentPath)
         p = process.stdout
