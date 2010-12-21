@@ -1,185 +1,117 @@
-###############################################################################
-# Name: __init__.py                                                           #
-# Purpose: Python Tools plugin                                                #
-# Author: Ofer Schwarz <os.urandom@gmail.com>,                                #
-#         Rudi Pettazzi <rudi.pettazzi@gmail.com>                             #
-# Copyright: (c) 2008 Ofer Schwarz <os.urandom@gmail.com>                     #
-# Licence: wxWindows Licence                                                  #
+# -*- coding: utf-8 -*-
+# Name: __init__.py                                                           
+# Purpose: Pylint plugin                                              
+# Author: Mike Rans                              
+# Copyright: (c) 2010 Mike Rans                                
+# License: wxWindows License                                                  
 ###############################################################################
 
-"""Various Python tools for Editra"""
+# Plugin Metadata
+"""
+Adds Python syntax checking using Pylint with results in a Shelf window.
 
-# Plugin Meta Data
-__author__ = "Ofer Schwarz, Rudi Pettazzi, Alexey Zankevich"
+"""
+
 __version__ = "0.1"
+__author__ = "Mike Rans"
+__svnid__ = "$Id$"
+__revision__ = "$Revision$"
 
 #-----------------------------------------------------------------------------#
 # Imports
-import os
-import re
-import sys
-import platform
-from StringIO import StringIO
 import wx
 
-# Editra Imports
+# Editra imports
+import ed_glob
 import iface
 import plugin
-import ed_msg
-from profiler import Profile_Get, Profile_Set
+import util
 
 # Local Imports
-from openmodule import OpenModuleDialog, ID_OPEN_MODULE
-from varchecker import HighLight
-import finder
-import ptcfg
-
-try:
-    from foxtrot import check_vars
-except ImportError, e:
-    raise ImportError('Please, install foxtrot package at first!')
+from SyntaxCheckWindow import SyntaxCheckWindow
+import ToolConfig
 
 #-----------------------------------------------------------------------------#
 # Globals
-
 _ = wx.GetTranslation
-PYTOOLS_PREFS = 'PyTools.Prefs'
-PYTOOLS_BASE_PATH_CHOOSE_MSG  = _("Select Python library directory (ex: %s): ")
-PYTOOLS_BASE_PATH_INVALID_MSG = _("""%s doesn't appear to be valid. 
-The selected directory should contain the site-packages subdirectory""")
 
 #-----------------------------------------------------------------------------#
+# Implementation
+class Pylint(plugin.Plugin):
+    """Script Launcher and output viewer"""
+    plugin.Implements(iface.ShelfI)
+    ID_PYLINT = wx.NewId()
+    INSTALLED = False
+    SHELF = None
 
-class PyTools(plugin.Plugin):
-    """ Adds Python tools to the Editra menus """
-    plugin.Implements(iface.MainWindowI)
+    @property
+    def __name__(self):
+        return u'Pylint'
 
-    def PlugIt(self, parent):
-        """Add menu entries"""
-        if parent:
-            # Use Editra's logging system
-            self._log = wx.GetApp().GetLog()
-            self._log("[pytools][info] Installing Pytools")
-            self._finder = None
-            # Install all tools
-            self.lighter = HighLight(parent)
-            self.lighter.PlugIt()
-            self.InstallOpenModule(parent)
-        else:
-            self._log("[pytools][err] Failed to install pytools plugin")
+    def AllowMultiple(self):
+        """PyLint allows multiple instances"""
+        return True
 
-    def InstallOpenModule(self, parent):
-        self._log("[pytools][info] Installing module opener")
-        file_menu = parent.GetMenuBar().GetMenuByName("file")
-        # Insert the Open Module command before Open Recent
-        # TODO: Find the 'open recent' position in a more generic way
-        # NOTE:CJP you can use the FindById method of wxMenu to do this
-        file_menu.Insert(4, ID_OPEN_MODULE,
-                _("Open Python &Module\tCtrl+Shift+M"),
-                _("Open the source code of a Python module from sys.path"))
+    def CreateItem(self, parent):
+        """Create a PyLint panel"""
+        util.Log("[PyLint][info] Creating Pylint instance for Shelf")
+        return SyntaxCheckWindow(parent)
 
-    def GetMenuHandlers(self):
-        """This is used to register the menu handler with the app and
-        associate the event with the parent window. It needs to return
-        a list of ID/Handler pairs for each menu handler that the plugin
-        is providing.
+    def GetBitmap(self):
+        """Get the tab bitmap
+        @return: wx.Bitmap
 
         """
-        return [(ID_OPEN_MODULE, self.OnOpenModule)]
+        bmp = wx.ArtProvider.GetBitmap(str(ed_glob.ID_BIN_FILE), wx.ART_MENU)
+        return bmp
 
-    def GetUIHandlers(self):
-        """This is used to register the update ui handler with the app and
-        associate the event with the parent window. This plugin doesn't use
-        the UpdateUI event so it can just return an empty list.
+    def GetId(self):
+        """The unique identifier of this plugin"""
+        return self.ID_PYLINT
+
+    def GetMenuEntry(self, menu):
+        """This plugins menu entry"""
+        item = wx.MenuItem(menu, self.ID_PYLINT, self.__name__,
+                           _("Show Pylint checker"))
+        item.SetBitmap(self.GetBitmap())
+        return item
+
+    def GetMinVersion(self):
+        """Minimum version of Editra this plugin is compatible with"""
+        return "5.86"
+
+    def GetName(self):
+        """The name of this plugin"""
+        return self.__name__
+
+    def InstallComponents(self, mainw):
+        """Install extra menu components
+        param mainw: MainWindow Instance
 
         """
-        return list()
+        pass
 
-    def OnOpenModule(self, evt):
-        """Show the OpenModule dialog"""
-        if evt.GetId() != ID_OPEN_MODULE:
-            evt.Skip()
+    def IsInstalled(self):
+        """Check whether PyLint has been installed yet or not
+        @note: overridden from Plugin
+        @return bool
 
-        win = wx.GetApp().GetActiveWindow()
+        """
+        return Pylint.INSTALLED
 
-        if self._finder == None:
-            prefs = Profile_Get(PYTOOLS_PREFS, default=dict())
-            base = prefs.get('module_base')
-            if not base or not CheckModuleBase(base):
-                base = ChooseModuleBase(win)
-            if base:
-                prefs['module_base'] = base
-                self._log("[pytools][debug] Saving base search dir: %s" % base)
-                Profile_Set(PYTOOLS_PREFS, prefs)
-                path = finder.GetSearchPath(base)
-                self._log("[pytools][debug] search path: %s" % path)
-                self._finder = finder.ModuleFinder(path)
-            else:
-                return
-
-        mdlg = OpenModuleDialog(win, self._finder, title=_("Open module"))
-        mdlg.SetFocus()
-        
-        if mdlg.ShowModal() != wx.ID_OK:
-            mdlg.Destroy()
-            return
-
-        filename = mdlg.GetValue()
-        if filename:
-            mdlg.Destroy()
-            win.DoOpen(evt, filename)
-
-def CheckModuleBase(base):
-    if sys.platform == 'win32':
-        spkg = os.path.join(base, 'lib', 'site-packages')
-    else:
-        spkg = os.path.join(base, 'site-packages')
-    return base != None and os.path.exists(base) and os.path.isdir(base) \
-            and os.path.exists(spkg)
-
-# XXX investigate python installation layout on MacOSX ("apple python" vs. 
-# default python install
-def ChooseModuleBase(parent):
-    """Shows a dialog to choose the python libraries directory.
-    @return: the python installation libraries root (the directory containing, 
-             among the others, the site-packages dir) or None if the user
-             didn't make any choice or choose an invalid path
-    """
-    if sys.platform == 'win32':
-        ex = "C:\Python26"
-    elif platform.mac_ver()[0]:
-        ex = "/Library/Frameworks/Python.framework/2.6"
-    else:
-        ex = "/usr/lib/python-2.6"
-
-    title = PYTOOLS_BASE_PATH_CHOOSE_MSG % ex
-    value = None
-    dlg = wx.DirDialog(parent, title,
-                       style=wx.DD_DEFAULT_STYLE | wx.DD_DIR_MUST_EXIST)
-    if dlg.ShowModal() == wx.ID_OK:
-        value = dlg.GetPath()
-        
-    if not CheckModuleBase(value):
-        errmsg = PYTOOLS_BASE_PATH_INVALID_MSG % value
-        errdlg = wx.MessageDialog(dlg, errmsg, 
-                                _('Error'),  wx.OK | wx.ICON_ERROR)
-        if errdlg.ShowModal() == wx.ID_OK:
-            errdlg.Destroy()
-        value = None
-
-    dlg.Destroy()
-    return value
+    def IsStockable(self):
+        """This item can be reloaded between sessions"""
+        return True
 
 #-----------------------------------------------------------------------------#
-# Plugin Configuration Interface Implementation
+# Configuration Interface
 
 def GetConfigObject():
-    return PyToolsConfigObject()
+    return ConfigObject()
 
-class PyToolsConfigObject(plugin.PluginConfigObject):
-    """Plugin configuration object. Plugins that wish to provide a
-    configuration panel should implement a subclass of this object
-    in their __init__ module.
+class ConfigObject(plugin.PluginConfigObject):
+    """Plugin configuration object for PyLint
+    Provides configuration panel for plugin dialog.
 
     """
     def GetConfigPanel(self, parent):
@@ -188,12 +120,11 @@ class PyToolsConfigObject(plugin.PluginConfigObject):
         @return: wxPanel
 
         """
-        return ptcfg.PyToolsCfgPanel(parent)
+        return ToolConfig.ToolConfigPanel(parent)
 
     def GetLabel(self):
         """Get the label for this config panel
         @return string
 
         """
-        return _("PyTools")
-
+        return _("PyLint")
