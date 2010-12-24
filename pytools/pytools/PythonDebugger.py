@@ -76,7 +76,7 @@ class PythonDebugger(AbstractDebugger):
             modulepath = os.path.splitext(childPath)[0].replace(os.path.sep, ".")
             cmdargs = self.winpdbargs.replace("%MODULE%", modulepath)
         else:
-            cmdargs = "%s %s" % (self.winpdbargs, childPath)
+            cmdargs = "%s %s" % (self.winpdbargs, '"%s"' % childPath)
         cmdline = "%s %s %s" % (debugpath, cmdargs, debugargs)
         process = Popen(cmdline,
                         shell=True,
