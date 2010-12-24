@@ -86,7 +86,7 @@ class PythonSyntaxChecker(AbstractSyntaxChecker):
 
         # Start pylint
         cmdline = lintpath + self.runpylint
-        process = Popen("%s%s" % (cmdline, childPath),
+        process = Popen("%s%s" % (cmdline, '"%s"' % childPath),
                         shell=True, stdout=PIPE, stderr=PIPE,
                         cwd=parentPath)
         p = process.stdout
