@@ -8,7 +8,7 @@
 
 # Plugin Metadata
 """
-Adds Python syntax checking using Pylint with results in a Shelf window.
+Adds Python syntax checking using Pylint and debugging using Winpdb with results in a Shelf window.
 
 """
 
@@ -127,9 +127,6 @@ class pytools(plugin.Plugin):
 
     def OnOpenModule(self, evt):
         """Show the OpenModule dialog"""
-        if evt.GetId() != ID_OPEN_MODULE:
-            evt.Skip()
-
         win = wx.GetApp().GetActiveWindow()
 
         if self._finder == None:
