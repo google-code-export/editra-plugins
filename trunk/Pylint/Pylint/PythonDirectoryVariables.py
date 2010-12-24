@@ -17,7 +17,7 @@ __revision__ = "$Revision$"
 import os
 from AbstractDirectoryVariables import AbstractDirectoryVariables
 
-class PythonDirectoryVariables(AbstractDirectoryVariables):    
+class PythonDirectoryVariables(AbstractDirectoryVariables):
     def __init__(self):
         AbstractDirectoryVariables.__init__(self, "py")
         self.addedpythonpaths = set()
@@ -29,7 +29,7 @@ class PythonDirectoryVariables(AbstractDirectoryVariables):
                 dir, _ = os.path.split(dirvarfile)
                 path = os.path.join(dir, path)
         return os.path.abspath(path)
-        
+
     def get_pythonpaths(self):
         paths = set()
         if os.environ.has_key("PYTHONPATH"):
@@ -39,7 +39,7 @@ class PythonDirectoryVariables(AbstractDirectoryVariables):
                 if not path in self.addedpythonpaths:
                     paths.add(os.path.abspath(path))
         return paths
-    
+
     def recurseup(self, dir):
         dir, rest = os.path.split(dir)
         dirvarfile = os.path.join(dir, self.dirvarfilename)
@@ -67,7 +67,7 @@ class PythonDirectoryVariables(AbstractDirectoryVariables):
                 for path in allnewpaths:
                     self.addedpythonpaths.add(self.get_abspath(dirvarfile, path))
             elif key == "PYLINTRC":
-                vardict["PYLINTRC"] = self.get_abspath(dirvarfile, val)            
+                vardict["PYLINTRC"] = '"%s"' % self.get_abspath(dirvarfile, val)
         vardict["ADDEDPYTHONPATHS"] = self.addedpythonpaths
         vardict["STARTCALL"] = self.set_envvars
         vardict["ENDCALL"] = self.restore_envvars
@@ -77,7 +77,7 @@ class PythonDirectoryVariables(AbstractDirectoryVariables):
         paths = self.get_pythonpaths()
         paths.update(self.addedpythonpaths)
         os.environ["PYTHONPATH"] = os.pathsep.join(paths)
-        
+
     def restore_envvars(self):
         paths = self.get_pythonpaths() # restore old python path
         os.environ["PYTHONPATH"] = os.pathsep.join(paths)
