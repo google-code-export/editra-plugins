@@ -1,8 +1,9 @@
 # -*- coding: utf-8 -*-
-# Setup script to build the pytools plugin. To build the plugin
+# Setup script to build the PyTools plugin. To build the plugin
 # just run 'python setup.py bdist_egg' and an egg will be built and put into
 # the dist directory of this folder.
-"""Adds various Python tools with results shown in a Shelf window.
+"""
+Adds Python syntax checking using Pylint and debugging using Winpdb with results in a Shelf window.
 
 """
 __author__ = "Mike Rans"
@@ -16,7 +17,7 @@ except ImportError:
 
 if setup != None:
     setup(
-        name='pytools',
+        name='PyTools',
         version='0.1',
         description=__doc__,
         author=__author__,
@@ -24,9 +25,9 @@ if setup != None:
         license="wxWindows",
         url="http://editra.org",
         platforms=["Linux", "OS X", "Windows"],
-        packages=['pytools'],
+        packages=['PyTools'],
         entry_points='''
         [Editra.plugins]
-        pytools = pytools:pytools
+        PyTools = PyTools:PyTools
         '''
         )

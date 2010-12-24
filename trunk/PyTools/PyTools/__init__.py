@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 # Name: __init__.py                                                           
-# Purpose: Pylint plugin                                              
+# Purpose: PyTools plugin                                              
 # Author: Mike Rans                              
 # Copyright: (c) 2010 Mike Rans                                
 # License: wxWindows License                                                  
@@ -47,7 +47,7 @@ The selected directory should contain the site-packages subdirectory""")
 
 #-----------------------------------------------------------------------------#
 # Implementation
-class pytools(plugin.Plugin):
+class PyTools(plugin.Plugin):
     """Script Launcher and output viewer"""
     plugin.Implements(iface.ShelfI)
     ID_PYTOOLS = wx.NewId()
@@ -56,15 +56,15 @@ class pytools(plugin.Plugin):
 
     @property
     def __name__(self):
-        return u'pytools'
+        return u'PyTools'
 
     def AllowMultiple(self):
-        """pytools allows multiple instances"""
+        """PyTools allows multiple instances"""
         return True
 
     def CreateItem(self, parent):
-        """Create a pytools panel"""
-        util.Log("[pytools][info] Creating pytools instance for Shelf")
+        """Create a PyTools panel"""
+        util.Log("[PyTools][info] Creating PyTools instance for Shelf")
         return SyntaxCheckWindow(parent)
 
     def GetBitmap(self):
@@ -82,7 +82,7 @@ class pytools(plugin.Plugin):
     def GetMenuEntry(self, menu):
         """This plugins menu entry"""
         item = wx.MenuItem(menu, self.ID_PYTOOLS, self.__name__,
-                           _("Show pytools"))
+                           _("Show PyTools"))
         item.SetBitmap(self.GetBitmap())
         return item
 
@@ -95,7 +95,7 @@ class pytools(plugin.Plugin):
         return self.__name__
 
     def InstallOpenModule(self, parent):
-        util.Log("[pytools][info] Installing module opener")
+        util.Log("[PyTools][info] Installing module opener")
         file_menu = parent.GetMenuBar().GetMenuByName("file")
         # Insert the Open Module command before Open Recent
         # TODO: Find the 'open recent' position in a more generic way
@@ -114,12 +114,12 @@ class pytools(plugin.Plugin):
         mainw.AddMenuHandler(ID_OPEN_MODULE, self.OnOpenModule)
             
     def IsInstalled(self):
-        """Check whether pytools has been installed yet or not
+        """Check whether PyTools has been installed yet or not
         @note: overridden from Plugin
         @return bool
 
         """
-        return pytools.INSTALLED
+        return PyTools.INSTALLED
 
     def IsStockable(self):
         """This item can be reloaded between sessions"""
@@ -136,10 +136,10 @@ class pytools(plugin.Plugin):
                 base = ChooseModuleBase(win)
             if base:
                 prefs['module_base'] = base
-                util.Log("[pytools][debug] Saving base search dir: %s" % base)
+                util.Log("[PyTools][debug] Saving base search dir: %s" % base)
                 Profile_Set(PYTOOLS_PREFS, prefs)
                 path = finder.GetSearchPath(base)
-                util.Log("[pytools][debug] search path: %s" % path)
+                util.Log("[PyTools][debug] search path: %s" % path)
                 self._finder = finder.ModuleFinder(path)
             else:
                 return
@@ -204,7 +204,7 @@ def GetConfigObject():
     return ConfigObject()
 
 class ConfigObject(plugin.PluginConfigObject):
-    """Plugin configuration object for pytools
+    """Plugin configuration object for PyTools
     Provides configuration panel for plugin dialog.
 
     """
@@ -221,4 +221,4 @@ class ConfigObject(plugin.PluginConfigObject):
         @return string
 
         """
-        return _("pytools")
+        return _("PyTools")

@@ -1,4 +1,4 @@
-Name=pytools
+Name=PyTools
 Author=Mike Rans, Cody Precord
-Description=Adds a Pylint Syntax Checker and Debugger to the Shelf Menu
+Description=Adds Python syntax checking using Pylint and debugging using Winpdb with results in a Shelf window.
 Version=0.1
