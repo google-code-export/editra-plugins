@@ -78,7 +78,7 @@ class Pylint(plugin.Plugin):
 
     def GetMinVersion(self):
         """Minimum version of Editra this plugin is compatible with"""
-        return "5.86"
+        return "5.99"
 
     def GetName(self):
         """The name of this plugin"""

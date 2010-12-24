@@ -60,6 +60,8 @@ def GetSearchPath(base=None):
     # contains the line 'wx-<version>-mws-unicode' and 'wx-<version>-mws-unicode is
     # a subdirectory of site-packages.
     for dir in path:
+        if not os.path.isdir(dir):
+            continue
         for f in os.listdir(dir):
             if os.path.splitext(f)[1] == '.pth':
                 list = _ParsePth(dir, f)
