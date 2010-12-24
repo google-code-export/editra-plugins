@@ -1,6 +1,6 @@
 ###############################################################################
 # Name: testfinder.py
-# Purpose: Unittest for pytools.finder
+# Purpose: Unittest for PyTools.finder
 # Author: Rudi Pettazzi <rudi.pettazzi@gmail.com>
 # Copyright: (c) 2009 Cody Precord <staff@editra.org>
 # License: wxWindows License
@@ -17,7 +17,7 @@ import StringIO
 import os
 import sys
 
-sys.path.insert(0, os.path.abspath('../pytools'))
+sys.path.insert(0, os.path.abspath('../PyTools'))
 
 import finder
 
