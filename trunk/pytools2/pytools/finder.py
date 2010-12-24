@@ -120,7 +120,7 @@ class ModuleFinder(object):
         self._searchpath = searchpath
         self._sources = []
 
-    def Find(self, text, useimport=False):
+    def Find(self, text):
         """ Find the source files of modules matching text.
         @param text: the module name
         @return: a list with the module sources path if any, an empty list
@@ -128,8 +128,6 @@ class ModuleFinder(object):
         """
         if not text:
             return []
-        elif useimport:
-            return self._FindUseImport(text)
         else:
             return self._Find(text);
 
@@ -239,47 +237,6 @@ class ModuleFinder(object):
 
     def _Skip(self, path):
         return path in self._searchpath or path.endswith(ModuleFinder._WXLOCALE)
-
-#--------------------------------------------------------------------------#
-# old algorithm
-
-    def _FindUseImport(self, name):
-        """Find the module source using __import__ with the current runtime
-        @param name: the module name
-        @return: None or the module source path
-        """
-        result = []
-        if not name:
-            return result
-
-        # Import the module to find out its file
-        # fromlist needs to be non-empty to import inside packages
-        # (e.g. 'wx.lib', 'distutils.core')
-        try:
-            lst = name.split('.')
-            module = __import__(name, lst[:-1])
-        except ImportError:
-            return result
-
-        fname = getattr(module, '__file__', None)
-
-        if fname:
-            # Open source files instead of bytecode
-            root, ext = os.path.splitext(fname)
-            if ext in ModuleFinder._BYTECODE_EXT:
-                for se in ModuleFinder._SRC_EXT:
-                    if os.path.isfile(root + se):
-                        fname = root + se
-                        break
-                else:
-                    fname = None
-            elif ext not in ModuleFinder._SRC_EXT:
-                # This is not a pure python module
-                fname = None
-
-        if fname:
-            result.append(fname)
-        return result
 
 #--------------------------------------------------------------------------#
 # Test
