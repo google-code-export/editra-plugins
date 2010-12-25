@@ -16,6 +16,7 @@ __revision__ = "$Revision: 1001 $"
 
 import os
 from AbstractDebugger import AbstractDebugger
+from PyToolsUtils import get_packageroot, get_modulepath
 import ToolConfig
 import ebmlib
 import os, re
@@ -64,16 +65,11 @@ class PythonDebugger(AbstractDebugger):
             return ((u"No Winpdb", self.nowinpdberror, u"NA"),)
 
         # traverse downwards until we are out of a python package
-        fullPath = os.path.abspath(self.filename)
-        parentPath, childPath = os.path.dirname(fullPath), os.path.basename(fullPath)
-
-        while parentPath != "/" and os.path.exists(os.path.join(parentPath, '__init__.py')):
-            childPath = os.path.join(os.path.basename(parentPath), childPath)
-            parentPath = os.path.dirname(parentPath)
+        childPath, parentPath = get_packageroot(self.filename)
 
         # Start winpdb
         if self.winpdbargs.find("%MODULE%") != -1:
-            modulepath = os.path.splitext(childPath)[0].replace(os.path.sep, ".")
+            modulepath = get_modulepath(childPath)
             cmdargs = self.winpdbargs.replace("%MODULE%", modulepath)
         else:
             cmdargs = "%s %s" % (self.winpdbargs, '"%s"' % childPath)

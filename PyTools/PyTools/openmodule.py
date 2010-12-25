@@ -44,8 +44,9 @@ class OpenModuleDialog(wx.Dialog):
         # Attributes
         self.finder = finder
         self.search = wx.SearchCtrl(self, style=wx.TE_PROCESS_ENTER)
+        self.search.ShowSearchButton(True)
         self.search.ShowCancelButton(True)
-        self.btnOk = wx.Button(self, wx.ID_OK, label=_('Ok'))
+        self.btnOk = wx.Button(self, wx.ID_OK, label=_('Select'))
         self.btnOk.Enable(False)
         self.btnCancel = wx.Button(self, wx.ID_CANCEL, label=_('Cancel'))
         self.listCtrl = wx.ListCtrl(self, style=wx.LC_REPORT | wx.LC_NO_HEADER
@@ -57,6 +58,7 @@ class OpenModuleDialog(wx.Dialog):
 
         # Event Handlers
         self.Bind(wx.EVT_TEXT_ENTER, self.OnSearch, self.search)
+        self.Bind(wx.EVT_SEARCHCTRL_SEARCH_BTN, self.OnSearch, self.search)
         self.Bind(wx.EVT_SEARCHCTRL_CANCEL_BTN, self.OnCancelSearch, self.search)
         self.Bind(wx.EVT_BUTTON, self.OnConfirm, self.btnOk)
         self.Bind(wx.EVT_BUTTON, self.OnCancel, self.btnCancel)
