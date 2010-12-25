@@ -14,6 +14,7 @@ __revision__ = "$Revision$"
 #-----------------------------------------------------------------------------#
 # Imports
 from AbstractSyntaxChecker import AbstractSyntaxChecker
+from PyToolsUtils import get_packageroot
 import ToolConfig
 import ebmlib
 import os, re
@@ -77,12 +78,7 @@ class PythonSyntaxChecker(AbstractSyntaxChecker):
             return ((u"No Pylint", self.nopylinterror, u"NA"),)
 
         # traverse downwards until we are out of a python package
-        fullPath = os.path.abspath(self.filename)
-        parentPath, childPath = os.path.dirname(fullPath), os.path.basename(fullPath)
-
-        while parentPath != "/" and os.path.exists(os.path.join(parentPath, '__init__.py')):
-            childPath = os.path.join(os.path.basename(parentPath), childPath)
-            parentPath = os.path.dirname(parentPath)
+        childPath, parentPath = get_packageroot(self.filename)
 
         # Start pylint
         cmdline = "%s %s" % (lintpath, self.pylintargs)

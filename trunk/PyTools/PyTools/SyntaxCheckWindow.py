@@ -31,6 +31,7 @@ import ToolConfig
 from CheckResultsList import CheckResultsList
 from PythonSyntaxChecker import PythonSyntaxChecker
 from PythonDebugger import PythonDebugger
+from PyToolsUtils import get_packageroot, get_modulepath
 
 # Directory Variables
 from PythonDirectoryVariables import PythonDirectoryVariables
@@ -39,6 +40,8 @@ from PythonDirectoryVariables import PythonDirectoryVariables
 
 _ = wx.GetTranslation
 #-----------------------------------------------------------------------------#
+
+ID_COPY_MODULEPATH = wx.NewId()
 
 class FreezeDrawer(object):
     """To be used in 'with' statements. Upon enter freezes the drawing
@@ -128,6 +131,7 @@ class SyntaxCheckWindow(eclib.ControlBox):
         ed_msg.Subscribe(self.OnFileSave, ed_msg.EDMSG_FILE_SAVED)
         ed_msg.Subscribe(self.OnPageChanged, ed_msg.EDMSG_UI_NB_CHANGED)
         ed_msg.Subscribe(self.OnThemeChanged, ed_msg.EDMSG_THEME_CHANGED)
+        ed_msg.Subscribe(self.OnTabMenu, ed_msg.EDMSG_UI_NB_TABMENU)
 
     def __del__(self):
         self._StopTimer()
@@ -135,6 +139,7 @@ class SyntaxCheckWindow(eclib.ControlBox):
         ed_msg.Unsubscribe(self.OnFileSave)
         ed_msg.Unsubscribe(self.OnPageChanged)
         ed_msg.Unsubscribe(self.OnThemeChanged)
+        ed_msg.Unsubscribe(self.OnTabMenu)
 
     def GetMainWindow(self):
         return self._mw
@@ -279,6 +284,24 @@ class SyntaxCheckWindow(eclib.ControlBox):
         if editor:
             wx.CallAfter(self._launchdebugger, editor)
 
+    def OnTabMenu(self, msg):
+        editor = wx.GetApp().GetCurrentBuffer()
+        if editor:
+            langid = getattr(editor, 'GetLangId', lambda: -1)()
+            ispython = langid == synglob.ID_LANG_PYTHON
+            if ispython:
+                contextmenumanager = msg.GetData()
+                menu = contextmenumanager.GetMenu()
+                menu.Append(ID_COPY_MODULEPATH, _("Copy Module Path"))
+                contextmenumanager.AddHandler(ID_COPY_MODULEPATH, self.copy_module_path)
+
+    def copy_module_path(self, editor, evt):
+        path = editor.GetFileName()
+        if path is not None:
+            childPath, _ = get_packageroot(path)
+            modulepath = get_modulepath(childPath)
+            util.SetClipboardText(modulepath)
+                
     def get_syntax_checker(self, filetype, vardict, filename):
         try:
             return self.__syntaxCheckers[filetype](vardict, filename)
