@@ -13,14 +13,19 @@ __svnid__ = "$Id: PythonDebugger.py 1001 2010-12-13 21:16:53Z rans@email.com $"
 __revision__ = "$Revision: 1001 $"
 
 #-----------------------------------------------------------------------------#
+# Imports
 
-import os
 from AbstractDebugger import AbstractDebugger
 from PyToolsUtils import get_packageroot, get_modulepath
 import ToolConfig
-import ebmlib
-import os, re
+import os
 from subprocess import Popen, PIPE
+
+# Editra Imports
+import ebmlib
+import util
+
+#-----------------------------------------------------------------------------#
 
 class PythonDebugger(AbstractDebugger):    
     def __init__(self, variabledict, filename):
@@ -74,6 +79,7 @@ class PythonDebugger(AbstractDebugger):
         else:
             cmdargs = "%s %s" % (self.winpdbargs, '"%s"' % childPath)
         cmdline = "%s %s %s" % (debugpath, cmdargs, debugargs)
+        util.Log("Winpdb Command Line: %s" % cmdline)
         process = Popen(cmdline,
                         shell=True,
                         cwd=parentPath)

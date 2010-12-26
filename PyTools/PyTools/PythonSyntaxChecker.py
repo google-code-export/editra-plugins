@@ -16,7 +16,6 @@ __revision__ = "$Revision$"
 from AbstractSyntaxChecker import AbstractSyntaxChecker
 from PyToolsUtils import get_packageroot
 import ToolConfig
-import ebmlib
 import os, re
 from subprocess import Popen, PIPE
 
@@ -32,8 +31,8 @@ class PythonSyntaxChecker(AbstractSyntaxChecker):
 
         # Attributes
         self.dirvarfile = variabledict.get("DIRVARFILE")
-        inithook = "--init-hook=\"import os; print 'PYTHONPATH=%s' % os.getenv('PYTHONPATH');\""
-        self.pylintargs = "-f parseable -r n %s " % inithook
+        self.inithook = "--init-hook=\"import os; print 'PYTHONPATH=%s' % os.getenv('PYTHONPATH');\""
+        self.pylintargs = "-f parseable -r n %s " % self.inithook
         pylintrc = variabledict.get("PYLINTRC")
         if pylintrc:
             pylintrc = "--rcfile=%s " % pylintrc
@@ -81,8 +80,9 @@ class PythonSyntaxChecker(AbstractSyntaxChecker):
         childPath, parentPath = get_packageroot(self.filename)
 
         # Start pylint
-        cmdline = "%s %s" % (lintpath, self.pylintargs)
-        process = Popen("%s %s" % (cmdline, '"%s"' % childPath),
+        cmdline = '%s %s "%s"' % (lintpath, self.pylintargs, childPath)
+        util.Log("Full Pylint Command Line: %s" % cmdline)
+        process = Popen(cmdline,
                         shell=True, stdout=PIPE, stderr=PIPE,
                         cwd=parentPath)
         p = process.stdout
@@ -94,7 +94,8 @@ class PythonSyntaxChecker(AbstractSyntaxChecker):
         if self.addedpythonpaths:
             rows.append((u"***", u"Using PYTHONPATH + %s"\
                           % u", ".join(self.addedpythonpaths), u"NA"))
-        rows.append((u"***", u"Pylint command line: %s" % cmdline, u"NA"))
+        basecmdline = cmdline.replace(self.inithook, "")
+        rows.append((u"***", u"Pylint command line: %s" % basecmdline, u"NA"))
         rows.append((u"***", u"Directory Variables file: %s" % self.dirvarfile, u"NA"))
         for line in p:
             # remove pylintrc warning

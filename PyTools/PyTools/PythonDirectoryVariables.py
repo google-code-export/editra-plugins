@@ -23,12 +23,16 @@ class PythonDirectoryVariables(AbstractDirectoryVariables):
         self.addedpythonpaths = set()
 
     @staticmethod
-    def get_abspath(dirvarfile, path):
+    def get_path(dirvarfile, path):
         if path != "":
             if path[0] == ".":
                 dir, _ = os.path.split(dirvarfile)
                 path = os.path.join(dir, path)
-        return os.path.abspath(path)
+        return path
+
+    @staticmethod
+    def get_abspath(dirvarfile, path):
+        return os.path.abspath(PythonDirectoryVariables.get_path(dirvarfile, path))
 
     def get_pythonpaths(self):
         paths = set()
@@ -71,9 +75,9 @@ class PythonDirectoryVariables(AbstractDirectoryVariables):
             elif key == "WINPDBARGS":
                 parts = val.split(" ")
                 for i, part in enumerate(parts):
-                    newpart = self.get_abspath(dirvarfile, part)
+                    newpart = self.get_path(dirvarfile, part)
                     if newpart != part:
-                        parts[i] = '"%s"' % newpart
+                        parts[i] = '"%s"' % os.path.abspath(newpart)
                 vardict[key] = " ".join(parts)            
             else:
                 vardict[key] = val            
