@@ -32,6 +32,7 @@ import util
 # Local Imports
 from openmodule import OpenModuleDialog, ID_OPEN_MODULE
 from profiler import Profile_Get, Profile_Set
+from ToolConfig import PYTOOL_CONFIG
 from SyntaxCheckWindow import SyntaxCheckWindow
 import ToolConfig
 import finder
@@ -40,7 +41,6 @@ import ptcfg
 #-----------------------------------------------------------------------------#
 # Globals
 _ = wx.GetTranslation
-PYTOOLS_PREFS = 'PyTools.Prefs'
 PYTOOLS_BASE_PATH_CHOOSE_MSG  = _("Select Python library directory (ex: %s): ")
 PYTOOLS_BASE_PATH_INVALID_MSG = _("""%s doesn't appear to be valid. 
 The selected directory should contain the site-packages subdirectory""")
@@ -130,14 +130,14 @@ class PyTools(plugin.Plugin):
         win = wx.GetApp().GetActiveWindow()
 
         if self._finder == None:
-            prefs = Profile_Get(PYTOOLS_PREFS, default=dict())
+            prefs = Profile_Get(PYTOOL_CONFIG, default=dict())
             base = prefs.get('module_base')
             if not base or not CheckModuleBase(base):
                 base = ChooseModuleBase(win)
             if base:
                 prefs['module_base'] = base
                 util.Log("[PyTools][debug] Saving base search dir: %s" % base)
-                Profile_Set(PYTOOLS_PREFS, prefs)
+                Profile_Set(PYTOOL_CONFIG, prefs)
                 path = finder.GetSearchPath(base)
                 util.Log("[PyTools][debug] search path: %s" % path)
                 self._finder = finder.ModuleFinder(path)

@@ -15,6 +15,7 @@ __revision__ = "$Revision $"
 #-----------------------------------------------------------------------------#
 # Imports
 import os
+import copy
 import wx
 
 # Editra Libraries
@@ -22,7 +23,9 @@ import ed_glob
 import util
 import eclib
 import ed_msg
-from profiler import Profile_Get
+import ed_menu
+from profiler import Profile_Get, Profile_Set
+from ToolConfig import PYTOOL_CONFIG
 from syntax import syntax
 import syntax.synglob as synglob
 
@@ -85,9 +88,11 @@ class SyntaxCheckWindow(eclib.ControlBox):
         self._jobtimer = wx.Timer(self)
         self._checker = None
         self._curfile = u""
+        self._prevfile = u""
         self._lintrun = False
         self._debugrun = False
         self._debugargs = ""
+        self._config = Profile_Get(PYTOOL_CONFIG, default=dict())
 
         # Setup
         self._listCtrl.set_mainwindow(self._mw)
@@ -103,19 +108,29 @@ class SyntaxCheckWindow(eclib.ControlBox):
             rbmp = None
         self.lintbtn = eclib.PlateButton(ctrlbar, wx.ID_ANY, _("Lint"), rbmp,
                                         style=eclib.PB_STYLE_NOBG)
+        self.lintbtn.Enable(False)
         ctrlbar.AddControl(self.lintbtn, wx.ALIGN_RIGHT)
         ctrlbar.AddSpacer(20,10)
+                        
         self.debugbtn = eclib.PlateButton(ctrlbar, wx.ID_ANY, _("Debug"), rbmp,
                                         style=eclib.PB_STYLE_NOBG)
+        self.debugbtn.Enable(False)
         ctrlbar.AddControl(self.debugbtn, wx.ALIGN_RIGHT)
-        caption = wx.StaticText(ctrlbar, label="Debug Args:",
-                                style=eclib.PB_STYLE_NOBG)
-        ctrlbar.AddControl(caption, wx.ALIGN_RIGHT)
+        self.choices = ["Debug Args", "Override Dbg CmdLine"]
+        self.combo = wx.ComboBox(ctrlbar, wx.ID_ANY, value=self.choices[0], choices=self.choices, style=wx.CB_READONLY|eclib.PB_STYLE_NOBG)
+        self.combo.Enable(False)
+        ctrlbar.AddControl(self.combo, wx.ALIGN_RIGHT)
+        self.combocurrent_selection = 0
+        self.combotexts = {}
+        for i, ignore in enumerate(self.choices):
+            self.combotexts[i] = ""
         txtentrysize = wx.Size(512, wx.DefaultSize.GetHeight())
-        self.debugtxtentry = eclib.CommandEntryBase(ctrlbar, wx.ID_ANY, 
-                                        _(""), size=txtentrysize, 
-                                        style=eclib.PB_STYLE_NOBG)
-        ctrlbar.AddControl(self.debugtxtentry, wx.ALIGN_RIGHT)
+        self.search = wx.SearchCtrl(ctrlbar, wx.ID_ANY, _(""), size=txtentrysize, style=eclib.PB_STYLE_NOBG)
+        self.search.Enable(False)
+        self.search.SetDescriptiveText("")
+        self.search.ShowSearchButton(False)
+        self.search.ShowCancelButton(True)
+        ctrlbar.AddControl(self.search, wx.ALIGN_RIGHT)
 
         # Layout
         self.SetWindow(self._listCtrl)
@@ -125,6 +140,8 @@ class SyntaxCheckWindow(eclib.ControlBox):
         self.Bind(wx.EVT_TIMER, self.OnJobTimer, self._jobtimer)
         self.Bind(wx.EVT_BUTTON, self.OnRunLint, self.lintbtn)
         self.Bind(wx.EVT_BUTTON, self.OnRunDebug, self.debugbtn)
+        self.Bind(wx.EVT_COMBOBOX, self.OnComboSelect, self.combo)
+        self.Bind(wx.EVT_SEARCHCTRL_CANCEL_BTN, self.OnCancelSearch, self.search)
 
         # Editra Message Handlers
         ed_msg.Subscribe(self.OnFileLoad, ed_msg.EDMSG_FILE_OPENED)
@@ -172,6 +189,7 @@ class SyntaxCheckWindow(eclib.ControlBox):
         # path of the file or a wx.EmptyString if the buffer does not contain
         # an on disk file
         filename = editor.GetFileName()
+        
         self._listCtrl.set_editor(editor)
         self._listCtrl.DeleteOldRows()
 
@@ -225,6 +243,40 @@ class SyntaxCheckWindow(eclib.ControlBox):
         ispython = langid == synglob.ID_LANG_PYTHON
         self.lintbtn.Enable(ispython)
         self.debugbtn.Enable(ispython)
+        self.combo.Enable(ispython)
+        self.search.Enable(ispython)
+        self.combotexts[self.combocurrent_selection] = self.search.GetValue()
+        if self._prevfile:
+            emptycombotexts = True
+            for key in self.combotexts:
+                combotext = self.combotexts[key]
+                if combotext:
+                    emptycombotexts = False
+                    break
+            key = "DEBUG_%s" % self._prevfile
+            if emptycombotexts:
+                if key in self._config:
+                    del self._config["DEBUG_%s" % self._prevfile]
+            else:
+                debuginfo = (self.combocurrent_selection, self.combotexts)
+                self._config[key] = copy.deepcopy(debuginfo)
+                Profile_Set(PYTOOL_CONFIG, self._config)
+
+        filename = editor.GetFileName()
+        self._prevfile = filename
+        debuginfo = self._config.get("DEBUG_%s" % filename, None)
+        if debuginfo:
+            self.combocurrent_selection, self.combotexts = debuginfo
+            self.combo.SetSelection(self.combocurrent_selection)
+            self.search.SetValue(self.combotexts[self.combocurrent_selection])
+        else:
+            self.combocurrent_selection = 0
+            self.combotexts = {}
+            for i, ignore in enumerate(self.choices):
+                self.combotexts[i] = ""
+            self.combo.SetSelection(0)
+            self.search.SetValue("")
+            
         if force or (not self._lintrun and not self._debugrun):
 #            fname = getattr(editor, 'GetFileName', lambda: u"")()
 #            if ispython:
@@ -280,9 +332,20 @@ class SyntaxCheckWindow(eclib.ControlBox):
             wx.CallAfter(self._onfileaccess, editor)
 
     def OnRunDebug(self, event):
+        self.combotexts[self.combocurrent_selection] = self.search.GetValue()
         editor = wx.GetApp().GetCurrentBuffer()
         if editor:
             wx.CallAfter(self._launchdebugger, editor)
+
+    def OnCancelSearch(self, event):
+        self.combotexts[self.combocurrent_selection] = ""
+        self.search.SetValue("")
+
+    def OnComboSelect(self, event):
+        """Handle change of combo choice"""
+        self.combotexts[self.combocurrent_selection] = self.search.GetValue()
+        self.combocurrent_selection = self.combo.GetSelection()
+        self.search.SetValue(self.combotexts[self.combocurrent_selection])
 
     def OnTabMenu(self, msg):
         editor = wx.GetApp().GetCurrentBuffer()
@@ -338,8 +401,9 @@ class SyntaxCheckWindow(eclib.ControlBox):
         debugger = self.get_debugger(filetype, vardict, filename)
         if not debugger:
             return []
-        debugargs = self.debugtxtentry.GetTextControl().GetValue()
-        return debugger.Debug(debugargs)
+        debugargs = self.combotexts[0]
+        debuggerargs = self.combotexts[1]
+        return debugger.Debug(debuggerargs, debugargs)
 
     def _OnListRows(self, data):
         # Data is something like 

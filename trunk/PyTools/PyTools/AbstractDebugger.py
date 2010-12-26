@@ -25,7 +25,7 @@ class AbstractDebugger(object):
         self.filename = filename
         self.variabledict = variabledict
 
-    def Debug(self, debugargs):
+    def Debug(self, debuggerargs, debugargs):
         """Interface method override to perform the debugging
         """
         raise NotImplementedError
