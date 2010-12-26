@@ -33,12 +33,13 @@ class PythonDebugger(AbstractDebugger):
 
         # Attributes
         self.dirvarfile = variabledict.get("DIRVARFILE")
-        self.winpdbargs = ""
-
+        
         windbgargs = variabledict.get("WINPDBARGS")
         if windbgargs:
-            self.winpdbargs = "%s %s" % (self.winpdbargs, windbgargs)
-                        
+            self.winpdbargs = windbgargs
+        else:
+            self.winpdbargs = ""
+            
         self.addedpythonpaths = variabledict.get("ADDEDPYTHONPATHS")
         self.nowinpdberror = u"***  FATAL ERROR: Winpdb is not installed"
         self.nowinpdberror += u" or is not in path!!! ***"
@@ -52,7 +53,7 @@ class PythonDebugger(AbstractDebugger):
         if not self.endcall:
             self.endcall = do_nothing
 
-    def Debug(self, debugargs):
+    def Debug(self, debuggerargs, debugargs):
         """Run Debugger"""
         self.startcall()
 
@@ -72,6 +73,9 @@ class PythonDebugger(AbstractDebugger):
         # traverse downwards until we are out of a python package
         childPath, parentPath = get_packageroot(self.filename)
 
+        # Override directory variables (WINPDBARGS) with GUI debugger args
+        if debuggerargs:
+            self.winpdbargs = debuggerargs
         # Start winpdb
         if self.winpdbargs.find("%MODULE%") != -1:
             modulepath = get_modulepath(childPath)
