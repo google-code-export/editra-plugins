@@ -1,3 +1,19 @@
+# -*- coding: utf-8 -*-
+# Name: PyToolsUtils.py
+# Purpose: Pylint plugin
+# Author: Mike Rans
+# Copyright: (c) 2010 Mike Rans
+# License: wxWindows License
+##############################################################################
+""" Utility functions """
+
+__version__ = "0.2"
+__author__ = "Mike Rans"
+__svnid__ = "$Id: PyToolsUtils.py 1025 2010-12-24 18:30:23Z rans@email.com $"
+__revision__ = "$Revision: 1025 $"
+
+#-----------------------------------------------------------------------------#
+
 import os.path
 
 def get_packageroot(filepath):
