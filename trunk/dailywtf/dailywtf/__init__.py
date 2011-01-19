@@ -118,11 +118,13 @@ def OnSubmit(buff, evt):
         if dlg.ShowModal() == wx.ID_OK:
             # send it
             info = dlg.GetSubmissionInfo()
+            dlg.Destroy()
             # Need to encode as UTF-8
             try:
                 info = [data.encode('utf-8') for data in info]
-            except UnicodeEncodeError:
-                return # FAIL TODO: report error to user
+            except UnicodeEncodeError, msg:
+                util.Log("[dailywtf][err] %s" % msg)
+                return
             host = "thedailywtf.com"
             bodytxt = SUBMIT_TPL % tuple(info)
             message = ebmlib.SOAP12Message(host, "/SubmitWTF.asmx", bodytxt,
@@ -130,7 +132,7 @@ def OnSubmit(buff, evt):
             message.Send()
             # TODO check return code to make sure it was submitted
         else:
-            pass # Canceled
+            dlg.Destroy() # Canceled
     else:
         evt.Skip()
 
