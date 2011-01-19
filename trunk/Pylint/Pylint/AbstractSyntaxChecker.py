@@ -17,6 +17,8 @@ __revision__ = "$Revision$"
 import wx
 import threading
 
+import util
+
 #-----------------------------------------------------------------------------#
 
 class SyntaxCheckThread(threading.Thread):
@@ -32,7 +34,11 @@ class SyntaxCheckThread(threading.Thread):
         self.target = target
 
     def run(self):
-        data = self.checker.DoCheck()
+        try:
+            data = self.checker.DoCheck()
+        except Exception, msg:
+            util.Log("[PyLint][err] Pylint Failure: %s" % msg)
+            data = [(u'Error', unicode(msg), -1)]
         wx.CallAfter(self.target, data)
 
 #-----------------------------------------------------------------------------#

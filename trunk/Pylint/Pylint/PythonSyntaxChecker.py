@@ -13,10 +13,14 @@ __revision__ = "$Revision$"
 
 #-----------------------------------------------------------------------------#
 # Imports
+import os
+import sys
+import re
+from subprocess import Popen, PIPE, STDOUT
+
+# Local Imports
 from AbstractSyntaxChecker import AbstractSyntaxChecker
 import LintConfig
-import os, re
-from subprocess import Popen, PIPE
 
 # Editra Imports
 import util
@@ -30,8 +34,8 @@ class PythonSyntaxChecker(AbstractSyntaxChecker):
 
         # Attributes
         self.dirvarfile = variabledict.get("DIRVARFILE")
-        inithook = "--init-hook=\"import os; print 'PYTHONPATH=%s' % os.getenv('PYTHONPATH');\""
-        self.runpylint = " -f parseable -r n %s " % inithook
+        # inithook = "--init-hook=\"import os; print 'PYTHONPATH=%s' % os.getenv('PYTHONPATH');\""
+        self.runpylint = " -f parseable  -r n" # %s " % inithook
         pylintrc = variabledict.get("PYLINTRC")
         if pylintrc:
             pylintrc = "--rcfile=%s " % pylintrc
@@ -74,7 +78,10 @@ class PythonSyntaxChecker(AbstractSyntaxChecker):
 
         # No configured pylint and its not on the PATH
         if lintpath is None:
-            return ((u"No Pylint", self.nopylinterror, u"NA"),)
+            return [(u"No Pylint", self.nopylinterror, u"NA"),]
+
+        inithook = " --init-hook=\"import os; print 'PYTHONPATH=%s' % os.getenv('PYTHONPATH');\""
+        self.runpylint += inithook
 
         # traverse downwards until we are out of a python package
         fullPath = os.path.abspath(self.filename)
@@ -86,8 +93,11 @@ class PythonSyntaxChecker(AbstractSyntaxChecker):
 
         # Start pylint
         cmdline = lintpath + self.runpylint
-        process = Popen("%s%s" % (cmdline, '"%s"' % childPath),
-                        shell=True, stdout=PIPE, stderr=PIPE,
+        plint_cmd = "%s%s" % (cmdline, '"%s"' % childPath)
+        util.Log("[PyLint][info] Starting command: %s" % plint_cmd)
+        util.Log("[Pylint][info] Using CWD: %s" % parentPath)
+        process = Popen(plint_cmd,
+                        shell=True, stdout=PIPE, stderr=STDOUT,
                         cwd=parentPath)
         p = process.stdout
 
@@ -102,8 +112,8 @@ class PythonSyntaxChecker(AbstractSyntaxChecker):
         rows.append((u"***", u"Directory Variables file: %s" % self.dirvarfile, u"NA"))
         for line in p:
             # remove pylintrc warning
+            util.Log("[PyLint][info] Reading output: %s" % line)
             if line.startswith(u"PYTHONPATH"):
-                util.Log(line)
                 continue
             if line.startswith(u"No config file found"):
                 continue
@@ -125,4 +135,5 @@ class PythonSyntaxChecker(AbstractSyntaxChecker):
 
         p.close()
         self.endcall()
+        util.Log("[PyLint][info] Pylint command finished running")
         return rows
