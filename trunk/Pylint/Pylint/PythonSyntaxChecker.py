@@ -34,8 +34,8 @@ class PythonSyntaxChecker(AbstractSyntaxChecker):
 
         # Attributes
         self.dirvarfile = variabledict.get("DIRVARFILE")
-        # inithook = "--init-hook=\"import os; print 'PYTHONPATH=%s' % os.getenv('PYTHONPATH');\""
-        self.runpylint = " -f parseable  -r n" # %s " % inithook
+        inithook = "--init-hook=\"import os; print 'PYTHONPATH=%s' % os.getenv('PYTHONPATH');\""
+        self.runpylint = " -f parseable  -r n %s " % inithook
         pylintrc = variabledict.get("PYLINTRC")
         if pylintrc:
             pylintrc = "--rcfile=%s " % pylintrc
@@ -80,8 +80,8 @@ class PythonSyntaxChecker(AbstractSyntaxChecker):
         if lintpath is None:
             return [(u"No Pylint", self.nopylinterror, u"NA"),]
 
-        inithook = " --init-hook=\"import os; print 'PYTHONPATH=%s' % os.getenv('PYTHONPATH');\""
-        self.runpylint += inithook
+        # inithook = " --init-hook=\"import os; print 'PYTHONPATH=%s' % os.getenv('PYTHONPATH');\""
+        # self.runpylint += inithook
 
         # traverse downwards until we are out of a python package
         fullPath = os.path.abspath(self.filename)

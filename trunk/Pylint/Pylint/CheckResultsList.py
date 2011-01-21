@@ -1,9 +1,9 @@
 # -*- coding: utf-8 -*-
-# Name: CheckResultsList.py                                                   
-# Purpose: Pylint plugin                                              
-# Author: Mike Rans                              
-# Copyright: (c) 2010 Mike Rans                                
-# License: wxWindows License                                                  
+# Name: CheckResultsList.py
+# Purpose: Pylint plugin
+# Author: Mike Rans
+# Copyright: (c) 2010 Mike Rans
+# License: wxWindows License
 ###############################################################################
 
 """Editra Shelf display window"""
@@ -58,7 +58,7 @@ class CheckResultsList(wx.ListCtrl,
 
     def set_mainwindow(self, mw):
         self._mainw = mw
-        
+
     def set_editor(self, editor):
         self.editor = editor
 
@@ -68,8 +68,9 @@ class CheckResultsList(wx.ListCtrl,
         buf = data.get('stc', None)
         if buf and buf == self.editor:
             lineno = data.get('line', -1)
-            if lineno in self.errorlines:
-                data['rdata'] = self.errorlines[lineno]
+            errorlist = self.errorlines.get(lineno)
+            if errorlist:
+                data['rdata'] = "\n".join(errorlist)
 
     def OnItemActivate(self, evt):
         """Go to the error in the file"""
@@ -91,7 +92,7 @@ class CheckResultsList(wx.ListCtrl,
             self.DeleteItem(itemIndex)
         CheckResultsList.unset_indic(self.editor)
         self.errorlines = {}
-        
+
     def PopulateRows(self, data):
         """Populate the list with the data
         @param data: list of tuples (errorType, errorText, errorLine)
@@ -101,7 +102,7 @@ class CheckResultsList(wx.ListCtrl,
             return
         self.editor.IndicatorSetStyle(2, STC_INDIC_SQUIGGLE)
         self.editor.IndicatorSetForeground(2, 'red')
-        
+
         typeText = _("Type")
         errorText = _("Error")
         minLType = max(self.GetTextExtent(typeText)[0], self.GetColumnWidth(0))
@@ -120,27 +121,31 @@ class CheckResultsList(wx.ListCtrl,
 
             try:
                 lineNo = int(eLine)
-                self.errorlines[lineNo] = eText
+                errorlist = self.errorlines.get(lineNo)
+                if not errorlist:
+                    errorlist = []
+                    self.errorlines[lineNo] = errorlist
+                errorlist.append(eText)
                 CheckResultsList.set_indic(lineNo - 1, eType, self.editor)
             except ValueError:
                 pass
         self.SetColumnWidth(0, minLType)
         self.SetColumnWidth(2, minLText)
-        
+
     @staticmethod
     def set_indic(lineNo, eType, editor):
         """Highlight a word by setting an indicator
-        
+
         @param start: number of a symbol where the indicator starts
         @type start: int
-        
+
         @param length: length of the highlighted word
         @type length: int
         """
 
         if eType != "Error":
             return False
-        
+
         start = editor.PositionFromLine(lineNo)
         text = editor.GetLineUTF8(lineNo)
         editor.StartStyling(start, STC_INDIC2_MASK)
