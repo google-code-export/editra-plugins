@@ -17,6 +17,8 @@ __revision__ = "$Revision$"
 import wx
 import threading
 
+import util
+
 #-----------------------------------------------------------------------------#
 
 class SyntaxCheckThread(threading.Thread):
@@ -32,14 +34,18 @@ class SyntaxCheckThread(threading.Thread):
         self.target = target
 
     def run(self):
-        data = self.checker.DoCheck()
+        try:
+            data = self.checker.DoCheck()
+        except Exception, msg:
+            util.Log("[Lint][err] Lint Failure: %s" % msg)
+            data = [(u'Error', unicode(msg), -1)]
         wx.CallAfter(self.target, data)
 
 #-----------------------------------------------------------------------------#
 
 class AbstractSyntaxChecker(object):
     def __init__(self, variabledict, filename):
-        """ Process dictionary of variables that might be 
+        """ Process dictionary of variables that might be
         useful to syntax checker.
         """
         super(AbstractSyntaxChecker, self).__init__()
