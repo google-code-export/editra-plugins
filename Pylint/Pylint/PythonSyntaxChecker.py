@@ -110,6 +110,7 @@ class PythonSyntaxChecker(AbstractSyntaxChecker):
                           % u", ".join(self.addedpythonpaths), u"NA"))
         rows.append((u"***", u"Pylint command line: %s" % cmdline, u"NA"))
         rows.append((u"***", u"Directory Variables file: %s" % self.dirvarfile, u"NA"))
+        rowsdict = {}
         for line in p:
             # remove pylintrc warning
             util.Log("[PyLint][info] Reading output: %s" % line)
@@ -121,7 +122,7 @@ class PythonSyntaxChecker(AbstractSyntaxChecker):
             if matcher is None:
                 continue
             mtypeabr = matcher.group(3)
-            lineno = matcher.group(2)
+            linenostr = matcher.group(2)
             classmethod = matcher.group(4)
             mtext = matcher.group(5)
             if mtypeabr == u"E" or mtypeabr == u"F":
@@ -131,7 +132,25 @@ class PythonSyntaxChecker(AbstractSyntaxChecker):
             outtext = mtext
             if classmethod:
                 outtext = u"[%s] %s" % (classmethod, outtext)
-            rows.append((mtype, outtext, lineno))
+            try:
+                lineno = int(linenostr)
+                mtyperows = rowsdict.get(mtype)
+                if not mtyperows:
+                    mtyperows = {}
+                    rowsdict[mtype] = mtyperows
+                linenorows = mtyperows.get(lineno)
+                if not linenorows:
+                    linenorows = set()
+                    mtyperows[lineno] = linenorows
+                linenorows.add(outtext)
+            except:
+                rows.append((mtype, outtext, linenostr))
+        for mtype in sorted(rowsdict):
+            mtyperows = rowsdict[mtype]
+            for lineno in sorted(mtyperows):
+                linenorows = mtyperows[lineno]
+                for outtext in sorted(linenorows):
+                    rows.append((mtype, outtext, lineno))
 
         p.close()
         self.endcall()
