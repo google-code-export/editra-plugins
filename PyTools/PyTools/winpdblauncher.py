@@ -33,8 +33,10 @@ if rpdb2.get_version() != "RPDB_2_4_8":
     sys.exit(1)
 
 class WinpdbLauncher(object):
-    def __init__(self, remoldbps, args):
+    def __init__(self, remoldbps, keepopen, bpfile, args):
         self.remoldbps = remoldbps.upper() == "Y"
+        self.keepopen = keepopen.upper() == "Y"
+        self.bpfile = os.path.abspath(bpfile)
         self.args = args
         self.pwd = "123"
         self.sessionmanager = None
@@ -46,9 +48,25 @@ class WinpdbLauncher(object):
         if not self.sessionmanager or not self.winpdbapp:
             return
         if event.m_state == rpdb2.STATE_DETACHED:
-            self.winpdbapp.m_frame.Close()
+            wx.CallAfter(self.callafter_savebreakpoints, event)
         elif not self.breakpoints_set and event.m_state == rpdb2.STATE_BROKEN:
             wx.CallAfter(self.callafter_setbreakpoints, event)
+
+    def callafter_savebreakpoints(self, event):
+        with open(self.bpfile, "wb") as fpw:
+            for file_to_breakpoint in self.breakpoints:
+                fpw.write("[%s]\r\n" % file_to_breakpoint)
+                linenos = self.breakpoints[file_to_breakpoint]
+                for lineno in linenos:
+                    enabled = linenos[lineno]
+                    if enabled:
+                        enabledstr = "True"
+                    else:
+                        enabledstr = "False"
+                    fpw.write("%d=%s\r\n" % (lineno, enabledstr))                    
+        
+        if not self.keepopen:
+            self.winpdbapp.m_frame.Close()
 
     def callafter_setbreakpoints(self, event):
         try:
@@ -67,6 +85,24 @@ class WinpdbLauncher(object):
                 rpdb2._print("%s, %d, %s" % (filepath, lineno, enabled))
         self.breakpoints_set = True
 
+    def callback_bps(self, event):
+        if not self.breakpoints_set or not self.sessionmanager or not self.winpdbapp:
+            return
+        wx.CallAfter(self.callafter_updatebreakpoints, event)
+            
+    def callafter_updatebreakpoints(self, event):            
+        bpl = self.sessionmanager.get_breakpoints()
+        self.breakpoints = {}
+        for bp in bpl.values():            
+            filename = bp.m_filename
+            lineno = bp.m_lineno
+            enabled = bp.m_fEnabled
+            filepath = self.breakpoints.get(filename)
+            if not filepath:
+                filepath = {}
+                self.breakpoints[filename] = filepath
+            filepath[lineno] = enabled            
+            
     def start_winpdbclient(self):
         fAllowUnencrypted = True
         fRemote = False
@@ -94,12 +130,15 @@ class WinpdbLauncher(object):
         event_type_dict = {rpdb2.CEventState: {}}
         self.sessionmanager.register_callback(self.callback_events, \
             event_type_dict, fSingleUse = False)
+        event_type_dict = {rpdb2.CEventBreakpoint: {}}
+        self.sessionmanager.register_callback(self.callback_bps, \
+            event_type_dict, fSingleUse = False)
         self.winpdbapp.MainLoop()
         self.sessionmanager.shutdown()
 
-    def run(self, bpfile):
+    def run(self):
         config = ConfigParser.ConfigParser()
-        config.read(os.path.abspath(bpfile))
+        config.read(self.bpfile)
         files_to_breakpoint = config.sections()
         for file_to_breakpoint in files_to_breakpoint:
             self.breakpoints[file_to_breakpoint] = {}
@@ -121,10 +160,11 @@ if __name__ == '__main__':
     parser = OptionParser(usage)
 
     parser.add_option("--remoldbps", default="Y", help="remove old breakpoints")
+    parser.add_option("--keepopen", default="N", help="keep open debugger on detach")
     parser.add_option("--bpfile", help="path to breakpoints file")
     (options, args) = parser.parse_args()
     if len(args) == 0:
         rpdb2._print(parser.get_usage())
         sys.exit(1)
-    winpdb = WinpdbLauncher(options.remoldbps, args)
-    ret = winpdb.run(options.bpfile)
+    winpdb = WinpdbLauncher(options.remoldbps, options.keepopen, options.bpfile, args)
+    ret = winpdb.run()
