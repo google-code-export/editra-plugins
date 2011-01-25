@@ -58,12 +58,12 @@ class WinpdbLauncher(object):
                 fpw.write("[%s]\r\n" % file_to_breakpoint)
                 linenos = self.breakpoints[file_to_breakpoint]
                 for lineno in linenos:
-                    enabled = linenos[lineno]
+                    enabled, exprstr = linenos[lineno]
                     if enabled:
                         enabledstr = "True"
                     else:
                         enabledstr = "False"
-                    fpw.write("%d=%s\r\n" % (lineno, enabledstr))                    
+                    fpw.write("%d=%s,%s\r\n" % (lineno, enabledstr, exprstr))                    
         
         if not self.keepopen:
             self.winpdbapp.m_frame.Close()
@@ -80,10 +80,11 @@ class WinpdbLauncher(object):
         for filepath in self.breakpoints:
             linenos = self.breakpoints[filepath]
             for lineno in linenos:
-                enabled = linenos[lineno]
-                self.sessionmanager.set_breakpoint(filepath, '', lineno, enabled, '')
-                rpdb2._print("%s, %d, %s" % (filepath, lineno, enabled))
+                enabled, exprstr = linenos[lineno]
+                self.sessionmanager.set_breakpoint(filepath, '', lineno, enabled, exprstr)
+                rpdb2._print("%s, %d, %s, %s" % (filepath, lineno, enabled, exprstr))
         self.breakpoints_set = True
+        self.sessionmanager.request_go()
 
     def callback_bps(self, event):
         if not self.breakpoints_set or not self.sessionmanager or not self.winpdbapp:
@@ -97,11 +98,12 @@ class WinpdbLauncher(object):
             filename = bp.m_filename
             lineno = bp.m_lineno
             enabled = bp.m_fEnabled
+            exprstr = bp.m_expr
             filepath = self.breakpoints.get(filename)
             if not filepath:
                 filepath = {}
                 self.breakpoints[filename] = filepath
-            filepath[lineno] = enabled            
+            filepath[lineno] = (enabled, exprstr)    
             
     def start_winpdbclient(self):
         fAllowUnencrypted = True
@@ -144,8 +146,10 @@ class WinpdbLauncher(object):
             self.breakpoints[file_to_breakpoint] = {}
             for linenostr in config.options(file_to_breakpoint):
                 lineno = int(linenostr)
-                enabled = "True" == config.get(file_to_breakpoint, linenostr)
-                self.breakpoints[file_to_breakpoint][lineno] = enabled
+                infostr = config.get(file_to_breakpoint, linenostr)
+                enabledstr, exprstr = infostr.split(",")
+                enabled = "True" == enabledstr
+                self.breakpoints[file_to_breakpoint][lineno] = (enabled, exprstr)
         callrpdb2 = ["rpdb2", "-d", "--pwd=%s" % self.pwd] + self.args
         rpdb2._print("Breakpoints file read. Running: %s" % " ".join(callrpdb2))
         process = subprocess.Popen(callrpdb2, shell=True)
