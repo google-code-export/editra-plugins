@@ -102,9 +102,7 @@ class PythonSyntaxChecker(AbstractSyntaxChecker):
             parentPath = os.path.dirname(parentPath)
 
         # Start pylint
-        lintpath = "%s%sscripts%spylint" % (localpythonpath, os.sep, os.sep)
-        if sys.platform == 'win32':
-            lintpath = "%s.bat" % lintpath
+        lintpath = "%s%spython %s%sscripts%spylint" % (localpythonpath, os.sep, localpythonpath, os.sep, os.sep)
         cmdline = lintpath + self.runpylint
         plint_cmd = "%s%s" % (cmdline, '"%s"' % childPath)
         util.Log("[PyLint][info] Starting command: %s" % plint_cmd)
