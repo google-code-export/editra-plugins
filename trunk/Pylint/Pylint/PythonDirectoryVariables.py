@@ -20,7 +20,7 @@ from AbstractDirectoryVariables import AbstractDirectoryVariables
 class PythonDirectoryVariables(AbstractDirectoryVariables):
     def __init__(self):
         AbstractDirectoryVariables.__init__(self, "py")
-        self.addedpythonpaths = set()
+        self.addedpythonpaths = []
 
     @staticmethod
     def get_abspath(dirvarfile, path):
@@ -29,16 +29,6 @@ class PythonDirectoryVariables(AbstractDirectoryVariables):
                 dir, _ = os.path.split(dirvarfile)
                 path = os.path.join(dir, path)
         return os.path.abspath(path)
-
-    def get_pythonpaths(self):
-        paths = set()
-        if os.environ.has_key("PYTHONPATH"):
-            curenv = os.getenv("PYTHONPATH")
-            curpaths = curenv.split(os.pathsep)
-            for path in curpaths:
-                if not path in self.addedpythonpaths:
-                    paths.add(os.path.abspath(path))
-        return paths
 
     def recurseup(self, dir):
         dir, rest = os.path.split(dir)
@@ -65,19 +55,8 @@ class PythonDirectoryVariables(AbstractDirectoryVariables):
             if key == "PYTHONPATH":
                 allnewpaths = val.split(",")
                 for path in allnewpaths:
-                    self.addedpythonpaths.add(self.get_abspath(dirvarfile, path))
+                    self.addedpythonpaths.append(self.get_abspath(dirvarfile, path))
             elif key == "PYLINTRC":
                 vardict["PYLINTRC"] = '"%s"' % self.get_abspath(dirvarfile, val)
         vardict["ADDEDPYTHONPATHS"] = self.addedpythonpaths
-        vardict["STARTCALL"] = self.set_envvars
-        vardict["ENDCALL"] = self.restore_envvars
         return vardict
-
-    def set_envvars(self):
-        paths = self.get_pythonpaths()
-        paths.update(self.addedpythonpaths)
-        os.environ["PYTHONPATH"] = os.pathsep.join(paths)
-
-    def restore_envvars(self):
-        paths = self.get_pythonpaths() # restore old python path
-        os.environ["PYTHONPATH"] = os.pathsep.join(paths)

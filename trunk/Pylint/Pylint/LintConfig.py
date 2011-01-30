@@ -15,6 +15,7 @@ __revision__ = "$Revision$"
 #-----------------------------------------------------------------------------#
 # Imports
 import os
+import sys
 import wx
 import wx.lib.mixins.listctrl as listmix
 
@@ -26,7 +27,7 @@ import eclib
 #-----------------------------------------------------------------------------#
 # Configuration Keys
 PYLINT_CONFIG = "Pylint.Config"
-PLC_LINT_PATH = "PylintPath"
+PLC_LOCAL_PYTHON = "LocalPython"
 PLC_AUTO_RUN = "AutoRun"
 PLC_DISABLED_CHK = "DisabledCheckers"
 
@@ -51,12 +52,10 @@ class LintConfigPanel(wx.Panel):
 
         # Attributes
         self._config = Profile_Get(PYLINT_CONFIG, default=dict())
-        path = self._config.get(PLC_LINT_PATH, None)
-        if path is None:
-            path = ebmlib.Which('pylint')
-        if path is None:
-            path = u""
-        self._path_pk = wx.FilePickerCtrl(self, path=path,
+        self.path = self._config.get(PLC_LOCAL_PYTHON, None)
+        if self.path is None:
+            self.path = GetDefaultPython()
+        self._path_pk = wx.DirPickerCtrl(self, path=self.path,
                                           style=wx.FLP_USE_TEXTCTRL|\
                                                 wx.FLP_CHANGE_DIR|\
                                                 wx.FLP_FILE_MUST_EXIST)
@@ -91,14 +90,14 @@ class LintConfigPanel(wx.Panel):
         self.Bind(wx.EVT_RADIOBUTTON, self.OnCheckBox, self._autorb)
         self.Bind(wx.EVT_RADIOBUTTON, self.OnCheckBox, self._manualrb)
         self.Bind(wx.EVT_CHOICE, self.OnChoice, self._msgtype)
-        self.Bind(wx.EVT_FILEPICKER_CHANGED, self.OnPathChanged, self._path_pk)
+        self.Bind(wx.EVT_DIRPICKER_CHANGED, self.OnPathChanged, self._path_pk)
 
     def __DoLayout(self):
         sizer = wx.BoxSizer(wx.VERTICAL)
 
-        # PyLint Path
+        # Python Path
         pathsz = wx.BoxSizer(wx.HORIZONTAL)
-        pathsz.Add(wx.StaticText(self, label=_("PyLint Path:")),
+        pathsz.Add(wx.StaticText(self, label=_("Local Python Path:")),
                    0, wx.ALIGN_CENTER_VERTICAL)
         pathsz.Add(self._path_pk, 1, wx.EXPAND|wx.LEFT, 5)
         sizer.Add(pathsz, 0, wx.EXPAND|wx.LEFT|wx.RIGHT|wx.TOP, 10)
@@ -141,9 +140,12 @@ class LintConfigPanel(wx.Panel):
     def OnPathChanged(self, event):
         """Update the configured pylint path"""
         path = self._path_pk.GetPath()
-        if path and os.path.exists(path):
-            self._config[PLC_LINT_PATH] = path
+        if CheckLocalPython(path):
+            self._config[PLC_LOCAL_PYTHON] = path
             Profile_Set(PYLINT_CONFIG, self._config)
+            self.path = path
+        else:
+            self._path_pk.SetPath(self.path)
 
     def UpdateListCtrl(self):
         """Update the list control for the selected message type"""
@@ -369,3 +371,22 @@ def Fatal():
             "F0321" : _("Format detection error"),
             "F0401" : _("Unable to import module")}
     return fmsg
+
+def GetDefaultPython():
+    path = None
+    if sys.platform == 'win32':
+        path = ebmlib.Which('python.exe')
+    else:
+        path = ebmlib.Which('python')
+    if path is None:
+        return u""
+    return os.path.dirname(path)
+
+def CheckLocalPython(path):
+    if not path or not os.path.isdir(path):
+        return False
+    if sys.platform == 'win32':
+        spkg = os.path.join(path, 'lib', 'site-packages')
+    else:
+        spkg = os.path.join(path, 'site-packages')
+    return os.path.isdir(spkg)
