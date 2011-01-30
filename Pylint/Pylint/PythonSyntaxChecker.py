@@ -24,6 +24,7 @@ if sys.platform == 'win32':
 # Local Imports
 from AbstractSyntaxChecker import AbstractSyntaxChecker
 import LintConfig
+from finder import GetSearchPath, ModuleFinder
 
 # Editra Imports
 import util
@@ -53,38 +54,44 @@ class PythonSyntaxChecker(AbstractSyntaxChecker):
                     disable = dlist[0]
                 self.runpylint += ("-d %s " % disable)
         self.addedpythonpaths = variabledict.get("ADDEDPYTHONPATHS")
-        self.nopylinterror = u"***  FATAL ERROR: Pylint is not installed"
-        self.nopylinterror += u" or is not in path!!! ***"
+        self.nopythonerror = u"***  FATAL ERROR: No local Python configured or found"
+        self.nopylinterror = u"***  FATAL ERROR: No Pylint found in local Python"
 
-        def do_nothing():
-            pass
-        self.startcall = variabledict.get("STARTCALL")
-        if not self.startcall:
-            self.startcall = do_nothing
-        self.endcall = variabledict.get("ENDCALL")
-        if not self.endcall:
-            self.endcall = do_nothing
-
+    def GetEnvironment(self, localpythonpath, pythonsearchpath):
+        environment = os.environ.copy()
+        if sys.platform == 'win32':
+            environment["PATH"] = str(environment["PATH"])
+            platformpaths = ["%s%sDLLs" % (localpythonpath, os.sep)]
+        elif platform.mac_ver()[0]:
+            platformpaths = []
+        else:
+            platformpaths = []
+        allpaths = pythonsearchpath + self.addedpythonpaths + platformpaths
+        environment["PYTHONPATH"] = str(os.pathsep.join(allpaths))
+        return environment    
+        
     def DoCheck(self):
         """Run pylint"""
-        self.startcall()
 
-        # Figure out what Pylint to use
+        # Figure out what Python to use
         # 1) First check configuration
         # 2) Second check for it on the path
-        lintpath = LintConfig.GetConfigValue(LintConfig.PLC_LINT_PATH)
-        if lintpath is None or not os.path.exists(lintpath):
-            lintpath = None
-            res = ebmlib.Which("pylint")
-            if res is not None:
-                lintpath = "pylint"
+        localpythonpath = LintConfig.GetConfigValue(LintConfig.PLC_LOCAL_PYTHON)
+        if not LintConfig.CheckLocalPython(localpythonpath):
+            localpythonpath = LintConfig.GetDefaultPython()
 
-        # No configured pylint and its not on the PATH
-        if lintpath is None:
+        # No configured Python
+        if not localpythonpath:
+            return [(u"No Python", self.nopythonerror, u"NA"),]
+
+        util.Log("[PyLint][info] Using Python: %s" % localpythonpath)
+        pythonsearchpath = GetSearchPath(localpythonpath)
+        util.Log("[PyLint][info] Using Python Searchpath: %s" % pythonsearchpath)
+        mf = ModuleFinder(pythonsearchpath)
+        results = mf.Find("pylint")
+        # No pylint found in local Python
+        if not results:
             return [(u"No Pylint", self.nopylinterror, u"NA"),]
-
-        # inithook = " --init-hook=\"import os; print 'PYTHONPATH=%s' % os.getenv('PYTHONPATH');\""
-        # self.runpylint += inithook
 
         # traverse downwards until we are out of a python package
         fullPath = os.path.abspath(self.filename)
@@ -95,18 +102,25 @@ class PythonSyntaxChecker(AbstractSyntaxChecker):
             parentPath = os.path.dirname(parentPath)
 
         # Start pylint
+        lintpath = "%s%sscripts%spylint" % (localpythonpath, os.sep, os.sep)
+        if sys.platform == 'win32':
+            lintpath = "%s.bat" % lintpath
         cmdline = lintpath + self.runpylint
         plint_cmd = "%s%s" % (cmdline, '"%s"' % childPath)
         util.Log("[PyLint][info] Starting command: %s" % plint_cmd)
         util.Log("[Pylint][info] Using CWD: %s" % parentPath)
+        environment = self.GetEnvironment(localpythonpath, pythonsearchpath)
+        util.Log("[Pylint][info] Using env: %s" % repr(environment))
         creationflags = 0
         if sys.platform == 'win32':
             creationflags = win32process.CREATE_NO_WINDOW
         process = Popen(plint_cmd,
-                        bufsize=1048576, stdout=PIPE,
-                        cwd=parentPath, creationflags = creationflags)
-        stdoutdata = process.communicate()[0]
-
+                        bufsize=1048576, stdout=PIPE, stderr=PIPE, 
+                        cwd=parentPath, env=environment, 
+                        creationflags=creationflags)
+        stdoutdata, stderrdata = process.communicate()
+        util.Log("[Pylint][info] stdout %s" % stdoutdata)
+        util.Log("[Pylint][info] stderr %s" % stderrdata)
         # The parseable line format is '%(path)s:%(line)s: [%(sigle)s%(obj)s] %(msg)s'
         # NOTE: This would be cleaner if we added an Emacs reporter to pylint.reporters.text ..
         regex = re.compile(r"(.*):(.*): \[([A-Z])[, ]*(.*)\] (.*)%s" % os.linesep)
@@ -151,6 +165,5 @@ class PythonSyntaxChecker(AbstractSyntaxChecker):
                 for outtext in sorted(linenorows):
                     rows.append((mtype, outtext, lineno))
 
-        self.endcall()
         util.Log("[PyLint][info] Pylint command finished running")
         return rows
