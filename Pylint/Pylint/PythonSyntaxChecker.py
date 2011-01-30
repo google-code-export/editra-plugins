@@ -18,6 +18,9 @@ import sys
 import re
 from subprocess import Popen, PIPE, STDOUT
 
+if sys.platform == 'win32':
+    import win32process
+
 # Local Imports
 from AbstractSyntaxChecker import AbstractSyntaxChecker
 import LintConfig
@@ -96,14 +99,17 @@ class PythonSyntaxChecker(AbstractSyntaxChecker):
         plint_cmd = "%s%s" % (cmdline, '"%s"' % childPath)
         util.Log("[PyLint][info] Starting command: %s" % plint_cmd)
         util.Log("[Pylint][info] Using CWD: %s" % parentPath)
+        creationflags = 0
+        if sys.platform == 'win32':
+            creationflags = win32process.CREATE_NO_WINDOW
         process = Popen(plint_cmd,
-                        shell=True, stdout=PIPE, stderr=STDOUT,
-                        cwd=parentPath)
-        p = process.stdout
+                        bufsize=1048576, stdout=PIPE,
+                        cwd=parentPath, creationflags = creationflags)
+        stdoutdata = process.communicate()[0]
 
         # The parseable line format is '%(path)s:%(line)s: [%(sigle)s%(obj)s] %(msg)s'
         # NOTE: This would be cleaner if we added an Emacs reporter to pylint.reporters.text ..
-        regex = re.compile(r"(.*):(.*): \[([A-Z])[, ]*(.*)\] (.*)")
+        regex = re.compile(r"(.*):(.*): \[([A-Z])[, ]*(.*)\] (.*)%s" % os.linesep)
         rows = []
         if self.addedpythonpaths:
             rows.append((u"***", u"Using PYTHONPATH + %s"\
@@ -111,14 +117,7 @@ class PythonSyntaxChecker(AbstractSyntaxChecker):
         rows.append((u"***", u"Pylint command line: %s" % cmdline, u"NA"))
         rows.append((u"***", u"Directory Variables file: %s" % self.dirvarfile, u"NA"))
         rowsdict = {}
-        for line in p:
-            # remove pylintrc warning
-            util.Log("[PyLint][info] Reading output: %s" % line)
-            if line.startswith(u"PYTHONPATH"):
-                continue
-            if line.startswith(u"No config file found"):
-                continue
-            matcher = regex.match(line)
+        for matcher in regex.finditer(stdoutdata):
             if matcher is None:
                 continue
             mtypeabr = matcher.group(3)
@@ -152,7 +151,6 @@ class PythonSyntaxChecker(AbstractSyntaxChecker):
                 for outtext in sorted(linenorows):
                     rows.append((mtype, outtext, lineno))
 
-        p.close()
         self.endcall()
         util.Log("[PyLint][info] Pylint command finished running")
         return rows
