@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 ###############################################################################
-# Name: LintConfig.py                                                         #
-# Purpose: PyLint Configuration Panel                                         #
+# Name: ToolConfig.py                                                         #
+# Purpose: Python Configuration Panel                                         #
 # Author: Cody Precord <cprecord@editra.org>                                  #
 # Copyright: (c) 2010 Cody Precord <staff@editra.org>                         #
 # License: wxWindows License                                                  #
@@ -15,7 +15,6 @@ __revision__ = "$Revision$"
 #-----------------------------------------------------------------------------#
 # Imports
 import os
-import sys
 import wx
 import wx.lib.mixins.listctrl as listmix
 
@@ -26,10 +25,11 @@ import eclib
 
 #-----------------------------------------------------------------------------#
 # Configuration Keys
-PYLINT_CONFIG = "Pylint.Config"
-PLC_LOCAL_PYTHON = "LocalPython"
-PLC_AUTO_RUN = "AutoRun"
-PLC_DISABLED_CHK = "DisabledCheckers"
+PYTOOL_CONFIG = "PyTool.Config"
+TLC_PYTHON_PATH = "PythonPath"
+TLC_SCRIPTS_PATH = "ScriptsPath"
+TLC_AUTO_RUN = "AutoRun"
+TLC_DISABLED_CHK = "DisabledCheckers"
 
 # Globals
 _ = wx.GetTranslation
@@ -37,30 +37,38 @@ _ = wx.GetTranslation
 
 def GetConfigValue(key):
     """Get a value from the config"""
-    config = Profile_Get(PYLINT_CONFIG, default=dict())
+    config = Profile_Get(PYTOOL_CONFIG, default=dict())
     return config.get(key, None)
 
 #-----------------------------------------------------------------------------#
 
-class LintConfigPanel(wx.Panel):
-    """Configuration panel for PyLint configuration in the
+class ToolConfigPanel(wx.Panel):
+    """Configuration panel for Python configuration in the
     PluginManager dialog.
 
     """
     def __init__(self, parent):
-        super(LintConfigPanel, self).__init__(parent)
+        super(ToolConfigPanel, self).__init__(parent)
 
         # Attributes
-        self._config = Profile_Get(PYLINT_CONFIG, default=dict())
-        self.path = self._config.get(PLC_LOCAL_PYTHON, None)
-        if self.path is None:
-            self.path = GetDefaultPython()
-        self._path_pk = wx.DirPickerCtrl(self, path=self.path,
+        self._config = Profile_Get(PYTOOL_CONFIG, default=dict())
+        pythonpath = self._config.get(TLC_PYTHON_PATH, None)
+        if not pythonpath:
+            pythonpath = GetDefaultPython()
+        self._python_path_pk = wx.FilePickerCtrl(self, path=pythonpath,
                                           style=wx.FLP_USE_TEXTCTRL|\
                                                 wx.FLP_CHANGE_DIR|\
                                                 wx.FLP_FILE_MUST_EXIST)
-        self._path_pk.SetPickerCtrlGrowable(True)
-        modebox = wx.StaticBox(self, label=_("Run Mode"))
+        self._python_path_pk.SetPickerCtrlGrowable(True)
+        path = self._config.get(TLC_SCRIPTS_PATH, None)
+        if not path:
+            path = GetDefaultScripts(pythonpath)
+        self._scripts_path_pk = wx.FilePickerCtrl(self, path=path,
+                                          style=wx.FLP_USE_TEXTCTRL|\
+                                                wx.FLP_CHANGE_DIR|\
+                                                wx.FLP_FILE_MUST_EXIST)
+        self._scripts_path_pk.SetPickerCtrlGrowable(True)
+        modebox = wx.StaticBox(self, label=_("Pylint Run Mode"))
         self._modesz = wx.StaticBoxSizer(modebox, wx.VERTICAL)
         self._autorb = wx.RadioButton(self, label=_("Automatic"))
         tooltip = _("Automatically rerun on save, document change, and file load")
@@ -68,7 +76,7 @@ class LintConfigPanel(wx.Panel):
         self._manualrb = wx.RadioButton(self, label=_("Manual"))
         tooltip = _("Only run when requested")
         self._manualrb.SetToolTipString(tooltip)
-        mode = self._config.get(PLC_AUTO_RUN, False)
+        mode = self._config.get(TLC_AUTO_RUN, False)
         self._autorb.SetValue(mode)
         self._manualrb.SetValue(not mode)
 
@@ -82,7 +90,7 @@ class LintConfigPanel(wx.Panel):
         self._msglst.SetConfig(self._config)
         self._msgtype.SetSelection(0)
         self.UpdateListCtrl()
-        
+
         # Layout
         self.__DoLayout()
 
@@ -90,16 +98,24 @@ class LintConfigPanel(wx.Panel):
         self.Bind(wx.EVT_RADIOBUTTON, self.OnCheckBox, self._autorb)
         self.Bind(wx.EVT_RADIOBUTTON, self.OnCheckBox, self._manualrb)
         self.Bind(wx.EVT_CHOICE, self.OnChoice, self._msgtype)
-        self.Bind(wx.EVT_DIRPICKER_CHANGED, self.OnPathChanged, self._path_pk)
+        self.Bind(wx.EVT_FILEPICKER_CHANGED, self.OnPythonPathChanged, self._python_path_pk)
+        self.Bind(wx.EVT_FILEPICKER_CHANGED, self.OnScriptsPathChanged, self._scripts_path_pk)
 
     def __DoLayout(self):
         sizer = wx.BoxSizer(wx.VERTICAL)
 
         # Python Path
         pathsz = wx.BoxSizer(wx.HORIZONTAL)
-        pathsz.Add(wx.StaticText(self, label=_("Local Python Path:")),
+        pathsz.Add(wx.StaticText(self, label=_("Python Executable:")),
                    0, wx.ALIGN_CENTER_VERTICAL)
-        pathsz.Add(self._path_pk, 1, wx.EXPAND|wx.LEFT, 5)
+        pathsz.Add(self._python_path_pk, 1, wx.EXPAND|wx.LEFT, 5)
+        sizer.Add(pathsz, 0, wx.EXPAND|wx.LEFT|wx.RIGHT|wx.TOP, 10)
+
+        # Python scripts Path
+        pathsz = wx.BoxSizer(wx.HORIZONTAL)
+        pathsz.Add(wx.StaticText(self, label=_("Python Scripts Path:")),
+                   0, wx.ALIGN_CENTER_VERTICAL)
+        pathsz.Add(self._scripts_path_pk, 1, wx.EXPAND|wx.LEFT, 5)
         sizer.Add(pathsz, 0, wx.EXPAND|wx.LEFT|wx.RIGHT|wx.TOP, 10)
 
         # Run mode configuration
@@ -123,12 +139,12 @@ class LintConfigPanel(wx.Panel):
     def OnCheckBox(self, evt):
         evt_obj = evt.GetEventObject()
         if evt_obj in (self._autorb, self._manualrb):
-            self._config[PLC_AUTO_RUN] = self._autorb.GetValue()
+            self._config[TLC_AUTO_RUN] = self._autorb.GetValue()
         else:
             evt.Skip()
             return
 
-        Profile_Set(PYLINT_CONFIG, self._config)
+        Profile_Set(PYTOOL_CONFIG, self._config)
 
     def OnChoice(self, evt):
         evt_obj = evt.GetEventObject()
@@ -137,15 +153,19 @@ class LintConfigPanel(wx.Panel):
         else:
             evt.Skip()
 
-    def OnPathChanged(self, event):
+    def OnPythonPathChanged(self, event):
         """Update the configured pylint path"""
-        path = self._path_pk.GetPath()
-        if CheckLocalPython(path):
-            self._config[PLC_LOCAL_PYTHON] = path
-            Profile_Set(PYLINT_CONFIG, self._config)
-            self.path = path
-        else:
-            self._path_pk.SetPath(self.path)
+        path = self._python_path_pk.GetPath()
+        if path and os.path.exists(path):
+            self._config[TLC_PYTHON_PATH] = path
+            Profile_Set(PYTOOL_CONFIG, self._config)
+
+    def OnScriptsPathChanged(self, event):
+        """Update the configured debugger path"""
+        path = self._scripts_path_pk.GetPath()
+        if path and os.path.exists(path):
+            self._config[TLC_SCRIPTS_PATH] = path
+            Profile_Set(PYTOOL_CONFIG, self._config)
 
     def UpdateListCtrl(self):
         """Update the list control for the selected message type"""
@@ -182,7 +202,7 @@ class MessageIDList(listmix.ListCtrlAutoWidthMixin,
         self.InsertColumn(1, _("Description"))
 
     def LoadData(self, data):
-        dlist = GetConfigValue(PLC_DISABLED_CHK)
+        dlist = GetConfigValue(TLC_DISABLED_CHK)
         if dlist is None:
             dlist = list()
 
@@ -200,15 +220,15 @@ class MessageIDList(listmix.ListCtrlAutoWidthMixin,
 
         item = self.GetItem(index, 0)
         plid = item.GetText()
-        dlist = self._config.get(PLC_DISABLED_CHK, list())
+        dlist = self._config.get(TLC_DISABLED_CHK, list())
         if plid in dlist:
             # Enable it
             dlist.remove(plid)
         else:
             # Disabling it
             dlist.append(plid)
-        self._config[PLC_DISABLED_CHK] = dlist
-        Profile_Set(PYLINT_CONFIG, self._config)
+        self._config[TLC_DISABLED_CHK] = dlist
+        Profile_Set(PYTOOL_CONFIG, self._config)
 
     def SetConfig(self, cfg):
         self._config = cfg
@@ -373,20 +393,29 @@ def Fatal():
     return fmsg
 
 def GetDefaultPython():
-    path = None
-    if sys.platform == 'win32':
-        path = ebmlib.Which('python.exe')
+    if wx.Platform == "__WXMSW__":
+        pythonpath = ebmlib.Which('python.exe')
     else:
-        path = ebmlib.Which('python')
-    if path is None:
-        return u""
-    return os.path.dirname(path)
+        pythonpath = ebmlib.Which('python')
+    if pythonpath:
+        return pythonpath
+    return u""
 
-def CheckLocalPython(path):
-    if not path or not os.path.isdir(path):
-        return False
-    if sys.platform == 'win32':
-        spkg = os.path.join(path, 'lib', 'site-packages')
+def GetDefaultScripts(pythonpath=None):
+    if wx.Platform == "__WXMSW__":
+        path = ebmlib.Which('pylint.bat')
+        if not path:
+            path = ebmlib.Which('winpdb.bat')
     else:
-        spkg = os.path.join(path, 'site-packages')
-    return os.path.isdir(spkg)
+        path = ebmlib.Which('pylint')
+        if not path:
+            path = ebmlib.Which('winpdb')
+    if path:
+        return os.path.dirname(path)
+    if pythonpath:
+        path = os.path.dirname(pythonpath)
+        if wx.Platform == "__WXMSW__":
+            path = os.path.join(path, "Scripts")
+        if os.path.isdir(path):
+            return path
+    return u""
