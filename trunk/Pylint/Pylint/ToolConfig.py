@@ -63,7 +63,7 @@ class ToolConfigPanel(wx.Panel):
         path = self._config.get(TLC_SCRIPTS_PATH, None)
         if not path:
             path = GetDefaultScripts(pythonpath)
-        self._scripts_path_pk = wx.FilePickerCtrl(self, path=path,
+        self._scripts_path_pk = wx.DirPickerCtrl(self, path=path,
                                           style=wx.FLP_USE_TEXTCTRL|\
                                                 wx.FLP_CHANGE_DIR|\
                                                 wx.FLP_FILE_MUST_EXIST)
@@ -99,7 +99,7 @@ class ToolConfigPanel(wx.Panel):
         self.Bind(wx.EVT_RADIOBUTTON, self.OnCheckBox, self._manualrb)
         self.Bind(wx.EVT_CHOICE, self.OnChoice, self._msgtype)
         self.Bind(wx.EVT_FILEPICKER_CHANGED, self.OnPythonPathChanged, self._python_path_pk)
-        self.Bind(wx.EVT_FILEPICKER_CHANGED, self.OnScriptsPathChanged, self._scripts_path_pk)
+        self.Bind(wx.EVT_DIRPICKER_CHANGED, self.OnScriptsPathChanged, self._scripts_path_pk)
 
     def __DoLayout(self):
         sizer = wx.BoxSizer(wx.VERTICAL)
