@@ -1,9 +1,9 @@
 # -*- coding: utf-8 -*-
-# Name: SyntaxCheckWindow.py                                                           
-# Purpose: Pylint plugin                                              
-# Author: Mike Rans                              
-# Copyright: (c) 2010 Mike Rans                                
-# License: wxWindows License                                                  
+# Name: SyntaxCheckWindow.py
+# Purpose: Pylint plugin
+# Author: Mike Rans
+# Copyright: (c) 2010 Mike Rans
+# License: wxWindows License
 ###############################################################################
 
 """Editra Shelf display window"""
@@ -27,7 +27,7 @@ from syntax import syntax
 import syntax.synglob as synglob
 
 # Local imports
-import LintConfig
+import ToolConfig
 from CheckResultsList import CheckResultsList
 from PythonSyntaxChecker import PythonSyntaxChecker
 
@@ -185,7 +185,7 @@ class SyntaxCheckWindow(eclib.ControlBox):
         """ Notebook tab was changed """
         notebook, pg_num = msg.GetData()
         editor = notebook.GetPage(pg_num)
-        if LintConfig.GetConfigValue(LintConfig.PLC_AUTO_RUN):
+        if ToolConfig.GetConfigValue(ToolConfig.TLC_AUTO_RUN):
             wx.CallAfter(self._onfileaccess, editor)
             self.UpdateForEditor(editor, True)
         else:
@@ -194,7 +194,7 @@ class SyntaxCheckWindow(eclib.ControlBox):
     def OnFileLoad(self, msg):
         """Load File message"""
         editor = self._GetEditorForFile(msg.GetData())
-        if LintConfig.GetConfigValue(LintConfig.PLC_AUTO_RUN):
+        if ToolConfig.GetConfigValue(ToolConfig.TLC_AUTO_RUN):
             wx.CallAfter(self._onfileaccess, editor)
             self.UpdateForEditor(editor, True)
         else:
@@ -204,7 +204,7 @@ class SyntaxCheckWindow(eclib.ControlBox):
         """Load File message"""
         filename, tmp = msg.GetData()
         editor = self._GetEditorForFile(filename)
-        if LintConfig.GetConfigValue(LintConfig.PLC_AUTO_RUN):
+        if ToolConfig.GetConfigValue(ToolConfig.TLC_AUTO_RUN):
             wx.CallAfter(self._onfileaccess, editor)
             self.UpdateForEditor(editor, True)
         else:
@@ -230,27 +230,27 @@ class SyntaxCheckWindow(eclib.ControlBox):
         except Exception:
             pass
         return None
-        
+
     def get_directory_variables(self, filetype):
         try:
             return self.__directoryVariables[filetype]()
         except Exception:
             pass
         return None
-        
+
     def _checksyntax(self, filetype, vardict, filename):
         syntaxchecker = self.get_syntax_checker(filetype, vardict, filename)
         if not syntaxchecker:
             return
         self._checker = syntaxchecker
         self._curfile = filename
-        
+
         # Start job timer
         self._StopTimer()
         self._jobtimer.Start(250, True)
 
     def _OnSyntaxData(self, data):
-        # Data is something like 
+        # Data is something like
         # [('Syntax Error', '__all__ = ["CSVSMonitorThread"]', 7)]
         if len(data) != 0:
             self._listCtrl.PopulateRows(data)
@@ -271,19 +271,18 @@ class SyntaxCheckWindow(eclib.ControlBox):
 
     def delete_rows(self):
         self._listCtrl.DeleteOldRows()
-            
+
     def _GetEditorForFile(self, fname):
         """Return the EdEditorView that's managing the file, if available
         @param fname: File name to open
         @param mainw: MainWindow instance to open the file in
         @return: Text control managing the file
         @rtype: ed_editv.EdEditorView
-        
+
         """
         nb = self._mw.GetNotebook()
         for page in nb.GetTextControls():
             if page.GetFileName() == fname:
                 return nb.GetPage(page.GetTabIndex())
-        
+
         return None
-    

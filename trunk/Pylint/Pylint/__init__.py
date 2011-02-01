@@ -1,9 +1,9 @@
 # -*- coding: utf-8 -*-
-# Name: __init__.py                                                           
-# Purpose: Pylint plugin                                              
-# Author: Mike Rans                              
-# Copyright: (c) 2010 Mike Rans                                
-# License: wxWindows License                                                  
+# Name: __init__.py
+# Purpose: Pylint plugin
+# Author: Mike Rans
+# Copyright: (c) 2010 Mike Rans
+# License: wxWindows License
 ###############################################################################
 
 # Plugin Metadata
@@ -29,7 +29,7 @@ import util
 
 # Local Imports
 from SyntaxCheckWindow import SyntaxCheckWindow
-import LintConfig
+import ToolConfig
 
 #-----------------------------------------------------------------------------#
 # Globals
@@ -120,7 +120,7 @@ class ConfigObject(plugin.PluginConfigObject):
         @return: wxPanel
 
         """
-        return LintConfig.LintConfigPanel(parent)
+        return ToolConfig.ToolConfigPanel(parent)
 
     def GetLabel(self):
         """Get the label for this config panel

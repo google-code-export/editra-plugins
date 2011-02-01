@@ -17,7 +17,7 @@ import os
 import os.path
 import re
 import sys
-
+import wx
 
 #--------------------------------------------------------------------------#
 # Globals
@@ -35,12 +35,12 @@ def GetSearchPath(base=None):
     """
     # installation-dependent default
     if base == None:
-        if sys.platform == 'win32':
+        if wx.Platform == "__WXMSW__":
             base = sys.prefix
         else:
             base = '%s/lib/python%s' % (sys.prefix, sys.version[:3])
 
-    if sys.platform == 'win32':
+    if wx.Platform == "__WXMSW__":
         path = [ os.path.join(base, 'lib'),
                  os.path.join(base, 'lib', 'site-packages') ]
     else:
@@ -256,7 +256,7 @@ if __name__ == '__main__':
 
     mf = ModuleFinder(path)
     t1 = time.clock()
-    result = mf.Find('mime', False)
+    result = mf.Find('mime')
     t2 = time.clock()
     print 'Found %s' % result
     print 'Find took %f seconds.' % (t2-t1)
