@@ -109,19 +109,19 @@ class ToolConfigPanel(wx.Panel):
         pathsz.Add(wx.StaticText(self, label=_("Python Executable:")),
                    0, wx.ALIGN_CENTER_VERTICAL)
         pathsz.Add(self._python_path_pk, 1, wx.EXPAND|wx.LEFT, 5)
-        sizer.Add(pathsz, 0, wx.EXPAND|wx.LEFT|wx.RIGHT|wx.TOP, 10)
+        sizer.Add(pathsz, 0, wx.EXPAND|wx.LEFT|wx.RIGHT|wx.TOP, 5)
 
         # Python scripts Path
         pathsz = wx.BoxSizer(wx.HORIZONTAL)
         pathsz.Add(wx.StaticText(self, label=_("Python Scripts Path:")),
                    0, wx.ALIGN_CENTER_VERTICAL)
         pathsz.Add(self._scripts_path_pk, 1, wx.EXPAND|wx.LEFT, 5)
-        sizer.Add(pathsz, 0, wx.EXPAND|wx.LEFT|wx.RIGHT|wx.TOP, 10)
+        sizer.Add(pathsz, 0, wx.EXPAND|wx.LEFT|wx.RIGHT|wx.TOP, 5)
 
         # Run mode configuration
         self._modesz.Add(self._autorb, 0, wx.ALL, 5)
         self._modesz.Add(self._manualrb, 0, wx.ALL, 5)
-        sizer.Add(self._modesz, 0, wx.ALL|wx.EXPAND, 10)
+        sizer.Add(self._modesz, 0, wx.ALL|wx.EXPAND, 8)
 
         # Enable/Disable pylint checkers
         hsizer = wx.BoxSizer(wx.HORIZONTAL)
@@ -132,7 +132,7 @@ class ToolConfigPanel(wx.Panel):
                         ((5, 5),0)])
         self._msgsz.Add(hsizer, 0, wx.EXPAND|wx.ALL, 5)
         self._msgsz.Add(self._msglst, 1, wx.EXPAND|wx.ALL, 5)
-        sizer.Add(self._msgsz, 1, wx.EXPAND|wx.ALL, 10)
+        sizer.Add(self._msgsz, 1, wx.EXPAND|wx.ALL, 8)
 
         self.SetSizer(sizer)
 
