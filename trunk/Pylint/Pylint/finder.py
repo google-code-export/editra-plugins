@@ -118,6 +118,8 @@ class ModuleFinder(object):
         """
         @param searchpath: list of modules search path
         """
+        super(ModuleFinder, self).__init__()
+
         self._searchpath = searchpath
         self._sources = []
 
