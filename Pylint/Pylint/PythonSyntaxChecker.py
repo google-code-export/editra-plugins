@@ -39,11 +39,11 @@ class PythonSyntaxChecker(AbstractSyntaxChecker):
         # Attributes
         self.dirvarfile = variabledict.get("DIRVARFILE")
         inithook = "--init-hook=\"import os; print 'PYTHONPATH=%s' % os.getenv('PYTHONPATH');\""
-        self.runpylint = " -f parseable  -r n %s " % inithook
+        self.runpylint = ["-f", "parseable", "-r", "n", inithook]
         pylintrc = variabledict.get("PYLINTRC")
         if pylintrc:
-            pylintrc = "--rcfile=%s " % pylintrc
-            self.runpylint = self.runpylint + pylintrc
+            pylintrc = ["--rcfile=%s" % pylintrc]
+            self.runpylint += pylintrc
         else:
             # Use built-in configuration
             dlist = ToolConfig.GetConfigValue(ToolConfig.TLC_DISABLED_CHK)
@@ -52,7 +52,7 @@ class PythonSyntaxChecker(AbstractSyntaxChecker):
                     disable = ",".join(dlist)
                 else:
                     disable = dlist[0]
-                self.runpylint += ("-d %s " % disable)
+                self.runpylint += ["-d", disable]
         self.addedpythonpaths = variabledict.get("ADDEDPYTHONPATHS")
         self.nopythonerror = u"***  FATAL ERROR: No local Python configured or found"
         self.noscriptserror = u"***  FATAL ERROR: No Python scripts folder"
@@ -105,19 +105,13 @@ class PythonSyntaxChecker(AbstractSyntaxChecker):
             return [(u"No Pylint", self.nopylinterror, u"NA"),]
         util.Log("[PyLint][info] Using Pylint: %s" % pylintpath)
 
-        # traverse downwards until we are out of a python package
-        fullPath = os.path.abspath(self.filename)
-        parentPath, childPath = os.path.dirname(fullPath), os.path.basename(fullPath)
-
-        while parentPath != "/" and os.path.exists(os.path.join(parentPath, '__init__.py')):
-            childPath = os.path.join(os.path.basename(parentPath), childPath)
-            parentPath = os.path.dirname(parentPath)
+        childPath, parentPath = get_packageroot(self.filename)
 
         # Start pylint
-        lintpath = "%s %s" % (localpythonpath, pylintpath)
+        lintpath = [localpythonpath, pylintpath]
         cmdline = lintpath + self.runpylint
-        plint_cmd = "%s%s" % (cmdline, '"%s"' % childPath)
-        util.Log("[PyLint][info] Starting command: %s" % plint_cmd)
+        plint_cmd = cmdline + [get_modulepath(childPath)]
+        util.Log("[PyLint][info] Starting command: %s" % repr(plint_cmd))
         util.Log("[Pylint][info] Using CWD: %s" % parentPath)
         creationflags = 0
         if wx.Platform == "__WXMSW__":
@@ -137,7 +131,7 @@ class PythonSyntaxChecker(AbstractSyntaxChecker):
         if self.addedpythonpaths:
             rows.append((u"***", u"Using PYTHONPATH + %s"\
                           % u", ".join(self.addedpythonpaths), u"NA"))
-        rows.append((u"***", u"Pylint command line: %s" % cmdline, u"NA"))
+        rows.append((u"***", u"Pylint command line: %s" % " ".join(plint_cmd), u"NA"))
         rows.append((u"***", u"Directory Variables file: %s" % self.dirvarfile, u"NA"))
         rowsdict = {}
         for matcher in regex.finditer(stdoutdata):
@@ -176,3 +170,16 @@ class PythonSyntaxChecker(AbstractSyntaxChecker):
 
         util.Log("[PyLint][info] Pylint command finished running")
         return rows
+
+def get_packageroot(filepath):
+    # traverse downwards until we are out of a python package
+    fullPath = os.path.abspath(filepath)
+    parentPath, childPath = os.path.dirname(fullPath), os.path.basename(fullPath)
+
+    while parentPath != "/" and os.path.exists(os.path.join(parentPath, '__init__.py')):
+        childPath = os.path.join(os.path.basename(parentPath), childPath)
+        parentPath = os.path.dirname(parentPath)
+    return (childPath, parentPath)
+
+def get_modulepath(childPath):
+    return os.path.splitext(childPath)[0].replace(os.path.sep, ".")
