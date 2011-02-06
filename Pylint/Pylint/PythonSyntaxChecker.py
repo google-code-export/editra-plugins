@@ -113,13 +113,16 @@ class PythonSyntaxChecker(AbstractSyntaxChecker):
         plint_cmd = cmdline + [get_modulepath(childPath)]
         util.Log("[PyLint][info] Starting command: %s" % repr(plint_cmd))
         util.Log("[Pylint][info] Using CWD: %s" % parentPath)
-        creationflags = 0
         if wx.Platform == "__WXMSW__":
             creationflags = win32process.CREATE_NO_WINDOW
+            environment = None
+        else:
+            creationflags = 0
+            environment = {}
         #environment = self.GetEnvironment(localpythonpath)
         process = Popen(plint_cmd,
                         bufsize=1048576, stdout=PIPE, stderr=PIPE,
-                        cwd=parentPath, #env=environment,
+                        cwd=parentPath, env=environment,
                         creationflags=creationflags)
         stdoutdata, stderrdata = process.communicate()
         util.Log("[Pylint][info] stdout %s" % stdoutdata)
