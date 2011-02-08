@@ -234,10 +234,10 @@ class SubmitPanel(wx.Panel):
         for ctrl in self._ctrls:
             value = ctrl.GetValue()
             if isinstance(value, bool):
-                value = str(value).lower()
+                value = unicode(value).lower()
             values.append(value)
         pub = self._nopubcb.GetValue()
-        values.append(str(pub).lower())
+        values.append(unicode(pub).lower())
         return tuple(values)
 
     @eclib.expose(SubmitDialog)
