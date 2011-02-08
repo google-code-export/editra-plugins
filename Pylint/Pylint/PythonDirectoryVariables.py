@@ -20,7 +20,7 @@ from AbstractDirectoryVariables import AbstractDirectoryVariables
 class PythonDirectoryVariables(AbstractDirectoryVariables):
     def __init__(self):
         AbstractDirectoryVariables.__init__(self, "py")
-        self.addedpythonpaths = []
+        self.pythonpath = []
 
     @staticmethod
     def get_abspath(dirvarfile, path):
@@ -55,8 +55,8 @@ class PythonDirectoryVariables(AbstractDirectoryVariables):
             if key == "PYTHONPATH":
                 allnewpaths = val.split(",")
                 for path in allnewpaths:
-                    self.addedpythonpaths.append(self.get_abspath(dirvarfile, path))
+                    self.pythonpath.append(self.get_abspath(dirvarfile, path))
             elif key == "PYLINTRC":
                 vardict["PYLINTRC"] = '"%s"' % self.get_abspath(dirvarfile, val)
-        vardict["ADDEDPYTHONPATHS"] = self.addedpythonpaths
+        vardict["PYTHONPATH"] = self.pythonpath
         return vardict
