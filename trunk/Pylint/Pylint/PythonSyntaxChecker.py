@@ -53,31 +53,15 @@ class PythonSyntaxChecker(AbstractSyntaxChecker):
                 else:
                     disable = dlist[0]
                 self.runpylint += ["-d", disable]
-        self.addedpythonpaths = variabledict.get("ADDEDPYTHONPATHS")
+        self.pythonpath = variabledict.get("PYTHONPATH")
         self.nopythonerror = u"***  FATAL ERROR: No local Python configured or found"
         self.nopylinterror = u"***  FATAL ERROR: No Pylint configured or found"
 
-    def GetEnvironment(self, pythonpath):
-        if wx.Platform == "__WXMSW__":
-            localpythonpath = os.path.dirname(pythonpath)
-        else:
-            localpythonpath = "usr/lib/python2.6" # HARD CODED FOR NOW
-        pythonsearchpath = GetSearchPath(localpythonpath)
-        util.Log("[PyLint][info] Using Python Searchpath: %s" % pythonsearchpath)
-
-        environment = os.environ.copy()
-        if wx.Platform == "__WXMSW__":
-            environment["PATH"] = str(environment["PATH"])
-            platformpaths = ["%s%sDLLs" % (localpythonpath, os.sep)]
-        elif wx.Platform == "__WXMAC__":
-            platformpaths = []
-        else:
-            platformpaths = []
-        allpaths = pythonsearchpath + self.addedpythonpaths + platformpaths
-        environment["PYTHONPATH"] = str(os.pathsep.join(allpaths))
-        util.Log("[Pylint][info] Using env: %s" % repr(environment))
-        return environment
-
+    def get_pythonpath(self):
+        if os.environ.has_key("PYTHONPATH"):
+            return os.getenv("PYTHONPATH")
+        return None
+        
     def DoCheck(self):
         """Run pylint"""
 
@@ -109,27 +93,35 @@ class PythonSyntaxChecker(AbstractSyntaxChecker):
         plint_cmd = cmdline + [get_modulepath(childPath)]
         util.Log("[PyLint][info] Starting command: %s" % repr(plint_cmd))
         util.Log("[Pylint][info] Using CWD: %s" % parentPath)
+        curpath = None
         if wx.Platform == "__WXMSW__":
             creationflags = win32process.CREATE_NO_WINDOW
             environment = None
+            curpath = self.get_pythonpath()
+            os.environ["PYTHONPATH"] = os.pathsep.join(self.pythonpath)
         else:
             creationflags = 0
             environment = {}
-        #environment = self.GetEnvironment(localpythonpath)
+            if self.pythonpath:
+                environment["PYTHONPATH"] = str(os.pathsep.join(self.pythonpath))
+
         process = Popen(plint_cmd,
                         bufsize=1048576, stdout=PIPE, stderr=PIPE,
                         cwd=parentPath, env=environment,
                         creationflags=creationflags)
         stdoutdata, stderrdata = process.communicate()
+        if wx.Platform == "__WXMSW__" and curpath:
+            os.environ["PYTHONPATH"] = curpath
+
         util.Log("[Pylint][info] stdout %s" % stdoutdata)
         util.Log("[Pylint][info] stderr %s" % stderrdata)
         # The parseable line format is '%(path)s:%(line)s: [%(sigle)s%(obj)s] %(msg)s'
         # NOTE: This would be cleaner if we added an Emacs reporter to pylint.reporters.text ..
         regex = re.compile(r"(.*):(.*): \[([A-Z])[, ]*(.*)\] (.*)%s" % os.linesep)
         rows = []
-        if self.addedpythonpaths:
+        if self.pythonpath:
             rows.append((u"***", u"Using PYTHONPATH + %s"\
-                          % u", ".join(self.addedpythonpaths), u"NA"))
+                          % u", ".join(self.pythonpath), u"NA"))
         rows.append((u"***", u"Pylint command line: %s" % " ".join(plint_cmd), u"NA"))
         rows.append((u"***", u"Directory Variables file: %s" % self.dirvarfile, u"NA"))
         rowsdict = {}
