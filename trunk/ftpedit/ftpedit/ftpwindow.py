@@ -58,7 +58,7 @@ _ = wx.GetTranslation
 class FtpWindow(eclib.ControlBox):
     """Ftp file window"""
     def __init__(self, parent, id_=wx.ID_ANY):
-        eclib.ControlBox.__init__(self, parent, id_)
+        super(FtpWindow, self).__init__(parent, id_)
 
         # Attributes
         self._mw = self.__FindMainWindow()
@@ -90,15 +90,17 @@ class FtpWindow(eclib.ControlBox):
         self.Bind(wx.EVT_LIST_ITEM_ACTIVATED, self.OnItemActivated)
         self.Bind(ftpclient.EVT_FTP_REFRESH, self.OnRefresh)
         self.Bind(ftpclient.EVT_FTP_DOWNLOAD, self.OnDownload)
+        self.Bind(wx.EVT_WINDOW_DESTROY, self.OnDestroy, self)
 
         # Editra Message Handlers
         ed_msg.Subscribe(self.OnThemeChanged, ed_msg.EDMSG_THEME_CHANGED)
         ed_msg.Subscribe(self.OnCfgUpdated, ftpconfig.EDMSG_FTPCFG_UPDATED)
 
-    def __del__(self):
+    def OnDestroy(self, event):
         """Cleanup"""
-        ed_msg.Unsubscribe(self.OnThemeChanged)
-        ed_msg.Unsubscribe(self.OnCfgUpdated)
+        if self:
+            ed_msg.Unsubscribe(self.OnThemeChanged)
+            ed_msg.Unsubscribe(self.OnCfgUpdated)
 
         # Cleanup file notifiers
 #        self.__DisconnectFiles()
@@ -601,15 +603,17 @@ class FtpList(listmix.ListCtrlAutoWidthMixin,
         # Event Handlers
 #        self.Bind(wx.EVT_CONTEXT_MENU, self.OnContextMenu)
         self.Bind(wx.EVT_LIST_ITEM_RIGHT_CLICK, self.OnContextMenu)
+        self.Bind(wx.EVT_WINDOW_DESTROY, self.OnDestroy, self)
 
         # Message Handlers
         ed_msg.Subscribe(self.OnThemeChanged, ed_msg.EDMSG_THEME_CHANGED)
         ed_msg.Subscribe(self.OnUpdateFont, ed_msg.EDMSG_DSP_FONT)
 
-    def __del__(self):
+    def OnDestroy(self, evt):
         """Unsubscribe from messages"""
-        ed_msg.Unsubscribe(self.OnThemeChanged)
-        ed_msg.Unsubscribe(self.OnUpdateFont)
+        if self:
+            ed_msg.Unsubscribe(self.OnThemeChanged)
+            ed_msg.Unsubscribe(self.OnUpdateFont)
 
     def AddItem(self, item):
         """Add an item to the list

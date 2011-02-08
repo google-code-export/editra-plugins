@@ -5,6 +5,12 @@ License: wxWindows
 Changelog:
 
 #-----------------------------------------------------------------------------#
+Version 0.4
+Released:
+
++Fix issue with disconnecting message handlers after window has been destroyed.
+
+#-----------------------------------------------------------------------------#
 Version 0.3
 Released: 04/26/2009
 
