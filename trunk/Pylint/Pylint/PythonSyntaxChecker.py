@@ -55,8 +55,7 @@ class PythonSyntaxChecker(AbstractSyntaxChecker):
                 self.runpylint += ["-d", disable]
         self.addedpythonpaths = variabledict.get("ADDEDPYTHONPATHS")
         self.nopythonerror = u"***  FATAL ERROR: No local Python configured or found"
-        self.noscriptserror = u"***  FATAL ERROR: No Python scripts folder"
-        self.nopylinterror = u"***  FATAL ERROR: No Pylint found in local Python"
+        self.nopylinterror = u"***  FATAL ERROR: No Pylint configured or found"
 
     def GetEnvironment(self, pythonpath):
         if wx.Platform == "__WXMSW__":
@@ -94,14 +93,11 @@ class PythonSyntaxChecker(AbstractSyntaxChecker):
             return [(u"No Python", self.nopythonerror, u"NA"),]
         util.Log("[PyLint][info] Using Python: %s" % localpythonpath)
 
-        localscriptspath = ToolConfig.GetConfigValue(ToolConfig.TLC_SCRIPTS_PATH)
-        if not localscriptspath:
-            localscriptspath = ToolConfig.GetDefaultScripts(localpythonpath)
+        pylintpath = ToolConfig.GetConfigValue(ToolConfig.TLC_PYLINT_PATH)
+        if not pylintpath:
+            pylintpath = ToolConfig.GetDefaultPylint(localpythonpath)
         # No pylint found in local Python
-        if not localscriptspath:
-            return [(u"No Scripts", self.noscriptserror, u"NA"),]
-        pylintpath = os.path.join(localscriptspath, "pylint")
-        if not os.path.isfile(pylintpath):
+        if not pylintpath or not os.path.isfile(pylintpath):
             return [(u"No Pylint", self.nopylinterror, u"NA"),]
         util.Log("[PyLint][info] Using Pylint: %s" % pylintpath)
 
