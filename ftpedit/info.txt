@@ -1,4 +1,4 @@
 Author=Cody Precord
 Version=0.4
 Name=FtpEdit
-Description=Edit files over Ftp (Editra > 0.4.28 Only)
+Description=Browse and Edit files over FTP

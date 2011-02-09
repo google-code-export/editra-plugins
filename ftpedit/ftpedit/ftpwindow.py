@@ -601,7 +601,6 @@ class FtpList(listmix.ListCtrlAutoWidthMixin,
         self.setResizeColumn(1) # <- NOTE: autowidth mixin starts from index 1
 
         # Event Handlers
-#        self.Bind(wx.EVT_CONTEXT_MENU, self.OnContextMenu)
         self.Bind(wx.EVT_LIST_ITEM_RIGHT_CLICK, self.OnContextMenu)
         self.Bind(wx.EVT_WINDOW_DESTROY, self.OnDestroy, self)
 
@@ -614,6 +613,8 @@ class FtpList(listmix.ListCtrlAutoWidthMixin,
         if self:
             ed_msg.Unsubscribe(self.OnThemeChanged)
             ed_msg.Unsubscribe(self.OnUpdateFont)
+            if self._menu:
+                self._menu.Destroy()
 
     def AddItem(self, item):
         """Add an item to the list
