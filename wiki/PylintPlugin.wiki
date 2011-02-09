@@ -10,7 +10,8 @@ The purpose of this plugin is to enable the syntax of Python source code to be c
 
 This is available from the Editra Plugin Manager by clicking on Configure for the Pylint plugin.
  
-  * The Pylint Path is the path to the external Pylint program. It defaults to any Pylint found on the system path or will be blank if no Pylint can be found, in which case the location can be manually specified.
+  * The Python Executable Path is the path to the external Python executable. It defaults to any Pylint found on the system path or will be blank if no Pylint can be found, in which case the location can be manually specified.
+  * The Pylint Script Path is the path to the external Pylint program. It defaults to any Pylint found on the system path or will be blank if no Pylint can be found, in which case the location can be manually specified.
   * The Run Mode is Manual for user activated syntax checking only or Automatic for checking on file open/save and change tab.
   * Messages from the following categories can be individually turned on or off: Convention, Refactor, Warning, Error, Fatal
 
