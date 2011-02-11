@@ -14,6 +14,7 @@ __revision__ = "$Revision$"
 #-----------------------------------------------------------------------------#
 # Imports
 import os
+import sys
 import re
 from subprocess import Popen, PIPE
 import wx
@@ -91,8 +92,11 @@ class PythonSyntaxChecker(AbstractSyntaxChecker):
         lintpath = [localpythonpath, pylintpath]
         cmdline = lintpath + self.runpylint
         plint_cmd = cmdline + [get_modulepath(childPath)]
+        plint_cmd = [ cmd.encode(sys.getfilesystemencoding())
+                       for cmd in plint_cmd ]
+        parentPath = parentPath.encode(sys.getfilesystemencoding())
         util.Log("[PyLint][info] Starting command: %s" % repr(plint_cmd))
-        util.Log("[Pylint][info] Using CWD: %s" % parentPath)
+        util.Log("[Pylint][info] Using CWD: %s" % repr(parentPath))
         curpath = None
         if wx.Platform == "__WXMSW__":
             creationflags = win32process.CREATE_NO_WINDOW
