@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 ###############################################################################
 # Name: ToolConfig.py                                                         #
-# Purpose: PyLint and Winpdb Configuration Panel                                         #
+# Purpose: Python Configuration Panel                                         #
 # Author: Cody Precord <cprecord@editra.org>                                  #
 # Copyright: (c) 2010 Cody Precord <staff@editra.org>                         #
 # License: wxWindows License                                                  #
@@ -23,11 +23,12 @@ from profiler import Profile_Get, Profile_Set
 import ebmlib
 import eclib
 
+# Local Imports
+from PyToolsUtils import PyToolsUtils
 #-----------------------------------------------------------------------------#
 # Configuration Keys
 PYTOOL_CONFIG = "PyTool.Config"
-TLC_LINT_PATH = "PylintPath"
-TLC_DEBUG_PATH = "WinpdbPath"
+TLC_PYTHON_PATH = "PythonPath"
 TLC_AUTO_RUN = "AutoRun"
 TLC_DISABLED_CHK = "DisabledCheckers"
 
@@ -43,7 +44,7 @@ def GetConfigValue(key):
 #-----------------------------------------------------------------------------#
 
 class ToolConfigPanel(wx.Panel):
-    """Configuration panel for PyLint configuration in the
+    """Configuration panel for Python configuration in the
     PluginManager dialog.
 
     """
@@ -52,30 +53,14 @@ class ToolConfigPanel(wx.Panel):
 
         # Attributes
         self._config = Profile_Get(PYTOOL_CONFIG, default=dict())
-        path = self._config.get(TLC_LINT_PATH, None)
-        if path is None:
-            path = ebmlib.Which('pylint.bat')
-        if path is None:
-            path = ebmlib.Which('pylint')
-        if path is None:
-            path = u""
-        self._lint_path_pk = wx.FilePickerCtrl(self, path=path,
+        pythonpath = self._config.get(TLC_PYTHON_PATH, None)
+        if not pythonpath:
+            pythonpath = PyToolsUtils.GetDefaultPython()
+        self._python_path_pk = wx.FilePickerCtrl(self, path=pythonpath,
                                           style=wx.FLP_USE_TEXTCTRL|\
                                                 wx.FLP_CHANGE_DIR|\
                                                 wx.FLP_FILE_MUST_EXIST)
-        self._lint_path_pk.SetPickerCtrlGrowable(True)
-        path = self._config.get(TLC_DEBUG_PATH, None)
-        if path is None:
-            path = ebmlib.Which('winpdb.bat')
-        if path is None:
-            path = ebmlib.Which('winpdb')
-        if path is None:
-            path = u""
-        self._debug_path_pk = wx.FilePickerCtrl(self, path=path,
-                                          style=wx.FLP_USE_TEXTCTRL|\
-                                                wx.FLP_CHANGE_DIR|\
-                                                wx.FLP_FILE_MUST_EXIST)
-        self._debug_path_pk.SetPickerCtrlGrowable(True)
+        self._python_path_pk.SetPickerCtrlGrowable(True)
         modebox = wx.StaticBox(self, label=_("Pylint Run Mode"))
         self._modesz = wx.StaticBoxSizer(modebox, wx.VERTICAL)
         self._autorb = wx.RadioButton(self, label=_("Automatic"))
@@ -98,7 +83,7 @@ class ToolConfigPanel(wx.Panel):
         self._msglst.SetConfig(self._config)
         self._msgtype.SetSelection(0)
         self.UpdateListCtrl()
-        
+
         # Layout
         self.__DoLayout()
 
@@ -106,30 +91,22 @@ class ToolConfigPanel(wx.Panel):
         self.Bind(wx.EVT_RADIOBUTTON, self.OnCheckBox, self._autorb)
         self.Bind(wx.EVT_RADIOBUTTON, self.OnCheckBox, self._manualrb)
         self.Bind(wx.EVT_CHOICE, self.OnChoice, self._msgtype)
-        self.Bind(wx.EVT_FILEPICKER_CHANGED, self.OnLintPathChanged, self._lint_path_pk)
-        self.Bind(wx.EVT_FILEPICKER_CHANGED, self.OnDebugPathChanged, self._debug_path_pk)
+        self.Bind(wx.EVT_FILEPICKER_CHANGED, self.OnPythonPathChanged, self._python_path_pk)
 
     def __DoLayout(self):
         sizer = wx.BoxSizer(wx.VERTICAL)
 
-        # PyLint Path
+        # Python Path
         pathsz = wx.BoxSizer(wx.HORIZONTAL)
-        pathsz.Add(wx.StaticText(self, label=_("Pylint Path:")),
+        pathsz.Add(wx.StaticText(self, label=_("Python Executable Path:")),
                    0, wx.ALIGN_CENTER_VERTICAL)
-        pathsz.Add(self._lint_path_pk, 1, wx.EXPAND|wx.LEFT, 5)
-        sizer.Add(pathsz, 0, wx.EXPAND|wx.LEFT|wx.RIGHT|wx.TOP, 10)
+        pathsz.Add(self._python_path_pk, 1, wx.EXPAND|wx.LEFT, 5)
+        sizer.Add(pathsz, 0, wx.EXPAND|wx.LEFT|wx.RIGHT|wx.TOP, 5)
 
-        # Winpdb Path
-        pathsz = wx.BoxSizer(wx.HORIZONTAL)
-        pathsz.Add(wx.StaticText(self, label=_("Winpdb Path:")),
-                   0, wx.ALIGN_CENTER_VERTICAL)
-        pathsz.Add(self._debug_path_pk, 1, wx.EXPAND|wx.LEFT, 5)
-        sizer.Add(pathsz, 0, wx.EXPAND|wx.LEFT|wx.RIGHT|wx.TOP, 10)
-        
         # Run mode configuration
         self._modesz.Add(self._autorb, 0, wx.ALL, 5)
         self._modesz.Add(self._manualrb, 0, wx.ALL, 5)
-        sizer.Add(self._modesz, 0, wx.ALL|wx.EXPAND, 10)
+        sizer.Add(self._modesz, 0, wx.ALL|wx.EXPAND, 8)
 
         # Enable/Disable pylint checkers
         hsizer = wx.BoxSizer(wx.HORIZONTAL)
@@ -140,7 +117,7 @@ class ToolConfigPanel(wx.Panel):
                         ((5, 5),0)])
         self._msgsz.Add(hsizer, 0, wx.EXPAND|wx.ALL, 5)
         self._msgsz.Add(self._msglst, 1, wx.EXPAND|wx.ALL, 5)
-        sizer.Add(self._msgsz, 1, wx.EXPAND|wx.ALL, 10)
+        sizer.Add(self._msgsz, 1, wx.EXPAND|wx.ALL, 8)
 
         self.SetSizer(sizer)
 
@@ -161,18 +138,11 @@ class ToolConfigPanel(wx.Panel):
         else:
             evt.Skip()
 
-    def OnLintPathChanged(self, event):
+    def OnPythonPathChanged(self, event):
         """Update the configured pylint path"""
-        path = self._lint_path_pk.GetPath()
+        path = self._python_path_pk.GetPath()
         if path and os.path.exists(path):
-            self._config[TLC_LINT_PATH] = path
-            Profile_Set(PYTOOL_CONFIG, self._config)
-
-    def OnDebugPathChanged(self, event):
-        """Update the configured debugger path"""
-        path = self._debug_path_pk.GetPath()
-        if path and os.path.exists(path):
-            self._config[TLC_DEBUG_PATH] = path
+            self._config[TLC_PYTHON_PATH] = path
             Profile_Set(PYTOOL_CONFIG, self._config)
 
     def UpdateListCtrl(self):

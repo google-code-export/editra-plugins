@@ -14,15 +14,13 @@ __revision__ = "$Revision$"
 #-----------------------------------------------------------------------------#
 # Imports
 import os
-import sys
 import re
-from subprocess import Popen, PIPE, STDOUT
 
 # Local Imports
-from PyToolsUtils import get_packageroot, get_modulepath
 from AbstractSyntaxChecker import AbstractSyntaxChecker
+from PyToolsUtils import PyToolsUtils
+from ProcessRunner import ProcessRunner
 import ToolConfig
-from finder import GetSearchPath
 
 # Editra Imports
 import util
@@ -36,11 +34,11 @@ class PythonSyntaxChecker(AbstractSyntaxChecker):
 
         # Attributes
         self.dirvarfile = variabledict.get("DIRVARFILE")
-        self.pylintargs = ['-r', 'n']
+        self.pylintargs = ["-f", "parseable", "-r", "n"]
         pylintrc = variabledict.get("PYLINTRC")
         if pylintrc:
-            pylintrc = "--rcfile=%s" % pylintrc
-            self.pylintargs = self.pylintargs + [pylintrc]
+            pylintrc = ["--rcfile=%s" % pylintrc]
+            self.pylintargs += pylintrc
         else:
             # Use built-in configuration
             dlist = ToolConfig.GetConfigValue(ToolConfig.TLC_DISABLED_CHK)
@@ -49,112 +47,90 @@ class PythonSyntaxChecker(AbstractSyntaxChecker):
                     disable = ",".join(dlist)
                 else:
                     disable = dlist[0]
-                self.pylintargs += ["-d", "%s" % disable]
-        self.addedpythonpaths = variabledict.get("ADDEDPYTHONPATHS")
-        self.nopylinterror = u"***  FATAL ERROR: Pylint is not installed"
-        self.nopylintmoduleerror = u"***  FATAL ERROR: Cannot import Pylint module!!! ***"
-
-        def do_nothing():
-            pass
-        self.startcall = variabledict.get("STARTCALL")
-        if not self.startcall:
-            self.startcall = do_nothing
-        self.endcall = variabledict.get("ENDCALL")
-        if not self.endcall:
-            self.endcall = do_nothing
-
-    @staticmethod
-    def getnewsyspath(extrapaths):
-        # Find Python path imports
-        dllpath = ["C:\\Python26\\DLLs"]
-        base = ToolConfig.GetConfigValue("module_base")
-        return GetSearchPath(base) + extrapaths + dllpath
+                self.pylintargs += ["-d", disable]
+        self.pythonpath = variabledict.get("PYTHONPATH")
+        self.nopythonerror = u"***  FATAL ERROR: No local Python configured or found"
+        self.nopylinterror = u"***  FATAL ERROR: No Pylint configured or found"
 
     def DoCheck(self):
         """Run pylint"""
-        self.startcall()
 
-        # traverse downwards until we are out of a python package
-        childPath, parentPath = get_packageroot(self.filename)
-        absparentPath = os.path.abspath(parentPath)
+        # Figure out what Python to use
+        # 1) First check configuration
+        # 2) Second check for it on the path
+        localpythonpath = ToolConfig.GetConfigValue(ToolConfig.TLC_PYTHON_PATH)
+        if not localpythonpath:
+            localpythonpath = PyToolsUtils.GetDefaultPython()
+
+        # No configured Python
+        if not localpythonpath:
+            return [(u"No Python", self.nopythonerror, u"NA"),]
+        util.Log("[PyLint][info] Using Python: %s" % localpythonpath)
+
+        childPath, parentPath = PyToolsUtils.get_packageroot(self.filename)
 
         # Start pylint
-        allargs = self.pylintargs + ['%s' % get_modulepath(childPath)]
-        util.Log("Full Pylint Arguments: %s" % repr(allargs))
+        allargs = self.pylintargs + [PyToolsUtils.get_modulepath(childPath)]
+        pythoncode = "from pylint import lint;lint.Run(%s)" % repr(allargs)
+        plint_cmd = [localpythonpath, "-c", pythoncode]
+        util.Log("[PyLint][info] Starting command: %s" % repr(plint_cmd))
+        util.Log("[Pylint][info] Using CWD: %s" % parentPath)
+        processrunner = ProcessRunner(self.pythonpath)
+        processrunner.runprocess(plint_cmd, parentPath)
+        stdoutdata, stderrdata = processrunner.getalloutput()
+        processrunner.restorepath()
 
-        # Pylint output
-        class PylintOutput:
-            def __init__(self, rows):
-                self.rows = rows
-                self.rowsdict = {}
-                self.regex = re.compile(r"(.*):(.*): \[([A-Z])[, ]*(.*)\] (.*)")
-
-            def write(self, line):
-                # remove pylintrc warning
-                if line.startswith(u"PYTHONPATH"):
-                    util.Log(line)
-                    return
-                if line.startswith(u"No config file found"):
-                    return
-                matcher = self.regex.match(line)
-                if matcher is None:
-                    return
-                mtypeabr = matcher.group(3)
-                linenostr = matcher.group(2)
-                classmethod = matcher.group(4)
-                mtext = matcher.group(5)
-                if mtypeabr == u"E" or mtypeabr == u"F":
-                    mtype = u"Error"
-                else:
-                    mtype = u"Warning"
-                outtext = mtext
-                if classmethod:
-                    outtext = u"[%s] %s" % (classmethod, outtext)
-                try:
-                    lineno = int(linenostr)
-                    mtyperows = self.rowsdict.get(mtype)
-                    if not mtyperows:
-                        mtyperows = {}
-                        self.rowsdict[mtype] = mtyperows
-                    linenorows = mtyperows.get(lineno)
-                    if not linenorows:
-                        linenorows = set()
-                        mtyperows[lineno] = linenorows
-                    linenorows.add(outtext)
-                except:
-                    self.rows.append((mtype, outtext, linenostr))
-
-        rows = []
-        pylint_output = PylintOutput(rows)
-        original_exit = sys.exit
-        original_path = sys.path
-        def no_exit(arg):
-            pass
-        util.Log("Original sys path: %s" % repr(sys.path))
-        sys.path = [".", absparentPath] + self.getnewsyspath(self.addedpythonpaths)
-        util.Log("New sys path: %s" % repr(sys.path))
-        from pylint import lint
-        from pylint.reporters.text import ParseableTextReporter
-
-        sys.exit = no_exit
-        lint.Run(allargs, reporter=ParseableTextReporter(pylint_output))
-        sys.exit = original_exit
-        sys.path = original_path
+        util.Log("[Pylint][info] stdout %s" % stdoutdata)
+        util.Log("[Pylint][info] stderr %s" % stderrdata)
+        stderrlower = stderrdata.lower()
+        ind = stderrlower.find("importerror")
+        if ind != -1:
+            if stderrlower.find("pylint", ind) != -1:
+                return [(u"No Pylint", self.nopylinterror, u"NA"),]
 
         # The parseable line format is '%(path)s:%(line)s: [%(sigle)s%(obj)s] %(msg)s'
         # NOTE: This would be cleaner if we added an Emacs reporter to pylint.reporters.text ..
-        if self.addedpythonpaths:
+        regex = re.compile(r"(.*):(.*): \[([A-Z])[, ]*(.*)\] (.*)%s" % os.linesep)
+        rows = []
+        if self.pythonpath:
             rows.append((u"***", u"Using PYTHONPATH + %s"\
-                          % u", ".join(self.addedpythonpaths), u"NA"))
-        rows.append((u"***", u"Pylint arguments: %s" % allargs, u"NA"))
+                          % u", ".join(self.pythonpath), u"NA"))
+        rows.append((u"***", u"Pylint command line: %s" % " ".join(plint_cmd), u"NA"))
         rows.append((u"***", u"Directory Variables file: %s" % self.dirvarfile, u"NA"))
-        for mtype in sorted(pylint_output.rowsdict):
-            mtyperows = pylint_output.rowsdict[mtype]
+        rowsdict = {}
+        for matcher in regex.finditer(stdoutdata):
+            if matcher is None:
+                continue
+            mtypeabr = matcher.group(3)
+            linenostr = matcher.group(2)
+            classmethod = matcher.group(4)
+            mtext = matcher.group(5)
+            if mtypeabr == u"E" or mtypeabr == u"F":
+                mtype = u"Error"
+            else:
+                mtype = u"Warning"
+            outtext = mtext
+            if classmethod:
+                outtext = u"[%s] %s" % (classmethod, outtext)
+            try:
+                lineno = int(linenostr)
+                mtyperows = rowsdict.get(mtype)
+                if not mtyperows:
+                    mtyperows = {}
+                    rowsdict[mtype] = mtyperows
+                linenorows = mtyperows.get(lineno)
+                if not linenorows:
+                    linenorows = set()
+                    mtyperows[lineno] = linenorows
+                linenorows.add(outtext)
+            except:
+                rows.append((mtype, outtext, linenostr))
+        for mtype in sorted(rowsdict):
+            mtyperows = rowsdict[mtype]
             for lineno in sorted(mtyperows):
                 linenorows = mtyperows[lineno]
                 for outtext in sorted(linenorows):
                     rows.append((mtype, outtext, lineno))
 
-        self.endcall()
         util.Log("[PyLint][info] Pylint command finished running")
         return rows

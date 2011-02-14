@@ -1,9 +1,9 @@
 # -*- coding: utf-8 -*-
-# Name: SyntaxCheckWindow.py                                                           
-# Purpose: Pylint plugin                                              
-# Author: Mike Rans                              
-# Copyright: (c) 2010 Mike Rans                                
-# License: wxWindows License                                                  
+# Name: ShelfWindow.py
+# Purpose: Pylint plugin
+# Author: Mike Rans
+# Copyright: (c) 2010 Mike Rans
+# License: wxWindows License
 ###############################################################################
 
 """Editra Shelf display window"""
@@ -23,7 +23,6 @@ import ed_glob
 import util
 import eclib
 import ed_msg
-import ed_menu
 from profiler import Profile_Get, Profile_Set
 from ToolConfig import PYTOOL_CONFIG
 from syntax import syntax
@@ -34,7 +33,7 @@ import ToolConfig
 from CheckResultsList import CheckResultsList
 from PythonSyntaxChecker import PythonSyntaxChecker
 from PythonDebugger import PythonDebugger
-from PyToolsUtils import get_packageroot, get_modulepath
+from PyToolsUtils import PyToolsUtils
 
 # Directory Variables
 from PythonDirectoryVariables import PythonDirectoryVariables
@@ -62,7 +61,7 @@ class FreezeDrawer(object):
 
 #-----------------------------------------------------------------------------#
 
-class SyntaxCheckWindow(eclib.ControlBox):
+class ShelfWindow(eclib.ControlBox):
     """Syntax Check Results Window"""
     __syntaxCheckers = {
         synglob.ID_LANG_PYTHON: PythonSyntaxChecker
@@ -77,7 +76,7 @@ class SyntaxCheckWindow(eclib.ControlBox):
     }
     def __init__(self, parent):
         """Initialize the window"""
-        super(SyntaxCheckWindow, self).__init__(parent)
+        super(ShelfWindow, self).__init__(parent)
 
         # Attributes
         # Parent is ed_shelf.EdShelfBook
@@ -91,7 +90,8 @@ class SyntaxCheckWindow(eclib.ControlBox):
         self._prevfile = u""
         self._lintrun = False
         self._debugrun = False
-        self._debugargs = ""
+        self._localpython = u""
+        self._debugargs = u""
         self._config = Profile_Get(PYTOOL_CONFIG, default=dict())
 
         # Setup
@@ -111,12 +111,12 @@ class SyntaxCheckWindow(eclib.ControlBox):
         self.lintbtn.Enable(False)
         ctrlbar.AddControl(self.lintbtn, wx.ALIGN_RIGHT)
         ctrlbar.AddSpacer(20,10)
-                        
+
         self.debugbtn = eclib.PlateButton(ctrlbar, wx.ID_ANY, _("Debug"), rbmp,
                                         style=eclib.PB_STYLE_NOBG)
         self.debugbtn.Enable(False)
         ctrlbar.AddControl(self.debugbtn, wx.ALIGN_RIGHT)
-        self.choices = ["Debug Args", "Override Dbg CmdLine"]
+        self.choices = ["1. Local Python", "2. Debug Args", "3. New Debug CmdLine"]
         self.combo = wx.ComboBox(ctrlbar, wx.ID_ANY, value=self.choices[0], choices=self.choices, style=wx.CB_READONLY|eclib.PB_STYLE_NOBG)
         self.combo.Enable(False)
         ctrlbar.AddControl(self.combo, wx.ALIGN_RIGHT)
@@ -125,7 +125,7 @@ class SyntaxCheckWindow(eclib.ControlBox):
         for i, ignore in enumerate(self.choices):
             self.combotexts[i] = ""
         txtentrysize = wx.Size(512, wx.DefaultSize.GetHeight())
-        self.search = wx.SearchCtrl(ctrlbar, wx.ID_ANY, _(""), size=txtentrysize, style=eclib.PB_STYLE_NOBG)
+        self.search = wx.SearchCtrl(ctrlbar, wx.ID_ANY, self.combotexts[0], size=txtentrysize, style=eclib.PB_STYLE_NOBG)
         self.search.Enable(False)
         self.search.SetDescriptiveText("")
         self.search.ShowSearchButton(False)
@@ -189,7 +189,7 @@ class SyntaxCheckWindow(eclib.ControlBox):
         # path of the file or a wx.EmptyString if the buffer does not contain
         # an on disk file
         filename = editor.GetFileName()
-        
+
         self._listCtrl.set_editor(editor)
         self._listCtrl.DeleteOldRows()
 
@@ -218,7 +218,7 @@ class SyntaxCheckWindow(eclib.ControlBox):
         filename = editor.GetFileName()
         self._listCtrl.set_editor(editor)
         self._listCtrl.DeleteOldRows()
-        
+
         if not filename:
             return
 
@@ -253,20 +253,20 @@ class SyntaxCheckWindow(eclib.ControlBox):
                 if combotext:
                     emptycombotexts = False
                     break
-            key = "DEBUG_%s" % self._prevfile
+            key = "PYTHON_%s" % self._prevfile
             if emptycombotexts:
                 if key in self._config:
-                    del self._config["DEBUG_%s" % self._prevfile]
+                    del self._config["PYTHON_%s" % self._prevfile]
             else:
-                debuginfo = (self.combocurrent_selection, self.combotexts)
-                self._config[key] = copy.deepcopy(debuginfo)
+                pythoninfo = (self.combocurrent_selection, self.combotexts)
+                self._config[key] = copy.deepcopy(pythoninfo)
                 Profile_Set(PYTOOL_CONFIG, self._config)
 
         filename = editor.GetFileName()
         self._prevfile = filename
-        debuginfo = self._config.get("DEBUG_%s" % filename, None)
-        if debuginfo:
-            self.combocurrent_selection, self.combotexts = debuginfo
+        pythoninfo = self._config.get("PYTHON_%s" % filename, None)
+        if pythoninfo:
+            self.combocurrent_selection, self.combotexts = pythoninfo
             self.combo.SetSelection(self.combocurrent_selection)
             self.search.SetValue(self.combotexts[self.combocurrent_selection])
         else:
@@ -276,13 +276,8 @@ class SyntaxCheckWindow(eclib.ControlBox):
                 self.combotexts[i] = ""
             self.combo.SetSelection(0)
             self.search.SetValue("")
-            
+
         if force or (not self._lintrun and not self._debugrun):
-#            fname = getattr(editor, 'GetFileName', lambda: u"")()
-#            if ispython:
-#                self._lbl.SetLabel(fname)
-#            else:
-#                self._lbl.SetLabel(u"")
             ctrlbar = self.GetControlBar(wx.TOP)
             ctrlbar.Layout()
 
@@ -346,6 +341,8 @@ class SyntaxCheckWindow(eclib.ControlBox):
         self.combotexts[self.combocurrent_selection] = self.search.GetValue()
         self.combocurrent_selection = self.combo.GetSelection()
         self.search.SetValue(self.combotexts[self.combocurrent_selection])
+        editor = wx.GetApp().GetCurrentBuffer()
+        self.UpdateForEditor(editor, True)
 
     def OnTabMenu(self, msg):
         editor = wx.GetApp().GetCurrentBuffer()
@@ -361,38 +358,38 @@ class SyntaxCheckWindow(eclib.ControlBox):
     def copy_module_path(self, editor, evt):
         path = editor.GetFileName()
         if path is not None:
-            childPath, _ = get_packageroot(path)
-            modulepath = get_modulepath(childPath)
+            childPath, _ = PyToolsUtils.get_packageroot(path)
+            modulepath = PyToolsUtils.get_modulepath(childPath)
             util.SetClipboardText(modulepath)
-                
+
     def get_syntax_checker(self, filetype, vardict, filename):
         try:
             return self.__syntaxCheckers[filetype](vardict, filename)
         except Exception:
             pass
         return None
-        
+
     def get_debugger(self, filetype, vardict, filename):
         try:
             return self.__debuggers[filetype](vardict, filename)
         except Exception:
             pass
         return None
-        
+
     def get_directory_variables(self, filetype):
         try:
             return self.__directoryVariables[filetype]()
         except Exception:
             pass
         return None
-        
+
     def _checksyntax(self, filetype, vardict, filename):
         syntaxchecker = self.get_syntax_checker(filetype, vardict, filename)
         if not syntaxchecker:
             return
         self._checker = syntaxchecker
         self._curfile = filename
-        
+
         # Start job timer
         self._StopTimer()
         self._jobtimer.Start(250, True)
@@ -406,7 +403,7 @@ class SyntaxCheckWindow(eclib.ControlBox):
         return debugger.Debug(debuggerargs, debugargs)
 
     def _OnListRows(self, data):
-        # Data is something like 
+        # Data is something like
         # [('Syntax Error', '__all__ = ["CSVSMonitorThread"]', 7)]
         if len(data) != 0:
             self._listCtrl.PopulateRows(data)
@@ -422,24 +419,23 @@ class SyntaxCheckWindow(eclib.ControlBox):
             ed_msg.PostMessage(ed_msg.EDMSG_PROGRESS_SHOW, (mwid, True))
             ed_msg.PostMessage(ed_msg.EDMSG_PROGRESS_STATE, (mwid, -1, -1))
             # Update the label to show what file the results are for
-            self._lbl.SetLabel(self._curfile)
+            self._lbl.SetLabel(os.path.basename(self._curfile))
             self._checker.Check(self._OnListRows)
 
     def delete_rows(self):
         self._listCtrl.DeleteOldRows()
-            
+
     def _GetEditorForFile(self, fname):
         """Return the EdEditorView that's managing the file, if available
         @param fname: File name to open
         @param mainw: MainWindow instance to open the file in
         @return: Text control managing the file
         @rtype: ed_editv.EdEditorView
-        
+
         """
         nb = self._mw.GetNotebook()
         for page in nb.GetTextControls():
             if page.GetFileName() == fname:
                 return nb.GetPage(page.GetTabIndex())
-        
+
         return None
-    
