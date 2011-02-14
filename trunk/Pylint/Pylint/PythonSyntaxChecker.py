@@ -70,7 +70,7 @@ class PythonSyntaxChecker(AbstractSyntaxChecker):
         childPath, parentPath = PyToolsUtils.get_packageroot(self.filename)
 
         # Start pylint
-        allargs = self.pylintargs + [PyToolsUtils.get_modulepath(childPath)] 
+        allargs = self.pylintargs + [PyToolsUtils.get_modulepath(childPath)]
         pythoncode = "from pylint import lint;lint.Run(%s)" % repr(allargs)
         plint_cmd = [localpythonpath, "-c", pythoncode]
         util.Log("[PyLint][info] Starting command: %s" % repr(plint_cmd))
@@ -82,6 +82,12 @@ class PythonSyntaxChecker(AbstractSyntaxChecker):
 
         util.Log("[Pylint][info] stdout %s" % stdoutdata)
         util.Log("[Pylint][info] stderr %s" % stderrdata)
+        stderrlower = stderrdata.lower()
+        ind = stderrlower.find("importerror")
+        if ind != -1:
+            if stderrlower.find("pylint", ind) != -1:
+                return [(u"No Pylint", self.nopylinterror, u"NA"),]
+
         # The parseable line format is '%(path)s:%(line)s: [%(sigle)s%(obj)s] %(msg)s'
         # NOTE: This would be cleaner if we added an Emacs reporter to pylint.reporters.text ..
         regex = re.compile(r"(.*):(.*): \[([A-Z])[, ]*(.*)\] (.*)%s" % os.linesep)
