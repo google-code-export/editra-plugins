@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# Name: SyntaxCheckWindow.py
+# Name: ShelfWindow.py
 # Purpose: Pylint plugin
 # Author: Mike Rans
 # Copyright: (c) 2010 Mike Rans
@@ -55,7 +55,7 @@ class FreezeDrawer(object):
 
 #-----------------------------------------------------------------------------#
 
-class SyntaxCheckWindow(eclib.ControlBox):
+class ShelfWindow(eclib.ControlBox):
     """Syntax Check Results Window"""
     __syntaxCheckers = {
         synglob.ID_LANG_PYTHON: PythonSyntaxChecker
@@ -66,7 +66,7 @@ class SyntaxCheckWindow(eclib.ControlBox):
     }
     def __init__(self, parent):
         """Initialize the window"""
-        super(SyntaxCheckWindow, self).__init__(parent)
+        super(ShelfWindow, self).__init__(parent)
 
         # Attributes
         # Parent is ed_shelf.EdShelfBook

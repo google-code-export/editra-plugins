@@ -23,11 +23,12 @@ from profiler import Profile_Get, Profile_Set
 import ebmlib
 import eclib
 
+# Local Imports
+from PyToolsUtils import PyToolsUtils
 #-----------------------------------------------------------------------------#
 # Configuration Keys
 PYTOOL_CONFIG = "PyTool.Config"
 TLC_PYTHON_PATH = "PythonPath"
-TLC_PYLINT_PATH = "PylintPath"
 TLC_AUTO_RUN = "AutoRun"
 TLC_DISABLED_CHK = "DisabledCheckers"
 
@@ -54,20 +55,12 @@ class ToolConfigPanel(wx.Panel):
         self._config = Profile_Get(PYTOOL_CONFIG, default=dict())
         pythonpath = self._config.get(TLC_PYTHON_PATH, None)
         if not pythonpath:
-            pythonpath = GetDefaultPython()
+            pythonpath = PyToolsUtils.GetDefaultPython()
         self._python_path_pk = wx.FilePickerCtrl(self, path=pythonpath,
                                           style=wx.FLP_USE_TEXTCTRL|\
                                                 wx.FLP_CHANGE_DIR|\
                                                 wx.FLP_FILE_MUST_EXIST)
         self._python_path_pk.SetPickerCtrlGrowable(True)
-        path = self._config.get(TLC_PYLINT_PATH, None)
-        if not path:
-            path = GetDefaultPylint(pythonpath)
-        self._pylint_path_pk = wx.FilePickerCtrl(self, path=path,
-                                          style=wx.FLP_USE_TEXTCTRL|\
-                                                wx.FLP_CHANGE_DIR|\
-                                                wx.FLP_FILE_MUST_EXIST)
-        self._pylint_path_pk.SetPickerCtrlGrowable(True)
         modebox = wx.StaticBox(self, label=_("Pylint Run Mode"))
         self._modesz = wx.StaticBoxSizer(modebox, wx.VERTICAL)
         self._autorb = wx.RadioButton(self, label=_("Automatic"))
@@ -99,7 +92,6 @@ class ToolConfigPanel(wx.Panel):
         self.Bind(wx.EVT_RADIOBUTTON, self.OnCheckBox, self._manualrb)
         self.Bind(wx.EVT_CHOICE, self.OnChoice, self._msgtype)
         self.Bind(wx.EVT_FILEPICKER_CHANGED, self.OnPythonPathChanged, self._python_path_pk)
-        self.Bind(wx.EVT_FILEPICKER_CHANGED, self.OnPylintPathChanged, self._pylint_path_pk)
 
     def __DoLayout(self):
         sizer = wx.BoxSizer(wx.VERTICAL)
@@ -109,13 +101,6 @@ class ToolConfigPanel(wx.Panel):
         pathsz.Add(wx.StaticText(self, label=_("Python Executable Path:")),
                    0, wx.ALIGN_CENTER_VERTICAL)
         pathsz.Add(self._python_path_pk, 1, wx.EXPAND|wx.LEFT, 5)
-        sizer.Add(pathsz, 0, wx.EXPAND|wx.LEFT|wx.RIGHT|wx.TOP, 5)
-
-        # Python scripts Path
-        pathsz = wx.BoxSizer(wx.HORIZONTAL)
-        pathsz.Add(wx.StaticText(self, label=_("Pylint Script Path:")),
-                   0, wx.ALIGN_CENTER_VERTICAL)
-        pathsz.Add(self._pylint_path_pk, 1, wx.EXPAND|wx.LEFT, 5)
         sizer.Add(pathsz, 0, wx.EXPAND|wx.LEFT|wx.RIGHT|wx.TOP, 5)
 
         # Run mode configuration
@@ -158,13 +143,6 @@ class ToolConfigPanel(wx.Panel):
         path = self._python_path_pk.GetPath()
         if path and os.path.exists(path):
             self._config[TLC_PYTHON_PATH] = path
-            Profile_Set(PYTOOL_CONFIG, self._config)
-
-    def OnPylintPathChanged(self, event):
-        """Update the configured debugger path"""
-        path = self._pylint_path_pk.GetPath()
-        if path and os.path.exists(path):
-            self._config[TLC_PYLINT_PATH] = path
             Profile_Set(PYTOOL_CONFIG, self._config)
 
     def UpdateListCtrl(self):
@@ -391,29 +369,3 @@ def Fatal():
             "F0321" : _("Format detection error"),
             "F0401" : _("Unable to import module")}
     return fmsg
-
-def GetDefaultPython():
-    if wx.Platform == "__WXMSW__":
-        pythonpath = ebmlib.Which("python.exe")
-    else:
-        pythonpath = ebmlib.Which("python")
-    if pythonpath:
-        return pythonpath
-    return u""
-
-def GetDefaultPylint(pythonpath=None):
-    if wx.Platform == "__WXMSW__":
-        path = ebmlib.Which("pylint.bat")
-    else:
-        path = ebmlib.Which("pylint")
-    if path:
-        return path
-    if pythonpath:
-        path = os.path.dirname(pythonpath)
-        if wx.Platform == "__WXMSW__":
-            path = os.path.join(path, "Scripts", "pylint")
-        else:
-            path = "/usr/local/bin/pylint"
-        if os.path.isfile(path):
-            return path
-    return u""

@@ -14,18 +14,13 @@ __revision__ = "$Revision$"
 #-----------------------------------------------------------------------------#
 # Imports
 import os
-import sys
 import re
-from subprocess import Popen, PIPE
-import wx
-
-if wx.Platform == "__WXMSW__":
-    import win32process
 
 # Local Imports
 from AbstractSyntaxChecker import AbstractSyntaxChecker
+from PyToolsUtils import PyToolsUtils
+from ProcessRunner import ProcessRunner
 import ToolConfig
-from finder import GetSearchPath
 
 # Editra Imports
 import util
@@ -39,12 +34,11 @@ class PythonSyntaxChecker(AbstractSyntaxChecker):
 
         # Attributes
         self.dirvarfile = variabledict.get("DIRVARFILE")
-        inithook = "--init-hook=\"import os; print 'PYTHONPATH=%s' % os.getenv('PYTHONPATH');\""
-        self.runpylint = ["-f", "parseable", "-r", "n", inithook]
+        self.pylintargs = ["-f", "parseable", "-r", "n"]
         pylintrc = variabledict.get("PYLINTRC")
         if pylintrc:
             pylintrc = ["--rcfile=%s" % pylintrc]
-            self.runpylint += pylintrc
+            self.pylintargs += pylintrc
         else:
             # Use built-in configuration
             dlist = ToolConfig.GetConfigValue(ToolConfig.TLC_DISABLED_CHK)
@@ -53,16 +47,11 @@ class PythonSyntaxChecker(AbstractSyntaxChecker):
                     disable = ",".join(dlist)
                 else:
                     disable = dlist[0]
-                self.runpylint += ["-d", disable]
+                self.pylintargs += ["-d", disable]
         self.pythonpath = variabledict.get("PYTHONPATH")
         self.nopythonerror = u"***  FATAL ERROR: No local Python configured or found"
         self.nopylinterror = u"***  FATAL ERROR: No Pylint configured or found"
 
-    def get_pythonpath(self):
-        if os.environ.has_key("PYTHONPATH"):
-            return os.getenv("PYTHONPATH")
-        return None
-        
     def DoCheck(self):
         """Run pylint"""
 
@@ -71,51 +60,25 @@ class PythonSyntaxChecker(AbstractSyntaxChecker):
         # 2) Second check for it on the path
         localpythonpath = ToolConfig.GetConfigValue(ToolConfig.TLC_PYTHON_PATH)
         if not localpythonpath:
-            localpythonpath = ToolConfig.GetDefaultPython()
+            localpythonpath = PyToolsUtils.GetDefaultPython()
 
         # No configured Python
         if not localpythonpath:
             return [(u"No Python", self.nopythonerror, u"NA"),]
         util.Log("[PyLint][info] Using Python: %s" % localpythonpath)
 
-        pylintpath = ToolConfig.GetConfigValue(ToolConfig.TLC_PYLINT_PATH)
-        if not pylintpath:
-            pylintpath = ToolConfig.GetDefaultPylint(localpythonpath)
-        # No pylint found in local Python
-        if not pylintpath or not os.path.isfile(pylintpath):
-            return [(u"No Pylint", self.nopylinterror, u"NA"),]
-        util.Log("[PyLint][info] Using Pylint: %s" % pylintpath)
-
-        childPath, parentPath = get_packageroot(self.filename)
+        childPath, parentPath = PyToolsUtils.get_packageroot(self.filename)
 
         # Start pylint
-        lintpath = [localpythonpath, pylintpath]
-        cmdline = lintpath + self.runpylint
-        plint_cmd = cmdline + [get_modulepath(childPath)]
-        plint_cmd = [ cmd.encode(sys.getfilesystemencoding())
-                       for cmd in plint_cmd ]
-        parentPath = parentPath.encode(sys.getfilesystemencoding())
+        allargs = self.pylintargs + [PyToolsUtils.get_modulepath(childPath)] 
+        pythoncode = "from pylint import lint;lint.Run(%s)" % repr(allargs)
+        plint_cmd = [localpythonpath, "-c", pythoncode]
         util.Log("[PyLint][info] Starting command: %s" % repr(plint_cmd))
-        util.Log("[Pylint][info] Using CWD: %s" % repr(parentPath))
-        curpath = None
-        if wx.Platform == "__WXMSW__":
-            creationflags = win32process.CREATE_NO_WINDOW
-            environment = None
-            curpath = self.get_pythonpath()
-            os.environ["PYTHONPATH"] = os.pathsep.join(self.pythonpath)
-        else:
-            creationflags = 0
-            environment = {}
-            if self.pythonpath:
-                environment["PYTHONPATH"] = str(os.pathsep.join(self.pythonpath))
-
-        process = Popen(plint_cmd,
-                        bufsize=1048576, stdout=PIPE, stderr=PIPE,
-                        cwd=parentPath, env=environment,
-                        creationflags=creationflags)
-        stdoutdata, stderrdata = process.communicate()
-        if wx.Platform == "__WXMSW__" and curpath:
-            os.environ["PYTHONPATH"] = curpath
+        util.Log("[Pylint][info] Using CWD: %s" % parentPath)
+        processrunner = ProcessRunner(self.pythonpath)
+        processrunner.runprocess(plint_cmd, parentPath)
+        stdoutdata, stderrdata = processrunner.getalloutput()
+        processrunner.restorepath()
 
         util.Log("[Pylint][info] stdout %s" % stdoutdata)
         util.Log("[Pylint][info] stderr %s" % stderrdata)
@@ -165,16 +128,3 @@ class PythonSyntaxChecker(AbstractSyntaxChecker):
 
         util.Log("[PyLint][info] Pylint command finished running")
         return rows
-
-def get_packageroot(filepath):
-    # traverse downwards until we are out of a python package
-    fullPath = os.path.abspath(filepath)
-    parentPath, childPath = os.path.dirname(fullPath), os.path.basename(fullPath)
-
-    while parentPath != "/" and os.path.exists(os.path.join(parentPath, '__init__.py')):
-        childPath = os.path.join(os.path.basename(parentPath), childPath)
-        parentPath = os.path.dirname(parentPath)
-    return (childPath, parentPath)
-
-def get_modulepath(childPath):
-    return os.path.splitext(childPath)[0].replace(os.path.sep, ".")
