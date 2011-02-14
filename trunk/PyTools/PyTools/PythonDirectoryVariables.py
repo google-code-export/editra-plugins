@@ -20,7 +20,7 @@ from AbstractDirectoryVariables import AbstractDirectoryVariables
 class PythonDirectoryVariables(AbstractDirectoryVariables):
     def __init__(self):
         AbstractDirectoryVariables.__init__(self, "py")
-        self.addedpythonpaths = set()
+        self.pythonpath = []
 
     @staticmethod
     def get_path(dirvarfile, path):
@@ -33,16 +33,6 @@ class PythonDirectoryVariables(AbstractDirectoryVariables):
     @staticmethod
     def get_abspath(dirvarfile, path):
         return os.path.abspath(PythonDirectoryVariables.get_path(dirvarfile, path))
-
-    def get_pythonpaths(self):
-        paths = set()
-        if os.environ.has_key("PYTHONPATH"):
-            curenv = os.getenv("PYTHONPATH")
-            curpaths = curenv.split(os.pathsep)
-            for path in curpaths:
-                if not path in self.addedpythonpaths:
-                    paths.add(os.path.abspath(path))
-        return paths
 
     def recurseup(self, dir):
         dir, rest = os.path.split(dir)
@@ -69,28 +59,17 @@ class PythonDirectoryVariables(AbstractDirectoryVariables):
             if key == "PYTHONPATH":
                 allnewpaths = val.split(",")
                 for path in allnewpaths:
-                    self.addedpythonpaths.add(self.get_abspath(dirvarfile, path))
+                    self.pythonpath.append(self.get_abspath(dirvarfile, path))
             elif key == "PYLINTRC":
-                vardict[key] = '"%s"' % self.get_abspath(dirvarfile, val)            
-            elif key == "WINPDBARGS":
+                vardict[key] = '"%s"' % self.get_abspath(dirvarfile, val)
+            elif key == "RPDB2ARGS":
                 parts = val.split(" ")
                 for i, part in enumerate(parts):
                     newpart = self.get_path(dirvarfile, part)
                     if newpart != part:
                         parts[i] = '"%s"' % os.path.abspath(newpart)
-                vardict[key] = " ".join(parts)            
+                vardict[key] = " ".join(parts)
             else:
-                vardict[key] = val            
-        vardict["ADDEDPYTHONPATHS"] = self.addedpythonpaths
-        vardict["STARTCALL"] = self.set_envvars
-        vardict["ENDCALL"] = self.restore_envvars
+                vardict[key] = val
+        vardict["PYTHONPATH"] = self.pythonpath
         return vardict
-
-    def set_envvars(self):
-        paths = self.get_pythonpaths()
-        paths.update(self.addedpythonpaths)
-        os.environ["PYTHONPATH"] = os.pathsep.join(paths)
-
-    def restore_envvars(self):
-        paths = self.get_pythonpaths() # restore old python path
-        os.environ["PYTHONPATH"] = os.pathsep.join(paths)

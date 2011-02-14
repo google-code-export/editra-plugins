@@ -15,9 +15,9 @@ __revision__ = "$Revision$"
 #-----------------------------------------------------------------------------#
 # Imports
 import wx
-import sys
-import os.path
-import finder
+import syntax.synglob as synglob
+from PythonDirectoryVariables import PythonDirectoryVariables
+from PythonModuleFinder import PythonModuleFinder
 
 ID_OPEN_MODULE = wx.NewId()
 
@@ -32,17 +32,15 @@ class OpenModuleDialog(wx.Dialog):
     editor notebook
     """
 
-    def __init__(self, parent, finder, *args, **kwargs):
+    def __init__(self, parent, *args, **kwargs):
         """Open the dialog.
         @param parent: the parent window
-        @param finder: an instance of finder.ModuleFinder
         """
         wx.Dialog.__init__(self, parent, wx.ID_ANY,
                            style=wx.DEFAULT_DIALOG_STYLE|wx.RESIZE_BORDER,
                            size=(400, 230), *args, **kwargs)
 
         # Attributes
-        self.finder = finder
         self.search = wx.SearchCtrl(self, style=wx.TE_PROCESS_ENTER)
         self.search.ShowSearchButton(True)
         self.search.ShowCancelButton(True)
@@ -52,7 +50,7 @@ class OpenModuleDialog(wx.Dialog):
         self.listCtrl = wx.ListCtrl(self, style=wx.LC_REPORT | wx.LC_NO_HEADER
                                 | wx.LC_SINGLE_SEL | wx.wx.BORDER_SUNKEN)
         self.listCtrl.InsertColumn(0, '')
-        
+
         # Layout
         self.__DoLayout()
 
@@ -121,28 +119,21 @@ class OpenModuleDialog(wx.Dialog):
     def OnSearch(self, evt):
         """Handle search events from the SearchCtrl"""
         self.listCtrl.DeleteAllItems()
-        files = self.finder.Find(self.search.GetValue())
+        editor = wx.GetApp().GetCurrentBuffer()
+        vardict = {}
+        if editor:
+            langid = getattr(editor, 'GetLangId', lambda: -1)()
+            ispython = langid == synglob.ID_LANG_PYTHON
+            if ispython:
+                directoryvariables = PythonDirectoryVariables()
+                filename = editor.GetFileName()
+                vardict = directoryvariables.read_dirvarfile(filename)
+        finder = PythonModuleFinder(vardict)
+        files = finder.Find(self.search.GetValue())
         for i, file in enumerate(files):
             self.listCtrl.InsertStringItem(i, file)
         self.listCtrl.SetColumnWidth(0, wx.LIST_AUTOSIZE)
         if len(files):
             self.listCtrl.Select(0)
             self.btnOk.Enable(True)
-
-#-----------------------------------------------------------------------------#
-# Test
-class MyApp(wx.App):
-    def OnInit(self):
-        mf = finder.ModuleFinder(finder.GetSearchPath())
-        dialog = OpenModuleDialog(None, mf, title=_("Open module"))
-        dialog.SetFocus()
-        if dialog.ShowModal() == wx.ID_OK:
-            print dialog.GetValue()
-        if dialog:
-            dialog.Destroy()
-        return True
-
-if __name__ == '__main__':
-    app = MyApp(0)
-    app.MainLoop()
 
