@@ -42,10 +42,10 @@ class ProcessRunner():
         return None
 
     def runprocess(self, cmdline, parentPath):
-        if wx.Platform == "__WXMSW__":
-            os.environ["PYTHONPATH"] = os.pathsep.join(self.pythonpath)
-        else:
-            if self.pythonpath:
+        if self.pythonpath:
+            if wx.Platform == "__WXMSW__":
+                os.environ["PYTHONPATH"] = os.pathsep.join(self.pythonpath)
+            else:
                 self.environment["PYTHONPATH"] = str(os.pathsep.join(self.pythonpath))
 
         cmdline = [ cmd.encode(sys.getfilesystemencoding())
