@@ -28,7 +28,7 @@ import plugin
 import util
 
 # Local Imports
-from SyntaxCheckWindow import SyntaxCheckWindow
+from ShelfWindow import ShelfWindow
 import ToolConfig
 
 #-----------------------------------------------------------------------------#
@@ -55,7 +55,7 @@ class Pylint(plugin.Plugin):
     def CreateItem(self, parent):
         """Create a PyLint panel"""
         util.Log("[PyLint][info] Creating Pylint instance for Shelf")
-        return SyntaxCheckWindow(parent)
+        return ShelfWindow(parent)
 
     def GetBitmap(self):
         """Get the tab bitmap
