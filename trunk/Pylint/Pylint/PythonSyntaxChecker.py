@@ -14,6 +14,7 @@ __revision__ = "$Revision$"
 #-----------------------------------------------------------------------------#
 # Imports
 import os
+import sys
 import re
 
 # Local Imports
@@ -70,7 +71,9 @@ class PythonSyntaxChecker(AbstractSyntaxChecker):
         childPath, parentPath = PyToolsUtils.get_packageroot(self.filename)
 
         # Start pylint
-        allargs = self.pylintargs + [PyToolsUtils.get_modulepath(childPath)]
+        modpath = PyToolsUtils.get_modulepath(childPath)
+        modpath = modpath.encode(sys.getfilesystemencoding())
+        allargs = self.pylintargs + [modpath,]
         pythoncode = "from pylint import lint;lint.Run(%s)" % repr(allargs)
         plint_cmd = [localpythonpath, "-c", pythoncode]
         util.Log("[PyLint][info] Starting command: %s" % repr(plint_cmd))
