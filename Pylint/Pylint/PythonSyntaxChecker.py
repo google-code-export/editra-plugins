@@ -72,7 +72,9 @@ class PythonSyntaxChecker(AbstractSyntaxChecker):
 
         # Start pylint
         modpath = PyToolsUtils.get_modulepath(childPath)
-        modpath = modpath.encode(sys.getfilesystemencoding())
+        if ebmlib.IsUnicode(modpath):
+            # Convert to string
+            modpath = modpath.encode(sys.getfilesystemencoding())
         allargs = self.pylintargs + [modpath,]
         pythoncode = "from pylint import lint;lint.Run(%s)" % repr(allargs)
         plint_cmd = [localpythonpath, "-c", pythoncode]
