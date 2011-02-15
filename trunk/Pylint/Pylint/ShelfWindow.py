@@ -90,6 +90,7 @@ class ShelfWindow(eclib.ControlBox):
             rbmp = None
         self.cfgbtn = eclib.PlateButton(ctrlbar, wx.ID_ANY, bmp=rbmp,
                                         style=eclib.PB_STYLE_NOBG)
+        self.cfgbtn.SetToolTipString(_("Configure"))
         ctrlbar.AddControl(self.cfgbtn, wx.ALIGN_LEFT)
         self._lbl = wx.StaticText(ctrlbar)
         ctrlbar.AddControl(self._lbl)
