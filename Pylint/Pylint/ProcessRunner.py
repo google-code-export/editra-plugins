@@ -22,8 +22,10 @@ import wx
 if wx.Platform == "__WXMSW__":
     import win32process
 
-class ProcessRunner():
+class ProcessRunner(object):
     def __init__(self, pythonpath=None):
+        super(ProcessRunner, self).__init__()
+
         self.pythonpath = pythonpath
         if wx.Platform == "__WXMSW__":
             self.creationflags = win32process.CREATE_NO_WINDOW
