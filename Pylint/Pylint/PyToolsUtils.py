@@ -13,7 +13,7 @@ __svnid__ = "$Id: PyToolsUtils.py 1025 2010-12-24 18:30:23Z rans@email.com $"
 __revision__ = "$Revision: 1025 $"
 
 #-----------------------------------------------------------------------------#
-
+# Imports
 import ebmlib
 import os.path
 import wx
