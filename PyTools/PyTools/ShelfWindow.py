@@ -100,6 +100,13 @@ class ShelfWindow(eclib.ControlBox):
         ctrlbar.SetVMargin(2, 2)
         if wx.Platform == '__WXGTK__':
             ctrlbar.SetWindowStyle(eclib.CTRLBAR_STYLE_DEFAULT)
+        rbmp = wx.ArtProvider.GetBitmap(str(ed_glob.ID_PREF), wx.ART_MENU)
+        if rbmp.IsNull() or not rbmp.IsOk():
+            rbmp = None
+        self.cfgbtn = eclib.PlateButton(ctrlbar, wx.ID_ANY, bmp=rbmp,
+                                        style=eclib.PB_STYLE_NOBG)
+        self.cfgbtn.SetToolTipString(_("Configure"))
+        ctrlbar.AddControl(self.cfgbtn, wx.ALIGN_LEFT)
         self._lbl = wx.StaticText(ctrlbar)
         ctrlbar.AddControl(self._lbl)
         ctrlbar.AddStretchSpacer()
@@ -138,6 +145,7 @@ class ShelfWindow(eclib.ControlBox):
 
         # Event Handlers
         self.Bind(wx.EVT_TIMER, self.OnJobTimer, self._jobtimer)
+        self.Bind(wx.EVT_BUTTON, self.OnShowConfig, self.cfgbtn)
         self.Bind(wx.EVT_BUTTON, self.OnRunLint, self.lintbtn)
         self.Bind(wx.EVT_BUTTON, self.OnRunDebug, self.debugbtn)
         self.Bind(wx.EVT_COMBOBOX, self.OnComboSelect, self.combo)
@@ -320,6 +328,13 @@ class ShelfWindow(eclib.ControlBox):
             self.lintbtn.Refresh()
             self.debugbtn.SetBitmap(rbmp)
             self.debugbtn.Refresh()
+
+    def OnShowConfig(self, event):
+        """Show the configuration dialog"""
+        mw = self.GetMainWindow()
+        dlg = ToolConfig.ToolConfigDialog(mw)
+        dlg.CenterOnParent()
+        dlg.ShowModal()
 
     def OnRunLint(self, event):
         editor = wx.GetApp().GetCurrentBuffer()

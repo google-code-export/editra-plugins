@@ -43,6 +43,16 @@ def GetConfigValue(key):
 
 #-----------------------------------------------------------------------------#
 
+class ToolConfigDialog(eclib.ECBaseDlg):
+    """Standalone configuraton dialog"""
+    def __init__(self, parent):
+        super(ToolConfigDialog, self).__init__(parent, title=_("Pylint Config"))
+
+        # Setup
+        self.SetPanel(ToolConfigPanel(self))
+
+#-----------------------------------------------------------------------------#
+
 class ToolConfigPanel(wx.Panel):
     """Configuration panel for Python configuration in the
     PluginManager dialog.
