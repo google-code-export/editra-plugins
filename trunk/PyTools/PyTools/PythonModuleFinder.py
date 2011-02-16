@@ -53,10 +53,10 @@ class PythonModuleFinder():
         if not pkg_resources.resource_exists("PyTools", "findmodule.py"):
             return ["No findmodule found"]
 
-        filename = pkg_resources.resource_filename("PyTools", "findmodule.py")
+        findmodule_script = pkg_resources.resource_filename("PyTools", "findmodule.py")
 
         # Start find module
-        finder_cmd = [localpythonpath, filename, moduletofind]
+        finder_cmd = [localpythonpath, findmodule_script, moduletofind]
         util.Log("[PyFind][info] Starting command: %s" % repr(finder_cmd))
         processrunner = ProcessRunner(self.pythonpath)
         processrunner.runprocess(finder_cmd, ".")
