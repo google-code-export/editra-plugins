@@ -24,20 +24,17 @@ import util
 import eclib
 import ed_msg
 from profiler import Profile_Get, Profile_Set
-from ToolConfig import PYTOOL_CONFIG
 from syntax import syntax
 import syntax.synglob as synglob
 
 # Local imports
 import ToolConfig
-from CheckResultsList import CheckResultsList
+from ToolConfig import PYTOOL_CONFIG
+from PyToolsUtils import PyToolsUtils
+from PythonDirectoryVariables import PythonDirectoryVariables
 from PythonSyntaxChecker import PythonSyntaxChecker
 from PythonDebugger import PythonDebugger
-from PyToolsUtils import PyToolsUtils
-
-# Directory Variables
-from PythonDirectoryVariables import PythonDirectoryVariables
-
+from CheckResultsList import CheckResultsList
 #-----------------------------------------------------------------------------#
 
 _ = wx.GetTranslation

@@ -28,14 +28,13 @@ import ed_glob
 import iface
 import plugin
 import util
+from profiler import Profile_Get, Profile_Set
 
 # Local Imports
-from openmodule import OpenModuleDialog, ID_OPEN_MODULE
-from profiler import Profile_Get, Profile_Set
-from ToolConfig import PYTOOL_CONFIG
-import PyToolsUtils
-from ShelfWindow import ShelfWindow
 import ToolConfig
+from ToolConfig import PYTOOL_CONFIG
+from openmodule import OpenModuleDialog, ID_OPEN_MODULE
+from ShelfWindow import ShelfWindow
 #-----------------------------------------------------------------------------#
 # Globals
 _ = wx.GetTranslation

@@ -19,7 +19,7 @@ import os.path
 import wx
 
 # Local Imports
-import rpdb2
+from Debugger import rpdb2
 from DebugState import DebugState
 from DebugBreakpoint import DebugBreakpoint
 # We'll have one class for each registered callback like synchronicity
