@@ -18,10 +18,10 @@ import sys
 import re
 
 # Local Imports
-from AbstractSyntaxChecker import AbstractSyntaxChecker
+import ToolConfig
 from PyToolsUtils import PyToolsUtils
 from ProcessRunner import ProcessRunner
-import ToolConfig
+from AbstractSyntaxChecker import AbstractSyntaxChecker
 
 # Editra Imports
 import util

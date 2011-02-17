@@ -12885,7 +12885,7 @@ detach      - Detach from script.
 launch      - Start a script and attach to it.
 restart     - Restart a script.
 stop        - Shutdown the debugged script.
-exit        - Exit from debugger.
+exit        - Exit from 
 
 Debuggee Control:
 -----------------

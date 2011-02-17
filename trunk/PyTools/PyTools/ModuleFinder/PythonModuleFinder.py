@@ -17,9 +17,9 @@ import os
 import pkg_resources
 
 # Local Imports
+import ToolConfig
 from PyToolsUtils import PyToolsUtils
 from ProcessRunner import ProcessRunner
-import ToolConfig
 
 # Editra Imports
 import util

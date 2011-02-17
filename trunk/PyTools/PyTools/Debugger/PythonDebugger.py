@@ -18,11 +18,11 @@ import sys
 import pkg_resources
 
 # Local Imports
-from AbstractDebugger import AbstractDebugger
+import ToolConfig
 from PyToolsUtils import PyToolsUtils
 from ProcessRunner import ProcessRunner
+from AbstractDebugger import AbstractDebugger
 from DebugClient import DebugClient
-import ToolConfig
 
 # Editra Imports
 import util
