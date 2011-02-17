@@ -25,7 +25,7 @@ if setup != None:
         license="wxWindows",
         url="http://editra.org",
         platforms=["Linux", "OS X", "Windows"],
-        packages=['PyTools', 'PyTools.Common', 'PyTools.SyntaxChecker', 'PyTools.Debugger'],
+        packages=['PyTools'],
         entry_points='''
         [Editra.plugins]
         PyTools = PyTools:PyTools
