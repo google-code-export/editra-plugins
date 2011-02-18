@@ -28,7 +28,7 @@ When the syntax checker is activated, it looks for this file automatically (with
 Currently, 2 parameters are supported in {{{__dirvar_py__.cfg}}}:
 
   * PYTHONPATH, a comma separated list of paths to add to the PYTHONPATH for Pylint to use
-  * PYLINTRC, the path to a Pylint configuration file
+  * PYLINTRC, the path to a Pylint configuration file. This takes precedence over messages settings in the Graphical Configuration.
 
 Relative paths are allowed, for example: . or ..
 
