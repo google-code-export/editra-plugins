@@ -17,9 +17,10 @@ import os
 import pkg_resources
 
 # Local Imports
-import ToolConfig
-from PyToolsUtils import PyToolsUtils
-from ProcessRunner import ProcessRunner
+from Common import ToolConfig
+from Common.PyToolsUtils import PyToolsUtils
+from Common.ProcessRunner import ProcessRunner
+from AbstractModuleFinder import AbstractModuleFinder
 
 # Editra Imports
 import util
@@ -27,14 +28,16 @@ import ebmlib
 
 #-----------------------------------------------------------------------------#
 
-class PythonModuleFinder():
-    def __init__(self, variabledict):
+class PythonModuleFinder(AbstractModuleFinder):
+    def __init__(self, variabledict, moduletofind):
+        super(PythonModuleFinder, self).__init__(variabledict, moduletofind)
+        
         # Attributes
         self.dirvarfile = variabledict.get("DIRVARFILE")
         self.pythonpath = variabledict.get("PYTHONPATH")
         self.nopythonerror = u"***  FATAL ERROR: No local Python configured or found"
 
-    def Find(self, moduletofind):
+    def DoFind(self):
         """Run Module Finder"""
 
         # Figure out what Python to use
@@ -50,13 +53,13 @@ class PythonModuleFinder():
         util.Log("[PyFind][info] Using Python: %s" % localpythonpath)
 
         # No findmodule found in plugin
-        if not pkg_resources.resource_exists("PyTools", "findmodule.py"):
+        if not pkg_resources.resource_exists("ModuleFinder", "findmodule.py"):
             return ["No findmodule found"]
 
-        findmodule_script = pkg_resources.resource_filename("PyTools", "findmodule.py")
+        findmodule_script = pkg_resources.resource_filename("ModuleFinder", "findmodule.py")
 
         # Start find module
-        finder_cmd = [localpythonpath, findmodule_script, moduletofind]
+        finder_cmd = [localpythonpath, findmodule_script, self.moduletofind]
         util.Log("[PyFind][info] Starting command: %s" % repr(finder_cmd))
         processrunner = ProcessRunner(self.pythonpath)
         processrunner.runprocess(finder_cmd, ".")
@@ -67,7 +70,14 @@ class PythonModuleFinder():
         util.Log("[PyFind][info] stderr %s" % stderrdata)
         util.Log("[PyFind][info] PyFind command finished running")
         try:
-            return eval(stdoutdata.rstrip('\r\n'))
+            stdoutrows = eval(stdoutdata.rstrip('\r\n'))
+            rows = []
+            if self.pythonpath:
+                rows.append(u"INFO: Using PYTHONPATH + %s"\
+                              % u", ".join(self.pythonpath))
+            rows.append(u"INFO: PyFind command line: %s" % " ".join(finder_cmd))
+            rows.append(u"INFO: Directory Variables file: %s" % self.dirvarfile)
+            return rows + stdoutrows
         except Exception, ex:
             msg = repr(ex)
             util.Log("[PyFind][info] Error: %s" % msg)

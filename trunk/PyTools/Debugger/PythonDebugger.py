@@ -18,9 +18,9 @@ import sys
 import pkg_resources
 
 # Local Imports
-import ToolConfig
-from PyToolsUtils import PyToolsUtils
-from ProcessRunner import ProcessRunner
+from Common import ToolConfig
+from Common.PyToolsUtils import PyToolsUtils
+from Common.ProcessRunner import ProcessRunner
 from AbstractDebugger import AbstractDebugger
 from DebugClient import DebugClient
 

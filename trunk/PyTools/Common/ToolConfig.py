@@ -46,7 +46,7 @@ def GetConfigValue(key):
 class ToolConfigDialog(eclib.ECBaseDlg):
     """Standalone configuraton dialog"""
     def __init__(self, parent):
-        super(ToolConfigDialog, self).__init__(parent, title=_("Pylint Config"))
+        super(ToolConfigDialog, self).__init__(parent, title=_("PyTools Config"))
 
         # Setup
         self.SetPanel(ToolConfigPanel(self))

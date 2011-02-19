@@ -25,9 +25,10 @@ if setup != None:
         license="wxWindows",
         url="http://editra.org",
         platforms=["Linux", "OS X", "Windows"],
-        packages=['PyTools'],
+        packages=['Common','SyntaxChecker','ModuleFinder','Debugger'],
         entry_points='''
         [Editra.plugins]
-        PyTools = PyTools:PyTools
+        SyntaxChecker = SyntaxChecker:PyLint
+        ModuleFinder = ModuleFinder:PyFind
         '''
         )

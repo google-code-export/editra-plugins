@@ -15,9 +15,10 @@ __revision__ = "$Revision: 1025 $"
 #-----------------------------------------------------------------------------#
 # Imports
 import ebmlib
-import os.path
 import wx
-
+import threading
+import os.path
+import ToolConfig
 #-----------------------------------------------------------------------------#
 # Globals
 _ = wx.GetTranslation
@@ -65,3 +66,56 @@ class PyToolsUtils():
             if os.path.isfile(path):
                 return path
         return u""
+
+    @staticmethod
+    def GetEditorForFile(mainw, fname):
+        """Return the EdEditorView that's managing the file, if available
+        @param fname: File name to open
+        @param mainw: MainWindow instance to open the file in
+        @return: Text control managing the file
+        @rtype: ed_editv.EdEditorView
+
+        """
+        nb = mainw.GetNotebook()
+        for page in nb.GetTextControls():
+            if page.GetFileName() == fname:
+                return nb.GetPage(page.GetTabIndex())
+
+        return None
+
+#-----------------------------------------------------------------------------#
+
+class RunProcInThread(threading.Thread):
+    """Background thread to run doer task in"""
+    def __init__(self, fn, target, desc):
+        """@param doer: ModuleFinder object instance
+        @param target: callable(data) To receive output data
+        """
+        super(RunProcInThread, self).__init__()
+
+        # Attributes
+        self.fn = fn
+        self.target = target
+        self.desc = desc
+
+    def run(self):
+        try:
+            data = self.fn()
+        except Exception, msg:
+            util.Log("[%s][err] %s Failure: %s" % (self.desc, self.desc, msg))
+            data = [(u'Error', unicode(msg), -1)]
+        wx.CallAfter(self.target, data)
+
+class FreezeDrawer(object):
+    """To be used in 'with' statements. Upon enter freezes the drawing
+    and thaws upon exit.
+
+    """
+    def __init__(self, wnd):
+        self._wnd = wnd
+
+    def __enter__(self):
+        self._wnd.Freeze()
+
+    def __exit__(self, eT, eV, tB):
+        self._wnd.Thaw()
