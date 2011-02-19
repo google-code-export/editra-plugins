@@ -18,9 +18,9 @@ import sys
 import re
 
 # Local Imports
-import ToolConfig
-from PyToolsUtils import PyToolsUtils
-from ProcessRunner import ProcessRunner
+from Common import ToolConfig
+from Common.PyToolsUtils import PyToolsUtils
+from Common.ProcessRunner import ProcessRunner
 from AbstractSyntaxChecker import AbstractSyntaxChecker
 
 # Editra Imports

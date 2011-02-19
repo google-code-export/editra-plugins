@@ -15,33 +15,8 @@ __revision__ = "$Revision$"
 #-----------------------------------------------------------------------------#
 # Imports
 import wx
-import threading
-
 import util
-
-#-----------------------------------------------------------------------------#
-
-class SyntaxCheckThread(threading.Thread):
-    """Background thread to run checker task in"""
-    def __init__(self, checker, target):
-        """@param checker: SyntaxChecker object instance
-        @param target: callable(data) To receive output data
-        """
-        super(SyntaxCheckThread, self).__init__()
-
-        # Attributes
-        self.checker = checker
-        self.target = target
-
-    def run(self):
-        try:
-            data = self.checker.DoCheck()
-        except Exception, msg:
-            util.Log("[Lint][err] Lint Failure: %s" % msg)
-            data = [(u'Error', unicode(msg), -1)]
-        wx.CallAfter(self.target, data)
-
-#-----------------------------------------------------------------------------#
+from Common.PyToolsUtils import RunProcInThread
 
 class AbstractSyntaxChecker(object):
     def __init__(self, variabledict, filename):
@@ -67,7 +42,7 @@ class AbstractSyntaxChecker(object):
         @param callback: callable(data) callback to receive data
 
         """
-        worker = SyntaxCheckThread(self, callback)
+        worker = RunProcInThread(self.DoCheck, callback, "Lint")
         worker.start()
 
     def _getFileName(self):
