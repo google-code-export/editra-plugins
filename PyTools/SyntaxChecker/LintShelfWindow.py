@@ -18,10 +18,8 @@ import os
 import wx
 
 # Editra Libraries
-import ed_glob
 import util
 import ed_msg
-from profiler import Profile_Get
 from syntax import syntax
 import syntax.synglob as synglob
 
@@ -49,15 +47,10 @@ class LintShelfWindow(BaseShelfWindow):
         self._lbl = wx.StaticText(ctrlbar)
         ctrlbar.AddControl(self._lbl)
         ctrlbar.AddStretchSpacer()
-        self.layout("Lint", self.OnRunLint)
+        self.layout("Lint", self.OnRunLint, self.OnJobTimer)
 
         # Attributes
-        self._jobtimer = wx.Timer(self)
         self._checker = None
-        self._hasrun = False
-
-        # Event Handlers
-        self.Bind(wx.EVT_TIMER, self.OnJobTimer, self._jobtimer)
 
         # Editra Message Handlers
         ed_msg.Subscribe(self.OnFileLoad, ed_msg.EDMSG_FILE_OPENED)
@@ -65,14 +58,9 @@ class LintShelfWindow(BaseShelfWindow):
         ed_msg.Subscribe(self.OnPageChanged, ed_msg.EDMSG_UI_NB_CHANGED)
 
     def __del__(self):
-        self._StopTimer()
         ed_msg.Unsubscribe(self.OnFileLoad)
         ed_msg.Unsubscribe(self.OnFileSave)
         ed_msg.Unsubscribe(self.OnPageChanged)
-
-    def _StopTimer(self):
-        if self._jobtimer.IsRunning():
-            self._jobtimer.Stop()
 
     def _onfileaccess(self, editor):
         # With the text control (ed_stc.EditraStc) this will return the full
@@ -184,6 +172,3 @@ class LintShelfWindow(BaseShelfWindow):
             # Update the label to show what file the results are for
             self._lbl.SetLabel(self._curfile)
             self._checker.Check(self._OnSyntaxData)
-
-    def delete_rows(self):
-        self._listCtrl.DeleteOldRows()

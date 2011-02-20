@@ -13,8 +13,6 @@ __revision__ = "$Revision: 1053 $"
 
 #-----------------------------------------------------------------------------#
 # Imports
-import os
-import sys
 import pkg_resources
 
 # Local Imports
@@ -31,22 +29,21 @@ import ebmlib
 #-----------------------------------------------------------------------------#
 
 class PythonDebugger(AbstractDebugger):
-    def __init__(self, variabledict, filename):
+    def __init__(self, variabledict, debuggerargs, programargs, filename):
         super(PythonDebugger, self).__init__(variabledict, filename)
 
         # Attributes
         self.dirvarfile = variabledict.get("DIRVARFILE")
         self.rpdb2args = ["-d", "--pwd=%s" % DebugClient.password]
-        rpdb2args = variabledict.get("RPDB2ARGS")
-        if rpdb2args:
-            self.rpdb2args = rpdb2args
-        else:
-            self.rpdb2args = ""
+        if not debuggerargs:
+            debuggerargs = variabledict.get("DEBUGGERARGS")
+        self.debuggerargs = debuggerargs
+        self.programargs = programargs
         self.pythonpath = variabledict.get("PYTHONPATH")
         self.nopythonerror = u"***  FATAL ERROR: No local Python configured or found"
         self.debugclient = DebugClient()
 
-    def DoCheck(self):
+    def DoDebug(self):
         """Run rpdb2args"""
 
         # Figure out what Python to use
@@ -62,26 +59,38 @@ class PythonDebugger(AbstractDebugger):
         util.Log("[PyDbg][info] Using Python: %s" % localpythonpath)
 
         # No rpdb2 found in plugin
-        if not pkg_resources.resource_exists("PyTools", "rpdb2.py"):
+        if not pkg_resources.resource_exists("", "rpdb2.py"):
             return ["No rpdb2 found"]
 
-        rpdb2_script = pkg_resources.resource_filename("PyTools", "rpdb2.py")
+        rpdb2_script = pkg_resources.resource_filename("", "rpdb2.py")
 
         childPath, parentPath = PyToolsUtils.get_packageroot(self.filename)
 
         # Start rpdb2
-        modpath = PyToolsUtils.get_modulepath(childPath)
-        if ebmlib.IsUnicode(modpath):
-            # Convert to string
-            modpath = modpath.encode(sys.getfilesystemencoding())
-        allargs = self.rpdb2args + [modpath,]
+        cmdargs = ""
+        debuggee = childPath
+        if self.debuggerargs:
+            cmdargs = self.debuggerargs.split(" ")
+            for i, cmd in enumerate(cmdargs):
+                if cmd == "%SCRIPT%":
+                    cmdargs[i] = debuggee
+                elif cmd == "%MODULE%":
+                    debuggee = PyToolsUtils.get_modulepath(childPath)
+                    cmdargs[i] = debuggee
+
+            cmdargs = self.rpdb2args + cmdargs
+        else:
+            cmdargs = self.rpdb2args + [debuggee,]
+        allargs = cmdargs
+        if self.programargs:
+            allargs = allargs + self.programargs.split(" ")
         rpdb2_cmd = [localpythonpath, rpdb2_script, allargs]
         util.Log("[PyDbg][info] Starting command: %s" % repr(rpdb2_cmd))
         processrunner = ProcessRunner(self.pythonpath)
         processrunner.runprocess(rpdb2_cmd, ".")
         processrunner.restorepath()
         # Attach Editra debug client
-        self.debugclient.attach(modpath)
+        self.debugclient.attach(debuggee)
         processrunner.terminate()
         rows = []
         if self.pythonpath:

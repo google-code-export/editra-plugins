@@ -19,7 +19,7 @@ import os.path
 import wx
 
 # Local Imports
-from Debugger import rpdb2
+import rpdb2
 
 class DebugState(object):
     def __init__(self, m_session_manager):

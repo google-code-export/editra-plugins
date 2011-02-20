@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 # Name: FindShelfWindow.py
-# Purpose: Pylint plugin
+# Purpose: ModuleFinder plugin
 # Author: Mike Rans
 # Copyright: (c) 2010 Mike Rans
 # License: wxWindows License
@@ -18,11 +18,9 @@ import os
 import wx
 
 # Editra Libraries
-import ed_glob
 import util
 import eclib
 import ed_msg
-from profiler import Profile_Get
 from syntax import syntax
 import syntax.synglob as synglob
 
@@ -44,7 +42,7 @@ class FindShelfWindow(BaseShelfWindow):
     __moduleFinders = {
         synglob.ID_LANG_PYTHON: PythonModuleFinder
     }
-    
+
     def __init__(self, parent):
         """Initialize the window"""
         super(FindShelfWindow, self).__init__(parent)
@@ -54,27 +52,17 @@ class FindShelfWindow(BaseShelfWindow):
         self.textentry = eclib.CommandEntryBase(ctrlbar, wx.ID_ANY, size=txtentrysize,
                                            style=wx.TE_PROCESS_ENTER|wx.WANTS_CHARS)
         ctrlbar.AddControl(self.textentry, wx.ALIGN_RIGHT)
-        self.layout("Find", self.OnFindModule)
-        
-        # Attributes
-        self._jobtimer = wx.Timer(self)
-        self._finder = None
-        self._hasrun = False
+        self.layout("Find", self.OnFindModule, self.OnJobTimer)
 
-        # Event Handlers
-        self.Bind(wx.EVT_TIMER, self.OnJobTimer, self._jobtimer)
+        # Attributes
+        self._finder = None
 
         # Editra Message Handlers
         ed_msg.Subscribe(self.OnTabMenu, ed_msg.EDMSG_UI_NB_TABMENU)
-        
+
     def __del__(self):
-        self._StopTimer()
         ed_msg.Unsubscribe(self.OnTabMenu)
-        
-    def _StopTimer(self):
-        if self._jobtimer.IsRunning():
-            self._jobtimer.Stop()
-            
+
     def OnTabMenu(self, msg):
         editor = wx.GetApp().GetCurrentBuffer()
         if editor:
@@ -153,7 +141,5 @@ class FindShelfWindow(BaseShelfWindow):
             ed_msg.PostMessage(ed_msg.EDMSG_PROGRESS_STATE, (mwid, -1, -1))
             self._finder.Find(self._OnFindData)
 
-    def delete_rows(self):
-        self._listCtrl.DeleteOldRows()
 
 
