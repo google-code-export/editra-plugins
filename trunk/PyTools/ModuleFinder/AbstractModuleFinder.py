@@ -14,8 +14,6 @@ __revision__ = "$Revision: 1071 $"
 
 #-----------------------------------------------------------------------------#
 # Imports
-import wx
-import util
 from Common.PyToolsUtils import RunProcInThread
 
 #-----------------------------------------------------------------------------#

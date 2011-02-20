@@ -8,7 +8,6 @@ Adds Python syntax checking using Pylint and debugging using Winpdb with results
 """
 __author__ = "Mike Rans"
 
-import sys
 try:
     from setuptools import setup
 except ImportError:
@@ -30,5 +29,6 @@ if setup != None:
         [Editra.plugins]
         SyntaxChecker = SyntaxChecker:PyLint
         ModuleFinder = ModuleFinder:PyFind
+        Debugger = Debugger:PyDebug
         '''
         )

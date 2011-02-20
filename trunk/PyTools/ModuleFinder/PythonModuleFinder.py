@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
-# Name: PythonSyntaxChecker.py
-# Purpose: Pylint plugin
+# Name: PythonModuleFinder.py
+# Purpose: ModuleFinder plugin
 # Author: Mike Rans
 # Copyright: (c) 2010 Mike Rans
 # License: wxWindows License
@@ -31,7 +31,7 @@ import ebmlib
 class PythonModuleFinder(AbstractModuleFinder):
     def __init__(self, variabledict, moduletofind):
         super(PythonModuleFinder, self).__init__(variabledict, moduletofind)
-        
+
         # Attributes
         self.dirvarfile = variabledict.get("DIRVARFILE")
         self.pythonpath = variabledict.get("PYTHONPATH")

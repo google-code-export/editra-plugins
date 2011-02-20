@@ -14,9 +14,9 @@ __revision__ = "$Revision$"
 
 #-----------------------------------------------------------------------------#
 # Imports
-import wx
-import util
 from Common.PyToolsUtils import RunProcInThread
+
+#-----------------------------------------------------------------------------#
 
 class AbstractSyntaxChecker(object):
     def __init__(self, variabledict, filename):

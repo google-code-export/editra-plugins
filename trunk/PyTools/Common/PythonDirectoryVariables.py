@@ -62,7 +62,7 @@ class PythonDirectoryVariables(AbstractDirectoryVariables):
                     self.pythonpath.append(self.get_abspath(dirvarfile, path))
             elif key == "PYLINTRC":
                 vardict[key] = '"%s"' % self.get_abspath(dirvarfile, val)
-            elif key == "RPDB2ARGS":
+            elif key == "DEBUGGERARGS":
                 parts = val.split(" ")
                 for i, part in enumerate(parts):
                     newpart = self.get_path(dirvarfile, part)
