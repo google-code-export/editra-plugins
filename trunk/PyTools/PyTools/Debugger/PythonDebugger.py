@@ -16,11 +16,11 @@ __revision__ = "$Revision: 1053 $"
 import pkg_resources
 
 # Local Imports
-from Common import ToolConfig
-from Common.PyToolsUtils import PyToolsUtils
-from Common.ProcessRunner import ProcessRunner
-from AbstractDebugger import AbstractDebugger
-from DebugClient import DebugClient
+from PyTools.Common import ToolConfig
+from PyTools.Common.PyToolsUtils import PyToolsUtils
+from PyTools.Common.ProcessRunner import ProcessRunner
+from PyTools.Debugger.AbstractDebugger import AbstractDebugger
+from PyTools.Debugger.DebugClient import DebugClient
 
 # Editra Imports
 import util
@@ -59,10 +59,10 @@ class PythonDebugger(AbstractDebugger):
         util.Log("[PyDbg][info] Using Python: %s" % localpythonpath)
 
         # No rpdb2 found in plugin
-        if not pkg_resources.resource_exists("", "rpdb2.py"):
+        if not pkg_resources.resource_exists("PyTools.Debugger", "rpdb2.py"):
             return ["No rpdb2 found"]
 
-        rpdb2_script = pkg_resources.resource_filename("", "rpdb2.py")
+        rpdb2_script = pkg_resources.resource_filename("PyTools.Debugger", "rpdb2.py")
 
         childPath, parentPath = PyToolsUtils.get_packageroot(self.filename)
 

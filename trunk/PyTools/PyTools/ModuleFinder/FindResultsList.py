@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
-# Name: DebugResultsList.py
-# Purpose: Debugger plugin
+# Name: FindResultsList.py
+# Purpose: ModuleFinder plugin
 # Author: Mike Rans
 # Copyright: (c) 2010 Mike Rans
 # License: wxWindows License
@@ -9,7 +9,7 @@
 """Editra Shelf display window"""
 
 __author__ = "Mike Rans"
-__svnid__ = "$Id: DebugResultsList.py -1   $"
+__svnid__ = "$Id: FindResultsList.py -1   $"
 __revision__ = "$Revision: -1 $"
 
 #----------------------------------------------------------------------------#
@@ -18,19 +18,17 @@ import wx
 import wx.lib.mixins.listctrl as mixins
 
 # Editra Imports
-import ed_msg
 import eclib.elistmix as elistmix
-import util
 
 # Local Imports
-from Common.PyToolsUtils import PyToolsUtils
+from PyTools.Common.PyToolsUtils import PyToolsUtils
 
 # Globals
 _ = wx.GetTranslation
 
 #----------------------------------------------------------------------------#
 
-class DebugResultsList(wx.ListCtrl,
+class FindResultsList(wx.ListCtrl,
                        mixins.ListCtrlAutoWidthMixin,
                        elistmix.ListRowHighlighter):
     """List control for displaying syntax check results"""

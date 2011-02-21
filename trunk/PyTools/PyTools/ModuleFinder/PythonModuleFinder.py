@@ -17,10 +17,10 @@ import os
 import pkg_resources
 
 # Local Imports
-from Common import ToolConfig
-from Common.PyToolsUtils import PyToolsUtils
-from Common.ProcessRunner import ProcessRunner
-from AbstractModuleFinder import AbstractModuleFinder
+from PyTools.Common import ToolConfig
+from PyTools.Common.PyToolsUtils import PyToolsUtils
+from PyTools.Common.ProcessRunner import ProcessRunner
+from PyTools.ModuleFinder.AbstractModuleFinder import AbstractModuleFinder
 
 # Editra Imports
 import util
@@ -53,10 +53,10 @@ class PythonModuleFinder(AbstractModuleFinder):
         util.Log("[PyFind][info] Using Python: %s" % localpythonpath)
 
         # No findmodule found in plugin
-        if not pkg_resources.resource_exists("ModuleFinder", "findmodule.py"):
+        if not pkg_resources.resource_exists("PyTools.ModuleFinder", "findmodule.py"):
             return ["No findmodule found"]
 
-        findmodule_script = pkg_resources.resource_filename("ModuleFinder", "findmodule.py")
+        findmodule_script = pkg_resources.resource_filename("PyTools.ModuleFinder", "findmodule.py")
 
         # Start find module
         finder_cmd = [localpythonpath, findmodule_script, self.moduletofind]

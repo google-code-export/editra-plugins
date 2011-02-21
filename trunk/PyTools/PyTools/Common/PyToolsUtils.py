@@ -14,12 +14,14 @@ __revision__ = "$Revision: 1025 $"
 
 #-----------------------------------------------------------------------------#
 # Imports
-import ebmlib
 import wx
 import threading
 import os.path
-import ToolConfig
-#-----------------------------------------------------------------------------#
+
+# Editra imports
+import ebmlib
+import util
+
 # Globals
 _ = wx.GetTranslation
 
@@ -86,10 +88,11 @@ class PyToolsUtils():
 #-----------------------------------------------------------------------------#
 
 class RunProcInThread(threading.Thread):
-    """Background thread to run doer task in"""
+    """Background thread to run task in"""
     def __init__(self, fn, target, desc):
-        """@param doer: ModuleFinder object instance
+        """@param fn: function to run
         @param target: callable(data) To receive output data
+        @param desc: description of task
         """
         super(RunProcInThread, self).__init__()
 

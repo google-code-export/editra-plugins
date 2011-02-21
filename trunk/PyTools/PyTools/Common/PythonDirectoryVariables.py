@@ -15,7 +15,7 @@ __revision__ = "$Revision$"
 #-----------------------------------------------------------------------------#
 
 import os
-from AbstractDirectoryVariables import AbstractDirectoryVariables
+from PyTools.Common.AbstractDirectoryVariables import AbstractDirectoryVariables
 
 class PythonDirectoryVariables(AbstractDirectoryVariables):
     def __init__(self):

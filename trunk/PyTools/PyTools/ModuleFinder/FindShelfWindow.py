@@ -25,11 +25,11 @@ from syntax import syntax
 import syntax.synglob as synglob
 
 # Local imports
-from Common import ToolConfig
-from Common.PyToolsUtils import PyToolsUtils
-from Common.BaseShelfWindow import BaseShelfWindow
-from FindResultsList import FindResultsList
-from PythonModuleFinder import PythonModuleFinder
+from PyTools.Common import ToolConfig
+from PyTools.Common.PyToolsUtils import PyToolsUtils
+from PyTools.Common.BaseShelfWindow import BaseShelfWindow
+from PyTools.ModuleFinder.FindResultsList import FindResultsList
+from PyTools.ModuleFinder.PythonModuleFinder import PythonModuleFinder
 
 # Globals
 _ = wx.GetTranslation

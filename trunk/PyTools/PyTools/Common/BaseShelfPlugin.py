@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
-# Name: __init__.py
-# Purpose: ModuleFinder plugin
+# Name: BaseShelfPlugin.py
+# Purpose: Base shelf plugin
 # Author: Mike Rans
 # Copyright: (c) 2010 Mike Rans
 # License: wxWindows License
@@ -8,13 +8,13 @@
 
 # Plugin Metadata
 """
-Adds Python module finding with results in a Shelf window.
+Base shelf plugin.
 
 """
 
 __version__ = "0.1"
 __author__ = "Mike Rans"
-__svnid__ = "$Id: __init__.py 1058 2011-02-14 20:44:05Z rans@email.com $"
+__svnid__ = "$Id: BaseShelfPlugin.py 1058 2011-02-14 20:44:05Z rans@email.com $"
 __revision__ = "$Revision: 1058 $"
 
 #-----------------------------------------------------------------------------#
@@ -27,35 +27,37 @@ import iface
 import plugin
 import util
 
-# Local Imports
-from FindShelfWindow import FindShelfWindow
-from Common import ToolConfig
-
 #-----------------------------------------------------------------------------#
 # Globals
 _ = wx.GetTranslation
 
 #-----------------------------------------------------------------------------#
 # Implementation
-class PyFind(plugin.Plugin):
+class BaseShelfPlugin(plugin.Plugin):
     """Script Launcher and output viewer"""
     plugin.Implements(iface.ShelfI)
-    ID_PYFIND = wx.NewId()
-    INSTALLED = False
-    SHELF = None
+    
+    def __init__(self, pluginname, shelfwindow):
+        super(BaseShelfPlugin, self).__init__()
+        self.pluginname = pluginname
+        self.shelfwindow = shelfwindow
+        self.pluginid = wx.NewId()
+        self.installed = False
+        self.shelf = None
 
     @property
     def __name__(self):
-        return u'PyFind'
+        return self.pluginname
 
     def AllowMultiple(self):
-        """PyFind allows multiple instances"""
+        """Plugin allows multiple instances"""
         return True
 
     def CreateItem(self, parent):
-        """Create a PyFind panel"""
-        util.Log("[PyFind][info] Creating PyFind instance for Shelf")
-        return FindShelfWindow(parent)
+        """Create a panel"""
+        util.Log("[%s][info] Creating %s instance for Shelf" % \
+            (self.pluginname, self.pluginname))
+        return self.shelfwindow(parent)
 
     def GetBitmap(self):
         """Get the tab bitmap
@@ -67,12 +69,12 @@ class PyFind(plugin.Plugin):
 
     def GetId(self):
         """The unique identifier of this plugin"""
-        return self.ID_PYFIND
+        return self.pluginid
 
     def GetMenuEntry(self, menu):
         """This plugins menu entry"""
-        item = wx.MenuItem(menu, self.ID_PYFIND, self.__name__,
-                           _("Show PyFind finder"))
+        item = wx.MenuItem(menu, self.pluginid, self.__name__,
+                           _("Show %s" % self.pluginname))
         item.SetBitmap(self.GetBitmap())
         return item
 
@@ -92,39 +94,14 @@ class PyFind(plugin.Plugin):
         pass
 
     def IsInstalled(self):
-        """Check whether PyFind has been installed yet or not
+        """Check whether PyDebug has been installed yet or not
         @note: overridden from Plugin
         @return bool
 
         """
-        return PyFind.INSTALLED
+        return self.installed
 
     def IsStockable(self):
         """This item can be reloaded between sessions"""
         return True
 
-#-----------------------------------------------------------------------------#
-# Configuration Interface
-
-def GetConfigObject():
-    return ConfigObject()
-
-class ConfigObject(plugin.PluginConfigObject):
-    """Plugin configuration object for PyFind
-    Provides configuration panel for plugin dialog.
-
-    """
-    def GetConfigPanel(self, parent):
-        """Get the configuration panel for this plugin
-        @param parent: parent window for the panel
-        @return: wxPanel
-
-        """
-        return ToolConfig.ToolConfigPanel(parent)
-
-    def GetLabel(self):
-        """Get the label for this config panel
-        @return string
-
-        """
-        return _("PyFind")
