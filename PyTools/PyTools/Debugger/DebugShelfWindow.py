@@ -157,24 +157,28 @@ class DebugShelfWindow(BaseShelfWindow):
         editor = PyToolsUtils.GetEditorForFile(self._mw, filename)
         self.UpdateForEditor(editor)
 
-    def _ondebug(self, editor, moduletofind):
+    def _ondebug(self, editor):
         # With the text control (ed_stc.EditraStc) this will return the full
         # path of the file or a wx.EmptyString if the buffer does not contain
         # an on disk file
         filename = editor.GetFileName()
         self._listCtrl.DeleteOldRows()
 
-        vardict = {}
-        if filename:
-            filename = os.path.abspath(filename)
-            fileext = os.path.splitext(filename)[1]
-            if fileext:
-                filetype = syntax.GetIdFromExt(fileext[1:]) # pass in file extension
-                directoryvariables = self.get_directory_variables(filetype)
-                if directoryvariables:
-                    vardict = directoryvariables.read_dirvarfile(filename)
+        if not filename:
+            return
 
-        self._debug(synglob.ID_LANG_PYTHON, vardict, moduletofind)
+        filename = os.path.abspath(filename)
+        fileext = os.path.splitext(filename)[1]
+        if fileext == u"":
+            return
+
+        filetype = syntax.GetIdFromExt(fileext[1:]) # pass in file extension
+        directoryvariables = self.get_directory_variables(filetype)
+        if directoryvariables:
+            vardict = directoryvariables.read_dirvarfile(filename)
+        else:
+            vardict = {}
+        self._debug(filetype, vardict, filename)
         self._hasrun = True
 
     def OnDebug(self, event):
