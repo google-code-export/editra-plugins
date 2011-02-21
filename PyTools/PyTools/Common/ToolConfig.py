@@ -24,7 +24,7 @@ import ebmlib
 import eclib
 
 # Local Imports
-from PyToolsUtils import PyToolsUtils
+from PyTools.Common.PyToolsUtils import PyToolsUtils
 #-----------------------------------------------------------------------------#
 # Configuration Keys
 PYTOOL_CONFIG = "PyTool.Config"

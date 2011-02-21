@@ -23,8 +23,8 @@ import ed_msg
 import syntax.synglob as synglob
 
 # Local imports
-from Common import ToolConfig
-from Common.PythonDirectoryVariables import PythonDirectoryVariables
+from PyTools.Common.ToolConfig import ToolConfigDialog
+from PyTools.Common.PythonDirectoryVariables import PythonDirectoryVariables
 
 # Globals
 _ = wx.GetTranslation
@@ -126,7 +126,7 @@ class BaseShelfWindow(eclib.ControlBox):
     def OnShowConfig(self, event):
         """Show the configuration dialog"""
         mw = self.GetMainWindow()
-        dlg = ToolConfig.ToolConfigDialog(mw)
+        dlg = ToolConfigDialog(mw)
         dlg.CenterOnParent()
         dlg.ShowModal()
 

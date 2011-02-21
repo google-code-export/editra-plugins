@@ -27,11 +27,11 @@ from syntax import syntax
 import syntax.synglob as synglob
 
 # Local imports
-from Common import ToolConfig
-from Common.PyToolsUtils import PyToolsUtils
-from Common.BaseShelfWindow import BaseShelfWindow
-from DebugResultsList import DebugResultsList
-from PythonDebugger import PythonDebugger
+from PyTools.Common import ToolConfig
+from PyTools.Common.PyToolsUtils import PyToolsUtils
+from PyTools.Common.BaseShelfWindow import BaseShelfWindow
+from PyTools.Debugger.DebugResultsList import DebugResultsList
+from PyTools.Debugger.PythonDebugger import PythonDebugger
 
 # Globals
 _ = wx.GetTranslation

@@ -24,11 +24,11 @@ from syntax import syntax
 import syntax.synglob as synglob
 
 # Local imports
-from Common import ToolConfig
-from Common.PyToolsUtils import PyToolsUtils
-from Common.BaseShelfWindow import BaseShelfWindow
-from CheckResultsList import CheckResultsList
-from PythonSyntaxChecker import PythonSyntaxChecker
+from PyTools.Common import ToolConfig
+from PyTools.Common.PyToolsUtils import PyToolsUtils
+from PyTools.Common.BaseShelfWindow import BaseShelfWindow
+from PyTools.SyntaxChecker.CheckResultsList import CheckResultsList
+from PyTools.SyntaxChecker.PythonSyntaxChecker import PythonSyntaxChecker
 
 # Globals
 _ = wx.GetTranslation

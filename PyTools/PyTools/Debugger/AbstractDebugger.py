@@ -14,7 +14,7 @@ __revision__ = "$Revision: 1001 $"
 
 #-----------------------------------------------------------------------------#
 # Imports
-from Common.PyToolsUtils import RunProcInThread
+from PyTools.Common.PyToolsUtils import RunProcInThread
 
 #-----------------------------------------------------------------------------#
 
