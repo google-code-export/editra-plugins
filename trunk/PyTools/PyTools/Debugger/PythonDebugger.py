@@ -84,10 +84,10 @@ class PythonDebugger(AbstractDebugger):
         allargs = cmdargs
         if self.programargs:
             allargs = allargs + self.programargs.split(" ")
-        rpdb2_cmd = [localpythonpath, rpdb2_script, allargs]
+        rpdb2_cmd = [localpythonpath, rpdb2_script] + allargs
         util.Log("[PyDbg][info] Starting command: %s" % repr(rpdb2_cmd))
         processrunner = ProcessRunner(self.pythonpath)
-        processrunner.runprocess(rpdb2_cmd, ".")
+        processrunner.runprocess(rpdb2_cmd, parentPath)
         processrunner.restorepath()
         # Attach Editra debug client
         self.debugclient.attach(debuggee)
