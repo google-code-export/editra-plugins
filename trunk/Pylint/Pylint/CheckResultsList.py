@@ -49,12 +49,14 @@ class CheckResultsList(wx.ListCtrl,
 
         # Event Handlers
         self.Bind(wx.EVT_LIST_ITEM_ACTIVATED, self.OnItemActivate)
+        self.Bind(wx.EVT_WINDOW_DESTROY, self.OnDestroy)
 
         # Message Handler
         ed_msg.Subscribe(self.OnDwellStart, ed_msg.EDMSG_UI_STC_DWELL_START)
 
-    def __del__(self):
-        ed_msg.Unsubscribe(self.OnDwellStart)
+    def OnDestroy(self, evt):
+        if evt.GetEventObject() is self:
+            ed_msg.Unsubscribe(self.OnDwellStart)
 
     def set_mainwindow(self, mw):
         self._mainw = mw

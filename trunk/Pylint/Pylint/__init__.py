@@ -62,6 +62,7 @@ class Pylint(plugin.Plugin):
         @return: wx.Bitmap
 
         """
+        # TODO: more unique bitmap?
         bmp = wx.ArtProvider.GetBitmap(str(ed_glob.ID_BIN_FILE), wx.ART_MENU)
         return bmp
 
@@ -71,7 +72,7 @@ class Pylint(plugin.Plugin):
 
     def GetMenuEntry(self, menu):
         """This plugins menu entry"""
-        item = wx.MenuItem(menu, self.ID_PYLINT, self.__name__,
+        item = wx.MenuItem(menu, Pylint.ID_PYLINT, self.__name__,
                            _("Show Pylint checker"))
         item.SetBitmap(self.GetBitmap())
         return item

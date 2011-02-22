@@ -37,21 +37,6 @@ from PythonDirectoryVariables import PythonDirectoryVariables
 #-----------------------------------------------------------------------------#
 
 _ = wx.GetTranslation
-#-----------------------------------------------------------------------------#
-
-class FreezeDrawer(object):
-    """To be used in 'with' statements. Upon enter freezes the drawing
-    and thaws upon exit.
-
-    """
-    def __init__(self, wnd):
-        self._wnd = wnd
-
-    def __enter__(self):
-        self._wnd.Freeze()
-
-    def __exit__(self, eT, eV, tB):
-        self._wnd.Thaw()
 
 #-----------------------------------------------------------------------------#
 
@@ -110,6 +95,7 @@ class ShelfWindow(eclib.ControlBox):
         self.Bind(wx.EVT_TIMER, self.OnJobTimer, self._jobtimer)
         self.Bind(wx.EVT_BUTTON, self.OnShowConfig, self.cfgbtn)
         self.Bind(wx.EVT_BUTTON, self.OnRunLint, self.runbtn)
+        self.Bind(wx.EVT_WINDOW_DESTROY, self.OnDestroy, self)
 
         # Editra Message Handlers
         ed_msg.Subscribe(self.OnFileLoad, ed_msg.EDMSG_FILE_OPENED)
@@ -117,7 +103,8 @@ class ShelfWindow(eclib.ControlBox):
         ed_msg.Subscribe(self.OnPageChanged, ed_msg.EDMSG_UI_NB_CHANGED)
         ed_msg.Subscribe(self.OnThemeChanged, ed_msg.EDMSG_THEME_CHANGED)
 
-    def __del__(self):
+    def OnDestroy(self, evt):
+        """Stop timer and disconnect message handlers"""
         self._StopTimer()
         ed_msg.Unsubscribe(self.OnFileLoad)
         ed_msg.Unsubscribe(self.OnFileSave)
