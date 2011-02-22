@@ -46,10 +46,12 @@ def GetConfigValue(key):
 class ToolConfigDialog(eclib.ECBaseDlg):
     """Standalone configuraton dialog"""
     def __init__(self, parent):
-        super(ToolConfigDialog, self).__init__(parent, title=_("Pylint Config"))
+        super(ToolConfigDialog, self).__init__(parent, title=_("Pylint Config"),
+                                               style=wx.DEFAULT_DIALOG_STYLE|wx.RESIZE_BORDER)
 
         # Setup
         self.SetPanel(ToolConfigPanel(self))
+        self.SetInitialSize()
 
 #-----------------------------------------------------------------------------#
 
