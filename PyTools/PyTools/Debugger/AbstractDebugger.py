@@ -19,7 +19,8 @@ from PyTools.Common.PyToolsUtils import RunProcInThread
 #-----------------------------------------------------------------------------#
 
 class AbstractDebugger(object):
-    def __init__(self, variabledict, filename):
+    def __init__(self, variabledict, debuggerargs, programargs, 
+        filename, debuggeewindow):
         """ Process dictionary of variables that might be
         useful to debugger.
         """
@@ -28,6 +29,9 @@ class AbstractDebugger(object):
         # Attributes
         self.filename = filename
         self.variabledict = variabledict
+        self.debuggerargs = debuggerargs
+        self.programargs = programargs
+        self.debuggeewindow = debuggeewindow
 
     def DoDebug(self):
         """Interface method override to perform the debug
@@ -37,16 +41,15 @@ class AbstractDebugger(object):
         """
         raise NotImplementedError
 
-    def Debug(self, callback):
+    def Debug(self):
         """Asynchronous method to perform module find
         @param callback: callable(data) callback to receive data
 
         """
-        worker = RunProcInThread(self.DoDebug, callback, "Debug")
+        worker = RunProcInThread(self.DoDebug, None, "Debug")
         worker.start()
 
-    def _getFileName(self):
-        return self.filename
-    def _setFileName(self, fname):
-        self.filename = fname
-    FileName = property(_getFileName, _setFileName)
+    #---- Properties ----#
+    FileName = property(lambda self: self.filename,
+                        lambda self, name: setattr(self, 'filename', name))
+

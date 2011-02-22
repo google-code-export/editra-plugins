@@ -7,7 +7,6 @@
 ##############################################################################
 """ Directory Variables module """
 
-__version__ = "0.2"
 __author__ = "Mike Rans"
 __svnid__ = "$Id$"
 __revision__ = "$Revision$"
@@ -19,15 +18,14 @@ class AbstractDirectoryVariables(object):
         self.dirvarfilename = "__dirvar_%s__.cfg" % filetype
     
     def read_dirvarfile(self, filepath):
-        """ Return a dict of variables for usage by tools eg. pylint
-        """
+        """ Return a dict of variables for usage by tools eg. pylint"""
         return {}
     
     def set_envvars(self, filepath):
-        """ Set any environment variables eg. PYTHONPATH
-        """
+        """ Set any environment variables eg. PYTHONPATH"""
         pass
         
     def restore_envvars(self):
         """ Restore changed environment variables """
         pass
+

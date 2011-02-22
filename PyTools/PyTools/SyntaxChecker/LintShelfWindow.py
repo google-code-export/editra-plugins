@@ -57,7 +57,7 @@ class LintShelfWindow(BaseShelfWindow):
         ed_msg.Subscribe(self.OnFileSave, ed_msg.EDMSG_FILE_SAVED)
         ed_msg.Subscribe(self.OnPageChanged, ed_msg.EDMSG_UI_NB_CHANGED)
 
-    def __del__(self):
+    def Destroy(self):
         ed_msg.Unsubscribe(self.OnFileLoad)
         ed_msg.Unsubscribe(self.OnFileSave)
         ed_msg.Unsubscribe(self.OnPageChanged)
@@ -68,7 +68,7 @@ class LintShelfWindow(BaseShelfWindow):
         # an on disk file
         filename = editor.GetFileName()
         self._listCtrl.set_editor(editor)
-        self._listCtrl.DeleteOldRows()
+        self._listCtrl.Clear()
 
         if not filename:
             return

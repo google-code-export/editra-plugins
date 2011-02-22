@@ -45,8 +45,7 @@ class AbstractSyntaxChecker(object):
         worker = RunProcInThread(self.DoCheck, callback, "Lint")
         worker.start()
 
-    def _getFileName(self):
-        return self.filename
-    def _setFileName(self, fname):
-        self.filename = fname
-    FileName = property(_getFileName, _setFileName)
+    #---- Properties ----#
+    FileName = property(lambda self: self.filename,
+                        lambda self, name: setattr(self, 'filename', name))
+

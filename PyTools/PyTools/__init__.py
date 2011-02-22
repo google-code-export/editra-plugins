@@ -42,18 +42,18 @@ _ = wx.GetTranslation
 # Implementation
 class PyLint(BaseShelfPlugin):
     """Script Launcher and output viewer"""
-    def __init__(self, a):
-        super(PyLint, self).__init__("PyLint", LintShelfWindow)
+    def __init__(self, pluginmgr):
+        super(PyLint, self).__init__(pluginmgr, "PyLint", LintShelfWindow)
 
 class PyFind(BaseShelfPlugin):
     """Script Launcher and output viewer"""
-    def __init__(self, a):
-        super(PyFind, self).__init__("PyFind", FindShelfWindow)
+    def __init__(self, pluginmgr):
+        super(PyFind, self).__init__(pluginmgr, "PyFind", FindShelfWindow)
 
 class PyDebug(BaseShelfPlugin):
     """Script Launcher and output viewer"""
-    def __init__(self, a):
-        super(PyDebug, self).__init__("PyDebug", DebugShelfWindow)
+    def __init__(self, pluginmgr):
+        super(PyDebug, self).__init__(pluginmgr, "PyDebug", DebugShelfWindow)
 
 #-----------------------------------------------------------------------------#
 # Configuration Interface

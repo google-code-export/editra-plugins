@@ -20,7 +20,7 @@ import re
 # Local Imports
 from PyTools.Common import ToolConfig
 from PyTools.Common.PyToolsUtils import PyToolsUtils
-from PyTools.Common.ProcessRunner import ProcessRunner
+from PyTools.Common.ProcessCreator import ProcessCreator
 from PyTools.SyntaxChecker.AbstractSyntaxChecker import AbstractSyntaxChecker
 
 # Editra Imports
@@ -75,12 +75,10 @@ class PythonSyntaxChecker(AbstractSyntaxChecker):
         allargs = self.pylintargs + [modpath,]
         pythoncode = "from pylint import lint;lint.Run(%s)" % repr(allargs)
         plint_cmd = [localpythonpath, "-c", pythoncode]
-        util.Log("[PyLint][info] Starting command: %s" % repr(plint_cmd))
-        util.Log("[Pylint][info] Using CWD: %s" % parentPath)
-        processrunner = ProcessRunner(self.pythonpath)
-        processrunner.runprocess(plint_cmd, parentPath)
-        stdoutdata, stderrdata = processrunner.getalloutput()
-        processrunner.restorepath()
+        processcreator = ProcessCreator(self.pythonpath)
+        process = processcreator.createprocess(plint_cmd, parentPath, "Pylint")
+        stdoutdata, stderrdata = process.communicate()
+        processcreator.restorepath()
 
         util.Log("[Pylint][info] stdout %s" % stdoutdata)
         util.Log("[Pylint][info] stderr %s" % stderrdata)

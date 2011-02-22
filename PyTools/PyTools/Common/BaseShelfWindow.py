@@ -43,6 +43,10 @@ class BaseShelfWindow(eclib.ControlBox):
         # Parent is ed_shelf.EdShelfBook
         self._mw = self.__FindMainWindow()
         self._log = wx.GetApp().GetLog()
+        
+        def do_nothing():
+            pass
+        self.destroyfn = do_nothing
 
     def setup(self, listCtrl):
         self._listCtrl = listCtrl
@@ -81,13 +85,20 @@ class BaseShelfWindow(eclib.ControlBox):
         self.Bind(wx.EVT_BUTTON, self.OnShowConfig, self.cfgbtn)
         self.Bind(wx.EVT_BUTTON, taskfn, self.taskbtn)
         self.Bind(wx.EVT_TIMER, timerfn, self._jobtimer)
+        self.Bind(wx.EVT_WINDOW_DESTROY, self.OnDestroy, self)
 
         # Editra Message Handlers
         ed_msg.Subscribe(self.OnThemeChanged, ed_msg.EDMSG_THEME_CHANGED)
 
-    def __del__(self):
+    # Overridden by derived classes
+    def Destroy(self):
+        pass
+    
+    def OnDestroy(self, evt):
+        """Stop timer and disconnect message handlers"""
         self._StopTimer()
         ed_msg.Unsubscribe(self.OnThemeChanged)
+        self.Destroy()
 
     def _StopTimer(self):
         if self._jobtimer.IsRunning():
@@ -137,5 +148,5 @@ class BaseShelfWindow(eclib.ControlBox):
             pass
         return None
 
-    def delete_rows(self):
-        self._listCtrl.DeleteOldRows()
+    def Clear(self):
+        self._listCtrl.Clear()

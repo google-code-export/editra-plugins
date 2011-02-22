@@ -45,8 +45,6 @@ class AbstractModuleFinder(object):
         worker = RunProcInThread(self.DoFind, callback, "Find")
         worker.start()
 
-    def _getModule(self):
-        return self.moduletofind
-    def _setModule(self, moduletofind):
-        self.moduletofind = moduletofind
-    ModuleToFind = property(_getModule, _setModule)
+    #---- Properties ----#
+    ModuleToFind = property(lambda self: self.moduletofind,
+                        lambda self, name: setattr(self, 'moduletofind', name))
