@@ -14,12 +14,15 @@ __revision__ = "$Revision$"
 
 #-----------------------------------------------------------------------------#
 
+# Imports
 import os
+
+# Local Imports
 from PyTools.Common.AbstractDirectoryVariables import AbstractDirectoryVariables
 
 class PythonDirectoryVariables(AbstractDirectoryVariables):
     def __init__(self):
-        AbstractDirectoryVariables.__init__(self, "py")
+        super(PythonDirectoryVariables, self).__init__("py")
         self.pythonpath = []
 
     @staticmethod

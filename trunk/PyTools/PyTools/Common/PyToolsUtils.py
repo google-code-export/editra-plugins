@@ -106,8 +106,9 @@ class RunProcInThread(threading.Thread):
             data = self.fn()
         except Exception, msg:
             util.Log("[%s][err] %s Failure: %s" % (self.desc, self.desc, msg))
-            data = [(u'Error', unicode(msg), -1)]
-        wx.CallAfter(self.target, data)
+            data = [(u"Error", unicode(msg), -1)]
+        if self.target:
+            wx.CallAfter(self.target, data)
 
 class FreezeDrawer(object):
     """To be used in 'with' statements. Upon enter freezes the drawing

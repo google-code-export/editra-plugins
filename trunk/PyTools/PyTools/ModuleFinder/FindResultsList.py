@@ -59,7 +59,7 @@ class FindResultsList(wx.ListCtrl,
         else:
             nb.OnDrop([fname])
 
-    def DeleteOldRows(self):
+    def Clear(self):
         """Delete all the rows """
         for itemIndex in reversed(xrange(0, self.GetItemCount())):
             self.DeleteItem(itemIndex)

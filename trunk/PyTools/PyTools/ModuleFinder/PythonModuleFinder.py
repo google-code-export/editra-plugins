@@ -19,7 +19,7 @@ import pkg_resources
 # Local Imports
 from PyTools.Common import ToolConfig
 from PyTools.Common.PyToolsUtils import PyToolsUtils
-from PyTools.Common.ProcessRunner import ProcessRunner
+from PyTools.Common.ProcessCreator import ProcessCreator
 from PyTools.ModuleFinder.AbstractModuleFinder import AbstractModuleFinder
 
 # Editra Imports
@@ -60,11 +60,10 @@ class PythonModuleFinder(AbstractModuleFinder):
 
         # Start find module
         finder_cmd = [localpythonpath, findmodule_script, self.moduletofind]
-        util.Log("[PyFind][info] Starting command: %s" % repr(finder_cmd))
-        processrunner = ProcessRunner(self.pythonpath)
-        processrunner.runprocess(finder_cmd, ".")
-        stdoutdata, stderrdata = processrunner.getalloutput()
-        processrunner.restorepath()
+        processcreator = ProcessCreator(self.pythonpath)
+        process = processcreator.createprocess(finder_cmd, ".", "PyFind")
+        stdoutdata, stderrdata = process.communicate()
+        processcreator.restorepath()
 
         util.Log("[PyFind][info] stdout %s" % stdoutdata)
         util.Log("[PyFind][info] stderr %s" % stderrdata)

@@ -18,27 +18,26 @@ import pkg_resources
 # Local Imports
 from PyTools.Common import ToolConfig
 from PyTools.Common.PyToolsUtils import PyToolsUtils
-from PyTools.Common.ProcessRunner import ProcessRunner
+from PyTools.Common.ProcessCreator import ProcessCreator
 from PyTools.Debugger.AbstractDebugger import AbstractDebugger
 from PyTools.Debugger.DebugClient import DebugClient
 
 # Editra Imports
 import util
 import ebmlib
-
 #-----------------------------------------------------------------------------#
 
 class PythonDebugger(AbstractDebugger):
-    def __init__(self, variabledict, debuggerargs, programargs, filename):
-        super(PythonDebugger, self).__init__(variabledict, filename)
+    def __init__(self, variabledict, debuggerargs, programargs, 
+        filename, debuggeewindow):
+        super(PythonDebugger, self).__init__(variabledict, debuggerargs, 
+            programargs, filename, debuggeewindow)
 
         # Attributes
         self.dirvarfile = variabledict.get("DIRVARFILE")
         self.rpdb2args = ["-d", "--pwd=%s" % DebugClient.password]
-        if not debuggerargs:
-            debuggerargs = variabledict.get("DEBUGGERARGS")
-        self.debuggerargs = debuggerargs
-        self.programargs = programargs
+        if not self.debuggerargs:
+            self.debuggerargs = variabledict.get("DEBUGGERARGS")
         self.pythonpath = variabledict.get("PYTHONPATH")
         self.nopythonerror = u"***  FATAL ERROR: No local Python configured or found"
         self.debugclient = DebugClient()
@@ -85,13 +84,14 @@ class PythonDebugger(AbstractDebugger):
         if self.programargs:
             allargs = allargs + self.programargs.split(" ")
         rpdb2_cmd = [localpythonpath, rpdb2_script] + allargs
-        util.Log("[PyDbg][info] Starting command: %s" % repr(rpdb2_cmd))
-        processrunner = ProcessRunner(self.pythonpath)
-        processrunner.runprocess(rpdb2_cmd, parentPath)
-        processrunner.restorepath()
+        processcreator = ProcessCreator(self.pythonpath)
+        process = processcreator.createprocess(rpdb2_cmd, parentPath, "PyDbg")
+        processcreator.restorepath()
+        self.debuggeewindow.setprocess(process)
+        self.debuggeewindow.start()
         # Attach Editra debug client
         self.debugclient.attach(debuggee)
-        processrunner.terminate()
+        self.debuggeewindow.Abort()
         rows = []
         if self.pythonpath:
             rows.append((u"***", u"Using PYTHONPATH + %s"\

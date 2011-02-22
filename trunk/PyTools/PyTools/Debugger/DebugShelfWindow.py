@@ -30,7 +30,7 @@ import syntax.synglob as synglob
 from PyTools.Common import ToolConfig
 from PyTools.Common.PyToolsUtils import PyToolsUtils
 from PyTools.Common.BaseShelfWindow import BaseShelfWindow
-from PyTools.Debugger.DebugResultsList import DebugResultsList
+from PyTools.Debugger.DebuggeeWindow import DebuggeeWindow
 from PyTools.Debugger.PythonDebugger import PythonDebugger
 
 # Globals
@@ -46,7 +46,8 @@ class DebugShelfWindow(BaseShelfWindow):
     def __init__(self, parent):
         """Initialize the window"""
         super(DebugShelfWindow, self).__init__(parent)
-        ctrlbar = self.setup(DebugResultsList(self, style=wx.LC_REPORT|wx.BORDER_NONE))
+        self.debuggeewindow = DebuggeeWindow(self, style=wx.LC_REPORT|wx.BORDER_NONE)
+        ctrlbar = self.setup(self.debuggeewindow)
         ctrlbar.AddStretchSpacer()
         self.choices = ["Program Args", "Debugger Args"]
         self.combo = wx.ComboBox(ctrlbar, wx.ID_ANY, value=self.choices[0], choices=self.choices, style=wx.CB_READONLY|eclib.PB_STYLE_NOBG)
@@ -82,6 +83,11 @@ class DebugShelfWindow(BaseShelfWindow):
         ed_msg.Subscribe(self.OnFileLoad, ed_msg.EDMSG_FILE_OPENED)
         ed_msg.Subscribe(self.OnFileSave, ed_msg.EDMSG_FILE_SAVED)
         ed_msg.Subscribe(self.OnPageChanged, ed_msg.EDMSG_UI_NB_CHANGED)
+
+    def Destroy(self):
+        ed_msg.Unsubscribe(self.OnFileLoad)
+        ed_msg.Unsubscribe(self.OnFileSave)
+        ed_msg.Unsubscribe(self.OnPageChanged)
 
     def OnCancelSearch(self, event):
         self.combotexts[self.combocurrent_selection] = ""
@@ -162,7 +168,7 @@ class DebugShelfWindow(BaseShelfWindow):
         # path of the file or a wx.EmptyString if the buffer does not contain
         # an on disk file
         filename = editor.GetFileName()
-        self._listCtrl.DeleteOldRows()
+        self._listCtrl.Clear()
 
         if not filename:
             return
@@ -187,17 +193,18 @@ class DebugShelfWindow(BaseShelfWindow):
         if editor:
             wx.CallAfter(self._ondebug, editor)
 
-    def get_debugger(self, filetype, vardict, debuggerargs, programargs, filename):
+    def get_debugger(self, filetype, vardict, filename):
         try:
-            return self.__debuggers[filetype](vardict, debuggerargs, programargs, filename)
+            programargs = self.combotexts[0]
+            debuggerargs = self.combotexts[1]
+            return self.__debuggers[filetype](vardict, debuggerargs, 
+                programargs, filename, self.debuggeewindow)
         except Exception:
             pass
         return None
 
     def _debug(self, filetype, vardict, filename):
-        programargs = self.combotexts[0]
-        debuggerargs = self.combotexts[1]
-        debugger = self.get_debugger(filetype, vardict, debuggerargs, programargs, filename)
+        debugger = self.get_debugger(filetype, vardict, filename)
         if not debugger:
             return []
         self._debugger = debugger
@@ -207,15 +214,6 @@ class DebugShelfWindow(BaseShelfWindow):
         self._StopTimer()
         self._jobtimer.Start(250, True)
 
-    def _OnDebugData(self, data):
-        # Data is something like
-        # [('Debug Error', '__all__ = ["CSVSMonitorThread"]', 7)]
-        if len(data) != 0:
-            self._listCtrl.PopulateRows(data)
-            self._listCtrl.RefreshRows()
-        mwid = self.GetMainWindow().GetId()
-        ed_msg.PostMessage(ed_msg.EDMSG_PROGRESS_SHOW, (mwid, False))
-
     def OnJobTimer(self, evt):
         """Start a debug job"""
         if self._debugger:
@@ -223,11 +221,4 @@ class DebugShelfWindow(BaseShelfWindow):
             mwid = self.GetMainWindow().GetId()
             ed_msg.PostMessage(ed_msg.EDMSG_PROGRESS_SHOW, (mwid, True))
             ed_msg.PostMessage(ed_msg.EDMSG_PROGRESS_STATE, (mwid, -1, -1))
-            self._debugger.Debug(self._OnDebugData)
-
-    def delete_rows(self):
-        self._listCtrl.DeleteOldRows()
-
-
-
-
+            self._debugger.Debug()

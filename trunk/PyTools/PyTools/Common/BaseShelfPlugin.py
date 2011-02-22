@@ -37,8 +37,9 @@ class BaseShelfPlugin(plugin.Plugin):
     """Script Launcher and output viewer"""
     plugin.Implements(iface.ShelfI)
     
-    def __init__(self, pluginname, shelfwindow):
+    def __init__(self, pluginmgr, pluginname, shelfwindow):
         super(BaseShelfPlugin, self).__init__()
+        self.pluginmgr = pluginmgr
         self.pluginname = pluginname
         self.shelfwindow = shelfwindow
         self.pluginid = wx.NewId()

@@ -60,7 +60,7 @@ class FindShelfWindow(BaseShelfWindow):
         # Editra Message Handlers
         ed_msg.Subscribe(self.OnTabMenu, ed_msg.EDMSG_UI_NB_TABMENU)
 
-    def __del__(self):
+    def Destroy(self):
         ed_msg.Unsubscribe(self.OnTabMenu)
 
     def OnTabMenu(self, msg):
@@ -86,7 +86,7 @@ class FindShelfWindow(BaseShelfWindow):
         # path of the file or a wx.EmptyString if the buffer does not contain
         # an on disk file
         filename = editor.GetFileName()
-        self._listCtrl.DeleteOldRows()
+        self._listCtrl.Clear()
 
         vardict = {}
         if filename:
