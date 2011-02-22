@@ -7,19 +7,22 @@
 ##############################################################################
 """ Directory Variables module for Python data """
 
-__version__ = "0.2"
 __author__ = "Mike Rans"
 __svnid__ = "$Id$"
 __revision__ = "$Revision$"
 
 #-----------------------------------------------------------------------------#
-
+# Imports
 import os
+
+# Local Imports
 from AbstractDirectoryVariables import AbstractDirectoryVariables
+
+#-----------------------------------------------------------------------------#
 
 class PythonDirectoryVariables(AbstractDirectoryVariables):
     def __init__(self):
-        AbstractDirectoryVariables.__init__(self, "py")
+        super(PythonDirectoryVariables, self).__init__("py")
         self.pythonpath = []
 
     @staticmethod

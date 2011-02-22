@@ -17,6 +17,7 @@ __revision__ = "$Revision$"
 import wx
 import threading
 
+# Editra Libraries
 import util
 
 #-----------------------------------------------------------------------------#
@@ -38,7 +39,7 @@ class SyntaxCheckThread(threading.Thread):
             data = self.checker.DoCheck()
         except Exception, msg:
             util.Log("[PyLint][err] Pylint Failure: %s" % msg)
-            data = [(u'Error', unicode(msg), -1)]
+            data = [(u"Error", unicode(msg), -1)]
         wx.CallAfter(self.target, data)
 
 #-----------------------------------------------------------------------------#
@@ -70,8 +71,7 @@ class AbstractSyntaxChecker(object):
         worker = SyntaxCheckThread(self, callback)
         worker.start()
 
-    def _getFileName(self):
-        return self.filename
-    def _setFileName(self, fname):
-        self.filename = fname
-    FileName = property(_getFileName, _setFileName)
+    #---- Properties ----#
+    FileName = property(lambda self: self.filename,
+                        lambda self, name: setattr(self, 'filename', name))
+
