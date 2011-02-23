@@ -29,9 +29,12 @@ if wx.Platform == "__WXMSW__":
         CREATE_NO_WINDOW = 0x08000000
 
 class ProcessCreator(object):
-    def __init__(self, pythonpath=None):
+    def __init__(self, info, parentPath, cmdline, pythonpath=None):
         super(ProcessCreator, self).__init__()
 
+        self.info = info
+        self.parentPath = parentPath
+        self.cmdline = cmdline
         self.pythonpath = pythonpath
         if wx.Platform == "__WXMSW__":
             self.creationflags = CREATE_NO_WINDOW
@@ -48,7 +51,7 @@ class ProcessCreator(object):
             return os.getenv("PYTHONPATH")
         return None
 
-    def createprocess(self, cmdline, parentPath, info):
+    def createprocess(self):
         if self.pythonpath:
             if wx.Platform == "__WXMSW__":
                 os.environ["PYTHONPATH"] = os.pathsep.join(self.pythonpath)
@@ -56,10 +59,10 @@ class ProcessCreator(object):
                 self.environment["PYTHONPATH"] = str(os.pathsep.join(self.pythonpath))
 
         cmdline = [ cmd.encode(sys.getfilesystemencoding())
-                       for cmd in cmdline ]
-        parentPath = parentPath.encode(sys.getfilesystemencoding())
-        util.Log("[%s][info] Using CWD: %s" % (info, parentPath))
-        util.Log("[%s][info] Starting command: %s" % (info, repr(cmdline)))
+                       for cmd in self.cmdline ]
+        parentPath = self.parentPath.encode(sys.getfilesystemencoding())
+        util.Log("[%s][info] Using CWD: %s" % (self.info, parentPath))
+        util.Log("[%s][info] Starting command: %s" % (self.info, repr(cmdline)))
         return Popen(cmdline,
                     bufsize=1048576, stdout=PIPE, stderr=PIPE,
                     cwd=parentPath, env=self.environment,

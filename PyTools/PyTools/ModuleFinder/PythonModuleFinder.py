@@ -37,7 +37,7 @@ class PythonModuleFinder(AbstractModuleFinder):
         self.pythonpath = variabledict.get("PYTHONPATH")
         self.nopythonerror = u"***  FATAL ERROR: No local Python configured or found"
 
-    def DoFind(self):
+    def RunModuleFind(self):
         """Run Module Finder"""
 
         # Figure out what Python to use
@@ -60,8 +60,8 @@ class PythonModuleFinder(AbstractModuleFinder):
 
         # Start find module
         finder_cmd = [localpythonpath, findmodule_script, self.moduletofind]
-        processcreator = ProcessCreator(self.pythonpath)
-        process = processcreator.createprocess(finder_cmd, ".", "PyFind")
+        processcreator = ProcessCreator("PyFind", ".", finder_cmd, self.pythonpath)
+        process = processcreator.createprocess()
         stdoutdata, stderrdata = process.communicate()
         processcreator.restorepath()
 

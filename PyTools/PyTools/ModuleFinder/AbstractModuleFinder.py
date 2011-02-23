@@ -29,7 +29,7 @@ class AbstractModuleFinder(object):
         self.moduletofind = moduletofind
         self.variabledict = variabledict
 
-    def DoFind(self):
+    def RunModuleFind(self):
         """Interface method override to perform the module find
         and return a list of tuples.
         @return: [ (Filepath), ]
@@ -42,7 +42,7 @@ class AbstractModuleFinder(object):
         @param callback: callable(data) callback to receive data
 
         """
-        worker = RunProcInThread(self.DoFind, callback, "Find")
+        worker = RunProcInThread(self.RunModuleFind, callback, "Find")
         worker.start()
 
     #---- Properties ----#

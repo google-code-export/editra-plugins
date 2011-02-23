@@ -53,7 +53,7 @@ class PythonSyntaxChecker(AbstractSyntaxChecker):
         self.nopythonerror = u"***  FATAL ERROR: No local Python configured or found"
         self.nopylinterror = u"***  FATAL ERROR: No Pylint configured or found"
 
-    def DoCheck(self):
+    def RunSyntaxCheck(self):
         """Run pylint"""
 
         # Figure out what Python to use
@@ -75,8 +75,8 @@ class PythonSyntaxChecker(AbstractSyntaxChecker):
         allargs = self.pylintargs + [modpath,]
         pythoncode = "from pylint import lint;lint.Run(%s)" % repr(allargs)
         plint_cmd = [localpythonpath, "-c", pythoncode]
-        processcreator = ProcessCreator(self.pythonpath)
-        process = processcreator.createprocess(plint_cmd, parentPath, "Pylint")
+        processcreator = ProcessCreator("Pylint", parentPath, plint_cmd, self.pythonpath)
+        process = processcreator.createprocess()
         stdoutdata, stderrdata = process.communicate()
         processcreator.restorepath()
 

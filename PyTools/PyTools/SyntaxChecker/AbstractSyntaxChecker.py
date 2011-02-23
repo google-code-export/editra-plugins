@@ -29,7 +29,7 @@ class AbstractSyntaxChecker(object):
         self.filename = filename
         self.variabledict = variabledict
 
-    def DoCheck(self):
+    def RunSyntaxCheck(self):
         """Interface method override to perform the syntax check
         and return a list of tuples.
         @return: [ (Type, Error, Line), ]
@@ -42,7 +42,7 @@ class AbstractSyntaxChecker(object):
         @param callback: callable(data) callback to receive data
 
         """
-        worker = RunProcInThread(self.DoCheck, callback, "Lint")
+        worker = RunProcInThread(self.RunSyntaxCheck, callback, "Lint")
         worker.start()
 
     #---- Properties ----#
