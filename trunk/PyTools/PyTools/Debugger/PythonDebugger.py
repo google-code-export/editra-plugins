@@ -18,7 +18,7 @@ import pkg_resources
 # Local Imports
 from PyTools.Common import ToolConfig
 from PyTools.Common.PyToolsUtils import PyToolsUtils
-from PyTools.Common.ProcessCreator import ProcessCreator
+from PyTools.Common.AsyncProcessCreator import AsyncProcessCreator
 from PyTools.Debugger.AbstractDebugger import AbstractDebugger
 from PyTools.Debugger.DebugClient import DebugClient
 
@@ -41,8 +41,10 @@ class PythonDebugger(AbstractDebugger):
         self.pythonpath = variabledict.get("PYTHONPATH")
         self.nopythonerror = u"***  FATAL ERROR: No local Python configured or found"
         self.debugclient = DebugClient()
+        self.debuggee = None
+        self.processcreator = None
 
-    def DoDebug(self):
+    def RunDebuggee(self):
         """Run rpdb2args"""
 
         # Figure out what Python to use
@@ -58,45 +60,47 @@ class PythonDebugger(AbstractDebugger):
         util.Log("[PyDbg][info] Using Python: %s" % localpythonpath)
 
         # No rpdb2 found in plugin
-        if not pkg_resources.resource_exists("PyTools.Debugger", "rpdb2.py"):
+        if not pkg_resources.resource_exists("PyTools.Debugger", "test.py"):
             return ["No rpdb2 found"]
 
-        rpdb2_script = pkg_resources.resource_filename("PyTools.Debugger", "rpdb2.py")
+        rpdb2_script = pkg_resources.resource_filename("PyTools.Debugger", "test.py")
 
         childPath, parentPath = PyToolsUtils.get_packageroot(self.filename)
 
         # Start rpdb2
         cmdargs = ""
-        debuggee = childPath
+        self.debuggee = childPath
         if self.debuggerargs:
             cmdargs = self.debuggerargs.split(" ")
             for i, cmd in enumerate(cmdargs):
                 if cmd == "%SCRIPT%":
-                    cmdargs[i] = debuggee
+                    cmdargs[i] = self.debuggee
                 elif cmd == "%MODULE%":
-                    debuggee = PyToolsUtils.get_modulepath(childPath)
-                    cmdargs[i] = debuggee
+                    self.debuggee = PyToolsUtils.get_modulepath(childPath)
+                    cmdargs[i] = self.debuggee
 
             cmdargs = self.rpdb2args + cmdargs
         else:
-            cmdargs = self.rpdb2args + [debuggee,]
+            cmdargs = self.rpdb2args + [self.debuggee,]
         allargs = cmdargs
         if self.programargs:
             allargs = allargs + self.programargs.split(" ")
         rpdb2_cmd = [localpythonpath, rpdb2_script] + allargs
-        processcreator = ProcessCreator(self.pythonpath)
-        process = processcreator.createprocess(rpdb2_cmd, parentPath, "PyDbg")
-        processcreator.restorepath()
-        self.debuggeewindow.setprocess(process)
-        self.debuggeewindow.start()
-        # Attach Editra debug client
-        self.debugclient.attach(debuggee)
-        self.debuggeewindow.Abort()
-        rows = []
+        text = ""
         if self.pythonpath:
-            rows.append((u"***", u"Using PYTHONPATH + %s"\
-                          % u", ".join(self.pythonpath), u"NA"))
-        rows.append((u"***", u"Rpdb2 command line: %s" % " ".join(rpdb2_cmd), u"NA"))
-        rows.append((u"***", u"Directory Variables file: %s" % self.dirvarfile, u"NA"))
-        util.Log("[PyDbg][info] Rpdb2 command finished running")
-        return rows
+            text += u"Using PYTHONPATH + %s" % u", ".join(self.pythonpath)
+        text += u"\nRpdb2 command line: %s" % " ".join(rpdb2_cmd)
+        text += u"\nDirectory Variables file: %s\n" % self.dirvarfile
+        self.debuggeewindow.SetText(text)
+        self.processcreator = AsyncProcessCreator(self.debuggeewindow, "PyDbg", parentPath, rpdb2_cmd, self.pythonpath)
+        self.processcreator.start()
+        util.Log("[PyDbg][info] Rpdb2 command running")
+
+    def RunDebugger(self):
+        if self.processcreator and self.debuggee:
+            util.Log("[PyDbg][info] Debugger attaching")
+            self.debugclient.attach(self.debuggee)
+            util.Log("[PyDbg][info] Debugger attached")
+        self.processcreator.restorepath()
+        #self.processcreator.Abort()
+        util.Log("[PyDbg][info] Debugger exiting")

@@ -15,12 +15,9 @@ __revision__ = "$Revision: -1 $"
 #----------------------------------------------------------------------------#
 # Imports
 import wx
-import wx.lib.mixins.listctrl as mixins
 
 # Editra Imports
-import ed_msg
-import eclib.outbuff as outbuff
-import util
+import eclib
 
 # Local Imports
 from PyTools.Common.PyToolsUtils import PyToolsUtils
@@ -30,25 +27,12 @@ _ = wx.GetTranslation
 
 #----------------------------------------------------------------------------#
 
-class DebuggeeWindow(outbuff.OutputBuffer,
-                       outbuff.ProcessBufferMixin,
-                       outbuff.ProcessThreadBase):
+class DebuggeeWindow(eclib.OutputBuffer,
+                       eclib.ProcessBufferMixin):
     """Debuggee Window"""
     def __init__(self, *args, **kwargs):
-        outbuff.OutputBuffer.__init__(self, *args, **kwargs)
-        outbuff.ProcessBufferMixin.__init__(self)
-        outbuff.ProcessThreadBase.__init__(self, args[0])
-        self.process = None
+        eclib.OutputBuffer.__init__(self, *args, **kwargs)
+        eclib.ProcessBufferMixin.__init__(self)
         
     def set_mainwindow(self, mw):
         self._mainw = mw
-
-    def setprocess(self, process):
-        self.process = process
-
-    def DoPopen(self):
-        """Open the process
-        @return: subprocess.Popen instance
-
-        """
-        return self.process

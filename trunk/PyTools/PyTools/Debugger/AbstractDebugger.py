@@ -33,11 +33,13 @@ class AbstractDebugger(object):
         self.programargs = programargs
         self.debuggeewindow = debuggeewindow
 
-    def DoDebug(self):
-        """Interface method override to perform the debug
-        and return a list of tuples.
-        @return: [ (Filepath), ]
+    def RunDebuggee(self):
+        """Interface method override to run the debuggee
+        """
+        raise NotImplementedError
 
+    def RunDebugger(self):
+        """Interface method override to run the debugger
         """
         raise NotImplementedError
 
@@ -46,7 +48,8 @@ class AbstractDebugger(object):
         @param callback: callable(data) callback to receive data
 
         """
-        worker = RunProcInThread(self.DoDebug, None, "Debug")
+        self.RunDebuggee()
+        worker = RunProcInThread(self.RunDebugger, None, "Debug")
         worker.start()
 
     #---- Properties ----#
