@@ -51,7 +51,7 @@ class ProcessCreator(object):
             return os.getenv("PYTHONPATH")
         return None
 
-    def createprocess(self):
+    def createprocess(self, stderr=PIPE):
         if self.pythonpath:
             if wx.Platform == "__WXMSW__":
                 os.environ["PYTHONPATH"] = os.pathsep.join(self.pythonpath)
@@ -64,7 +64,7 @@ class ProcessCreator(object):
         util.Log("[%s][info] Using CWD: %s" % (self.info, parentPath))
         util.Log("[%s][info] Starting command: %s" % (self.info, repr(cmdline)))
         return Popen(cmdline,
-                    bufsize=1048576, stdout=PIPE, stderr=PIPE,
+                    bufsize=1048576, stdout=PIPE, stderr=stderr,
                     cwd=parentPath, env=self.environment,
                     creationflags=self.creationflags)
 

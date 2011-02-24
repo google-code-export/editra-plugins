@@ -40,17 +40,11 @@ class PythonModuleFinder(AbstractModuleFinder):
     def RunModuleFind(self):
         """Run Module Finder"""
 
-        # Figure out what Python to use
-        # 1) First check configuration
-        # 2) Second check for it on the path
-        localpythonpath = ToolConfig.GetConfigValue(ToolConfig.TLC_PYTHON_PATH)
-        if not localpythonpath:
-            localpythonpath = PyToolsUtils.GetDefaultPython()
+        flag, localpythonpath = ToolConfig.GetPythonExecutablePath("PyFind")
 
-        # No configured Python
-        if not localpythonpath:
-            return self.nopythonerror
-        util.Log("[PyFind][info] Using Python: %s" % localpythonpath)
+        if not flag:
+            # No configured Python
+            return [localpythonpath]
 
         # No findmodule found in plugin
         if not pkg_resources.resource_exists("PyTools.ModuleFinder", "findmodule.py"):

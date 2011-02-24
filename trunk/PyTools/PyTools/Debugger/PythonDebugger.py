@@ -39,7 +39,6 @@ class PythonDebugger(AbstractDebugger):
         if not self.debuggerargs:
             self.debuggerargs = variabledict.get("DEBUGGERARGS")
         self.pythonpath = variabledict.get("PYTHONPATH")
-        self.nopythonerror = u"***  FATAL ERROR: No local Python configured or found"
         self.debugclient = DebugClient()
         self.debuggee = None
         self.processcreator = None
@@ -47,23 +46,17 @@ class PythonDebugger(AbstractDebugger):
     def RunDebuggee(self):
         """Run rpdb2args"""
 
-        # Figure out what Python to use
-        # 1) First check configuration
-        # 2) Second check for it on the path
-        localpythonpath = ToolConfig.GetConfigValue(ToolConfig.TLC_PYTHON_PATH)
-        if not localpythonpath:
-            localpythonpath = PyToolsUtils.GetDefaultPython()
+        flag, localpythonpath = ToolConfig.GetPythonExecutablePath("PyDbg")
 
-        # No configured Python
-        if not localpythonpath:
-            return [(u"No Python", self.nopythonerror, u"NA"),]
-        util.Log("[PyDbg][info] Using Python: %s" % localpythonpath)
+        if not flag:
+            # No configured Python
+            return [(u"No Python", localpythonpath, u"NA"),]
 
         # No rpdb2 found in plugin
-        if not pkg_resources.resource_exists("PyTools.Debugger", "test.py"):
+        if not pkg_resources.resource_exists("PyTools.Debugger", "rpdb2.py"):
             return ["No rpdb2 found"]
 
-        rpdb2_script = pkg_resources.resource_filename("PyTools.Debugger", "test.py")
+        rpdb2_script = pkg_resources.resource_filename("PyTools.Debugger", "rpdb2.py")
 
         childPath, parentPath = PyToolsUtils.get_packageroot(self.filename)
 
@@ -85,7 +78,7 @@ class PythonDebugger(AbstractDebugger):
         allargs = cmdargs
         if self.programargs:
             allargs = allargs + self.programargs.split(" ")
-        rpdb2_cmd = [localpythonpath, rpdb2_script] + allargs
+        rpdb2_cmd = [localpythonpath, "-u", rpdb2_script] + allargs
         text = ""
         if self.pythonpath:
             text += u"Using PYTHONPATH + %s" % u", ".join(self.pythonpath)
