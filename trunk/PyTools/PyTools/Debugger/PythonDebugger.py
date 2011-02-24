@@ -13,11 +13,14 @@ __revision__ = "$Revision: 1053 $"
 
 #-----------------------------------------------------------------------------#
 # Imports
+import os.path
 import pkg_resources
+from time import sleep
 
 # Local Imports
 from PyTools.Common import ToolConfig
 from PyTools.Common.PyToolsUtils import PyToolsUtils
+from PyTools.Common.PyToolsUtils import RunProcInThread
 from PyTools.Common.AsyncProcessCreator import AsyncProcessCreator
 from PyTools.Debugger.AbstractDebugger import AbstractDebugger
 from PyTools.Debugger.DebugClient import DebugClient
@@ -62,19 +65,19 @@ class PythonDebugger(AbstractDebugger):
 
         # Start rpdb2
         cmdargs = ""
-        self.debuggee = childPath
+        debuggee = childPath
         if self.debuggerargs:
             cmdargs = self.debuggerargs.split(" ")
             for i, cmd in enumerate(cmdargs):
                 if cmd == "%SCRIPT%":
-                    cmdargs[i] = self.debuggee
+                    cmdargs[i] = debuggee
                 elif cmd == "%MODULE%":
-                    self.debuggee = PyToolsUtils.get_modulepath(childPath)
-                    cmdargs[i] = self.debuggee
+                    debuggee = PyToolsUtils.get_modulepath(childPath)
+                    cmdargs[i] = debuggee
 
             cmdargs = self.rpdb2args + cmdargs
         else:
-            cmdargs = self.rpdb2args + [self.debuggee,]
+            cmdargs = self.rpdb2args + [debuggee,]
         allargs = cmdargs
         if self.programargs:
             allargs = allargs + self.programargs.split(" ")
@@ -85,15 +88,14 @@ class PythonDebugger(AbstractDebugger):
         text += u"\nRpdb2 command line: %s" % " ".join(rpdb2_cmd)
         text += u"\nDirectory Variables file: %s\n" % self.dirvarfile
         self.debuggeewindow.SetText(text)
+        self.debuggeewindow.set_debuggerfn(self.RunDebugger)
         self.processcreator = AsyncProcessCreator(self.debuggeewindow, "PyDbg", parentPath, rpdb2_cmd, self.pythonpath)
         self.processcreator.start()
         util.Log("[PyDbg][info] Rpdb2 command running")
 
-    def RunDebugger(self):
-        if self.processcreator and self.debuggee:
-            util.Log("[PyDbg][info] Debugger attaching")
-            self.debugclient.attach(self.debuggee)
-            util.Log("[PyDbg][info] Debugger attached")
+    def RunDebugger(self):                    
+        self.debuggeewindow.set_debuggerfn(None)
         self.processcreator.restorepath()
-        #self.processcreator.Abort()
-        util.Log("[PyDbg][info] Debugger exiting")
+        self.debugclient.set_pid(self.processcreator.Process.pid)
+        worker = RunProcInThread(self.debugclient.attach, None, "Debug")
+        worker.start()
