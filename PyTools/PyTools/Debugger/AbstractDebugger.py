@@ -13,10 +13,6 @@ __svnid__ = "$Id: AbstractDebugger.py 1001 2010-12-13 21:16:53Z rans@email.com $
 __revision__ = "$Revision: 1001 $"
 
 #-----------------------------------------------------------------------------#
-# Imports
-from PyTools.Common.PyToolsUtils import RunProcInThread
-
-#-----------------------------------------------------------------------------#
 
 class AbstractDebugger(object):
     def __init__(self, variabledict, debuggerargs, programargs, 
@@ -49,8 +45,6 @@ class AbstractDebugger(object):
 
         """
         self.RunDebuggee()
-        worker = RunProcInThread(self.RunDebugger, None, "Debug")
-        worker.start()
 
     #---- Properties ----#
     FileName = property(lambda self: self.filename,

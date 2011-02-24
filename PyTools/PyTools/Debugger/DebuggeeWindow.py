@@ -36,3 +36,16 @@ class DebuggeeWindow(eclib.OutputBuffer,
         
     def set_mainwindow(self, mw):
         self._mainw = mw
+
+    def set_debuggerfn(self, debuggerfn):
+        self.debuggerfn = debuggerfn
+
+    def DoProcessStart(self, cmd=''):
+        """Override this method to do any pre-processing before starting
+        a processes output.
+        @keyword cmd: Command used to start program
+        @return: None
+
+        """
+        if self.debuggerfn:
+            wx.CallAfter(self.debuggerfn)

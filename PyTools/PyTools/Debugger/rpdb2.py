@@ -833,7 +833,6 @@ class CSessionManager:
         if key is not a unicode string it will be decoded into unicode
         with the given encoding
         """
-
         key = as_unicode(key, encoding, fstrict = True)
 
         return self.__smi.attach(key, name)
@@ -14488,8 +14487,7 @@ def main(StartClient_func = StartClient, version = RPDB_TITLE):
 
 
 if __name__ == '__main__':
-    print "Starting Debuggee"
-    #import rpdb2
+    import rpdb2
 
     #
     # Debuggee breaks (pauses) here

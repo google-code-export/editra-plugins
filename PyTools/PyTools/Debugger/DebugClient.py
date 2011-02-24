@@ -24,13 +24,16 @@ from PyTools.Debugger.DebugState import DebugState
 from PyTools.Debugger.DebugBreakpoint import DebugBreakpoint
 # We'll have one class for each registered callback like synchronicity
 
+# Editra imports
+import util
+
 class DebugClient(object):
     fAllowUnencrypted = True
     fRemote = False
     host = "localhost"
     fAttach = True
     fchdir = False
-    password = "123"
+    password = "editra123"
 
     def __init__(self):
         super(DebugClient, self).__init__()
@@ -38,9 +41,19 @@ class DebugClient(object):
             DebugClient.fAllowUnencrypted, DebugClient.fRemote, DebugClient.host)
         self.state = DebugState(self.m_session_manager)
         self.breakpoint = DebugBreakpoint(self.m_session_manager)
+        self.pid = None
 
-    def attach(self, debuggee):
-        self.m_session_manager.attach(debuggee, encoding = rpdb2.detect_locale())
+    def set_pid(self, pid):
+        self.pid = str(pid)
+    
+    def attach(self):
+        if self.pid:
+            try:
+                util.Log("[PyDbg][info] Trying to Attach")
+                self.m_session_manager.attach(self.pid, encoding = rpdb2.detect_locale())
+            except Exception, ex:
+                util.Log("[PyDbg][info] Attach error: %s" % repr(ex))
+            self.pid = None
 
     def do_detach(self, event):
         self.m_session_manager.detach()
