@@ -12,6 +12,9 @@ __svnid__ = "$Id: AsyncProcessCreator.py 1025 2010-12-24 18:30:23Z rans@email.co
 __revision__ = "$Revision: 1025 $"
 
 #-----------------------------------------------------------------------------#
+# Imports
+from subprocess import STDOUT
+
 # Local Imports
 from PyTools.Common.ProcessCreator import ProcessCreator
 
@@ -25,4 +28,4 @@ class AsyncProcessCreator(eclib.ProcessThreadBase, ProcessCreator):
         ProcessCreator.__init__(self, info, parentPath, cmdline, pythonpath)
 
     def DoPopen(self):
-        return self.createprocess()
+        return self.createprocess(STDOUT)

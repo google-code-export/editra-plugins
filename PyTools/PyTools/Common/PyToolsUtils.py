@@ -26,6 +26,7 @@ import util
 _ = wx.GetTranslation
 
 class PyToolsUtils():
+
     @staticmethod
     def get_packageroot(filepath):
         # traverse downwards until we are out of a python package

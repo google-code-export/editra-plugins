@@ -22,6 +22,7 @@ import wx
 from profiler import Profile_Get, Profile_Set
 import ebmlib
 import eclib
+import util
 
 # Local Imports
 from PyTools.Common.PyToolsUtils import PyToolsUtils
@@ -35,6 +36,7 @@ TLC_DISABLED_CHK = "DisabledCheckers"
 
 # Globals
 _ = wx.GetTranslation
+NOPYTHONERROR = u"***  FATAL ERROR: No local Python configured or found"
 
 #-----------------------------------------------------------------------------#
 
@@ -42,6 +44,22 @@ def GetConfigValue(key):
     """Get a value from the config"""
     config = Profile_Get(PYTOOL_CONFIG, default=dict())
     return config.get(key, None)
+
+def GetPythonExecutablePath(info):
+    # Figure out what Python to use
+    # 1) First check configuration
+    # 2) Second check for it on the path
+    localpythonpath = GetConfigValue(TLC_PYTHON_PATH)
+    if not localpythonpath:
+        localpythonpath = PyToolsUtils.GetDefaultPython()
+
+    if localpythonpath:
+        util.Log("[%s][info] Using Python: %s" % (info, localpythonpath))
+        return (True, localpythonpath)
+    else:
+        # No configured Python
+        util.Log("[%s][info] %s" % (info, NOPYTHONERROR))
+        return (False, NOPYTHONERROR)
 
 #-----------------------------------------------------------------------------#
 

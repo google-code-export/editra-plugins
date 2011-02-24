@@ -14488,7 +14488,8 @@ def main(StartClient_func = StartClient, version = RPDB_TITLE):
 
 
 if __name__ == '__main__':
-    import rpdb2
+    print "Starting Debuggee"
+    #import rpdb2
 
     #
     # Debuggee breaks (pauses) here

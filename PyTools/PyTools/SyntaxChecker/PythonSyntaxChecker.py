@@ -56,17 +56,11 @@ class PythonSyntaxChecker(AbstractSyntaxChecker):
     def RunSyntaxCheck(self):
         """Run pylint"""
 
-        # Figure out what Python to use
-        # 1) First check configuration
-        # 2) Second check for it on the path
-        localpythonpath = ToolConfig.GetConfigValue(ToolConfig.TLC_PYTHON_PATH)
-        if not localpythonpath:
-            localpythonpath = PyToolsUtils.GetDefaultPython()
+        flag, localpythonpath = ToolConfig.GetPythonExecutablePath("PyLint")
 
-        # No configured Python
-        if not localpythonpath:
-            return [(u"No Python", self.nopythonerror, u"NA"),]
-        util.Log("[PyLint][info] Using Python: %s" % localpythonpath)
+        if not flag:
+            # No configured Python
+            return [(u"No Python", localpythonpath, u"NA"),]
 
         childPath, parentPath = PyToolsUtils.get_packageroot(self.filename)
 
