@@ -7,7 +7,8 @@
 # License: wxWindows License                                                  #
 ###############################################################################
 
-"""Launch User Interface"""
+"""PyTools Configuration User Interface"""
+
 __author__ = "Cody Precord <cprecord@editra.org>"
 __svnid__ = "$Id$"
 __revision__ = "$Revision$"
@@ -16,7 +17,6 @@ __revision__ = "$Revision$"
 # Imports
 import os
 import wx
-import wx.lib.mixins.listctrl as listmix
 
 # Editra Imports
 from profiler import Profile_Get, Profile_Set
@@ -25,6 +25,7 @@ import eclib
 
 # Local Imports
 from PyTools.Common.PyToolsUtils import PyToolsUtils
+
 #-----------------------------------------------------------------------------#
 # Configuration Keys
 PYTOOL_CONFIG = "PyTool.Config"
@@ -34,6 +35,7 @@ TLC_DISABLED_CHK = "DisabledCheckers"
 
 # Globals
 _ = wx.GetTranslation
+
 #-----------------------------------------------------------------------------#
 
 def GetConfigValue(key):
@@ -172,16 +174,10 @@ class ToolConfigPanel(wx.Panel):
 
 #-----------------------------------------------------------------------------#
 
-class MessageIDList(listmix.ListCtrlAutoWidthMixin,
-                    eclib.ListRowHighlighter,
-                    listmix.CheckListCtrlMixin,
-                    wx.ListCtrl):
+class MessageIDList(eclib.ECheckListCtrl):
     """List to display Pylint message ID's"""
     def __init__(self, *args, **kwargs):
-        wx.ListCtrl.__init__(self, *args, **kwargs)
-        listmix.ListCtrlAutoWidthMixin.__init__(self)
-        listmix.CheckListCtrlMixin.__init__(self)
-        eclib.ListRowHighlighter.__init__(self)
+        super(MessageIDList, self).__init__(*args, **kwargs)
 
         # Attributes
         self._updating = False

@@ -28,6 +28,7 @@ import plugin
 import util
 
 # Local Imports
+from PyTools.Common import Images
 from PyTools.Common.ToolConfig import ToolConfigPanel
 from PyTools.Common.BaseShelfPlugin import BaseShelfPlugin
 from PyTools.SyntaxChecker.LintShelfWindow import LintShelfWindow
@@ -45,15 +46,37 @@ class PyLint(BaseShelfPlugin):
     def __init__(self, pluginmgr):
         super(PyLint, self).__init__(pluginmgr, "PyLint", LintShelfWindow)
 
+    def GetBitmap(self):
+        """Get the tab bitmap
+        @return: wx.Bitmap
+
+        """
+        return Images.Lint.Bitmap
+
 class PyFind(BaseShelfPlugin):
     """Script Launcher and output viewer"""
     def __init__(self, pluginmgr):
         super(PyFind, self).__init__(pluginmgr, "PyFind", FindShelfWindow)
 
+    def GetBitmap(self):
+        """Get the tab bitmap
+        @return: wx.Bitmap
+
+        """
+        bmp = wx.ArtProvider.GetBitmap(str(ed_glob.ID_FIND), wx.ART_MENU)
+        return bmp
+
 class PyDebug(BaseShelfPlugin):
     """Script Launcher and output viewer"""
     def __init__(self, pluginmgr):
         super(PyDebug, self).__init__(pluginmgr, "PyDebug", DebugShelfWindow)
+
+    def GetBitmap(self):
+        """Get the tab bitmap
+        @return: wx.Bitmap
+
+        """
+        return Images.Bug.Bitmap
 
 #-----------------------------------------------------------------------------#
 # Configuration Interface

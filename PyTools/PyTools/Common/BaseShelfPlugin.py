@@ -38,6 +38,7 @@ class BaseShelfPlugin(plugin.Plugin):
     plugin.Implements(iface.ShelfI)
     
     def __init__(self, pluginmgr, pluginname, shelfwindow):
+        """@todo: document arguments"""
         super(BaseShelfPlugin, self).__init__()
         self.pluginmgr = pluginmgr
         self.pluginname = pluginname
@@ -57,7 +58,7 @@ class BaseShelfPlugin(plugin.Plugin):
     def CreateItem(self, parent):
         """Create a panel"""
         util.Log("[%s][info] Creating %s instance for Shelf" % \
-            (self.pluginname, self.pluginname))
+                  (self.pluginname, self.pluginname))
         return self.shelfwindow(parent)
 
     def GetBitmap(self):
