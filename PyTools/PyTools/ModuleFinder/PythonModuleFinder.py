@@ -22,7 +22,7 @@ from PyTools.Common.PyToolsUtils import PyToolsUtils
 from PyTools.Common.ProcessCreator import ProcessCreator
 from PyTools.ModuleFinder.AbstractModuleFinder import AbstractModuleFinder
 
-# Editra Imports
+# Editra Libraries
 import util
 import ebmlib
 

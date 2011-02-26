@@ -18,7 +18,7 @@ import os.path
 from subprocess import Popen, PIPE
 import wx
 
-# Editra Imports
+# Editra Libraries
 import util
 #-----------------------------------------------------------------------------#
 

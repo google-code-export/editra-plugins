@@ -69,7 +69,7 @@ class BaseShelfWindow(eclib.ControlBox):
         self.ctrlbar.AddControl(self.cfgbtn, wx.ALIGN_LEFT)
         return self.ctrlbar
 
-    def layout(self, taskbtndesc, taskfn, timerfn):
+    def layout(self, taskbtndesc, taskfn, timerfn=None):
         rbmp = wx.ArtProvider.GetBitmap(str(ed_glob.ID_BIN_FILE), wx.ART_MENU)
         if rbmp.IsNull() or not rbmp.IsOk():
             rbmp = None
@@ -84,7 +84,8 @@ class BaseShelfWindow(eclib.ControlBox):
         # Event Handlers
         self.Bind(wx.EVT_BUTTON, self.OnShowConfig, self.cfgbtn)
         self.Bind(wx.EVT_BUTTON, taskfn, self.taskbtn)
-        self.Bind(wx.EVT_TIMER, timerfn, self._jobtimer)
+        if timerfn:
+            self.Bind(wx.EVT_TIMER, timerfn, self._jobtimer)
         self.Bind(wx.EVT_WINDOW_DESTROY, self.OnDestroy, self)
 
         # Editra Message Handlers

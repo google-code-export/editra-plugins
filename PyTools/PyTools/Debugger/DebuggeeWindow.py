@@ -16,7 +16,7 @@ __revision__ = "$Revision: -1 $"
 # Imports
 import wx
 
-# Editra Imports
+# Editra Libraries
 import eclib
 
 # Local Imports

@@ -23,7 +23,7 @@ from PyTools.Common.PyToolsUtils import PyToolsUtils
 from PyTools.Common.ProcessCreator import ProcessCreator
 from PyTools.SyntaxChecker.AbstractSyntaxChecker import AbstractSyntaxChecker
 
-# Editra Imports
+# Editra Libraries
 import util
 import ebmlib
 

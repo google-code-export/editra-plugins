@@ -23,9 +23,10 @@ from PyTools.Common.PyToolsUtils import PyToolsUtils
 from PyTools.Common.PyToolsUtils import RunProcInThread
 from PyTools.Common.AsyncProcessCreator import AsyncProcessCreator
 from PyTools.Debugger.AbstractDebugger import AbstractDebugger
-from PyTools.Debugger.DebugClient import DebugClient
+from PyTools.Debugger.RpdbDebugger import RpdbDebugger
+from PyTools.Debugger import RPDBDEBUGGER
 
-# Editra Imports
+# Editra Libraries
 import util
 import ebmlib
 #-----------------------------------------------------------------------------#
@@ -38,11 +39,10 @@ class PythonDebugger(AbstractDebugger):
 
         # Attributes
         self.dirvarfile = variabledict.get("DIRVARFILE")
-        self.rpdb2args = ["-d", "--pwd=%s" % DebugClient.password]
+        self.rpdb2args = ["-d", "--pwd=%s" % RpdbDebugger.password]
         if not self.debuggerargs:
             self.debuggerargs = variabledict.get("DEBUGGERARGS")
         self.pythonpath = variabledict.get("PYTHONPATH")
-        self.debugclient = DebugClient()
         self.debuggee = None
         self.processcreator = None
 
@@ -96,6 +96,6 @@ class PythonDebugger(AbstractDebugger):
     def RunDebugger(self):                    
         self.debuggeewindow.set_debuggerfn(None)
         self.processcreator.restorepath()
-        self.debugclient.set_pid(self.processcreator.Process.pid)
-        worker = RunProcInThread(self.debugclient.attach, None, "Debug")
+        RPDBDEBUGGER.set_pid(self.processcreator.Process.pid)
+        worker = RunProcInThread(RPDBDEBUGGER.attach, None, "Debug")
         worker.start()

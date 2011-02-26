@@ -31,5 +31,6 @@ if setup != None:
         SyntaxChecker = PyTools:PyLint
         ModuleFinder = PyTools:PyFind
         Debugger = PyTools:PyDebug
+        BreakPoints = PyTools:PyBreakPoint
         '''
         )

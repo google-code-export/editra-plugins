@@ -21,7 +21,7 @@ __revision__ = "$Revision: 1058 $"
 # Imports
 import wx
 
-# Editra imports
+# Editra Libraries
 import ed_glob
 import iface
 import plugin
@@ -34,6 +34,7 @@ from PyTools.Common.BaseShelfPlugin import BaseShelfPlugin
 from PyTools.SyntaxChecker.LintShelfWindow import LintShelfWindow
 from PyTools.ModuleFinder.FindShelfWindow import FindShelfWindow
 from PyTools.Debugger.DebugShelfWindow import DebugShelfWindow
+from PyTools.Debugger.BreakPointsShelfWindow import BreakPointsShelfWindow
 
 #-----------------------------------------------------------------------------#
 # Globals
@@ -70,6 +71,18 @@ class PyDebug(BaseShelfPlugin):
     """Script Launcher and output viewer"""
     def __init__(self, pluginmgr):
         super(PyDebug, self).__init__(pluginmgr, "PyDebug", DebugShelfWindow)
+
+    def GetBitmap(self):
+        """Get the tab bitmap
+        @return: wx.Bitmap
+
+        """
+        return Images.Bug.Bitmap
+
+class PyBreakPoint(BaseShelfPlugin):
+    """Script Launcher and output viewer"""
+    def __init__(self, pluginmgr):
+        super(PyBreakPoint, self).__init__(pluginmgr, "PyBreakPoint", BreakPointsShelfWindow)
 
     def GetBitmap(self):
         """Get the tab bitmap
