@@ -32,6 +32,7 @@ from PyTools.Common.PyToolsUtils import PyToolsUtils
 from PyTools.Common.BaseShelfWindow import BaseShelfWindow
 from PyTools.Debugger.DebuggeeWindow import DebuggeeWindow
 from PyTools.Debugger.PythonDebugger import PythonDebugger
+from PyTools.Debugger import RPDBDEBUGGER
 
 # Globals
 _ = wx.GetTranslation
@@ -46,8 +47,7 @@ class DebugShelfWindow(BaseShelfWindow):
     def __init__(self, parent):
         """Initialize the window"""
         super(DebugShelfWindow, self).__init__(parent)
-        self.debuggeewindow = DebuggeeWindow(self, style=wx.LC_REPORT|wx.BORDER_NONE)
-        ctrlbar = self.setup(self.debuggeewindow)
+        ctrlbar = self.setup(DebuggeeWindow(self, style=wx.LC_REPORT|wx.BORDER_NONE))
         ctrlbar.AddStretchSpacer()
         self.choices = ["Program Args", "Debugger Args"]
         self.combo = wx.ComboBox(ctrlbar, wx.ID_ANY, value=self.choices[0], choices=self.choices, style=wx.CB_READONLY|eclib.PB_STYLE_NOBG)
@@ -198,7 +198,7 @@ class DebugShelfWindow(BaseShelfWindow):
             programargs = self.combotexts[0]
             debuggerargs = self.combotexts[1]
             return self.__debuggers[filetype](vardict, debuggerargs, 
-                programargs, filename, self.debuggeewindow)
+                programargs, filename, self._listCtrl)
         except Exception:
             pass
         return None
@@ -220,5 +220,5 @@ class DebugShelfWindow(BaseShelfWindow):
             util.Log("[PyDebug][info] fileName %s" % (self._curfile))
             mwid = self.GetMainWindow().GetId()
             ed_msg.PostMessage(ed_msg.EDMSG_PROGRESS_SHOW, (mwid, True))
-            ed_msg.PostMessage(ed_msg.EDMSG_PROGRESS_STATE, (mwid, -1, -1))
+            RPDBDEBUGGER.statemanager.set_mainwindowid(mwid)
             self._debugger.Debug()

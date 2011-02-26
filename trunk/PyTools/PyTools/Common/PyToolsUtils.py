@@ -18,7 +18,7 @@ import wx
 import threading
 import os.path
 
-# Editra imports
+# Editra Libraries
 import ebmlib
 import util
 

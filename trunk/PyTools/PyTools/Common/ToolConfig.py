@@ -18,7 +18,7 @@ __revision__ = "$Revision$"
 import os
 import wx
 
-# Editra Imports
+# Editra Libraries
 from profiler import Profile_Get, Profile_Set
 import ebmlib
 import eclib
@@ -33,6 +33,7 @@ PYTOOL_CONFIG = "PyTool.Config"
 TLC_PYTHON_PATH = "PythonPath"
 TLC_AUTO_RUN = "AutoRun"
 TLC_DISABLED_CHK = "DisabledCheckers"
+TLC_BREAKPOINTS = "Breakpoints"
 
 # Globals
 _ = wx.GetTranslation

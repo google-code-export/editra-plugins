@@ -18,7 +18,7 @@ import wx
 import wx.lib.mixins.listctrl as mixins
 from wx.stc import STC_INDIC_SQUIGGLE, STC_INDIC2_MASK
 
-# Editra Imports
+# Editra Libraries
 import ed_msg
 import eclib.elistmix as elistmix
 

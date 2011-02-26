@@ -21,7 +21,7 @@ __revision__ = "$Revision: 1058 $"
 # Imports
 import wx
 
-# Editra imports
+# Editra Libraries
 import ed_glob
 import iface
 import plugin

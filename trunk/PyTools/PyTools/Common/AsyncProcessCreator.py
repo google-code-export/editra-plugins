@@ -18,7 +18,7 @@ from subprocess import STDOUT
 # Local Imports
 from PyTools.Common.ProcessCreator import ProcessCreator
 
-# Editra Imports
+# Editra Libraries
 import eclib
 #-----------------------------------------------------------------------------#
 
