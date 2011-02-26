@@ -56,10 +56,10 @@ class PythonDebugger(AbstractDebugger):
             return [(u"No Python", localpythonpath, u"NA"),]
 
         # No rpdb2 found in plugin
-        if not pkg_resources.resource_exists("PyTools.Debugger", "rpdb2.py"):
+        if not pkg_resources.resource_exists("rpdb2", "rpdb2.py"):
             return ["No rpdb2 found"]
 
-        rpdb2_script = pkg_resources.resource_filename("PyTools.Debugger", "rpdb2.py")
+        rpdb2_script = pkg_resources.resource_filename("rpdb2", "rpdb2.py")
 
         childPath, parentPath = PyToolsUtils.get_packageroot(self.filename)
 
