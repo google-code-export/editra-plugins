@@ -1,5 +1,6 @@
 #! /usr/bin/env python
 
+print "PyTools rpdb2"
 """
     rpdb2.py - version 2.4.8
 

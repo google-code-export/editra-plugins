@@ -50,11 +50,9 @@ class DebugClient(object):
         if self.pid:
             try:
                 util.Log("[PyDbg][info] Trying to Attach")
-                #res = self.m_session_manager.calc_server_list()
-                #util.Log("[PyDbg][info] server list %s" % repr(res))
-                #self.m_session_manager.attach(self.pid, encoding = rpdb2.detect_locale())
-                sys.argv = ["", "--pwd=editra123", "--host=localhost", "-a", "goodbyeworld.py"]
-                rpdb2.main()
+                self.m_session_manager.attach(self.pid, encoding = rpdb2.detect_locale())
+                util.Log("[PyDbg][info] Running")
+                self.m_session_manager.request_go()
             except Exception, ex:
                 util.Log("[PyDbg][info] Attach error: %s" % repr(ex))
             self.pid = None
