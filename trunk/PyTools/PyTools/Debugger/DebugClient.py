@@ -19,7 +19,7 @@ import os.path
 import wx
 
 # Local Imports
-from PyTools.Debugger import rpdb2
+import rpdb2
 from PyTools.Debugger.DebugState import DebugState
 from PyTools.Debugger.DebugBreakpoint import DebugBreakpoint
 # We'll have one class for each registered callback like synchronicity
@@ -50,7 +50,11 @@ class DebugClient(object):
         if self.pid:
             try:
                 util.Log("[PyDbg][info] Trying to Attach")
-                self.m_session_manager.attach(self.pid, encoding = rpdb2.detect_locale())
+                #res = self.m_session_manager.calc_server_list()
+                #util.Log("[PyDbg][info] server list %s" % repr(res))
+                #self.m_session_manager.attach(self.pid, encoding = rpdb2.detect_locale())
+                sys.argv = ["", "--pwd=editra123", "--host=localhost", "-a", "goodbyeworld.py"]
+                rpdb2.main()
             except Exception, ex:
                 util.Log("[PyDbg][info] Attach error: %s" % repr(ex))
             self.pid = None
