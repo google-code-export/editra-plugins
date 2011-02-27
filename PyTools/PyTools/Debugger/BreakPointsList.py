@@ -15,10 +15,9 @@ __revision__ = "$Revision: -1 $"
 #----------------------------------------------------------------------------#
 # Imports
 import wx
-import wx.lib.mixins.listctrl as mixins
 
 # Editra Libraries
-import eclib.elistmix as elistmix
+import eclib
 
 # Local Imports
 from PyTools.Common.PyToolsUtils import PyToolsUtils
@@ -28,14 +27,10 @@ _ = wx.GetTranslation
 
 #----------------------------------------------------------------------------#
 
-class BreakPointsList(wx.ListCtrl,
-                       mixins.ListCtrlAutoWidthMixin,
-                       elistmix.ListRowHighlighter):
-    """List control for displaying syntax check results"""
-    def __init__(self, *args, **kwargs):
-        wx.ListCtrl.__init__(self, *args, **kwargs)
-        mixins.ListCtrlAutoWidthMixin.__init__(self)
-        elistmix.ListRowHighlighter.__init__(self)
+class BreakPointsList(eclib.EEditListCtrl):
+    """List control for displaying breakpoints results"""
+    def __init__(self, parent):
+        super(BreakPointsList, self).__init__(parent)
 
         # Setup
         self.InsertColumn(0, _("File"))
@@ -43,12 +38,12 @@ class BreakPointsList(wx.ListCtrl,
         self.InsertColumn(2, _("Expression"))
 
         # Event Handlers
-        self.Bind(wx.EVT_LIST_ITEM_ACTIVATED, self.OnItemActivate)
+        self.Bind(wx.EVT_LIST_ITEM_RIGHT_CLICK, self.OnItemRightClicked)
 
     def set_mainwindow(self, mw):
         self._mainw = mw
 
-    def OnItemActivate(self, evt):
+    def OnItemRightClicked(self, evt):
         """Go to the file"""
         idx = evt.GetIndex()
         fileName = self.GetItem(idx, 0).GetText()

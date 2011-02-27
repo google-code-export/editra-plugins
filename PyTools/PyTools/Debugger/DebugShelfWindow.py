@@ -47,7 +47,7 @@ class DebugShelfWindow(BaseShelfWindow):
     def __init__(self, parent):
         """Initialize the window"""
         super(DebugShelfWindow, self).__init__(parent)
-        ctrlbar = self.setup(DebuggeeWindow(self, style=wx.LC_REPORT|wx.BORDER_NONE))
+        ctrlbar = self.setup(DebuggeeWindow(self))
         ctrlbar.AddStretchSpacer()
         self.choices = ["Program Args", "Debugger Args"]
         self.combo = wx.ComboBox(ctrlbar, wx.ID_ANY, value=self.choices[0], choices=self.choices, style=wx.CB_READONLY|eclib.PB_STYLE_NOBG)

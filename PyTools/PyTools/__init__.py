@@ -28,6 +28,7 @@ import plugin
 import util
 
 # Local Imports
+from PyTools.ShelfWindowManager import ShelfWindowManager
 from PyTools.Common import Images
 from PyTools.Common.ToolConfig import ToolConfigPanel
 from PyTools.Common.BaseShelfPlugin import BaseShelfPlugin
@@ -35,17 +36,19 @@ from PyTools.SyntaxChecker.LintShelfWindow import LintShelfWindow
 from PyTools.ModuleFinder.FindShelfWindow import FindShelfWindow
 from PyTools.Debugger.DebugShelfWindow import DebugShelfWindow
 from PyTools.Debugger.BreakPointsShelfWindow import BreakPointsShelfWindow
+from PyTools.Debugger.StackFrameShelfWindow import StackFrameShelfWindow
 
 #-----------------------------------------------------------------------------#
 # Globals
 _ = wx.GetTranslation
-
+PYTOOLSSHELFWINDOWMANAGER = ShelfWindowManager()
 #-----------------------------------------------------------------------------#
 # Implementation
 class PyLint(BaseShelfPlugin):
     """Script Launcher and output viewer"""
     def __init__(self, pluginmgr):
         super(PyLint, self).__init__(pluginmgr, "PyLint", LintShelfWindow)
+        PYTOOLSSHELFWINDOWMANAGER.setLintShelfWindow(self.shelfwindow)
 
     def GetBitmap(self):
         """Get the tab bitmap
@@ -58,6 +61,7 @@ class PyFind(BaseShelfPlugin):
     """Script Launcher and output viewer"""
     def __init__(self, pluginmgr):
         super(PyFind, self).__init__(pluginmgr, "PyFind", FindShelfWindow)
+        PYTOOLSSHELFWINDOWMANAGER.setFindShelfWindow(self.shelfwindow)
 
     def GetBitmap(self):
         """Get the tab bitmap
@@ -71,6 +75,7 @@ class PyDebug(BaseShelfPlugin):
     """Script Launcher and output viewer"""
     def __init__(self, pluginmgr):
         super(PyDebug, self).__init__(pluginmgr, "PyDebug", DebugShelfWindow)
+        PYTOOLSSHELFWINDOWMANAGER.setDebugShelfWindow(self.shelfwindow)
 
     def GetBitmap(self):
         """Get the tab bitmap
@@ -83,6 +88,20 @@ class PyBreakPoint(BaseShelfPlugin):
     """Script Launcher and output viewer"""
     def __init__(self, pluginmgr):
         super(PyBreakPoint, self).__init__(pluginmgr, "PyBreakPoint", BreakPointsShelfWindow)
+        PYTOOLSSHELFWINDOWMANAGER.setBreakpointsShelfWindow(self.shelfwindow)
+
+    def GetBitmap(self):
+        """Get the tab bitmap
+        @return: wx.Bitmap
+
+        """
+        return Images.Bug.Bitmap
+
+class PyStackFrame(BaseShelfPlugin):
+    """Script Launcher and output viewer"""
+    def __init__(self, pluginmgr):
+        super(PyStackFrame, self).__init__(pluginmgr, "PyStackFrame", StackFrameShelfWindow)
+        PYTOOLSSHELFWINDOWMANAGER.setStackFrameShelfWindow(self.shelfwindow)
 
     def GetBitmap(self):
         """Get the tab bitmap

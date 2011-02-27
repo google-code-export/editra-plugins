@@ -43,7 +43,7 @@ class LintShelfWindow(BaseShelfWindow):
     def __init__(self, parent):
         """Initialize the window"""
         super(LintShelfWindow, self).__init__(parent)
-        ctrlbar = self.setup(CheckResultsList(self, style=wx.LC_REPORT|wx.BORDER_NONE))
+        ctrlbar = self.setup(CheckResultsList(self))
         self._lbl = wx.StaticText(ctrlbar)
         ctrlbar.AddControl(self._lbl)
         ctrlbar.AddStretchSpacer()

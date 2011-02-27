@@ -44,7 +44,7 @@ class BreakPointsShelfWindow(BaseShelfWindow):
     def __init__(self, parent):
         """Initialize the window"""
         super(BreakPointsShelfWindow, self).__init__(parent)
-        ctrlbar = self.setup(BreakPointsList(self, style=wx.LC_REPORT|wx.BORDER_NONE))
+        ctrlbar = self.setup(BreakPointsList(self))
         ctrlbar.AddStretchSpacer()
         txtentrysize = wx.Size(256, wx.DefaultSize.GetHeight())
         self.textentry = eclib.CommandEntryBase(ctrlbar, wx.ID_ANY, size=txtentrysize,
@@ -63,10 +63,16 @@ class BreakPointsShelfWindow(BaseShelfWindow):
         
         self.breakpoints = self._config.get(ToolConfig.TLC_BREAKPOINTS, dict())
         self._listCtrl.PopulateRows(self.breakpoints)
-        RPDBDEBUGGER.set_breakpointfn(self.GetBreakPoints)
+        RPDBDEBUGGER.set_getbreakpoints_fn(self.GetBreakPoints)
+        RPDBDEBUGGER.set_restorebreakpoints_fn(self.RestoreBreakPoints)
 
     def GetBreakPoints(self):
         return self.breakpoints
+
+    def RestoreBreakPoints(self):
+        self._listCtrl.Clear()
+        self._listCtrl.PopulateRows(self.breakpoints)
+        self._listCtrl.RefreshRows()
 
     def Destroy(self):
         ed_msg.Unsubscribe(self.OnFileLoad)
@@ -83,9 +89,7 @@ class BreakPointsShelfWindow(BaseShelfWindow):
 
         self._config[ToolConfig.TLC_BREAKPOINTS] = copy.deepcopy(self.breakpoints)
         Profile_Set(ToolConfig.PYTOOL_CONFIG, self._config)
-        self._listCtrl.Clear()
-        self._listCtrl.PopulateRows(self.breakpoints)
-        self._listCtrl.RefreshRows()
+        self.RestoreBreakPoints()
             
         if force or not self._hasrun:
 #            fname = getattr(editor, 'GetFileName', lambda: u"")()
@@ -129,7 +133,7 @@ class BreakPointsShelfWindow(BaseShelfWindow):
 
     def toggle_breakpoint(self, editor, evt):
         filepath = editor.GetFileName()
-        lineno = editor.GetCurrentLineNum()
+        lineno = editor.GetCurrentLineNum() + 1
         if not filepath or not lineno:
             return
         if filepath in self.breakpoints:
@@ -150,8 +154,3 @@ class BreakPointsShelfWindow(BaseShelfWindow):
         linenos[lineno] = (True, "", bpid)
         self.UpdateForEditor(editor)
 
-    def show_breakpoint_hit(self, fileName, lineNo):    
-        editor = PyToolsUtils.GetEditorOrOpenFile(self._mainw, fileName)
-        editor.IndicatorSetStyle(2, STC_INDIC_PLAIN)
-        editor.IndicatorSetBackground(2, 'red')
-        PyToolsUtils.set_indic(lineNo - 1, editor)
