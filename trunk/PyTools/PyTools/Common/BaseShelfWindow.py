@@ -91,7 +91,7 @@ class BaseShelfWindow(eclib.ControlBox):
         # Editra Message Handlers
         ed_msg.Subscribe(self.OnThemeChanged, ed_msg.EDMSG_THEME_CHANGED)
 
-    def GetMainWindows(self):
+    def GetMainWindow(self):
         return self._mw
 
     # Overridden by derived classes

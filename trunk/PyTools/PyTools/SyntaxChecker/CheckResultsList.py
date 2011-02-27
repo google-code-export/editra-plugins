@@ -16,11 +16,10 @@ __revision__ = "$Revision$"
 # Imports
 import wx
 from wx.stc import STC_INDIC_SQUIGGLE
-import wx.lib.mixins.listctrl as mixins
 
 # Editra Libraries
 import ed_msg
-import eclib.elistmix as elistmix
+import eclib
 
 # Local imports
 from PyTools.Common.PyToolsUtils import PyToolsUtils
@@ -30,14 +29,10 @@ _ = wx.GetTranslation
 
 #----------------------------------------------------------------------------#
 
-class CheckResultsList(wx.ListCtrl,
-                       mixins.ListCtrlAutoWidthMixin,
-                       elistmix.ListRowHighlighter):
+class CheckResultsList(eclib.EBaseListCtrl):
     """List control for displaying syntax check results"""
-    def __init__(self, *args, **kwargs):
-        wx.ListCtrl.__init__(self, *args, **kwargs)
-        mixins.ListCtrlAutoWidthMixin.__init__(self)
-        elistmix.ListRowHighlighter.__init__(self)
+    def __init__(self, parent):
+        super(CheckResultsList, self).__init__(parent)
 
         # Attributes
         self.editor = None

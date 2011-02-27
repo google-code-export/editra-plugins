@@ -46,7 +46,7 @@ class FindShelfWindow(BaseShelfWindow):
     def __init__(self, parent):
         """Initialize the window"""
         super(FindShelfWindow, self).__init__(parent)
-        ctrlbar = self.setup(FindResultsList(self, style=wx.LC_REPORT|wx.BORDER_NONE))
+        ctrlbar = self.setup(FindResultsList(self))
         ctrlbar.AddStretchSpacer()
         txtentrysize = wx.Size(256, wx.DefaultSize.GetHeight())
         self.textentry = eclib.CommandEntryBase(ctrlbar, wx.ID_ANY, size=txtentrysize,

@@ -32,5 +32,6 @@ if setup != None:
         ModuleFinder = PyTools:PyFind
         Debugger = PyTools:PyDebug
         BreakPoints = PyTools:PyBreakPoint
+        StackFrame = PyTools:PyStackFrame
         '''
         )

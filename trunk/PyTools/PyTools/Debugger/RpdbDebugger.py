@@ -26,7 +26,7 @@ from profiler import Profile_Get, Profile_Set
 import rpdb2
 from PyTools.Debugger.RpdbStateManager import RpdbStateManager
 from PyTools.Debugger.RpdbBreakpointsManager import RpdbBreakpointsManager
-# We'll have one class for each registered callback like synchronicity
+from PyTools.Debugger.RpdbStackFrameManager import RpdbStackFrameManager
 
 class RpdbDebugger(object):
     fAllowUnencrypted = True
@@ -42,10 +42,20 @@ class RpdbDebugger(object):
             RpdbDebugger.fAllowUnencrypted, RpdbDebugger.fRemote, RpdbDebugger.host)
         self.breakpointmanager = RpdbBreakpointsManager(self.sessionmanager)
         self.statemanager = RpdbStateManager(self.sessionmanager, self.breakpointmanager)
+        self.stackframemanager = RpdbStackFrameManager(self.sessionmanager)
         self.pid = None
 
-    def set_breakpointfn(self, getbreakpointfn):
+    def set_getbreakpoints_fn(self, getbreakpointfn):
         self.breakpointmanager.getbreakpoints = getbreakpointfn
+    
+    def set_seteditormarkers_fn(self, seteditormarkersfn):
+        self.stackframemanager.seteditormarkers = seteditormarkersfn
+    
+    def set_unseteditormarkers_fn(self, unseteditormarkersfn):
+        self.statemanager.unseteditormarkers = unseteditormarkersfn
+        
+    def set_restorebreakpoints_fn(self, restorebreakpointsfn):
+        self.statemanager.restorebreakpoints = restorebreakpointsfn    
     
     def set_mainwindowid(self, mwid):
         self.statemanager.mainwindowid = mwid
