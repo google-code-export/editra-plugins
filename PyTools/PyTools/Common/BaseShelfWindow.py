@@ -91,6 +91,9 @@ class BaseShelfWindow(eclib.ControlBox):
         # Editra Message Handlers
         ed_msg.Subscribe(self.OnThemeChanged, ed_msg.EDMSG_THEME_CHANGED)
 
+    def GetMainWindows(self):
+        return self._mw
+
     # Overridden by derived classes
     def Destroy(self):
         pass
@@ -104,9 +107,6 @@ class BaseShelfWindow(eclib.ControlBox):
     def _StopTimer(self):
         if self._jobtimer.IsRunning():
             self._jobtimer.Stop()
-
-    def GetMainWindow(self):
-        return self._mw
 
     def __FindMainWindow(self):
         """Find the mainwindow of this control
@@ -137,8 +137,7 @@ class BaseShelfWindow(eclib.ControlBox):
 
     def OnShowConfig(self, event):
         """Show the configuration dialog"""
-        mw = self.GetMainWindow()
-        dlg = ToolConfigDialog(mw)
+        dlg = ToolConfigDialog(self._mw)
         dlg.CenterOnParent()
         dlg.ShowModal()
 

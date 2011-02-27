@@ -15,12 +15,15 @@ __revision__ = "$Revision$"
 #----------------------------------------------------------------------------#
 # Imports
 import wx
+from wx.stc import STC_INDIC_SQUIGGLE
 import wx.lib.mixins.listctrl as mixins
-from wx.stc import STC_INDIC_SQUIGGLE, STC_INDIC2_MASK
 
 # Editra Libraries
 import ed_msg
 import eclib.elistmix as elistmix
+
+# Local imports
+from PyTools.Common.PyToolsUtils import PyToolsUtils
 
 # Globals
 _ = wx.GetTranslation
@@ -92,7 +95,7 @@ class CheckResultsList(wx.ListCtrl,
             return
         for itemIndex in reversed(xrange(0, self.GetItemCount())):
             self.DeleteItem(itemIndex)
-        CheckResultsList.unset_indic(self.editor)
+        PyToolsUtils.unset_indic(self.editor)
         self.errorlines = {}
 
     def PopulateRows(self, data):
@@ -128,40 +131,12 @@ class CheckResultsList(wx.ListCtrl,
                     errorlist = []
                     self.errorlines[lineNo] = errorlist
                 errorlist.append(eText)
-                CheckResultsList.set_indic(lineNo - 1, eType, self.editor)
+                if eType == "Error":
+                    PyToolsUtils.set_indic(lineNo - 1, self.editor)
             except ValueError:
                 pass
         self.SetColumnWidth(0, minLType)
         self.SetColumnWidth(2, minLText)
-
-    @staticmethod
-    def set_indic(lineNo, eType, editor):
-        """Highlight a word by setting an indicator
-
-        @param start: number of a symbol where the indicator starts
-        @type start: int
-
-        @param length: length of the highlighted word
-        @type length: int
-        """
-
-        if eType != "Error":
-            return False
-
-        start = editor.PositionFromLine(lineNo)
-        text = editor.GetLineUTF8(lineNo)
-        editor.StartStyling(start, STC_INDIC2_MASK)
-        editor.SetStyling(len(text), STC_INDIC2_MASK)
-        return True
-
-    @staticmethod
-    def unset_indic(editor):
-        """Remove all the indicators"""
-        if not editor:
-            return
-        editor.StartStyling(0, STC_INDIC2_MASK)
-        end = editor.GetTextLength()
-        editor.SetStyling(end, 0)
 
     @staticmethod
     def _printListCtrl(ctrl):

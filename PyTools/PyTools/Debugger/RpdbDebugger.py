@@ -44,6 +44,12 @@ class RpdbDebugger(object):
         self.statemanager = RpdbStateManager(self.sessionmanager, self.breakpointmanager)
         self.pid = None
 
+    def set_breakpointfn(self, getbreakpointfn):
+        self.breakpointmanager.getbreakpoints = getbreakpointfn
+    
+    def set_mainwindowid(self, mwid):
+        self.statemanager.mainwindowid = mwid
+        
     def set_pid(self, pid):
         self.pid = str(pid)
     
@@ -75,8 +81,11 @@ class RpdbDebugger(object):
         except rpdb2.NotAttached:
             pass
 
-    def do_jump(self):
-        pass
+    def do_jump(self, lineno):
+        try:
+            self.sessionmanager.request_jump(lineno)
+        except rpdb2.NotAttached:
+            pass
 
     def do_go(self):
         try:

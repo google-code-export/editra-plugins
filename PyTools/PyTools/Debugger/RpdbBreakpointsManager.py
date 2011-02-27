@@ -29,9 +29,7 @@ class RpdbBreakpointsManager(object):
         super(RpdbBreakpointsManager, self).__init__()
         self.sessionmanager = sessionmanager
         self.breakpoints_set = False
-    
-    def set_bpshelfwindow(self, bpshelfwindow):
-        self.bpshelfwindow = bpshelfwindow
+        self.getbreakpoints = None
     
     def loadbreakpoints(self):
         try:
@@ -41,7 +39,7 @@ class RpdbBreakpointsManager(object):
         except IOError:
             util.Log("Failed to load old breakpoints")
         util.Log("Setting breakpoints: (Path, Line No, Enabled)")
-        breakpoints = self.bpshelfwindow.GetBreakPoints()
+        breakpoints = self.getbreakpoints()
         for filepath in breakpoints:
             linenos = breakpoints[filepath]
             for lineno in linenos:
