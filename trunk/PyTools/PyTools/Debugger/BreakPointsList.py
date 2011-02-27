@@ -51,13 +51,8 @@ class BreakPointsList(wx.ListCtrl,
     def OnItemActivate(self, evt):
         """Go to the file"""
         idx = evt.GetIndex()
-        fname = self.GetItem(idx, 0).GetText()
-        editor = PyToolsUtils.GetEditorForFile(self._mainw, fname)
-        nb = self._mainw.GetNotebook()
-        if editor:
-            nb.ChangePage(editor.GetTabIndex())
-        else:
-            nb.OnDrop([fname])
+        fileName = self.GetItem(idx, 0).GetText()
+        editor = PyToolsUtils.GetEditorOrOpenFile(self._mainw, fileName)
         lineno = int(self.GetItem(idx, 1).GetText())
         editor.GotoLine(lineno)
 
@@ -75,21 +70,21 @@ class BreakPointsList(wx.ListCtrl,
         editor = wx.GetApp().GetCurrentBuffer()
         if editor:
             curpath = editor.GetFileName()
+            editor.DeleteAllBreakpoints()
         filenameText = _("File")
         exprText = _("Expression")
         minLType = max(self.GetTextExtent(filenameText)[0], self.GetColumnWidth(0))
         minLText = max(self.GetTextExtent(exprText)[0], self.GetColumnWidth(2))
-        self.errorlines = {}
         self._data = {}
         idx = 0
         for filepath in data:
             linenos = data[filepath]
             for lineno in linenos:
                 enabled, exprstr, bpid = linenos[lineno]
-                if filename == curpath:
-                    editor.SetBreakpoint(int(lineno))
-                self._data[idx] = (unicode(filename), unicode(lineno), unicode(exprstr))
-                minLType = max(minLType, self.GetTextExtent(filename)[0])
+                if filepath == curpath:
+                    editor.SetBreakpoint(int(lineno) - 1)
+                self._data[idx] = (unicode(filepath), unicode(lineno), unicode(exprstr))
+                minLType = max(minLType, self.GetTextExtent(filepath)[0])
                 minLText = max(minLText, self.GetTextExtent(exprstr)[0])
                 self.Append(self._data[idx])
                 self.SetItemData(idx, idx)

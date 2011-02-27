@@ -67,6 +67,7 @@ class DebugShelfWindow(BaseShelfWindow):
         ctrlbar.AddControl(self.search, wx.ALIGN_RIGHT)
 
         self.layout("Debug", self.OnDebug, self.OnJobTimer)
+        RPDBDEBUGGER.set_mainwindowid(self._mw.GetId())
 
         # Attributes
         self._debugger = None
@@ -218,7 +219,5 @@ class DebugShelfWindow(BaseShelfWindow):
         """Start a debug job"""
         if self._debugger:
             util.Log("[PyDebug][info] fileName %s" % (self._curfile))
-            mwid = self.GetMainWindow().GetId()
-            ed_msg.PostMessage(ed_msg.EDMSG_PROGRESS_SHOW, (mwid, True))
-            RPDBDEBUGGER.statemanager.set_mainwindowid(mwid)
+            ed_msg.PostMessage(ed_msg.EDMSG_PROGRESS_SHOW, (self._mw.GetId(), True))
             self._debugger.Debug()

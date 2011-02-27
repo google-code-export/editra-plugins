@@ -16,6 +16,7 @@ __revision__ = "$Revision $"
 # Imports
 import os
 import wx
+from wx.stc import STC_INDIC_PLAIN
 import copy
 
 # Editra Libraries
@@ -61,7 +62,8 @@ class BreakPointsShelfWindow(BaseShelfWindow):
         ed_msg.Subscribe(self.OnContextMenu, ed_msg.EDMSG_UI_STC_CONTEXT_MENU)
         
         self.breakpoints = self._config.get(ToolConfig.TLC_BREAKPOINTS, dict())
-        RPDBDEBUGGER.breakpointmanager.set_bpshelfwindow(self)
+        self._listCtrl.PopulateRows(self.breakpoints)
+        RPDBDEBUGGER.set_breakpointfn(self.GetBreakPoints)
 
     def GetBreakPoints(self):
         return self.breakpoints
@@ -81,7 +83,9 @@ class BreakPointsShelfWindow(BaseShelfWindow):
 
         self._config[ToolConfig.TLC_BREAKPOINTS] = copy.deepcopy(self.breakpoints)
         Profile_Set(ToolConfig.PYTOOL_CONFIG, self._config)
+        self._listCtrl.Clear()
         self._listCtrl.PopulateRows(self.breakpoints)
+        self._listCtrl.RefreshRows()
             
         if force or not self._hasrun:
 #            fname = getattr(editor, 'GetFileName', lambda: u"")()
@@ -131,17 +135,23 @@ class BreakPointsShelfWindow(BaseShelfWindow):
         if filepath in self.breakpoints:
             linenos = self.breakpoints[filepath]
             if lineno in linenos:
-                editor.DeleteBreakpoint(lineno)
                 enabled, exprstr, bpid = linenos[lineno]
                 RPDBDEBUGGER.delete_breakpoint(bpid)
                 del linenos[lineno]
+                self.UpdateForEditor(editor)
                 return
         else:
             linenos = {}
             self.breakpoints[filepath] = linenos
-        editor.SetBreakpoint(lineno)
         bp = RPDBDEBUGGER.set_breakpoint(filepath, lineno)
         bpid = None
         if bp:
             bpid = bp.m_id
         linenos[lineno] = (True, "", bpid)
+        self.UpdateForEditor(editor)
+
+    def show_breakpoint_hit(self, fileName, lineNo):    
+        editor = PyToolsUtils.GetEditorOrOpenFile(self._mainw, fileName)
+        editor.IndicatorSetStyle(2, STC_INDIC_PLAIN)
+        editor.IndicatorSetBackground(2, 'red')
+        PyToolsUtils.set_indic(lineNo - 1, editor)

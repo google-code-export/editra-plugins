@@ -15,6 +15,7 @@ __revision__ = "$Revision: 1025 $"
 #-----------------------------------------------------------------------------#
 # Imports
 import wx
+from wx.stc import STC_INDIC2_MASK
 import threading
 import os.path
 
@@ -85,6 +86,39 @@ class PyToolsUtils():
                 return nb.GetPage(page.GetTabIndex())
 
         return None
+        
+    @staticmethod
+    def GetEditorOrOpenFile(mainw, fname):
+        editor = PyToolsUtils.GetEditorForFile(mainw, fname)
+        nb = mainw.GetNotebook()
+        if editor:
+            nb.ChangePage(editor.GetTabIndex())
+        else:
+            nb.OnDrop([fname])
+        return PyToolsUtils.GetEditorForFile(mainw, fname)
+
+    @staticmethod
+    def set_indic(lineNo, editor):
+        """Highlight a word by setting an indicator
+
+        @param lineNo: line to set indicator starts
+        @type lineNo: int
+        """
+
+        start = editor.PositionFromLine(lineNo)
+        text = editor.GetLineUTF8(lineNo)
+        editor.StartStyling(start, STC_INDIC2_MASK)
+        editor.SetStyling(len(text), STC_INDIC2_MASK)
+        return True
+
+    @staticmethod
+    def unset_indic(editor):
+        """Remove all the indicators"""
+        if not editor:
+            return
+        editor.StartStyling(0, STC_INDIC2_MASK)
+        end = editor.GetTextLength()
+        editor.SetStyling(end, 0)
 
 #-----------------------------------------------------------------------------#
 
