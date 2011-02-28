@@ -19,6 +19,7 @@ import wx
 # Editra Libraries
 import ed_glob
 import eclib
+import ed_basewin
 import ed_msg
 import syntax.synglob as synglob
 
@@ -30,7 +31,7 @@ from PyTools.Common.PythonDirectoryVariables import PythonDirectoryVariables
 _ = wx.GetTranslation
 #-----------------------------------------------------------------------------#
 
-class BaseShelfWindow(eclib.ControlBox):
+class BaseShelfWindow(ed_basewin.EdBaseCtrlBox):
     __directoryVariables = {
         synglob.ID_LANG_PYTHON: PythonDirectoryVariables
     }
@@ -56,10 +57,7 @@ class BaseShelfWindow(eclib.ControlBox):
 
         # Setup
         self._listCtrl.set_mainwindow(self._mw)
-        self.ctrlbar = eclib.ControlBar(self, style=eclib.CTRLBAR_STYLE_GRADIENT)
-        self.ctrlbar.SetVMargin(2, 2)
-        if wx.Platform == '__WXGTK__':
-            self.ctrlbar.SetWindowStyle(eclib.CTRLBAR_STYLE_DEFAULT)
+        self.ctrlbar = self.CreateControlBar(wx.TOP)
         rbmp = wx.ArtProvider.GetBitmap(str(ed_glob.ID_PREF), wx.ART_MENU)
         if rbmp.IsNull() or not rbmp.IsOk():
             rbmp = None
