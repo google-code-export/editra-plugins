@@ -33,6 +33,7 @@ PYTOOL_CONFIG = "PyTool.Config"
 TLC_PYTHON_PATH = "PythonPath"
 TLC_AUTO_RUN = "AutoRun"
 TLC_DISABLED_CHK = "DisabledCheckers"
+TLC_EXITHANDLE = "ExitHandle"
 TLC_BREAKPOINTS = "Breakpoints"
 
 # Globals
@@ -94,9 +95,9 @@ class ToolConfigPanel(wx.Panel):
                                                 wx.FLP_CHANGE_DIR|\
                                                 wx.FLP_FILE_MUST_EXIST)
         self._python_path_pk.SetPickerCtrlGrowable(True)
-        modebox = wx.StaticBox(self, label=_("Pylint Run Mode"))
+        modebox = wx.StaticBox(self, label=_("Lint Run Mode"))
         self._modesz = wx.StaticBoxSizer(modebox, wx.VERTICAL)
-        self._autorb = wx.RadioButton(self, label=_("Automatic"))
+        self._autorb = wx.RadioButton(self, label=_("Automatic"), style=wx.RB_GROUP)
         tooltip = _("Automatically rerun on save, document change, and file load")
         self._autorb.SetToolTipString(tooltip)
         self._manualrb = wx.RadioButton(self, label=_("Manual"))
@@ -112,6 +113,18 @@ class ToolConfigPanel(wx.Panel):
         self._msgtype = wx.Choice(self, choices=_GetPyLintMessageTypes())
         self._msglst = MessageIDList(self, style=wx.LC_REPORT)
 
+        dbgexitbox = wx.StaticBox(self, label=_("Debug Exit Handlers"))
+        self._dbgexitz = wx.StaticBoxSizer(dbgexitbox, wx.VERTICAL)
+        self._dbgexitrb = wx.RadioButton(self, label=_("Yes"), style=wx.RB_GROUP)
+        tooltip = _("Auto breakpoint just before program termination")
+        self._dbgexitrb.SetToolTipString(tooltip)
+        self._nodbgexitrb = wx.RadioButton(self, label=_("No"))
+        tooltip = _("Allow immediate program termination")
+        self._nodbgexitrb.SetToolTipString(tooltip)
+        mode = self._config.get(TLC_EXITHANDLE, False)
+        self._dbgexitrb.SetValue(mode)
+        self._nodbgexitrb.SetValue(not mode)
+        
         # Setup
         self._msglst.SetConfig(self._config)
         self._msgtype.SetSelection(0)
@@ -121,8 +134,10 @@ class ToolConfigPanel(wx.Panel):
         self.__DoLayout()
 
         # Event Handlers
-        self.Bind(wx.EVT_RADIOBUTTON, self.OnCheckBox, self._autorb)
-        self.Bind(wx.EVT_RADIOBUTTON, self.OnCheckBox, self._manualrb)
+        self.Bind(wx.EVT_RADIOBUTTON, self.OnRunModeCheckBox, self._autorb)
+        self.Bind(wx.EVT_RADIOBUTTON, self.OnRunModeCheckBox, self._manualrb)
+        self.Bind(wx.EVT_RADIOBUTTON, self.OnExitHandleCheckBox, self._dbgexitrb)
+        self.Bind(wx.EVT_RADIOBUTTON, self.OnExitHandleCheckBox, self._nodbgexitrb)
         self.Bind(wx.EVT_CHOICE, self.OnChoice, self._msgtype)
         self.Bind(wx.EVT_FILEPICKER_CHANGED, self.OnPythonPathChanged, self._python_path_pk)
 
@@ -152,12 +167,27 @@ class ToolConfigPanel(wx.Panel):
         self._msgsz.Add(self._msglst, 1, wx.EXPAND|wx.ALL, 5)
         sizer.Add(self._msgsz, 1, wx.EXPAND|wx.ALL, 8)
 
+        # Exit handle configuration
+        self._dbgexitz.Add(self._dbgexitrb, 0, wx.ALL, 5)
+        self._dbgexitz.Add(self._nodbgexitrb, 0, wx.ALL, 5)
+        sizer.Add(self._dbgexitz, 0, wx.ALL|wx.EXPAND, 8)
+
         self.SetSizer(sizer)
 
-    def OnCheckBox(self, evt):
+    def OnRunModeCheckBox(self, evt):
         evt_obj = evt.GetEventObject()
         if evt_obj in (self._autorb, self._manualrb):
             self._config[TLC_AUTO_RUN] = self._autorb.GetValue()
+        else:
+            evt.Skip()
+            return
+
+        Profile_Set(PYTOOL_CONFIG, self._config)
+
+    def OnExitHandleCheckBox(self, evt):
+        evt_obj = evt.GetEventObject()
+        if evt_obj in (self._dbgexitrb, self._nodbgexitrb):
+            self._config[TLC_EXITHANDLE] = self._dbgexitrb.GetValue()
         else:
             evt.Skip()
             return

@@ -65,7 +65,7 @@ class BreakPointsList(eclib.EEditListCtrl):
         editor = wx.GetApp().GetCurrentBuffer()
         if editor:
             curpath = editor.GetFileName()
-            editor.DeleteAllBreakpoints()
+            #editor.DeleteAllBreakpoints()
         filenameText = _("File")
         exprText = _("Expression")
         minLType = max(self.GetTextExtent(filenameText)[0], self.GetColumnWidth(0))

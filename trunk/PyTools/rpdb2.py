@@ -1,6 +1,5 @@
 #! /usr/bin/env python
 
-print "PyTools rpdb2"
 """
     rpdb2.py - version 2.4.8
 
@@ -14505,7 +14504,7 @@ if __name__ == '__main__':
     #
     # You can step to debug any exit handlers.
     #
-    #rpdb2.setbreak()
+    rpdb2.setbreak()
 
 
 
