@@ -57,7 +57,7 @@ class LintShelfWindow(BaseShelfWindow):
         ed_msg.Subscribe(self.OnFileSave, ed_msg.EDMSG_FILE_SAVED)
         ed_msg.Subscribe(self.OnPageChanged, ed_msg.EDMSG_UI_NB_CHANGED)
 
-    def Destroy(self):
+    def Unsubscription(self):
         ed_msg.Unsubscribe(self.OnFileLoad)
         ed_msg.Unsubscribe(self.OnFileSave)
         ed_msg.Unsubscribe(self.OnPageChanged)

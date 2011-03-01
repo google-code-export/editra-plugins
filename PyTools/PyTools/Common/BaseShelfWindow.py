@@ -93,14 +93,14 @@ class BaseShelfWindow(ed_basewin.EdBaseCtrlBox):
         return self._mw
 
     # Overridden by derived classes
-    def Destroy(self):
+    def Unsubscription(self):
         pass
     
     def OnDestroy(self, evt):
         """Stop timer and disconnect message handlers"""
         self._StopTimer()
         ed_msg.Unsubscribe(self.OnThemeChanged)
-        self.Destroy()
+        self.Unsubscription()
 
     def _StopTimer(self):
         if self._jobtimer.IsRunning():

@@ -38,6 +38,7 @@ class RpdbStateManager(object):
         self.mainwindowid = None
         self.unseteditormarkers = None
         self.restorebreakpoints = None
+        self.restoreautorun = None
 
     def update_state(self, event):
         wx.CallAfter(self.callback_state, event)
@@ -46,6 +47,8 @@ class RpdbStateManager(object):
         ed_msg.PostMessage(ed_msg.EDMSG_PROGRESS_SHOW, (self.mainwindowid, False))
         self.unseteditormarkers()
         self.restorebreakpoints()
+        self.restoreautorun()
+        self.breakpointmanager.breakpoints_set = False
     
     def callback_state(self, event):
         old_state = self.m_state
@@ -53,8 +56,9 @@ class RpdbStateManager(object):
 
         # change menu or toolbar items displayed according to state eg. running, paused etc.
         if self.m_state == rpdb2.STATE_DETACHED:
-            # clear all debugging stuff as we have finished
-            wx.CallAfter(self.restore_editor)
+            if self.breakpointmanager.breakpoints_set:
+                # clear all debugging stuff as we have finished
+                wx.CallAfter(self.restore_editor)
         elif (old_state in [rpdb2.STATE_DETACHED, rpdb2.STATE_DETACHING, rpdb2.STATE_SPAWNING, rpdb2.STATE_ATTACHING]) and (self.m_state not in [rpdb2.STATE_DETACHED, rpdb2.STATE_DETACHING, rpdb2.STATE_SPAWNING, rpdb2.STATE_ATTACHING]):
             try:
                 serverinfo = self.sessionmanager.get_server_info()

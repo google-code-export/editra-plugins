@@ -87,7 +87,7 @@ class PythonDebugger(AbstractDebugger):
             text += u"Using PYTHONPATH + %s" % u", ".join(self.pythonpath)
         text += u"\nRpdb2 command line: %s" % " ".join(rpdb2_cmd)
         text += u"\nDirectory Variables file: %s\n" % self.dirvarfile
-        self.debuggeewindow.SetText(text)
+        self.debuggeewindow.AddText(text)
         self.debuggeewindow.set_debuggerfn(self.RunDebugger)
         self.processcreator = AsyncProcessCreator(self.debuggeewindow, "PyDbg", parentPath, rpdb2_cmd, self.pythonpath)
         self.processcreator.start()
@@ -99,3 +99,4 @@ class PythonDebugger(AbstractDebugger):
         RPDBDEBUGGER.set_pid(self.processcreator.Process.pid)
         worker = RunProcInThread(RPDBDEBUGGER.attach, None, "Debug")
         worker.start()
+        self.debuggeewindow.AddText("Debuggee running, attaching Debugger.")

@@ -60,7 +60,7 @@ class FindShelfWindow(BaseShelfWindow):
         # Editra Message Handlers
         ed_msg.Subscribe(self.OnTabMenu, ed_msg.EDMSG_UI_NB_TABMENU)
 
-    def Destroy(self):
+    def Unsubscription(self):
         ed_msg.Unsubscribe(self.OnTabMenu)
 
     def OnTabMenu(self, msg):

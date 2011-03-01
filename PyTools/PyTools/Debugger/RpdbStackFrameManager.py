@@ -34,6 +34,7 @@ class RpdbStackFrameManager(object):
         event_type_dict = {rpdb2.CEventStack: {}}
         self.sessionmanager.register_callback(self.update_stack, event_type_dict, fSingleUse = False)
         self.seteditormarkers = None
+        self.checkterminate = None
         
     #
     #------------------- Frame Select Logic -------------
@@ -74,6 +75,9 @@ class RpdbStackFrameManager(object):
         fBroken = self.m_stack[rpdb2.DICT_KEY_BROKEN]
         event = self.m_stack[rpdb2.DICT_KEY_EVENT]
         if fBroken:
+            if self.checkterminate(filename, lineno):
+                self.sessionmanager.request_go()
+                return
             if index != 0:
                 event = "call"
         else:

@@ -48,6 +48,9 @@ class RpdbDebugger(object):
     def set_getbreakpoints_fn(self, getbreakpointfn):
         self.breakpointmanager.getbreakpoints = getbreakpointfn
     
+    def set_output_fn(self, outputfn):
+        self.breakpointmanager.output = outputfn
+    
     def set_seteditormarkers_fn(self, seteditormarkersfn):
         self.stackframemanager.seteditormarkers = seteditormarkersfn
     
@@ -56,16 +59,22 @@ class RpdbDebugger(object):
         
     def set_restorebreakpoints_fn(self, restorebreakpointsfn):
         self.statemanager.restorebreakpoints = restorebreakpointsfn    
+
+    def set_restoreautorun_fn(self, restoreautorunfn):
+        self.statemanager.restoreautorun = restoreautorunfn    
     
     def set_mainwindowid(self, mwid):
         self.statemanager.mainwindowid = mwid
-        
+
+    def set_checkterminate_fn(self, checkterminatefn):
+        self.stackframemanager.checkterminate = checkterminatefn
+    
     def set_pid(self, pid):
         self.pid = str(pid)
     
     def attach(self):
         if self.pid:
-            util.Log("[PyDbg][info] Trying to Attach")
+            util.Log("[PyDbg][info] Trying to Attach")    
             self.sessionmanager.attach(self.pid, encoding = rpdb2.detect_locale())
             util.Log("[PyDbg][info] Running")
             self.pid = None

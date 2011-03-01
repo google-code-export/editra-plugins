@@ -77,6 +77,7 @@ class StackFrameShelfWindow(BaseShelfWindow):
 #        editor.MarkerDefine(37, marker[0], marker[1], marker[2]) 
 #        editor.MarkerAdd(lineNo - 1, 37)
         if event != "running":
+            editor.GotoLine(editorlineno)
             editor.MarkerDefine(3, wx.stc.STC_MARK_BACKGROUND, 'white', 'red')
             self.prevhandle = editor.MarkerAdd(editorlineno, 3)
             
@@ -84,7 +85,7 @@ class StackFrameShelfWindow(BaseShelfWindow):
         if self.preveditor and self.prevhandle:
             self.preveditor.MarkerDeleteHandle(self.prevhandle)
 
-    def Destroy(self):
+    def Unsubscription(self):
         pass
 
     def OnGo(self):

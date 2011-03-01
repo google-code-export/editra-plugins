@@ -65,6 +65,7 @@ class BreakPointsShelfWindow(BaseShelfWindow):
         self._listCtrl.PopulateRows(self.breakpoints)
         RPDBDEBUGGER.set_getbreakpoints_fn(self.GetBreakPoints)
         RPDBDEBUGGER.set_restorebreakpoints_fn(self.RestoreBreakPoints)
+        RPDBDEBUGGER.set_checkterminate_fn(self.CheckTerminate)
 
     def GetBreakPoints(self):
         return self.breakpoints
@@ -74,7 +75,19 @@ class BreakPointsShelfWindow(BaseShelfWindow):
         self._listCtrl.PopulateRows(self.breakpoints)
         self._listCtrl.RefreshRows()
 
-    def Destroy(self):
+    def CheckTerminate(self, filepath, lineno):
+        if self._config.get(ToolConfig.TLC_EXITHANDLE, False):
+            return False
+        if filepath.find("rpdb2.py") == -1:
+            return False
+        bpinfile = self.breakpoints.get(filepath)
+        if not bpinfile:
+            return True
+        if not bpinfile.get(lineno):
+            return True
+        return False
+        
+    def Unsubscription(self):
         ed_msg.Unsubscribe(self.OnFileLoad)
         ed_msg.Unsubscribe(self.OnFileSave)
         ed_msg.Unsubscribe(self.OnPageChanged)

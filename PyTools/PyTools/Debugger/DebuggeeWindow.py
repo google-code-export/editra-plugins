@@ -37,6 +37,10 @@ class DebuggeeWindow(eclib.OutputBuffer,
     def set_mainwindow(self, mw):
         self._mainw = mw
 
+    def AddText(self, text):
+        newtext = u"%s\n%s\n" % (self.GetText(), text)
+        self.SetText(newtext)
+    
     def set_debuggerfn(self, debuggerfn):
         self.debuggerfn = debuggerfn
 
