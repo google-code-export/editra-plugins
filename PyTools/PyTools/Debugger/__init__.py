@@ -19,6 +19,3 @@ from PyTools.Debugger.RpdbDebugger import RpdbDebugger
 # Globals
 RPDBDEBUGGER = RpdbDebugger()
 #----------------------------------------------------------------------------#
-
-
-

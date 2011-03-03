@@ -62,7 +62,6 @@ class StackFrameShelfWindow(BaseShelfWindow):
 
         # Attributes
         RPDBDEBUGGER.set_seteditormarkers_fn(self.SetEditorMarkers)
-        RPDBDEBUGGER.set_unseteditormarkers_fn(self.DeleteEditorMarkers)
         
         self.preveditor = None
         self.prevhandle = None
@@ -78,13 +77,8 @@ class StackFrameShelfWindow(BaseShelfWindow):
 #        editor.MarkerAdd(lineNo - 1, 37)
         if event != "running":
             editor.GotoLine(editorlineno)
-            editor.MarkerDefine(3, wx.stc.STC_MARK_BACKGROUND, 'white', 'red')
-            self.prevhandle = editor.MarkerAdd(editorlineno, 3)
+            self.prevhandle = editor.SetBreakpointTriggered(editorlineno)
             
-    def DeleteEditorMarkers(self):
-        if self.preveditor and self.prevhandle:
-            self.preveditor.MarkerDeleteHandle(self.prevhandle)
-
     def Unsubscription(self):
         pass
 
