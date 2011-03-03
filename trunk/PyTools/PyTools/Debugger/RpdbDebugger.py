@@ -54,15 +54,9 @@ class RpdbDebugger(object):
     def set_seteditormarkers_fn(self, seteditormarkersfn):
         self.stackframemanager.seteditormarkers = seteditormarkersfn
     
-    def set_unseteditormarkers_fn(self, unseteditormarkersfn):
-        self.statemanager.unseteditormarkers = unseteditormarkersfn
-        
     def set_restorebreakpoints_fn(self, restorebreakpointsfn):
-        self.statemanager.restorebreakpoints = restorebreakpointsfn    
+        self.restorebreakpoints = restorebreakpointsfn    
 
-    def set_restoreautorun_fn(self, restoreautorunfn):
-        self.statemanager.restoreautorun = restoreautorunfn    
-    
     def set_mainwindowid(self, mwid):
         self.statemanager.mainwindowid = mwid
 

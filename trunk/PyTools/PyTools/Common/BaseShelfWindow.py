@@ -148,3 +148,4 @@ class BaseShelfWindow(ed_basewin.EdBaseCtrlBox):
 
     def Clear(self):
         self._listCtrl.Clear()
+        

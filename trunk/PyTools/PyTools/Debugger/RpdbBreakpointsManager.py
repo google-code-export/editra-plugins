@@ -48,5 +48,5 @@ class RpdbBreakpointsManager(object):
                 linenos[lineno] = enabled, exprstr, bpid
                 util.Log("%s, %d, %s, %s" % (filepath, lineno, enabled, exprstr))
         self.breakpoints_set = True
-        self.output("Debugger attached, Breakpoints set. Program output starts now...\n")
+        self.output("\nDebugger attached. Breakpoints set. Program output starts now...\n")
         self.sessionmanager.request_go()

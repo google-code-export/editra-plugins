@@ -70,11 +70,48 @@ class BreakPointsShelfWindow(BaseShelfWindow):
     def GetBreakPoints(self):
         return self.breakpoints
 
+    def DeleteBreakpoint(self, filepath, lineno):
+        if not filepath in self.breakpoints:
+            return None
+        linenos = self.breakpoints[filepath]
+        if not lineno in linenos:
+            return None
+        enabled, exprstr, bpid = linenos[lineno]
+        RPDBDEBUGGER.delete_breakpoint(bpid)
+        del linenos[lineno]
+        if len(linenos) == 0:
+            del self.breakpoints[filepath]
+        self.SaveBreakpoints()
+        return lineno
+        
+    def ChangeBreakpoint(self, filepath, lineno, newexprstr, newenabled):
+        enabled, exprstr, bpid = self.breakpoints[filepath][lineno]
+        self.breakpoints[filepath][lineno] = (newenabled, newexprstr, bpid)
+        self.SaveBreakpoints()
+        
+    def SetBreakpoint(self, filepath, lineno, exprstr, enabled):
+        if filepath in self.breakpoints:
+            linenos = self.breakpoints[filepath]
+        else:
+            linenos = {}
+            self.breakpoints[filepath] = linenos
+        bp = RPDBDEBUGGER.set_breakpoint(filepath, lineno, exprstr)
+        bpid = None
+        if bp:
+            bpid = bp.m_id
+        linenos[lineno] = (enabled, exprstr, bpid)
+        self.SaveBreakpoints()
+        return lineno
+        
     def RestoreBreakPoints(self):
         self._listCtrl.Clear()
         self._listCtrl.PopulateRows(self.breakpoints)
         self._listCtrl.RefreshRows()
 
+    def SaveBreakpoints(self):
+        self._config[ToolConfig.TLC_BREAKPOINTS] = copy.deepcopy(self.breakpoints)
+        Profile_Set(ToolConfig.PYTOOL_CONFIG, self._config)
+    
     def CheckTerminate(self, filepath, lineno):
         if self._config.get(ToolConfig.TLC_EXITHANDLE, False):
             return False
@@ -98,10 +135,7 @@ class BreakPointsShelfWindow(BaseShelfWindow):
         ispython = langid == synglob.ID_LANG_PYTHON
         self.taskbtn.Enable(ispython)
 
-        filename = editor.GetFileName()
-
-        self._config[ToolConfig.TLC_BREAKPOINTS] = copy.deepcopy(self.breakpoints)
-        Profile_Set(ToolConfig.PYTOOL_CONFIG, self._config)
+        self.SaveBreakpoints()
         self.RestoreBreakPoints()
             
         if force or not self._hasrun:
@@ -146,24 +180,9 @@ class BreakPointsShelfWindow(BaseShelfWindow):
 
     def toggle_breakpoint(self, editor, evt):
         filepath = editor.GetFileName()
-        lineno = editor.GetCurrentLineNum() + 1
-        if not filepath or not lineno:
-            return
-        if filepath in self.breakpoints:
-            linenos = self.breakpoints[filepath]
-            if lineno in linenos:
-                enabled, exprstr, bpid = linenos[lineno]
-                RPDBDEBUGGER.delete_breakpoint(bpid)
-                del linenos[lineno]
-                self.UpdateForEditor(editor)
-                return
-        else:
-            linenos = {}
-            self.breakpoints[filepath] = linenos
-        bp = RPDBDEBUGGER.set_breakpoint(filepath, lineno)
-        bpid = None
-        if bp:
-            bpid = bp.m_id
-        linenos[lineno] = (True, "", bpid)
-        self.UpdateForEditor(editor)
-
+        editorlineno = editor.GetCurrentLineNum()
+        lineno = editorlineno + 1
+        if not self.DeleteBreakpoint(filepath, lineno):
+            self.SetBreakpoint(filepath, lineno, "", True)
+        self.RestoreBreakPoints()
+        

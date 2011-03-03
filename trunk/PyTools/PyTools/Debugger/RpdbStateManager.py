@@ -36,18 +36,12 @@ class RpdbStateManager(object):
         event_type_dict = {rpdb2.CEventState: {}}
         self.sessionmanager.register_callback(self.update_state, event_type_dict, fSingleUse = False)
         self.mainwindowid = None
-        self.unseteditormarkers = None
-        self.restorebreakpoints = None
-        self.restoreautorun = None
 
     def update_state(self, event):
         wx.CallAfter(self.callback_state, event)
 
     def restore_editor(self):
         ed_msg.PostMessage(ed_msg.EDMSG_PROGRESS_SHOW, (self.mainwindowid, False))
-        self.unseteditormarkers()
-        self.restorebreakpoints()
-        self.restoreautorun()
         self.breakpointmanager.breakpoints_set = False
     
     def callback_state(self, event):

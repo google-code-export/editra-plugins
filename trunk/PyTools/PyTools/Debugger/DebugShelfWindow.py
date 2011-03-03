@@ -208,7 +208,7 @@ class DebugShelfWindow(BaseShelfWindow):
     def restorepylint_autorun(self):
         self._config[ToolConfig.TLC_AUTO_RUN] = True    
         Profile_Set(ToolConfig.PYTOOL_CONFIG, self._config)
-        self._listCtrl.AddText("Reenabling Pylint Autorun")
+        self._listCtrl.AddText("Reenabling Pylint Autorun.")
     
     def _debug(self, filetype, vardict, filename):
         debugger = self.get_debugger(filetype, vardict, filename)
@@ -221,12 +221,12 @@ class DebugShelfWindow(BaseShelfWindow):
         if mode:
             self._config[ToolConfig.TLC_AUTO_RUN] = False
             Profile_Set(ToolConfig.PYTOOL_CONFIG, self._config)
-            self._listCtrl.AddText("Disabling Pylint Autorun during Debug")
-            RPDBDEBUGGER.set_restoreautorun_fn(self.restorepylint_autorun)
+            self._listCtrl.AddText("Disabling Pylint Autorun during Debug.")
+            self._listCtrl.set_restoreautorun_fn(self.restorepylint_autorun)
         else:
             def donothing():
                 pass
-            RPDBDEBUGGER.set_restoreautorun_fn(donothing)
+            self._listCtrl.set_restoreautorun_fn(donothing)
 
         # Start job timer
         self._StopTimer()
