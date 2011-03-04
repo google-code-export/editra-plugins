@@ -81,8 +81,10 @@ class PyToolsUtils():
 
         """
         nb = mainw.GetNotebook()
+        filepath = os.path.normcase(fname)
         for page in nb.GetTextControls():
-            if page.GetFileName() == fname:
+            tabfile = os.path.normcase(page.GetFileName())
+            if tabfile == filepath:
                 return nb.GetPage(page.GetTabIndex())
 
         return None

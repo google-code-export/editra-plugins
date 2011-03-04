@@ -28,6 +28,8 @@ from PyTools.Debugger.RpdbStateManager import RpdbStateManager
 from PyTools.Debugger.RpdbBreakpointsManager import RpdbBreakpointsManager
 from PyTools.Debugger.RpdbStackFrameManager import RpdbStackFrameManager
 
+#----------------------------------------------------------------------------#
+
 class RpdbDebugger(object):
     fAllowUnencrypted = True
     fRemote = False
@@ -42,8 +44,10 @@ class RpdbDebugger(object):
             RpdbDebugger.fAllowUnencrypted, RpdbDebugger.fRemote, RpdbDebugger.host)
         self.breakpointmanager = RpdbBreakpointsManager(self.sessionmanager)
         self.statemanager = RpdbStateManager(self.sessionmanager, self.breakpointmanager)
-        self.stackframemanager = RpdbStackFrameManager(self.sessionmanager)
+        self.stackframemanager = RpdbStackFrameManager(self.sessionmanager, self.breakpointmanager, self.do_go)
         self.pid = None
+        self.removeeditormarkers = None
+        self.restorebreakpoints = None
 
     def set_getbreakpoints_fn(self, getbreakpointfn):
         self.breakpointmanager.getbreakpoints = getbreakpointfn
@@ -53,6 +57,9 @@ class RpdbDebugger(object):
     
     def set_seteditormarkers_fn(self, seteditormarkersfn):
         self.stackframemanager.seteditormarkers = seteditormarkersfn
+    
+    def set_removeeditormarkers_fn(self, removeeditormarkersfn):
+        self.removeeditormarkers = removeeditormarkersfn
     
     def set_restorebreakpoints_fn(self, restorebreakpointsfn):
         self.restorebreakpoints = restorebreakpointsfn    
@@ -100,8 +107,9 @@ class RpdbDebugger(object):
         except rpdb2.NotAttached:
             pass
 
-    def do_go(self):
+    def do_go(self, filename, lineno):
         try:
+            self.removeeditormarkers(filename, lineno)
             self.sessionmanager.request_go()
         except rpdb2.NotAttached:
             pass

@@ -24,10 +24,14 @@ import ed_msg
 # Local Imports
 import rpdb2
 
+#----------------------------------------------------------------------------#
+
 class RpdbStackFrameManager(object):
-    def __init__(self, sessionmanager):
+    def __init__(self, sessionmanager, breakpointmanager, do_gofn):
         super(RpdbStackFrameManager, self).__init__()
         self.sessionmanager = sessionmanager
+        self.breakpointmanager = breakpointmanager
+        self.do_go = do_gofn
         self.m_stack = None
         event_type_dict = {rpdb2.CEventStackFrameChange: {}}
         self.sessionmanager.register_callback(self.update_frame, event_type_dict, fSingleUse = False)
@@ -73,15 +77,17 @@ class RpdbStackFrameManager(object):
         lineno = e[1]
 
         fBroken = self.m_stack[rpdb2.DICT_KEY_BROKEN]
-        event = self.m_stack[rpdb2.DICT_KEY_EVENT]
-        if fBroken:
-            if self.checkterminate(filename, lineno):
-                self.sessionmanager.request_go()
-                return
-            if index != 0:
-                event = "call"
-        else:
-            event = "running"
-        wx.CallAfter(self.seteditormarkers, filename, lineno, event)
+        #event = self.m_stack[rpdb2.DICT_KEY_EVENT]
+        if not fBroken:
+            return
+        if not self.breakpointmanager.breakpoints_set:
+            self.breakpointmanager.loadbreakpoints(filename)
+            self.breakpointmanager.breakpoints_set = True
+            self.do_go(filename, lineno)
+            return            
+        if self.checkterminate(filename, lineno):
+            self.do_go(filename, lineno)
+            return
+        self.seteditormarkers(filename, lineno)
 
 
