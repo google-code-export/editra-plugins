@@ -24,6 +24,8 @@ import util
 # Local Imports
 import rpdb2
 
+#----------------------------------------------------------------------------#
+
 class RpdbBreakpointsManager(object):
     def __init__(self, sessionmanager):
         super(RpdbBreakpointsManager, self).__init__()
@@ -31,7 +33,7 @@ class RpdbBreakpointsManager(object):
         self.breakpoints_set = False
         self.getbreakpoints = None
     
-    def loadbreakpoints(self):
+    def loadbreakpoints(self, filename):
         try:
             self.sessionmanager.load_breakpoints()
             util.Log("[DbgBp][info] Removing old breakpoints")
@@ -48,5 +50,4 @@ class RpdbBreakpointsManager(object):
                 linenos[lineno] = enabled, exprstr, bpid
                 util.Log("%s, %d, %s, %s" % (filepath, lineno, enabled, exprstr))
         self.breakpoints_set = True
-        self.output("\nDebugger attached. Breakpoints set. Program output starts now...\n")
-        self.sessionmanager.request_go()
+        self.output("\nDebugger attached. Breakpoints set. %s output starts now...\n" % filename)

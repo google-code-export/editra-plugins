@@ -165,7 +165,12 @@ class BreakPointsShelfWindow(BaseShelfWindow):
         self.UpdateForEditor(editor)
 
     def OnGo(self, event):
-        RPDBDEBUGGER.do_go()
+        editor = wx.GetApp().GetCurrentBuffer()
+        filepath = editor.GetFileName()
+        editorlineno = editor.GetCurrentLineNum()
+        # need to get current active stack frame and hence work out current active broken thread's
+        # filename and line number
+        RPDBDEBUGGER.do_go(filepath, editorlineno)
     
     def OnContextMenu(self, msg):
         editor = wx.GetApp().GetCurrentBuffer()

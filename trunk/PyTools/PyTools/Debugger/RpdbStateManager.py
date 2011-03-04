@@ -24,6 +24,8 @@ import ed_msg
 # Local Imports
 import rpdb2
 
+#----------------------------------------------------------------------------#
+
 class RpdbStateManager(object):
     def __init__(self, sessionmanager, breakpointmanager):
         super(RpdbStateManager, self).__init__()
@@ -40,10 +42,6 @@ class RpdbStateManager(object):
     def update_state(self, event):
         wx.CallAfter(self.callback_state, event)
 
-    def restore_editor(self):
-        ed_msg.PostMessage(ed_msg.EDMSG_PROGRESS_SHOW, (self.mainwindowid, False))
-        self.breakpointmanager.breakpoints_set = False
-    
     def callback_state(self, event):
         old_state = self.m_state
         self.m_state = event.m_state
@@ -52,7 +50,8 @@ class RpdbStateManager(object):
         if self.m_state == rpdb2.STATE_DETACHED:
             if self.breakpointmanager.breakpoints_set:
                 # clear all debugging stuff as we have finished
-                wx.CallAfter(self.restore_editor)
+                ed_msg.PostMessage(ed_msg.EDMSG_PROGRESS_SHOW, (self.mainwindowid, False))
+                self.breakpointmanager.breakpoints_set = False
         elif (old_state in [rpdb2.STATE_DETACHED, rpdb2.STATE_DETACHING, rpdb2.STATE_SPAWNING, rpdb2.STATE_ATTACHING]) and (self.m_state not in [rpdb2.STATE_DETACHED, rpdb2.STATE_DETACHING, rpdb2.STATE_SPAWNING, rpdb2.STATE_ATTACHING]):
             try:
                 serverinfo = self.sessionmanager.get_server_info()
@@ -65,12 +64,7 @@ class RpdbStateManager(object):
         if self.m_state == rpdb2.STATE_BROKEN:
             # we hit a breakpoint
             # show the stack viewer, threads viewer, namespace viewer
-            if not self.breakpointmanager.breakpoints_set:
-                wx.CallAfter(self.breakpointmanager.loadbreakpoints)
-#            elif serverinfo: 
-#                wx.CallAfter(self.bpshelfwindow.show_breakpoint_hit, serverinfo.m_filename, lineNo?)
-# can't be done here - as line number seems to only come in the stack frame event CEventStackFrameChange
-# see call hierarachy for set_position in winpdb.py where the markers get set
+            pass
             
         elif self.m_state == rpdb2.STATE_ANALYZE:
             # we are analyzing an exception

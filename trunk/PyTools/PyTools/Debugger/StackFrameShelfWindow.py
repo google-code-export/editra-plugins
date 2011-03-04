@@ -37,18 +37,10 @@ from PyTools.Debugger import RPDBDEBUGGER
 # Globals
 _ = wx.GetTranslation
 
-MARKER_CALL = [stc.STC_MARK_CHARACTER + ord('C'), wx.WHITE, "#99A9C2"]
-MARKER_LINE = [stc.STC_MARK_CHARACTER + ord('L'), wx.WHITE, "#99A9C2"]
-MARKER_RETURN = [stc.STC_MARK_CHARACTER + ord('R'), wx.WHITE, "#99A9C2"]
-MARKER_EXCEPTION = [stc.STC_MARK_CHARACTER + ord('E'), wx.WHITE, "#99A9C2"]
-MARKER_RUNNING = [stc.STC_MARK_CHARACTER + ord('*'), wx.WHITE, "#99A9C2"]
-
 ID_TOGGLE_BREAKPOINT = wx.NewId()
 #-----------------------------------------------------------------------------#
 
 class StackFrameShelfWindow(BaseShelfWindow):
-    eventmarkermapping = {'running': MARKER_RUNNING, 'call': MARKER_CALL, 'line': MARKER_LINE, 'return': MARKER_RETURN,  'exception': MARKER_EXCEPTION}
-
     def __init__(self, parent):
         """Initialize the window"""
         super(StackFrameShelfWindow, self).__init__(parent)
@@ -62,23 +54,41 @@ class StackFrameShelfWindow(BaseShelfWindow):
 
         # Attributes
         RPDBDEBUGGER.set_seteditormarkers_fn(self.SetEditorMarkers)
+        RPDBDEBUGGER.set_removeeditormarkers_fn(self.RemoveEditorMarkers)
         
-        self.preveditor = None
-        self.prevhandle = None
+        self.triggeredbps = {}
         
-    def SetEditorMarkers(self, fileName, lineNo, event):
-        editorlineno = lineNo - 1
+    def SetEditorMarkers(self, fileName, lineNo):
         editor = PyToolsUtils.GetEditorOrOpenFile(self._mw, fileName)
-        marker = StackFrameShelfWindow.eventmarkermapping[event]
-        if editor == self.preveditor:
-            editor.MarkerDeleteHandle(self.prevhandle)
-        self.preveditor = editor
-#        editor.MarkerDefine(37, marker[0], marker[1], marker[2]) 
-#        editor.MarkerAdd(lineNo - 1, 37)
-        if event != "running":
-            editor.GotoLine(editorlineno)
-            self.prevhandle = editor.SetBreakpointTriggered(editorlineno)
-            
+        editorlineno = lineNo - 1
+        editor.GotoLine(editorlineno)
+        handle = editor.SetBreakpointTriggered(editorlineno)
+        linenos = self.triggeredbps.get(editor)
+        if not linenos:
+            linenos = {}
+            self.triggeredbps[editor] = linenos                
+        if handle == -1:
+            linenos[editorlineno] = linenos[editorlineno] + 1
+        else:
+            linenos[editorlineno] = 1
+
+    def RemoveEditorMarkers(self, fileName, editorlineno):
+        editor = PyToolsUtils.GetEditorForFile(self._mw, fileName)
+        if not editor:
+            return
+        linenos = self.triggeredbps.get(editor)
+        if not linenos:
+            return
+        numberthreads = linenos.get(editorlineno)
+        if not numberthreads:
+            return
+        numberthreads = numberthreads - 1
+        if numberthreads:
+            linenos[editorlineno] = numberthreads
+            return
+        del linenos[editorlineno]
+        editor.DeleteBreakpoint(editorlineno)        
+    
     def Unsubscription(self):
         pass
 
