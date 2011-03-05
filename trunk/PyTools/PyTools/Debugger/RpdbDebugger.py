@@ -42,37 +42,18 @@ class RpdbDebugger(object):
         super(RpdbDebugger, self).__init__()
         self.sessionmanager = rpdb2.CSessionManager(RpdbDebugger.password, \
             RpdbDebugger.fAllowUnencrypted, RpdbDebugger.fRemote, RpdbDebugger.host)
-        self.breakpointmanager = RpdbBreakpointsManager(self.sessionmanager)
-        self.statemanager = RpdbStateManager(self.sessionmanager, self.breakpointmanager)
-        self.stackframemanager = RpdbStackFrameManager(self.sessionmanager, self.breakpointmanager, self.do_go)
+        self.breakpointmanager = RpdbBreakpointsManager(self)
+        self.statemanager = RpdbStateManager(self)
+        self.stackframemanager = RpdbStackFrameManager(self)
         self.pid = None
+        self.mainwindowid = None
+        self.debuggeroutput = None
+        self.getbreakpoints = None
+        self.breakpoints_loaded = False
+        self.seteditormarkers = None
         self.removeeditormarkers = None
-        self.restorebreakpoints = None
+        self.checkterminate = None
 
-    def set_getbreakpoints_fn(self, getbreakpointfn):
-        self.breakpointmanager.getbreakpoints = getbreakpointfn
-    
-    def set_output_fn(self, outputfn):
-        self.breakpointmanager.output = outputfn
-    
-    def set_seteditormarkers_fn(self, seteditormarkersfn):
-        self.stackframemanager.seteditormarkers = seteditormarkersfn
-    
-    def set_removeeditormarkers_fn(self, removeeditormarkersfn):
-        self.removeeditormarkers = removeeditormarkersfn
-    
-    def set_restorebreakpoints_fn(self, restorebreakpointsfn):
-        self.restorebreakpoints = restorebreakpointsfn    
-
-    def set_mainwindowid(self, mwid):
-        self.statemanager.mainwindowid = mwid
-
-    def set_checkterminate_fn(self, checkterminatefn):
-        self.stackframemanager.checkterminate = checkterminatefn
-    
-    def set_pid(self, pid):
-        self.pid = str(pid)
-    
     def attach(self):
         if self.pid:
             util.Log("[PyDbg][info] Trying to Attach")    
@@ -80,9 +61,6 @@ class RpdbDebugger(object):
             util.Log("[PyDbg][info] Running")
             self.pid = None
 
-    def get_breakpointmanager(self):
-        return self.breakpointmanager
-    
     def do_detach(self):
         try:
             self.sessionmanager.detach()
@@ -173,3 +151,10 @@ class RpdbDebugger(object):
             self.sessionmanager.delete_breakpoint([bpid], True)
         except rpdb2.NotAttached:
             pass
+
+    def load_breakpoints(self):
+        try:
+            self.sessionmanager.load_breakpoints()
+        except rpdb2.NotAttached:
+            pass
+        

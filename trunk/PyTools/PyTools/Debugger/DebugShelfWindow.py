@@ -67,8 +67,8 @@ class DebugShelfWindow(BaseShelfWindow):
         ctrlbar.AddControl(self.search, wx.ALIGN_RIGHT)
 
         self.layout("Debug", self.OnDebug, self.OnJobTimer)
-        RPDBDEBUGGER.set_mainwindowid(self._mw.GetId())
-        RPDBDEBUGGER.set_output_fn(self._listCtrl.AddText)
+        RPDBDEBUGGER.mainwindowid = self._mw.GetId()
+        RPDBDEBUGGER.debuggeroutput = self._listCtrl.AddText
 
         # Attributes
         self._debugger = None
@@ -222,11 +222,11 @@ class DebugShelfWindow(BaseShelfWindow):
             self._config[ToolConfig.TLC_AUTO_RUN] = False
             Profile_Set(ToolConfig.PYTOOL_CONFIG, self._config)
             self._listCtrl.AddText("Disabling Pylint Autorun during Debug.")
-            self._listCtrl.set_restoreautorun_fn(self.restorepylint_autorun)
+            self._listCtrl.restoreautorun = self.restorepylint_autorun
         else:
             def donothing():
                 pass
-            self._listCtrl.set_restoreautorun_fn(donothing)
+            self._listCtrl.restoreautorun = donothing
 
         # Start job timer
         self._StopTimer()

@@ -34,7 +34,7 @@ class DebuggeeWindow(eclib.OutputBuffer,
     def __init__(self, *args, **kwargs):
         eclib.OutputBuffer.__init__(self, *args, **kwargs)
         eclib.ProcessBufferMixin.__init__(self)
-        self.debuggerfn = None
+        self.calldebugger = None
         self.restoreautorun = None
         
     def set_mainwindow(self, mw):
@@ -44,15 +44,6 @@ class DebuggeeWindow(eclib.OutputBuffer,
         newtext = u"%s\n%s\n" % (self.GetText(), text)
         self.SetText(newtext)
     
-    def set_debuggerfn(self, debuggerfn):
-        self.debuggerfn = debuggerfn
-
-    def set_restorebreakpoints_fn(self, restorebreakpointsfn):
-        self.restorebreakpoints = restorebreakpointsfn
-
-    def set_restoreautorun_fn(self, restoreautorunfn):
-        self.restoreautorun = restoreautorunfn
-
     def DoProcessStart(self, cmd=''):
         """Override this method to do any pre-processing before starting
         a processes output.
@@ -60,8 +51,8 @@ class DebuggeeWindow(eclib.OutputBuffer,
         @return: None
 
         """
-        if self.debuggerfn:
-            wx.CallAfter(self.debuggerfn)
+        if self.calldebugger:
+            wx.CallAfter(self.calldebugger)
 
     def DoProcessExit(self, code=0):
         """Override this method to do any post processing after the running
@@ -74,5 +65,4 @@ class DebuggeeWindow(eclib.OutputBuffer,
         self.AddText("Debugger detached. Debuggee finished.")
         self.restoreautorun()
         self.Stop()
-        wx.CallAfter(RPDBDEBUGGER.restorebreakpoints)
         
