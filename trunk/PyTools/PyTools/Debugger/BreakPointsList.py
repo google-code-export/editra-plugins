@@ -15,6 +15,7 @@ __revision__ = "$Revision: -1 $"
 #----------------------------------------------------------------------------#
 # Imports
 import wx
+import os.path
 
 # Editra Libraries
 import eclib
@@ -58,7 +59,7 @@ class BreakPointsList(eclib.EToggleEditListCtrl):
     def _seteditorbreakpoint(self, filepath, lineno, enabled, delete=False):
         editor = wx.GetApp().GetCurrentBuffer()
         if editor:
-            curpath = editor.GetFileName()
+            curpath = os.path.normcase(editor.GetFileName())
             if filepath == curpath:
                 editorlineno = lineno - 1
                 if delete:
@@ -99,8 +100,7 @@ class BreakPointsList(eclib.EToggleEditListCtrl):
                     
     def Clear(self):
         """Delete all the rows """
-        for itemIndex in reversed(xrange(0, self.GetItemCount())):
-            self.DeleteItem(itemIndex)
+        self.DeleteAllItems()
         editor = wx.GetApp().GetCurrentBuffer()
         if editor:
             editor.DeleteAllBreakpoints()

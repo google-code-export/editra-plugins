@@ -15,12 +15,14 @@ __revision__ = "$Revision: -1 $"
 #----------------------------------------------------------------------------#
 # Imports
 import wx
+import os.path
 
 # Editra Libraries
 import eclib
 
 # Local Imports
 from PyTools.Common.PyToolsUtils import PyToolsUtils
+from PyTools.Debugger import RPDBDEBUGGER
 
 # Globals
 _ = wx.GetTranslation
@@ -33,32 +35,86 @@ class StackFrameList(eclib.EBaseListCtrl):
         super(StackFrameList, self).__init__(parent)
 
         # Setup
-        self.InsertColumn(0, _("File"))
-        self.InsertColumn(1, _("Line"))
-        self.InsertColumn(2, _("Expression"))
+        self.InsertColumn(0, _("Frame"))
+        self.InsertColumn(1, _("File"))
+        self.InsertColumn(2, _("Line"))
+        self.InsertColumn(3, _("Function"))
 
+        # Attributes
+        self.suppress_recursion = 0
+        
         # Event Handlers
-        self.Bind(wx.EVT_LIST_ITEM_ACTIVATED, self.OnItemActivate)
+        self.Bind(wx.EVT_LIST_ITEM_ACTIVATED, self.OnFrameSelected)
 
     def set_mainwindow(self, mw):
         self._mainw = mw
 
-    def OnItemActivate(self, evt):
+    def select_frame(self, index):
+        if self.suppress_recursion > 0:
+            self.suppress_recursion -= 1
+            return
+            
+        if (index < 0) or (index > self.GetItemCount()):
+            return
+
+        if self.IsSelected(index):
+            return
+            
+        self.suppress_recursion += 1
+        self.Select(index)
+
+    def OnFrameSelected(self, evt):
         """Go to the file"""
-        pass
+        if self.suppress_recursion == 0:
+            self.suppress_recursion += 1
+            RPDBDEBUGGER.set_frameindex(evt.m_itemIndex)
+        else:
+            self.suppress_recursion -= 1
+
+        evt.Skip()
 
     def Clear(self):
         """Delete all the rows """
-        for itemIndex in reversed(xrange(0, self.GetItemCount())):
-            self.DeleteItem(itemIndex)
+        self.DeleteAllItems()
 
     def PopulateRows(self, data):
         """Populate the list with the data
-        @param data: dictionary of breakpoints
+        @param data: dictionary of stack info
 
         """
-        pass
+        fileText = _("File")
+        funcText = _("Function")
+        minLFile = max(self.GetTextExtent(fileText)[0], self.GetColumnWidth(1))
+        minLFunc = max(self.GetTextExtent(funcText)[0], self.GetColumnWidth(3))
         
+        self._data = {}
+        idx = 0
+        while idx < len(data):
+            e = data[-(1 + idx)]
+            
+            filename = os.path.normcase(e[0])
+            lineno = e[1]
+            function = e[2]
+
+            efilename = unicode(filename)
+            efunction = unicode(function)
+            self._data[idx] = (unicode(idx), efilename, unicode(lineno), efunction)
+            minLFile = max(minLFile, self.GetTextExtent(efilename)[0])
+            minLFunc = max(minLFunc, self.GetTextExtent(efunction)[0])
+            self.Append(self._data[idx])
+            self.SetItemData(idx, idx)
+
+            idx += 1
+            
+        self.SetColumnWidth(1, minLFile)
+        self.SetColumnWidth(3, minLFunc)
+        self.suppress_recursion += 1
+        self.Select(0)
+
+    def GetFileNameLineNo(self, index):
+        idx, filename, linenostr, function = self._data[index]
+        return (filename, int(linenostr))
+    
     @staticmethod
     def _printListCtrl(ctrl):
         for row in xrange(0, ctrl.GetItemCount()):

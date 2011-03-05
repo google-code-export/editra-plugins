@@ -66,7 +66,7 @@ class LintShelfWindow(BaseShelfWindow):
         # With the text control (ed_stc.EditraStc) this will return the full
         # path of the file or a wx.EmptyString if the buffer does not contain
         # an on disk file
-        filename = editor.GetFileName()
+        filename = os.path.normcase(editor.GetFileName())
         self._listCtrl.set_editor(editor)
         self._listCtrl.Clear()
 

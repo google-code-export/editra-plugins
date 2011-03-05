@@ -56,8 +56,7 @@ class FindResultsList(eclib.EBaseListCtrl):
 
     def Clear(self):
         """Delete all the rows """
-        for itemIndex in reversed(xrange(0, self.GetItemCount())):
-            self.DeleteItem(itemIndex)
+        self.DeleteAllItems()
 
     def PopulateRows(self, data):
         """Populate the list with the data
