@@ -88,6 +88,8 @@ class StackFrameShelfWindow(BaseShelfWindow):
         if not linenos:
             return
         res = linenos.get(editorlineno + 1)
+        if not res:
+            return
         enabled, exprstr, bpid = res
         if enabled:
             editor.SetBreakpoint(editorlineno)
@@ -106,5 +108,5 @@ class StackFrameShelfWindow(BaseShelfWindow):
         index = RPDBDEBUGGER.get_frameindex()
         if index is None:
             return
-        filepath, lineno = self._listCtrl.GetFileNameLineNo(index)
-        RPDBDEBUGGER.do_go(filepath, lineno - 1)
+        filepath, editorlineno = self._listCtrl.GetFileNameEditorLineNo(index)
+        RPDBDEBUGGER.do_go(filepath, editorlineno)

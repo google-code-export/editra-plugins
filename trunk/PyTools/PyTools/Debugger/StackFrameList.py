@@ -67,6 +67,10 @@ class StackFrameList(eclib.EBaseListCtrl):
         """Go to the file"""
         if self.suppress_recursion == 0:
             self.suppress_recursion += 1
+            index = RPDBDEBUGGER.get_frameindex()
+            if index is not None:
+                filepath, editorlineno = self.GetFileNameEditorLineNo(index)
+                RPDBDEBUGGER.removeeditormarkers(filepath, editorlineno)
             RPDBDEBUGGER.set_frameindex(evt.m_itemIndex)
         else:
             self.suppress_recursion -= 1
@@ -111,9 +115,9 @@ class StackFrameList(eclib.EBaseListCtrl):
         self.suppress_recursion += 1
         self.Select(0)
 
-    def GetFileNameLineNo(self, index):
+    def GetFileNameEditorLineNo(self, index):
         idx, filename, linenostr, function = self._data[index]
-        return (filename, int(linenostr))
+        return (filename, int(linenostr) - 1)
     
     @staticmethod
     def _printListCtrl(ctrl):

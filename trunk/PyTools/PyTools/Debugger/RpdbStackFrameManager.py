@@ -59,7 +59,7 @@ class RpdbStackFrameManager(object):
         stackinfo = _stack.get(rpdb2.DICT_KEY_STACK, [])        
         self.rpdb2debugger.updatestacklist(stackinfo)
         
-        index = self.rpdb2debugger.sessionmanager.get_frame_index()
+        index = self.rpdb2debugger.get_frameindex()
         self.do_update_frame(index)
 
 

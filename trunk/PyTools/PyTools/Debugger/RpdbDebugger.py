@@ -39,14 +39,20 @@ class RpdbDebugger(object):
         self.breakpointmanager = RpdbBreakpointsManager(self)
         self.statemanager = RpdbStateManager(self)
         self.stackframemanager = RpdbStackFrameManager(self)
+        
+        # attributes that will be set later
         self.pid = None
         self.mainwindowid = None
+        
+        # functions that will be set later
         self.debuggeroutput = None
         self.getbreakpoints = None
         self.breakpoints_loaded = False
         self.seteditormarkers = None
         self.removeeditormarkers = None
         self.checkterminate = None
+        self.selectframe = None
+        self.updatestacklist = None
 
     def attach(self):
         if self.pid:
