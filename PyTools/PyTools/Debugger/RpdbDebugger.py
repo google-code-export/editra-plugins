@@ -13,14 +13,8 @@ __svnid__ = "$Id: RpdbDebugger.py 1025 2010-12-24 18:30:23Z rans@email.com $"
 __revision__ = "$Revision: 1025 $"
 
 #-----------------------------------------------------------------------------#
-# Imports
-import sys
-import os.path
-import wx
-
 # Editra Libraries
 import util
-from profiler import Profile_Get, Profile_Set
 
 # Local Imports
 import rpdb2

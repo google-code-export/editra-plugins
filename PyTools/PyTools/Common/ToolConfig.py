@@ -15,12 +15,10 @@ __revision__ = "$Revision$"
 
 #-----------------------------------------------------------------------------#
 # Imports
-import os
 import wx
 
 # Editra Libraries
 from profiler import Profile_Get, Profile_Set
-import ebmlib
 import eclib
 import util
 

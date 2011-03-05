@@ -13,16 +13,8 @@ __svnid__ = "$Id: DebugState.py 1025 2010-12-24 18:30:23Z rans@email.com $"
 __revision__ = "$Revision: 1025 $"
 
 #-----------------------------------------------------------------------------#
-# Imports
-import sys
-import os.path
-import wx
-
 # Editra Libraries
 import util
-
-# Local Imports
-import rpdb2
 
 #----------------------------------------------------------------------------#
 

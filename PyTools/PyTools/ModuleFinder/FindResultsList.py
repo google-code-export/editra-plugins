@@ -47,12 +47,7 @@ class FindResultsList(eclib.EBaseListCtrl):
         fname = self.GetItem(idx, 0).GetText()
         if fname.find("INFO:") != -1:
             return
-        editor = PyToolsUtils.GetEditorForFile(self._mainw, fname)
-        nb = self._mainw.GetNotebook()
-        if editor:
-            nb.ChangePage(editor.GetTabIndex())
-        else:
-            nb.OnDrop([fname])
+        editor = PyToolsUtils.GetEditorOrOpenFile(self._mainw, fname)
 
     def Clear(self):
         """Delete all the rows """
