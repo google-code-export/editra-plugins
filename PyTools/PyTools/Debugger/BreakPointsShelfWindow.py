@@ -63,9 +63,8 @@ class BreakPointsShelfWindow(BaseShelfWindow):
         
         self.breakpoints = self._config.get(ToolConfig.TLC_BREAKPOINTS, dict())
         self._listCtrl.PopulateRows(self.breakpoints)
-        RPDBDEBUGGER.set_getbreakpoints_fn(self.GetBreakPoints)
-        RPDBDEBUGGER.set_restorebreakpoints_fn(self.RestoreBreakPoints)
-        RPDBDEBUGGER.set_checkterminate_fn(self.CheckTerminate)
+        RPDBDEBUGGER.getbreakpoints = self.GetBreakPoints
+        RPDBDEBUGGER.checkterminate = self.CheckTerminate
 
     def GetBreakPoints(self):
         return self.breakpoints

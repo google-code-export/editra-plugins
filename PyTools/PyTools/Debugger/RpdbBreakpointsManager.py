@@ -27,27 +27,22 @@ import rpdb2
 #----------------------------------------------------------------------------#
 
 class RpdbBreakpointsManager(object):
-    def __init__(self, sessionmanager):
+    def __init__(self, rpdb2debugger):
         super(RpdbBreakpointsManager, self).__init__()
-        self.sessionmanager = sessionmanager
-        self.breakpoints_set = False
-        self.getbreakpoints = None
+        self.rpdb2debugger = rpdb2debugger
     
     def loadbreakpoints(self, filename):
-        try:
-            self.sessionmanager.load_breakpoints()
-            util.Log("[DbgBp][info] Removing old breakpoints")
-            self.sessionmanager.delete_breakpoint([], True)
-        except IOError:
-            util.Log("Failed to load old breakpoints")
+        self.rpdb2debugger.load_breakpoints()
+        util.Log("[DbgBp][info] Removing old breakpoints")
+        self.rpdb2debugger.clear_breakpoints()
         util.Log("Setting breakpoints: (Path, Line No, Enabled)")
-        breakpoints = self.getbreakpoints()
+        breakpoints = self.rpdb2debugger.getbreakpoints()
         for filepath in breakpoints:
             linenos = breakpoints[filepath]
             for lineno in linenos:
                 enabled, exprstr, bpid = linenos[lineno]
-                bpid = self.sessionmanager.set_breakpoint(filepath, '', lineno, enabled, exprstr)
+                bpid = self.rpdb2debugger.set_breakpoint(filepath, lineno, exprstr, enabled)
                 linenos[lineno] = enabled, exprstr, bpid
                 util.Log("%s, %d, %s, %s" % (filepath, lineno, enabled, exprstr))
-        self.breakpoints_set = True
-        self.output("\nDebugger attached. Breakpoints set. %s output starts now...\n" % filename)
+        self.rpdb2debugger.breakpoints_loaded = True
+        self.rpdb2debugger.debuggeroutput("\nDebugger attached. Breakpoints set. %s output starts now...\n" % filename)

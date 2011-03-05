@@ -27,18 +27,14 @@ import rpdb2
 #----------------------------------------------------------------------------#
 
 class RpdbStackFrameManager(object):
-    def __init__(self, sessionmanager, breakpointmanager, do_gofn):
+    def __init__(self, rpdb2debugger):
         super(RpdbStackFrameManager, self).__init__()
-        self.sessionmanager = sessionmanager
-        self.breakpointmanager = breakpointmanager
-        self.do_go = do_gofn
+        self.rpdb2debugger = rpdb2debugger
         self.m_stack = None
         event_type_dict = {rpdb2.CEventStackFrameChange: {}}
-        self.sessionmanager.register_callback(self.update_frame, event_type_dict, fSingleUse = False)
+        self.rpdb2debugger.sessionmanager.register_callback(self.update_frame, event_type_dict, fSingleUse = False)
         event_type_dict = {rpdb2.CEventStack: {}}
-        self.sessionmanager.register_callback(self.update_stack, event_type_dict, fSingleUse = False)
-        self.seteditormarkers = None
-        self.checkterminate = None
+        self.rpdb2debugger.sessionmanager.register_callback(self.update_stack, event_type_dict, fSingleUse = False)
         
     #
     #------------------- Frame Select Logic -------------
@@ -65,7 +61,7 @@ class RpdbStackFrameManager(object):
 
 #        self.m_stack_viewer.update_stack_list(self.m_stack)
         
-        index = self.sessionmanager.get_frame_index()
+        index = self.rpdb2debugger.sessionmanager.get_frame_index()
         self.do_update_frame(index)
 
 
@@ -80,14 +76,14 @@ class RpdbStackFrameManager(object):
         #event = self.m_stack[rpdb2.DICT_KEY_EVENT]
         if not fBroken:
             return
-        if not self.breakpointmanager.breakpoints_set:
-            self.breakpointmanager.loadbreakpoints(filename)
-            self.breakpointmanager.breakpoints_set = True
-            self.do_go(filename, lineno)
+        if not self.rpdb2debugger.breakpoints_loaded:
+            self.rpdb2debugger.breakpointmanager.loadbreakpoints(filename)
+            self.rpdb2debugger.breakpoints_loaded = True
+            self.rpdb2debugger.do_go(filename, lineno)
             return            
-        if self.checkterminate(filename, lineno):
-            self.do_go(filename, lineno)
+        if self.rpdb2debugger.checkterminate(filename, lineno):
+            self.rpdb2debugger.do_go(filename, lineno)
             return
-        self.seteditormarkers(filename, lineno)
+        self.rpdb2debugger.seteditormarkers(filename, lineno)
 
 

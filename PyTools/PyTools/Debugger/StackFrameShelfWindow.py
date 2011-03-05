@@ -53,8 +53,8 @@ class StackFrameShelfWindow(BaseShelfWindow):
         self.layout("Whatever", self.OnGo)
 
         # Attributes
-        RPDBDEBUGGER.set_seteditormarkers_fn(self.SetEditorMarkers)
-        RPDBDEBUGGER.set_removeeditormarkers_fn(self.RemoveEditorMarkers)
+        RPDBDEBUGGER.seteditormarkers = self.SetEditorMarkers
+        RPDBDEBUGGER.removeeditormarkers = self.RemoveEditorMarkers
         
         self.triggeredbps = {}
         
@@ -87,8 +87,18 @@ class StackFrameShelfWindow(BaseShelfWindow):
             linenos[editorlineno] = numberthreads
             return
         del linenos[editorlineno]
-        editor.DeleteBreakpoint(editorlineno)        
-    
+        editor.DeleteBreakpoint(editorlineno)
+        breakpoints = RPDBDEBUGGER.getbreakpoints()
+        linenos = breakpoints.get(fileName)
+        if not linenos:
+            return
+        res = linenos.get(editorlineno + 1)
+        enabled, exprstr, bpid = res
+        if enabled:
+            editor.SetBreakpoint(editorlineno)
+        else:
+            editor.SetBreakpointDisabled(editorlineno)
+            
     def Unsubscription(self):
         pass
 

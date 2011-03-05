@@ -27,17 +27,15 @@ import rpdb2
 #----------------------------------------------------------------------------#
 
 class RpdbStateManager(object):
-    def __init__(self, sessionmanager, breakpointmanager):
+    def __init__(self, rpdb2debugger):
         super(RpdbStateManager, self).__init__()
         self.m_state = rpdb2.STATE_DETACHED
-        self.sessionmanager = sessionmanager
-        self.breakpointmanager = breakpointmanager
-        state = self.sessionmanager.get_state()
+        self.rpdb2debugger = rpdb2debugger
+        state = self.rpdb2debugger.sessionmanager.get_state()
         self.update_state(rpdb2.CEventState(state))
         
         event_type_dict = {rpdb2.CEventState: {}}
-        self.sessionmanager.register_callback(self.update_state, event_type_dict, fSingleUse = False)
-        self.mainwindowid = None
+        self.rpdb2debugger.sessionmanager.register_callback(self.update_state, event_type_dict, fSingleUse = False)
 
     def update_state(self, event):
         wx.CallAfter(self.callback_state, event)
@@ -48,16 +46,16 @@ class RpdbStateManager(object):
 
         # change menu or toolbar items displayed according to state eg. running, paused etc.
         if self.m_state == rpdb2.STATE_DETACHED:
-            if self.breakpointmanager.breakpoints_set:
+            if self.rpdb2debugger.breakpoints_loaded:
                 # clear all debugging stuff as we have finished
-                ed_msg.PostMessage(ed_msg.EDMSG_PROGRESS_SHOW, (self.mainwindowid, False))
-                self.breakpointmanager.breakpoints_set = False
+                ed_msg.PostMessage(ed_msg.EDMSG_PROGRESS_SHOW, (self.rpdb2debugger.mainwindowid, False))
+                self.rpdb2debugger.breakpoints_loaded = False
         elif (old_state in [rpdb2.STATE_DETACHED, rpdb2.STATE_DETACHING, rpdb2.STATE_SPAWNING, rpdb2.STATE_ATTACHING]) and (self.m_state not in [rpdb2.STATE_DETACHED, rpdb2.STATE_DETACHING, rpdb2.STATE_SPAWNING, rpdb2.STATE_ATTACHING]):
             try:
-                serverinfo = self.sessionmanager.get_server_info()
+                serverinfo = self.rpdb2debugger.sessionmanager.get_server_info()
                 # we are debugging serverinfo.m_filename
-                f = self.sessionmanager.get_encryption()
-                ed_msg.PostMessage(ed_msg.EDMSG_PROGRESS_STATE, (self.mainwindowid, -1, -1))
+                f = self.rpdb2debugger.sessionmanager.get_encryption()
+                ed_msg.PostMessage(ed_msg.EDMSG_PROGRESS_STATE, (self.rpdb2debugger.mainwindowid, -1, -1))
             except rpdb2.NotAttached:
                 pass
 
