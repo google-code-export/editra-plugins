@@ -14,8 +14,6 @@ __revision__ = "$Revision: 1025 $"
 
 #-----------------------------------------------------------------------------#
 # Imports
-import sys
-import os.path
 import wx
 
 # Editra Libraries

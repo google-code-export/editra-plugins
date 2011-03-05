@@ -14,21 +14,14 @@ __revision__ = "$Revision $"
 
 #-----------------------------------------------------------------------------#
 # Imports
-import os
 import wx
-from wx import stc
-import copy
 
 # Editra Libraries
 import util
 import eclib
 import ed_msg
-from profiler import Profile_Get, Profile_Set
-from syntax import syntax
-import syntax.synglob as synglob
 
 # Local imports
-from PyTools.Common import ToolConfig
 from PyTools.Common.PyToolsUtils import PyToolsUtils
 from PyTools.Common.BaseShelfWindow import BaseShelfWindow
 from PyTools.Debugger.StackFrameList import StackFrameList

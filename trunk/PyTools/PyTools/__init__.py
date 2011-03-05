@@ -25,7 +25,6 @@ import wx
 import ed_glob
 import iface
 import plugin
-import util
 
 # Local Imports
 from PyTools.Common import Images
@@ -41,6 +40,7 @@ from PyTools.Debugger.StackFrameShelfWindow import StackFrameShelfWindow
 # Globals
 _ = wx.GetTranslation
 #-----------------------------------------------------------------------------#
+
 # Implementation
 class PyLint(BaseShelfPlugin):
     """Script Launcher and output viewer"""

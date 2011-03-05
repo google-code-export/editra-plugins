@@ -14,10 +14,10 @@ __revision__ = "$Revision: 1025 $"
 
 #-----------------------------------------------------------------------------#
 # Imports
+import os.path
+import threading
 import wx
 from wx.stc import STC_INDIC2_MASK
-import threading
-import os.path
 
 # Editra Libraries
 import ebmlib

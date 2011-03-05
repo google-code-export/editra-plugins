@@ -14,7 +14,7 @@ __revision__ = "$Revision $"
 
 #-----------------------------------------------------------------------------#
 # Imports
-import os
+import os.path
 import wx
 import copy
 
