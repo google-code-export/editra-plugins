@@ -50,11 +50,13 @@ class StackFrameShelfWindow(BaseShelfWindow):
         self.textentry = eclib.CommandEntryBase(ctrlbar, wx.ID_ANY, size=txtentrysize,
                                            style=wx.TE_PROCESS_ENTER|wx.WANTS_CHARS)
         ctrlbar.AddControl(self.textentry, wx.ALIGN_RIGHT)
-        self.layout("Whatever", self.OnGo)
+        self.layout("Go", self.OnGo)
 
         # Attributes
         RPDBDEBUGGER.seteditormarkers = self.SetEditorMarkers
         RPDBDEBUGGER.removeeditormarkers = self.RemoveEditorMarkers
+        RPDBDEBUGGER.selectframe = self._listCtrl.select_frame
+        RPDBDEBUGGER.updatestacklist = self.UpdateStackList
         
         self.triggeredbps = {}
         
@@ -98,9 +100,18 @@ class StackFrameShelfWindow(BaseShelfWindow):
             editor.SetBreakpoint(editorlineno)
         else:
             editor.SetBreakpointDisabled(editorlineno)
-            
+
+    def UpdateStackList(self, stack):
+        self._listCtrl.Clear()
+        self._listCtrl.PopulateRows(stack)
+        self._listCtrl.RefreshRows()
+        
     def Unsubscription(self):
         pass
 
-    def OnGo(self):
-        pass
+    def OnGo(self, event):
+        index = RPDBDEBUGGER.get_frameindex()
+        if index is None:
+            return
+        filepath, lineno = self._listCtrl.GetFileNameLineNo(index)
+        RPDBDEBUGGER.do_go(filepath, lineno - 1)

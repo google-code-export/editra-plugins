@@ -35,7 +35,7 @@ class RpdbStateManager(object):
         self.update_state(rpdb2.CEventState(state))
         
         event_type_dict = {rpdb2.CEventState: {}}
-        self.rpdb2debugger.sessionmanager.register_callback(self.update_state, event_type_dict, fSingleUse = False)
+        self.rpdb2debugger.register_callback(self.update_state, event_type_dict)
 
     def update_state(self, event):
         wx.CallAfter(self.callback_state, event)

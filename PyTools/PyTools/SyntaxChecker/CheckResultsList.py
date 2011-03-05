@@ -88,8 +88,7 @@ class CheckResultsList(eclib.EBaseListCtrl):
         """Delete all the rows """
         if not self.editor:
             return
-        for itemIndex in reversed(xrange(0, self.GetItemCount())):
-            self.DeleteItem(itemIndex)
+        self.DeleteAllItems()
         PyToolsUtils.unset_indic(self.editor)
         self.errorlines = {}
 

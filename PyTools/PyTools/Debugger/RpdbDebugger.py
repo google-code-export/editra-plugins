@@ -67,6 +67,22 @@ class RpdbDebugger(object):
         except rpdb2.NotAttached:
             pass
 
+    def register_callback(self, func, event_type_dict, fSingleUse = False):
+        self.sessionmanager.register_callback(func, event_type_dict, fSingleUse = fSingleUse)
+
+    def set_frameindex(self, index):
+        try:
+            self.sessionmanager.set_frame_index(index)        
+        except rpdb2.NotAttached:
+            pass
+            
+    def get_frameindex(self):
+        try:
+            return self.sessionmanager.get_frame_index()        
+        except rpdb2.NotAttached:
+            pass
+        return None
+            
     def do_stop(self):
         try:
             self.sessionmanager.stop_debuggee()

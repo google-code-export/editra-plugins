@@ -50,7 +50,7 @@ class BreakPointsShelfWindow(BaseShelfWindow):
         self.textentry = eclib.CommandEntryBase(ctrlbar, wx.ID_ANY, size=txtentrysize,
                                            style=wx.TE_PROCESS_ENTER|wx.WANTS_CHARS)
         ctrlbar.AddControl(self.textentry, wx.ALIGN_RIGHT)
-        self.layout("Go", self.OnGo)
+        self.layout("Clear", self.OnClear)
 
         # Attributes
         self._config = Profile_Get(ToolConfig.PYTOOL_CONFIG, default=dict())
@@ -162,14 +162,6 @@ class BreakPointsShelfWindow(BaseShelfWindow):
         filename, tmp = msg.GetData()
         editor = PyToolsUtils.GetEditorForFile(self._mw, filename)
         self.UpdateForEditor(editor)
-
-    def OnGo(self, event):
-        editor = wx.GetApp().GetCurrentBuffer()
-        filepath = editor.GetFileName()
-        editorlineno = editor.GetCurrentLineNum()
-        # need to get current active stack frame and hence work out current active broken thread's
-        # filename and line number
-        RPDBDEBUGGER.do_go(filepath, editorlineno)
     
     def OnContextMenu(self, msg):
         editor = wx.GetApp().GetCurrentBuffer()
@@ -183,10 +175,15 @@ class BreakPointsShelfWindow(BaseShelfWindow):
                 contextmenumanager.AddHandler(ID_TOGGLE_BREAKPOINT, self.toggle_breakpoint)
 
     def toggle_breakpoint(self, editor, evt):
-        filepath = editor.GetFileName()
+        filepath = os.path.normcase(editor.GetFileName())
         editorlineno = editor.GetCurrentLineNum()
         lineno = editorlineno + 1
         if not self.DeleteBreakpoint(filepath, lineno):
             self.SetBreakpoint(filepath, lineno, "", True)
+        self.RestoreBreakPoints()
+  
+    def OnClear(self, evt):
+        self.breakpoints = {}
+        self.SaveBreakpoints()
         self.RestoreBreakPoints()
         

@@ -32,9 +32,9 @@ class RpdbStackFrameManager(object):
         self.rpdb2debugger = rpdb2debugger
         self.m_stack = None
         event_type_dict = {rpdb2.CEventStackFrameChange: {}}
-        self.rpdb2debugger.sessionmanager.register_callback(self.update_frame, event_type_dict, fSingleUse = False)
+        self.rpdb2debugger.register_callback(self.update_frame, event_type_dict)
         event_type_dict = {rpdb2.CEventStack: {}}
-        self.rpdb2debugger.sessionmanager.register_callback(self.update_stack, event_type_dict, fSingleUse = False)
+        self.rpdb2debugger.register_callback(self.update_stack, event_type_dict)
         
     #
     #------------------- Frame Select Logic -------------
@@ -45,21 +45,20 @@ class RpdbStackFrameManager(object):
 
     def do_update_frame(self, index):
         self.do_set_position(index)
-#        self.m_stack_viewer.select_frame(index)
+        self.rpdb2debugger.selectframe(index)
 
     #
     #----------------------------------------------------------
     #
     
     def update_stack(self, event):
-        self.m_stack = event.m_stack
         wx.CallAfter(self.do_update_stack, event.m_stack)
-
 
     def do_update_stack(self, _stack):
         self.m_stack = _stack
 
-#        self.m_stack_viewer.update_stack_list(self.m_stack)
+        stackinfo = _stack.get(rpdb2.DICT_KEY_STACK, [])        
+        self.rpdb2debugger.updatestacklist(stackinfo)
         
         index = self.rpdb2debugger.sessionmanager.get_frame_index()
         self.do_update_frame(index)
@@ -69,7 +68,7 @@ class RpdbStackFrameManager(object):
         s = self.m_stack[rpdb2.DICT_KEY_STACK]
         e = s[-(1 + index)]
         
-        filename = e[0]
+        filename = os.path.normcase(e[0])
         lineno = e[1]
 
         fBroken = self.m_stack[rpdb2.DICT_KEY_BROKEN]
