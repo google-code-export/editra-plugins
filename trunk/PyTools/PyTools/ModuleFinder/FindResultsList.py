@@ -59,13 +59,11 @@ class FindResultsList(eclib.EBaseListCtrl):
 
         """
         self._data = {}
-        idx = 0
-        for eText in data:
+        for idx, eText in enumerate(data):
             eText = unicode(eText).rstrip()
             self._data[idx] = (eText,)
             self.Append(self._data[idx])
             self.SetItemData(idx, idx)
-            idx += 1
 
     @staticmethod
     def _printListCtrl(ctrl):

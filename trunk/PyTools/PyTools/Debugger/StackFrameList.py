@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 # Name: StackFrameList.py
-# Purpose: ModuleFinder plugin
+# Purpose: Debugger plugin
 # Author: Mike Rans
 # Copyright: (c) 2010 Mike Rans
 # License: wxWindows License
@@ -21,7 +21,6 @@ import wx
 import eclib
 
 # Local Imports
-from PyTools.Common.PyToolsUtils import PyToolsUtils
 from PyTools.Debugger import RPDBDEBUGGER
 
 # Globals
@@ -94,11 +93,11 @@ class StackFrameList(eclib.EBaseListCtrl):
         self._data = {}
         idx = 0
         while idx < len(data):
-            e = data[-(1 + idx)]
+            frameinfo = data[-(1 + idx)]
             
-            filename = os.path.normcase(e[0])
-            lineno = e[1]
-            function = e[2]
+            filename = os.path.normcase(frameinfo[0])
+            lineno = frameinfo[1]
+            function = frameinfo[2]
 
             efilename = unicode(filename)
             efunction = unicode(function)

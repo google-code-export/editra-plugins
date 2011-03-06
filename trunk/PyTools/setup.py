@@ -33,5 +33,9 @@ if setup != None:
         Debugger = PyTools:PyDebug
         BreakPoints = PyTools:PyBreakPoint
         StackFrame = PyTools:PyStackFrame
+        Threads = PyTools:PyThread
         '''
         )
+#        LocalVariables = PyTools:PyLocalVariable
+#        GlobalVariables = PyTools:PyGlobalVariable
+#        ExceptionVariables = PyTools:PyExceptionVariable

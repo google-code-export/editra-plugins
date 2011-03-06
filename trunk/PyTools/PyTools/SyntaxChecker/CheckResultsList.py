@@ -108,15 +108,13 @@ class CheckResultsList(eclib.EBaseListCtrl):
         minLText = max(self.GetTextExtent(errorText)[0], self.GetColumnWidth(2))
         self.errorlines = {}
         self._data = {}
-        idx = 0
-        for (eType, eText, eLine) in data:
+        for idx, (eType, eText, eLine) in enumerate(data):
             eText = unicode(eText).rstrip()
             self._data[idx] = (unicode(eType), unicode(eLine), eText)
             minLType = max(minLType, self.GetTextExtent(eType)[0])
             minLText = max(minLText, self.GetTextExtent(eText)[0])
             self.Append(self._data[idx])
             self.SetItemData(idx, idx)
-            idx += 1
 
             try:
                 lineNo = int(eLine)
