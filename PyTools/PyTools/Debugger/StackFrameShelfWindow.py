@@ -46,6 +46,7 @@ class StackFrameShelfWindow(BaseShelfWindow):
         self.layout("Go", self.OnGo)
 
         # Attributes
+        RPDBDEBUGGER.clearframe = self._listCtrl.Clear
         RPDBDEBUGGER.seteditormarkers = self.SetEditorMarkers
         RPDBDEBUGGER.removeeditormarkers = self.RemoveEditorMarkers
         RPDBDEBUGGER.selectframe = self._listCtrl.select_frame

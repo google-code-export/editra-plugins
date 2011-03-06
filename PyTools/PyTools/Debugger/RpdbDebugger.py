@@ -21,6 +21,7 @@ import rpdb2
 from PyTools.Debugger.RpdbStateManager import RpdbStateManager
 from PyTools.Debugger.RpdbBreakpointsManager import RpdbBreakpointsManager
 from PyTools.Debugger.RpdbStackFrameManager import RpdbStackFrameManager
+from PyTools.Debugger.RpdbThreadsManager import RpdbThreadsManager
 
 #----------------------------------------------------------------------------#
 
@@ -39,20 +40,35 @@ class RpdbDebugger(object):
         self.breakpointmanager = RpdbBreakpointsManager(self)
         self.statemanager = RpdbStateManager(self)
         self.stackframemanager = RpdbStackFrameManager(self)
+        self.threadmanager = RpdbThreadsManager(self)
         
         # attributes that will be set later
         self.pid = None
         self.mainwindowid = None
         
         # functions that will be set later
+        
+        # debuggee shelf
         self.debuggeroutput = None
+        # breakpoint shelf
         self.getbreakpoints = None
         self.breakpoints_loaded = False
+        # stackframe shelf
         self.seteditormarkers = None
         self.removeeditormarkers = None
         self.checkterminate = None
+        self.clearframe = None
         self.selectframe = None
         self.updatestacklist = None
+        # thread shelf
+        self.clearthread = None
+        self.updatethread = None
+        self.updatethreadlist = None
+
+    def clear_all(self):
+        #self.clearvariables()
+        self.clearframe()
+        self.clearthread()
 
     def attach(self):
         if self.pid:

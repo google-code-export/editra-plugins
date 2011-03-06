@@ -48,6 +48,7 @@ class RpdbStateManager(object):
                 # clear all debugging stuff as we have finished
                 ed_msg.PostMessage(ed_msg.EDMSG_PROGRESS_SHOW, (self.rpdb2debugger.mainwindowid, False))
                 self.rpdb2debugger.breakpoints_loaded = False
+                wx.CallAfter(self.rpdb2debugger.clear_all)
         elif (old_state in [rpdb2.STATE_DETACHED, rpdb2.STATE_DETACHING, rpdb2.STATE_SPAWNING, rpdb2.STATE_ATTACHING]) and (self.m_state not in [rpdb2.STATE_DETACHED, rpdb2.STATE_DETACHING, rpdb2.STATE_SPAWNING, rpdb2.STATE_ATTACHING]):
             try:
                 serverinfo = self.rpdb2debugger.sessionmanager.get_server_info()
