@@ -42,7 +42,7 @@ class AbstractModuleFinder(object):
         @param callback: callable(data) callback to receive data
 
         """
-        worker = RunProcInThread(self.RunModuleFind, callback, "Find")
+        worker = RunProcInThread("Find", callback, self.RunModuleFind)
         worker.start()
 
     #---- Properties ----#

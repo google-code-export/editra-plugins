@@ -47,56 +47,22 @@ class StackFrameShelfWindow(BaseShelfWindow):
 
         # Attributes
         RPDBDEBUGGER.clearframe = self._listCtrl.Clear
-        RPDBDEBUGGER.seteditormarkers = self.SetEditorMarkers
-        RPDBDEBUGGER.removeeditormarkers = self.RemoveEditorMarkers
+        RPDBDEBUGGER.clearstepmarker = self.ClearStepMarker
+        RPDBDEBUGGER.setstepmarker = self.SetStepMarker
         RPDBDEBUGGER.selectframe = self._listCtrl.select_frame
         RPDBDEBUGGER.updatestacklist = self.UpdateStackList
         
-        self.triggeredbps = {}
+    def ClearStepMarker(self):
+        editor = wx.GetApp().GetCurrentBuffer()
+        if editor:
+            editor.ShowStepMarker(1, show=False)
         
-    def SetEditorMarkers(self, fileName, lineNo):
+    def SetStepMarker(self, fileName, lineNo):
         editor = PyToolsUtils.GetEditorOrOpenFile(self._mw, fileName)
         editorlineno = lineNo - 1
         editor.GotoLine(editorlineno)
-        handle = editor.SetBreakpointTriggered(editorlineno)
-        linenos = self.triggeredbps.get(editor)
-        if not linenos:
-            linenos = {}
-            self.triggeredbps[editor] = linenos                
-        if handle == -1:
-            linenos[editorlineno] = linenos[editorlineno] + 1
-        else:
-            linenos[editorlineno] = 1
-
-    def RemoveEditorMarkers(self, fileName, editorlineno):
-        editor = PyToolsUtils.GetEditorForFile(self._mw, fileName)
-        if not editor:
-            return
-        linenos = self.triggeredbps.get(editor)
-        if not linenos:
-            return
-        numberthreads = linenos.get(editorlineno)
-        if not numberthreads:
-            return
-        numberthreads = numberthreads - 1
-        if numberthreads:
-            linenos[editorlineno] = numberthreads
-            return
-        del linenos[editorlineno]
-        editor.DeleteBreakpoint(editorlineno)
-        breakpoints = RPDBDEBUGGER.getbreakpoints()
-        linenos = breakpoints.get(fileName)
-        if not linenos:
-            return
-        res = linenos.get(editorlineno + 1)
-        if not res:
-            return
-        enabled, exprstr, bpid = res
-        if enabled:
-            editor.SetBreakpoint(editorlineno)
-        else:
-            editor.SetBreakpointDisabled(editorlineno)
-
+        editor.ShowStepMarker(editorlineno, show=True)
+        
     def UpdateStackList(self, stack):
         self._listCtrl.Clear()
         self._listCtrl.PopulateRows(stack)
@@ -106,8 +72,4 @@ class StackFrameShelfWindow(BaseShelfWindow):
         pass
 
     def OnGo(self, event):
-        index = RPDBDEBUGGER.get_frameindex()
-        if index is None:
-            return
-        filepath, editorlineno = self._listCtrl.GetFileNameEditorLineNo(index)
-        RPDBDEBUGGER.do_go(filepath, editorlineno)
+        RPDBDEBUGGER.do_go()

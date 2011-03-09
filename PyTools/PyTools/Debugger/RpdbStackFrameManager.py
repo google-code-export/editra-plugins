@@ -29,7 +29,6 @@ class RpdbStackFrameManager(object):
     def __init__(self, rpdb2debugger):
         super(RpdbStackFrameManager, self).__init__()
         self.rpdb2debugger = rpdb2debugger
-        self.m_stack = None
         event_type_dict = {rpdb2.CEventStackFrameChange: {}}
         self.rpdb2debugger.register_callback(self.update_frame, event_type_dict)
         event_type_dict = {rpdb2.CEventStack: {}}
@@ -54,7 +53,7 @@ class RpdbStackFrameManager(object):
         wx.CallAfter(self.do_update_stack, event.m_stack)
 
     def do_update_stack(self, _stack):
-        self.m_stack = _stack
+        self.rpdb2debugger.curstack = _stack
 
         stackinfo = _stack.get(rpdb2.DICT_KEY_STACK, [])        
         self.rpdb2debugger.updatestacklist(stackinfo)
@@ -64,24 +63,24 @@ class RpdbStackFrameManager(object):
 
 
     def do_set_position(self, index):
-        s = self.m_stack[rpdb2.DICT_KEY_STACK]
+        s = self.rpdb2debugger.curstack[rpdb2.DICT_KEY_STACK]
         e = s[-(1 + index)]
         
         filename = os.path.normcase(e[0])
         lineno = e[1]
 
-        fBroken = self.m_stack[rpdb2.DICT_KEY_BROKEN]
-        #event = self.m_stack[rpdb2.DICT_KEY_EVENT]
+        fBroken = self.rpdb2debugger.curstack[rpdb2.DICT_KEY_BROKEN]
+        #event = self.rpdb2debugger.curstack[rpdb2.DICT_KEY_EVENT]
         if not fBroken:
             return
         if not self.rpdb2debugger.breakpoints_loaded:
             self.rpdb2debugger.breakpointmanager.loadbreakpoints(filename)
             self.rpdb2debugger.breakpoints_loaded = True
-            self.rpdb2debugger.do_go(filename, lineno)
+            self.rpdb2debugger.do_go()
             return            
         if self.rpdb2debugger.checkterminate(filename, lineno):
-            self.rpdb2debugger.do_go(filename, lineno)
+            self.rpdb2debugger.do_go()
             return
-        self.rpdb2debugger.seteditormarkers(filename, lineno)
+        self.rpdb2debugger.setstepmarker(filename, lineno)
 
 

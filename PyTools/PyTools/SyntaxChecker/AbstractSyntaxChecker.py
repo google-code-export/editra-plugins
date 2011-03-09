@@ -42,7 +42,7 @@ class AbstractSyntaxChecker(object):
         @param callback: callable(data) callback to receive data
 
         """
-        worker = RunProcInThread(self.RunSyntaxCheck, callback, "Lint")
+        worker = RunProcInThread("Lint", callback, self.RunSyntaxCheck)
         worker.start()
 
     #---- Properties ----#

@@ -66,10 +66,6 @@ class StackFrameList(eclib.EBaseListCtrl):
         """Go to the file"""
         if self.suppress_recursion == 0:
             self.suppress_recursion += 1
-            index = RPDBDEBUGGER.get_frameindex()
-            if index is not None:
-                filepath, editorlineno = self.GetFileNameEditorLineNo(index)
-                RPDBDEBUGGER.removeeditormarkers(filepath, editorlineno)
             RPDBDEBUGGER.set_frameindex(evt.m_itemIndex)
         else:
             self.suppress_recursion -= 1

@@ -224,9 +224,7 @@ class DebugShelfWindow(BaseShelfWindow):
             self._listCtrl.AddText("Disabling Pylint Autorun during Debug.")
             self._listCtrl.restoreautorun = self.restorepylint_autorun
         else:
-            def donothing():
-                pass
-            self._listCtrl.restoreautorun = donothing
+            self._listCtrl.restoreautorun = lambda:None
 
         # Start job timer
         self._StopTimer()

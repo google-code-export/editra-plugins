@@ -22,6 +22,7 @@ from PyTools.Debugger.RpdbStateManager import RpdbStateManager
 from PyTools.Debugger.RpdbBreakpointsManager import RpdbBreakpointsManager
 from PyTools.Debugger.RpdbStackFrameManager import RpdbStackFrameManager
 from PyTools.Debugger.RpdbThreadsManager import RpdbThreadsManager
+from PyTools.Debugger.RpdbVariablesManager import RpdbVariablesManager
 
 #----------------------------------------------------------------------------#
 
@@ -41,10 +42,13 @@ class RpdbDebugger(object):
         self.statemanager = RpdbStateManager(self)
         self.stackframemanager = RpdbStackFrameManager(self)
         self.threadmanager = RpdbThreadsManager(self)
+        self.variablesmanager = RpdbVariablesManager(self)
         
         # attributes that will be set later
         self.pid = None
         self.mainwindowid = None
+        self.breakpoints_loaded = False
+        self.curstack = None
         
         # functions that will be set later
         
@@ -52,10 +56,9 @@ class RpdbDebugger(object):
         self.debuggeroutput = None
         # breakpoint shelf
         self.getbreakpoints = None
-        self.breakpoints_loaded = False
         # stackframe shelf
-        self.seteditormarkers = None
-        self.removeeditormarkers = None
+        self.clearstepmarker = None
+        self.setstepmarker = None
         self.checkterminate = None
         self.clearframe = None
         self.selectframe = None
@@ -64,9 +67,19 @@ class RpdbDebugger(object):
         self.clearthread = None
         self.updatethread = None
         self.updatethreadlist = None
+        # variables shelf
+        self.clearlocalvariables = None
+        self.clearglobalvariables = None
+        self.clearexceptions = None
+        self.updatelocalvariableslist = None
+        self.updateglobalvariableslist = None
+        self.updateexceptionslist = None
 
     def clear_all(self):
-        #self.clearvariables()
+        self.clearstepmarker()
+        self.clearlocalvariables()
+        self.clearglobalvariables()
+        self.clearexceptions()
         self.clearframe()
         self.clearthread()
 
@@ -117,9 +130,8 @@ class RpdbDebugger(object):
         except rpdb2.NotAttached:
             pass
 
-    def do_go(self, filename, lineno):
+    def do_go(self):
         try:
-            self.removeeditormarkers(filename, lineno)
             self.sessionmanager.request_go()
         except rpdb2.NotAttached:
             pass
@@ -189,4 +201,10 @@ class RpdbDebugger(object):
             self.sessionmanager.load_breakpoints()
         except rpdb2.NotAttached:
             pass
-        
+
+    def update_variableslists(self):
+        self.curstack
+        self.updatelocalvariableslist(variables)
+        self.updateglobalvariableslist(variables)
+        self.updateexceptionslist(variables)
+

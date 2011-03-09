@@ -34,8 +34,8 @@ if setup != None:
         BreakPoints = PyTools:PyBreakPoint
         StackFrame = PyTools:PyStackFrame
         Threads = PyTools:PyThread
+        LocalVariables = PyTools:PyLocalVariable
+        GlobalVariables = PyTools:PyGlobalVariable
+        Exceptions = PyTools:PyException
         '''
         )
-#        LocalVariables = PyTools:PyLocalVariable
-#        GlobalVariables = PyTools:PyGlobalVariable
-#        ExceptionVariables = PyTools:PyExceptionVariable
