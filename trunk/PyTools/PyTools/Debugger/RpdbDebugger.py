@@ -45,8 +45,8 @@ class RpdbDebugger(object):
         self.variablesmanager = RpdbVariablesManager(self)
         
         # attributes that will be set later
-        self.pid = None
         self.mainwindowid = None
+        self.pid = None
         self.breakpoints_loaded = False
         self.curstack = None
         
@@ -76,6 +76,9 @@ class RpdbDebugger(object):
         self.updateexceptionslist = None
 
     def clear_all(self):
+        self.pid = None
+        self.breakpoints_loaded = False
+        self.curstack = None
         self.clearstepmarker()
         self.clearlocalvariables()
         self.clearglobalvariables()
