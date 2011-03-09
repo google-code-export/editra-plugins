@@ -70,7 +70,8 @@ class BaseVariablesShelfWindow(BaseShelfWindow):
             expressionlist = [(self.listtype, True)]
 
         namespace = RPDBDEBUGGER.get_namespace(expressionlist, self.filterlevel)
-        self._listCtrl.PopulateRows(namespace)
+        if namespace:
+            self.UpdateVariablesList(namespace)
         return (old_key, old_expressionlist)
 
 class LocalVariablesShelfWindow(BaseVariablesShelfWindow):

@@ -70,7 +70,6 @@ class VariablesList(wx.gizmos.TreeListCtrl):
         @param data: dictionary of variables info
 
         """
-        self.DeleteAllItems()
         root = self.AddRoot("root")
         self.SetItemPyData(root, (self.listtype, False))
         self.SetItemHasChildren(root, True)
@@ -125,7 +124,11 @@ class VariablesList(wx.gizmos.TreeListCtrl):
         res = None
         exc_info = (None, None, None)
         
-        warning, error = RPDBDEBUGGER.execute(_suite)
+        res = RPDBDEBUGGER.execute(_suite)        
+        if not res:
+            return
+            
+        warning, error = res
         
         if error != '':
             dlg = wx.MessageDialog(self, error, "Error", wx.OK | wx.ICON_ERROR)
@@ -165,23 +168,13 @@ class VariablesList(wx.gizmos.TreeListCtrl):
 
         (expr, is_valid) = self.GetPyData(item)
 
-        variables = RPDBDEBUGGER.get_namespace([(expr, True)], self.filterlevel)
-
         item = self.find_item(expr)
         if item == None:
             return
       
-        #
-        # When expanding a tree item with arrow-keys on wxPython 2.6, the 
-        # temporary "loading" child is automatically selected. After 
-        # replacement with real children we need to reselect the first child.
-        #
-        children = self.get_children(item)
-        freselect_child = len(children) != 0 and children[0] == self.GetSelection()
-            
-        self.DeleteChildren(item)
-    
-        if variables is None or len(variables) == 0:
+        variables = RPDBDEBUGGER.get_namespace([(expr, True)], self.filterlevel)
+
+        if not variables:
             child = self.AppendItem(item, STR_NAMESPACE_DEADLOCK)
             self.SetItemText(child, ' ' + STR_NAMESPACE_DEADLOCK, 2)
             self.SetItemText(child, ' ' + STR_NAMESPACE_DEADLOCK, 1)
@@ -192,7 +185,16 @@ class VariablesList(wx.gizmos.TreeListCtrl):
                 self.SelectItem(child)
 
             return
+        #
+        # When expanding a tree item with arrow-keys on wxPython 2.6, the 
+        # temporary "loading" child is automatically selected. After 
+        # replacement with real children we need to reselect the first child.
+        #
+        children = self.get_children(item)
+        freselect_child = len(children) != 0 and children[0] == self.GetSelection()
             
+        self.DeleteChildren(item)
+                
         self.expand_item(item, variables, False, True)  
 
         if freselect_child:
