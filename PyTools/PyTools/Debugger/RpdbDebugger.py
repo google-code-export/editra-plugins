@@ -99,6 +99,18 @@ class RpdbDebugger(object):
     def register_callback(self, func, event_type_dict, fSingleUse = False):
         self.sessionmanager.register_callback(func, event_type_dict, fSingleUse = fSingleUse)
 
+    def execute(self, suite):
+        try:
+            return self.sessionmanager.execute(suite)
+        except rpdb2.NotAttached:
+            return None
+
+    def get_namespace(self, expressionlist, filterlevel):
+        try:
+            return self.sessionmanager.get_namespace(expressionlist, filterlevel)
+        except rpdb2.NotAttached:
+            return None
+    
     def set_frameindex(self, index):
         try:
             self.sessionmanager.set_frame_index(index)        
@@ -201,10 +213,3 @@ class RpdbDebugger(object):
             self.sessionmanager.load_breakpoints()
         except rpdb2.NotAttached:
             pass
-
-    def update_variableslists(self):
-        self.curstack
-        self.updatelocalvariableslist(variables)
-        self.updateglobalvariableslist(variables)
-        self.updateexceptionslist(variables)
-

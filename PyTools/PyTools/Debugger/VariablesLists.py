@@ -70,6 +70,7 @@ class VariablesList(wx.gizmos.TreeListCtrl):
         @param data: dictionary of variables info
 
         """
+        self.DeleteAllItems()
         root = self.AddRoot("root")
         self.SetItemPyData(root, (self.listtype, False))
         self.SetItemHasChildren(root, True)
@@ -99,7 +100,9 @@ class VariablesList(wx.gizmos.TreeListCtrl):
         (expr, is_valid) = self.GetPyData(item)
         if expr in [STR_NAMESPACE_LOADING, STR_NAMESPACE_DEADLOCK, STR_MAX_NAMESPACE_WARNING_TITLE]:
             return
-
+        wx.CallAfter(self._onitemactivated, expr, is_valid)
+        
+    def _onitemactivated(self, expr, is_valid):
         if is_valid:
             default_value = self.GetItemText(item, 2)[1:]
         else:
@@ -118,18 +121,11 @@ class VariablesList(wx.gizmos.TreeListCtrl):
         expr_dialog.Destroy()
 
         _suite = "%s = %s" % (expr, _expr)
+
+        res = None
+        exc_info = (None, None, None)
         
-        worker = PyToolsUtils.RunProcInThread("PyVar", self.callback_execute, RPDBDEBUGGER.execute, _suite)
-        worker.start()
-
-    def callback_execute(self, r, exc_info):
-        (t, v, tb) = exc_info
-
-        if t != None:
-            rpdb2.print_exception(t, b, tb)
-            return
-
-        (warning, error) = r
+        warning, error = RPDBDEBUGGER.execute(_suite)
         
         if error != '':
             dlg = wx.MessageDialog(self, error, "Error", wx.OK | wx.ICON_ERROR)
@@ -152,11 +148,14 @@ class VariablesList(wx.gizmos.TreeListCtrl):
             event.Skip()
             return
         
-        if self.GetChildrenCount(item) > 0:
+        if self.get_numberofchildren(item) > 0:
             event.Skip()
             self.Refresh();
             return
-            
+        
+        wx.CallAfter(self._onitemexpanding, item)
+    
+    def _onitemexpanding(self, item):
         self.DeleteChildren(item)
         
         child = self.AppendItem(item, STR_NAMESPACE_LOADING)
@@ -166,13 +165,7 @@ class VariablesList(wx.gizmos.TreeListCtrl):
 
         (expr, is_valid) = self.GetPyData(item)
 
-        fn = lambda r, exc_info: self.callback_ns(r, exc_info, expr)        
-        worker = PyToolsUtils.RunProcInThread("PyVar", fn, RPDBDEBUGGER.get_namespace([(expr, True)], self.filterlevel))
-        worker.start()
-        event.Skip()
-
-    def callback_ns(self, r, exc_info, expr):
-        (t, v, tb) = exc_info
+        variables = RPDBDEBUGGER.get_namespace([(expr, True)], self.filterlevel)
 
         item = self.find_item(expr)
         if item == None:
@@ -188,7 +181,7 @@ class VariablesList(wx.gizmos.TreeListCtrl):
             
         self.DeleteChildren(item)
     
-        if t != None or r is None or len(r) == 0:
+        if variables is None or len(variables) == 0:
             child = self.AppendItem(item, STR_NAMESPACE_DEADLOCK)
             self.SetItemText(child, ' ' + STR_NAMESPACE_DEADLOCK, 2)
             self.SetItemText(child, ' ' + STR_NAMESPACE_DEADLOCK, 1)
@@ -200,7 +193,7 @@ class VariablesList(wx.gizmos.TreeListCtrl):
 
             return
             
-        self.expand_item(item, r, False, True)  
+        self.expand_item(item, variables, False, True)  
 
         if freselect_child:
             children = self.get_children(item)
@@ -209,7 +202,7 @@ class VariablesList(wx.gizmos.TreeListCtrl):
         self.Refresh()
         
     # Helper functions
-    def GetChildrenCount(self, item):
+    def get_numberofchildren(self, item):
         nochildren = self.GetChildrenCount(item)
         if nochildren != 1:
             return nochildren 
@@ -229,14 +222,14 @@ class VariablesList(wx.gizmos.TreeListCtrl):
         if not froot and not fskip_expansion_check and self.IsExpanded(item):
             return
 
-        if self.GetChildrenCount(item) > 0:
+        if self.get_numberofchildren(item) > 0:
             return
         
         (expr, is_valid) = self.GetPyData(item)
 
         variables_with_expr = [e for e in variables if e.get("expr", None) == expr]
         if variables_with_expr == []:
-            return None
+            return
 
         first_variable_with_expr = variables_with_expr[0] 
         if first_variable_with_expr is None:
@@ -255,7 +248,7 @@ class VariablesList(wx.gizmos.TreeListCtrl):
         # In case of a list, no sorting is needed.
         #
 
-        for subnode in first_variable_with_expr["n_subnodes"]:
+        for subnode in first_variable_with_expr["subnodes"]:
             _name = unicode(subnode["name"])
             _type = unicode(subnode["type"])
             _repr = unicode(subnode["repr"])
@@ -301,7 +294,7 @@ class VariablesList(wx.gizmos.TreeListCtrl):
         while len(variablelist) > 0:
             item = variablelist.pop(0)
             (expr, is_valid) = self.GetPyData(item)
-            fExpand = self.IsExpanded(item) and self.GetChildrenCount(item) > 0
+            fExpand = self.IsExpanded(item) and self.get_numberofchildren(item) > 0
             if not fExpand:
                 continue
 
