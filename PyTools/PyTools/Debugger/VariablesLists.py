@@ -99,9 +99,9 @@ class VariablesList(wx.gizmos.TreeListCtrl):
         (expr, is_valid) = self.GetPyData(item)
         if expr in [STR_NAMESPACE_LOADING, STR_NAMESPACE_DEADLOCK, STR_MAX_NAMESPACE_WARNING_TITLE]:
             return
-        wx.CallAfter(self._onitemactivated, expr, is_valid)
+        wx.CallAfter(self._onitemactivated, item, expr, is_valid)
         
-    def _onitemactivated(self, expr, is_valid):
+    def _onitemactivated(self, item, expr, is_valid):
         if is_valid:
             default_value = self.GetItemText(item, 2)[1:]
         else:
