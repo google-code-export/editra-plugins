@@ -44,9 +44,6 @@ class BaseVariablesShelfWindow(BaseShelfWindow):
         
         # attributes
         self.filterlevel = filterlevel
-        self.lock = threading.RLock()
-        self.jobs = []
-        self.n_workers = 0
         self.key = None
 
     def UpdateVariablesList(self, variables):
@@ -72,40 +69,14 @@ class BaseVariablesShelfWindow(BaseShelfWindow):
         if expressionlist is None:
             expressionlist = [(self.listtype, True)]
 
-        self.post(expressionlist, self.filterlevel)
-
+        namespace = RPDBDEBUGGER.get_namespace(expressionlist, self.filterlevel)
+        self._listCtrl.PopulateRows(namespace)
         return (old_key, old_expressionlist)
-
-    def post(self, expressionlist, filter_level):
-        self.jobs.insert(0, (expressionlist, filter_level))
-
-        if self.n_workers == 0:
-            pass
-            #self.job_post(self.job_update_namespace, ())
-        
-    def job_update_namespace(self):
-        while len(self.jobs) > 0:
-            self.lock.acquire()
-            self.n_workers += 1
-            self.lock.release()
-            
-            try:
-                del self.jobs[1:]
-                (expressionlist, filter_level) = self.jobs.pop()
-                rl = self.get_namespace(expressionlist, filter_level)
-                wx.CallAfter(self.do_update_namespace, rl)
-
-            except (rpdb2.ThreadDone, rpdb2.NoThreads):
-                wx.CallAfter(self._listCtrl.Clear())
-
-            self.lock.acquire()
-            self.n_workers -= 1
-            self.lock.release()
 
 class LocalVariablesShelfWindow(BaseVariablesShelfWindow):
     def __init__(self, parent):
         """Initialize the window"""
-        super(LocalVariablesShelfWindow, self).__init__(parent, u"locals()", "Medium")
+        super(LocalVariablesShelfWindow, self).__init__(parent, u"locals()", 0)
 
         # Attributes
         RPDBDEBUGGER.clearlocalvariables = self._listCtrl.Clear
@@ -114,7 +85,7 @@ class LocalVariablesShelfWindow(BaseVariablesShelfWindow):
 class GlobalVariablesShelfWindow(BaseVariablesShelfWindow):
     def __init__(self, parent):
         """Initialize the window"""
-        super(GlobalVariablesShelfWindow, self).__init__(parent, u"globals()", "Medium")
+        super(GlobalVariablesShelfWindow, self).__init__(parent, u"globals()", 0)
 
         # Attributes
         RPDBDEBUGGER.clearglobalvariables = self._listCtrl.Clear
@@ -123,7 +94,7 @@ class GlobalVariablesShelfWindow(BaseVariablesShelfWindow):
 class ExceptionsShelfWindow(BaseVariablesShelfWindow):
     def __init__(self, parent):
         """Initialize the window"""
-        super(ExceptionsShelfWindow, self).__init__(parent, u"rpdb_exception_info", "Medium")
+        super(ExceptionsShelfWindow, self).__init__(parent, u"rpdb_exception_info", 0)
 
         # Attributes
         RPDBDEBUGGER.clearexceptions = self._listCtrl.Clear
