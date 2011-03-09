@@ -66,10 +66,6 @@ class ThreadsList(eclib.EBaseListCtrl):
         """Go to the file"""
         if self.suppress_recursion == 0:
             self.suppress_recursion += 1
-#            index = RPDBDEBUGGER.get_frameindex()
-#            if index is not None:
-#                filepath, editorlineno = self.GetFileNameEditorLineNo(index)
-#                RPDBDEBUGGER.removeeditormarkers(filepath, editorlineno)
             tid = self.GetItemData(index)
             RPDBDEBUGGER.set_thread(tid)
         else:

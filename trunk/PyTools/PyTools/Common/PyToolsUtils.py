@@ -126,7 +126,7 @@ class PyToolsUtils():
 
 class RunProcInThread(threading.Thread):
     """Background thread to run task in"""
-    def __init__(self, fn, target, desc):
+    def __init__(self, desc, target, fn, *args, **kwargs):
         """@param fn: function to run
         @param target: callable(data) To receive output data
         @param desc: description of task
@@ -134,13 +134,15 @@ class RunProcInThread(threading.Thread):
         super(RunProcInThread, self).__init__()
 
         # Attributes
-        self.fn = fn
-        self.target = target
         self.desc = desc
+        self.target = target
+        self.fn = fn
+        self.args = args
+        self.kwargs = kwargs
 
     def run(self):
         try:
-            data = self.fn()
+            data = self.fn(*self.args, **self.kwargs)
         except Exception, msg:
             util.Log("[%s][err] %s Failure: %s" % (self.desc, self.desc, msg))
             data = [(u"Error", unicode(msg), -1)]

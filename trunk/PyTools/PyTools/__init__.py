@@ -36,9 +36,9 @@ from PyTools.Debugger.DebugShelfWindow import DebugShelfWindow
 from PyTools.Debugger.BreakPointsShelfWindow import BreakPointsShelfWindow
 from PyTools.Debugger.StackFrameShelfWindow import StackFrameShelfWindow
 from PyTools.Debugger.ThreadsShelfWindow import ThreadsShelfWindow
-#from PyTools.Debugger.VariablesShelfWindows import LocalVariablesShelfWindow
-#from PyTools.Debugger.VariablesShelfWindows import GlobalVariablesShelfWindow
-#from PyTools.Debugger.VariablesShelfWindows import ExceptionVariablesShelfWindow
+from PyTools.Debugger.VariablesShelfWindows import LocalVariablesShelfWindow
+from PyTools.Debugger.VariablesShelfWindows import GlobalVariablesShelfWindow
+from PyTools.Debugger.VariablesShelfWindows import ExceptionsShelfWindow
 
 #-----------------------------------------------------------------------------#
 # Globals
@@ -119,41 +119,41 @@ class PyThread(BaseShelfPlugin):
         """
         return Images.Bug.Bitmap
 
-# class PyLocalVariable(BaseShelfPlugin):
-    # """Script Launcher and output viewer"""
-    # def __init__(self, pluginmgr):
-        # super(PyLocalVariables, self).__init__(pluginmgr, "PyLocalVariable", LocalVariablesShelfWindow)
+class PyLocalVariable(BaseShelfPlugin):
+    """Script Launcher and output viewer"""
+    def __init__(self, pluginmgr):
+        super(PyLocalVariable, self).__init__(pluginmgr, "PyLocalVariable", LocalVariablesShelfWindow)
 
-    # def GetBitmap(self):
-        # """Get the tab bitmap
-        # @return: wx.Bitmap
+    def GetBitmap(self):
+        """Get the tab bitmap
+        @return: wx.Bitmap
 
-        # """
-        # return Images.Bug.Bitmap
+        """
+        return Images.Bug.Bitmap
 
-# class PyGlobalVariable(BaseShelfPlugin):
-    # """Script Launcher and output viewer"""
-    # def __init__(self, pluginmgr):
-        # super(PyGlobalVariables, self).__init__(pluginmgr, "PyGlobalVariable", GlobalVariablesShelfWindow)
+class PyGlobalVariable(BaseShelfPlugin):
+    """Script Launcher and output viewer"""
+    def __init__(self, pluginmgr):
+        super(PyGlobalVariable, self).__init__(pluginmgr, "PyGlobalVariable", GlobalVariablesShelfWindow)
 
-    # def GetBitmap(self):
-        # """Get the tab bitmap
-        # @return: wx.Bitmap
+    def GetBitmap(self):
+        """Get the tab bitmap
+        @return: wx.Bitmap
 
-        # """
-        # return Images.Bug.Bitmap
+        """
+        return Images.Bug.Bitmap
 
-# class PyExceptionVariable(BaseShelfPlugin):
-    # """Script Launcher and output viewer"""
-    # def __init__(self, pluginmgr):
-        # super(PyExceptionVariables, self).__init__(pluginmgr, "PyExceptionVariable", ExceptionVariablesShelfWindow)
+class PyException(BaseShelfPlugin):
+    """Script Launcher and output viewer"""
+    def __init__(self, pluginmgr):
+        super(PyException, self).__init__(pluginmgr, "PyException", ExceptionsShelfWindow)
 
-    # def GetBitmap(self):
-        # """Get the tab bitmap
-        # @return: wx.Bitmap
+    def GetBitmap(self):
+        """Get the tab bitmap
+        @return: wx.Bitmap
 
-        # """
-        # return Images.Bug.Bitmap
+        """
+        return Images.Bug.Bitmap
 
 #-----------------------------------------------------------------------------#
 # Configuration Interface
