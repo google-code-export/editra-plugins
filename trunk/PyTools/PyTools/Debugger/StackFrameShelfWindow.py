@@ -50,6 +50,7 @@ class StackFrameShelfWindow(BaseShelfWindow):
         RPDBDEBUGGER.clearframe = self._listCtrl.Clear
         RPDBDEBUGGER.clearstepmarker = self.ClearStepMarker
         RPDBDEBUGGER.setstepmarker = self.SetStepMarker
+        RPDBDEBUGGER.restorestepmarker = self.RestoreStepMarker
         RPDBDEBUGGER.selectframe = self._listCtrl.select_frame
         RPDBDEBUGGER.updatestacklist = self.UpdateStackList
         
@@ -60,9 +61,15 @@ class StackFrameShelfWindow(BaseShelfWindow):
         
     def SetStepMarker(self, fileName, lineNo):
         self.editor = PyToolsUtils.GetEditorOrOpenFile(self._mw, fileName)
-        editorlineno = lineNo - 1
-        self.editor.GotoLine(editorlineno)
-        self.editor.ShowStepMarker(editorlineno, show=True)
+        self.editorlineno = lineNo - 1
+        self.editor.GotoLine(self.editorlineno)
+        self.editor.ShowStepMarker(self.editorlineno, show=True)
+        
+    def RestoreStepMarker(self, editor):
+        if self.editor != editor:
+            return
+        self.editor.GotoLine(self.editorlineno)
+        self.editor.ShowStepMarker(self.editorlineno, show=True)
         
     def UpdateStackList(self, stack):
         self._listCtrl.Clear()

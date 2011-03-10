@@ -136,6 +136,7 @@ class BreakPointsShelfWindow(BaseShelfWindow):
 
         self.SaveBreakpoints()
         self.RestoreBreakPoints()
+        RPDBDEBUGGER.restorestepmarker(editor)
             
         if force or not self._hasrun:
 #            fname = getattr(editor, 'GetFileName', lambda: u"")()
