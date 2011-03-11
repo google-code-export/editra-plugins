@@ -69,6 +69,7 @@ class DebugShelfWindow(BaseShelfWindow):
         self.layout("Debug", self.OnDebug, self.OnJobTimer)
         RPDBDEBUGGER.mainwindowid = self._mw.GetId()
         RPDBDEBUGGER.debuggeroutput = self._listCtrl.AddText
+        RPDBDEBUGGER.conflictingmodules = self.ConflictingModules
 
         # Attributes
         self._debugger = None
@@ -91,6 +92,12 @@ class DebugShelfWindow(BaseShelfWindow):
         ed_msg.Unsubscribe(self.OnFileSave)
         ed_msg.Unsubscribe(self.OnPageChanged)
 
+    def ConflictingModules(self, moduleslist):
+        dlg = wx.MessageDialog(self, "The modules: %s, which are incompatible with the debugger were " +
+        "detected and can possibly cause the debugger to fail." % moduleslist, "Warning", wx.OK | wx.ICON_WARNING)
+        dlg.ShowModal()
+        dlg.Destroy()
+        
     def OnCancelSearch(self, event):
         self.combotexts[self.combocurrent_selection] = ""
         self.search.SetValue("")

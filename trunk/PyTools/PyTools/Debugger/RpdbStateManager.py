@@ -32,15 +32,22 @@ class RpdbStateManager(object):
         state = self.rpdb2debugger.sessionmanager.get_state()
         self.update_state(rpdb2.CEventState(state))
         
+        event_type_dict = {rpdb2.CEventConflictingModules: {}}
+        self.rpdb2debugger.register_callback(self.update_conflicting_modules, event_type_dict)
+        
         event_type_dict = {rpdb2.CEventState: {}}
         self.rpdb2debugger.register_callback(self.update_state, event_type_dict)
 
+    def update_conflicting_modules(self, event):
+        modulesstr = ', '.join(event.m_modules_list)
+        wx.CallAfter(self.conflictingmodules, modulesstr)
+        
     def update_state(self, event):
-        wx.CallAfter(self.callback_state, event)
+        wx.CallAfter(self.callback_state, event.m_state)
 
-    def callback_state(self, event):
+    def callback_state(self, state):
         old_state = self.m_state
-        self.m_state = event.m_state
+        self.m_state = state
 
         # change menu or toolbar items displayed according to state eg. running, paused etc.
         if self.m_state == rpdb2.STATE_DETACHED:

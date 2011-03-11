@@ -64,7 +64,7 @@ class BreakPointsShelfWindow(BaseShelfWindow):
         self.breakpoints = self._config.get(ToolConfig.TLC_BREAKPOINTS, dict())
         self._listCtrl.PopulateRows(self.breakpoints)
         RPDBDEBUGGER.getbreakpoints = self.GetBreakPoints
-        RPDBDEBUGGER.checkterminate = self.CheckTerminate
+        RPDBDEBUGGER.isrpdbbreakpoint = self.IsRpdbBreakpoint
 
     def GetBreakPoints(self):
         return self.breakpoints
@@ -111,9 +111,7 @@ class BreakPointsShelfWindow(BaseShelfWindow):
         self._config[ToolConfig.TLC_BREAKPOINTS] = copy.deepcopy(self.breakpoints)
         Profile_Set(ToolConfig.PYTOOL_CONFIG, self._config)
     
-    def CheckTerminate(self, filepath, lineno):
-        if self._config.get(ToolConfig.TLC_EXITHANDLE, False):
-            return False
+    def IsRpdbBreakpoint(self, filepath, lineno):
         if filepath.find("rpdb2.py") == -1:
             return False
         bpinfile = self.breakpoints.get(filepath)

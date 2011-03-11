@@ -49,17 +49,19 @@ class RpdbDebugger(object):
         self.pid = None
         self.breakpoints_loaded = False
         self.curstack = None
+        self.unhandledexception = False
         
         # functions that will be set later
         
         # debuggee shelf
         self.debuggeroutput = None
+        self.conflictingmodules = None
         # breakpoint shelf
         self.getbreakpoints = None
         # stackframe shelf
         self.clearstepmarker = None
         self.setstepmarker = None
-        self.checkterminate = None
+        self.isrpdbbreakpoint = None
         self.clearframe = None
         self.selectframe = None
         self.updatestacklist = None
@@ -71,14 +73,16 @@ class RpdbDebugger(object):
         self.clearlocalvariables = None
         self.clearglobalvariables = None
         self.clearexceptions = None
-        self.updatelocalvariableslist = None
-        self.updateglobalvariableslist = None
-        self.updateexceptionslist = None
+        self.updatelocalvariables = None
+        self.updateglobalvariables = None
+        self.updateexceptions = None
+        self.catchunhandledexception = None
 
     def clear_all(self):
         self.pid = None
         self.breakpoints_loaded = False
         self.curstack = None
+        self.unhandledexception = False
         self.clearstepmarker()
         self.clearlocalvariables()
         self.clearglobalvariables()
@@ -113,7 +117,13 @@ class RpdbDebugger(object):
             return self.sessionmanager.get_namespace(expressionlist, filterlevel)
         except rpdb2.NotAttached:
             return None
-    
+
+    def set_analyze(self, analyze):
+        try:
+            self.sessionmanager.set_analyze(analyze)   
+        except rpdb2.NotAttached:
+            pass
+            
     def set_frameindex(self, index):
         try:
             self.sessionmanager.set_frame_index(index)        
