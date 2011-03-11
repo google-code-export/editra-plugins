@@ -136,7 +136,7 @@ class VariablesList(wx.gizmos.TreeListCtrl):
             dlg.Destroy()
 
         if not warning in self.ignoredwarnings:
-            dlg = wx.MessageDialog(self, "%s\n\nClick 'Cancel' to ignore this warning in this session." % (warning, ),\
+            dlg = wx.MessageDialog(self, "%s\n\nClick 'Cancel' to ignore this warning in this session." % warning,\
             "Warning", wx.OK | wx.CANCEL | wx.YES_DEFAULT | wx.ICON_WARNING)
             res = dlg.ShowModal()
             dlg.Destroy()

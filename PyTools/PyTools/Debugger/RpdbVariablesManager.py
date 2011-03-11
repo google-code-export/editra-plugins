@@ -28,12 +28,19 @@ class RpdbVariablesManager(object):
     def __init__(self, rpdb2debugger):
         super(RpdbVariablesManager, self).__init__()
         self.rpdb2debugger = rpdb2debugger
+
+        event_type_dict = {rpdb2.CEventUnhandledException: {}}
+        self.rpdb2debugger.register_callback(self.update_unhandled_exception, event_type_dict)
         
         event_type_dict = {rpdb2.CEventNamespace: {}}
         self.rpdb2debugger.register_callback(self.update_variables, event_type_dict)
 
         self.variableskey_map = {}
         
+    def update_unhandled_exception(self, event):
+        self.rpdb2debugger.unhandledexception = True
+        wx.CallAfter(self.rpdb2debugger.catchunhandledexception)
+
     def update_variables(self, event):
         wx.CallAfter(self.update_namespace)
 

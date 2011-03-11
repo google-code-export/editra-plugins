@@ -78,8 +78,9 @@ class RpdbStackFrameManager(object):
             self.rpdb2debugger.breakpoints_loaded = True
             self.rpdb2debugger.do_go()
             return            
-        if self.rpdb2debugger.checkterminate(filename, lineno):
-            self.rpdb2debugger.do_go()
+        if self.rpdb2debugger.isrpdbbreakpoint(filename, lineno):
+            if not self.rpdb2debugger.unhandledexception:
+                self.rpdb2debugger.do_go()
             return
         self.rpdb2debugger.setstepmarker(filename, lineno)
 
