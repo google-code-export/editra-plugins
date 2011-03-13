@@ -67,13 +67,15 @@ class BaseShelfWindow(ed_basewin.EdBaseCtrlBox):
         self.ctrlbar.AddControl(self.cfgbtn, wx.ALIGN_LEFT)
         return self.ctrlbar
 
-    def layout(self, taskbtndesc, taskfn, timerfn=None):
+    def layout(self, taskbtndesc=None, taskfn=None, timerfn=None):
         rbmp = wx.ArtProvider.GetBitmap(str(ed_glob.ID_BIN_FILE), wx.ART_MENU)
         if rbmp.IsNull() or not rbmp.IsOk():
             rbmp = None
-        self.taskbtn = eclib.PlateButton(self.ctrlbar, wx.ID_ANY, _(taskbtndesc), rbmp,
-                                        style=eclib.PB_STYLE_NOBG)
-        self.ctrlbar.AddControl(self.taskbtn, wx.ALIGN_RIGHT)
+        if taskfn:
+            self.taskbtn = eclib.PlateButton(self.ctrlbar, wx.ID_ANY, _(taskbtndesc), rbmp,
+                                            style=eclib.PB_STYLE_NOBG)
+            self.ctrlbar.AddControl(self.taskbtn, wx.ALIGN_RIGHT)
+            self.Bind(wx.EVT_BUTTON, taskfn, self.taskbtn)
 
         # Layout
         self.SetWindow(self._listCtrl)
@@ -81,7 +83,6 @@ class BaseShelfWindow(ed_basewin.EdBaseCtrlBox):
 
         # Event Handlers
         self.Bind(wx.EVT_BUTTON, self.OnShowConfig, self.cfgbtn)
-        self.Bind(wx.EVT_BUTTON, taskfn, self.taskbtn)
         if timerfn:
             self.Bind(wx.EVT_TIMER, timerfn, self._jobtimer)
         self.Bind(wx.EVT_WINDOW_DESTROY, self.OnDestroy, self)

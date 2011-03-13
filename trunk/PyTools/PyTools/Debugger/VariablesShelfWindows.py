@@ -35,17 +35,16 @@ _ = wx.GetTranslation
 #-----------------------------------------------------------------------------#
 
 class BaseVariablesShelfWindow(BaseShelfWindow):
-    def __init__(self, parent, listtype, filterlevel, buttontitle="Unused"):
+    def __init__(self, parent, listtype, filterlevel, buttontitle="Unused", taskfn=None):
         """Initialize the window"""
         super(BaseVariablesShelfWindow, self).__init__(parent)
         self.listtype = listtype
         ctrlbar = self.setup(VariablesList(self, listtype, filterlevel))
         ctrlbar.AddStretchSpacer()
-        self.layout(buttontitle, self.OnTask)
+        self.layout(buttontitle, taskfn)
         
         # attributes
         self.filterlevel = filterlevel
-        self.buttontitle = buttontitle
         self.key = None
 
     def UpdateVariablesList(self, variables):
@@ -56,9 +55,6 @@ class BaseVariablesShelfWindow(BaseShelfWindow):
     def Unsubscription(self):
         pass
 
-    def OnTask(self, event):
-        pass
-        
     def update_namespace(self, key, expressionlist):
         old_key = self.key
         old_expressionlist = self._listCtrl.get_expression_list()
@@ -100,9 +96,10 @@ class ExceptionsShelfWindow(BaseVariablesShelfWindow):
 
     def __init__(self, parent):
         """Initialize the window"""
-        super(ExceptionsShelfWindow, self).__init__(parent, u"rpdb_exception_info", 0, self.ANALYZELBL)
+        super(ExceptionsShelfWindow, self).__init__(parent, u"rpdb_exception_info", 0, self.ANALYZELBL, self.OnAnalyze)
 
         # Attributes
+        self.buttontitle = self.ANALYZELBL
         RPDBDEBUGGER.clearexceptions = self._listCtrl.Clear
         RPDBDEBUGGER.updateexceptions = self.update_namespace
         RPDBDEBUGGER.catchunhandledexception = self.UnhandledException
@@ -121,7 +118,7 @@ class ExceptionsShelfWindow(BaseVariablesShelfWindow):
         self.buttontitle = self.STOPANALYZELBL
         self.taskbtn.SetLabel(self.buttontitle)
         
-    def OnTask(self, event):
+    def OnAnalyze(self, event):
         if self.buttontitle == self.ANALYZELBL:
             RPDBDEBUGGER.set_analyze(True)
             self.buttontitle = self.STOPANALYZELBL
