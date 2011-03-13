@@ -238,7 +238,10 @@ class VariablesList(wx.gizmos.TreeListCtrl):
         
         (expr, is_valid) = self.GetPyData(item)
 
-        variables_with_expr = [e for e in variables if e.get("expr", None) == expr]
+        variables_with_expr = []
+        for expression in variables:
+            if hasattr(expression, "get") and expression.get("expr", None) == expr: 
+                variables_with_expr.append(expression)
         if variables_with_expr == []:
             return
 
