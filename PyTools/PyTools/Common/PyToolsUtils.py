@@ -139,7 +139,13 @@ class RunProcInThread(threading.Thread):
         self.fn = fn
         self.args = args
         self.kwargs = kwargs
+        self.param = None
+        
+        self.setDaemon(True)
 
+    def pass_parameter(self, param):
+        self.param = param
+    
     def run(self):
         try:
             data = self.fn(*self.args, **self.kwargs)
@@ -147,7 +153,10 @@ class RunProcInThread(threading.Thread):
             util.Log("[%s][err] %s Failure: %s" % (self.desc, self.desc, msg))
             data = [(u"Error", unicode(msg), -1)]
         if self.target:
-            wx.CallAfter(self.target, data)
+            if self.param:
+                wx.CallAfter(self.target, data, param)
+            else:
+                wx.CallAfter(self.target, data)
 
 class FreezeDrawer(object):
     """To be used in 'with' statements. Upon enter freezes the drawing
