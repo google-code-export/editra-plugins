@@ -153,8 +153,8 @@ class RunProcInThread(threading.Thread):
             util.Log("[%s][err] %s Failure: %s" % (self.desc, self.desc, msg))
             data = [(u"Error", unicode(msg), -1)]
         if self.target:
-            if self.param:
-                wx.CallAfter(self.target, data, param)
+            if self.param is not None:
+                wx.CallAfter(self.target, data, self.param)
             else:
                 wx.CallAfter(self.target, data)
 

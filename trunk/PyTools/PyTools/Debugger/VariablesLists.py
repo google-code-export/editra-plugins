@@ -122,9 +122,6 @@ class VariablesList(wx.gizmos.TreeListCtrl):
 
         _suite = "%s = %s" % (expr, _expr)
 
-        res = None
-        exc_info = (None, None, None)
-        
         worker = RunProcInThread(self.listtype, self._onitemactivatedcallback, \
             RPDBDEBUGGER.execute, _suite)
         worker.start()

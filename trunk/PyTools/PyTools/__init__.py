@@ -39,6 +39,7 @@ from PyTools.Debugger.ThreadsShelfWindow import ThreadsShelfWindow
 from PyTools.Debugger.VariablesShelfWindows import LocalVariablesShelfWindow
 from PyTools.Debugger.VariablesShelfWindows import GlobalVariablesShelfWindow
 from PyTools.Debugger.VariablesShelfWindows import ExceptionsShelfWindow
+from PyTools.Debugger.ExpressionsShelfWindow import ExpressionsShelfWindow
 
 #-----------------------------------------------------------------------------#
 # Globals
@@ -147,6 +148,18 @@ class PyException(BaseShelfPlugin):
     """Script Launcher and output viewer"""
     def __init__(self, pluginmgr):
         super(PyException, self).__init__(pluginmgr, "PyException", ExceptionsShelfWindow)
+
+    def GetBitmap(self):
+        """Get the tab bitmap
+        @return: wx.Bitmap
+
+        """
+        return Images.Bug.Bitmap
+
+class PyExpression(BaseShelfPlugin):
+    """Script Launcher and output viewer"""
+    def __init__(self, pluginmgr):
+        super(PyExpression, self).__init__(pluginmgr, "PyExpression", ExpressionsShelfWindow)
 
     def GetBitmap(self):
         """Get the tab bitmap
