@@ -71,6 +71,8 @@ class ExpressionsList(eclib.EToggleEditListCtrl):
         expression, = self._data[idx]
         self.parent.SetExpression(expression, enabled)
         self.Evaluate(enabled, expression, idx)
+        if not enabled:
+            self.SetStringItem(idx, 1, u"")        
 
     def Evaluate(self, enabled, expression, idx):
         if not enabled or not expression:
