@@ -90,10 +90,11 @@ class BreakPointsShelfWindow(BaseShelfWindow):
         else:
             linenos = {}
             self.breakpoints[filepath] = linenos
-        bp = RPDBDEBUGGER.set_breakpoint(filepath, lineno, exprstr)
         bpid = None
-        if bp:
-            bpid = bp.m_id
+        if os.path.isfile(filepath):
+            bp = RPDBDEBUGGER.set_breakpoint(filepath, lineno, exprstr)
+            if bp:
+                bpid = bp.m_id
         linenos[lineno] = (enabled, exprstr, bpid)
         self.SaveBreakpoints()
         return lineno
