@@ -61,6 +61,7 @@ class RpdbDebugger(object):
         # stackframe shelf
         self.clearstepmarker = None
         self.setstepmarker = None
+        self.restorestepmarker = None
         self.isrpdbbreakpoint = None
         self.clearframe = None
         self.selectframe = None
