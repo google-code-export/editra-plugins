@@ -39,10 +39,6 @@ class StackFrameShelfWindow(BaseShelfWindow):
         super(StackFrameShelfWindow, self).__init__(parent)
         ctrlbar = self.setup(StackFrameList(self))
         ctrlbar.AddStretchSpacer()
-        txtentrysize = wx.Size(256, wx.DefaultSize.GetHeight())
-        self.textentry = eclib.CommandEntryBase(ctrlbar, wx.ID_ANY, size=txtentrysize,
-                                           style=wx.TE_PROCESS_ENTER|wx.WANTS_CHARS)
-        ctrlbar.AddControl(self.textentry, wx.ALIGN_RIGHT)
         self.layout("Go", self.OnGo)
 
         # Attributes

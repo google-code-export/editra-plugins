@@ -37,7 +37,7 @@ class ThreadsShelfWindow(BaseShelfWindow):
         """Initialize the window"""
         super(ThreadsShelfWindow, self).__init__(parent)
         ctrlbar = self.setup(ThreadsList(self))
-        self.layout("Unused", self.OnGo)
+        self.layout()
 
         # Attributes
         RPDBDEBUGGER.clearthread = self._listCtrl.Clear

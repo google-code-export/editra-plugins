@@ -46,10 +46,6 @@ class BreakPointsShelfWindow(BaseShelfWindow):
         super(BreakPointsShelfWindow, self).__init__(parent)
         ctrlbar = self.setup(BreakPointsList(self))
         ctrlbar.AddStretchSpacer()
-        txtentrysize = wx.Size(256, wx.DefaultSize.GetHeight())
-        self.textentry = eclib.CommandEntryBase(ctrlbar, wx.ID_ANY, size=txtentrysize,
-                                           style=wx.TE_PROCESS_ENTER|wx.WANTS_CHARS)
-        ctrlbar.AddControl(self.textentry, wx.ALIGN_RIGHT)
         self.layout("Clear", self.OnClear)
 
         # Attributes
