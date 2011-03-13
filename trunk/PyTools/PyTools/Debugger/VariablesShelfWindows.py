@@ -24,6 +24,7 @@ import ed_msg
 
 # Local imports
 from PyTools.Common.PyToolsUtils import PyToolsUtils
+from PyTools.Common.PyToolsUtils import RunProcInThread
 from PyTools.Common.BaseShelfWindow import BaseShelfWindow
 from PyTools.Debugger.VariablesLists import VariablesList
 from PyTools.Debugger import RPDBDEBUGGER
@@ -49,7 +50,8 @@ class BaseVariablesShelfWindow(BaseShelfWindow):
 
     def UpdateVariablesList(self, variables):
         self._listCtrl.Clear()
-        self._listCtrl.PopulateRows(variables)
+        if variables:
+            self._listCtrl.PopulateRows(variables)
         self._listCtrl.Refresh()
 
     def Unsubscription(self):
@@ -67,11 +69,11 @@ class BaseVariablesShelfWindow(BaseShelfWindow):
         if expressionlist is None:
             expressionlist = [(self.listtype, True)]
 
-        namespace = RPDBDEBUGGER.get_namespace(expressionlist, self.filterlevel)
-        if namespace:
-            self.UpdateVariablesList(namespace)
+        worker = RunProcInThread(self.listtype, self.UpdateVariablesList, \
+            RPDBDEBUGGER.get_namespace, expressionlist, self.filterlevel)
+        worker.start()
         return (old_key, old_expressionlist)
-
+        
 class LocalVariablesShelfWindow(BaseVariablesShelfWindow):
     def __init__(self, parent):
         """Initialize the window"""

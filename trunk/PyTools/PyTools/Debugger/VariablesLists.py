@@ -24,6 +24,7 @@ import eclib
 
 # Local Imports
 from PyTools.Common.PyToolsUtils import PyToolsUtils
+from PyTools.Common.PyToolsUtils import RunProcInThread
 from PyTools.Debugger.ExpressionDialog import ExpressionDialog
 from PyTools.Debugger import RPDBDEBUGGER
 
@@ -124,7 +125,11 @@ class VariablesList(wx.gizmos.TreeListCtrl):
         res = None
         exc_info = (None, None, None)
         
-        res = RPDBDEBUGGER.execute(_suite)        
+        worker = RunProcInThread(self.listtype, self._onitemactivatedcallback, \
+            RPDBDEBUGGER.execute, _suite)
+        worker.start()
+        
+    def _onitemactivatedcallback(self, res):
         if not res:
             return
             
@@ -172,8 +177,12 @@ class VariablesList(wx.gizmos.TreeListCtrl):
         if item == None:
             return
       
-        variables = RPDBDEBUGGER.get_namespace([(expr, True)], self.filterlevel)
+        worker = RunProcInThread(self.listtype, self._itemexpandingcallback, \
+            RPDBDEBUGGER.get_namespace, [(expr, True)], self.filterlevel)
+        worker.pass_parameters(item)
+        worker.start()
 
+    def _itemexpandingcallback(self, variables, item):
         if not variables:
             child = self.AppendItem(item, STR_NAMESPACE_DEADLOCK)
             self.SetItemText(child, ' ' + STR_NAMESPACE_DEADLOCK, 2)
