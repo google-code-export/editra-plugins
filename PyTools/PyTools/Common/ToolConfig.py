@@ -32,6 +32,7 @@ TLC_PYTHON_PATH = "PythonPath"
 TLC_AUTO_RUN = "AutoRun"
 TLC_DISABLED_CHK = "DisabledCheckers"
 TLC_BREAKPOINTS = "Breakpoints"
+TLC_EXPRESSIONS = "Expressions"
 
 # Globals
 _ = wx.GetTranslation

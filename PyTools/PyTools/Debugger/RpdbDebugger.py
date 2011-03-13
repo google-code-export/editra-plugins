@@ -78,6 +78,10 @@ class RpdbDebugger(object):
         self.updateglobalvariables = None
         self.updateexceptions = None
         self.catchunhandledexception = None
+        # expressions shelf
+        self.restoreexpressions = None
+        self.saveandrestoreexpressions = None
+        self.clearexpressionvalues = None
 
     def clear_all(self):
         self.pid = None
@@ -90,6 +94,7 @@ class RpdbDebugger(object):
         self.clearexceptions()
         self.clearframe()
         self.clearthread()
+        self.clearexpressionvalues()
 
     def attach(self):
         if self.pid:
@@ -110,6 +115,12 @@ class RpdbDebugger(object):
     def execute(self, suite):
         try:
             return self.sessionmanager.execute(suite)
+        except rpdb2.NotAttached:
+            return None
+
+    def evaluate(self, suite):
+        try:
+            return self.sessionmanager.evaluate(suite)
         except rpdb2.NotAttached:
             return None
 

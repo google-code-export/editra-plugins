@@ -37,5 +37,6 @@ if setup != None:
         LocalVariables = PyTools:PyLocalVariable
         GlobalVariables = PyTools:PyGlobalVariable
         Exceptions = PyTools:PyException
+        Expressions = PyTools:PyExpression
         '''
         )

@@ -52,9 +52,16 @@ class BreakPointsList(eclib.EToggleEditListCtrl):
         """Go to the file"""
         idx = evt.GetIndex()
         fileName = self.GetItem(idx, 0).GetText()
+        if not fileName:
+            return
         editor = PyToolsUtils.GetEditorOrOpenFile(self._mainw, fileName)
-        lineno = int(self.GetItem(idx, 1).GetText())
-        editor.GotoLine(lineno - 1)
+        if not editor:
+            return
+        try:
+            lineno = int(self.GetItem(idx, 1).GetText())            
+            editor.GotoLine(lineno - 1)
+        except ValueError:
+            pass
 
     def _seteditorbreakpoint(self, filepath, lineno, enabled, delete=False):
         editor = wx.GetApp().GetCurrentBuffer()
@@ -74,29 +81,48 @@ class BreakPointsList(eclib.EToggleEditListCtrl):
         if evt.IsEditCancelled():
             evt.Veto()
             return
-        index = evt.GetIndex()
+        idx = evt.GetIndex()
         newval = evt.GetLabel()
         column = evt.GetColumn()
-        filepath, linenostr, exprstr = self._data[index]
-        lineno = int(linenostr)
-        self.parent.DeleteBreakpoint(filepath, lineno)
-        self._seteditorbreakpoint(filepath, lineno, False, True)
+        filepath, linenostr, exprstr = self._data[idx]
+        lineno = ""
+        if filepath and linenostr:
+            try:
+                lineno = int(linenostr)
+                self.parent.DeleteBreakpoint(filepath, lineno)
+                self._seteditorbreakpoint(filepath, lineno, False, True)
+            except ValueError:
+                pass
         if column == 0:
             filepath = newval
         elif column == 1:
-            lineno = int(newval)
+            try:
+                lineno = int(newval)
+            except ValueError:
+                pass
         else:
             exprstr = newval
-        enabled = self.IsChecked(index)
-        self.parent.SetBreakpoint(filepath, lineno, exprstr, enabled)
-        self._data[index] = (unicode(filepath), unicode(lineno), unicode(exprstr))
-        self._seteditorbreakpoint(filepath, lineno, enabled)
+        enabled = self.IsChecked(idx)
+        self._data[idx] = (unicode(filepath), unicode(lineno), unicode(exprstr))
+        if filepath and lineno:
+            self.parent.SetBreakpoint(filepath, lineno, exprstr, enabled)
+            self._seteditorbreakpoint(filepath, lineno, enabled)
+        if filepath or lineno or exprstr:
+            idx = idx + 1
+            if idx == len(self._data):
+                self._data[idx] = (u"", u"", u"")
+                self.Append(self._data[idx])        
 
-    def OnCheckItem(self, index, enabled):
-        filepath, linenostr, exprstr = self._data[index]
-        lineno = int(linenostr)
-        self.parent.ChangeBreakpoint(filepath, lineno, exprstr, enabled)
-        self._seteditorbreakpoint(filepath, lineno, enabled)
+    def OnCheckItem(self, idx, enabled):
+        filepath, linenostr, exprstr = self._data[idx]
+        if not filepath or not linenostr:
+            return
+        try:
+            lineno = int(linenostr)
+            self.parent.ChangeBreakpoint(filepath, lineno, exprstr, enabled)
+            self._seteditorbreakpoint(filepath, lineno, enabled)
+        except ValueError:
+            pass
                     
     def Clear(self):
         """Delete all the rows """
@@ -120,7 +146,8 @@ class BreakPointsList(eclib.EToggleEditListCtrl):
             linenos = data[filepath]
             for lineno in linenos:
                 enabled, exprstr, bpid = linenos[lineno]
-                self._seteditorbreakpoint(filepath, lineno, enabled)
+                if filepath and lineno:
+                    self._seteditorbreakpoint(filepath, lineno, enabled)
                 self._data[idx] = (unicode(filepath), unicode(lineno), unicode(exprstr))
                 minLType = max(minLType, self.GetTextExtent(filepath)[0])
                 minLText = max(minLText, self.GetTextExtent(exprstr)[0])
@@ -128,6 +155,8 @@ class BreakPointsList(eclib.EToggleEditListCtrl):
                 self.SetItemData(idx, idx)
                 self.CheckItem(idx, enabled)
                 idx += 1
+        self._data[idx] = (u"", u"", u"")        
+        self.Append(self._data[idx])
         self.SetColumnWidth(0, minLType)
         self.SetColumnWidth(2, minLText)
 

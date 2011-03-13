@@ -83,5 +83,6 @@ class RpdbStackFrameManager(object):
                 self.rpdb2debugger.do_go()
             return
         self.rpdb2debugger.setstepmarker(filename, lineno)
+        self.rpdb2debugger.restoreexpressions()
 
 

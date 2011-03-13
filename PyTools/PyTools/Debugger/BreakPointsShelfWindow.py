@@ -130,6 +130,8 @@ class BreakPointsShelfWindow(BaseShelfWindow):
 
         self.SaveBreakpoints()
         self.RestoreBreakPoints()
+        if RPDBDEBUGGER.saveandrestoreexpressions:
+            RPDBDEBUGGER.saveandrestoreexpressions()
         if RPDBDEBUGGER.restorestepmarker:
             RPDBDEBUGGER.restorestepmarker(editor)
             
