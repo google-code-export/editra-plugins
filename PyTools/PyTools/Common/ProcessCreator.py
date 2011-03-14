@@ -63,7 +63,8 @@ class ProcessCreator(object):
                 os.environ["PYTHONPATH"] = os.pathsep.join(self.pythonpath)
             else:
                 self.environment["PYTHONPATH"] = str(os.pathsep.join(self.pythonpath))
-                self.environment["PATH"] = str(self.get_path())
+        if wx.Platform != "__WXMSW__":
+            self.environment["PATH"] = str(self.get_path())
 
         cmdline = [ cmd.encode(sys.getfilesystemencoding())
                        for cmd in self.cmdline ]
