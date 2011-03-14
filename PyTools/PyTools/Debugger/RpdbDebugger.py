@@ -236,5 +236,5 @@ class RpdbDebugger(object):
     def load_breakpoints(self):
         try:
             self.sessionmanager.load_breakpoints()
-        except rpdb2.NotAttached:
+        except:
             pass
