@@ -91,6 +91,8 @@ class DebugShelfWindow(BaseShelfWindow):
         ed_msg.Unsubscribe(self.OnFileLoad)
         ed_msg.Unsubscribe(self.OnFileSave)
         ed_msg.Unsubscribe(self.OnPageChanged)
+        RPDBDEBUGGER.debuggeroutput = lambda x:None
+        RPDBDEBUGGER.conflictingmodules = lambda x:None
 
     def ConflictingModules(self, moduleslist):
         dlg = wx.MessageDialog(self, "The modules: %s, which are incompatible with the debugger were " +

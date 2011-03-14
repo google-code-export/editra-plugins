@@ -44,6 +44,11 @@ class ThreadsShelfWindow(BaseShelfWindow):
         RPDBDEBUGGER.updatethread = self._listCtrl.update_thread
         RPDBDEBUGGER.updatethreadlist = self.UpdateThreadList
         
+    def Unsubscription(self):
+        RPDBDEBUGGER.clearthread = lambda:None
+        RPDBDEBUGGER.updatethread = lambda x,y,z:None
+        RPDBDEBUGGER.updatethreadlist = lambda x,y:None
+
     def UpdateThreadList(self, current_thread, threads_list):
         if self._listCtrl.check_suppress_recursion():
             return
@@ -51,8 +56,5 @@ class ThreadsShelfWindow(BaseShelfWindow):
         self._listCtrl.PopulateRows(current_thread, threads_list)
         self._listCtrl.RefreshRows()
         
-    def Unsubscription(self):
-        pass
-
     def OnGo(self, event):
         pass
