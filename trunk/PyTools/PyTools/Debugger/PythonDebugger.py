@@ -13,6 +13,7 @@ __revision__ = "$Revision: 1053 $"
 
 #-----------------------------------------------------------------------------#
 # Imports
+import wx
 import os.path
 import pkg_resources
 from time import sleep
@@ -39,7 +40,9 @@ class PythonDebugger(AbstractDebugger):
 
         # Attributes
         self.dirvarfile = variabledict.get("DIRVARFILE")
-        self.rpdb2args = ["-d", "--pwd=%s" % RpdbDebugger.password]
+        self.rpdb2args = ["-d"]
+        if wx.Platform == "__WXMSW__":        
+            self.rpdb2args += ["--pwd=%s" % RpdbDebugger.password]
         if not self.debuggerargs:
             self.debuggerargs = variabledict.get("DEBUGGERARGS")
         self.pythonpath = variabledict.get("PYTHONPATH")
