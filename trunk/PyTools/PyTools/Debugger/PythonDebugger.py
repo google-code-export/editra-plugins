@@ -41,8 +41,6 @@ class PythonDebugger(AbstractDebugger):
         # Attributes
         self.dirvarfile = variabledict.get("DIRVARFILE")
         self.rpdb2args = ["-d"]
-        if wx.Platform == "__WXMSW__":        
-            self.rpdb2args += ["--pwd=%s" % RpdbDebugger.password]
         if not self.debuggerargs:
             self.debuggerargs = variabledict.get("DEBUGGERARGS")
         self.pythonpath = variabledict.get("PYTHONPATH")
@@ -64,6 +62,12 @@ class PythonDebugger(AbstractDebugger):
 
         rpdb2_script = pkg_resources.resource_filename("rpdb2", "rpdb2.py")
 
+        if wx.Platform == "__WXMSW__":        
+            self.rpdb2args += ["--pwd=%s" % RpdbDebugger.password]
+        else:
+            rpdb2_pw = os.path.join(os.path.dirname(rpdb2_script), "rpdbpw.txt")
+            self.rpdb2args += ["--rid=%s" % rpdb2_pw]
+        
         childPath, parentPath = PyToolsUtils.get_packageroot(self.filename)
 
         # Start rpdb2
