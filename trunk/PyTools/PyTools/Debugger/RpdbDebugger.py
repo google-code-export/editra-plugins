@@ -54,34 +54,34 @@ class RpdbDebugger(object):
         # functions that will be set later
         
         # debuggee shelf
-        self.debuggeroutput = None
-        self.conflictingmodules = None
+        self.debuggeroutput = lambda x:None
+        self.conflictingmodules = lambda x:None
         # breakpoint shelf
-        self.getbreakpoints = None
+        self.getbreakpoints = lambda:{}
         # stackframe shelf
-        self.clearstepmarker = None
-        self.setstepmarker = None
-        self.restorestepmarker = None
-        self.isrpdbbreakpoint = None
-        self.clearframe = None
-        self.selectframe = None
-        self.updatestacklist = None
+        self.clearstepmarker = lambda:None
+        self.setstepmarker = lambda x,y:None
+        self.restorestepmarker = lambda x:None
+        self.isrpdbbreakpoint = lambda x,y:None
+        self.clearframe = lambda:None
+        self.selectframe = lambda x:None
+        self.updatestacklist = lambda x:None
         # thread shelf
-        self.clearthread = None
-        self.updatethread = None
-        self.updatethreadlist = None
+        self.clearthread = lambda:None
+        self.updatethread = lambda x,y,z:None
+        self.updatethreadlist = lambda x,y:None
         # variables shelf
-        self.clearlocalvariables = None
-        self.clearglobalvariables = None
-        self.clearexceptions = None
-        self.updatelocalvariables = None
-        self.updateglobalvariables = None
-        self.updateexceptions = None
-        self.catchunhandledexception = None
+        self.clearlocalvariables = lambda:None
+        self.clearglobalvariables = lambda:None
+        self.clearexceptions = lambda:None
+        self.updatelocalvariables = lambda x,y:(None,None)
+        self.updateglobalvariables = lambda x,y:(None,None)
+        self.updateexceptions = lambda x,y:(None,None)
+        self.catchunhandledexception = lambda:None
         # expressions shelf
-        self.restoreexpressions = None
-        self.saveandrestoreexpressions = None
-        self.clearexpressionvalues = None
+        self.restoreexpressions = lambda:None
+        self.saveandrestoreexpressions = lambda:None
+        self.clearexpressionvalues = lambda:None
 
     def clear_all(self):
         self.pid = None
