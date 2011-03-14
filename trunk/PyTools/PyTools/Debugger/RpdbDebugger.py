@@ -106,6 +106,7 @@ class RpdbDebugger(object):
             while tries != 3:
                 sleep(1)
                 util.Log("[PyDbg][info] Trying to Attach")
+                err = None
                 try:
                     self.sessionmanager.attach(self.pid, encoding = rpdb2.detect_locale())
                     break
