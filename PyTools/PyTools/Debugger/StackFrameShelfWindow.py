@@ -50,6 +50,14 @@ class StackFrameShelfWindow(BaseShelfWindow):
         RPDBDEBUGGER.selectframe = self._listCtrl.select_frame
         RPDBDEBUGGER.updatestacklist = self.UpdateStackList
         
+    def Unsubscription(self):
+        RPDBDEBUGGER.clearframe = lambda:None
+        RPDBDEBUGGER.clearstepmarker = lambda:None
+        RPDBDEBUGGER.setstepmarker = lambda x,y:None
+        RPDBDEBUGGER.restorestepmarker = lambda x:None
+        RPDBDEBUGGER.selectframe = lambda x:None
+        RPDBDEBUGGER.updatestacklist = lambda x:None
+
     def ClearStepMarker(self):
         if self.editor:
             self.editor.ShowStepMarker(1, show=False)
@@ -72,8 +80,5 @@ class StackFrameShelfWindow(BaseShelfWindow):
         self._listCtrl.PopulateRows(stack)
         self._listCtrl.RefreshRows()
         
-    def Unsubscription(self):
-        pass
-
     def OnGo(self, event):
         RPDBDEBUGGER.do_go()

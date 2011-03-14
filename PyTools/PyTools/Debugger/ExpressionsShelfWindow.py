@@ -56,6 +56,11 @@ class ExpressionsShelfWindow(BaseShelfWindow):
         RPDBDEBUGGER.saveandrestoreexpressions = self.SaveAndRestoreExpressions
         RPDBDEBUGGER.clearexpressionvalues = self._listCtrl.clearexpressionvalues
 
+    def Unsubscription(self):
+        RPDBDEBUGGER.restoreexpressions = lambda:None
+        RPDBDEBUGGER.saveandrestoreexpressions = lambda:None
+        RPDBDEBUGGER.clearexpressionvalues = lambda:None
+        
     def DeleteExpression(self, expression):
         if not expression in self.expressions:
             return None

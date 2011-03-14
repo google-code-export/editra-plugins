@@ -54,9 +54,6 @@ class BaseVariablesShelfWindow(BaseShelfWindow):
             self._listCtrl.PopulateRows(variables)
         self._listCtrl.Refresh()
 
-    def Unsubscription(self):
-        pass
-
     def update_namespace(self, key, expressionlist):
         old_key = self.key
         old_expressionlist = self._listCtrl.get_expression_list()
@@ -82,6 +79,10 @@ class LocalVariablesShelfWindow(BaseVariablesShelfWindow):
         # Attributes
         RPDBDEBUGGER.clearlocalvariables = self._listCtrl.Clear
         RPDBDEBUGGER.updatelocalvariables = self.update_namespace
+
+    def Unsubscription(self):
+        RPDBDEBUGGER.clearlocalvariables = lambda:None
+        RPDBDEBUGGER.updatelocalvariables = lambda x,y:(None,None)
         
 class GlobalVariablesShelfWindow(BaseVariablesShelfWindow):
     def __init__(self, parent):
@@ -91,6 +92,10 @@ class GlobalVariablesShelfWindow(BaseVariablesShelfWindow):
         # Attributes
         RPDBDEBUGGER.clearglobalvariables = self._listCtrl.Clear
         RPDBDEBUGGER.updateglobalvariables = self.update_namespace
+        
+    def Unsubscription(self):
+        RPDBDEBUGGER.clearglobalvariables = lambda:None
+        RPDBDEBUGGER.updateglobalvariables = lambda x,y:(None,None)
         
 class ExceptionsShelfWindow(BaseVariablesShelfWindow):
     ANALYZELBL = "Analyze Exception"
@@ -105,6 +110,11 @@ class ExceptionsShelfWindow(BaseVariablesShelfWindow):
         RPDBDEBUGGER.clearexceptions = self._listCtrl.Clear
         RPDBDEBUGGER.updateexceptions = self.update_namespace
         RPDBDEBUGGER.catchunhandledexception = self.UnhandledException
+        
+    def Unsubscription(self):
+        RPDBDEBUGGER.clearexceptions = lambda:None
+        RPDBDEBUGGER.updateexceptions = lambda x,y:(None,None)
+        RPDBDEBUGGER.catchunhandledexception = lambda:None
         
     def UnhandledException(self):
         dlg = wx.MessageDialog(self, "An unhandled exception was caught. Would you like to analyze it?",\

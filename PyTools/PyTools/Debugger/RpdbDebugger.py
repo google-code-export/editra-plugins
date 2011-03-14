@@ -58,11 +58,11 @@ class RpdbDebugger(object):
         self.conflictingmodules = lambda x:None
         # breakpoint shelf
         self.getbreakpoints = lambda:{}
+        self.isrpdbbreakpoint = lambda x,y:None
         # stackframe shelf
         self.clearstepmarker = lambda:None
         self.setstepmarker = lambda x,y:None
         self.restorestepmarker = lambda x:None
-        self.isrpdbbreakpoint = lambda x,y:None
         self.clearframe = lambda:None
         self.selectframe = lambda x:None
         self.updatestacklist = lambda x:None

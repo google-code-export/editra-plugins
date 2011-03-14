@@ -62,6 +62,14 @@ class BreakPointsShelfWindow(BaseShelfWindow):
         RPDBDEBUGGER.getbreakpoints = self.GetBreakPoints
         RPDBDEBUGGER.isrpdbbreakpoint = self.IsRpdbBreakpoint
 
+    def Unsubscription(self):
+        ed_msg.Unsubscribe(self.OnFileLoad)
+        ed_msg.Unsubscribe(self.OnFileSave)
+        ed_msg.Unsubscribe(self.OnPageChanged)
+        ed_msg.Unsubscribe(self.OnContextMenu)
+        RPDBDEBUGGER.getbreakpoints = lambda:{}
+        RPDBDEBUGGER.isrpdbbreakpoint = lambda x,y:None
+
     def GetBreakPoints(self):
         return self.breakpoints
 
@@ -118,12 +126,6 @@ class BreakPointsShelfWindow(BaseShelfWindow):
             return True
         return False
         
-    def Unsubscription(self):
-        ed_msg.Unsubscribe(self.OnFileLoad)
-        ed_msg.Unsubscribe(self.OnFileSave)
-        ed_msg.Unsubscribe(self.OnPageChanged)
-        ed_msg.Unsubscribe(self.OnContextMenu)
-
     def UpdateForEditor(self, editor, force=False):
         langid = getattr(editor, 'GetLangId', lambda: -1)()
         ispython = langid == synglob.ID_LANG_PYTHON
