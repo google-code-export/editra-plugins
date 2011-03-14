@@ -13,6 +13,9 @@ __svnid__ = "$Id: RpdbDebugger.py 1025 2010-12-24 18:30:23Z rans@email.com $"
 __revision__ = "$Revision: 1025 $"
 
 #-----------------------------------------------------------------------------#
+# Imports
+from time import sleep
+
 # Editra Libraries
 import util
 
@@ -98,8 +101,20 @@ class RpdbDebugger(object):
 
     def attach(self):
         if self.pid:
-            util.Log("[PyDbg][info] Trying to Attach")    
-            self.sessionmanager.attach(self.pid, encoding = rpdb2.detect_locale())
+            util.Log("[PyDbg][info] Trying to Attach")
+            tries = 0
+            err = None
+            while tries != 3:
+                sleep(1)
+                try:
+                    self.sessionmanager.attach(self.pid, encoding = rpdb2.detect_locale())
+                    break
+                except Exception, err:
+                    tries = tries + 1
+            if err:
+                util.Log("[PyDbg][err] Failed to attach. Error: %s" % repr(err))
+                return
+            
             util.Log("[PyDbg][info] Running")
             self.pid = None
 
