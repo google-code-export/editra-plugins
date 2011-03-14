@@ -105,5 +105,6 @@ class PythonDebugger(AbstractDebugger):
         self.processcreator.restorepath()
         RPDBDEBUGGER.pid = str(self.processcreator.Process.pid)
         self.debuggeewindow.AddText("Debuggee running. Attaching Debugger.\n")
+        sleep(1)
         worker = RunProcInThread("Debug", None, RPDBDEBUGGER.attach)
         worker.start()
