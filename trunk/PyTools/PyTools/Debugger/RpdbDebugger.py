@@ -101,7 +101,7 @@ class RpdbDebugger(object):
         self.clearthread()
         self.clearexpressionvalues()
         sleep(1)
-        self.debuggeroutput("Debugger detached.")
+        self.debuggeroutput("\nDebugger detached.")
 
     def isrpdbbreakpoint(self, filepath, lineno):
         if filepath.find("rpdb2.py") == -1:
