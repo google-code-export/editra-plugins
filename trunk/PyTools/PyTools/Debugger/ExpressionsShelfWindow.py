@@ -47,10 +47,8 @@ class ExpressionsShelfWindow(BaseShelfWindow):
         self.layout("Clear", self.OnClear)
 
         # Attributes
-        self._config = Profile_Get(ToolConfig.PYTOOL_CONFIG, default=dict())
-
-        # Editra Message Handlers        
-        self.expressions = self._config.get(ToolConfig.TLC_EXPRESSIONS, dict())
+        config = Profile_Get(ToolConfig.PYTOOL_CONFIG, default=dict())
+        self.expressions = config.get(ToolConfig.TLC_EXPRESSIONS, dict())
         self._listCtrl.PopulateRows(self.expressions)
         RPDBDEBUGGER.restoreexpressions = self.RestoreExpressions
         RPDBDEBUGGER.saveandrestoreexpressions = self.SaveAndRestoreExpressions
@@ -77,8 +75,7 @@ class ExpressionsShelfWindow(BaseShelfWindow):
         self._listCtrl.RefreshRows()
 
     def SaveExpressions(self):
-        self._config[ToolConfig.TLC_EXPRESSIONS] = copy.deepcopy(self.expressions)
-        Profile_Set(ToolConfig.PYTOOL_CONFIG, self._config)
+        RPDBDEBUGGER._config[ToolConfig.TLC_EXPRESSIONS] = copy.deepcopy(self.expressions)
 
     def SaveAndRestoreExpressions(self):
         self.SaveExpressions()
@@ -87,3 +84,4 @@ class ExpressionsShelfWindow(BaseShelfWindow):
     def OnClear(self, evt):
         self.expressions = {}
         self.SaveAndRestoreExpressions()
+        Profile_Set(ToolConfig.PYTOOL_CONFIG, RPDBDEBUGGER._config)

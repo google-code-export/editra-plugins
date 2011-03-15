@@ -114,7 +114,7 @@ class ExceptionsShelfWindow(BaseVariablesShelfWindow):
     def Unsubscription(self):
         RPDBDEBUGGER.clearexceptions = lambda:None
         RPDBDEBUGGER.updateexceptions = lambda x,y:(None,None)
-        RPDBDEBUGGER.catchunhandledexception = lambda:None
+        RPDBDEBUGGER.catchunhandledexception = RPDBDEBUGGER.clearunhandledexception
         
     def UnhandledException(self):
         dlg = wx.MessageDialog(self, "An unhandled exception was caught. Would you like to analyze it?",\

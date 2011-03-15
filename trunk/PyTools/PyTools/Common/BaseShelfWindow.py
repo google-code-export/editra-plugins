@@ -68,10 +68,10 @@ class BaseShelfWindow(ed_basewin.EdBaseCtrlBox):
         return self.ctrlbar
 
     def layout(self, taskbtndesc=None, taskfn=None, timerfn=None):
-        rbmp = wx.ArtProvider.GetBitmap(str(ed_glob.ID_BIN_FILE), wx.ART_MENU)
-        if rbmp.IsNull() or not rbmp.IsOk():
-            rbmp = None
         if taskfn:
+            rbmp = wx.ArtProvider.GetBitmap(str(ed_glob.ID_BIN_FILE), wx.ART_MENU)
+            if rbmp.IsNull() or not rbmp.IsOk():
+                rbmp = None
             self.taskbtn = eclib.PlateButton(self.ctrlbar, wx.ID_ANY, _(taskbtndesc), rbmp,
                                             style=eclib.PB_STYLE_NOBG)
             self.ctrlbar.AddControl(self.taskbtn, wx.ALIGN_RIGHT)

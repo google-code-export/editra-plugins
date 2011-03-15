@@ -21,7 +21,7 @@ import ed_msg
 
 # Local Imports
 import rpdb2
-
+from PyTools.Common.PyToolsUtils import RunProcInThread
 #----------------------------------------------------------------------------#
 
 class RpdbStateManager(object):
@@ -54,7 +54,8 @@ class RpdbStateManager(object):
             if self.rpdb2debugger.breakpoints_loaded:
                 # clear all debugging stuff as we have finished
                 ed_msg.PostMessage(ed_msg.EDMSG_PROGRESS_SHOW, (self.rpdb2debugger.mainwindowid, False))
-                wx.CallAfter(self.rpdb2debugger.clear_all)
+                worker = RunProcInThread("Detach", None, self.rpdb2debugger.clear_all)
+                worker.start()
         elif (old_state in [rpdb2.STATE_DETACHED, rpdb2.STATE_DETACHING, rpdb2.STATE_SPAWNING, rpdb2.STATE_ATTACHING]) and (self.m_state not in [rpdb2.STATE_DETACHED, rpdb2.STATE_DETACHING, rpdb2.STATE_SPAWNING, rpdb2.STATE_ATTACHING]):
             try:
                 serverinfo = self.rpdb2debugger.sessionmanager.get_server_info()
