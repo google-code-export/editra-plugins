@@ -82,7 +82,7 @@ class RpdbDebugger(object):
         self.updatelocalvariables = lambda x,y:(None,None)
         self.updateglobalvariables = lambda x,y:(None,None)
         self.updateexceptions = lambda x,y:(None,None)
-        self.catchunhandledexception = self.clearunhandledexception
+        self.catchunhandledexception = lambda:None
         # expressions shelf
         self.restoreexpressions = lambda:None
         self.saveandrestoreexpressions = lambda:None
@@ -92,7 +92,7 @@ class RpdbDebugger(object):
         self.pid = None
         self.breakpoints_loaded = False
         self.curstack = None
-        self.clearunhandledexception()
+        self.unhandledexception = False
         self.clearstepmarker()
         self.clearlocalvariables()
         self.clearglobalvariables()
@@ -113,9 +113,6 @@ class RpdbDebugger(object):
             return True
         return False
 
-    def clearunhandledexception(self):
-        self.unhandledexception = False
-    
     def attach(self, abortfn):
         if self.pid:
             tries = 0
