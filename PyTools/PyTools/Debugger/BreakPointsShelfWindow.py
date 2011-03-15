@@ -49,55 +49,47 @@ class BreakPointsShelfWindow(BaseShelfWindow):
         self.layout("Clear", self.OnClear)
 
         # Attributes
-        self._config = Profile_Get(ToolConfig.PYTOOL_CONFIG, default=dict())
+        config = Profile_Get(ToolConfig.PYTOOL_CONFIG, default=dict())
+        RPDBDEBUGGER.breakpoints = config.get(ToolConfig.TLC_BREAKPOINTS, dict())
+        RPDBDEBUGGER.saveandrestorebreakpoints = self.SaveAndRestoreBreakpoints
+        self._listCtrl.PopulateRows(RPDBDEBUGGER.breakpoints)
 
         # Editra Message Handlers
-        ed_msg.Subscribe(self.OnFileLoad, ed_msg.EDMSG_FILE_OPENED)
-        ed_msg.Subscribe(self.OnFileSave, ed_msg.EDMSG_FILE_SAVED)
-        ed_msg.Subscribe(self.OnPageChanged, ed_msg.EDMSG_UI_NB_CHANGED)
-        ed_msg.Subscribe(self.OnContextMenu, ed_msg.EDMSG_UI_STC_CONTEXT_MENU)
-        
-        self.breakpoints = self._config.get(ToolConfig.TLC_BREAKPOINTS, dict())
-        self._listCtrl.PopulateRows(self.breakpoints)
-        RPDBDEBUGGER.getbreakpoints = self.GetBreakPoints
-        RPDBDEBUGGER.isrpdbbreakpoint = self.IsRpdbBreakpoint
+        ed_msg.Subscribe(self.OnContextMenu, ed_msg.EDMSG_UI_STC_CONTEXT_MENU)        
 
     def Unsubscription(self):
-        ed_msg.Unsubscribe(self.OnFileLoad)
-        ed_msg.Unsubscribe(self.OnFileSave)
-        ed_msg.Unsubscribe(self.OnPageChanged)
+        editor = wx.GetApp().GetCurrentBuffer()
+        if editor:
+            editor.DeleteAllBreakpoints()
         ed_msg.Unsubscribe(self.OnContextMenu)
-        RPDBDEBUGGER.getbreakpoints = lambda:{}
-        RPDBDEBUGGER.isrpdbbreakpoint = lambda x,y:None
-
-    def GetBreakPoints(self):
-        return self.breakpoints
+        RPDBDEBUGGER.breakpoints = {}
+        RPDBDEBUGGER.saveandrestorebreakpoints = lambda:None
 
     def DeleteBreakpoint(self, filepath, lineno):
-        if not filepath in self.breakpoints:
+        if not filepath in RPDBDEBUGGER.breakpoints:
             return None
-        linenos = self.breakpoints[filepath]
+        linenos = RPDBDEBUGGER.breakpoints[filepath]
         if not lineno in linenos:
             return None
         enabled, exprstr, bpid = linenos[lineno]
         RPDBDEBUGGER.delete_breakpoint(bpid)
         del linenos[lineno]
         if len(linenos) == 0:
-            del self.breakpoints[filepath]
+            del RPDBDEBUGGER.breakpoints[filepath]
         self.SaveBreakpoints()
         return lineno
         
     def ChangeBreakpoint(self, filepath, lineno, newexprstr, newenabled):
-        enabled, exprstr, bpid = self.breakpoints[filepath][lineno]
-        self.breakpoints[filepath][lineno] = (newenabled, newexprstr, bpid)
+        enabled, exprstr, bpid = RPDBDEBUGGER.breakpoints[filepath][lineno]
+        RPDBDEBUGGER.breakpoints[filepath][lineno] = (newenabled, newexprstr, bpid)
         self.SaveBreakpoints()
         
     def SetBreakpoint(self, filepath, lineno, exprstr, enabled):
-        if filepath in self.breakpoints:
-            linenos = self.breakpoints[filepath]
+        if filepath in RPDBDEBUGGER.breakpoints:
+            linenos = RPDBDEBUGGER.breakpoints[filepath]
         else:
             linenos = {}
-            self.breakpoints[filepath] = linenos
+            RPDBDEBUGGER.breakpoints[filepath] = linenos
         bpid = None
         if os.path.isfile(filepath):
             bp = RPDBDEBUGGER.set_breakpoint(filepath, lineno, exprstr)
@@ -109,60 +101,11 @@ class BreakPointsShelfWindow(BaseShelfWindow):
         
     def RestoreBreakPoints(self):
         self._listCtrl.Clear()
-        self._listCtrl.PopulateRows(self.breakpoints)
+        self._listCtrl.PopulateRows(RPDBDEBUGGER.breakpoints)
         self._listCtrl.RefreshRows()
 
     def SaveBreakpoints(self):
-        self._config[ToolConfig.TLC_BREAKPOINTS] = copy.deepcopy(self.breakpoints)
-        Profile_Set(ToolConfig.PYTOOL_CONFIG, self._config)
-    
-    def IsRpdbBreakpoint(self, filepath, lineno):
-        if filepath.find("rpdb2.py") == -1:
-            return False
-        bpinfile = self.breakpoints.get(filepath)
-        if not bpinfile:
-            return True
-        if not bpinfile.get(lineno):
-            return True
-        return False
-        
-    def UpdateForEditor(self, editor, force=False):
-        langid = getattr(editor, 'GetLangId', lambda: -1)()
-        ispython = langid == synglob.ID_LANG_PYTHON
-        self.taskbtn.Enable(ispython)
-
-        self.SaveBreakpoints()
-        self.RestoreBreakPoints()
-        if RPDBDEBUGGER.saveandrestoreexpressions:
-            RPDBDEBUGGER.saveandrestoreexpressions()
-        if RPDBDEBUGGER.restorestepmarker:
-            RPDBDEBUGGER.restorestepmarker(editor)
-            
-        if force or not self._hasrun:
-#            fname = getattr(editor, 'GetFileName', lambda: u"")()
-#            if ispython:
-#                self._lbl.SetLabel(fname)
-#            else:
-#                self._lbl.SetLabel(u"")
-            ctrlbar = self.GetControlBar(wx.TOP)
-            ctrlbar.Layout()
-
-    def OnPageChanged(self, msg):
-        """ Notebook tab was changed """
-        notebook, pg_num = msg.GetData()
-        editor = notebook.GetPage(pg_num)
-        self.UpdateForEditor(editor)
-
-    def OnFileLoad(self, msg):
-        """Load File message"""
-        editor = PyToolsUtils.GetEditorForFile(self._mw, msg.GetData())
-        self.UpdateForEditor(editor)
-
-    def OnFileSave(self, msg):
-        """Load File message"""
-        filename, tmp = msg.GetData()
-        editor = PyToolsUtils.GetEditorForFile(self._mw, filename)
-        self.UpdateForEditor(editor)
+        RPDBDEBUGGER._config[ToolConfig.TLC_BREAKPOINTS] = copy.deepcopy(RPDBDEBUGGER.breakpoints)
     
     def OnContextMenu(self, msg):
         editor = wx.GetApp().GetCurrentBuffer()
@@ -182,9 +125,13 @@ class BreakPointsShelfWindow(BaseShelfWindow):
         if not self.DeleteBreakpoint(filepath, lineno):
             self.SetBreakpoint(filepath, lineno, "", True)
         self.RestoreBreakPoints()
-  
-    def OnClear(self, evt):
-        self.breakpoints = {}
+
+    def SaveAndRestoreBreakpoints(self):
         self.SaveBreakpoints()
         self.RestoreBreakPoints()
+    
+    def OnClear(self, evt):
+        RPDBDEBUGGER.breakpoints = {}
+        self.SaveAndRestoreBreakpoints()
+        Profile_Set(ToolConfig.PYTOOL_CONFIG, RPDBDEBUGGER._config)
         

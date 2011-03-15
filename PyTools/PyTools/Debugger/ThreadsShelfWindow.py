@@ -28,8 +28,6 @@ from PyTools.Debugger import RPDBDEBUGGER
 
 # Globals
 _ = wx.GetTranslation
-
-ID_TOGGLE_BREAKPOINT = wx.NewId()
 #-----------------------------------------------------------------------------#
 
 class ThreadsShelfWindow(BaseShelfWindow):

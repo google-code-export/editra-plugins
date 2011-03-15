@@ -19,17 +19,18 @@ import wx
 import copy
 
 # Editra Libraries
+import ed_glob
 import util
 import eclib
 import ed_msg
-from profiler import Profile_Get, Profile_Set
+from profiler import Profile_Set
 from syntax import syntax
 import syntax.synglob as synglob
 
 # Local imports
 from PyTools.Common import ToolConfig
-from PyTools.Common.PyToolsUtils import PyToolsUtils
 from PyTools.Common.BaseShelfWindow import BaseShelfWindow
+from PyTools.Debugger.MessageHandler import MessageHandler
 from PyTools.Debugger.DebuggeeWindow import DebuggeeWindow
 from PyTools.Debugger.PythonDebugger import PythonDebugger
 from PyTools.Debugger import RPDBDEBUGGER
@@ -38,7 +39,7 @@ from PyTools.Debugger import RPDBDEBUGGER
 _ = wx.GetTranslation
 #-----------------------------------------------------------------------------#
 
-class DebugShelfWindow(BaseShelfWindow):
+class DebugShelfWindow(BaseShelfWindow, MessageHandler):
     """Module Debug Results Window"""
     __debuggers = {
         synglob.ID_LANG_PYTHON: PythonDebugger
@@ -46,8 +47,15 @@ class DebugShelfWindow(BaseShelfWindow):
 
     def __init__(self, parent):
         """Initialize the window"""
-        super(DebugShelfWindow, self).__init__(parent)
+        BaseShelfWindow.__init__(self, parent)
+        MessageHandler.__init__(self)
         ctrlbar = self.setup(DebuggeeWindow(self))
+        rbmp = wx.ArtProvider.GetBitmap(str(ed_glob.ID_BIN_FILE), wx.ART_MENU)
+        if rbmp.IsNull() or not rbmp.IsOk():
+            rbmp = None
+        self.gobtn = eclib.PlateButton(ctrlbar, wx.ID_ANY, _("Go"), rbmp,
+                                        style=eclib.PB_STYLE_NOBG)
+        ctrlbar.AddControl(self.gobtn, wx.ALIGN_RIGHT)
         ctrlbar.AddStretchSpacer()
         self.choices = ["Program Args", "Debugger Args"]
         self.combo = wx.ComboBox(ctrlbar, wx.ID_ANY, value=self.choices[0], choices=self.choices, style=wx.CB_READONLY|eclib.PB_STYLE_NOBG)
@@ -69,37 +77,24 @@ class DebugShelfWindow(BaseShelfWindow):
         self.layout("Debug", self.OnDebug, self.OnJobTimer)
         RPDBDEBUGGER.mainwindowid = self._mw.GetId()
         RPDBDEBUGGER.debuggeroutput = self._listCtrl.AddText
-        RPDBDEBUGGER.conflictingmodules = self.ConflictingModules
 
         # Attributes
         self._debugger = None
-        self._prevfile = u""
         self._debugrun = False
         self._debugargs = ""
-        self._config = Profile_Get(ToolConfig.PYTOOL_CONFIG, default=dict())
 
         # Event Handlers
+        self.Bind(wx.EVT_BUTTON, self.OnGo, self.gobtn)
         self.Bind(wx.EVT_COMBOBOX, self.OnComboSelect, self.combo)
         self.Bind(wx.EVT_SEARCHCTRL_CANCEL_BTN, self.OnCancelSearch, self.search)
 
-        # Editra Message Handlers
-        ed_msg.Subscribe(self.OnFileLoad, ed_msg.EDMSG_FILE_OPENED)
-        ed_msg.Subscribe(self.OnFileSave, ed_msg.EDMSG_FILE_SAVED)
-        ed_msg.Subscribe(self.OnPageChanged, ed_msg.EDMSG_UI_NB_CHANGED)
-
     def Unsubscription(self):
-        ed_msg.Unsubscribe(self.OnFileLoad)
-        ed_msg.Unsubscribe(self.OnFileSave)
-        ed_msg.Unsubscribe(self.OnPageChanged)
+        super(DebugShelfWindow, self).Unsubscription()
         RPDBDEBUGGER.debuggeroutput = lambda x:None
-        RPDBDEBUGGER.conflictingmodules = lambda x:None
 
-    def ConflictingModules(self, moduleslist):
-        dlg = wx.MessageDialog(self, "The modules: %s, which are incompatible with the debugger were " +
-        "detected and can possibly cause the debugger to fail." % moduleslist, "Warning", wx.OK | wx.ICON_WARNING)
-        dlg.ShowModal()
-        dlg.Destroy()
-        
+    def OnGo(self, event):
+        RPDBDEBUGGER.do_go()
+
     def OnCancelSearch(self, event):
         self.combotexts[self.combocurrent_selection] = ""
         self.search.SetValue("")
@@ -110,9 +105,7 @@ class DebugShelfWindow(BaseShelfWindow):
         self.combocurrent_selection = self.combo.GetSelection()
         self.search.SetValue(self.combotexts[self.combocurrent_selection])
 
-    def UpdateForEditor(self, editor, force=False):
-        langid = getattr(editor, 'GetLangId', lambda: -1)()
-        ispython = langid == synglob.ID_LANG_PYTHON
+    def OnEditorUpdate(self, ispython, filename, force):
         self.taskbtn.Enable(ispython)
         self.combo.Enable(ispython)
         self.search.Enable(ispython)
@@ -126,16 +119,14 @@ class DebugShelfWindow(BaseShelfWindow):
                     break
             key = "DEBUG_%s" % self._prevfile
             if emptycombotexts:
-                if key in self._config:
-                    del self._config["DEBUG_%s" % self._prevfile]
+                if key in RPDBDEBUGGER._config:
+                    del RPDBDEBUGGER._config["DEBUG_%s" % self._prevfile]
             else:
                 debuginfo = (self.combocurrent_selection, self.combotexts)
-                self._config[key] = copy.deepcopy(debuginfo)
-                Profile_Set(ToolConfig.PYTOOL_CONFIG, self._config)
+                RPDBDEBUGGER._config[key] = copy.deepcopy(debuginfo)
+                Profile_Set(ToolConfig.PYTOOL_CONFIG, RPDBDEBUGGER._config)
 
-        filename = os.path.normcase(editor.GetFileName())
-        self._prevfile = filename
-        debuginfo = self._config.get("DEBUG_%s" % filename, None)
+        debuginfo = RPDBDEBUGGER._config.get("DEBUG_%s" % filename, None)
         if debuginfo:
             self.combocurrent_selection, self.combotexts = debuginfo
             self.combo.SetSelection(self.combocurrent_selection)
@@ -149,30 +140,8 @@ class DebugShelfWindow(BaseShelfWindow):
             self.search.SetValue("")
 
         if force or not self._hasrun:
-#            fname = getattr(editor, 'GetFileName', lambda: u"")()
-#            if ispython:
-#                self._lbl.SetLabel(fname)
-#            else:
-#                self._lbl.SetLabel(u"")
             ctrlbar = self.GetControlBar(wx.TOP)
             ctrlbar.Layout()
-
-    def OnPageChanged(self, msg):
-        """ Notebook tab was changed """
-        notebook, pg_num = msg.GetData()
-        editor = notebook.GetPage(pg_num)
-        self.UpdateForEditor(editor)
-
-    def OnFileLoad(self, msg):
-        """Load File message"""
-        editor = PyToolsUtils.GetEditorForFile(self._mw, msg.GetData())
-        self.UpdateForEditor(editor)
-
-    def OnFileSave(self, msg):
-        """Load File message"""
-        filename, tmp = msg.GetData()
-        editor = PyToolsUtils.GetEditorForFile(self._mw, filename)
-        self.UpdateForEditor(editor)
 
     def _ondebug(self, editor):
         # With the text control (ed_stc.EditraStc) this will return the full
@@ -215,8 +184,8 @@ class DebugShelfWindow(BaseShelfWindow):
         return None
         
     def restorepylint_autorun(self):
-        self._config[ToolConfig.TLC_AUTO_RUN] = True    
-        Profile_Set(ToolConfig.PYTOOL_CONFIG, self._config)
+        RPDBDEBUGGER._config[ToolConfig.TLC_AUTO_RUN] = True    
+        Profile_Set(ToolConfig.PYTOOL_CONFIG, RPDBDEBUGGER._config)
         self._listCtrl.AddText("Reenabling Pylint Autorun.")
     
     def _debug(self, filetype, vardict, filename):
@@ -226,10 +195,10 @@ class DebugShelfWindow(BaseShelfWindow):
         self._debugger = debugger
         self._curfile = filename
 
-        mode = self._config.get(ToolConfig.TLC_AUTO_RUN, False)
+        mode = RPDBDEBUGGER._config.get(ToolConfig.TLC_AUTO_RUN, False)
         if mode:
-            self._config[ToolConfig.TLC_AUTO_RUN] = False
-            Profile_Set(ToolConfig.PYTOOL_CONFIG, self._config)
+            RPDBDEBUGGER._config[ToolConfig.TLC_AUTO_RUN] = False
+            Profile_Set(ToolConfig.PYTOOL_CONFIG, RPDBDEBUGGER._config)
             self._listCtrl.AddText("Disabling Pylint Autorun during Debug.")
             self._listCtrl.restoreautorun = self.restorepylint_autorun
         else:

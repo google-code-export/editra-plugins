@@ -31,9 +31,8 @@ class RpdbBreakpointsManager(object):
         util.Log("[DbgBp][info] Removing old breakpoints")
         self.rpdb2debugger.clear_breakpoints()
         util.Log("Setting breakpoints: (Path, Line No, Enabled)")
-        breakpoints = self.rpdb2debugger.getbreakpoints()
-        for filepath in breakpoints:
-            linenos = breakpoints[filepath]
+        for filepath in self.rpdb2debugger.breakpoints:
+            linenos = self.rpdb2debugger.breakpoints[filepath]
             for lineno in linenos:
                 enabled, exprstr, bpid = linenos[lineno]
                 if filepath and lineno:

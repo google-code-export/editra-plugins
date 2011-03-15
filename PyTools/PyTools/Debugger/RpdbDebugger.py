@@ -49,23 +49,25 @@ class RpdbDebugger(object):
         
         # attributes that will be set later
         self.mainwindowid = None
+        self._config = {}
         self.pid = None
+        self.breakpoints = {}
         self.breakpoints_loaded = False
         self.curstack = None
         self.unhandledexception = False
         
         # functions that will be set later
-        
+
+        # message handler
+        self.conflictingmodules = lambda x:None
+        self.setstepmarker = lambda x,y:None        
+        self.clearstepmarker = lambda:None
+        self.setstepmarker = lambda x,y:None        
         # debuggee shelf
         self.debuggeroutput = lambda x:None
-        self.conflictingmodules = lambda x:None
-        # breakpoint shelf
-        self.getbreakpoints = lambda:{}
-        self.isrpdbbreakpoint = lambda x,y:None
+        # breakpoints shelf
+        self.saveandrestorebreakpoints = lambda:None
         # stackframe shelf
-        self.clearstepmarker = lambda:None
-        self.setstepmarker = lambda x,y:None
-        self.restorestepmarker = lambda x:None
         self.clearframe = lambda:None
         self.selectframe = lambda x:None
         self.updatestacklist = lambda x:None
@@ -80,7 +82,7 @@ class RpdbDebugger(object):
         self.updatelocalvariables = lambda x,y:(None,None)
         self.updateglobalvariables = lambda x,y:(None,None)
         self.updateexceptions = lambda x,y:(None,None)
-        self.catchunhandledexception = lambda:None
+        self.catchunhandledexception = self.clearunhandledexception
         # expressions shelf
         self.restoreexpressions = lambda:None
         self.saveandrestoreexpressions = lambda:None
@@ -90,7 +92,7 @@ class RpdbDebugger(object):
         self.pid = None
         self.breakpoints_loaded = False
         self.curstack = None
-        self.unhandledexception = False
+        self.clearunhandledexception()
         self.clearstepmarker()
         self.clearlocalvariables()
         self.clearglobalvariables()
@@ -98,12 +100,27 @@ class RpdbDebugger(object):
         self.clearframe()
         self.clearthread()
         self.clearexpressionvalues()
+        sleep(1)
+        self.debuggeroutput("Debugger detached.")
 
-    def attach(self):
+    def isrpdbbreakpoint(self, filepath, lineno):
+        if filepath.find("rpdb2.py") == -1:
+            return False
+        bpinfile = self.breakpoints.get(filepath)
+        if not bpinfile:
+            return True
+        if not bpinfile.get(lineno):
+            return True
+        return False
+
+    def clearunhandledexception(self):
+        self.unhandledexception = False
+    
+    def attach(self, abortfn):
         if self.pid:
             tries = 0
             err = None
-            while tries != 3:
+            while tries != 5:
                 sleep(1)
                 util.Log("[PyDbg][info] Trying to Attach")
                 err = None
@@ -112,12 +129,13 @@ class RpdbDebugger(object):
                     break
                 except Exception, err:
                     tries = tries + 1
+            self.pid = None
             if err:
                 util.Log("[PyDbg][err] Failed to attach. Error: %s" % repr(err))
+                abortfn()
                 return
             
             util.Log("[PyDbg][info] Running")
-            self.pid = None
 
     def do_detach(self):
         try:
