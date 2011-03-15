@@ -22,7 +22,6 @@ import ed_msg
 
 # Local Imports
 import rpdb2
-
 #----------------------------------------------------------------------------#
 
 class RpdbStackFrameManager(object):
