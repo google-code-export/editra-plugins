@@ -57,13 +57,7 @@ class RpdbStateManager(object):
                 worker = RunProcInThread("Detach", None, self.rpdb2debugger.clear_all)
                 worker.start()
         elif (old_state in [rpdb2.STATE_DETACHED, rpdb2.STATE_DETACHING, rpdb2.STATE_SPAWNING, rpdb2.STATE_ATTACHING]) and (self.m_state not in [rpdb2.STATE_DETACHED, rpdb2.STATE_DETACHING, rpdb2.STATE_SPAWNING, rpdb2.STATE_ATTACHING]):
-            try:
-                serverinfo = self.rpdb2debugger.sessionmanager.get_server_info()
-                # we are debugging serverinfo.m_filename
-                f = self.rpdb2debugger.sessionmanager.get_encryption()
-                ed_msg.PostMessage(ed_msg.EDMSG_PROGRESS_STATE, (self.rpdb2debugger.mainwindowid, -1, -1))
-            except rpdb2.NotAttached:
-                pass
+            ed_msg.PostMessage(ed_msg.EDMSG_PROGRESS_STATE, (self.rpdb2debugger.mainwindowid, -1, -1))
 
         if self.m_state == rpdb2.STATE_BROKEN:
             # we hit a breakpoint
