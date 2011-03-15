@@ -251,7 +251,12 @@ class RpdbDebugger(object):
 
     def clear_breakpoints(self):
         try:
+            self.sessionmanager.load_breakpoints()
+        except:
+            pass
+        try:
             self.sessionmanager.delete_breakpoint([], True)
+            self.sessionmanager.save_breakpoints()
         except rpdb2.NotAttached:
             pass
         
@@ -265,10 +270,4 @@ class RpdbDebugger(object):
         try:
             self.sessionmanager.delete_breakpoint([bpid], True)
         except rpdb2.NotAttached:
-            pass
-
-    def load_breakpoints(self):
-        try:
-            self.sessionmanager.load_breakpoints()
-        except:
             pass
