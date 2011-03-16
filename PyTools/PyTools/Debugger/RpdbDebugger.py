@@ -119,15 +119,17 @@ class RpdbDebugger(object):
             err = None
             while tries != 5:
                 sleep(1)
-                util.Log("[PyDbg][info] Trying to Attach")
+                util.Log("[PyDbg][info] Trying to Attach: %d" % (tries+1))
                 err = None
                 try:
-                    self.sessionmanager.attach(self.pid, encoding = rpdb2.detect_locale())
-                    break
+                    self.sessionmanager.attach(self.pid, encoding=rpdb2.detect_locale())
                 except Exception, err:
                     tries = tries + 1
+                else:
+                    break
+
             self.pid = None
-            if err:
+            if err is not None:
                 util.Log("[PyDbg][err] Failed to attach. Error: %s" % repr(err))
                 abortfn()
                 return
