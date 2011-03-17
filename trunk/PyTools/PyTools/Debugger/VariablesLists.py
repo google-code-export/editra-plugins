@@ -129,8 +129,11 @@ class VariablesList(wx.gizmos.TreeListCtrl):
     def _onitemactivatedcallback(self, res):
         if not res:
             return
-            
-        warning, error = res
+        
+        if len(res) == 2:
+            warning, error = res
+        else:
+            error = res
         
         if error != '':
             dlg = wx.MessageDialog(self, error, "Error", wx.OK | wx.ICON_ERROR)
@@ -176,7 +179,7 @@ class VariablesList(wx.gizmos.TreeListCtrl):
       
         worker = RunProcInThread(self.listtype, self._itemexpandingcallback, \
             RPDBDEBUGGER.get_namespace, [(expr, True)], self.filterlevel)
-        worker.pass_parameters(item)
+        worker.pass_parameter(item)
         worker.start()
 
     def _itemexpandingcallback(self, variables, item):
