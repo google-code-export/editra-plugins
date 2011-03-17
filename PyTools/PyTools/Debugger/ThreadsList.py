@@ -20,11 +20,11 @@ import wx
 import eclib
 
 # Local Imports
+import rpdb2
 from PyTools.Debugger import RPDBDEBUGGER
 
 # Globals
 _ = wx.GetTranslation
-
 #----------------------------------------------------------------------------#
 
 class ThreadsList(eclib.EBaseListCtrl):
@@ -66,12 +66,13 @@ class ThreadsList(eclib.EBaseListCtrl):
         """Go to the file"""
         if self.suppress_recursion == 0:
             self.suppress_recursion += 1
+            index = evt.m_itemIndex
             tid = self.GetItemData(index)
             RPDBDEBUGGER.set_thread(tid)
         else:
             self.suppress_recursion -= 1
 
-        event.Skip()
+        evt.Skip()
         
     def Clear(self):
         """Delete all the rows """
