@@ -37,20 +37,11 @@ class ThreadsList(eclib.EBaseListCtrl):
         self.InsertColumn(1, _("Name"))
         self.InsertColumn(2, _("State"))
 
-        # Attributes
-        self.suppress_recursion = 0
-        
         # Event Handlers
         self.Bind(wx.EVT_LIST_ITEM_ACTIVATED, self.OnThreadSelected)
 
     def set_mainwindow(self, mw):
         self._mainw = mw
-
-    def check_suppress_recursion(self):
-        if self.suppress_recursion > 0:
-            self.suppress_recursion -= 1
-            return True
-        return False
 
     def update_thread(self, thread_id, thread_name, fBroken):
         index = self.FindItemData(-1, thread_id)
@@ -64,13 +55,9 @@ class ThreadsList(eclib.EBaseListCtrl):
         
     def OnThreadSelected(self, evt):
         """Go to the file"""
-        if self.suppress_recursion == 0:
-            self.suppress_recursion += 1
-            index = evt.m_itemIndex
-            tid = self.GetItemData(index)
-            RPDBDEBUGGER.set_thread(tid)
-        else:
-            self.suppress_recursion -= 1
+        index = evt.m_itemIndex
+        tid = self.GetItemData(index)
+        RPDBDEBUGGER.set_thread(tid)
 
         evt.Skip()
         
@@ -109,7 +96,6 @@ class ThreadsList(eclib.EBaseListCtrl):
         self.SetColumnWidth(1, minLName)
         self.SetColumnWidth(2, minLState)
         if selectedidx is not None:
-            self.suppress_recursion += 1
             self.Select(selectedidx)
 
     @staticmethod

@@ -48,8 +48,6 @@ class ThreadsShelfWindow(BaseShelfWindow):
         RPDBDEBUGGER.updatethreadlist = lambda x,y:None
 
     def UpdateThreadList(self, current_thread, threads_list):
-        if self._listCtrl.check_suppress_recursion():
-            return
         self._listCtrl.Clear()
         self._listCtrl.PopulateRows(current_thread, threads_list)
         self._listCtrl.RefreshRows()
