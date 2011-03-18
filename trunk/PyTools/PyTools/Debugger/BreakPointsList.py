@@ -18,6 +18,7 @@ import os.path
 import wx
 
 # Editra Libraries
+import ed_marker
 import eclib
 
 # Local Imports
@@ -37,6 +38,8 @@ class BreakPointsList(eclib.EToggleEditListCtrl):
         self.InsertColumn(0, _("File"))
         self.InsertColumn(1, _("Line"))
         self.InsertColumn(2, _("Expression"))
+        self.SetCheckedBitmap(ed_marker.Breakpoint().Bitmap)
+        self.SetUnCheckedBitmap(ed_marker.BreakpointDisabled().Bitmap)
 
         # Attributes
         self.parent = parent
