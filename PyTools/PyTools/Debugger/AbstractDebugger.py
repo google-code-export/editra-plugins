@@ -7,7 +7,6 @@
 ##############################################################################
 """ Debugger module """
 
-__version__ = "0.2"
 __author__ = "Mike Rans"
 __svnid__ = "$Id$"
 __revision__ = "$Revision$"
