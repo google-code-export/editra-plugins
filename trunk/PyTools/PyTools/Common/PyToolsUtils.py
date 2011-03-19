@@ -122,6 +122,14 @@ class PyToolsUtils():
         end = editor.GetTextLength()
         editor.SetStyling(end, 0)
 
+    @staticmethod
+    def error_dialog(parent, error):
+        if error == '':
+            return
+        dlg = wx.MessageDialog(parent, error, _("Error"), wx.OK | wx.ICON_ERROR)
+        dlg.ShowModal()
+        dlg.Destroy()
+
 #-----------------------------------------------------------------------------#
 
 class RunProcInThread(threading.Thread):

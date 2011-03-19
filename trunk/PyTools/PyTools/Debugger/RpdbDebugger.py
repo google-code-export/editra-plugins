@@ -20,6 +20,7 @@ import util
 
 # Local Imports
 import rpdb2
+from PyTools.Common.PyToolsUtils import PyToolsUtils
 from PyTools.Debugger.RpdbStateManager import RpdbStateManager
 from PyTools.Debugger.RpdbBreakpointsManager import RpdbBreakpointsManager
 from PyTools.Debugger.RpdbStackFrameManager import RpdbStackFrameManager
@@ -47,7 +48,8 @@ class RpdbDebugger(object):
         self.variablesmanager = RpdbVariablesManager(self)
         
         # attributes that will be set later
-        self.mainwindowid = None
+        self.attached = False
+        self.mainwindow = None
         self._config = {}
         self.pid = None
         self.breakpoints = {}
@@ -94,6 +96,7 @@ class RpdbDebugger(object):
         self.breakpoints_loaded = False
         self.curstack = {}
         self.unhandledexception = False
+        self.attached = False
         self.abort = lambda:None
         self.clearstepmarker()
         self.clearframe()
@@ -116,29 +119,44 @@ class RpdbDebugger(object):
     def attach(self, abortfn):
         if self.pid:
             tries = 0
-            err = None
+            ex = None
             while tries != 5:
                 sleep(1)
                 util.Log("[PyDbg][info] Trying to Attach")
-                err = None
+                ex = None
                 try:
                     self.sessionmanager.attach(self.pid, encoding = rpdb2.detect_locale())
                     break
-                except Exception, err:
+                except Exception, ex:
                     tries = tries + 1
             self.pid = None
-            if err:
-                util.Log("[PyDbg][err] Failed to attach. Error: %s" % repr(err))
+            if ex:
+                err = repr(ex)
+                util.Log("[PyDbg][err] Failed to attach. Error: %s" % err)
+                PyToolsUtils.error_dialog(err)
+                
                 abortfn()
                 return
             self.abort = abortfn
+            self.attached = True
             util.Log("[PyDbg][info] Running")
 
-    def do_detach(self):
+    def callsessionmanagerfn(self, fn, *args, **kwargs):
+        ex = None
         try:
-            self.sessionmanager.detach()
-        except rpdb2.NotAttached:
+            return fn(*args, **kwargs)
+        except rpdb2.NotAttached, ex:
+            if not self.attached:
+                return None
+        except Exception, ex:
             pass
+        if self.mainwindow:
+            msg = rpdb2.g_error_mapping.get(type(ex), rpdb2.STR_ERROR_OTHER)
+            PyToolsUtils.error_dialog(self.mainwindow, msg)
+        return None
+    
+    def do_detach(self):
+        self.callsessionmanagerfn(self.sessionmanager.detach)
 
     def register_callback(self, func, event_type_dict, fSingleUse = False):
         self.sessionmanager.register_callback(func, event_type_dict, fSingleUse = fSingleUse)
@@ -147,158 +165,94 @@ class RpdbDebugger(object):
         self.breakpointmanager.loadbreakpoints()
             
     def set_frameindex(self, index):
-        try:
-            self.sessionmanager.set_frame_index(index)        
-        except rpdb2.NotAttached:
-            pass
+        self.callsessionmanagerfn(self.sessionmanager.set_frame_index, index)
             
     def get_frameindex(self):
-        try:
-            return self.sessionmanager.get_frame_index()        
-        except rpdb2.NotAttached:
-            pass
-        return None
+        return self.callsessionmanagerfn(self.sessionmanager.get_frame_index)
     
     def update_stack(self):
-        try:
-            stacklist = self.sessionmanager.get_stack([], True)        
+        stacklist = self.callsessionmanagerfn(self.sessionmanager.get_stack, [], True)
+        if stacklist is not None:
             self.stackframemanager.do_update_stack(stacklist[0])
-        except rpdb2.NotAttached:
-            pass
 
     def get_thread_list(self):
-        try:
-            return self.sessionmanager.get_thread_list()        
-        except rpdb2.NotAttached:
-            pass
+        res = self.callsessionmanagerfn(self.sessionmanager.get_thread_list)
+        if res is not None:
+            return res
         return (None, {})
     
     def set_thread(self, tid):
-        try:
-            self.sessionmanager.set_thread(tid)        
-        except rpdb2.NotAttached:
-            pass
+        self.callsessionmanagerfn(self.sessionmanager.set_thread, tid)
             
     def execute(self, suite):
-        try:
-            return self.sessionmanager.execute(suite)
-        except rpdb2.NotAttached:
-            return None
+        return self.callsessionmanagerfn(self.sessionmanager.execute, suite)
 
     def evaluate(self, suite):
-        try:
-            return self.sessionmanager.evaluate(suite)
-        except rpdb2.NotAttached:
-            return None
+        return self.callsessionmanagerfn(self.sessionmanager.evaluate, suite)
 
     def update_namespace(self):
         self.variablesmanager.update_namespace()
 
     def get_namespace(self, expressionlist, filterlevel):
-        try:
-            return self.sessionmanager.get_namespace(expressionlist, filterlevel)
-        except rpdb2.NotAttached:
-            return None
+        return self.callsessionmanagerfn(self.sessionmanager.get_namespace, expressionlist, filterlevel)
 
     def set_analyze(self, analyze):
-        try:
-            self.sessionmanager.set_analyze(analyze)   
-        except rpdb2.NotAttached:
-            pass
+        self.callsessionmanagerfn(self.sessionmanager.set_analyze, analyze)
             
     def do_stop(self):
-        try:
-            self.sessionmanager.stop_debuggee()
-            self.clearstepmarker()
-        except rpdb2.NotAttached:
-            pass
+        self.callsessionmanagerfn(self.sessionmanager.stop_debuggee)
+        self.clearstepmarker()
 
     def do_restart(self):
-        try:
-            self.sessionmanager.restart()
-            self.clearstepmarker()
-        except rpdb2.NotAttached:
-            pass
+        self.callsessionmanagerfn(self.sessionmanager.restart)
+        self.clearstepmarker()
 
     def do_jump(self, lineno):
-        try:
-            self.sessionmanager.request_jump(lineno)
-            self.clearstepmarker()
-        except rpdb2.NotAttached:
-            pass
+        self.callsessionmanagerfn(self.sessionmanager.request_jump, lineno)
+        self.clearstepmarker()
 
     def do_go(self):
-        try:
-            self.sessionmanager.request_go()
-            self.clearstepmarker()
-        except rpdb2.NotAttached:
-            pass
+        self.callsessionmanagerfn(self.sessionmanager.request_go)
+        self.clearstepmarker()
 
     def do_break(self):
-        try:
-            self.sessionmanager.request_break()
-        except rpdb2.NotAttached:
-            pass
+        self.callsessionmanagerfn(self.sessionmanager.request_break)
 
     def do_step(self):
-        try:
-            self.sessionmanager.request_step()
-            self.clearstepmarker()
-        except rpdb2.NotAttached:
-            pass
+        self.callsessionmanagerfn(self.sessionmanager.request_step)
+        self.clearstepmarker()
 
     def do_next(self):
-        try:
-            self.sessionmanager.request_next()
-            self.clearstepmarker()
-        except rpdb2.NotAttached:
-            pass
+        self.callsessionmanagerfn(self.sessionmanager.request_next)
+        self.clearstepmarker()
 
     def do_return(self):
-        try:
-            self.sessionmanager.request_return()
-            self.clearstepmarker()
-        except rpdb2.NotAttached:
-            pass
+        self.callsessionmanagerfn(self.sessionmanager.request_return)
+        self.clearstepmarker()
 
     def run_toline(self, filename, lineno):
-        try:
-            self.sessionmanager.request_go_breakpoint(filename, '', lineno)
-            self.clearstepmarker()
-        except rpdb2.NotAttached:
-            pass
+        self.callsessionmanagerfn(self.sessionmanager.request_go_breakpoint, filename, '', lineno)
+        self.clearstepmarker()
 
     def disable_breakpoint(self, bpid):
-        try:
-            self.sessionmanager.disable_breakpoint([bpid], True)
-        except rpdb2.NotAttached:
-            pass
+        self.callsessionmanagerfn(self.sessionmanager.disable_breakpoint, [bpid], True)
 
     def enable_breakpoint(self, bpid):
-        try:
-            self.sessionmanager.enable_breakpoint([bpid], True)
-        except rpdb2.NotAttached:
-            pass
+        self.callsessionmanagerfn(self.sessionmanager.enable_breakpoint, [bpid], True)
 
     def clear_breakpoints(self):
         try:
             self.sessionmanager.load_breakpoints()
         except:
             pass
+        self.callsessionmanagerfn(self.sessionmanager.delete_breakpoint, [], True)
         try:
-            self.sessionmanager.delete_breakpoint([], True)
             self.sessionmanager.save_breakpoints()
-        except rpdb2.NotAttached:
+        except:
             pass
         
     def set_breakpoint(self, filepath, lineno, exprstr = "", enabled=True):
-        try:
-            return self.sessionmanager.set_breakpoint(filepath, '', lineno, enabled, exprstr)
-        except rpdb2.NotAttached:
-            return None
+        return self.callsessionmanagerfn(self.sessionmanager.set_breakpoint, filepath, '', lineno, enabled, exprstr)
 
     def delete_breakpoint(self, bpid):
-        try:
-            self.sessionmanager.delete_breakpoint([bpid], True)
-        except rpdb2.NotAttached:
-            pass
+        self.callsessionmanagerfn(self.sessionmanager.delete_breakpoint, [bpid], True)
