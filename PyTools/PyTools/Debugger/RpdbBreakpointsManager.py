@@ -25,7 +25,7 @@ class RpdbBreakpointsManager(object):
         super(RpdbBreakpointsManager, self).__init__()
         self.rpdb2debugger = rpdb2debugger
     
-    def loadbreakpoints(self, filename):
+    def loadbreakpoints(self):
         util.Log("[DbgBp][info] Removing old breakpoints")
         self.rpdb2debugger.clear_breakpoints()
         util.Log("[DbgBp][info] Setting breakpoints: (Path, Line No, Enabled, Expression)")
@@ -39,4 +39,3 @@ class RpdbBreakpointsManager(object):
                 linenos[lineno] = enabled, exprstr, bpid
                 util.Log("[DbgBp][info] %s, %d, %s, %s" % (filepath, lineno, enabled, exprstr))
         self.rpdb2debugger.breakpoints_loaded = True
-        self.rpdb2debugger.debuggeroutput("\nDebugger attached. Breakpoints set. %s output starts now...\n" % filename)

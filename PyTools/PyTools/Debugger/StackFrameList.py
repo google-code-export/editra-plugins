@@ -40,7 +40,7 @@ class StackFrameList(eclib.EBaseListCtrl):
         self.InsertColumn(3, _("Function"))
 
         # Attributes
-        self.suppress_recursion = 0
+        self.previndex = None
         
         # Event Handlers
         self.Bind(wx.EVT_LIST_ITEM_ACTIVATED, self.OnFrameSelected)
@@ -49,32 +49,25 @@ class StackFrameList(eclib.EBaseListCtrl):
         self._mainw = mw
 
     def select_frame(self, index):
-        if self.suppress_recursion > 0:
-            self.suppress_recursion -= 1
-            return
-            
         if (index < 0) or (index > self.GetItemCount()):
             return
 
         if self.IsSelected(index):
             return
             
-        self.suppress_recursion += 1
         self.Select(index)
 
     def OnFrameSelected(self, evt):
-        """Go to the file"""
-        if self.suppress_recursion == 0:
-            self.suppress_recursion += 1
-            RPDBDEBUGGER.set_frameindex(evt.m_itemIndex)
-        else:
-            self.suppress_recursion -= 1
-
-        evt.Skip()
+        index = evt.m_itemIndex
+        if self.previndex == index:
+            return
+        self.previndex = index
+        RPDBDEBUGGER.set_frameindex(index)
 
     def Clear(self):
         """Delete all the rows """
         self.DeleteAllItems()
+        self.previndex = None
 
     def PopulateRows(self, data):
         """Populate the list with the data
@@ -107,13 +100,9 @@ class StackFrameList(eclib.EBaseListCtrl):
             
         self.SetColumnWidth(1, minLFile)
         self.SetColumnWidth(3, minLFunc)
-        self.suppress_recursion += 1
+        self.previndex = None
         self.Select(0)
 
-    def GetFileNameEditorLineNo(self, index):
-        idx, filename, linenostr, function = self._data[index]
-        return (filename, int(linenostr) - 1)
-    
     @staticmethod
     def _printListCtrl(ctrl):
         for row in xrange(0, ctrl.GetItemCount()):

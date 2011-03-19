@@ -58,13 +58,11 @@ class ExpressionDialog(eclib.ECBaseDlg):
 
         self._sizer.Fit(self)        
 
-    def OnText(self, event):
-        if event.GetString() == '':
+    def OnText(self, evt):
+        if evt.GetString() == '':
             self.m_ok.Disable()
         else:
             self.m_ok.Enable()
-
-        event.Skip()
                    
     def get_expression(self):
         expr = self.m_entry_expr.GetValue()

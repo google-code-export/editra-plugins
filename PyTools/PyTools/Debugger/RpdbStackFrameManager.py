@@ -73,8 +73,9 @@ class RpdbStackFrameManager(object):
         if not fBroken:
             return
         if not self.rpdb2debugger.breakpoints_loaded:
-            self.rpdb2debugger.breakpointmanager.loadbreakpoints(filename)
+            self.rpdb2debugger.load_breakpoints()
             self.rpdb2debugger.breakpoints_loaded = True
+            self.rpdb2debugger.debuggeroutput("\nDebugger attached. Breakpoints set. %s output starts now...\n" % filename)
             self.rpdb2debugger.do_go()
             return            
         if self.rpdb2debugger.isrpdbbreakpoint(filename, lineno):
