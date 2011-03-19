@@ -9,8 +9,8 @@
 """Editra Base Shelf display window"""
 
 __author__ = "Mike Rans"
-__svnid__ = "$Id $"
-__revision__ = "$Revision $"
+__svnid__ = "$Id  $"
+__revision__ = "$Revision  $"
 
 #-----------------------------------------------------------------------------#
 # Imports
