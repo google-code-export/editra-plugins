@@ -21,7 +21,6 @@ import eclib
 
 # Local Imports
 from PyTools.Common.PyToolsUtils import PyToolsUtils
-from PyTools.Debugger import RPDBDEBUGGER
 
 # Globals
 _ = wx.GetTranslation

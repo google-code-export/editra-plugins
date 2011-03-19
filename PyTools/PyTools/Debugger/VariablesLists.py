@@ -133,10 +133,7 @@ class VariablesList(wx.gizmos.TreeListCtrl):
         else:
             error = res
         
-        if error != '':
-            dlg = wx.MessageDialog(self, error, _("Error"), wx.OK | wx.ICON_ERROR)
-            dlg.ShowModal()
-            dlg.Destroy()
+        PyToolsUtils.error_dialog(self, error)
 
         if not warning in self.ignoredwarnings:
             dlg = wx.MessageDialog(self, _("%s\n\nClick 'Cancel' to ignore this warning in this session.") % warning,\

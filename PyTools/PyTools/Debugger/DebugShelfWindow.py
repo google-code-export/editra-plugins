@@ -71,7 +71,7 @@ class DebugShelfWindow(BaseShelfWindow, MessageHandler):
         ctrlbar.AddControl(self.search, wx.ALIGN_RIGHT)
 
         self.layout("Debug", self.OnDebug, self.OnJobTimer)
-        RPDBDEBUGGER.mainwindowid = self._mw.GetId()
+        RPDBDEBUGGER.mainwindow = self._mw
         RPDBDEBUGGER.debuggeroutput = self._listCtrl.AddText
 
         # Attributes
