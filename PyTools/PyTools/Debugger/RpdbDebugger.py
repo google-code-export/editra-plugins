@@ -62,7 +62,8 @@ class RpdbDebugger(object):
         self.conflictingmodules = lambda x:None
         self.setstepmarker = lambda x,y:None        
         self.clearstepmarker = lambda:None
-        self.setstepmarker = lambda x,y:None        
+        self.setstepmarker = lambda x,y:None
+        self.restorestepmarker = lambda x:None      
         # debuggee shelf
         self.debuggeroutput = lambda x:None
         # breakpoints shelf

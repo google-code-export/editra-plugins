@@ -50,6 +50,7 @@ class MessageHandler(object):
         RPDBDEBUGGER.conflictingmodules = self.ConflictingModules
         RPDBDEBUGGER.clearstepmarker = self.ClearStepMarker
         RPDBDEBUGGER.setstepmarker = self.SetStepMarker
+        RPDBDEBUGGER.restorestepmarker = self.RestoreStepMarker
 
         # Editra Message Handlers
         ed_msg.Subscribe(self.OnFileLoad, ed_msg.EDMSG_FILE_OPENED)
@@ -63,6 +64,7 @@ class MessageHandler(object):
         RPDBDEBUGGER.conflictingmodules = lambda x:None
         RPDBDEBUGGER.clearstepmarker = lambda:None
         RPDBDEBUGGER.setstepmarker = lambda x,y:None
+        RPDBDEBUGGER.restorestepmarker = lambda x:None      
 
     def ConflictingModules(self, moduleslist):
         dlg = wx.MessageDialog(self, "The modules: %s, which are incompatible with the debugger were " +

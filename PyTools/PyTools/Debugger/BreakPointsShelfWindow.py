@@ -55,6 +55,9 @@ class BreakPointsShelfWindow(BaseShelfWindow):
         RPDBDEBUGGER.saveandrestorebreakpoints = self.SaveAndRestoreBreakpoints
         
         self._listCtrl.PopulateRows(RPDBDEBUGGER.breakpoints)
+        editor = wx.GetApp().GetCurrentBuffer()
+        if editor:
+            RPDBDEBUGGER.restorestepmarker(editor)
 
         # Editra Message Handlers
         ed_msg.Subscribe(self.OnContextMenu, ed_msg.EDMSG_UI_STC_CONTEXT_MENU)        
