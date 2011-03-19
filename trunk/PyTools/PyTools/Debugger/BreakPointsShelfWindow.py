@@ -48,10 +48,12 @@ class BreakPointsShelfWindow(BaseShelfWindow):
         ctrlbar.AddStretchSpacer()
         self.layout("Clear", self.OnClear)
 
-        # Attributes
         config = Profile_Get(ToolConfig.PYTOOL_CONFIG, default=dict())
+        
+        # Attributes
         RPDBDEBUGGER.breakpoints = config.get(ToolConfig.TLC_BREAKPOINTS, dict())
         RPDBDEBUGGER.saveandrestorebreakpoints = self.SaveAndRestoreBreakpoints
+        
         self._listCtrl.PopulateRows(RPDBDEBUGGER.breakpoints)
 
         # Editra Message Handlers
