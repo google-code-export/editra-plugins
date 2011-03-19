@@ -8,8 +8,8 @@
 """ Utility functions """
 
 __author__ = "Mike Rans"
-__svnid__ = "$Id: AsyncProcessCreator.py 1025 2010-12-24 18:30:23Z rans@email.com $"
-__revision__ = "$Revision: 1025 $"
+__svnid__ = "$Id$"
+__revision__ = "$Revision$"
 
 #-----------------------------------------------------------------------------#
 # Imports

@@ -8,8 +8,8 @@
 """ Rpdb2 module for Python data """
 
 __author__ = "Mike Rans"
-__svnid__ = "$Id: PythonDebugger.py 1053 2011-02-08 22:09:37Z rans@email.com $"
-__revision__ = "$Revision: 1053 $"
+__svnid__ = "$Id$"
+__revision__ = "$Revision$"
 
 #-----------------------------------------------------------------------------#
 # Imports

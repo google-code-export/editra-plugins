@@ -9,8 +9,8 @@
 """Editra expression dialog"""
 
 __author__ = "Mike Rans"
-__svnid__ = "$Id: ExpressionDialog.py -1   $"
-__revision__ = "$Revision: -1 $"
+__svnid__ = "$Id$"
+__revision__ = "$Revision$"
 
 #----------------------------------------------------------------------------#
 # Imports

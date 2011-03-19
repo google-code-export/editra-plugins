@@ -9,8 +9,8 @@
 
 __version__ = "0.2"
 __author__ = "Mike Rans"
-__svnid__ = "$Id: AbstractDebugger.py 1001 2010-12-13 21:16:53Z rans@email.com $"
-__revision__ = "$Revision: 1001 $"
+__svnid__ = "$Id$"
+__revision__ = "$Revision$"
 
 #-----------------------------------------------------------------------------#
 
