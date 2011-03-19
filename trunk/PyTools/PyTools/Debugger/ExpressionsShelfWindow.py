@@ -36,6 +36,7 @@ from PyTools.Debugger import RPDBDEBUGGER
 
 # Globals
 _ = wx.GetTranslation
+
 #-----------------------------------------------------------------------------#
 
 class ExpressionsShelfWindow(BaseShelfWindow):

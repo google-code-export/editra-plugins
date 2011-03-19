@@ -7,7 +7,6 @@
 ##############################################################################
 """ RpdbDebugger functions """
 
-__version__ = "0.2"
 __author__ = "Mike Rans"
 __svnid__ = "$Id: RpdbDebugger.py 1025 2010-12-24 18:30:23Z rans@email.com $"
 __revision__ = "$Revision: 1025 $"
@@ -102,7 +101,7 @@ class RpdbDebugger(object):
         self.clearthread()
         self.clearexpressionvalues()
         sleep(1)
-        self.debuggeroutput("\nDebugger detached.")
+        self.debuggeroutput(_("\nDebugger detached."))
 
     def isrpdbbreakpoint(self, filepath, lineno):
         if filepath.find("rpdb2.py") == -1:

@@ -27,6 +27,7 @@ from PyTools.Debugger import RPDBDEBUGGER
 
 # Globals
 _ = wx.GetTranslation
+
 #-----------------------------------------------------------------------------#
 
 class StackFrameShelfWindow(BaseShelfWindow):

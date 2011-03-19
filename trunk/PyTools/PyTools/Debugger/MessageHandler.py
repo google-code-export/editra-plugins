@@ -35,6 +35,7 @@ from PyTools.Debugger import RPDBDEBUGGER
 
 # Globals
 _ = wx.GetTranslation
+
 #-----------------------------------------------------------------------------#
 
 class MessageHandler(object):
@@ -67,8 +68,10 @@ class MessageHandler(object):
         RPDBDEBUGGER.restorestepmarker = lambda x:None      
 
     def ConflictingModules(self, moduleslist):
-        dlg = wx.MessageDialog(self, "The modules: %s, which are incompatible with the debugger were " +
-        "detected and can possibly cause the debugger to fail." % moduleslist, "Warning", wx.OK | wx.ICON_WARNING)
+        dlg = wx.MessageDialog(self, 
+        _("The modules: %s, which are incompatible with the debugger were "
+        "detected and can possibly cause the debugger to fail.") % moduleslist,
+        _("Warning"), wx.OK|wx.ICON_WARNING)
         dlg.ShowModal()
         dlg.Destroy()
         

@@ -50,12 +50,7 @@ class DebugShelfWindow(BaseShelfWindow, MessageHandler):
         BaseShelfWindow.__init__(self, parent)
         MessageHandler.__init__(self)
         ctrlbar = self.setup(DebuggeeWindow(self))
-        rbmp = wx.ArtProvider.GetBitmap(str(ed_glob.ID_BIN_FILE), wx.ART_MENU)
-        if rbmp.IsNull() or not rbmp.IsOk():
-            rbmp = None
-        self.gobtn = eclib.PlateButton(ctrlbar, wx.ID_ANY, _("Go"), rbmp,
-                                        style=eclib.PB_STYLE_NOBG)
-        ctrlbar.AddControl(self.gobtn, wx.ALIGN_RIGHT)
+        self.gobtn = self.AddPlateButton(_("Go"), ed_glob.ID_NEXT_POS, wx.ALIGN_LEFT)
         ctrlbar.AddStretchSpacer()
         self.choices = ["Program Args", "Debugger Args"]
         self.combo = wx.ComboBox(ctrlbar, wx.ID_ANY, value=self.choices[0], choices=self.choices, style=wx.CB_READONLY|eclib.PB_STYLE_NOBG)

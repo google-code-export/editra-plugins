@@ -58,13 +58,8 @@ class BaseShelfWindow(ed_basewin.EdBaseCtrlBox):
         # Setup
         self._listCtrl.set_mainwindow(self._mw)
         self.ctrlbar = self.CreateControlBar(wx.TOP)
-        rbmp = wx.ArtProvider.GetBitmap(str(ed_glob.ID_PREF), wx.ART_MENU)
-        if rbmp.IsNull() or not rbmp.IsOk():
-            rbmp = None
-        self.cfgbtn = eclib.PlateButton(self.ctrlbar, wx.ID_ANY, bmp=rbmp,
-                                        style=eclib.PB_STYLE_NOBG)
+        self.cfgbtn = self.AddPlateButton(u"", ed_glob.ID_PREF, wx.ALIGN_LEFT)
         self.cfgbtn.SetToolTipString(_("Configure"))
-        self.ctrlbar.AddControl(self.cfgbtn, wx.ALIGN_LEFT)
         return self.ctrlbar
 
     def layout(self, taskbtndesc=None, taskfn=None, timerfn=None):
