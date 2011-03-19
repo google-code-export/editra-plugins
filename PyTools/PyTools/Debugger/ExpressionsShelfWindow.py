@@ -46,10 +46,12 @@ class ExpressionsShelfWindow(BaseShelfWindow):
         ctrlbar.AddStretchSpacer()
         self.layout("Clear", self.OnClear)
 
-        # Attributes
         config = Profile_Get(ToolConfig.PYTOOL_CONFIG, default=dict())
+        
+        # Attributes
         self.expressions = config.get(ToolConfig.TLC_EXPRESSIONS, dict())
         self._listCtrl.PopulateRows(self.expressions)
+        
         RPDBDEBUGGER.restoreexpressions = self.RestoreExpressions
         RPDBDEBUGGER.saveandrestoreexpressions = self.SaveAndRestoreExpressions
         RPDBDEBUGGER.clearexpressionvalues = self._listCtrl.clearexpressionvalues

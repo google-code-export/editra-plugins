@@ -79,6 +79,8 @@ class LocalVariablesShelfWindow(BaseVariablesShelfWindow):
         # Attributes
         RPDBDEBUGGER.clearlocalvariables = self._listCtrl.Clear
         RPDBDEBUGGER.updatelocalvariables = self.update_namespace
+        
+        RPDBDEBUGGER.update_namespace()
 
     def Unsubscription(self):
         RPDBDEBUGGER.clearlocalvariables = lambda:None
@@ -92,6 +94,8 @@ class GlobalVariablesShelfWindow(BaseVariablesShelfWindow):
         # Attributes
         RPDBDEBUGGER.clearglobalvariables = self._listCtrl.Clear
         RPDBDEBUGGER.updateglobalvariables = self.update_namespace
+        
+        RPDBDEBUGGER.update_namespace()
         
     def Unsubscription(self):
         RPDBDEBUGGER.clearglobalvariables = lambda:None
@@ -110,6 +114,8 @@ class ExceptionsShelfWindow(BaseVariablesShelfWindow):
         RPDBDEBUGGER.clearexceptions = self._listCtrl.Clear
         RPDBDEBUGGER.updateexceptions = self.update_namespace
         RPDBDEBUGGER.catchunhandledexception = self.UnhandledException
+
+        RPDBDEBUGGER.update_namespace()
         
     def Unsubscription(self):
         RPDBDEBUGGER.clearexceptions = lambda:None

@@ -41,6 +41,8 @@ class StackFrameShelfWindow(BaseShelfWindow):
         RPDBDEBUGGER.clearframe = self._listCtrl.Clear
         RPDBDEBUGGER.selectframe = self._listCtrl.select_frame
         RPDBDEBUGGER.updatestacklist = self.UpdateStackList
+
+        RPDBDEBUGGER.update_stack()
         
     def Unsubscription(self):
         RPDBDEBUGGER.clearframe = lambda:None

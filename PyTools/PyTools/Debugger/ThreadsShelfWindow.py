@@ -37,17 +37,23 @@ class ThreadsShelfWindow(BaseShelfWindow):
         ctrlbar = self.setup(ThreadsList(self))
         self.layout()
 
+        current_thread, threads_list = RPDBDEBUGGER.get_thread_list()
+        self.UpdateThreadList(current_thread, threads_list)
+                
         # Attributes
         RPDBDEBUGGER.clearthread = self._listCtrl.Clear
         RPDBDEBUGGER.updatethread = self._listCtrl.update_thread
         RPDBDEBUGGER.updatethreadlist = self.UpdateThreadList
-        
+
     def Unsubscription(self):
         RPDBDEBUGGER.clearthread = lambda:None
         RPDBDEBUGGER.updatethread = lambda x,y,z:None
         RPDBDEBUGGER.updatethreadlist = lambda x,y:None
 
     def UpdateThreadList(self, current_thread, threads_list):
+        if self._listCtrl.suppressrecursion > 0:
+            self._listCtrl.suppressrecursion -= 1
+            return
         self._listCtrl.Clear()
         self._listCtrl.PopulateRows(current_thread, threads_list)
         self._listCtrl.RefreshRows()

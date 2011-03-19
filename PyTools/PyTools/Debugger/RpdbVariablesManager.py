@@ -46,6 +46,12 @@ class RpdbVariablesManager(object):
     def update_namespace(self):    
         try:
             frame_index = self.rpdb2debugger.get_frameindex()
+            if frame_index is None:
+                self.rpdb2debugger.clearlocalvariables()
+                self.rpdb2debugger.clearglobalvariables()
+                self.rpdb2debugger.clearexceptions()
+                return
+            
             key = self.get_local_key(frame_index)
             expressionlist = self.variableskey_map.get(key, None)
             (key0, el0) = self.rpdb2debugger.updatelocalvariables(key, expressionlist)

@@ -53,7 +53,7 @@ class RpdbDebugger(object):
         self.pid = None
         self.breakpoints = {}
         self.breakpoints_loaded = False
-        self.curstack = None
+        self.curstack = {}
         self.unhandledexception = False
         
         # functions that will be set later
@@ -91,7 +91,7 @@ class RpdbDebugger(object):
     def clear_all(self):
         self.pid = None
         self.breakpoints_loaded = False
-        self.curstack = None
+        self.curstack = {}
         self.unhandledexception = False
         self.clearstepmarker()
         self.clearlocalvariables()
@@ -143,30 +143,6 @@ class RpdbDebugger(object):
     def register_callback(self, func, event_type_dict, fSingleUse = False):
         self.sessionmanager.register_callback(func, event_type_dict, fSingleUse = fSingleUse)
 
-    def execute(self, suite):
-        try:
-            return self.sessionmanager.execute(suite)
-        except rpdb2.NotAttached:
-            return None
-
-    def evaluate(self, suite):
-        try:
-            return self.sessionmanager.evaluate(suite)
-        except rpdb2.NotAttached:
-            return None
-
-    def get_namespace(self, expressionlist, filterlevel):
-        try:
-            return self.sessionmanager.get_namespace(expressionlist, filterlevel)
-        except rpdb2.NotAttached:
-            return None
-
-    def set_analyze(self, analyze):
-        try:
-            self.sessionmanager.set_analyze(analyze)   
-        except rpdb2.NotAttached:
-            pass
-            
     def set_frameindex(self, index):
         try:
             self.sessionmanager.set_frame_index(index)        
@@ -180,9 +156,50 @@ class RpdbDebugger(object):
             pass
         return None
     
+    def update_stack(self):
+        try:
+            stacklist = self.sessionmanager.get_stack([], True)        
+            self.stackframemanager.do_update_stack(stacklist[0])
+        except rpdb2.NotAttached:
+            pass
+
+    def get_thread_list(self):
+        try:
+            return self.sessionmanager.get_thread_list()        
+        except rpdb2.NotAttached:
+            pass
+        return (None, {})
+    
     def set_thread(self, tid):
         try:
             self.sessionmanager.set_thread(tid)        
+        except rpdb2.NotAttached:
+            pass
+            
+    def execute(self, suite):
+        try:
+            return self.sessionmanager.execute(suite)
+        except rpdb2.NotAttached:
+            return None
+
+    def evaluate(self, suite):
+        try:
+            return self.sessionmanager.evaluate(suite)
+        except rpdb2.NotAttached:
+            return None
+
+    def update_namespace(self):
+        self.variablesmanager.update_namespace()
+
+    def get_namespace(self, expressionlist, filterlevel):
+        try:
+            return self.sessionmanager.get_namespace(expressionlist, filterlevel)
+        except rpdb2.NotAttached:
+            return None
+
+    def set_analyze(self, analyze):
+        try:
+            self.sessionmanager.set_analyze(analyze)   
         except rpdb2.NotAttached:
             pass
             
