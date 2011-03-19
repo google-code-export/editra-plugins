@@ -9,8 +9,8 @@
 """Editra Shelf display window"""
 
 __author__ = "Mike Rans"
-__svnid__ = "$Id: VariablesList.py -1   $"
-__revision__ = "$Revision: -1 $"
+__svnid__ = "$Id: $"
+__revision__ = "$Revision: $"
 
 #----------------------------------------------------------------------------#
 # Imports
@@ -86,13 +86,11 @@ class VariablesList(wx.gizmos.TreeListCtrl):
 
     def OnItemToolTip(self, event):
         item = event.GetItem()
-
         tooltip = self.GetItemText(item, 2)[1:]
         event.SetToolTip(tooltip)
        
     def OnItemCollapsing(self, event):
         item = event.GetItem()
-
         event.Skip()
 
     def OnItemActivated(self, event):
@@ -122,8 +120,8 @@ class VariablesList(wx.gizmos.TreeListCtrl):
 
         _suite = "%s = %s" % (expr, _expr)
 
-        worker = RunProcInThread(self.listtype, self._onitemactivatedcallback, \
-            RPDBDEBUGGER.execute, _suite)
+        worker = RunProcInThread(self.listtype, self._onitemactivatedcallback,
+                                 RPDBDEBUGGER.execute, _suite)
         worker.start()
         
     def _onitemactivatedcallback(self, res):
@@ -136,13 +134,14 @@ class VariablesList(wx.gizmos.TreeListCtrl):
             error = res
         
         if error != '':
-            dlg = wx.MessageDialog(self, error, "Error", wx.OK | wx.ICON_ERROR)
+            dlg = wx.MessageDialog(self, error, _("Error"), wx.OK | wx.ICON_ERROR)
             dlg.ShowModal()
             dlg.Destroy()
 
         if not warning in self.ignoredwarnings:
-            dlg = wx.MessageDialog(self, "%s\n\nClick 'Cancel' to ignore this warning in this session." % warning,\
-            "Warning", wx.OK | wx.CANCEL | wx.YES_DEFAULT | wx.ICON_WARNING)
+            dlg = wx.MessageDialog(self, _("%s\n\nClick 'Cancel' to ignore this warning in this session.") % warning,\
+                                   _("Warning"),
+                                   wx.OK|wx.CANCEL|wx.YES_DEFAULT|wx.ICON_WARNING)
             res = dlg.ShowModal()
             dlg.Destroy()
 
@@ -151,7 +150,6 @@ class VariablesList(wx.gizmos.TreeListCtrl):
                 
     def OnItemExpanding(self, event):
         item = event.GetItem()        
-
         if not self.ItemHasChildren(item):
             event.Skip()
             return
@@ -178,7 +176,8 @@ class VariablesList(wx.gizmos.TreeListCtrl):
             return
       
         worker = RunProcInThread(self.listtype, self._itemexpandingcallback, \
-            RPDBDEBUGGER.get_namespace, [(expr, True)], self.filterlevel)
+                                 RPDBDEBUGGER.get_namespace, [(expr, True)], 
+                                 self.filterlevel)
         worker.pass_parameter(item)
         worker.start()
 
@@ -192,7 +191,6 @@ class VariablesList(wx.gizmos.TreeListCtrl):
 
             if freselect_child:
                 self.SelectItem(child)
-
             return
         #
         # When expanding a tree item with arrow-keys on wxPython 2.6, the 
@@ -317,4 +315,3 @@ class VariablesList(wx.gizmos.TreeListCtrl):
             variablelist = items + variablelist
 
         return expressionlist    
-

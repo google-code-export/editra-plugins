@@ -139,4 +139,3 @@ class BreakPointsShelfWindow(BaseShelfWindow):
         RPDBDEBUGGER.breakpoints = {}
         self.SaveAndRestoreBreakpoints()
         Profile_Set(ToolConfig.PYTOOL_CONFIG, RPDBDEBUGGER._config)
-        

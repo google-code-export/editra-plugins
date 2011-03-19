@@ -62,7 +62,7 @@ class DebuggeeWindow(eclib.OutputBuffer,
         @return: None
 
         """
-        self.AddText("Debuggee finished.")
+        self.AddText(_("Debuggee finished."))
         self.restoreautorun()
         self.Stop()
         

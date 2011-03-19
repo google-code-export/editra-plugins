@@ -37,9 +37,6 @@ class ExpressionsList(eclib.EToggleEditListCtrl):
         self.InsertColumn(0, _("Expression"))
         self.InsertColumn(1, _("Value"))
 
-        # Attributes
-        self.parent = parent
-        
         # Event Handlers
         self.Bind(wx.EVT_LIST_END_LABEL_EDIT, self.OnItemEdited)
         
@@ -54,12 +51,12 @@ class ExpressionsList(eclib.EToggleEditListCtrl):
         newval = evt.GetLabel()
         column = evt.GetColumn()
         expression, = self._data[idx]
-        self.parent.DeleteExpression(expression)
+        self.Parent.DeleteExpression(expression)
         if column == 0:
             expression = newval
         enabled = self.IsChecked(idx)
-        self.parent.SetExpression(expression, enabled)
-        self._data[idx] = [unicode(expression)]
+        self.Parent.SetExpression(expression, enabled)
+        self._data[idx] = [unicode(expression),]
         self.Evaluate(enabled, expression, idx)        
         if expression:
             idx = idx + 1
@@ -69,7 +66,7 @@ class ExpressionsList(eclib.EToggleEditListCtrl):
 
     def OnCheckItem(self, idx, enabled):
         expression, = self._data[idx]
-        self.parent.SetExpression(expression, enabled)
+        self.Parent.SetExpression(expression, enabled)
         self.Evaluate(enabled, expression, idx)
         if not enabled:
             self.SetStringItem(idx, 1, u"")        
@@ -78,7 +75,7 @@ class ExpressionsList(eclib.EToggleEditListCtrl):
         if not enabled or not expression:
             return
         worker = RunProcInThread("Expr", self.fillexpressionvalue, \
-            RPDBDEBUGGER.evaluate, expression)
+                                 RPDBDEBUGGER.evaluate, expression)
         worker.pass_parameter(idx)
         worker.start()
     
@@ -97,7 +94,7 @@ class ExpressionsList(eclib.EToggleEditListCtrl):
         idx = 0
         for expression in data:
             enabled = data[expression]
-            self._data[idx] = [unicode(expression)]
+            self._data[idx] = [unicode(expression),]
             self.Evaluate(enabled, expression, idx)
             
             minLText = max(minLText, self.GetTextExtent(expression)[0])
@@ -123,7 +120,7 @@ class ExpressionsList(eclib.EToggleEditListCtrl):
         
     @staticmethod
     def _printListCtrl(ctrl):
-        for row in xrange(0, ctrl.GetItemCount()):
+        for row in range(0, ctrl.GetItemCount()):
             for column in xrange(0, ctrl.GetColumnCount()):
                 print ctrl.GetItem(row, column).GetText(), "\t",
             print ""
