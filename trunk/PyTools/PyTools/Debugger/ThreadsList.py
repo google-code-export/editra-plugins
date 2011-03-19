@@ -20,7 +20,6 @@ import wx
 import eclib
 
 # Local Imports
-import rpdb2
 from PyTools.Debugger import RPDBDEBUGGER
 
 # Globals
@@ -38,7 +37,7 @@ class ThreadsList(eclib.EBaseListCtrl):
         self.InsertColumn(2, _("State"))
         
         # Attributes
-        self.suppressrecursion = 0
+        self.previndex = None
         
         # Event Handlers
         self.Bind(wx.EVT_LIST_ITEM_ACTIVATED, self.OnThreadSelected)
@@ -49,27 +48,23 @@ class ThreadsList(eclib.EBaseListCtrl):
     def update_thread(self, thread_id, thread_name, fBroken):
         index = self.FindItemData(-1, thread_id)
         if index < 0:
-            return -1
+            return
 
         self.SetStringItem(index, 1, thread_name)
-        self.SetStringItem(index, 2, [rpdb2.STATE_RUNNING, rpdb2.STR_STATE_BROKEN][fBroken])
-
-        return index
+        self.SetStringItem(index, 2, [u"running", u"waiting at breakpoint"][fBroken])
         
     def OnThreadSelected(self, evt):
-        if self.suppressrecursion == 0:
-            self.suppressrecursion += 1
-            index = evt.m_itemIndex
-            tid = self.GetItemData(index)
-            RPDBDEBUGGER.set_thread(tid)
-        else:
-            self.suppressrecursion -= 1
-
-        evt.Skip()
+        index = evt.m_itemIndex
+        if self.previndex == index:
+            return
+        self.previndex = index
+        tid = self.GetItemData(index)
+        RPDBDEBUGGER.set_thread(tid)
         
     def Clear(self):
         """Delete all the rows """
         self.DeleteAllItems()
+        self.previndex = None
 
     def PopulateRows(self, current_thread, threads_list):
         """Populate the list with the data
@@ -90,7 +85,7 @@ class ThreadsList(eclib.EBaseListCtrl):
             fBroken = threadinfo["broken"]
 
             ename = unicode(name)
-            estate = unicode(["running", "waiting at break point"][fBroken])
+            estate = [u"running", u"waiting at breakpoint"][fBroken]
             self._data[idx] = (unicode(tid), ename, estate)
             minLName = max(minLName, self.GetTextExtent(ename)[0])
             minLState = max(minLState, self.GetTextExtent(estate)[0])
@@ -102,7 +97,7 @@ class ThreadsList(eclib.EBaseListCtrl):
         self.SetColumnWidth(1, minLName)
         self.SetColumnWidth(2, minLState)
         if selectedidx is not None:
-            self.suppressrecursion += 1
+            self.previndex = None
             self.Select(selectedidx)
 
     @staticmethod

@@ -14,6 +14,7 @@ __revision__ = "$Revision$"
 
 #-----------------------------------------------------------------------------#
 # Imports
+from time import sleep
 import wx
 
 # Editra Libraries
@@ -45,6 +46,10 @@ class RpdbStateManager(object):
     def update_state(self, event):
         wx.CallAfter(self.callback_state, event.m_state)
 
+    def finalmessage(self):
+        sleep(1)
+        self.rpdb2debugger.debuggeroutput("\nDebugger detached.")
+    
     def callback_state(self, state):
         old_state = self.m_state
         self.m_state = state
@@ -54,7 +59,8 @@ class RpdbStateManager(object):
             if self.rpdb2debugger.breakpoints_loaded:
                 # clear all debugging stuff as we have finished
                 ed_msg.PostMessage(ed_msg.EDMSG_PROGRESS_SHOW, (self.rpdb2debugger.mainwindowid, False))
-                worker = RunProcInThread("Detach", None, self.rpdb2debugger.clear_all)
+                self.rpdb2debugger.clear_all()
+                worker = RunProcInThread("Detach", None, self.finalmessage)
                 worker.start()
         elif (old_state in [rpdb2.STATE_DETACHED, rpdb2.STATE_DETACHING, rpdb2.STATE_SPAWNING, rpdb2.STATE_ATTACHING]) and (self.m_state not in [rpdb2.STATE_DETACHED, rpdb2.STATE_DETACHING, rpdb2.STATE_SPAWNING, rpdb2.STATE_ATTACHING]):
             ed_msg.PostMessage(ed_msg.EDMSG_PROGRESS_STATE, (self.rpdb2debugger.mainwindowid, -1, -1))

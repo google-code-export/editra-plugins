@@ -28,7 +28,6 @@ from PyTools.Common.PyToolsUtils import RunProcInThread
 from PyTools.Common.BaseShelfWindow import BaseShelfWindow
 from PyTools.Debugger.VariablesLists import VariablesList
 from PyTools.Debugger import RPDBDEBUGGER
-import rpdb2
 
 # Globals
 _ = wx.GetTranslation

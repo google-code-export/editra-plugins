@@ -51,6 +51,7 @@ class DebugShelfWindow(BaseShelfWindow, MessageHandler):
         MessageHandler.__init__(self)
         ctrlbar = self.setup(DebuggeeWindow(self))
         self.gobtn = self.AddPlateButton(_("Go"), ed_glob.ID_NEXT_POS, wx.ALIGN_LEFT)
+        self.abortbtn = self.AddPlateButton(_("Abort"), ed_glob.ID_NEXT_POS, wx.ALIGN_LEFT)
         ctrlbar.AddStretchSpacer()
         self.choices = ["Program Args", "Debugger Args"]
         self.combo = wx.ComboBox(ctrlbar, wx.ID_ANY, value=self.choices[0], choices=self.choices, style=wx.CB_READONLY|eclib.PB_STYLE_NOBG)
@@ -80,6 +81,7 @@ class DebugShelfWindow(BaseShelfWindow, MessageHandler):
 
         # Event Handlers
         self.Bind(wx.EVT_BUTTON, self.OnGo, self.gobtn)
+        self.Bind(wx.EVT_BUTTON, self.OnAbort, self.abortbtn)
         self.Bind(wx.EVT_COMBOBOX, self.OnComboSelect, self.combo)
         self.Bind(wx.EVT_SEARCHCTRL_CANCEL_BTN, self.OnCancelSearch, self.search)
 
@@ -89,6 +91,9 @@ class DebugShelfWindow(BaseShelfWindow, MessageHandler):
 
     def OnGo(self, event):
         RPDBDEBUGGER.do_go()
+
+    def OnAbort(self, event):
+        RPDBDEBUGGER.abort()
 
     def OnCancelSearch(self, event):
         self.combotexts[self.combocurrent_selection] = ""

@@ -15,9 +15,9 @@ __revision__ = "$Revision$"
 #-----------------------------------------------------------------------------#
 # Imports
 import os.path
+import copy
 import wx
 from wx.stc import STC_INDIC_PLAIN
-import copy
 
 # Editra Libraries
 import util
@@ -58,6 +58,7 @@ class BreakPointsShelfWindow(BaseShelfWindow):
         editor = wx.GetApp().GetCurrentBuffer()
         if editor:
             RPDBDEBUGGER.restorestepmarker(editor)
+        RPDBDEBUGGER.load_breakpoints()
 
         # Editra Message Handlers
         ed_msg.Subscribe(self.OnContextMenu, ed_msg.EDMSG_UI_STC_CONTEXT_MENU)        
@@ -66,9 +67,11 @@ class BreakPointsShelfWindow(BaseShelfWindow):
         editor = wx.GetApp().GetCurrentBuffer()
         if editor:
             editor.DeleteAllBreakpoints()
+            RPDBDEBUGGER.restorestepmarker(editor)
         ed_msg.Unsubscribe(self.OnContextMenu)
         RPDBDEBUGGER.breakpoints = {}
         RPDBDEBUGGER.saveandrestorebreakpoints = lambda:None
+        RPDBDEBUGGER.load_breakpoints()
 
     def DeleteBreakpoint(self, filepath, lineno):
         if not filepath in RPDBDEBUGGER.breakpoints:
@@ -108,6 +111,9 @@ class BreakPointsShelfWindow(BaseShelfWindow):
         self._listCtrl.Clear()
         self._listCtrl.PopulateRows(RPDBDEBUGGER.breakpoints)
         self._listCtrl.RefreshRows()
+        editor = wx.GetApp().GetCurrentBuffer()
+        if editor:
+            RPDBDEBUGGER.restorestepmarker(editor)
 
     def SaveBreakpoints(self):
         RPDBDEBUGGER._config[ToolConfig.TLC_BREAKPOINTS] = copy.deepcopy(RPDBDEBUGGER.breakpoints)

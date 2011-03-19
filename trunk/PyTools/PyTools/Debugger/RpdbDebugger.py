@@ -65,6 +65,7 @@ class RpdbDebugger(object):
         self.restorestepmarker = lambda x:None      
         # debuggee shelf
         self.debuggeroutput = lambda x:None
+        self.abort = lambda:None
         # breakpoints shelf
         self.saveandrestorebreakpoints = lambda:None
         # stackframe shelf
@@ -93,15 +94,14 @@ class RpdbDebugger(object):
         self.breakpoints_loaded = False
         self.curstack = {}
         self.unhandledexception = False
+        self.abort = lambda:None
         self.clearstepmarker()
+        self.clearframe()
+        self.clearthread()
         self.clearlocalvariables()
         self.clearglobalvariables()
         self.clearexceptions()
-        self.clearframe()
-        self.clearthread()
         self.clearexpressionvalues()
-        sleep(1)
-        self.debuggeroutput(_("\nDebugger detached."))
 
     def isrpdbbreakpoint(self, filepath, lineno):
         if filepath.find("rpdb2.py") == -1:
@@ -131,7 +131,7 @@ class RpdbDebugger(object):
                 util.Log("[PyDbg][err] Failed to attach. Error: %s" % repr(err))
                 abortfn()
                 return
-            
+            self.abort = abortfn
             util.Log("[PyDbg][info] Running")
 
     def do_detach(self):
@@ -143,6 +143,9 @@ class RpdbDebugger(object):
     def register_callback(self, func, event_type_dict, fSingleUse = False):
         self.sessionmanager.register_callback(func, event_type_dict, fSingleUse = fSingleUse)
 
+    def load_breakpoints(self):
+        self.breakpointmanager.loadbreakpoints()
+            
     def set_frameindex(self, index):
         try:
             self.sessionmanager.set_frame_index(index)        
@@ -206,24 +209,28 @@ class RpdbDebugger(object):
     def do_stop(self):
         try:
             self.sessionmanager.stop_debuggee()
+            self.clearstepmarker()
         except rpdb2.NotAttached:
             pass
 
     def do_restart(self):
         try:
             self.sessionmanager.restart()
+            self.clearstepmarker()
         except rpdb2.NotAttached:
             pass
 
     def do_jump(self, lineno):
         try:
             self.sessionmanager.request_jump(lineno)
+            self.clearstepmarker()
         except rpdb2.NotAttached:
             pass
 
     def do_go(self):
         try:
             self.sessionmanager.request_go()
+            self.clearstepmarker()
         except rpdb2.NotAttached:
             pass
 
@@ -236,24 +243,28 @@ class RpdbDebugger(object):
     def do_step(self):
         try:
             self.sessionmanager.request_step()
+            self.clearstepmarker()
         except rpdb2.NotAttached:
             pass
 
     def do_next(self):
         try:
             self.sessionmanager.request_next()
+            self.clearstepmarker()
         except rpdb2.NotAttached:
             pass
 
     def do_return(self):
         try:
             self.sessionmanager.request_return()
+            self.clearstepmarker()
         except rpdb2.NotAttached:
             pass
 
     def run_toline(self, filename, lineno):
         try:
             self.sessionmanager.request_go_breakpoint(filename, '', lineno)
+            self.clearstepmarker()
         except rpdb2.NotAttached:
             pass
 

@@ -36,14 +36,16 @@ class ThreadsShelfWindow(BaseShelfWindow):
         super(ThreadsShelfWindow, self).__init__(parent)
         ctrlbar = self.setup(ThreadsList(self))
         self.layout()
+                
+        # Attributes
+        self.current_thread = None
+        self.threads_list = None
+        RPDBDEBUGGER.clearthread = self.ClearThreadList
+        RPDBDEBUGGER.updatethread = self._listCtrl.update_thread
+        RPDBDEBUGGER.updatethreadlist = self.UpdateThreadList
 
         current_thread, threads_list = RPDBDEBUGGER.get_thread_list()
         self.UpdateThreadList(current_thread, threads_list)
-                
-        # Attributes
-        RPDBDEBUGGER.clearthread = self._listCtrl.Clear
-        RPDBDEBUGGER.updatethread = self._listCtrl.update_thread
-        RPDBDEBUGGER.updatethreadlist = self.UpdateThreadList
 
     def Unsubscription(self):
         RPDBDEBUGGER.clearthread = lambda:None
@@ -51,12 +53,18 @@ class ThreadsShelfWindow(BaseShelfWindow):
         RPDBDEBUGGER.updatethreadlist = lambda x,y:None
 
     def UpdateThreadList(self, current_thread, threads_list):
-        if self._listCtrl.suppressrecursion > 0:
-            self._listCtrl.suppressrecursion -= 1
+        if self.current_thread == current_thread and self.threads_list == threads_list:
             return
+        self.current_thread = current_thread
+        self.threads_list = threads_list
         self._listCtrl.Clear()
         self._listCtrl.PopulateRows(current_thread, threads_list)
         self._listCtrl.RefreshRows()
+        
+    def ClearThreadList(self):
+        self.current_thread = None
+        self.threads_list = None
+        self._listCtrl.Clear()
         
     def OnGo(self, event):
         pass
