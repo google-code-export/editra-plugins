@@ -14,8 +14,8 @@ Adds shelf windows
 
 __version__ = "0.1"
 __author__ = "Mike Rans"
-__svnid__ = "$Id: __init__.py 1058 2011-02-14 20:44:05Z rans@email.com $"
-__revision__ = "$Revision: 1058 $"
+__svnid__ = "$Id$"
+__revision__ = "$Revision$"
 
 #-----------------------------------------------------------------------------#
 # Imports

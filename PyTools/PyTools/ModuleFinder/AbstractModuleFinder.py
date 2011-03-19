@@ -9,8 +9,8 @@
 """ Abstract Module Finder module """
 
 __author__ = "Mike Rans"
-__svnid__ = "$Id: AbstractModuleFinder.py 1071 2011-02-17 20:49:32Z rans@email.com $"
-__revision__ = "$Revision: 1071 $"
+__svnid__ = "$Id$"
+__revision__ = "$Revision$"
 
 #-----------------------------------------------------------------------------#
 # Imports
