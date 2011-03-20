@@ -31,6 +31,7 @@ import syntax.synglob as synglob
 from PyTools.Common import ToolConfig
 from PyTools.Common.PyToolsUtils import PyToolsUtils
 from PyTools.Common.BaseShelfWindow import BaseShelfWindow
+from PyTools.Debugger.BreakpointsMessageHandler import BreakpointsMessageHandler
 from PyTools.Debugger.BreakPointsList import BreakPointsList
 from PyTools.Debugger import RPDBDEBUGGER
 
@@ -40,10 +41,11 @@ _ = wx.GetTranslation
 ID_TOGGLE_BREAKPOINT = wx.NewId()
 #-----------------------------------------------------------------------------#
 
-class BreakPointsShelfWindow(BaseShelfWindow):
+class BreakPointsShelfWindow(BaseShelfWindow, BreakpointsMessageHandler):
     def __init__(self, parent):
         """Initialize the window"""
-        super(BreakPointsShelfWindow, self).__init__(parent)
+        BaseShelfWindow.__init__(self, parent)
+        BreakpointsMessageHandler.__init__(self)
         ctrlbar = self.setup(BreakPointsList(self))
         ctrlbar.AddStretchSpacer()
         self.layout("Clear", self.OnClear)
@@ -72,6 +74,7 @@ class BreakPointsShelfWindow(BaseShelfWindow):
         RPDBDEBUGGER.breakpoints = {}
         RPDBDEBUGGER.saveandrestorebreakpoints = lambda:None
         RPDBDEBUGGER.install_breakpoints()
+        BreakpointsMessageHandler.Unsubscription(self)
 
     def DeleteBreakpoint(self, filepath, lineno):
         if not os.path.isfile(filepath):

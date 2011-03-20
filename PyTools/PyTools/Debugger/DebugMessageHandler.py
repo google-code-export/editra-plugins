@@ -1,12 +1,12 @@
 # -*- coding: utf-8 -*-
-# Name: DebugShelfWindow.py
+# Name: DebugMessageHandler.py
 # Purpose: Debugger plugin
 # Author: Mike Rans
 # Copyright: (c) 2010 Mike Rans
 # License: wxWindows License
 ###############################################################################
 
-"""Editra Shelf display window"""
+"""Editra Debug Message Handler"""
 
 __author__ = "Mike Rans"
 __svnid__ = "$Id $"
@@ -38,11 +38,11 @@ _ = wx.GetTranslation
 
 #-----------------------------------------------------------------------------#
 
-class MessageHandler(object):
+class DebugMessageHandler(object):
     """Module Message Handler"""
     def __init__(self):
         """Initialize"""
-        super(MessageHandler, self).__init__()
+        super(DebugMessageHandler, self).__init__()
 
         # Attributes
         self._prevfile = u""
@@ -51,13 +51,15 @@ class MessageHandler(object):
         RPDBDEBUGGER.clearstepmarker = self.ClearStepMarker
         RPDBDEBUGGER.setstepmarker = self.SetStepMarker
         RPDBDEBUGGER.restorestepmarker = self.RestoreStepMarker
+        
+        self.Subscription()
+        self.RestoreStepMarker(wx.GetApp().GetCurrentBuffer())
 
+    def Subscription(self):
         # Editra Message Handlers
         ed_msg.Subscribe(self.OnFileLoad, ed_msg.EDMSG_FILE_OPENED)
         ed_msg.Subscribe(self.OnFileSave, ed_msg.EDMSG_FILE_SAVED)
-        ed_msg.Subscribe(self.OnPageChanged, ed_msg.EDMSG_UI_NB_CHANGED)
-        
-        self.RestoreStepMarker(wx.GetApp().GetCurrentBuffer())
+        ed_msg.Subscribe(self.OnPageChanged, ed_msg.EDMSG_UI_NB_CHANGED)        
 
     def Unsubscription(self):
         ed_msg.Unsubscribe(self.OnFileLoad)
@@ -103,8 +105,6 @@ class MessageHandler(object):
         filename = os.path.normcase(editor.GetFileName())
         self.OnEditorUpdate(ispython, filename, force)
         self._prevfile = filename
-        if RPDBDEBUGGER.saveandrestorebreakpoints:
-            RPDBDEBUGGER.saveandrestorebreakpoints()
         if RPDBDEBUGGER.saveandrestoreexpressions:
             RPDBDEBUGGER.saveandrestoreexpressions()
         self.RestoreStepMarker(editor)

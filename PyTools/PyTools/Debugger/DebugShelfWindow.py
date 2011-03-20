@@ -15,8 +15,9 @@ __revision__ = "$Revision$"
 #-----------------------------------------------------------------------------#
 # Imports
 import os.path
-import wx
 import copy
+from time import sleep
+import wx
 
 # Editra Libraries
 import ed_glob
@@ -30,7 +31,7 @@ import syntax.synglob as synglob
 # Local imports
 from PyTools.Common import ToolConfig
 from PyTools.Common.BaseShelfWindow import BaseShelfWindow
-from PyTools.Debugger.MessageHandler import MessageHandler
+from PyTools.Debugger.DebugMessageHandler import DebugMessageHandler
 from PyTools.Debugger.DebuggeeWindow import DebuggeeWindow
 from PyTools.Debugger.PythonDebugger import PythonDebugger
 from PyTools.Debugger import RPDBDEBUGGER
@@ -39,7 +40,7 @@ from PyTools.Debugger import RPDBDEBUGGER
 _ = wx.GetTranslation
 #-----------------------------------------------------------------------------#
 
-class DebugShelfWindow(BaseShelfWindow, MessageHandler):
+class DebugShelfWindow(BaseShelfWindow, DebugMessageHandler):
     """Module Debug Results Window"""
     __debuggers = {
         synglob.ID_LANG_PYTHON: PythonDebugger
@@ -48,7 +49,7 @@ class DebugShelfWindow(BaseShelfWindow, MessageHandler):
     def __init__(self, parent):
         """Initialize the window"""
         BaseShelfWindow.__init__(self, parent)
-        MessageHandler.__init__(self)
+        DebugMessageHandler.__init__(self)
         ctrlbar = self.setup(DebuggeeWindow(self))
         self.gobtn = self.AddPlateButton(_("Go"), ed_glob.ID_NEXT_POS, wx.ALIGN_LEFT)
         self.abortbtn = self.AddPlateButton(_("Abort"), ed_glob.ID_NEXT_POS, wx.ALIGN_LEFT)
@@ -86,8 +87,9 @@ class DebugShelfWindow(BaseShelfWindow, MessageHandler):
 
     def Unsubscription(self):
         if RPDBDEBUGGER.attached:
+            RPDBDEBUGGER.do_detach()
             RPDBDEBUGGER.abort()
-        MessageHandler.Unsubscription(self)
+        DebugMessageHandler.Unsubscription(self)
 
     def OnGo(self, event):
         RPDBDEBUGGER.do_go()

@@ -207,7 +207,11 @@ class RpdbDebugger(object):
 
     def set_analyze(self, analyze):
         self.callsessionmanagerfn(self.sessionmanager.set_analyze, analyze)
-            
+    
+    def do_shutdown(self):
+        self.callsessionmanagerfn(self.sessionmanager.shutdown)
+        self.clearstepmarker()
+    
     def do_stop(self):
         self.callsessionmanagerfn(self.sessionmanager.stop_debuggee)
         self.clearstepmarker()
