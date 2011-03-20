@@ -53,6 +53,8 @@ class ThreadsShelfWindow(BaseShelfWindow):
         RPDBDEBUGGER.updatethreadlist = lambda x,y:None
 
     def UpdateThreadList(self, current_thread, threads_list):
+        if not threads_list:
+            return
         if self.current_thread == current_thread and self.threads_list == threads_list:
             return
         self.current_thread = current_thread

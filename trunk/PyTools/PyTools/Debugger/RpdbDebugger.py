@@ -53,7 +53,7 @@ class RpdbDebugger(object):
         self._config = {}
         self.pid = None
         self.breakpoints = {}
-        self.breakpoints_loaded = False
+        self.breakpoints_installed = False
         self.curstack = {}
         self.unhandledexception = False
         
@@ -93,7 +93,7 @@ class RpdbDebugger(object):
 
     def clear_all(self):
         self.pid = None
-        self.breakpoints_loaded = False
+        self.breakpoints_installed = False
         self.curstack = {}
         self.unhandledexception = False
         self.attached = False
@@ -131,10 +131,12 @@ class RpdbDebugger(object):
                     tries = tries + 1
             self.pid = None
             if ex:
-                err = repr(ex)
-                util.Log("[PyDbg][err] Failed to attach. Error: %s" % err)
-                PyToolsUtils.error_dialog(err)
-                
+                err = rpdb2.g_error_mapping.get(type(ex), repr(ex))
+                err = "Failed to attach. Error: %s" % err
+                util.Log("[PyDbg][err] %s" % err)
+                self.debuggeroutput("\n%s" % err)
+                PyToolsUtils.error_dialog(self.mainwindow, err)
+                self.attached = False
                 abortfn()
                 return
             self.abort = abortfn
@@ -148,11 +150,12 @@ class RpdbDebugger(object):
         except rpdb2.NotAttached, ex:
             if not self.attached:
                 return None
+            self.attached = False
         except Exception, ex:
             pass
         if self.mainwindow:
-            msg = rpdb2.g_error_mapping.get(type(ex), rpdb2.STR_ERROR_OTHER)
-            PyToolsUtils.error_dialog(self.mainwindow, msg)
+            err = rpdb2.g_error_mapping.get(type(ex), repr(ex))
+            PyToolsUtils.error_dialog(self.mainwindow, err)
         return None
     
     def do_detach(self):
@@ -161,8 +164,8 @@ class RpdbDebugger(object):
     def register_callback(self, func, event_type_dict, fSingleUse = False):
         self.sessionmanager.register_callback(func, event_type_dict, fSingleUse = fSingleUse)
 
-    def load_breakpoints(self):
-        self.breakpointmanager.loadbreakpoints()
+    def install_breakpoints(self):
+        self.breakpointmanager.installbreakpoints()
             
     def set_frameindex(self, index):
         self.callsessionmanagerfn(self.sessionmanager.set_frame_index, index)
@@ -235,24 +238,32 @@ class RpdbDebugger(object):
         self.clearstepmarker()
 
     def disable_breakpoint(self, bpid):
-        self.callsessionmanagerfn(self.sessionmanager.disable_breakpoint, [bpid], True)
+        self.callsessionmanagerfn(self.sessionmanager.disable_breakpoint, [bpid], False)
 
     def enable_breakpoint(self, bpid):
-        self.callsessionmanagerfn(self.sessionmanager.enable_breakpoint, [bpid], True)
+        self.callsessionmanagerfn(self.sessionmanager.enable_breakpoint, [bpid], False)
 
-    def clear_breakpoints(self):
+    def load_breakpoints(self):
         try:
             self.sessionmanager.load_breakpoints()
-        except:
+        except rpdb2.NotAttached:
             pass
+        except IOError:
+            pass
+    
+    def clear_breakpoints(self):
         self.callsessionmanagerfn(self.sessionmanager.delete_breakpoint, [], True)
-        try:
-            self.sessionmanager.save_breakpoints()
-        except:
-            pass
         
     def set_breakpoint(self, filepath, lineno, exprstr = "", enabled=True):
         return self.callsessionmanagerfn(self.sessionmanager.set_breakpoint, filepath, '', lineno, enabled, exprstr)
 
-    def delete_breakpoint(self, bpid):
-        self.callsessionmanagerfn(self.sessionmanager.delete_breakpoint, [bpid], True)
+    def get_breakpoints(self):
+        return self.callsessionmanagerfn(self.sessionmanager.get_breakpoints)
+
+    def delete_breakpoint(self, filepath, lineno):
+        bps = self.get_breakpoints()
+        if not bps:
+            return
+        for bp in bps.values():            
+            if bp.m_lineno == lineno and bp.m_filename == filepath:
+                self.callsessionmanagerfn(self.sessionmanager.delete_breakpoint, [bp.m_id], False)

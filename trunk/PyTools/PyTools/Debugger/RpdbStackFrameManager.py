@@ -72,10 +72,10 @@ class RpdbStackFrameManager(object):
         #event = self.rpdb2debugger.curstack[rpdb2.DICT_KEY_EVENT]
         if not fBroken:
             return
-        if not self.rpdb2debugger.breakpoints_loaded:
-            self.rpdb2debugger.load_breakpoints()
-            self.rpdb2debugger.breakpoints_loaded = True
+        if not self.rpdb2debugger.breakpoints_installed:
             self.rpdb2debugger.debuggeroutput("\nDebugger attached. Breakpoints set. %s output starts now...\n" % filename)
+            self.rpdb2debugger.install_breakpoints()
+            self.rpdb2debugger.breakpoints_installed = True
             self.rpdb2debugger.do_go()
             return            
         if self.rpdb2debugger.isrpdbbreakpoint(filename, lineno):
