@@ -61,6 +61,7 @@ class DebugMessageHandler(object):
         ed_msg.Unsubscribe(self.OnFileLoad)
         ed_msg.Unsubscribe(self.OnFileSave)
         ed_msg.Unsubscribe(self.OnPageChanged)
+        self.ClearStepMarker()
         RPDBDEBUGGER.conflictingmodules = lambda x:None
         RPDBDEBUGGER.clearstepmarker = lambda:None
         RPDBDEBUGGER.setstepmarker = lambda x,y:None
