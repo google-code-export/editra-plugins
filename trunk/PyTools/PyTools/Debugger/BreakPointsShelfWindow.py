@@ -102,7 +102,8 @@ class BreakPointsShelfWindow(BaseShelfWindow, BreakpointsMessageHandler):
             RPDBDEBUGGER.breakpoints[filepath] = linenos
         linenos[lineno] = (enabled, exprstr)
         util.Log("[DbgBp][info] %s, %d, %s, %s" % (filepath, lineno, enabled, exprstr))
-        RPDBDEBUGGER.set_breakpoint(filepath, lineno, exprstr)
+        if enabled:
+            RPDBDEBUGGER.set_breakpoint(filepath, lineno, exprstr)
         self.SaveBreakpoints()
         return lineno
         
