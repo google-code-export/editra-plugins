@@ -45,7 +45,6 @@ class MessageHandler(object):
         super(MessageHandler, self).__init__()
 
         # Attributes
-        self.editor = None
         self._prevfile = u""
         RPDBDEBUGGER._config = Profile_Get(ToolConfig.PYTOOL_CONFIG, default=dict())
         RPDBDEBUGGER.conflictingmodules = self.ConflictingModules
@@ -57,6 +56,8 @@ class MessageHandler(object):
         ed_msg.Subscribe(self.OnFileLoad, ed_msg.EDMSG_FILE_OPENED)
         ed_msg.Subscribe(self.OnFileSave, ed_msg.EDMSG_FILE_SAVED)
         ed_msg.Subscribe(self.OnPageChanged, ed_msg.EDMSG_UI_NB_CHANGED)
+        
+        self.RestoreStepMarker(wx.GetApp().GetCurrentBuffer())
 
     def Unsubscription(self):
         ed_msg.Unsubscribe(self.OnFileLoad)
@@ -76,21 +77,21 @@ class MessageHandler(object):
         dlg.Destroy()
         
     def ClearStepMarker(self):
-        if self.editor:
-            self.editor.ShowStepMarker(1, show=False)
-            self.editor = None
+        if RPDBDEBUGGER.editor:
+            RPDBDEBUGGER.editor.ShowStepMarker(1, show=False)
+            RPDBDEBUGGER.editor = None
         
     def SetStepMarker(self, fileName, lineNo):
-        self.editor = PyToolsUtils.GetEditorOrOpenFile(self._mw, fileName)
-        self.editorlineno = lineNo - 1
-        self.editor.GotoLine(self.editorlineno)
-        self.editor.ShowStepMarker(self.editorlineno, show=True)
+        RPDBDEBUGGER.editor = PyToolsUtils.GetEditorOrOpenFile(self._mw, fileName)
+        RPDBDEBUGGER.editorlineno = lineNo - 1
+        RPDBDEBUGGER.editor.GotoLine(RPDBDEBUGGER.editorlineno)
+        RPDBDEBUGGER.editor.ShowStepMarker(RPDBDEBUGGER.editorlineno, show=True)
         
     def RestoreStepMarker(self, editor):
-        if self.editor != editor:
+        if not editor or RPDBDEBUGGER.editor != editor:
             return
-        self.editor.GotoLine(self.editorlineno)
-        self.editor.ShowStepMarker(self.editorlineno, show=True)
+        RPDBDEBUGGER.editor.GotoLine(RPDBDEBUGGER.editorlineno)
+        RPDBDEBUGGER.editor.ShowStepMarker(RPDBDEBUGGER.editorlineno, show=True)
         
     # override in children
     def OnEditorUpdate(self, ispython, editor, force):
