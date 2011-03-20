@@ -66,6 +66,7 @@ class DebugMessageHandler(object):
         RPDBDEBUGGER.clearstepmarker = lambda:None
         RPDBDEBUGGER.setstepmarker = lambda x,y:None
         RPDBDEBUGGER.restorestepmarker = lambda x:None      
+        Profile_Set(ToolConfig.PYTOOL_CONFIG, RPDBDEBUGGER._config)
 
     def ConflictingModules(self, moduleslist):
         dlg = wx.MessageDialog(self, 

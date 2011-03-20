@@ -125,10 +125,8 @@ class BreakPointsList(eclib.EToggleEditListCtrl):
             return
         try:
             lineno = int(linenostr)
-            if enabled:
-                self.parent.SetBreakpoint(filepath, lineno, exprstr, enabled)
-            else:
-                self.parent.DeleteBreakpoint(filepath, lineno)
+            self.parent.DeleteBreakpoint(filepath, lineno)
+            self.parent.SetBreakpoint(filepath, lineno, exprstr, enabled)
             self._seteditorbreakpoint(filepath, lineno, enabled)
         except ValueError:
             pass
