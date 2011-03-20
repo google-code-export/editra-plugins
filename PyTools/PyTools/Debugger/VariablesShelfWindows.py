@@ -111,7 +111,7 @@ class ExceptionsShelfWindow(BaseVariablesShelfWindow):
 
         # Attributes
         self.buttontitle = self.ANALYZELBL
-        RPDBDEBUGGER.clearexceptions = self._listCtrl.Clear
+        RPDBDEBUGGER.clearexceptions = self.Clear
         RPDBDEBUGGER.updateexceptions = self.update_namespace
         RPDBDEBUGGER.catchunhandledexception = self.UnhandledException
 
@@ -151,3 +151,10 @@ class ExceptionsShelfWindow(BaseVariablesShelfWindow):
             RPDBDEBUGGER.set_analyze(False)
             self.buttontitle = self.ANALYZELBL
             self.taskbtn.SetLabel(self.buttontitle)
+
+    def Clear(self):
+        if self.buttontitle != self.ANALYZELBL:
+            RPDBDEBUGGER.set_analyze(False)
+            self.buttontitle = self.ANALYZELBL
+            self.taskbtn.SetLabel(self.buttontitle)
+        self._listCtrl.Clear()
