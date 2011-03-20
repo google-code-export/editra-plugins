@@ -32,6 +32,7 @@ import syntax.synglob as synglob
 from PyTools.Common import ToolConfig
 from PyTools.Common.BaseShelfWindow import BaseShelfWindow
 from PyTools.Debugger.DebugMessageHandler import DebugMessageHandler
+from PyTools.Common import Images
 from PyTools.Debugger.DebuggeeWindow import DebuggeeWindow
 from PyTools.Debugger.PythonDebugger import PythonDebugger
 from PyTools.Debugger import RPDBDEBUGGER
@@ -50,9 +51,12 @@ class DebugShelfWindow(BaseShelfWindow, DebugMessageHandler):
         """Initialize the window"""
         BaseShelfWindow.__init__(self, parent)
         DebugMessageHandler.__init__(self)
+
         ctrlbar = self.setup(DebuggeeWindow(self))
-        self.gobtn = self.AddPlateButton(_("Go"), ed_glob.ID_NEXT_POS, wx.ALIGN_LEFT)
-        self.abortbtn = self.AddPlateButton(_("Abort"), ed_glob.ID_NEXT_POS, wx.ALIGN_LEFT)
+        self.gobtn = self.AddPlateButton(u"", Images.Go.Bitmap, wx.ALIGN_LEFT)
+        self.gobtn.ToolTip = wx.ToolTip(_("Run to next breakpoint"))
+        self.abortbtn = self.AddPlateButton(u"", Images.Stop.Bitmap, wx.ALIGN_LEFT)
+        self.abortbtn.ToolTip = wx.ToolTip(_("Stop debugging"))
         ctrlbar.AddStretchSpacer()
         self.choices = ["Program Args", "Debugger Args"]
         self.combo = wx.ComboBox(ctrlbar, wx.ID_ANY, value=self.choices[0], choices=self.choices, style=wx.CB_READONLY|eclib.PB_STYLE_NOBG)
