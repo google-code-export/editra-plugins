@@ -9,8 +9,8 @@
 """Editra Breakpoints MessageHandler"""
 
 __author__ = "Mike Rans"
-__svnid__ = "$Id: BreakpointsMessageHandler.py 1145 2011-03-20 12:40:44Z rans@email.com $"
-__revision__ = "$Revision: 1145 $"
+__svnid__ = "$Id$"
+__revision__ = "$Revision$"
 
 #-----------------------------------------------------------------------------#
 # Imports
