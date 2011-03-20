@@ -49,6 +49,7 @@ class RpdbStateManager(object):
     def finalmessage(self):
         sleep(1)
         self.rpdb2debugger.debuggeroutput("\nDebugger detached.")
+        self.rpdb2debugger.debuggeroutput = lambda x:None
     
     def callback_state(self, state):
         old_state = self.m_state

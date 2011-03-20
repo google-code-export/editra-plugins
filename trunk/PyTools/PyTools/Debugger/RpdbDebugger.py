@@ -116,7 +116,7 @@ class RpdbDebugger(object):
             return True
         return False
 
-    def attach(self, abortfn):
+    def attach(self, outputfn, abortfn):
         if self.pid:
             tries = 0
             ex = None
@@ -134,14 +134,15 @@ class RpdbDebugger(object):
                 err = rpdb2.g_error_mapping.get(type(ex), repr(ex))
                 err = "Failed to attach. Error: %s" % err
                 util.Log("[PyDbg][err] %s" % err)
-                self.debuggeroutput("\n%s" % err)
+                outputfn("\n%s" % err)
                 PyToolsUtils.error_dialog(self.mainwindow, err)
-                self.attached = False
                 abortfn()
                 return
+            self.debuggeroutput = outputfn
             self.abort = abortfn
             self.attached = True
             util.Log("[PyDbg][info] Running")
+            outputfn("\nDebugger attached. Program output starts now...\n")
 
     def callsessionmanagerfn(self, fn, *args, **kwargs):
         ex = None
