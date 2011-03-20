@@ -74,7 +74,8 @@ class BreakPointsShelfWindow(BaseShelfWindow):
         RPDBDEBUGGER.install_breakpoints()
 
     def DeleteBreakpoint(self, filepath, lineno):
-        RPDBDEBUGGER.delete_breakpoint(filepath, lineno)
+        if not os.path.isfile(filepath):
+            return None
         if not filepath in RPDBDEBUGGER.breakpoints:
             return None
         linenos = RPDBDEBUGGER.breakpoints[filepath]
@@ -84,19 +85,21 @@ class BreakPointsShelfWindow(BaseShelfWindow):
         del linenos[lineno]
         if len(linenos) == 0:
             del RPDBDEBUGGER.breakpoints[filepath]
+        RPDBDEBUGGER.delete_breakpoint(filepath, lineno)
         self.SaveBreakpoints()
         return lineno
         
     def SetBreakpoint(self, filepath, lineno, exprstr, enabled):
+        if not os.path.isfile(filepath):
+            return
         if filepath in RPDBDEBUGGER.breakpoints:
             linenos = RPDBDEBUGGER.breakpoints[filepath]
         else:
             linenos = {}
             RPDBDEBUGGER.breakpoints[filepath] = linenos
-        if os.path.isfile(filepath):
-            RPDBDEBUGGER.set_breakpoint(filepath, lineno, exprstr)
         linenos[lineno] = (enabled, exprstr)
         util.Log("[DbgBp][info] %s, %d, %s, %s" % (filepath, lineno, enabled, exprstr))
+        RPDBDEBUGGER.set_breakpoint(filepath, lineno, exprstr)
         self.SaveBreakpoints()
         return lineno
         

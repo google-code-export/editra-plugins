@@ -72,7 +72,6 @@ class DebugShelfWindow(BaseShelfWindow, MessageHandler):
 
         self.layout("Debug", self.OnDebug, self.OnJobTimer)
         RPDBDEBUGGER.mainwindow = self._mw
-        RPDBDEBUGGER.debuggeroutput = self._listCtrl.AddText
 
         # Attributes
         self._debugger = None
@@ -87,7 +86,6 @@ class DebugShelfWindow(BaseShelfWindow, MessageHandler):
 
     def Unsubscription(self):
         super(DebugShelfWindow, self).Unsubscription()
-        RPDBDEBUGGER.debuggeroutput = lambda x:None
 
     def OnGo(self, event):
         RPDBDEBUGGER.do_go()
