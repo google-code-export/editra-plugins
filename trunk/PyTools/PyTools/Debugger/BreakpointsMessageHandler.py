@@ -49,6 +49,7 @@ class BreakpointsMessageHandler(object):
         ed_msg.Subscribe(self.OnPageChanged, ed_msg.EDMSG_UI_NB_CHANGED)
     
     def Unsubscription(self):
+        Profile_Set(ToolConfig.PYTOOL_CONFIG, RPDBDEBUGGER._config)
         ed_msg.Unsubscribe(self.OnFileLoad)
         ed_msg.Unsubscribe(self.OnFileSave)
         ed_msg.Unsubscribe(self.OnPageChanged)
