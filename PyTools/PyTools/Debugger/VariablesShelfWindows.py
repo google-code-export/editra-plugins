@@ -48,9 +48,10 @@ class BaseVariablesShelfWindow(BaseShelfWindow):
         self.key = None
 
     def UpdateVariablesList(self, variables):
+        if not variables:
+            return
         self._listCtrl.Clear()
-        if variables:
-            self._listCtrl.PopulateRows(variables)
+        self._listCtrl.PopulateRows(variables)
         self._listCtrl.Refresh()
 
     def update_namespace(self, key, expressionlist):

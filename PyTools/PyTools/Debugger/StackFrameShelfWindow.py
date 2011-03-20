@@ -51,6 +51,8 @@ class StackFrameShelfWindow(BaseShelfWindow):
         RPDBDEBUGGER.updatestacklist = lambda x:None
 
     def UpdateStackList(self, stack):
+        if not stack:
+            return
         if self.prevstack == stack:
             return
         self.prevstack = stack

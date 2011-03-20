@@ -58,7 +58,7 @@ class BreakPointsShelfWindow(BaseShelfWindow):
         editor = wx.GetApp().GetCurrentBuffer()
         if editor:
             RPDBDEBUGGER.restorestepmarker(editor)
-        RPDBDEBUGGER.load_breakpoints()
+        RPDBDEBUGGER.install_breakpoints()
 
         # Editra Message Handlers
         ed_msg.Subscribe(self.OnContextMenu, ed_msg.EDMSG_UI_STC_CONTEXT_MENU)        
@@ -71,26 +71,21 @@ class BreakPointsShelfWindow(BaseShelfWindow):
         ed_msg.Unsubscribe(self.OnContextMenu)
         RPDBDEBUGGER.breakpoints = {}
         RPDBDEBUGGER.saveandrestorebreakpoints = lambda:None
-        RPDBDEBUGGER.load_breakpoints()
+        RPDBDEBUGGER.install_breakpoints()
 
     def DeleteBreakpoint(self, filepath, lineno):
+        RPDBDEBUGGER.delete_breakpoint(filepath, lineno)
         if not filepath in RPDBDEBUGGER.breakpoints:
             return None
         linenos = RPDBDEBUGGER.breakpoints[filepath]
         if not lineno in linenos:
             return None
-        enabled, exprstr, bpid = linenos[lineno]
-        RPDBDEBUGGER.delete_breakpoint(bpid)
+        enabled, exprstr = linenos[lineno]
         del linenos[lineno]
         if len(linenos) == 0:
             del RPDBDEBUGGER.breakpoints[filepath]
         self.SaveBreakpoints()
         return lineno
-        
-    def ChangeBreakpoint(self, filepath, lineno, newexprstr, newenabled):
-        enabled, exprstr, bpid = RPDBDEBUGGER.breakpoints[filepath][lineno]
-        RPDBDEBUGGER.breakpoints[filepath][lineno] = (newenabled, newexprstr, bpid)
-        self.SaveBreakpoints()
         
     def SetBreakpoint(self, filepath, lineno, exprstr, enabled):
         if filepath in RPDBDEBUGGER.breakpoints:
@@ -98,12 +93,10 @@ class BreakPointsShelfWindow(BaseShelfWindow):
         else:
             linenos = {}
             RPDBDEBUGGER.breakpoints[filepath] = linenos
-        bpid = None
         if os.path.isfile(filepath):
-            bp = RPDBDEBUGGER.set_breakpoint(filepath, lineno, exprstr)
-            if bp:
-                bpid = bp.m_id
-        linenos[lineno] = (enabled, exprstr, bpid)
+            RPDBDEBUGGER.set_breakpoint(filepath, lineno, exprstr)
+        linenos[lineno] = (enabled, exprstr)
+        util.Log("[DbgBp][info] %s, %d, %s, %s" % (filepath, lineno, enabled, exprstr))
         self.SaveBreakpoints()
         return lineno
         
