@@ -58,6 +58,7 @@ class ExpressionsShelfWindow(BaseShelfWindow):
         RPDBDEBUGGER.clearexpressionvalues = self._listCtrl.clearexpressionvalues
 
     def Unsubscription(self):
+        Profile_Set(ToolConfig.PYTOOL_CONFIG, RPDBDEBUGGER._config)
         RPDBDEBUGGER.restoreexpressions = lambda:None
         RPDBDEBUGGER.saveandrestoreexpressions = lambda:None
         RPDBDEBUGGER.clearexpressionvalues = lambda:None

@@ -88,7 +88,6 @@ class DebugShelfWindow(BaseShelfWindow, DebugMessageHandler):
     def Unsubscription(self):
         if RPDBDEBUGGER.attached:
             RPDBDEBUGGER.do_detach()
-            RPDBDEBUGGER.abort()
         DebugMessageHandler.Unsubscription(self)
 
     def OnGo(self, event):
