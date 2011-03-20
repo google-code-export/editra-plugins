@@ -14,13 +14,10 @@ __revision__ = "$Revision$"
 
 #-----------------------------------------------------------------------------#
 # Imports
-import os.path
 import wx
-import copy
 
 # Editra Libraries
 import util
-import eclib
 import ed_msg
 from profiler import Profile_Get, Profile_Set
 

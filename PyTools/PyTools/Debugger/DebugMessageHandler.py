@@ -14,13 +14,10 @@ __revision__ = "$Revision$"
 
 #-----------------------------------------------------------------------------#
 # Imports
-import os.path
 import wx
-import copy
 
 # Editra Libraries
 import util
-import eclib
 import ed_msg
 from profiler import Profile_Get, Profile_Set
 from syntax import syntax
@@ -29,8 +26,6 @@ import syntax.synglob as synglob
 # Local imports
 from PyTools.Common import ToolConfig
 from PyTools.Common.PyToolsUtils import PyToolsUtils
-from PyTools.Debugger.DebuggeeWindow import DebuggeeWindow
-from PyTools.Debugger.PythonDebugger import PythonDebugger
 from PyTools.Debugger import RPDBDEBUGGER
 
 # Globals
