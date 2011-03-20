@@ -85,6 +85,8 @@ class DebugShelfWindow(BaseShelfWindow, MessageHandler):
         self.Bind(wx.EVT_SEARCHCTRL_CANCEL_BTN, self.OnCancelSearch, self.search)
 
     def Unsubscription(self):
+        if RPDBDEBUGGER.attached:
+            RPDBDEBUGGER.abort()
         MessageHandler.Unsubscription(self)
 
     def OnGo(self, event):
