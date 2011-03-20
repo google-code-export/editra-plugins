@@ -58,6 +58,7 @@ class RpdbStateManager(object):
 
         # change menu or toolbar items displayed according to state eg. running, paused etc.
         if self.m_state == rpdb2.STATE_DETACHED:
+            self.rpdb2debugger.attached = False
             if self.rpdb2debugger.breakpoints_installed:
                 # clear all debugging stuff as we have finished
                 ed_msg.PostMessage(ed_msg.EDMSG_PROGRESS_SHOW, (self.rpdb2debugger.mainwindow.GetId(), False))
@@ -65,6 +66,7 @@ class RpdbStateManager(object):
                 worker = RunProcInThread("Detach", None, self.finalmessage)
                 worker.start()
         elif (old_state in [rpdb2.STATE_DETACHED, rpdb2.STATE_DETACHING, rpdb2.STATE_SPAWNING, rpdb2.STATE_ATTACHING]) and (self.m_state not in [rpdb2.STATE_DETACHED, rpdb2.STATE_DETACHING, rpdb2.STATE_SPAWNING, rpdb2.STATE_ATTACHING]):
+            self.rpdb2debugger.attached = True
             ed_msg.PostMessage(ed_msg.EDMSG_PROGRESS_STATE, (self.rpdb2debugger.mainwindow.GetId(), -1, -1))
 
         if self.m_state == rpdb2.STATE_BROKEN:

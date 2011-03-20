@@ -41,6 +41,8 @@ class RpdbStackFrameManager(object):
         wx.CallAfter(self.do_update_frame, event.m_frame_index)
 
     def do_update_frame(self, index):
+        if index is None:
+            return
         self.do_set_position(index)
         self.rpdb2debugger.selectframe(index)
 
@@ -62,6 +64,8 @@ class RpdbStackFrameManager(object):
 
 
     def do_set_position(self, index):
+        if index is None:
+            return
         s = self.rpdb2debugger.curstack[rpdb2.DICT_KEY_STACK]
         e = s[-(1 + index)]
         

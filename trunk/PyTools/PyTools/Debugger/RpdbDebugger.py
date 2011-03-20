@@ -131,6 +131,9 @@ class RpdbDebugger(object):
                 ex = None
                 try:
                     self.sessionmanager.attach(self.pid, encoding = rpdb2.detect_locale())
+                    self.attached = True
+                    self.debuggeroutput = outputfn
+                    self.abort = abortfn
                     break
                 except Exception, ex:
                     tries = tries + 1
@@ -143,19 +146,16 @@ class RpdbDebugger(object):
                 PyToolsUtils.error_dialog(self.mainwindow, err)
                 abortfn()
                 return
-            self.debuggeroutput = outputfn
-            self.abort = abortfn
-            self.attached = True
             util.Log("[PyDbg][info] Running")
             outputfn("\nDebugger attached. Program output starts now...\n")
 
     def callsessionmanagerfn(self, fn, *args, **kwargs):
+        if not self.attached:
+            return None
         ex = None
         try:
             return fn(*args, **kwargs)
         except rpdb2.NotAttached, ex:
-            if not self.attached:
-                return None
             self.attached = False
         except Exception, ex:
             pass
