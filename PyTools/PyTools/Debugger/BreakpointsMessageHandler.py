@@ -19,10 +19,8 @@ import wx
 # Editra Libraries
 import util
 import ed_msg
-from profiler import Profile_Get, Profile_Set
 
 # Local imports
-from PyTools.Common import ToolConfig
 from PyTools.Common.PyToolsUtils import PyToolsUtils
 from PyTools.Debugger import RPDBDEBUGGER
 
@@ -37,9 +35,6 @@ class BreakpointsMessageHandler(object):
         """Initialize"""
         super(BreakpointsMessageHandler, self).__init__()
 
-        # Attributes
-        RPDBDEBUGGER._config = Profile_Get(ToolConfig.PYTOOL_CONFIG, default=dict())
-        
         self.Subscription()
 
     def Subscription(self):
@@ -49,7 +44,6 @@ class BreakpointsMessageHandler(object):
         ed_msg.Subscribe(self.OnPageChanged, ed_msg.EDMSG_UI_NB_CHANGED)
     
     def Unsubscription(self):
-        Profile_Set(ToolConfig.PYTOOL_CONFIG, RPDBDEBUGGER._config)
         ed_msg.Unsubscribe(self.OnFileLoad)
         ed_msg.Unsubscribe(self.OnFileSave)
         ed_msg.Unsubscribe(self.OnPageChanged)
@@ -60,7 +54,6 @@ class BreakpointsMessageHandler(object):
         
     def UpdateForEditor(self, editor, force=False):
         self.SaveAndRestoreBreakpoints()
-        Profile_Set(ToolConfig.PYTOOL_CONFIG, RPDBDEBUGGER._config)
 
     def OnPageChanged(self, msg):
         """ Notebook tab was changed """

@@ -105,7 +105,7 @@ class LintShelfWindow(BaseShelfWindow):
         """ Notebook tab was changed """
         notebook, pg_num = msg.GetData()
         editor = notebook.GetPage(pg_num)
-        if ToolConfig.GetConfigValue(ToolConfig.TLC_AUTO_RUN):
+        if ToolConfig.GetConfigValue(ToolConfig.TLC_LINT_AUTORUN):
             wx.CallAfter(self._onfileaccess, editor)
             self.UpdateForEditor(editor, True)
         else:
@@ -114,7 +114,7 @@ class LintShelfWindow(BaseShelfWindow):
     def OnFileLoad(self, msg):
         """Load File message"""
         editor = PyToolsUtils.GetEditorForFile(self._mw, msg.GetData())
-        if ToolConfig.GetConfigValue(ToolConfig.TLC_AUTO_RUN):
+        if ToolConfig.GetConfigValue(ToolConfig.TLC_LINT_AUTORUN):
             wx.CallAfter(self._onfileaccess, editor)
             self.UpdateForEditor(editor, True)
         else:
@@ -124,7 +124,7 @@ class LintShelfWindow(BaseShelfWindow):
         """Load File message"""
         filename, tmp = msg.GetData()
         editor = PyToolsUtils.GetEditorForFile(self._mw, filename)
-        if ToolConfig.GetConfigValue(ToolConfig.TLC_AUTO_RUN):
+        if ToolConfig.GetConfigValue(ToolConfig.TLC_LINT_AUTORUN):
             wx.CallAfter(self._onfileaccess, editor)
             self.UpdateForEditor(editor, True)
         else:

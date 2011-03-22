@@ -59,6 +59,7 @@ class RpdbStateManager(object):
         # change menu or toolbar items displayed according to state eg. running, paused etc.
         if self.m_state == rpdb2.STATE_DETACHED:
             self.rpdb2debugger.attached = False
+            self.rpdb2debugger.analyzing = False
             if self.rpdb2debugger.breakpoints_installed:
                 # clear all debugging stuff as we have finished
                 ed_msg.PostMessage(ed_msg.EDMSG_PROGRESS_SHOW, (self.rpdb2debugger.mainwindow.GetId(), False))
@@ -72,13 +73,17 @@ class RpdbStateManager(object):
         if self.m_state == rpdb2.STATE_BROKEN:
             # we hit a breakpoint
             # show the stack viewer, threads viewer, namespace viewer
+            self.rpdb2debugger.analyzing = False
             pass
             
         elif self.m_state == rpdb2.STATE_ANALYZE:
             # we are analyzing an exception
             # show the stack viewer and namespace viewer
+            self.rpdb2debugger.analyzing = True
             pass
         else:
             # any other state
             # don't show any viewers
+            self.rpdb2debugger.analyzing = False
             pass
+        self.rpdb2debugger.updateanalyze()
