@@ -24,12 +24,19 @@ import util
 
 # Local Imports
 from PyTools.Common.PyToolsUtils import PyToolsUtils
+from PyTools.Debugger import RPDBDEBUGGER
 
 #-----------------------------------------------------------------------------#
 # Configuration Keys
 PYTOOL_CONFIG = "PyTool.Config"
 TLC_PYTHON_PATH = "PythonPath"
-TLC_AUTO_RUN = "AutoRun"
+TLC_TRAP_EXCEPTIONS = "TrapExceptions"
+TLC_SYNCHRONICITY = "Synchronicity"
+TLC_AUTO_FORK = "AutoFork"
+TLC_FORK_MODE = "ForkMode"
+TLC_EXECEVALENCODING = "ExecEvalEncoding"
+TLC_EXECEVALESCAPING = "ExecEvalEscaping"
+TLC_LINT_AUTORUN = "LintAutoRun"
 TLC_DISABLED_CHK = "DisabledCheckers"
 TLC_BREAKPOINTS = "Breakpoints"
 TLC_EXPRESSIONS = "Expressions"
@@ -93,17 +100,93 @@ class ToolConfigPanel(wx.Panel):
                                                 wx.FLP_CHANGE_DIR|\
                                                 wx.FLP_FILE_MUST_EXIST)
         self._python_path_pk.SetPickerCtrlGrowable(True)
+        
+        modebox = wx.StaticBox(self, label=_("Trap Unhandled Exceptions"))
+        self._trapsz = wx.StaticBoxSizer(modebox, wx.VERTICAL)
+        self._traprb = wx.RadioButton(self, label=_("Yes"), style=wx.RB_GROUP)
+        tooltip = _("Trap unhandled exceptions")
+        self._traprb.SetToolTipString(tooltip)
+        self._notraprb = wx.RadioButton(self, label=_("No"))
+        tooltip = _("Ignore unhandled exceptions")
+        self._notraprb.SetToolTipString(tooltip)
+        trap = self._config.get(TLC_TRAP_EXCEPTIONS, True)
+        self._traprb.SetValue(trap)
+        self._notraprb.SetValue(not trap)
+        RPDBDEBUGGER.set_trap_unhandled_exceptions(trap)
+        
+        modebox = wx.StaticBox(self, label=_("Allow Synchronicity"))
+        self._synchronicitysz = wx.StaticBoxSizer(modebox, wx.VERTICAL)
+        self._synchronicityrb = wx.RadioButton(self, label=_("Yes"), style=wx.RB_GROUP)
+        tooltip = _("Allow operations on all threads")
+        self._synchronicityrb.SetToolTipString(tooltip)
+        self._nosynchronicityrb = wx.RadioButton(self, label=_("No"))
+        tooltip = _("Restrict operations to the inspected thread")
+        self._nosynchronicityrb.SetToolTipString(tooltip)
+        synchronicity = self._config.get(TLC_SYNCHRONICITY, True)
+        self._synchronicityrb.SetValue(synchronicity)
+        self._nosynchronicityrb.SetValue(not synchronicity)
+        RPDBDEBUGGER.set_synchronicity(synchronicity)
+        
+        modebox = wx.StaticBox(self, label=_("Pause before fork"))
+        self._autoforksz = wx.StaticBoxSizer(modebox, wx.VERTICAL)
+        self._manualforkrb = wx.RadioButton(self, label=_("Yes"), style=wx.RB_GROUP)
+        tooltip = _("Pause before fork")
+        self._manualforkrb.SetToolTipString(tooltip)
+        self._autoforkrb = wx.RadioButton(self, label=_("No"))
+        tooltip = _("Do not pause before fork")
+        self._autoforkrb.SetToolTipString(tooltip)
+        autofork = self._config.get(TLC_AUTO_FORK, True)
+        self._autoforkrb.SetValue(autofork)
+        self._manualforkrb.SetValue(not autofork)
+        
+        modebox = wx.StaticBox(self, label=_("Fork into Child"))
+        self._forkmodesz = wx.StaticBoxSizer(modebox, wx.VERTICAL)
+        self._forkchildrb = wx.RadioButton(self, label=_("Yes"), style=wx.RB_GROUP)
+        tooltip = _("Fork into child")
+        self._forkchildrb.SetToolTipString(tooltip)
+        self._forkparentrb = wx.RadioButton(self, label=_("No"))
+        tooltip = _("Stay in parent after fork")
+        self._forkparentrb.SetToolTipString(tooltip)
+        forkmode = self._config.get(TLC_FORK_MODE, True)
+        self._forkchildrb.SetValue(forkmode)
+        self._forkparentrb.SetValue(not forkmode)
+        RPDBDEBUGGER.set_fork_mode(forkmode, autofork)
+        
+        modebox = wx.StaticBox(self, label=_("Source Encoding for Execute/Evaluate"))
+        self._execevalencodingsz = wx.StaticBoxSizer(modebox, wx.VERTICAL)
+        txtentrysize = wx.Size(256, wx.DefaultSize.GetHeight())
+        self._execevalencodingt = eclib.CommandEntryBase(self, wx.ID_ANY, size=txtentrysize,
+                                           style=wx.TE_PROCESS_ENTER|wx.WANTS_CHARS)
+        encoding = self._config.get(TLC_EXECEVALENCODING, "auto")
+        self._execevalencodingt.SetValue(encoding)
+        self._execevalencodingt.SetDescriptiveText("Source Encoding for Execute/Evaluate")
+        self._execevalencodingt.ShowSearchButton(True)
+        self._execevalencodingt.ShowCancelButton(True)
+        
+        modebox = wx.StaticBox(self, label=_("Escape Non-Ascii Characters for Execute/Evaluate"))
+        self._execevalescapingsz = wx.StaticBoxSizer(modebox, wx.VERTICAL)
+        self._execevalescapingrb = wx.RadioButton(self, label=_("Yes"), style=wx.RB_GROUP)
+        tooltip = _("Escape non-ascii characters")
+        self._execevalescapingrb.SetToolTipString(tooltip)
+        self._noexecevalescapingrb = wx.RadioButton(self, label=_("No"))
+        tooltip = _("Do not escape non-ascii characters")
+        self._noexecevalescapingrb.SetToolTipString(tooltip)
+        escaping = self._config.get(TLC_EXECEVALESCAPING, True)
+        self._execevalescapingrb.SetValue(escaping)
+        self._noexecevalescapingrb.SetValue(not escaping)
+        RPDBDEBUGGER.set_encoding(encoding, escaping)
+        
         modebox = wx.StaticBox(self, label=_("Lint Run Mode"))
-        self._modesz = wx.StaticBoxSizer(modebox, wx.VERTICAL)
-        self._autorb = wx.RadioButton(self, label=_("Automatic"), style=wx.RB_GROUP)
+        self._lintmodesz = wx.StaticBoxSizer(modebox, wx.VERTICAL)
+        self._lintautorb = wx.RadioButton(self, label=_("Automatic"), style=wx.RB_GROUP)
         tooltip = _("Automatically rerun on save, document change, and file load")
-        self._autorb.SetToolTipString(tooltip)
-        self._manualrb = wx.RadioButton(self, label=_("Manual"))
+        self._lintautorb.SetToolTipString(tooltip)
+        self._lintmanualrb = wx.RadioButton(self, label=_("Manual"))
         tooltip = _("Only run when requested")
-        self._manualrb.SetToolTipString(tooltip)
-        mode = self._config.get(TLC_AUTO_RUN, False)
-        self._autorb.SetValue(mode)
-        self._manualrb.SetValue(not mode)
+        self._lintmanualrb.SetToolTipString(tooltip)
+        mode = self._config.get(TLC_LINT_AUTORUN, False)
+        self._lintautorb.SetValue(mode)
+        self._lintmanualrb.SetValue(not mode)
 
         ## Message configuration
         msgbox = wx.StaticBox(self, label=_("Messages"))
@@ -120,8 +203,20 @@ class ToolConfigPanel(wx.Panel):
         self.__DoLayout()
 
         # Event Handlers
-        self.Bind(wx.EVT_RADIOBUTTON, self.OnRunModeCheckBox, self._autorb)
-        self.Bind(wx.EVT_RADIOBUTTON, self.OnRunModeCheckBox, self._manualrb)
+        self.Bind(wx.EVT_RADIOBUTTON, self.OnTrapExceptionsCheckBox, self._traprb)
+        self.Bind(wx.EVT_RADIOBUTTON, self.OnTrapExceptionsCheckBox, self._notraprb)
+        self.Bind(wx.EVT_RADIOBUTTON, self.OnSynchronicityCheckBox, self._synchronicityrb)
+        self.Bind(wx.EVT_RADIOBUTTON, self.OnSynchronicityCheckBox, self._nosynchronicityrb)
+        self.Bind(wx.EVT_RADIOBUTTON, self.OnForkCheckBox, self._manualforkrb)
+        self.Bind(wx.EVT_RADIOBUTTON, self.OnForkCheckBox, self._autoforkrb)
+        self.Bind(wx.EVT_RADIOBUTTON, self.OnForkCheckBox, self._forkchildrb)
+        self.Bind(wx.EVT_RADIOBUTTON, self.OnForkCheckBox, self._forkparentrb)
+        self.Bind(wx.EVT_SEARCHCTRL_SEARCH_BTN, self.OnFinishEdit, self._execevalencodingt)
+        self.Bind(wx.EVT_SEARCHCTRL_CANCEL_BTN, self.OnCancelEdit, self._execevalencodingt)
+        self.Bind(wx.EVT_RADIOBUTTON, self.OnEscapingCheckBox, self._execevalescapingrb)
+        self.Bind(wx.EVT_RADIOBUTTON, self.OnEscapingCheckBox, self._noexecevalescapingrb)
+        self.Bind(wx.EVT_RADIOBUTTON, self.OnRunModeCheckBox, self._lintautorb)
+        self.Bind(wx.EVT_RADIOBUTTON, self.OnRunModeCheckBox, self._lintmanualrb)
         self.Bind(wx.EVT_CHOICE, self.OnChoice, self._msgtype)
         self.Bind(wx.EVT_FILEPICKER_CHANGED, self.OnPythonPathChanged, self._python_path_pk)
 
@@ -135,10 +230,39 @@ class ToolConfigPanel(wx.Panel):
         pathsz.Add(self._python_path_pk, 1, wx.EXPAND|wx.LEFT, 5)
         sizer.Add(pathsz, 0, wx.EXPAND|wx.LEFT|wx.RIGHT|wx.TOP, 5)
 
+        # Unhandled exception configuration
+        self._trapsz.Add(self._traprb, 0, wx.ALL, 5)
+        self._trapsz.Add(self._notraprb, 0, wx.ALL, 5)
+        sizer.Add(self._trapsz, 0, wx.ALL|wx.EXPAND, 8)
+
+        # Synchronicity configuration
+        self._synchronicitysz.Add(self._synchronicityrb, 0, wx.ALL, 5)
+        self._synchronicitysz.Add(self._nosynchronicityrb, 0, wx.ALL, 5)
+        sizer.Add(self._synchronicitysz, 0, wx.ALL|wx.EXPAND, 8)
+
+        # Auto fork configuration
+        self._autoforksz.Add(self._manualforkrb, 0, wx.ALL, 5)
+        self._autoforksz.Add(self._autoforkrb, 0, wx.ALL, 5)
+        sizer.Add(self._autoforksz, 0, wx.ALL|wx.EXPAND, 8)
+
+        # Fork mode configuration
+        self._forkmodesz.Add(self._forkchildrb, 0, wx.ALL, 5)
+        self._forkmodesz.Add(self._forkparentrb, 0, wx.ALL, 5)
+        sizer.Add(self._forkmodesz, 0, wx.ALL|wx.EXPAND, 8)
+
+        # Execute/evaluate encoding configuration
+        self._execevalencodingsz.Add(self._execevalencodingt, 0, wx.ALL, 5)
+        sizer.Add(self._execevalencodingsz, 0, wx.ALL|wx.EXPAND, 8)
+
+        # Execute/evaluate escaping configuration
+        self._execevalescapingsz.Add(self._execevalescapingrb, 0, wx.ALL, 5)
+        self._execevalescapingsz.Add(self._noexecevalescapingrb, 0, wx.ALL, 5)
+        sizer.Add(self._execevalescapingsz, 0, wx.ALL|wx.EXPAND, 8)
+
         # Run mode configuration
-        self._modesz.Add(self._autorb, 0, wx.ALL, 5)
-        self._modesz.Add(self._manualrb, 0, wx.ALL, 5)
-        sizer.Add(self._modesz, 0, wx.ALL|wx.EXPAND, 8)
+        self._lintmodesz.Add(self._lintautorb, 0, wx.ALL, 5)
+        self._lintmodesz.Add(self._lintmanualrb, 0, wx.ALL, 5)
+        sizer.Add(self._lintmodesz, 0, wx.ALL|wx.EXPAND, 8)
 
         # Enable/Disable pylint checkers
         hsizer = wx.BoxSizer(wx.HORIZONTAL)
@@ -153,10 +277,91 @@ class ToolConfigPanel(wx.Panel):
 
         self.SetSizer(sizer)
 
+    def OnTrapExceptionsCheckBox(self, evt):
+        evt_obj = evt.GetEventObject()
+        if evt_obj in (self._traprb, self._notraprb):
+            trap = self._traprb.GetValue()
+            self._config[TLC_TRAP_EXCEPTIONS] = trap
+            RPDBDEBUGGER.set_trap_unhandled_exceptions(trap)
+        else:
+            evt.Skip()
+            return
+
+        Profile_Set(PYTOOL_CONFIG, self._config)
+
+    def OnSynchronicityCheckBox(self, evt):
+        evt_obj = evt.GetEventObject()
+        if evt_obj in (self._synchronicityrb, self._nosynchronicityrb):
+            synchronicity = self._synchronicityrb.GetValue()
+            self._config[TLC_SYNCHRONICITY] = synchronicity
+            RPDBDEBUGGER.set_synchronicity(synchronicity)
+        else:
+            evt.Skip()
+            return
+
+        Profile_Set(PYTOOL_CONFIG, self._config)
+
+    def OnForkCheckBox(self, evt):
+        evt_obj = evt.GetEventObject()
+        if evt_obj in (self._manualforkrb, self._autoforkrb, self._forkchildrb, self._forkparentrb):
+            autofork = self._manualforkrb.GetValue()
+            self._config[TLC_AUTO_FORK] = autofork
+            forkmode = self._forkchildrb.GetValue()
+            self._config[TLC_FORK_MODE] = forkmode
+            RPDBDEBUGGER.set_fork_mode(forkmode, autofork)
+        else:
+            evt.Skip()
+            return
+
+        Profile_Set(PYTOOL_CONFIG, self._config)
+
+    def OnFinishEdit(self, evt):
+        evt_obj = evt.GetEventObject()
+        if evt_obj == self._execevalencodingt:
+            encoding = self._execevalencodingt.GetValue()
+            self._config[TLC_EXECEVALENCODING] = encoding
+            escaping = self._execevalescapingrb.GetValue()
+            self._config[TLC_EXECEVALESCAPING] = escaping
+            RPDBDEBUGGER.set_encoding(encoding, escaping)
+        else:
+            evt.Skip()
+            return
+
+        Profile_Set(PYTOOL_CONFIG, self._config)
+            
+    def OnCancelEdit(self, evt):
+        evt_obj = evt.GetEventObject()
+        if evt_obj == self._execevalencodingt:
+            encoding = "auto"
+            self._execevalencodingt.SetValue(encoding)
+            self._config[TLC_EXECEVALENCODING] = encoding
+            escaping = self._execevalescapingrb.GetValue()
+            self._config[TLC_EXECEVALESCAPING] = escaping
+            RPDBDEBUGGER.set_encoding(encoding, escaping)
+        else:
+            evt.Skip()
+            return
+
+        Profile_Set(PYTOOL_CONFIG, self._config)
+        
+    def OnEscapingCheckBox(self, evt):
+        evt_obj = evt.GetEventObject()
+        if evt_obj in (self._execevalescapingrb, self._noexecevalescapingrb):
+            encoding = self._execevalencodingt.GetValue()
+            self._config[TLC_EXECEVALENCODING] = encoding
+            escaping = self._execevalescapingrb.GetValue()
+            self._config[TLC_EXECEVALESCAPING] = escaping
+            RPDBDEBUGGER.set_encoding(encoding, escaping)
+        else:
+            evt.Skip()
+            return
+
+        Profile_Set(PYTOOL_CONFIG, self._config)
+
     def OnRunModeCheckBox(self, evt):
         evt_obj = evt.GetEventObject()
-        if evt_obj in (self._autorb, self._manualrb):
-            self._config[TLC_AUTO_RUN] = self._autorb.GetValue()
+        if evt_obj in (self._lintautorb, self._lintmanualrb):
+            self._config[TLC_LINT_AUTORUN] = self._lintautorb.GetValue()
         else:
             evt.Skip()
             return

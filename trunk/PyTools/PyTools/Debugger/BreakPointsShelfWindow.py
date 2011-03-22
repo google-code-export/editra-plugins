@@ -50,10 +50,8 @@ class BreakPointsShelfWindow(BaseShelfWindow, BreakpointsMessageHandler):
         ctrlbar.AddStretchSpacer()
         self.layout("Clear", self.OnClear)
 
-        config = Profile_Get(ToolConfig.PYTOOL_CONFIG, default=dict())
-        
         # Attributes
-        RPDBDEBUGGER.breakpoints = config.get(ToolConfig.TLC_BREAKPOINTS, dict())
+        RPDBDEBUGGER.breakpoints = ToolConfig.GetConfigValue(ToolConfig.TLC_BREAKPOINTS)
         RPDBDEBUGGER.saveandrestorebreakpoints = self.SaveAndRestoreBreakpoints
         
         self._listCtrl.PopulateRows(RPDBDEBUGGER.breakpoints)
@@ -116,7 +114,9 @@ class BreakPointsShelfWindow(BaseShelfWindow, BreakpointsMessageHandler):
             RPDBDEBUGGER.restorestepmarker(editor)
 
     def SaveBreakpoints(self):
-        RPDBDEBUGGER._config[ToolConfig.TLC_BREAKPOINTS] = copy.deepcopy(RPDBDEBUGGER.breakpoints)
+        config = Profile_Get(ToolConfig.PYTOOL_CONFIG, default=dict())
+        config[ToolConfig.TLC_BREAKPOINTS] = copy.deepcopy(RPDBDEBUGGER.breakpoints)
+        Profile_Set(ToolConfig.PYTOOL_CONFIG, config)
     
     def OnContextMenu(self, msg):
         editor = wx.GetApp().GetCurrentBuffer()
@@ -144,4 +144,3 @@ class BreakPointsShelfWindow(BaseShelfWindow, BreakpointsMessageHandler):
     def OnClear(self, evt):
         RPDBDEBUGGER.breakpoints = {}
         self.SaveAndRestoreBreakpoints()
-        Profile_Set(ToolConfig.PYTOOL_CONFIG, RPDBDEBUGGER._config)

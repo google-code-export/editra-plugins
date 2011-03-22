@@ -24,7 +24,7 @@ import ed_glob
 import util
 import eclib
 import ed_msg
-from profiler import Profile_Set
+from profiler import Profile_Get, Profile_Set
 from syntax import syntax
 import syntax.synglob as synglob
 
@@ -115,6 +115,7 @@ class DebugShelfWindow(BaseShelfWindow, DebugMessageHandler):
         self.combo.Enable(ispython)
         self.search.Enable(ispython)
         self.combotexts[self.combocurrent_selection] = self.search.GetValue()
+        config = Profile_Get(ToolConfig.PYTOOL_CONFIG, default=dict())
         if self._prevfile:
             emptycombotexts = True
             for key in self.combotexts:
@@ -124,14 +125,14 @@ class DebugShelfWindow(BaseShelfWindow, DebugMessageHandler):
                     break
             key = "DEBUG_%s" % self._prevfile
             if emptycombotexts:
-                if key in RPDBDEBUGGER._config:
-                    del RPDBDEBUGGER._config["DEBUG_%s" % self._prevfile]
+                if key in config:
+                    del config["DEBUG_%s" % self._prevfile]
             else:
                 debuginfo = (self.combocurrent_selection, self.combotexts)
-                RPDBDEBUGGER._config[key] = copy.deepcopy(debuginfo)
-                Profile_Set(ToolConfig.PYTOOL_CONFIG, RPDBDEBUGGER._config)
+                config[key] = copy.deepcopy(debuginfo)
+                Profile_Set(ToolConfig.PYTOOL_CONFIG, config)
 
-        debuginfo = RPDBDEBUGGER._config.get("DEBUG_%s" % filename, None)
+        debuginfo = config.get("DEBUG_%s" % filename, None)
         if debuginfo:
             self.combocurrent_selection, self.combotexts = debuginfo
             self.combo.SetSelection(self.combocurrent_selection)
@@ -189,8 +190,9 @@ class DebugShelfWindow(BaseShelfWindow, DebugMessageHandler):
         return None
         
     def restorepylint_autorun(self):
-        RPDBDEBUGGER._config[ToolConfig.TLC_AUTO_RUN] = True    
-        Profile_Set(ToolConfig.PYTOOL_CONFIG, RPDBDEBUGGER._config)
+        config = Profile_Get(ToolConfig.PYTOOL_CONFIG, default=dict())
+        config[ToolConfig.TLC_LINT_AUTORUN] = True
+        Profile_Set(ToolConfig.PYTOOL_CONFIG, config)
         self._listCtrl.AddText("Reenabling Pylint Autorun.")
     
     def _debug(self, filetype, vardict, filename):
@@ -200,10 +202,11 @@ class DebugShelfWindow(BaseShelfWindow, DebugMessageHandler):
         self._debugger = debugger
         self._curfile = filename
 
-        mode = RPDBDEBUGGER._config.get(ToolConfig.TLC_AUTO_RUN, False)
+        config = Profile_Get(ToolConfig.PYTOOL_CONFIG, default=dict())
+        mode = config.get(ToolConfig.TLC_LINT_AUTORUN, False)
         if mode:
-            RPDBDEBUGGER._config[ToolConfig.TLC_AUTO_RUN] = False
-            Profile_Set(ToolConfig.PYTOOL_CONFIG, RPDBDEBUGGER._config)
+            config[ToolConfig.TLC_LINT_AUTORUN] = False
+            Profile_Set(ToolConfig.PYTOOL_CONFIG, config)
             self._listCtrl.AddText("Disabling Pylint Autorun during Debug.")
             self._listCtrl.restoreautorun = self.restorepylint_autorun
         else:

@@ -110,10 +110,10 @@ class ExceptionsShelfWindow(BaseVariablesShelfWindow):
         super(ExceptionsShelfWindow, self).__init__(parent, u"rpdb_exception_info", 0, self.ANALYZELBL, self.OnAnalyze)
 
         # Attributes
-        self.buttontitle = self.ANALYZELBL
-        RPDBDEBUGGER.clearexceptions = self.Clear
+        RPDBDEBUGGER.clearexceptions = self._listCtrl.Clear
         RPDBDEBUGGER.updateexceptions = self.update_namespace
         RPDBDEBUGGER.catchunhandledexception = self.UnhandledException
+        RPDBDEBUGGER.updateanalyze = self.UpdateAnalyze
 
         RPDBDEBUGGER.update_namespace()
         
@@ -122,6 +122,7 @@ class ExceptionsShelfWindow(BaseVariablesShelfWindow):
         RPDBDEBUGGER.updateexceptions = lambda x,y:(None,None)
         RPDBDEBUGGER.unhandledexception = False
         RPDBDEBUGGER.catchunhandledexception = lambda:None
+        RPDBDEBUGGER.updateanalyze = lambda:None
         
     def UnhandledException(self):
         RPDBDEBUGGER.unhandledexception = True
@@ -139,22 +140,15 @@ class ExceptionsShelfWindow(BaseVariablesShelfWindow):
             return
 
         RPDBDEBUGGER.set_analyze(True)
-        self.buttontitle = self.STOPANALYZELBL
-        self.taskbtn.SetLabel(self.buttontitle)
         
     def OnAnalyze(self, event):
-        if self.buttontitle == self.ANALYZELBL:
+        if self.taskbtn.GetLabel() == self.ANALYZELBL:
             RPDBDEBUGGER.set_analyze(True)
-            self.buttontitle = self.STOPANALYZELBL
-            self.taskbtn.SetLabel(self.buttontitle)
         else:
             RPDBDEBUGGER.set_analyze(False)
-            self.buttontitle = self.ANALYZELBL
-            self.taskbtn.SetLabel(self.buttontitle)
 
-    def Clear(self):
-        if self.buttontitle != self.ANALYZELBL:
-            RPDBDEBUGGER.set_analyze(False)
-            self.buttontitle = self.ANALYZELBL
-            self.taskbtn.SetLabel(self.buttontitle)
-        self._listCtrl.Clear()
+    def UpdateAnalyze(self):
+        if RPDBDEBUGGER.analyzing:
+            self.taskbtn.SetLabel(self.STOPANALYZELBL)
+        else:
+            self.taskbtn.SetLabel(self.ANALYZELBL)

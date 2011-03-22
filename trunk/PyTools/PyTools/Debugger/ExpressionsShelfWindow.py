@@ -47,10 +47,8 @@ class ExpressionsShelfWindow(BaseShelfWindow):
         ctrlbar.AddStretchSpacer()
         self.layout("Clear", self.OnClear)
 
-        config = Profile_Get(ToolConfig.PYTOOL_CONFIG, default=dict())
-        
         # Attributes
-        self.expressions = config.get(ToolConfig.TLC_EXPRESSIONS, dict())
+        self.expressions = ToolConfig.GetConfigValue(ToolConfig.TLC_EXPRESSIONS)
         self._listCtrl.PopulateRows(self.expressions)
         
         RPDBDEBUGGER.restoreexpressions = self.RestoreExpressions
@@ -58,7 +56,6 @@ class ExpressionsShelfWindow(BaseShelfWindow):
         RPDBDEBUGGER.clearexpressionvalues = self._listCtrl.clearexpressionvalues
 
     def Unsubscription(self):
-        Profile_Set(ToolConfig.PYTOOL_CONFIG, RPDBDEBUGGER._config)
         RPDBDEBUGGER.restoreexpressions = lambda:None
         RPDBDEBUGGER.saveandrestoreexpressions = lambda:None
         RPDBDEBUGGER.clearexpressionvalues = lambda:None
@@ -79,7 +76,9 @@ class ExpressionsShelfWindow(BaseShelfWindow):
         self._listCtrl.RefreshRows()
 
     def SaveExpressions(self):
-        RPDBDEBUGGER._config[ToolConfig.TLC_EXPRESSIONS] = copy.deepcopy(self.expressions)
+        config = Profile_Get(ToolConfig.PYTOOL_CONFIG, default=dict())
+        config[ToolConfig.TLC_EXPRESSIONS] = copy.deepcopy(self.expressions)
+        Profile_Set(ToolConfig.PYTOOL_CONFIG, config)
 
     def SaveAndRestoreExpressions(self):
         self.SaveExpressions()
@@ -88,4 +87,3 @@ class ExpressionsShelfWindow(BaseShelfWindow):
     def OnClear(self, evt):
         self.expressions = {}
         self.SaveAndRestoreExpressions()
-        Profile_Set(ToolConfig.PYTOOL_CONFIG, RPDBDEBUGGER._config)

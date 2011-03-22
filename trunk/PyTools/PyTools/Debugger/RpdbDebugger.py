@@ -17,6 +17,7 @@ from time import sleep
 
 # Editra Libraries
 import util
+from profiler import Profile_Get
 
 # Local Imports
 import rpdb2
@@ -49,8 +50,8 @@ class RpdbDebugger(object):
         
         # attributes that will be set later
         self.attached = False
+        self.analyzing = False
         self.mainwindow = None
-        self._config = {}
         self.pid = None
         self.breakpoints = {}
         self.breakpoints_installed = False
@@ -88,6 +89,7 @@ class RpdbDebugger(object):
         self.updateglobalvariables = lambda x,y:(None,None)
         self.updateexceptions = lambda x,y:(None,None)
         self.catchunhandledexception = lambda:None
+        self.updateanalyze = lambda:None
         # expressions shelf
         self.restoreexpressions = lambda:None
         self.saveandrestoreexpressions = lambda:None
@@ -101,6 +103,7 @@ class RpdbDebugger(object):
         self.curstack = {}
         self.unhandledexception = False
         self.attached = False
+        self.analyzing = False
         self.abort = lambda:None
         self.clearstepmarker()
         self.clearframe()
@@ -205,9 +208,33 @@ class RpdbDebugger(object):
     def get_namespace(self, expressionlist, filterlevel):
         return self.callsessionmanagerfn(self.sessionmanager.get_namespace, expressionlist, filterlevel)
 
+    def set_synchronicity(self, synchronicity):
+        self.callsessionmanagerfn(self.sessionmanager.set_synchronicity, synchronicity)
+        
+    def get_synchronicity(self):
+        return self.callsessionmanagerfn(self.sessionmanager.get_synchronicity)
+        
+    def set_trap_unhandled_exceptions(self, trap):
+        self.callsessionmanagerfn(self.sessionmanager.set_trap_unhandled_exceptions, trap)
+        
+    def get_trap_unhandled_exceptions(self):
+        return self.callsessionmanagerfn(self.sessionmanager.get_trap_unhandled_exceptions)
+        
+    def set_fork_mode(self, forkmode, autofork):
+        self.callsessionmanagerfn(self.sessionmanager.set_fork_mode, forkmode, autofork)
+        
+    def get_fork_mode(self):
+        return self.callsessionmanagerfn(self.sessionmanager.get_fork_mode)
+        
+    def set_encoding(self, encoding, escaping):
+        self.callsessionmanagerfn(self.sessionmanager.set_fork_mode, encoding, escaping)
+        
+    def get_encoding(self):
+        return self.callsessionmanagerfn(self.sessionmanager.get_encoding)
+        
     def set_analyze(self, analyze):
         self.callsessionmanagerfn(self.sessionmanager.set_analyze, analyze)
-    
+
     def do_shutdown(self):
         self.callsessionmanagerfn(self.sessionmanager.shutdown)
         self.clearstepmarker()

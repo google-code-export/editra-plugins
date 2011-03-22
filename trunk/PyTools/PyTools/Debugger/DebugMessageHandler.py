@@ -20,7 +20,6 @@ import wx
 # Editra Libraries
 import util
 import ed_msg
-from profiler import Profile_Get, Profile_Set
 from syntax import syntax
 import syntax.synglob as synglob
 
@@ -42,7 +41,6 @@ class DebugMessageHandler(object):
 
         # Attributes
         self._prevfile = u""
-        RPDBDEBUGGER._config = Profile_Get(ToolConfig.PYTOOL_CONFIG, default=dict())
         RPDBDEBUGGER.conflictingmodules = self.ConflictingModules
         RPDBDEBUGGER.clearstepmarker = self.ClearStepMarker
         RPDBDEBUGGER.setstepmarker = self.SetStepMarker
@@ -66,7 +64,6 @@ class DebugMessageHandler(object):
         RPDBDEBUGGER.clearstepmarker = lambda:None
         RPDBDEBUGGER.setstepmarker = lambda x,y:None
         RPDBDEBUGGER.restorestepmarker = lambda x:None      
-        Profile_Set(ToolConfig.PYTOOL_CONFIG, RPDBDEBUGGER._config)
 
     def ConflictingModules(self, moduleslist):
         dlg = wx.MessageDialog(self, 
@@ -106,7 +103,6 @@ class DebugMessageHandler(object):
         if RPDBDEBUGGER.saveandrestoreexpressions:
             RPDBDEBUGGER.saveandrestoreexpressions()
         self.RestoreStepMarker(editor)
-        Profile_Set(ToolConfig.PYTOOL_CONFIG, RPDBDEBUGGER._config)
 
     def OnPageChanged(self, msg):
         """ Notebook tab was changed """
