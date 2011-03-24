@@ -60,6 +60,14 @@ class DebugShelfWindow(BaseShelfWindow, DebugMessageHandler):
         self.gobtn.ToolTip = wx.ToolTip(_("Run to next breakpoint"))
         self.abortbtn = self.AddPlateButton(u"", Images.Stop.Bitmap, wx.ALIGN_LEFT)
         self.abortbtn.ToolTip = wx.ToolTip(_("Stop debugging"))
+        ctrlbar.AddControl(wx.StaticLine(ctrlbar, size=(-1, 16), style=wx.SL_VERTICAL),
+                           wx.ALIGN_LEFT)
+        self.stepinbtn = self.AddPlateButton(u"", Images.StepIn.Bitmap, wx.ALIGN_LEFT)
+        self.stepinbtn.ToolTip = wx.ToolTip(_("Step In"))
+        self.stepovbtn = self.AddPlateButton(u"", Images.StepOver.Bitmap, wx.ALIGN_LEFT)
+        self.stepovbtn.ToolTip = wx.ToolTip(_("Step Over"))
+        self.stepoutbtn = self.AddPlateButton(u"", Images.StepOut.Bitmap, wx.ALIGN_LEFT)
+        self.stepoutbtn.ToolTip = wx.ToolTip(_("Step Out"))
         ctrlbar.AddStretchSpacer()
         self.choices = ["Program Args", "Debugger Args"]
         self.combo = wx.ComboBox(ctrlbar, wx.ID_ANY, value=self.choices[0], choices=self.choices, style=wx.CB_READONLY|eclib.PB_STYLE_NOBG)
@@ -89,6 +97,9 @@ class DebugShelfWindow(BaseShelfWindow, DebugMessageHandler):
         # Event Handlers
         self.Bind(wx.EVT_BUTTON, self.OnGo, self.gobtn)
         self.Bind(wx.EVT_BUTTON, self.OnAbort, self.abortbtn)
+        self.Bind(wx.EVT_BUTTON, self.OnStepIn, self.stepinbtn)
+        self.Bind(wx.EVT_BUTTON, self.OnStepOver, self.stepovbtn)
+        self.Bind(wx.EVT_BUTTON, self.OnStepOut, self.stepoutbtn)
         self.Bind(wx.EVT_COMBOBOX, self.OnComboSelect, self.combo)
         self.Bind(wx.EVT_SEARCHCTRL_CANCEL_BTN, self.OnCancelSearch, self.search)
 
@@ -102,6 +113,15 @@ class DebugShelfWindow(BaseShelfWindow, DebugMessageHandler):
 
     def OnAbort(self, event):
         RPDBDEBUGGER.abort()
+
+    def OnStepIn(self, event):
+        pass #TODO: add Step in
+
+    def OnStepOver(self, event):
+        pass #TODO: Add Step Over
+
+    def OnStepOut(self, event):
+        pass #TODO: Add Step Out
 
     def OnCancelSearch(self, event):
         self.combotexts[self.combocurrent_selection] = ""
