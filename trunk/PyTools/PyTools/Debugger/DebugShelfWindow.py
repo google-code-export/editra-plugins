@@ -52,7 +52,10 @@ class DebugShelfWindow(BaseShelfWindow, DebugMessageHandler):
         BaseShelfWindow.__init__(self, parent)
         DebugMessageHandler.__init__(self)
 
+        # Attributes
         ctrlbar = self.setup(DebuggeeWindow(self))
+        ctrlbar.AddControl(wx.StaticLine(ctrlbar, size=(-1, 16), style=wx.SL_VERTICAL),
+                           wx.ALIGN_LEFT)
         self.gobtn = self.AddPlateButton(u"", Images.Go.Bitmap, wx.ALIGN_LEFT)
         self.gobtn.ToolTip = wx.ToolTip(_("Run to next breakpoint"))
         self.abortbtn = self.AddPlateButton(u"", Images.Stop.Bitmap, wx.ALIGN_LEFT)
