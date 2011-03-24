@@ -258,11 +258,11 @@ class RpdbDebugger(object):
     def do_break(self):
         self.callsessionmanagerfn(self.sessionmanager.request_break)
 
-    def do_step(self):
+    def do_step(self): # Step In
         self.callsessionmanagerfn(self.sessionmanager.request_step)
         self.clearstepmarker()
 
-    def do_next(self):
+    def do_next(self): # Step Over
         self.callsessionmanagerfn(self.sessionmanager.request_next)
         self.clearstepmarker()
 
