@@ -55,8 +55,6 @@ class RpdbDebugger(object):
         self.pid = None
         self.breakpoints = {}
         self.breakpoints_installed = False
-        self.editor = None
-        self.editorlineno = None
         self.curstack = {}
         self.unhandledexception = False
         
@@ -98,8 +96,6 @@ class RpdbDebugger(object):
     def clear_all(self):
         self.pid = None
         self.breakpoints_installed = False
-        self.editor = None
-        self.editorlineno = None
         self.curstack = {}
         self.unhandledexception = False
         self.attached = False
@@ -112,6 +108,7 @@ class RpdbDebugger(object):
         self.clearglobalvariables()
         self.clearexceptions()
         self.clearexpressionvalues()
+        self.saveandrestoreexpressions()
         self.saveandrestorebreakpoints()
 
     def isrpdbbreakpoint(self, filepath, lineno):

@@ -20,7 +20,6 @@ from time import sleep
 import wx
 
 # Editra Libraries
-import ed_glob
 import util
 import eclib
 import ed_msg
@@ -31,17 +30,17 @@ import syntax.synglob as synglob
 # Local imports
 from PyTools.Common import ToolConfig
 from PyTools.Common.BaseShelfWindow import BaseShelfWindow
-from PyTools.Debugger.DebugMessageHandler import DebugMessageHandler
 from PyTools.Common import Images
 from PyTools.Debugger.DebuggeeWindow import DebuggeeWindow
 from PyTools.Debugger.PythonDebugger import PythonDebugger
 from PyTools.Debugger import RPDBDEBUGGER
+from PyTools.Debugger import MESSAGEHANDLER
 
 # Globals
 _ = wx.GetTranslation
 #-----------------------------------------------------------------------------#
 
-class DebugShelfWindow(BaseShelfWindow, DebugMessageHandler):
+class DebugShelfWindow(BaseShelfWindow):
     """Module Debug Results Window"""
     __debuggers = {
         synglob.ID_LANG_PYTHON: PythonDebugger
@@ -49,15 +48,14 @@ class DebugShelfWindow(BaseShelfWindow, DebugMessageHandler):
 
     def __init__(self, parent):
         """Initialize the window"""
-        BaseShelfWindow.__init__(self, parent)
-        DebugMessageHandler.__init__(self)
+        super(DebugShelfWindow, self).__init__(parent)
 
         # Attributes
         ctrlbar = self.setup(DebuggeeWindow(self))
         ctrlbar.AddControl(wx.StaticLine(ctrlbar, size=(-1, 16), style=wx.SL_VERTICAL),
                            wx.ALIGN_LEFT)
         self.gobtn = self.AddPlateButton(u"", Images.Go.Bitmap, wx.ALIGN_LEFT)
-        self.gobtn.ToolTip = wx.ToolTip(_("Run to next breakpoint"))
+        self.gobtn.ToolTip = wx.ToolTip(_("Run"))
         self.abortbtn = self.AddPlateButton(u"", Images.Stop.Bitmap, wx.ALIGN_LEFT)
         self.abortbtn.ToolTip = wx.ToolTip(_("Stop debugging"))
         ctrlbar.AddControl(wx.StaticLine(ctrlbar, size=(-1, 16), style=wx.SL_VERTICAL),
@@ -68,6 +66,8 @@ class DebugShelfWindow(BaseShelfWindow, DebugMessageHandler):
         self.stepovbtn.ToolTip = wx.ToolTip(_("Step Over"))
         self.stepoutbtn = self.AddPlateButton(u"", Images.StepOut.Bitmap, wx.ALIGN_LEFT)
         self.stepoutbtn.ToolTip = wx.ToolTip(_("Step Out"))
+        self.breakbtn = self.AddPlateButton(u"", Images.Go.Bitmap, wx.ALIGN_LEFT)
+        self.breakbtn.ToolTip = wx.ToolTip(_("Break"))
         ctrlbar.AddStretchSpacer()
         self.choices = ["Program Args", "Debugger Args"]
         self.combo = wx.ComboBox(ctrlbar, wx.ID_ANY, value=self.choices[0], choices=self.choices, style=wx.CB_READONLY|eclib.PB_STYLE_NOBG)
@@ -86,10 +86,12 @@ class DebugShelfWindow(BaseShelfWindow, DebugMessageHandler):
         self.search.ShowCancelButton(True)
         ctrlbar.AddControl(self.search, wx.ALIGN_RIGHT)
 
-        self.layout("Debug", self.OnDebug, self.OnJobTimer)
-        RPDBDEBUGGER.mainwindow = self._mw
+        self.layout(None, None, self.OnJobTimer)
 
         # Attributes
+        RPDBDEBUGGER.mainwindow = self._mw
+        MESSAGEHANDLER.mainwindow = self._mw
+        MESSAGEHANDLER.debugeditorupdate = self.OnEditorUpdate
         self._debugger = None
         self._debugrun = False
         self._debugargs = ""
@@ -100,28 +102,14 @@ class DebugShelfWindow(BaseShelfWindow, DebugMessageHandler):
         self.Bind(wx.EVT_BUTTON, self.OnStepIn, self.stepinbtn)
         self.Bind(wx.EVT_BUTTON, self.OnStepOver, self.stepovbtn)
         self.Bind(wx.EVT_BUTTON, self.OnStepOut, self.stepoutbtn)
+        self.Bind(wx.EVT_BUTTON, self.OnBreak, self.breakbtn)
         self.Bind(wx.EVT_COMBOBOX, self.OnComboSelect, self.combo)
         self.Bind(wx.EVT_SEARCHCTRL_CANCEL_BTN, self.OnCancelSearch, self.search)
 
     def Unsubscription(self):
         if RPDBDEBUGGER.attached:
             RPDBDEBUGGER.do_detach()
-        DebugMessageHandler.Unsubscription(self)
-
-    def OnGo(self, event):
-        RPDBDEBUGGER.do_go()
-
-    def OnAbort(self, event):
-        RPDBDEBUGGER.abort()
-
-    def OnStepIn(self, event):
-        RPDBDEBUGGER.do_step()
-
-    def OnStepOver(self, event):
-        RPDBDEBUGGER.do_next()
-
-    def OnStepOut(self, event):
-        pass #TODO: Add Step Out
+        MESSAGEHANDLER.debugeditorupdate = lambda x,y,z:None
 
     def OnCancelSearch(self, event):
         self.combotexts[self.combocurrent_selection] = ""
@@ -134,22 +122,27 @@ class DebugShelfWindow(BaseShelfWindow, DebugMessageHandler):
         self.search.SetValue(self.combotexts[self.combocurrent_selection])
 
     def OnEditorUpdate(self, ispython, filename, force):
-        self.taskbtn.Enable(ispython)
+        self.gobtn.Enable(ispython)
+        self.abortbtn.Enable(ispython)
+        self.stepinbtn.Enable(ispython)
+        self.stepovbtn.Enable(ispython)
+        self.stepoutbtn.Enable(ispython)
+        self.breakbtn.Enable(ispython)
         self.combo.Enable(ispython)
         self.search.Enable(ispython)
         self.combotexts[self.combocurrent_selection] = self.search.GetValue()
         config = Profile_Get(ToolConfig.PYTOOL_CONFIG, default=dict())
-        if self._prevfile:
+        if MESSAGEHANDLER._prevfile:
             emptycombotexts = True
             for key in self.combotexts:
                 combotext = self.combotexts[key]
                 if combotext:
                     emptycombotexts = False
                     break
-            key = "DEBUG_%s" % self._prevfile
+            key = "DEBUG_%s" % MESSAGEHANDLER._prevfile
             if emptycombotexts:
                 if key in config:
-                    del config["DEBUG_%s" % self._prevfile]
+                    del config["DEBUG_%s" % MESSAGEHANDLER._prevfile]
             else:
                 debuginfo = (self.combocurrent_selection, self.combotexts)
                 config[key] = copy.deepcopy(debuginfo)
@@ -196,7 +189,11 @@ class DebugShelfWindow(BaseShelfWindow, DebugMessageHandler):
         self._debug(filetype, vardict, filename)
         self._hasrun = True
 
-    def OnDebug(self, event):
+    def OnGo(self, event):
+        if RPDBDEBUGGER.attached:
+            RPDBDEBUGGER.do_go()
+            return
+            
         self.combotexts[self.combocurrent_selection] = self.search.GetValue()
         editor = wx.GetApp().GetCurrentBuffer()
         if editor:
@@ -245,3 +242,18 @@ class DebugShelfWindow(BaseShelfWindow, DebugMessageHandler):
             util.Log("[PyDebug][info] fileName %s" % (self._curfile))
             ed_msg.PostMessage(ed_msg.EDMSG_PROGRESS_SHOW, (self._mw.GetId(), True))
             self._debugger.Debug()
+
+    def OnAbort(self, event):
+        RPDBDEBUGGER.abort()
+
+    def OnStepIn(self, event):
+        RPDBDEBUGGER.do_step()
+
+    def OnStepOver(self, event):
+        RPDBDEBUGGER.do_next()
+
+    def OnStepOut(self, event):
+        RPDBDEBUGGER.do_return()
+
+    def OnBreak(self, event):
+        RPDBDEBUGGER.do_break()

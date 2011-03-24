@@ -16,11 +16,6 @@ __revision__ = "$Revision $"
 # Imports
 import wx
 
-# Editra Libraries
-import util
-import eclib
-import ed_msg
-
 # Local imports
 from PyTools.Common.BaseShelfWindow import BaseShelfWindow
 from PyTools.Debugger.ThreadsList import ThreadsList

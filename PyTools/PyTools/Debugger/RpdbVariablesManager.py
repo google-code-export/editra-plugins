@@ -16,9 +16,6 @@ __revision__ = "$Revision$"
 # Imports
 import wx
 
-# Editra Libraries
-import ed_msg
-
 # Local Imports
 import rpdb2
 
