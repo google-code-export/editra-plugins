@@ -115,10 +115,10 @@ class DebugShelfWindow(BaseShelfWindow, DebugMessageHandler):
         RPDBDEBUGGER.abort()
 
     def OnStepIn(self, event):
-        pass #TODO: add Step in
+        RPDBDEBUGGER.do_step()
 
     def OnStepOver(self, event):
-        pass #TODO: Add Step Over
+        RPDBDEBUGGER.do_next()
 
     def OnStepOut(self, event):
         pass #TODO: Add Step Out
