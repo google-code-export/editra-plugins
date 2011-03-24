@@ -20,12 +20,7 @@ from wx.stc import STC_INDIC_PLAIN
 import copy
 
 # Editra Libraries
-import util
-import eclib
-import ed_msg
 from profiler import Profile_Get, Profile_Set
-from syntax import syntax
-import syntax.synglob as synglob
 
 # Local imports
 from PyTools.Common import ToolConfig

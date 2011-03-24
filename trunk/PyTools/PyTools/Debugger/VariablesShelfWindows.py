@@ -17,11 +17,6 @@ __revision__ = "$Revision $"
 import threading
 import wx
 
-# Editra Libraries
-import util
-import eclib
-import ed_msg
-
 # Local imports
 from PyTools.Common.PyToolsUtils import PyToolsUtils
 from PyTools.Common.PyToolsUtils import RunProcInThread

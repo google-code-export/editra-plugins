@@ -21,19 +21,15 @@ from wx.stc import STC_INDIC_PLAIN
 
 # Editra Libraries
 import util
-import eclib
-import ed_msg
 from profiler import Profile_Get, Profile_Set
-from syntax import syntax
-import syntax.synglob as synglob
 
 # Local imports
 from PyTools.Common import ToolConfig
 from PyTools.Common.PyToolsUtils import PyToolsUtils
 from PyTools.Common.BaseShelfWindow import BaseShelfWindow
-from PyTools.Debugger.BreakpointsMessageHandler import BreakpointsMessageHandler
 from PyTools.Debugger.BreakPointsList import BreakPointsList
 from PyTools.Debugger import RPDBDEBUGGER
+from PyTools.Debugger import MESSAGEHANDLER
 
 # Globals
 _ = wx.GetTranslation
@@ -41,11 +37,10 @@ _ = wx.GetTranslation
 ID_TOGGLE_BREAKPOINT = wx.NewId()
 #-----------------------------------------------------------------------------#
 
-class BreakPointsShelfWindow(BaseShelfWindow, BreakpointsMessageHandler):
+class BreakPointsShelfWindow(BaseShelfWindow):
     def __init__(self, parent):
         """Initialize the window"""
-        BaseShelfWindow.__init__(self, parent)
-        BreakpointsMessageHandler.__init__(self)
+        super(BreakPointsShelfWindow, self).__init__(parent)
         ctrlbar = self.setup(BreakPointsList(self))
         ctrlbar.AddStretchSpacer()
         self.layout("Clear", self.OnClear)
@@ -59,20 +54,17 @@ class BreakPointsShelfWindow(BaseShelfWindow, BreakpointsMessageHandler):
         if editor:
             RPDBDEBUGGER.restorestepmarker(editor)
         RPDBDEBUGGER.install_breakpoints()
-
-        # Editra Message Handlers
-        ed_msg.Subscribe(self.OnContextMenu, ed_msg.EDMSG_UI_STC_CONTEXT_MENU)        
+        MESSAGEHANDLER.AddMenuItem(0, ID_TOGGLE_BREAKPOINT, _("Toggle Breakpoint"), self.toggle_breakpoint)
 
     def Unsubscription(self):
         editor = wx.GetApp().GetCurrentBuffer()
         if editor:
             editor.DeleteAllBreakpoints()
             RPDBDEBUGGER.restorestepmarker(editor)
-        ed_msg.Unsubscribe(self.OnContextMenu)
         RPDBDEBUGGER.breakpoints = {}
         RPDBDEBUGGER.saveandrestorebreakpoints = lambda:None
         RPDBDEBUGGER.install_breakpoints()
-        BreakpointsMessageHandler.Unsubscription(self)
+        MESSAGEHANDLER.DeleteMenuItem(0)
 
     def DeleteBreakpoint(self, filepath, lineno):
         if not os.path.isfile(filepath):
@@ -118,29 +110,16 @@ class BreakPointsShelfWindow(BaseShelfWindow, BreakpointsMessageHandler):
         config[ToolConfig.TLC_BREAKPOINTS] = copy.deepcopy(RPDBDEBUGGER.breakpoints)
         Profile_Set(ToolConfig.PYTOOL_CONFIG, config)
     
-    def OnContextMenu(self, msg):
-        editor = wx.GetApp().GetCurrentBuffer()
-        if editor:
-            langid = getattr(editor, 'GetLangId', lambda: -1)()
-            ispython = langid == synglob.ID_LANG_PYTHON
-            if ispython:
-                contextmenumanager = msg.GetData()
-                menu = contextmenumanager.GetMenu()
-                menu.Append(ID_TOGGLE_BREAKPOINT, _("Toggle Breakpoint"))
-                contextmenumanager.AddHandler(ID_TOGGLE_BREAKPOINT, self.toggle_breakpoint)
-
-    def toggle_breakpoint(self, editor, evt):
+    def toggle_breakpoint(self, editor, event):
         filepath = os.path.normcase(editor.GetFileName())
-        editorlineno = editor.GetCurrentLineNum()
-        lineno = editorlineno + 1
-        if not self.DeleteBreakpoint(filepath, lineno):
-            self.SetBreakpoint(filepath, lineno, "", True)
+        if not self.DeleteBreakpoint(filepath, MESSAGEHANDLER.contextlineno):
+            self.SetBreakpoint(filepath, MESSAGEHANDLER.contextlineno, "", True)
         self.RestoreBreakPoints()
 
     def SaveAndRestoreBreakpoints(self):
         self.SaveBreakpoints()
         self.RestoreBreakPoints()
     
-    def OnClear(self, evt):
+    def OnClear(self, event):
         RPDBDEBUGGER.breakpoints = {}
         self.SaveAndRestoreBreakpoints()

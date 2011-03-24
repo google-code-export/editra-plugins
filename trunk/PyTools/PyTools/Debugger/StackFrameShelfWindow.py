@@ -16,10 +16,6 @@ __revision__ = "$Revision $"
 # Imports
 import wx
 
-# Editra Libraries
-import eclib
-import ed_msg
-
 # Local imports
 from PyTools.Common.BaseShelfWindow import BaseShelfWindow
 from PyTools.Debugger.StackFrameList import StackFrameList
