@@ -73,7 +73,7 @@ def GetPythonExecutablePath(info):
 class ToolConfigDialog(eclib.ECBaseDlg):
     """Standalone configuraton dialog"""
     def __init__(self, parent):
-        super(ToolConfigDialog, self).__init__(parent, title=_("PyTools Config"), 
+        super(ToolConfigDialog, self).__init__(parent, title=_("PyTools Config"),
                                                style=wx.DEFAULT_DIALOG_STYLE|wx.RESIZE_BORDER)
 
         # Setup
@@ -87,7 +87,7 @@ class ToolConfigPanel(wx.Panel):
         super(ToolConfigPanel, self).__init__(parent)
 
         sizer = wx.BoxSizer(wx.VERTICAL)
-        sizer.Add(ConfigBook(self), 1, wx.EXPAND)
+        sizer.Add(ConfigBook(self), 1, wx.EXPAND|wx.ALL, 5)
         self.SetSizer(sizer)
 
 #-----------------------------------------------------------------------------#
@@ -270,20 +270,20 @@ class DebugConfigPanel(wx.Panel):
         forkmode = config.get(TLC_FORK_MODE, True)
         self._forkchildcb.SetValue(forkmode)
         RPDBDEBUGGER.set_fork_mode(forkmode, autofork)
-        
-        modebox = wx.StaticBox(self, label=_("Source Encoding for Execute/Evaluate"))
-        self._execevalencodingsz = wx.StaticBoxSizer(modebox, wx.VERTICAL)
-        self._execevalencodingt = eclib.CommandEntryBase(self, size=(256,-1),
-                                                         style=wx.TE_PROCESS_ENTER|wx.WANTS_CHARS)
+
+        self._enclbl = wx.StaticText(self, label=_("Source Encoding:"))
+        encodings = eclib.GetAllEncodings()
+        encodings.insert(0, "auto")
+        self._encch = wx.Choice(self, wx.ID_ANY, choices=encodings)
+        self._encch.SetToolTipString(_("Source Encoding for Execute/Evaluate"))
         encoding = config.get(TLC_EXECEVALENCODING, "auto")
-        self._execevalencodingt.SetValue(encoding)
-        self._execevalencodingt.SetDescriptiveText(_("Source Encoding for Execute/Evaluate"))
+        self._encch.SetStringSelection(encoding)
 
         self._esccb = wx.CheckBox(self, label=_("Escape Non-Ascii Characters for Execute/Evaluate"))
         escaping = config.get(TLC_EXECEVALESCAPING, True)
         self._esccb.SetValue(escaping)
         RPDBDEBUGGER.set_encoding(encoding, escaping)
-        
+
         # Layout
         self.__DoLayout()
 
@@ -292,8 +292,7 @@ class DebugConfigPanel(wx.Panel):
         self.Bind(wx.EVT_CHECKBOX, self.OnSynchronicityCheckBox, self._synccb)
         self.Bind(wx.EVT_CHECKBOX, self.OnForkCheckBox, self._forkcb)
         self.Bind(wx.EVT_RADIOBUTTON, self.OnForkCheckBox, self._forkchildcb)
-        self.Bind(wx.EVT_SEARCHCTRL_SEARCH_BTN, self.OnFinishEdit, self._execevalencodingt)
-        self.Bind(wx.EVT_SEARCHCTRL_CANCEL_BTN, self.OnCancelEdit, self._execevalencodingt)
+        self.Bind(wx.EVT_CHOICE, self.OnEncoding, self._encch)
         self.Bind(wx.EVT_CHECKBOX, self.OnEscapingCheckBox, self._esccb)
 
     def __DoLayout(self):
@@ -309,8 +308,11 @@ class DebugConfigPanel(wx.Panel):
         # Fork mode configuration
         sizer.Add(self._forkchildcb, 0, wx.ALL|wx.EXPAND, 5)
         # Execute/evaluate encoding configuration
-        self._execevalencodingsz.Add(self._execevalencodingt, 0, wx.ALL, 5)
-        sizer.Add(self._execevalencodingsz, 0, wx.ALL|wx.EXPAND, 5)
+        encsz = wx.BoxSizer(wx.HORIZONTAL)
+        encsz.Add(self._enclbl, 0, wx.ALIGN_CENTER_VERTICAL)
+        encsz.Add((3,3),0)
+        encsz.Add(self._encch, 0, wx.EXPAND)
+        sizer.Add(encsz, 0, wx.ALL|wx.EXPAND, 5)
         # Execute/evaluate escaping configuration
         sizer.Add(self._esccb, 0, wx.ALL|wx.EXPAND, 5)
 
@@ -318,8 +320,8 @@ class DebugConfigPanel(wx.Panel):
 
     def OnTrapExceptionsCheckBox(self, evt):
         config = Profile_Get(PYTOOL_CONFIG, default=dict())
-        if evt.GetEventObject() is self._traprb:
-            trap = self._traprb.GetValue()
+        if evt.GetEventObject() is self._trapcb:
+            trap = self._trapcb.GetValue()
             config[TLC_TRAP_EXCEPTIONS] = trap
             RPDBDEBUGGER.set_trap_unhandled_exceptions(trap)
         else:
@@ -356,11 +358,11 @@ class DebugConfigPanel(wx.Panel):
 
         Profile_Set(PYTOOL_CONFIG, config)
 
-    def OnFinishEdit(self, evt):
+    def OnEncoding(self, evt):
         evt_obj = evt.GetEventObject()
         config = Profile_Get(PYTOOL_CONFIG, default=dict())
-        if evt_obj == self._execevalencodingt:
-            encoding = self._execevalencodingt.GetValue()
+        if evt_obj is self._encch:
+            encoding = self._encch.GetStringSelection()
             config[TLC_EXECEVALENCODING] = encoding
             escaping = self._esccb.GetValue()
             config[TLC_EXECEVALESCAPING] = escaping
@@ -370,28 +372,12 @@ class DebugConfigPanel(wx.Panel):
             return
 
         Profile_Set(PYTOOL_CONFIG, config)
-            
-    def OnCancelEdit(self, evt):
-        evt_obj = evt.GetEventObject()
-        config = Profile_Get(PYTOOL_CONFIG, default=dict())
-        if evt_obj == self._execevalencodingt:
-            encoding = "auto"
-            self._execevalencodingt.SetValue(encoding)
-            config[TLC_EXECEVALENCODING] = encoding
-            escaping = self._esccb.GetValue()
-            config[TLC_EXECEVALESCAPING] = escaping
-            RPDBDEBUGGER.set_encoding(encoding, escaping)
-        else:
-            evt.Skip()
-            return
 
-        Profile_Set(PYTOOL_CONFIG, config)
-        
     def OnEscapingCheckBox(self, evt):
         evt_obj = evt.GetEventObject()
         config = Profile_Get(PYTOOL_CONFIG, default=dict())
         if evt_obj is self._esccb:
-            encoding = self._execevalencodingt.GetValue()
+            encoding = self._encch.GetStringSelection()
             config[TLC_EXECEVALENCODING] = encoding
             escaping = self._esccb.GetValue()
             config[TLC_EXECEVALESCAPING] = escaping
