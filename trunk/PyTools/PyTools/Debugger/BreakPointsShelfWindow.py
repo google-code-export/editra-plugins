@@ -54,7 +54,7 @@ class BreakPointsShelfWindow(BaseShelfWindow):
         if editor:
             RPDBDEBUGGER.restorestepmarker(editor)
         RPDBDEBUGGER.install_breakpoints()
-        MESSAGEHANDLER.AddMenuItem(0, ID_TOGGLE_BREAKPOINT, _("Toggle Breakpoint"), self.toggle_breakpoint)
+        MESSAGEHANDLER.AddMenuItem(0, False, ID_TOGGLE_BREAKPOINT, _("Toggle Breakpoint"), self.toggle_breakpoint)
 
     def Unsubscription(self):
         editor = wx.GetApp().GetCurrentBuffer()

@@ -6,7 +6,7 @@
 # License: wxWindows License
 ###############################################################################
 
-"""Editra Shelf display window"""
+"""Editra global variables"""
 
 __author__ = "Mike Rans"
 __svnid__ = "$Id$"

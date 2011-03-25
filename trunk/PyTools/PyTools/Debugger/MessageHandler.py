@@ -44,8 +44,8 @@ class MessageHandler(object):
         self.editor = None
         self.editorlineno = None
         self.contextlineno = None
-        self.contextmenus = {1:(ID_ON_RUNTOLINE, _("Run To Line"), self.OnRunToLine), 
-                             2:(ID_ON_JUMP, _("Jump"), self.OnJump)}
+        self.contextmenus = {1:(True, ID_ON_RUNTOLINE, _("Run To Line"), self.OnRunToLine), 
+                             2:(True, ID_ON_JUMP, _("Jump"), self.OnJump)}
         self.debugeditorupdate = lambda x,y,z:None
         rpdbdebugger.conflictingmodules = self.ConflictingModules
         rpdbdebugger.clearstepmarker = self.ClearStepMarker
@@ -115,8 +115,8 @@ class MessageHandler(object):
         editor = PyToolsUtils.GetEditorForFile(self.mainwindow, filename)
         self.UpdateForEditor(editor)
 
-    def AddMenuItem(self, pos, wxid, menutitle, menufncallback):
-        self.contextmenus[pos] = (wxid, menutitle, menufncallback)
+    def AddMenuItem(self, pos, reqattach, wxid, menutitle, menufncallback):
+        self.contextmenus[pos] = (reqattach, wxid, menutitle, menufncallback)
     
     def DeleteMenuItem(self, pos):
         del self.contextmenus[pos]
@@ -136,7 +136,9 @@ class MessageHandler(object):
         self.contextlineno = editor.LineFromPosition(contextmenumanager.GetPosition()) + 1
         menu.AppendSeparator()
         for pos in sorted(self.contextmenus.keys()):
-            wxid, menutitle, menufncallback = self.contextmenus[pos]
+            reqattach, wxid, menutitle, menufncallback = self.contextmenus[pos]
+            if reqattach and not self.rpdbdebugger.attached:
+                continue
             menu.Append(wxid, menutitle)
             contextmenumanager.AddHandler(wxid, menufncallback)
 
