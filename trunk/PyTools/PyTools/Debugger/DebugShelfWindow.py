@@ -239,6 +239,16 @@ class DebugShelfWindow(BaseShelfWindow):
         self._curfile = filename
 
         config = Profile_Get(ToolConfig.PYTOOL_CONFIG, default=dict())
+        trap = config.get(ToolConfig.TLC_TRAP_EXCEPTIONS, True)
+        RPDBDEBUGGER.set_trap_unhandled_exceptions(trap)
+        synchronicity = config.get(ToolConfig.TLC_SYNCHRONICITY, True)
+        RPDBDEBUGGER.set_synchronicity(synchronicity)
+        autofork = config.get(ToolConfig.TLC_AUTO_FORK, True)
+        forkmode = config.get(ToolConfig.TLC_FORK_MODE, False)
+        RPDBDEBUGGER.set_fork_mode(forkmode, autofork)
+        encoding = config.get(ToolConfig.TLC_EXECEVALENCODING, "auto")
+        escaping = config.get(ToolConfig.TLC_EXECEVALESCAPING, True)
+        RPDBDEBUGGER.set_encoding(encoding, escaping)
         mode = config.get(ToolConfig.TLC_LINT_AUTORUN, False)
         if mode:
             config[ToolConfig.TLC_LINT_AUTORUN] = False
