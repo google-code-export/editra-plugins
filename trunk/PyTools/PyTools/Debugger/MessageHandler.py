@@ -51,13 +51,17 @@ class MessageHandler(object):
         rpdbdebugger.clearstepmarker = self.ClearStepMarker
         rpdbdebugger.setstepmarker = self.SetStepMarker
         rpdbdebugger.restorestepmarker = self.RestoreStepMarker
-        self.mainwindow = wx.GetApp().GetTopWindow()
         
         # Editra Message Handlers
         ed_msg.Subscribe(self.OnFileLoad, ed_msg.EDMSG_FILE_OPENED)
         ed_msg.Subscribe(self.OnFileSave, ed_msg.EDMSG_FILE_SAVED)
         ed_msg.Subscribe(self.OnPageChanged, ed_msg.EDMSG_UI_NB_CHANGED)        
         ed_msg.Subscribe(self.OnContextMenu, ed_msg.EDMSG_UI_STC_CONTEXT_MENU)
+
+    @property
+    def mainwindow(self):
+        mw = wx.GetApp().GetActiveWindow() # Gets main window if one created
+        return mw
 
     def ConflictingModules(self, moduleslist):
         dlg = wx.MessageDialog(self, 
