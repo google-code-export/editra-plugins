@@ -90,7 +90,7 @@ class DebugShelfWindow(BaseShelfWindow):
 
         # Attributes
         RPDBDEBUGGER.mainwindow = self._mw
-        MESSAGEHANDLER.mainwindow = self._mw
+#        MESSAGEHANDLER.mainwindow = self._mw # TODO:
         MESSAGEHANDLER.debugeditorupdate = self.OnEditorUpdate
         self._debugger = None
         self._debugrun = False
