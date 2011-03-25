@@ -90,6 +90,7 @@ class DebugShelfWindow(BaseShelfWindow):
 
         # Attributes
         RPDBDEBUGGER.mainwindow = self._mw
+        RPDBDEBUGGER.debugbuttonsupdate = self.OnButtonsUpdate
 #        MESSAGEHANDLER.mainwindow = self._mw # TODO:
         MESSAGEHANDLER.debugeditorupdate = self.OnEditorUpdate
         self._debugger = None
@@ -109,6 +110,7 @@ class DebugShelfWindow(BaseShelfWindow):
     def Unsubscription(self):
         if RPDBDEBUGGER.attached:
             RPDBDEBUGGER.do_detach()
+        RPDBDEBUGGER.debugbuttonsupdate = lambda:None
         MESSAGEHANDLER.debugeditorupdate = lambda x,y,z:None
 
     def OnCancelSearch(self, event):
@@ -121,15 +123,29 @@ class DebugShelfWindow(BaseShelfWindow):
         self.combocurrent_selection = self.combo.GetSelection()
         self.search.SetValue(self.combotexts[self.combocurrent_selection])
 
+    def _onbuttonsupdate(self, ispython):
+        attached = RPDBDEBUGGER.attached
+        self.gobtn.Enable(attached or ispython)
+        self.abortbtn.Enable(attached)
+        self.stepinbtn.Enable(attached)
+        self.stepovbtn.Enable(attached)
+        self.stepoutbtn.Enable(attached)
+        self.breakbtn.Enable(attached)
+
+    def OnButtonsUpdate(self):
+        editor = wx.GetApp().GetCurrentBuffer()
+        if not editor:
+            self._onbuttonsupdate(False)
+            return
+        langid = getattr(editor, 'GetLangId', lambda: -1)()
+        ispython = langid == synglob.ID_LANG_PYTHON
+        self._onbuttonsupdate(ispython)
+        
     def OnEditorUpdate(self, ispython, filename, force):
-        self.gobtn.Enable(ispython)
-        self.abortbtn.Enable(ispython)
-        self.stepinbtn.Enable(ispython)
-        self.stepovbtn.Enable(ispython)
-        self.stepoutbtn.Enable(ispython)
-        self.breakbtn.Enable(ispython)
-        self.combo.Enable(ispython)
-        self.search.Enable(ispython)
+        self._onbuttonsupdate(ispython)
+        enabledflag = ispython and not RPDBDEBUGGER.attached
+        self.combo.Enable(enabledflag)
+        self.search.Enable(enabledflag)
         self.combotexts[self.combocurrent_selection] = self.search.GetValue()
         config = Profile_Get(ToolConfig.PYTOOL_CONFIG, default=dict())
         if MESSAGEHANDLER._prevfile:
@@ -241,6 +257,7 @@ class DebugShelfWindow(BaseShelfWindow):
         if self._debugger:
             util.Log("[PyDebug][info] fileName %s" % (self._curfile))
             ed_msg.PostMessage(ed_msg.EDMSG_PROGRESS_SHOW, (self._mw.GetId(), True))
+            ed_msg.PostMessage(ed_msg.EDMSG_PROGRESS_STATE, (self._mw.GetId(), -1, -1))
             self._debugger.Debug()
 
     def OnAbort(self, event):

@@ -18,6 +18,7 @@ from time import sleep
 # Editra Libraries
 import util
 from profiler import Profile_Get
+import ed_msg
 
 # Local Imports
 import rpdb2
@@ -69,6 +70,7 @@ class RpdbDebugger(object):
         # debuggee shelf
         self.debuggeroutput = lambda x:None
         self.abort = lambda:None
+        self.debugbuttonsupdate = lambda:None
         # breakpoints shelf
         self.saveandrestorebreakpoints = lambda:None
         # stackframe shelf
@@ -138,6 +140,7 @@ class RpdbDebugger(object):
                 except Exception, ex:
                     tries = tries + 1
             self.pid = None
+            ed_msg.PostMessage(ed_msg.EDMSG_PROGRESS_SHOW, (self.mainwindow.GetId(), False))
             if ex:
                 err = rpdb2.g_error_mapping.get(type(ex), repr(ex))
                 err = "Failed to attach. Error: %s" % err

@@ -9,8 +9,8 @@
 """Editra Shelf display window"""
 
 __author__ = "Mike Rans"
-__svnid__ = "$Id $"
-__revision__ = "$Revision $"
+__svnid__ = "$Id$"
+__revision__ = "$Revision$"
 
 #-----------------------------------------------------------------------------#
 # Imports
@@ -33,8 +33,6 @@ from PyTools.ModuleFinder.PythonModuleFinder import PythonModuleFinder
 
 # Globals
 _ = wx.GetTranslation
-
-ID_COPY_MODULEPATH = wx.NewId()
 #-----------------------------------------------------------------------------#
 
 class FindShelfWindow(BaseShelfWindow):
@@ -56,30 +54,6 @@ class FindShelfWindow(BaseShelfWindow):
 
         # Attributes
         self._finder = None
-
-        # Editra Message Handlers
-        ed_msg.Subscribe(self.OnTabMenu, ed_msg.EDMSG_UI_NB_TABMENU)
-
-    def Unsubscription(self):
-        ed_msg.Unsubscribe(self.OnTabMenu)
-
-    def OnTabMenu(self, msg):
-        editor = wx.GetApp().GetCurrentBuffer()
-        if editor:
-            langid = getattr(editor, 'GetLangId', lambda: -1)()
-            ispython = langid == synglob.ID_LANG_PYTHON
-            if ispython:
-                contextmenumanager = msg.GetData()
-                menu = contextmenumanager.GetMenu()
-                menu.Append(ID_COPY_MODULEPATH, _("Copy Module Path"))
-                contextmenumanager.AddHandler(ID_COPY_MODULEPATH, self.copy_module_path)
-
-    def copy_module_path(self, editor, evt):
-        path = os.path.normcase(editor.GetFileName())
-        if path is not None:
-            childPath, _ = PyToolsUtils.get_packageroot(path)
-            modulepath = PyToolsUtils.get_modulepath(childPath)
-            util.SetClipboardText(modulepath)
 
     def _onmodulefind(self, editor, moduletofind):
         # With the text control (ed_stc.EditraStc) this will return the full

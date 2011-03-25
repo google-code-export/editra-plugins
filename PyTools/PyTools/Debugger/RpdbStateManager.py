@@ -17,9 +17,6 @@ __revision__ = "$Revision$"
 from time import sleep
 import wx
 
-# Editra Libraries
-import ed_msg
-
 # Local Imports
 import rpdb2
 from PyTools.Common.PyToolsUtils import RunProcInThread
@@ -62,13 +59,11 @@ class RpdbStateManager(object):
             self.rpdb2debugger.analyzing = False
             if self.rpdb2debugger.breakpoints_installed:
                 # clear all debugging stuff as we have finished
-                ed_msg.PostMessage(ed_msg.EDMSG_PROGRESS_SHOW, (self.rpdb2debugger.mainwindow.GetId(), False))
                 self.rpdb2debugger.clear_all()
                 worker = RunProcInThread("Detach", None, self.finalmessage)
                 worker.start()
         elif (old_state in [rpdb2.STATE_DETACHED, rpdb2.STATE_DETACHING, rpdb2.STATE_SPAWNING, rpdb2.STATE_ATTACHING]) and (self.m_state not in [rpdb2.STATE_DETACHED, rpdb2.STATE_DETACHING, rpdb2.STATE_SPAWNING, rpdb2.STATE_ATTACHING]):
             self.rpdb2debugger.attached = True
-            ed_msg.PostMessage(ed_msg.EDMSG_PROGRESS_STATE, (self.rpdb2debugger.mainwindow.GetId(), -1, -1))
 
         if self.m_state == rpdb2.STATE_BROKEN:
             # we hit a breakpoint
@@ -87,3 +82,4 @@ class RpdbStateManager(object):
             self.rpdb2debugger.analyzing = False
             pass
         self.rpdb2debugger.updateanalyze()
+        self.rpdb2debugger.debugbuttonsupdate()
