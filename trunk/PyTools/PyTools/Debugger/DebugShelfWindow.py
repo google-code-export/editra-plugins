@@ -66,7 +66,7 @@ class DebugShelfWindow(BaseShelfWindow):
         self.stepovbtn.ToolTip = wx.ToolTip(_("Step Over"))
         self.stepoutbtn = self.AddPlateButton(u"", Images.StepOut.Bitmap, wx.ALIGN_LEFT)
         self.stepoutbtn.ToolTip = wx.ToolTip(_("Step Out"))
-        self.breakbtn = self.AddPlateButton(u"", Images.Go.Bitmap, wx.ALIGN_LEFT)
+        self.breakbtn = self.AddPlateButton(u"", Images.Break.Bitmap, wx.ALIGN_LEFT)
         self.breakbtn.ToolTip = wx.ToolTip(_("Break"))
         ctrlbar.AddStretchSpacer()
         self.choices = ["Program Args", "Debugger Args"]
