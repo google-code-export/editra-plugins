@@ -264,10 +264,10 @@ class DebugConfigPanel(wx.Panel):
 
         self._forkcb = wx.CheckBox(self, label=_("Pause before fork"))
         autofork = config.get(TLC_AUTO_FORK, True)
-        self._forkcb.SetValue(autofork)
+        self._forkcb.SetValue(not autofork)
 
         self._forkchildcb = wx.CheckBox(self, label=_("Fork into Child"))
-        forkmode = config.get(TLC_FORK_MODE, True)
+        forkmode = config.get(TLC_FORK_MODE, False)
         self._forkchildcb.SetValue(forkmode)
         RPDBDEBUGGER.set_fork_mode(forkmode, autofork)
 
@@ -347,7 +347,7 @@ class DebugConfigPanel(wx.Panel):
         evt_obj = evt.GetEventObject()
         config = Profile_Get(PYTOOL_CONFIG, default=dict())
         if evt_obj in (self._forkcb, self._forkchildcb):
-            autofork = self._forkcb.GetValue()
+            autofork = not self._forkcb.GetValue()
             config[TLC_AUTO_FORK] = autofork
             forkmode = self._forkchildcb.GetValue()
             config[TLC_FORK_MODE] = forkmode
