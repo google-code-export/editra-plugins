@@ -126,6 +126,7 @@ class DebugShelfWindow(BaseShelfWindow):
         self.search.SetValue(self.combotexts[self.combocurrent_selection])
 
     def DisableButtons(self):
+        self.gobtn.SetBitmap(Images.Go.Bitmap)
         self.gobtn.Enable(False)
         self.abortbtn.Enable(False)
         self.stepinbtn.Enable(False)
@@ -141,6 +142,10 @@ class DebugShelfWindow(BaseShelfWindow):
         attachedandbroken = attached and broken
         ispythonandnotattached = ispython and not attached
         self.gobtn.Enable(attachedandbroken or ispythonandnotattached)
+        if attached:
+            self.gobtn.SetBitmap(Images.GoRunning.Bitmap)
+        else:
+            self.gobtn.SetBitmap(Images.Go.Bitmap)
         self.abortbtn.Enable(attached)
         self.stepinbtn.Enable(attachedandbroken)
         self.stepovbtn.Enable(attachedandbroken)
@@ -210,7 +215,7 @@ class DebugShelfWindow(BaseShelfWindow):
         if fileext == u"":
             return
 
-        filetype = syntax.GetIdFromExt(fileext[1:]) # pass in file extension
+        filetype = editor.GetLangId() #syntax.GetIdFromExt(fileext[1:]) # pass in file extension
         directoryvariables = self.get_directory_variables(filetype)
         if directoryvariables:
             vardict = directoryvariables.read_dirvarfile(filename)
@@ -230,14 +235,16 @@ class DebugShelfWindow(BaseShelfWindow):
             wx.CallAfter(self._ondebug, editor)
 
     def get_debugger(self, filetype, vardict, filename):
+        dbgr = None
         try:
             programargs = self.combotexts[0]
             debuggerargs = self.combotexts[1]
-            return self.__debuggers[filetype](vardict, debuggerargs, 
-                programargs, filename, self._listCtrl)
+            dbgr = self.__debuggers[filetype](vardict, debuggerargs, 
+                                              programargs, filename, 
+                                              self._listCtrl)
         except Exception:
             pass
-        return None
+        return dbgr
         
     def restorepylint_autorun(self):
         config = Profile_Get(ToolConfig.PYTOOL_CONFIG, default=dict())
@@ -267,7 +274,7 @@ class DebugShelfWindow(BaseShelfWindow):
         if mode:
             config[ToolConfig.TLC_LINT_AUTORUN] = False
             Profile_Set(ToolConfig.PYTOOL_CONFIG, config)
-            self._listCtrl.AddText("Disabling Pylint Autorun during Debug.")
+            self._listCtrl.AddText(_("Disabling Pylint Autorun during Debug."))
             self._listCtrl.restoreautorun = self.restorepylint_autorun
         else:
             self._listCtrl.restoreautorun = lambda:None
