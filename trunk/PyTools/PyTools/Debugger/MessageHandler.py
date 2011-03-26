@@ -122,25 +122,27 @@ class MessageHandler(object):
         del self.contextmenus[pos]
     
     def OnContextMenu(self, msg):
-        if not self.contextmenus:
+        """Customize the editor buffers context menu"""
+        if not len(self.contextmenus):
             return
-        editor = wx.GetApp().GetCurrentBuffer()
+        ctxmgr = msg.GetData()
+        editor = ctxmgr.GetUserData('buffer')
         if not editor:
             return
-        langid = getattr(editor, 'GetLangId', lambda: -1)()
-        ispython = langid == synglob.ID_LANG_PYTHON
-        if not ispython:
+        langid = editor.GetLangId()
+        if langid != synglob.ID_LANG_PYTHON:
             return
-        contextmenumanager = msg.GetData()
-        menu = contextmenumanager.GetMenu()
-        self.contextlineno = editor.LineFromPosition(contextmenumanager.GetPosition()) + 1
+
+        # Add our custom options to the menu
+        menu = ctxmgr.GetMenu()
+        self.contextlineno = editor.LineFromPosition(ctxmgr.GetPosition()) + 1
         menu.AppendSeparator()
         for pos in sorted(self.contextmenus.keys()):
             reqattach, wxid, menutitle, menufncallback = self.contextmenus[pos]
             if reqattach and not self.rpdbdebugger.attached:
                 continue
             menu.Append(wxid, menutitle)
-            contextmenumanager.AddHandler(wxid, menufncallback)
+            ctxmgr.AddHandler(wxid, menufncallback)
 
     def OnRunToLine(self, editor, event):
         self.rpdbdebugger.run_toline(editor.GetFileName(), self.contextlineno)
