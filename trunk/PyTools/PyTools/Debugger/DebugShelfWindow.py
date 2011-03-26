@@ -123,6 +123,16 @@ class DebugShelfWindow(BaseShelfWindow):
         self.combocurrent_selection = self.combo.GetSelection()
         self.search.SetValue(self.combotexts[self.combocurrent_selection])
 
+    def setbuttonsdebug(self):
+        self.gobtn.Enable(True)
+        self.abortbtn.Enable(True)
+        self.stepinbtn.Enable(True)
+        self.stepovbtn.Enable(True)
+        self.stepoutbtn.Enable(True)
+        self.breakbtn.Enable(True)
+        self.combo.Enable(False)
+        self.search.Enable(False)
+    
     def _onbuttonsupdate(self, ispython):
         attached = RPDBDEBUGGER.attached
         self.gobtn.Enable(attached or ispython)
@@ -131,6 +141,9 @@ class DebugShelfWindow(BaseShelfWindow):
         self.stepovbtn.Enable(attached)
         self.stepoutbtn.Enable(attached)
         self.breakbtn.Enable(attached)
+        enabledflag = ispython and not attached
+        self.combo.Enable(enabledflag)
+        self.search.Enable(enabledflag)
 
     def OnButtonsUpdate(self):
         editor = wx.GetApp().GetCurrentBuffer()
@@ -143,9 +156,6 @@ class DebugShelfWindow(BaseShelfWindow):
         
     def OnEditorUpdate(self, ispython, filename, force):
         self._onbuttonsupdate(ispython)
-        enabledflag = ispython and not RPDBDEBUGGER.attached
-        self.combo.Enable(enabledflag)
-        self.search.Enable(enabledflag)
         self.combotexts[self.combocurrent_selection] = self.search.GetValue()
         config = Profile_Get(ToolConfig.PYTOOL_CONFIG, default=dict())
         if MESSAGEHANDLER._prevfile:
@@ -268,6 +278,7 @@ class DebugShelfWindow(BaseShelfWindow):
             util.Log("[PyDebug][info] fileName %s" % (self._curfile))
             ed_msg.PostMessage(ed_msg.EDMSG_PROGRESS_SHOW, (self._mw.GetId(), True))
             ed_msg.PostMessage(ed_msg.EDMSG_PROGRESS_STATE, (self._mw.GetId(), -1, -1))
+            self.setbuttonsdebug()
             self._debugger.Debug()
 
     def OnAbort(self, event):
