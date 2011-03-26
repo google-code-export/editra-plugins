@@ -26,6 +26,10 @@ class AsyncProcessCreator(eclib.ProcessThreadBase, ProcessCreator):
     def __init__(self, parent, info, parentPath, cmdline, pythonpath=None):
         eclib.ProcessThreadBase.__init__(self, parent)
         ProcessCreator.__init__(self, info, parentPath, cmdline, pythonpath)
+        self.debuggeewindow = parent
 
     def DoPopen(self):
         return self.createprocess(STDOUT)
+        
+    def AddText(self, text):
+        self.debuggeewindow.AddText(text)

@@ -91,6 +91,7 @@ class DebugShelfWindow(BaseShelfWindow):
         # Attributes
         RPDBDEBUGGER.mainwindow = self._mw
         RPDBDEBUGGER.debugbuttonsupdate = self.OnButtonsUpdate
+        RPDBDEBUGGER.disabledebugbuttons = self.DisableButtons
 #        MESSAGEHANDLER.mainwindow = self._mw # TODO:
         MESSAGEHANDLER.debugeditorupdate = self.OnEditorUpdate
         self._debugger = None
@@ -111,6 +112,7 @@ class DebugShelfWindow(BaseShelfWindow):
         if RPDBDEBUGGER.attached:
             RPDBDEBUGGER.do_detach()
         RPDBDEBUGGER.debugbuttonsupdate = lambda:None
+        RPDBDEBUGGER.disabledebugbuttons = lambda:None
         MESSAGEHANDLER.debugeditorupdate = lambda x,y,z:None
 
     def OnCancelSearch(self, event):
@@ -123,27 +125,29 @@ class DebugShelfWindow(BaseShelfWindow):
         self.combocurrent_selection = self.combo.GetSelection()
         self.search.SetValue(self.combotexts[self.combocurrent_selection])
 
-    def setbuttonsdebug(self):
-        self.gobtn.Enable(True)
-        self.abortbtn.Enable(True)
-        self.stepinbtn.Enable(True)
-        self.stepovbtn.Enable(True)
-        self.stepoutbtn.Enable(True)
-        self.breakbtn.Enable(True)
+    def DisableButtons(self):
+        self.gobtn.Enable(False)
+        self.abortbtn.Enable(False)
+        self.stepinbtn.Enable(False)
+        self.stepovbtn.Enable(False)
+        self.stepoutbtn.Enable(False)
+        self.breakbtn.Enable(False)
         self.combo.Enable(False)
         self.search.Enable(False)
     
     def _onbuttonsupdate(self, ispython):
         attached = RPDBDEBUGGER.attached
-        self.gobtn.Enable(attached or ispython)
+        broken = RPDBDEBUGGER.broken
+        attachedandbroken = attached and broken
+        ispythonandnotattached = ispython and not attached
+        self.gobtn.Enable(attachedandbroken or ispythonandnotattached)
         self.abortbtn.Enable(attached)
-        self.stepinbtn.Enable(attached)
-        self.stepovbtn.Enable(attached)
-        self.stepoutbtn.Enable(attached)
-        self.breakbtn.Enable(attached)
-        enabledflag = ispython and not attached
-        self.combo.Enable(enabledflag)
-        self.search.Enable(enabledflag)
+        self.stepinbtn.Enable(attachedandbroken)
+        self.stepovbtn.Enable(attachedandbroken)
+        self.stepoutbtn.Enable(attachedandbroken)
+        self.breakbtn.Enable(attached and not broken and not RPDBDEBUGGER.analyzing)
+        self.combo.Enable(ispythonandnotattached)
+        self.search.Enable(ispythonandnotattached)
 
     def OnButtonsUpdate(self):
         editor = wx.GetApp().GetCurrentBuffer()
@@ -278,11 +282,11 @@ class DebugShelfWindow(BaseShelfWindow):
             util.Log("[PyDebug][info] fileName %s" % (self._curfile))
             ed_msg.PostMessage(ed_msg.EDMSG_PROGRESS_SHOW, (self._mw.GetId(), True))
             ed_msg.PostMessage(ed_msg.EDMSG_PROGRESS_STATE, (self._mw.GetId(), -1, -1))
-            self.setbuttonsdebug()
+            self.DisableButtons()
             self._debugger.Debug()
 
     def OnAbort(self, event):
-        RPDBDEBUGGER.abort()
+        RPDBDEBUGGER.do_abort()
 
     def OnStepIn(self, event):
         RPDBDEBUGGER.do_step()
