@@ -13,6 +13,7 @@ __revision__ = "$Revision$"
 
 #-----------------------------------------------------------------------------#
 # Imports
+import traceback
 from time import sleep
 
 # Editra Libraries
@@ -152,7 +153,7 @@ class RpdbDebugger(object):
             util.Log("[PyDbg][info] Running")
             outputfn("\nDebugger attached. Program output starts now...\n")
 
-    def attached_callsessionmanagerfn(self, fn, *args, **kwargs):
+    def attached_callsessionmanagerfn(self, fn, tdexc_clrvars, *args, **kwargs):
         if not self.attached:
             return None
         ex = None
@@ -160,8 +161,15 @@ class RpdbDebugger(object):
             return fn(*args, **kwargs)
         except rpdb2.NotAttached, ex:
             self.attached = False
+        except (rpdb2.ThreadDone, rpdb2.NoThreads), ex:
+            if tdexc_clrvars:
+                self.clearlocalvariables()
+                self.clearglobalvariables()
+                self.clearexceptions()
+                return
+            util.Log("[PyDbg][err] %s" % traceback.format_exc())
         except Exception, ex:
-            util.Log("[PyDbg][err] %s" % repr(ex))
+            util.Log("[PyDbg][err] %s" % traceback.format_exc())
         if self.mainwindow:
             err = rpdb2.g_error_mapping.get(type(ex), repr(ex))
             PyToolsUtils.error_dialog(self.mainwindow, err)
@@ -172,14 +180,14 @@ class RpdbDebugger(object):
         try:
             return fn(*args, **kwargs)
         except Exception, ex:
-            util.Log("[PyDbg][err] %s" % repr(ex))
+            util.Log("[PyDbg][err] %s" % traceback.format_exc())
         if self.mainwindow:
             err = rpdb2.g_error_mapping.get(type(ex), repr(ex))
             PyToolsUtils.error_dialog(self.mainwindow, err)
         return None
     
     def do_detach(self):
-        self.attached_callsessionmanagerfn(self.sessionmanager.detach)
+        self.attached_callsessionmanagerfn(self.sessionmanager.detach, False)
 
     def register_callback(self, func, event_type_dict, fSingleUse = False):
         self.sessionmanager.register_callback(func, event_type_dict, fSingleUse = fSingleUse)
@@ -188,36 +196,36 @@ class RpdbDebugger(object):
         self.breakpointmanager.installbreakpoints()
             
     def set_frameindex(self, index):
-        self.attached_callsessionmanagerfn(self.sessionmanager.set_frame_index, index)
+        self.attached_callsessionmanagerfn(self.sessionmanager.set_frame_index, False, index)
             
     def get_frameindex(self):
-        return self.attached_callsessionmanagerfn(self.sessionmanager.get_frame_index)
+        return self.attached_callsessionmanagerfn(self.sessionmanager.get_frame_index, False)
     
     def update_stack(self):
-        stacklist = self.attached_callsessionmanagerfn(self.sessionmanager.get_stack, [], True)
+        stacklist = self.attached_callsessionmanagerfn(self.sessionmanager.get_stack, False, [], True)
         if stacklist is not None:
             self.stackframemanager.do_update_stack(stacklist[0])
 
     def get_thread_list(self):
-        res = self.attached_callsessionmanagerfn(self.sessionmanager.get_thread_list)
+        res = self.attached_callsessionmanagerfn(self.sessionmanager.get_thread_list, False)
         if res is not None:
             return res
         return (None, {})
     
     def set_thread(self, tid):
-        self.attached_callsessionmanagerfn(self.sessionmanager.set_thread, tid)
+        self.attached_callsessionmanagerfn(self.sessionmanager.set_thread, False, tid)
             
     def execute(self, suite):
-        return self.attached_callsessionmanagerfn(self.sessionmanager.execute, suite)
+        return self.attached_callsessionmanagerfn(self.sessionmanager.execute, False, suite)
 
     def evaluate(self, suite):
-        return self.attached_callsessionmanagerfn(self.sessionmanager.evaluate, suite)
+        return self.attached_callsessionmanagerfn(self.sessionmanager.evaluate, False, suite)
 
     def update_namespace(self):
         self.variablesmanager.update_namespace()
 
     def get_namespace(self, expressionlist, filterlevel):
-        return self.attached_callsessionmanagerfn(self.sessionmanager.get_namespace, expressionlist, filterlevel)
+        return self.attached_callsessionmanagerfn(self.sessionmanager.get_namespace, True, expressionlist, filterlevel)
 
     def set_synchronicity(self, synchronicity):
         self.callsessionmanagerfn(self.sessionmanager.set_synchronicity, synchronicity)
@@ -244,52 +252,52 @@ class RpdbDebugger(object):
         return self.callsessionmanagerfn(self.sessionmanager.get_encoding)
         
     def set_analyze(self, analyze):
-        self.attached_callsessionmanagerfn(self.sessionmanager.set_analyze, analyze)
+        self.attached_callsessionmanagerfn(self.sessionmanager.set_analyze, False, analyze)
 
     def do_shutdown(self):
-        self.attached_callsessionmanagerfn(self.sessionmanager.shutdown)
+        self.attached_callsessionmanagerfn(self.sessionmanager.shutdown, False)
         self.clearstepmarker()
     
     def do_stop(self):
-        self.attached_callsessionmanagerfn(self.sessionmanager.stop_debuggee)
+        self.attached_callsessionmanagerfn(self.sessionmanager.stop_debuggee, False)
         self.clearstepmarker()
 
     def do_restart(self):
-        self.attached_callsessionmanagerfn(self.sessionmanager.restart)
+        self.attached_callsessionmanagerfn(self.sessionmanager.restart, False)
         self.clearstepmarker()
 
     def do_jump(self, lineno):
-        self.attached_callsessionmanagerfn(self.sessionmanager.request_jump, lineno)
+        self.attached_callsessionmanagerfn(self.sessionmanager.request_jump, False, lineno)
         self.clearstepmarker()
 
     def do_go(self):
-        self.attached_callsessionmanagerfn(self.sessionmanager.request_go)
+        self.attached_callsessionmanagerfn(self.sessionmanager.request_go, False)
         self.clearstepmarker()
 
     def do_break(self):
-        self.attached_callsessionmanagerfn(self.sessionmanager.request_break)
+        self.attached_callsessionmanagerfn(self.sessionmanager.request_break, False)
 
     def do_step(self): # Step In
-        self.attached_callsessionmanagerfn(self.sessionmanager.request_step)
+        self.attached_callsessionmanagerfn(self.sessionmanager.request_step, False)
         self.clearstepmarker()
 
     def do_next(self): # Step Over
-        self.attached_callsessionmanagerfn(self.sessionmanager.request_next)
+        self.attached_callsessionmanagerfn(self.sessionmanager.request_next, False)
         self.clearstepmarker()
 
     def do_return(self):
-        self.attached_callsessionmanagerfn(self.sessionmanager.request_return)
+        self.attached_callsessionmanagerfn(self.sessionmanager.request_return, False)
         self.clearstepmarker()
 
     def run_toline(self, filename, lineno):
-        self.attached_callsessionmanagerfn(self.sessionmanager.request_go_breakpoint, filename, '', lineno)
+        self.attached_callsessionmanagerfn(self.sessionmanager.request_go_breakpoint, False, filename, '', lineno)
         self.clearstepmarker()
 
     def disable_breakpoint(self, bpid):
-        self.attached_callsessionmanagerfn(self.sessionmanager.disable_breakpoint, [bpid], False)
+        self.attached_callsessionmanagerfn(self.sessionmanager.disable_breakpoint, False, [bpid], False)
 
     def enable_breakpoint(self, bpid):
-        self.attached_callsessionmanagerfn(self.sessionmanager.enable_breakpoint, [bpid], False)
+        self.attached_callsessionmanagerfn(self.sessionmanager.enable_breakpoint, False, [bpid], False)
 
     def load_breakpoints(self):
         try:
@@ -300,13 +308,13 @@ class RpdbDebugger(object):
             pass
     
     def clear_breakpoints(self):
-        self.attached_callsessionmanagerfn(self.sessionmanager.delete_breakpoint, [], True)
+        self.attached_callsessionmanagerfn(self.sessionmanager.delete_breakpoint, False, [], True)
         
     def set_breakpoint(self, filepath, lineno, exprstr = "", enabled=True):
-        return self.attached_callsessionmanagerfn(self.sessionmanager.set_breakpoint, filepath, '', lineno, enabled, exprstr)
+        return self.attached_callsessionmanagerfn(self.sessionmanager.set_breakpoint, False, filepath, '', lineno, enabled, exprstr)
 
     def get_breakpoints(self):
-        return self.attached_callsessionmanagerfn(self.sessionmanager.get_breakpoints)
+        return self.attached_callsessionmanagerfn(self.sessionmanager.get_breakpoints, False)
 
     def delete_breakpoint(self, filepath, lineno):
         bps = self.get_breakpoints()
@@ -314,4 +322,4 @@ class RpdbDebugger(object):
             return
         for bp in bps.values():            
             if bp.m_lineno == lineno and bp.m_filename == filepath:
-                self.attached_callsessionmanagerfn(self.sessionmanager.delete_breakpoint, [bp.m_id], False)
+                self.attached_callsessionmanagerfn(self.sessionmanager.delete_breakpoint, False, [bp.m_id], False)

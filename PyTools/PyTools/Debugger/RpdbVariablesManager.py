@@ -41,32 +41,27 @@ class RpdbVariablesManager(object):
         wx.CallAfter(self.update_namespace)
 
     def update_namespace(self):    
-        try:
-            frame_index = self.rpdb2debugger.get_frameindex()
-            if frame_index is None:
-                self.rpdb2debugger.clearlocalvariables()
-                self.rpdb2debugger.clearglobalvariables()
-                self.rpdb2debugger.clearexceptions()
-                return
-            
-            key = self.get_local_key(frame_index)
-            expressionlist = self.variableskey_map.get(key, None)
-            (key0, el0) = self.rpdb2debugger.updatelocalvariables(key, expressionlist)
-            self.variableskey_map[key0] = el0
-            
-            key = self.get_global_key(frame_index)
-            expressionlist = self.variableskey_map.get(key, None)
-            (key1, el1) = self.rpdb2debugger.updateglobalvariables(key, expressionlist)
-            self.variableskey_map[key1] = el1
-            
-            key = 'exception'
-            expressionlist = self.variableskey_map.get(key, None)
-            (key1, el1) = self.rpdb2debugger.updateexceptions(key, expressionlist)
-            self.variableskey_map[key] = el1
-        except (rpdb2.ThreadDone, rpdb2.NoThreads):
+        frame_index = self.rpdb2debugger.get_frameindex()
+        if frame_index is None:
             self.rpdb2debugger.clearlocalvariables()
             self.rpdb2debugger.clearglobalvariables()
             self.rpdb2debugger.clearexceptions()
+            return
+        
+        key = self.get_local_key(frame_index)
+        expressionlist = self.variableskey_map.get(key, None)
+        (key0, el0) = self.rpdb2debugger.updatelocalvariables(key, expressionlist)
+        self.variableskey_map[key0] = el0
+        
+        key = self.get_global_key(frame_index)
+        expressionlist = self.variableskey_map.get(key, None)
+        (key1, el1) = self.rpdb2debugger.updateglobalvariables(key, expressionlist)
+        self.variableskey_map[key1] = el1
+        
+        key = 'exception'
+        expressionlist = self.variableskey_map.get(key, None)
+        (key1, el1) = self.rpdb2debugger.updateexceptions(key, expressionlist)
+        self.variableskey_map[key] = el1
 
     def get_local_key(self, frame_index):
         c = self.rpdb2debugger.curstack.get(rpdb2.DICT_KEY_CODE_LIST, [])
