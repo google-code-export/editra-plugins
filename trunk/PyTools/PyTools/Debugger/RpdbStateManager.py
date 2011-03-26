@@ -45,9 +45,9 @@ class RpdbStateManager(object):
 
     def finalmessage(self):
         sleep(1)
-        self.rpdb2debugger.debuggeroutput("\nDebugger detached.")
+        self.rpdb2debugger.processcreator.AddText("\nDebugger detached.")
         sleep(1)
-        self.rpdb2debugger.debuggeroutput = lambda x:None
+        self.rpdb2debugger.processcreator = None
     
     def callback_state(self, state):
         old_state = self.m_state
@@ -57,30 +57,31 @@ class RpdbStateManager(object):
         if self.m_state == rpdb2.STATE_DETACHED:
             self.rpdb2debugger.attached = False
             self.rpdb2debugger.analyzing = False
+            self.rpdb2debugger.broken = False
             if self.rpdb2debugger.breakpoints_installed:
                 # clear all debugging stuff as we have finished
                 self.rpdb2debugger.clear_all()
                 worker = RunProcInThread("Detach", None, self.finalmessage)
                 worker.start()
-#        elif (old_state in [rpdb2.STATE_DETACHED, rpdb2.STATE_DETACHING, rpdb2.STATE_SPAWNING, rpdb2.STATE_ATTACHING]) and (self.m_state not in [rpdb2.STATE_DETACHED, rpdb2.STATE_DETACHING, rpdb2.STATE_SPAWNING, rpdb2.STATE_ATTACHING]):
-        else:
+        elif (old_state in [rpdb2.STATE_DETACHED, rpdb2.STATE_DETACHING, rpdb2.STATE_SPAWNING, rpdb2.STATE_ATTACHING]) and (self.m_state not in [rpdb2.STATE_DETACHED, rpdb2.STATE_DETACHING, rpdb2.STATE_SPAWNING, rpdb2.STATE_ATTACHING]):
             self.rpdb2debugger.attached = True
 
         if self.m_state == rpdb2.STATE_BROKEN:
             # we hit a breakpoint
             # show the stack viewer, threads viewer, namespace viewer
             self.rpdb2debugger.analyzing = False
-            pass
+            self.rpdb2debugger.broken = True
             
         elif self.m_state == rpdb2.STATE_ANALYZE:
             # we are analyzing an exception
             # show the stack viewer and namespace viewer
             self.rpdb2debugger.analyzing = True
-            pass
+            self.rpdb2debugger.broken = False
         else:
             # any other state
             # don't show any viewers
             self.rpdb2debugger.analyzing = False
-            pass
-        self.rpdb2debugger.updateanalyze()
-        self.rpdb2debugger.debugbuttonsupdate()
+            self.rpdb2debugger.broken = False
+        if self.rpdb2debugger.breakpoints_installed:
+            self.rpdb2debugger.updateanalyze()
+            self.rpdb2debugger.debugbuttonsupdate()

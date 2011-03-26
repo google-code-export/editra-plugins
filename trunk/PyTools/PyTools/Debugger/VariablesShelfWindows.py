@@ -62,7 +62,7 @@ class BaseVariablesShelfWindow(BaseShelfWindow):
             expressionlist = [(self.listtype, True)]
 
         worker = RunProcInThread(self.listtype, self.UpdateVariablesList, \
-            RPDBDEBUGGER.get_namespace, expressionlist, self.filterlevel)
+            RPDBDEBUGGER.catchexc_get_namespace, expressionlist, self.filterlevel)
         worker.start()
         return (old_key, old_expressionlist)
         
