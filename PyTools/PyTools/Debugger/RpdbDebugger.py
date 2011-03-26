@@ -161,7 +161,7 @@ class RpdbDebugger(object):
         except rpdb2.NotAttached, ex:
             self.attached = False
         except Exception, ex:
-            pass
+            util.Log("[PyDbg][err] %s" % repr(ex))
         if self.mainwindow:
             err = rpdb2.g_error_mapping.get(type(ex), repr(ex))
             PyToolsUtils.error_dialog(self.mainwindow, err)
@@ -172,7 +172,7 @@ class RpdbDebugger(object):
         try:
             return fn(*args, **kwargs)
         except Exception, ex:
-            pass
+            util.Log("[PyDbg][err] %s" % repr(ex))
         if self.mainwindow:
             err = rpdb2.g_error_mapping.get(type(ex), repr(ex))
             PyToolsUtils.error_dialog(self.mainwindow, err)

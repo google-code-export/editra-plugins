@@ -62,7 +62,8 @@ class RpdbStateManager(object):
                 self.rpdb2debugger.clear_all()
                 worker = RunProcInThread("Detach", None, self.finalmessage)
                 worker.start()
-        elif (old_state in [rpdb2.STATE_DETACHED, rpdb2.STATE_DETACHING, rpdb2.STATE_SPAWNING, rpdb2.STATE_ATTACHING]) and (self.m_state not in [rpdb2.STATE_DETACHED, rpdb2.STATE_DETACHING, rpdb2.STATE_SPAWNING, rpdb2.STATE_ATTACHING]):
+#        elif (old_state in [rpdb2.STATE_DETACHED, rpdb2.STATE_DETACHING, rpdb2.STATE_SPAWNING, rpdb2.STATE_ATTACHING]) and (self.m_state not in [rpdb2.STATE_DETACHED, rpdb2.STATE_DETACHING, rpdb2.STATE_SPAWNING, rpdb2.STATE_ATTACHING]):
+        else:
             self.rpdb2debugger.attached = True
 
         if self.m_state == rpdb2.STATE_BROKEN:
