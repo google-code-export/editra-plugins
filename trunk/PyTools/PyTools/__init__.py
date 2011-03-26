@@ -36,9 +36,7 @@ from PyTools.Debugger.DebugShelfWindow import DebugShelfWindow
 from PyTools.Debugger.BreakPointsShelfWindow import BreakPointsShelfWindow
 from PyTools.Debugger.StackFrameShelfWindow import StackFrameShelfWindow
 from PyTools.Debugger.ThreadsShelfWindow import ThreadsShelfWindow
-from PyTools.Debugger.VariablesShelfWindows import LocalVariablesShelfWindow
-from PyTools.Debugger.VariablesShelfWindows import GlobalVariablesShelfWindow
-from PyTools.Debugger.VariablesShelfWindows import ExceptionsShelfWindow
+from PyTools.Debugger.VariablesShelfWindow import VariablesShelfWindow
 from PyTools.Debugger.ExpressionsShelfWindow import ExpressionsShelfWindow
 
 #-----------------------------------------------------------------------------#
@@ -120,34 +118,10 @@ class PyThread(BaseShelfPlugin):
         """
         return Images.Bug.Bitmap
 
-class PyLocalVariable(BaseShelfPlugin):
+class PyVariable(BaseShelfPlugin):
     """Script Launcher and output viewer"""
     def __init__(self, pluginmgr):
-        super(PyLocalVariable, self).__init__(pluginmgr, "PyLocalVariable", LocalVariablesShelfWindow)
-
-    def GetBitmap(self):
-        """Get the tab bitmap
-        @return: wx.Bitmap
-
-        """
-        return Images.Bug.Bitmap
-
-class PyGlobalVariable(BaseShelfPlugin):
-    """Script Launcher and output viewer"""
-    def __init__(self, pluginmgr):
-        super(PyGlobalVariable, self).__init__(pluginmgr, "PyGlobalVariable", GlobalVariablesShelfWindow)
-
-    def GetBitmap(self):
-        """Get the tab bitmap
-        @return: wx.Bitmap
-
-        """
-        return Images.Bug.Bitmap
-
-class PyException(BaseShelfPlugin):
-    """Script Launcher and output viewer"""
-    def __init__(self, pluginmgr):
-        super(PyException, self).__init__(pluginmgr, "PyException", ExceptionsShelfWindow)
+        super(PyVariable, self).__init__(pluginmgr, "PyVariable", VariablesShelfWindow)
 
     def GetBitmap(self):
         """Get the tab bitmap

@@ -51,6 +51,7 @@ class VariablesList(wx.gizmos.TreeListCtrl):
         # Attributes
         self.listtype = listtype
         self.filterlevel = filterlevel
+        self.key = None
         self.ignoredwarnings = {'': True}
         
         # Event Handlers
@@ -83,6 +84,30 @@ class VariablesList(wx.gizmos.TreeListCtrl):
             
             items = self.get_children(item)
             variablelist = items + variablelist
+
+    def UpdateVariablesList(self, variables):
+        if not variables:
+            return
+        self.Clear()
+        self.PopulateRows(variables)
+        self.Refresh()
+
+    def update_namespace(self, key, expressionlist):
+        old_key = self.key
+        old_expressionlist = self.get_expression_list()
+
+        if key == old_key:
+            expressionlist = old_expressionlist
+
+        self.key = key
+
+        if expressionlist is None:
+            expressionlist = [(self.listtype, True)]
+
+        worker = RunProcInThread(self.listtype, self.UpdateVariablesList, \
+            RPDBDEBUGGER.catchexc_get_namespace, expressionlist, self.filterlevel)
+        worker.start()
+        return (old_key, old_expressionlist)
 
     def OnItemToolTip(self, event):
         item = event.GetItem()
