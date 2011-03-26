@@ -38,6 +38,7 @@ from PyTools.Debugger import MESSAGEHANDLER
 
 # Globals
 _ = wx.GetTranslation
+
 #-----------------------------------------------------------------------------#
 
 class DebugShelfWindow(BaseShelfWindow):
@@ -77,14 +78,13 @@ class DebugShelfWindow(BaseShelfWindow):
         self.combotexts = {}
         for i, ignore in enumerate(self.choices):
             self.combotexts[i] = ""
-        txtentrysize = wx.Size(512, wx.DefaultSize.GetHeight())
-        self.search = eclib.CommandEntryBase(ctrlbar, wx.ID_ANY, size=txtentrysize,
-                                           style=wx.TE_PROCESS_ENTER|wx.WANTS_CHARS|eclib.PB_STYLE_NOBG)
+        self.search = eclib.CommandEntryBase(ctrlbar, wx.ID_ANY,
+                                             style=wx.TE_PROCESS_ENTER|wx.WANTS_CHARS|eclib.PB_STYLE_NOBG)
         self.search.Enable(False)
-        self.search.SetDescriptiveText("")
+        self.search.SetDescriptiveText(u"")
         self.search.ShowSearchButton(False)
         self.search.ShowCancelButton(True)
-        ctrlbar.AddControl(self.search, wx.ALIGN_RIGHT)
+        ctrlbar.AddControl(self.search, wx.ALIGN_RIGHT, 2)
 
         self.layout(None, None, self.OnJobTimer)
 
@@ -92,7 +92,6 @@ class DebugShelfWindow(BaseShelfWindow):
         RPDBDEBUGGER.mainwindow = self._mw
         RPDBDEBUGGER.debugbuttonsupdate = self.OnButtonsUpdate
         RPDBDEBUGGER.disabledebugbuttons = self.DisableButtons
-#        MESSAGEHANDLER.mainwindow = self._mw # TODO:
         MESSAGEHANDLER.debugeditorupdate = self.OnEditorUpdate
         self._debugger = None
         self._debugrun = False
@@ -109,6 +108,7 @@ class DebugShelfWindow(BaseShelfWindow):
         self.Bind(wx.EVT_SEARCHCTRL_CANCEL_BTN, self.OnCancelSearch, self.search)
 
     def Unsubscription(self):
+        """Cleanup message handlers on Destroy"""
         if RPDBDEBUGGER.attached:
             RPDBDEBUGGER.do_detach()
         RPDBDEBUGGER.debugbuttonsupdate = lambda:None
@@ -116,6 +116,7 @@ class DebugShelfWindow(BaseShelfWindow):
         MESSAGEHANDLER.debugeditorupdate = lambda x,y,z:None
 
     def OnCancelSearch(self, event):
+        """Clear the text from the text control"""
         self.combotexts[self.combocurrent_selection] = ""
         self.search.SetValue("")
 
@@ -126,7 +127,7 @@ class DebugShelfWindow(BaseShelfWindow):
         self.search.SetValue(self.combotexts[self.combocurrent_selection])
 
     def DisableButtons(self):
-        self.gobtn.SetBitmap(Images.Go.Bitmap)
+        """Disable all debugger buttons"""
         self.gobtn.Enable(False)
         self.abortbtn.Enable(False)
         self.stepinbtn.Enable(False)
@@ -137,6 +138,7 @@ class DebugShelfWindow(BaseShelfWindow):
         self.search.Enable(False)
     
     def _onbuttonsupdate(self, ispython):
+        """Update button states based on debugger state"""
         attached = RPDBDEBUGGER.attached
         broken = RPDBDEBUGGER.broken
         attachedandbroken = attached and broken
@@ -194,13 +196,17 @@ class DebugShelfWindow(BaseShelfWindow):
             for i, ignore in enumerate(self.choices):
                 self.combotexts[i] = ""
             self.combo.SetSelection(0)
-            self.search.SetValue("")
+            self.search.SetValue(u"")
 
         if force or not self._hasrun:
             ctrlbar = self.GetControlBar(wx.TOP)
             ctrlbar.Layout()
 
     def _ondebug(self, editor):
+        """Start debugging
+        @param editor: EditraStc
+
+        """
         # With the text control (ed_stc.EditraStc) this will return the full
         # path of the file or a wx.EmptyString if the buffer does not contain
         # an on disk file
@@ -211,11 +217,7 @@ class DebugShelfWindow(BaseShelfWindow):
             return
 
         filename = os.path.abspath(filename)
-        fileext = os.path.splitext(filename)[1]
-        if fileext == u"":
-            return
-
-        filetype = editor.GetLangId() #syntax.GetIdFromExt(fileext[1:]) # pass in file extension
+        filetype = editor.GetLangId()
         directoryvariables = self.get_directory_variables(filetype)
         if directoryvariables:
             vardict = directoryvariables.read_dirvarfile(filename)
@@ -225,6 +227,10 @@ class DebugShelfWindow(BaseShelfWindow):
         self._hasrun = True
 
     def OnGo(self, event):
+        """Go button clicked. Starts debugging if not already attached or
+        lets program run till next breakpoint is hit.
+
+        """
         if RPDBDEBUGGER.attached:
             RPDBDEBUGGER.do_go()
             return
@@ -235,6 +241,7 @@ class DebugShelfWindow(BaseShelfWindow):
             wx.CallAfter(self._ondebug, editor)
 
     def get_debugger(self, filetype, vardict, filename):
+        """Get the debugger object for the current context"""
         dbgr = None
         try:
             programargs = self.combotexts[0]
@@ -250,7 +257,7 @@ class DebugShelfWindow(BaseShelfWindow):
         config = Profile_Get(ToolConfig.PYTOOL_CONFIG, default=dict())
         config[ToolConfig.TLC_LINT_AUTORUN] = True
         Profile_Set(ToolConfig.PYTOOL_CONFIG, config)
-        self._listCtrl.AddText("Reenabling Pylint Autorun.")
+        self._listCtrl.AddText(_("Reenabling Pylint Autorun."))
     
     def _debug(self, filetype, vardict, filename):
         debugger = self.get_debugger(filetype, vardict, filename)
@@ -293,16 +300,21 @@ class DebugShelfWindow(BaseShelfWindow):
             self._debugger.Debug()
 
     def OnAbort(self, event):
+        """Stop debugging"""
         RPDBDEBUGGER.do_abort()
 
     def OnStepIn(self, event):
+        """Step in to the code on the current line"""
         RPDBDEBUGGER.do_step()
 
     def OnStepOver(self, event):
+        """Step over the code on the current line"""
         RPDBDEBUGGER.do_next()
 
     def OnStepOut(self, event):
+        """Step out of the current scope"""
         RPDBDEBUGGER.do_return()
 
     def OnBreak(self, event):
+        """Break now"""
         RPDBDEBUGGER.do_break()
