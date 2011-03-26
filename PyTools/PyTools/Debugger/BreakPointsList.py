@@ -31,27 +31,37 @@ _ = wx.GetTranslation
 
 class BreakPointsList(eclib.EToggleEditListCtrl):
     """List control for displaying breakpoints results"""
+    COL_FILE = 0
+    COL_LINE = 1
+    COL_EXPR = 2
     def __init__(self, parent):
         super(BreakPointsList, self).__init__(parent)
 
         # Setup
-        self.InsertColumn(0, _("File"))
-        self.InsertColumn(1, _("Line"))
-        self.InsertColumn(2, _("Expression"))
+        self.InsertColumn(BreakPointsList.COL_FILE, _("File"))
+        self.InsertColumn(BreakPointsList.COL_LINE, _("Line"))
+        self.InsertColumn(BreakPointsList.COL_EXPR, _("Expression"))
         self.SetCheckedBitmap(ed_marker.Breakpoint().Bitmap)
         self.SetUnCheckedBitmap(ed_marker.BreakpointDisabled().Bitmap)
 
-        # Attributes
-        self.parent = parent
-        
         # Event Handlers
-        self.Bind(wx.EVT_LIST_ITEM_RIGHT_CLICK, self.OnItemRightClicked)
+        self.Bind(wx.EVT_LIST_ITEM_ACTIVATED, self.OnItemActivated)
         self.Bind(wx.EVT_LIST_END_LABEL_EDIT, self.OnItemEdited)
-        
+
     def set_mainwindow(self, mw):
         self._mainw = mw
 
-    def OnItemRightClicked(self, evt):
+    def GetSelectedBreakpoints(self):
+        """Get a list of selected breakpoints
+        @return: [(fname, line, expr),]
+
+        """
+        rval = list()
+        for index in self.GetSelections():
+            rval.append(self.GetRowData(index))
+        return rval
+
+    def OnItemActivated(self, evt):
         """Go to the file"""
         idx = evt.GetIndex()
         fileName = self.GetItem(idx, 0).GetText()
@@ -61,12 +71,22 @@ class BreakPointsList(eclib.EToggleEditListCtrl):
         if not editor:
             return
         try:
-            lineno = int(self.GetItem(idx, 1).GetText())            
+            lineno = int(self.GetItem(idx, 1).GetText())
             editor.GotoLine(lineno - 1)
         except ValueError:
             pass
 
+    def OpenEditor(self, col, row):
+        """Disable the editor for the first and second columns
+        @param col: Column to edit
+        @param row: Row to edit
+
+        """
+        if col == BreakPointsList.COL_EXPR:
+            super(BreakPointsList, self).OpenEditor(col, row)
+
     def _seteditorbreakpoint(self, filepath, lineno, enabled, delete=False):
+        """Set a breakpoint the the current editor"""
         editor = wx.GetApp().GetCurrentBuffer()
         if editor:
             curpath = os.path.normcase(editor.GetFileName())
@@ -74,12 +94,11 @@ class BreakPointsList(eclib.EToggleEditListCtrl):
                 editorlineno = lineno - 1
                 if delete:
                     editor.DeleteBreakpoint(editorlineno)
-                    return
-                if enabled:
+                elif enabled:
                     editor.SetBreakpoint(editorlineno)
                 else:
                     editor.SetBreakpointDisabled(editorlineno)
-    
+
     def OnItemEdited(self, evt):
         if evt.IsEditCancelled():
             evt.Veto()
@@ -87,50 +106,41 @@ class BreakPointsList(eclib.EToggleEditListCtrl):
         idx = evt.GetIndex()
         newval = evt.GetLabel()
         column = evt.GetColumn()
-        filepath, linenostr, exprstr = self._data[idx]
+        if column != BreakPointsList.COL_EXPR:
+            return
+
+        filepath, linenostr, exprstr = self.GetRowData(idx)
         lineno = ""
         if filepath and linenostr:
             try:
                 lineno = int(linenostr)
-                self.parent.DeleteBreakpoint(filepath, lineno)
+                self.Parent.DeleteBreakpoint(filepath, lineno)
                 self._seteditorbreakpoint(filepath, lineno, False, True)
             except ValueError:
                 pass
-        if column == 0:
-            filepath = newval
-        elif column == 1:
-            try:
-                lineno = int(newval)
-            except ValueError:
-                pass
-        else:
-            exprstr = newval
+        exprstr = newval
         enabled = self.IsChecked(idx)
-        self._data[idx] = (unicode(filepath), unicode(lineno), unicode(exprstr))
         if filepath and lineno:
-            self.parent.SetBreakpoint(filepath, lineno, exprstr, enabled)
+            self.Parent.SetBreakpoint(filepath, lineno, exprstr, enabled)
             self._seteditorbreakpoint(filepath, lineno, enabled)
-        if filepath or lineno or exprstr:
-            idx = idx + 1
-            if idx == len(self._data):
-                self._data[idx] = (u"", u"", u"")
-                self.Append(self._data[idx])        
 
     def OnCheckItem(self, idx, enabled):
         wx.CallAfter(self._oncheckitem, idx, enabled)
-        
-    def _oncheckitem(self, idx, enabled):        
-        filepath, linenostr, exprstr = self._data[idx]
-        if not filepath or not linenostr:
-            return
-        try:
-            lineno = int(linenostr)
-            self.parent.DeleteBreakpoint(filepath, lineno)
-            self.parent.SetBreakpoint(filepath, lineno, exprstr, enabled)
-            self._seteditorbreakpoint(filepath, lineno, enabled)
-        except ValueError:
-            pass
-                    
+
+    def _oncheckitem(self, idx, enabled):
+        data = self.GetRowData(idx)
+        if len(data) == 3:
+            filepath, linenostr, exprstr = data
+            if not filepath or not linenostr:
+                return
+            try:
+                lineno = int(linenostr)
+                self.Parent.DeleteBreakpoint(filepath, lineno)
+                self.Parent.SetBreakpoint(filepath, lineno, exprstr, enabled)
+                self._seteditorbreakpoint(filepath, lineno, enabled)
+            except ValueError:
+                pass
+
     def Clear(self):
         """Delete all the rows """
         self.DeleteAllItems()
@@ -147,7 +157,7 @@ class BreakPointsList(eclib.EToggleEditListCtrl):
         exprText = _("Expression")
         minLType = max(self.GetTextExtent(filenameText)[0], self.GetColumnWidth(0))
         minLText = max(self.GetTextExtent(exprText)[0], self.GetColumnWidth(2))
-        self._data = {}
+
         idx = 0
         for filepath in data.keys():
             linenos = data.get(filepath)
@@ -160,21 +170,10 @@ class BreakPointsList(eclib.EToggleEditListCtrl):
                 enabled, exprstr = bpline
                 if filepath and lineno:
                     self._seteditorbreakpoint(filepath, lineno, enabled)
-                self._data[idx] = (unicode(filepath), unicode(lineno), unicode(exprstr))
                 minLType = max(minLType, self.GetTextExtent(filepath)[0])
                 minLText = max(minLText, self.GetTextExtent(exprstr)[0])
-                self.Append(self._data[idx])
-                self.SetItemData(idx, idx)
+                self.Append((unicode(filepath), unicode(lineno), unicode(exprstr)))
                 self.CheckItem(idx, enabled)
                 idx += 1
-        self._data[idx] = (u"", u"", u"")        
-        self.Append(self._data[idx])
         self.SetColumnWidth(0, minLType)
         self.SetColumnWidth(2, minLText)
-
-    @staticmethod
-    def _printListCtrl(ctrl):
-        for row in xrange(0, ctrl.GetItemCount()):
-            for column in xrange(0, ctrl.GetColumnCount()):
-                print ctrl.GetItem(row, column).GetText(), "\t",
-            print ""
