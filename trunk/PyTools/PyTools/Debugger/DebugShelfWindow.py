@@ -313,12 +313,20 @@ class DebugShelfWindow(BaseShelfWindow):
             util.Log("[PyDebug][info] fileName %s" % (self._curfile))
             ed_msg.PostMessage(ed_msg.EDMSG_PROGRESS_SHOW, (self._mw.GetId(), True))
             ed_msg.PostMessage(ed_msg.EDMSG_PROGRESS_STATE, (self._mw.GetId(), -1, -1))
+            self.abortfn = self._abort
             self.DisableButtons()
             self._debugger.Debug()
 
     def OnAbort(self, event):
+        self.abortfn()
+
+    def _abort(self):
         """Stop debugging"""
         RPDBDEBUGGER.do_abort()
+
+    def _detach(self):
+        """Detach debugger"""
+        RPDBDEBUGGER.do_detach()
 
     def OnStepIn(self, event):
         """Step in to the code on the current line"""
@@ -349,10 +357,12 @@ class DebugShelfWindow(BaseShelfWindow):
                 return []
             self._debugger = debugger
             self._listCtrl.SetText("Debugging remote debuggee %s\n" % server.m_filename)
-            dpc = DummyProcessCreator(server.m_rid, self._listCtrl.AddText, RPDBDEBUGGER.do_detach)
+            dpc = DummyProcessCreator(server.m_rid, self._listCtrl.AddText)
             dpc.restorepath = lambda:None
             self._debugger.processcreator = dpc
             self._setdebuggeroptions()
+            self.abortfn = self._detach
+            self.DisableButtons()
             self._debugger.RunDebugger()
         
         attach_dialog.Destroy()
