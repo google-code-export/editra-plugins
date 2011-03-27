@@ -62,6 +62,9 @@ class VariablesList(wx.gizmos.TreeListCtrl):
     def set_mainwindow(self, mw):
         self._mainw = mw
 
+    def SetFilterLevel(self, filterlevel):
+        self.filterlevel = filterlevel
+
     def Clear(self):
         """Delete all the rows """
         self.DeleteAllItems()
