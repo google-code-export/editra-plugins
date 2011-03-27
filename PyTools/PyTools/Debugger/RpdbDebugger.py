@@ -128,7 +128,7 @@ class RpdbDebugger(object):
     def attach(self, processcreator):
         if not processcreator:
             return
-        pid = str(processcreator.Process.pid)
+        pid = str(processcreator.GetPID())
         tries = 0
         ex = None
         while tries != 5:
