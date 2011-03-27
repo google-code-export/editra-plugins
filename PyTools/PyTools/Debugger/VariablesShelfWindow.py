@@ -19,8 +19,10 @@ import wx
 
 # Editra Libraries
 import eclib
+from profiler import Profile_Get, Profile_Set
 
 # Local imports
+from PyTools.Common import ToolConfig
 from PyTools.Common.PyToolsUtils import PyToolsUtils
 from PyTools.Common.PyToolsUtils import RunProcInThread
 from PyTools.Common.BaseShelfWindow import BaseShelfWindow
@@ -38,18 +40,24 @@ class VariablesShelfWindow(BaseShelfWindow):
     EXCEPTIONSSTR = u"rpdb_exception_info"
     ANALYZELBL = "Analyze Exception"
     STOPANALYZELBL = "Stop Analysis"
-
+    FILTER_LEVELS = ('0:Off', '1:Medium', '2:Maximum')
+    
     def __init__(self, parent):
         """Initialize the window"""
         super(VariablesShelfWindow, self).__init__(parent)
 
+        config = Profile_Get(ToolConfig.PYTOOL_CONFIG, default=dict())
+        localsfilterlevel = config.get(ToolConfig.TLC_LOCALS_FILTERLEVEL, 0)
+        globalsfilterlevel = config.get(ToolConfig.TLC_GLOBALS_FILTERLEVEL, 0)
+        exceptionsfilterlevel = config.get(ToolConfig.TLC_EXCEPTIONS_FILTERLEVEL, 0)
+        
         # Attributes
         bstyle = eclib.SEGBOOK_STYLE_NO_DIVIDERS|eclib.SEGBOOK_STYLE_LABELS
         self._nb = eclib.SegmentBook(self, style=bstyle)
-        self._locals = VariablesList(self._nb, self.LOCALSSTR, 0)
-        self._globals = VariablesList(self._nb, self.GLOBALSSTR, 0)
-        self._exceptions = VariablesList(self._nb, self.EXCEPTIONSSTR, 0)
-
+        self._locals = VariablesList(self._nb, self.LOCALSSTR, localsfilterlevel)
+        self._globals = VariablesList(self._nb, self.GLOBALSSTR, globalsfilterlevel)
+        self._exceptions = VariablesList(self._nb, self.EXCEPTIONSSTR, exceptionsfilterlevel)
+        
         # Setup
         self._InitImageList()
         self._nb.AddPage(self._locals, _("Locals"), img_id=0)
@@ -58,6 +66,21 @@ class VariablesShelfWindow(BaseShelfWindow):
         ctrlbar = self.setup(self._nb, self._locals,
                              self._globals, self._exceptions)
         ctrlbar.AddStretchSpacer()
+        self.filterlevellocals = wx.ComboBox(ctrlbar, wx.ID_ANY, \
+        value=self.FILTER_LEVELS[localsfilterlevel], choices=self.FILTER_LEVELS, style=wx.CB_READONLY|eclib.PB_STYLE_NOBG)
+        self.filterlevelglobals = wx.ComboBox(ctrlbar, wx.ID_ANY, \
+        value=self.FILTER_LEVELS[globalsfilterlevel], choices=self.FILTER_LEVELS, style=wx.CB_READONLY|eclib.PB_STYLE_NOBG)
+        self.filterlevelexceptions = wx.ComboBox(ctrlbar, wx.ID_ANY, \
+        value=self.FILTER_LEVELS[exceptionsfilterlevel], choices=self.FILTER_LEVELS, style=wx.CB_READONLY|eclib.PB_STYLE_NOBG)
+        text = wx.StaticText(ctrlbar, wx.ID_ANY, "Filter Levels           Locals")
+        ctrlbar.AddControl(text, wx.ALIGN_RIGHT)
+        ctrlbar.AddControl(self.filterlevellocals, wx.ALIGN_RIGHT)
+        text = wx.StaticText(ctrlbar, wx.ID_ANY, "Globals")
+        ctrlbar.AddControl(text, wx.ALIGN_RIGHT)
+        ctrlbar.AddControl(self.filterlevelglobals, wx.ALIGN_RIGHT)
+        text = wx.StaticText(ctrlbar, wx.ID_ANY, "Exceptions")
+        ctrlbar.AddControl(text, wx.ALIGN_RIGHT)
+        ctrlbar.AddControl(self.filterlevelexceptions, wx.ALIGN_RIGHT)
         self.layout(self.ANALYZELBL, self.OnAnalyze)
 
         # Debugger attributes
@@ -70,6 +93,11 @@ class VariablesShelfWindow(BaseShelfWindow):
         RPDBDEBUGGER.catchunhandledexception = self.UnhandledException
         RPDBDEBUGGER.updateanalyze = self.UpdateAnalyze
         
+        # Event Handlers
+        self.Bind(wx.EVT_COMBOBOX, self.SetFilterLevelLocals, self.filterlevellocals)
+        self.Bind(wx.EVT_COMBOBOX, self.SetFilterLevelGlobals, self.filterlevelglobals)
+        self.Bind(wx.EVT_COMBOBOX, self.SetFilterLevelExceptions, self.filterlevelexceptions)
+
         RPDBDEBUGGER.update_namespace()
 
     def Unsubscription(self):
@@ -113,3 +141,25 @@ class VariablesShelfWindow(BaseShelfWindow):
             self.taskbtn.SetLabel(self.STOPANALYZELBL)
         else:
             self.taskbtn.SetLabel(self.ANALYZELBL)
+
+    def UpdateConfig(self, key, value):
+        config = Profile_Get(ToolConfig.PYTOOL_CONFIG, default=dict())
+        config[key] = value
+        Profile_Set(ToolConfig.PYTOOL_CONFIG, config)
+        RPDBDEBUGGER.update_namespace()
+    
+    def SetFilterLevelLocals(self, evt):
+        combocurrent_selection = self.filterlevellocals.GetSelection()
+        self._locals.SetFilterLevel(combocurrent_selection)
+        self.UpdateConfig(ToolConfig.TLC_LOCALS_FILTERLEVEL, combocurrent_selection)
+        
+    def SetFilterLevelGlobals(self, evt):
+        combocurrent_selection = self.filterlevelglobals.GetSelection()
+        self._globals.SetFilterLevel(combocurrent_selection)
+        self.UpdateConfig(ToolConfig.TLC_GLOBALS_FILTERLEVEL, combocurrent_selection)        
+        
+    def SetFilterLevelExceptions(self, evt):
+        combocurrent_selection = self.filterlevelexceptions.GetSelection()
+        self._exceptions.SetFilterLevel(combocurrent_selection)
+        self.UpdateConfig(ToolConfig.TLC_EXCEPTIONS_FILTERLEVEL, combocurrent_selection)
+        
