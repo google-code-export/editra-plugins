@@ -23,14 +23,16 @@ from PyTools.Debugger import RPDBDEBUGGER
 
 # Globals
 _ = wx.GetTranslation
+
 #-----------------------------------------------------------------------------#
 
 class StackFrameShelfWindow(BaseShelfWindow):
     def __init__(self, parent):
         """Initialize the window"""
         super(StackFrameShelfWindow, self).__init__(parent)
+
+        # Setup
         ctrlbar = self.setup(StackFrameList(self))
-        ctrlbar.AddStretchSpacer()
         self.layout()
 
         # Attributes
@@ -40,16 +42,16 @@ class StackFrameShelfWindow(BaseShelfWindow):
 
         self.prevstack = None
         RPDBDEBUGGER.update_stack()
-        
+
     def Unsubscription(self):
+        """Cleanup on Destroy"""
         RPDBDEBUGGER.clearframe = lambda:None
         RPDBDEBUGGER.selectframe = lambda x:None
         RPDBDEBUGGER.updatestacklist = lambda x:None
 
     def UpdateStackList(self, stack):
-        if not stack:
-            return
-        if self.prevstack == stack:
+        """Update stack information ListCtrl"""
+        if not stack or self.prevstack == stack:
             return
         self.prevstack = stack
         self._listCtrl.Clear()
@@ -57,5 +59,6 @@ class StackFrameShelfWindow(BaseShelfWindow):
         self._listCtrl.RefreshRows()
 
     def ClearStackList(self):
+        """Clear the ListCtrl"""
         self.prevstack = None
         self._listCtrl.Clear()
