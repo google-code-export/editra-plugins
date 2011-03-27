@@ -72,16 +72,17 @@ class DebugShelfWindow(BaseShelfWindow):
         self.breakbtn = self.AddPlateButton(u"", Images.Break.Bitmap, wx.ALIGN_LEFT)
         self.breakbtn.ToolTip = wx.ToolTip(_("Break"))
         ctrlbar.AddStretchSpacer()
-        self.choices = ["Program Args", "Debugger Args"]
-        self.combo = wx.ComboBox(ctrlbar, wx.ID_ANY, value=self.choices[0], choices=self.choices, style=wx.CB_READONLY|eclib.PB_STYLE_NOBG)
+        self.choices = [_("Program Args"), _("Debugger Args")]
+        self.combo = wx.ComboBox(ctrlbar, value=self.choices[0], 
+                                 choices=self.choices, style=wx.CB_READONLY)
         self.combo.Enable(False)
         ctrlbar.AddControl(self.combo, wx.ALIGN_RIGHT)
         self.combocurrent_selection = 0
         self.combotexts = {}
         for i, ignore in enumerate(self.choices):
             self.combotexts[i] = ""
-        self.search = eclib.CommandEntryBase(ctrlbar, wx.ID_ANY,
-                                             style=wx.TE_PROCESS_ENTER|wx.WANTS_CHARS|eclib.PB_STYLE_NOBG)
+        self.search = eclib.CommandEntryBase(ctrlbar,
+                                             style=wx.TE_PROCESS_ENTER|wx.WANTS_CHARS)
         self.search.Enable(False)
         self.search.SetDescriptiveText(u"")
         self.search.ShowSearchButton(False)
