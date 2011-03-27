@@ -50,8 +50,9 @@ class BreakPointsShelfWindow(BaseShelfWindow):
         self.addbtn.ToolTip = wx.ToolTip(_("Set Breakpoint"))
         self.delbtn = self.AddPlateButton(u"", ed_glob.ID_REMOVE, wx.ALIGN_LEFT)
         self.delbtn.ToolTip = wx.ToolTip(_("Delete Breakpoint"))
-        ctrlbar.AddStretchSpacer()
-        self.layout("Clear", self.OnClear)
+        self.delallbtn = self.AddPlateButton(u"", ed_glob.ID_DELETE, wx.ALIGN_LEFT)
+        self.delallbtn.ToolTip = wx.ToolTip(_("Delete All Breakpoints"))
+        self.layout(None, None)
 
         # Attributes
         RPDBDEBUGGER.breakpoints = ToolConfig.GetConfigValue(ToolConfig.TLC_BREAKPOINTS)
@@ -69,6 +70,7 @@ class BreakPointsShelfWindow(BaseShelfWindow):
         # Event Handlers
         self.Bind(wx.EVT_BUTTON, self.OnButton, self.addbtn)
         self.Bind(wx.EVT_BUTTON, self.OnButton, self.delbtn)
+        self.Bind(wx.EVT_BUTTON, self.OnClear, self.delallbtn)
 
     def Unsubscription(self):
         """Cleanup items on destroy"""
