@@ -31,8 +31,10 @@ import syntax.synglob as synglob
 from PyTools.Common import ToolConfig
 from PyTools.Common.BaseShelfWindow import BaseShelfWindow
 from PyTools.Common import Images
+from PyTools.Common.DummyProcessCreator import DummyProcessCreator
 from PyTools.Debugger.DebuggeeWindow import DebuggeeWindow
 from PyTools.Debugger.PythonDebugger import PythonDebugger
+from PyTools.Debugger.AttachDialog import AttachDialog
 from PyTools.Debugger import RPDBDEBUGGER
 from PyTools.Debugger import MESSAGEHANDLER
 
@@ -86,16 +88,22 @@ class DebugShelfWindow(BaseShelfWindow):
         self.search.ShowCancelButton(True)
         ctrlbar.AddControl(self.search, wx.ALIGN_RIGHT, 2)
 
-        self.layout(None, None, self.OnJobTimer)
+        self.layout("Remote", self.OnRemote, self.OnJobTimer)
 
         # Attributes
-        RPDBDEBUGGER.mainwindow = self._mw
-        RPDBDEBUGGER.debugbuttonsupdate = self.OnButtonsUpdate
-        RPDBDEBUGGER.disabledebugbuttons = self.DisableButtons
         MESSAGEHANDLER.debugeditorupdate = self.OnEditorUpdate
         self._debugger = None
         self._debugrun = False
         self._debugargs = ""
+        
+        # For remote attachment
+        self._lastpwd = ""
+        self._lasthost = "localhost"
+
+        # Debugger Attributes
+        RPDBDEBUGGER.mainwindow = self._mw
+        RPDBDEBUGGER.debugbuttonsupdate = self.OnButtonsUpdate
+        RPDBDEBUGGER.disabledebugbuttons = self.DisableButtons
 
         # Event Handlers
         self.Bind(wx.EVT_BUTTON, self.OnGo, self.gobtn)
@@ -128,6 +136,7 @@ class DebugShelfWindow(BaseShelfWindow):
 
     def DisableButtons(self):
         """Disable all debugger buttons"""
+        self.taskbtn.Enable(False)
         self.gobtn.Enable(False)
         self.abortbtn.Enable(False)
         self.stepinbtn.Enable(False)
@@ -140,6 +149,7 @@ class DebugShelfWindow(BaseShelfWindow):
     def _onbuttonsupdate(self, ispython):
         """Update button states based on debugger state"""
         attached = RPDBDEBUGGER.attached
+        self.taskbtn.Enable(not attached)
         broken = RPDBDEBUGGER.broken
         attachedandbroken = attached and broken
         ispythonandnotattached = ispython and not attached
@@ -259,13 +269,11 @@ class DebugShelfWindow(BaseShelfWindow):
         Profile_Set(ToolConfig.PYTOOL_CONFIG, config)
         self._listCtrl.AddText(_("Reenabling Pylint Autorun."))
     
-    def _debug(self, filetype, vardict, filename):
-        debugger = self.get_debugger(filetype, vardict, filename)
-        if not debugger:
-            return []
-        self._debugger = debugger
-        self._curfile = filename
-
+    def _setdebuggerdefaults(self):
+        RPDBDEBUGGER.set_default_password()
+        RPDBDEBUGGER.set_default_host()
+    
+    def _setdebuggeroptions(self):
         config = Profile_Get(ToolConfig.PYTOOL_CONFIG, default=dict())
         trap = config.get(ToolConfig.TLC_TRAP_EXCEPTIONS, True)
         RPDBDEBUGGER.set_trap_unhandled_exceptions(trap)
@@ -286,6 +294,15 @@ class DebugShelfWindow(BaseShelfWindow):
         else:
             self._listCtrl.restoreautorun = lambda:None
 
+    def _debug(self, filetype, vardict, filename):
+        debugger = self.get_debugger(filetype, vardict, filename)
+        if not debugger:
+            return []
+        self._debugger = debugger
+        self._curfile = filename
+        
+        self._setdebuggerdefaults()
+        self._setdebuggeroptions()
         # Start job timer
         self._StopTimer()
         self._jobtimer.Start(250, True)
@@ -318,3 +335,25 @@ class DebugShelfWindow(BaseShelfWindow):
     def OnBreak(self, event):
         """Break now"""
         RPDBDEBUGGER.do_break()
+
+    def OnRemote(self, event):
+        """Remote debug"""
+        if RPDBDEBUGGER.attached:
+            return
+        attach_dialog = AttachDialog(self)
+        r = attach_dialog.ShowModal()
+        if r == wx.ID_OK:
+            server = attach_dialog.get_server()
+            debugger = self.get_debugger(synglob.ID_LANG_PYTHON, {}, "")
+            if not debugger:
+                return []
+            self._debugger = debugger
+            self._listCtrl.SetText("Debugging remote debuggee %s\n" % server.m_filename)
+            dpc = DummyProcessCreator(server.m_rid, self._listCtrl.AddText, RPDBDEBUGGER.do_detach)
+            dpc.restorepath = lambda:None
+            self._debugger.processcreator = dpc
+            self._setdebuggeroptions()
+            self._debugger.RunDebugger()
+        
+        attach_dialog.Destroy()
+        

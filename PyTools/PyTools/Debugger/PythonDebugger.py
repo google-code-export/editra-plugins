@@ -95,7 +95,7 @@ class PythonDebugger(AbstractDebugger):
         text += u"\nDirectory Variables file: %s" % self.dirvarfile
         self.debuggeewindow.AddText(text)
         self.debuggeewindow.calldebugger = self.RunDebugger
-        self.processcreator = AsyncProcessCreator(self.debuggeewindow, "PyDbg", parentPath, rpdb2_cmd, self.pythonpath)
+        self.processcreator = AsyncProcessCreator(self.debuggeewindow, self.debuggeewindow.AddText, "PyDbg", parentPath, rpdb2_cmd, self.pythonpath)
         self.processcreator.start()
         util.Log("[PyDbg][info] Rpdb2 command running")
 
