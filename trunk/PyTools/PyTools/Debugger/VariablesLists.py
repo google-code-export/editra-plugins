@@ -135,7 +135,8 @@ class VariablesList(wx.gizmos.TreeListCtrl):
         else:
             default_value = ""
 
-        expr_dialog = ExpressionDialog(self, default_value)
+        desc = "The new expression will be evaluated at the debuggee and its value will be set to the item."    
+        expr_dialog = ExpressionDialog(self, default_value, "Enter Expression", desc, "New Expression:", (200, -1))
         pos = self.GetPositionTuple()
         expr_dialog.SetPosition((pos[0] + 50, pos[1] + 50))
         r = expr_dialog.ShowModal()
