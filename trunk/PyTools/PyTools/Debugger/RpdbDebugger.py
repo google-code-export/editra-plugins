@@ -197,6 +197,28 @@ class RpdbDebugger(object):
     def do_detach(self):
         self.attached_callsessionmanagerfn(self.sessionmanager.detach)
 
+    def get_host(self):
+        return self.callsessionmanagerfn(self.sessionmanager.get_host)
+    
+    def set_default_host(self):
+        self.callsessionmanagerfn(self.sessionmanager.set_host, RpdbDebugger.host)
+        
+    def calc_server_list(self, host):
+        self.sessionmanager.set_host(host)
+        return self.sessionmanager.calc_server_list()
+    
+    def get_server_list(self, host):
+        return self.callsessionmanagerfn(self.calc_server_list, host)
+        
+    def get_password(self):
+        return self.callsessionmanagerfn(self.sessionmanager.get_password)
+        
+    def set_password(self, pwd):
+        self.callsessionmanagerfn(self.sessionmanager.set_password, pwd)
+        
+    def set_default_password(self):
+        self.callsessionmanagerfn(self.sessionmanager.set_password, RpdbDebugger.password)
+        
     def register_callback(self, func, event_type_dict, fSingleUse = False):
         self.sessionmanager.register_callback(func, event_type_dict, fSingleUse = fSingleUse)
 

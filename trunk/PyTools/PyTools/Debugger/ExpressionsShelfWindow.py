@@ -110,7 +110,7 @@ class ExpressionsShelfWindow(BaseShelfWindow):
 
         expr_dialog.Destroy()
         
-        worker = RunProcInThread("PyExec", self._oncodeexecuted,
+        worker = RunProcInThread("DbgExec", self._oncodeexecuted,
                                  RPDBDEBUGGER.execute, _expr)
         worker.start()
 
