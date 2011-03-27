@@ -33,3 +33,7 @@ class AsyncProcessCreator(eclib.ProcessThreadBase, ProcessCreator):
         
     def AddText(self, text):
         self.textfn(text)
+        
+    def GetPID(self):
+        return self.Process.pid
+        

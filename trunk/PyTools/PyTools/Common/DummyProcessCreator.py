@@ -19,10 +19,7 @@ import eclib
 class DummyProcessCreator(object):
     def __init__(self, pid, textfn, abortfn):
         super(DummyProcessCreator, self).__init__()
-        class pidholder(object):
-            pid = None
-        self.Process = pidholder
-        self.Process.pid = pid
+        self.pid = pid
         self.textfn = textfn
         self.abortfn = abortfn
 
@@ -31,3 +28,6 @@ class DummyProcessCreator(object):
         
     def Abort(self):
         self.abortfn()
+        
+    def GetPID(self):
+        return self.pid
