@@ -69,6 +69,8 @@ class VariablesShelfWindow(BaseShelfWindow):
         RPDBDEBUGGER.updateexceptions = self._exceptions.update_namespace
         RPDBDEBUGGER.catchunhandledexception = self.UnhandledException
         RPDBDEBUGGER.updateanalyze = self.UpdateAnalyze
+        
+        RPDBDEBUGGER.update_namespace()
 
     def Unsubscription(self):
         """Cleanup on Destroy"""

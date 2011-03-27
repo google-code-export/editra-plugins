@@ -34,8 +34,7 @@ from PyTools.SyntaxChecker.LintShelfWindow import LintShelfWindow
 from PyTools.ModuleFinder.FindShelfWindow import FindShelfWindow
 from PyTools.Debugger.DebugShelfWindow import DebugShelfWindow
 from PyTools.Debugger.BreakPointsShelfWindow import BreakPointsShelfWindow
-from PyTools.Debugger.StackFrameShelfWindow import StackFrameShelfWindow
-from PyTools.Debugger.ThreadsShelfWindow import ThreadsShelfWindow
+from PyTools.Debugger.StackThreadShelfWindow import StackThreadShelfWindow
 from PyTools.Debugger.VariablesShelfWindow import VariablesShelfWindow
 from PyTools.Debugger.ExpressionsShelfWindow import ExpressionsShelfWindow
 
@@ -94,22 +93,10 @@ class PyBreakPoint(BaseShelfPlugin):
         """
         return Images.Bug.Bitmap
 
-class PyStackFrame(BaseShelfPlugin):
+class PyStackThread(BaseShelfPlugin):
     """Script Launcher and output viewer"""
     def __init__(self, pluginmgr):
-        super(PyStackFrame, self).__init__(pluginmgr, "PyStackFrame", StackFrameShelfWindow)
-
-    def GetBitmap(self):
-        """Get the tab bitmap
-        @return: wx.Bitmap
-
-        """
-        return Images.Bug.Bitmap
-
-class PyThread(BaseShelfPlugin):
-    """Script Launcher and output viewer"""
-    def __init__(self, pluginmgr):
-        super(PyThread, self).__init__(pluginmgr, "PyThread", ThreadsShelfWindow)
+        super(PyStackThread, self).__init__(pluginmgr, "PyStackThread", StackThreadShelfWindow)
 
     def GetBitmap(self):
         """Get the tab bitmap
