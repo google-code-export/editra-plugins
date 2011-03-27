@@ -20,14 +20,8 @@ class DummyProcessCreator(object):
     def __init__(self, pid, textfn, abortfn):
         super(DummyProcessCreator, self).__init__()
         self.pid = pid
-        self.textfn = textfn
-        self.abortfn = abortfn
+        self.AddText = textfn
+        self.Abort = abortfn
 
-    def AddText(self, text):
-        self.textfn(text)
-        
-    def Abort(self):
-        self.abortfn()
-        
     def GetPID(self):
         return self.pid
