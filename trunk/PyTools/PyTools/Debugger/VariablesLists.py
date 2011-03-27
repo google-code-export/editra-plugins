@@ -20,7 +20,6 @@ import wx
 import wx.gizmos
 
 # Editra Libraries
-import eclib
 
 # Local Imports
 from PyTools.Common.PyToolsUtils import PyToolsUtils
@@ -30,14 +29,14 @@ from PyTools.Debugger import RPDBDEBUGGER
 
 # Globals
 _ = wx.GetTranslation
-STR_NAMESPACE_DEADLOCK = "Data Retrieval Timeout"
-STR_NAMESPACE_LOADING = "Loading..."
-STR_MAX_NAMESPACE_WARNING_TITLE = "Namespace Warning"
 
 #----------------------------------------------------------------------------#
 
 class VariablesList(wx.gizmos.TreeListCtrl):
     """List control for displaying stack frame results"""
+    COL_NAME = 0
+    COL_REPR = 1
+    COL_TYPE = 2
     def __init__(self, parent, listtype, filterlevel):
         super(VariablesList, self).__init__(parent)
 
@@ -104,14 +103,15 @@ class VariablesList(wx.gizmos.TreeListCtrl):
         if expressionlist is None:
             expressionlist = [(self.listtype, True)]
 
-        worker = RunProcInThread(self.listtype, self.UpdateVariablesList, \
-            RPDBDEBUGGER.catchexc_get_namespace, expressionlist, self.filterlevel)
+        worker = RunProcInThread(self.listtype, self.UpdateVariablesList,
+                                 RPDBDEBUGGER.catchexc_get_namespace, 
+                                 expressionlist, self.filterlevel)
         worker.start()
         return (old_key, old_expressionlist)
 
     def OnItemToolTip(self, event):
         item = event.GetItem()
-        tooltip = self.GetItemText(item, 2)[1:]
+        tooltip = self.GetItemText(item, VariablesList.COL_REPR)[1:]
         event.SetToolTip(tooltip)
        
     def OnItemCollapsing(self, event):
@@ -121,13 +121,14 @@ class VariablesList(wx.gizmos.TreeListCtrl):
     def OnItemActivated(self, event):
         item = event.GetItem()
         (expr, is_valid) = self.GetPyData(item)
-        if expr in [STR_NAMESPACE_LOADING, STR_NAMESPACE_DEADLOCK, STR_MAX_NAMESPACE_WARNING_TITLE]:
+        if expr in [_("Loading..."), _("Data Retrieval Timeout"), 
+                    _("Namespace Warning")]:
             return
         wx.CallAfter(self._onitemactivated, item, expr, is_valid)
         
     def _onitemactivated(self, item, expr, is_valid):
         if is_valid:
-            default_value = self.GetItemText(item, 2)[1:]
+            default_value = self.GetItemText(item, VariablesList.COL_REPR)[1:]
         else:
             default_value = ""
 
@@ -161,7 +162,8 @@ class VariablesList(wx.gizmos.TreeListCtrl):
         PyToolsUtils.error_dialog(self, error)
 
         if not warning in self.ignoredwarnings:
-            dlg = wx.MessageDialog(self, _("%s\n\nClick 'Cancel' to ignore this warning in this session.") % warning,\
+            dlg = wx.MessageDialog(self, 
+                                   _("%s\n\nClick 'Cancel' to ignore this warning in this session.") % warning,\
                                    _("Warning"),
                                    wx.OK|wx.CANCEL|wx.YES_DEFAULT|wx.ICON_WARNING)
             res = dlg.ShowModal()
@@ -186,10 +188,10 @@ class VariablesList(wx.gizmos.TreeListCtrl):
     def _onitemexpanding(self, item):
         self.DeleteChildren(item)
         
-        child = self.AppendItem(item, STR_NAMESPACE_LOADING)
-        self.SetItemText(child, ' ' + STR_NAMESPACE_LOADING, 2)
-        self.SetItemText(child, ' ' + STR_NAMESPACE_LOADING, 1)
-        self.SetItemPyData(child, (STR_NAMESPACE_LOADING, False))
+        child = self.AppendItem(item, _("Loading..."))
+        self.SetItemText(child, u' ' + _("Loading..."), VariablesList.COL_REPR)
+        self.SetItemText(child, ' ' + _("Loading..."), VariablesList.COL_TYPE)
+        self.SetItemPyData(child, (_("Loading..."), False))
 
         (expr, is_valid) = self.GetPyData(item)
 
@@ -197,7 +199,7 @@ class VariablesList(wx.gizmos.TreeListCtrl):
         if item == None:
             return
       
-        worker = RunProcInThread(self.listtype, self._itemexpandingcallback, \
+        worker = RunProcInThread(self.listtype, self._itemexpandingcallback,
                                  RPDBDEBUGGER.get_namespace, [(expr, True)], 
                                  self.filterlevel)
         worker.pass_parameter(item)
@@ -205,10 +207,12 @@ class VariablesList(wx.gizmos.TreeListCtrl):
 
     def _itemexpandingcallback(self, variables, item):
         if not variables:
-            child = self.AppendItem(item, STR_NAMESPACE_DEADLOCK)
-            self.SetItemText(child, ' ' + STR_NAMESPACE_DEADLOCK, 2)
-            self.SetItemText(child, ' ' + STR_NAMESPACE_DEADLOCK, 1)
-            self.SetItemPyData(child, (STR_NAMESPACE_DEADLOCK, False))
+            child = self.AppendItem(item, _("Data Retrieval Timeout"))
+            self.SetItemText(child, u' ' + _("Data Retrieval Timeout"), 
+                             VariablesList.COL_REPR)
+            self.SetItemText(child, u' ' + _("Data Retrieval Timeout"), 
+                             VariablesList.COL_TYPE)
+            self.SetItemPyData(child, (_("Data Retrieval Timeout"), False))
             self.Expand(item)
 
             if freselect_child:
@@ -241,12 +245,12 @@ class VariablesList(wx.gizmos.TreeListCtrl):
         child = self.get_children(item)[0]
         (expr, is_valid) = self.GetPyData(child)
 
-        if expr in [STR_NAMESPACE_LOADING, STR_NAMESPACE_DEADLOCK]:
+        if expr in [_("Loading..."), _("Data Retrieval Timeout")]:
             return 0
 
         return 1
 
-    def expand_item(self, item, variables, froot = False, fskip_expansion_check = False):
+    def expand_item(self, item, variables, froot=False, fskip_expansion_check=False):
         if not self.ItemHasChildren(item):
             return
         
@@ -281,15 +285,14 @@ class VariablesList(wx.gizmos.TreeListCtrl):
         # The list is indexed by name or directory key.
         # In case of a list, no sorting is needed.
         #
-
         for subnode in first_variable_with_expr["subnodes"]:
             _name = unicode(subnode["name"])
             _type = unicode(subnode["type"])
             _repr = unicode(subnode["repr"])
 
             child = self.AppendItem(item, _name)
-            self.SetItemText(child, ' ' + _repr, 2)
-            self.SetItemText(child, ' ' + _type, 1)
+            self.SetItemText(child, ' ' + _repr, VariablesList.COL_REPR)
+            self.SetItemText(child, ' ' + _type, VariablesList.COL_TYPE)
             self.SetItemPyData(child, (subnode["expr"], subnode["fvalid"]))
             self.SetItemHasChildren(child, (subnode["n_subnodes"] > 0))
 
