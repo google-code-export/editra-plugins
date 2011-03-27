@@ -14,12 +14,11 @@ __revision__ = "$Revision$"
 
 #-----------------------------------------------------------------------------#
 # Imports
-import os.path
+import os
 import wx
 
 # Editra Libraries
 import util
-import eclib
 import ed_msg
 from syntax import syntax
 import syntax.synglob as synglob
@@ -31,12 +30,19 @@ from PyTools.Common.PyToolsUtils import PyToolsUtils
 _ = wx.GetTranslation
 
 ID_COPY_MODULEPATH = wx.NewId()
+
 #-----------------------------------------------------------------------------#
 
 class FindTabMenu(object):
+    """Handles customization of buffer tab menu"""
     def __init__(self):
+        super(FindTabMenu, self).__init__()
+
         # Editra Message Handlers
         ed_msg.Subscribe(self.OnTabMenu, ed_msg.EDMSG_UI_NB_TABMENU)
+
+    def __del__(self):
+        self.Unsubscription()
 
     def Unsubscription(self):
         ed_msg.Unsubscribe(self.OnTabMenu)
@@ -45,8 +51,7 @@ class FindTabMenu(object):
         editor = wx.GetApp().GetCurrentBuffer()
         if editor:
             langid = getattr(editor, 'GetLangId', lambda: -1)()
-            ispython = langid == synglob.ID_LANG_PYTHON
-            if ispython:
+            if langid == synglob.ID_LANG_PYTHON:
                 contextmenumanager = msg.GetData()
                 menu = contextmenumanager.GetMenu()
                 menu.Append(ID_COPY_MODULEPATH, _("Copy Module Path"))
@@ -55,6 +60,6 @@ class FindTabMenu(object):
     def copy_module_path(self, editor, evt):
         path = os.path.normcase(editor.GetFileName())
         if path is not None:
-            childPath, _ = PyToolsUtils.get_packageroot(path)
+            childPath, foo = PyToolsUtils.get_packageroot(path)
             modulepath = PyToolsUtils.get_modulepath(childPath)
             util.SetClipboardText(modulepath)
