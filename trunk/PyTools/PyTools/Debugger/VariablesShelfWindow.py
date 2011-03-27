@@ -18,6 +18,7 @@ import threading
 import wx
 
 # Editra Libraries
+import ed_glob
 import eclib
 from profiler import Profile_Get, Profile_Set
 
@@ -52,7 +53,8 @@ class VariablesShelfWindow(BaseShelfWindow):
         exceptionsfilterlevel = config.get(ToolConfig.TLC_EXCEPTIONS_FILTERLEVEL, 0)
         
         # Attributes
-        bstyle = eclib.SEGBOOK_STYLE_NO_DIVIDERS|eclib.SEGBOOK_STYLE_LABELS
+        bstyle = eclib.SEGBOOK_STYLE_NO_DIVIDERS|\
+                 eclib.SEGBOOK_STYLE_LEFT
         self._nb = eclib.SegmentBook(self, style=bstyle)
         self._locals = VariablesList(self._nb, self.LOCALSSTR, localsfilterlevel)
         self._globals = VariablesList(self._nb, self.GLOBALSSTR, globalsfilterlevel)
@@ -61,8 +63,8 @@ class VariablesShelfWindow(BaseShelfWindow):
         # Setup
         self._InitImageList()
         self._nb.AddPage(self._locals, _("Locals"), img_id=0)
-        self._nb.AddPage(self._globals, _("Globals"), img_id=0)
-        self._nb.AddPage(self._exceptions, _("Exceptions"), img_id=0)
+        self._nb.AddPage(self._globals, _("Globals"), img_id=1)
+        self._nb.AddPage(self._exceptions, _("Exceptions"), img_id=2)
         ctrlbar = self.setup(self._nb, self._locals,
                              self._globals, self._exceptions)
         ctrlbar.AddStretchSpacer()
@@ -99,6 +101,26 @@ class VariablesShelfWindow(BaseShelfWindow):
         self.Bind(wx.EVT_COMBOBOX, self.SetFilterLevelExceptions, self.filterlevelexceptions)
 
         RPDBDEBUGGER.update_namespace()
+
+    def _InitImageList(self):
+        """Initialize the segmentbooks image list"""
+        dorefresh = False
+        if len(self._imglst):
+            del self._imglst
+            self._imglst = list()
+            dorefresh = True
+
+        bmp = wx.ArtProvider.GetBitmap(str(ed_glob.ID_VARIABLE_TYPE), wx.ART_MENU)
+        self._imglst.append(bmp)
+        bmp = wx.ArtProvider.GetBitmap(str(ed_glob.ID_WEB), wx.ART_MENU)
+        self._imglst.append(bmp)
+        bmp = wx.ArtProvider.GetBitmap(wx.ART_ERROR, wx.ART_MENU)
+        self._imglst.append(bmp)
+        self._nb.SetImageList(self._imglst)
+        self._nb.SetUsePyImageList(True)
+
+        if dorefresh:
+            self._nb.Refresh()
 
     def Unsubscription(self):
         """Cleanup on Destroy"""
