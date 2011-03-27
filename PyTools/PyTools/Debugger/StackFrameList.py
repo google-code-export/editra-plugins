@@ -18,10 +18,12 @@ import os.path
 import wx
 
 # Editra Libraries
+import util
 import eclib
 
 # Local Imports
 from PyTools.Debugger import RPDBDEBUGGER
+from PyTools.Common.PyToolsUtils import PyToolsUtils
 
 # Globals
 _ = wx.GetTranslation
@@ -30,18 +32,22 @@ _ = wx.GetTranslation
 
 class StackFrameList(eclib.EBaseListCtrl):
     """List control for displaying stack frame results"""
+    COL_FRAME = 0
+    COL_FILE = 1
+    COL_LINE = 2
+    COL_FUNCT = 3
     def __init__(self, parent):
         super(StackFrameList, self).__init__(parent)
 
         # Setup
-        self.InsertColumn(0, _("Frame"))
-        self.InsertColumn(1, _("File"))
-        self.InsertColumn(2, _("Line"))
-        self.InsertColumn(3, _("Function"))
+        self.InsertColumn(StackFrameList.COL_FRAME, _("Frame"))
+        self.InsertColumn(StackFrameList.COL_FILE, _("File"))
+        self.InsertColumn(StackFrameList.COL_LINE, _("Line"))
+        self.InsertColumn(StackFrameList.COL_FUNCT, _("Function"))
 
         # Attributes
         self.previndex = None
-        
+
         # Event Handlers
         self.Bind(wx.EVT_LIST_ITEM_ACTIVATED, self.OnFrameSelected)
 
@@ -49,20 +55,32 @@ class StackFrameList(eclib.EBaseListCtrl):
         self._mainw = mw
 
     def select_frame(self, index):
-        if (index < 0) or (index > self.GetItemCount()):
+        """Select a frame in the ListCtrl"""
+        if (index < 0) or (index > self.GetItemCount() or self.IsSelected(index)):
             return
-
-        if self.IsSelected(index):
-            return
-            
         self.Select(index)
 
     def OnFrameSelected(self, evt):
-        index = evt.m_itemIndex
+        index = evt.GetIndex()
         if self.previndex == index:
             return
         self.previndex = index
         RPDBDEBUGGER.set_frameindex(index)
+        # TODO: should probably break at this frame
+
+        # Navigate to the selected frame
+        # TODO: find out why it jumps back to the other tab seems like
+        #       the debugger does a Go after activating an item in the stack.
+        fileName = self.GetItem(index, StackFrameList.COL_FILE).GetText()
+        if not fileName:
+            return
+        editor = PyToolsUtils.GetEditorOrOpenFile(self._mainw, fileName)
+        if editor:
+            try:
+                lineno = int(self.GetItem(index, StackFrameList.COL_LINE).GetText())
+                editor.GotoLine(lineno - 1)
+            except ValueError:
+                util.Log("[PyTools][err] StackFrame: failed to jump to file")
 
     def Clear(self):
         """Delete all the rows """
@@ -78,34 +96,23 @@ class StackFrameList(eclib.EBaseListCtrl):
         funcText = _("Function")
         minLFile = max(self.GetTextExtent(fileText)[0], self.GetColumnWidth(1))
         minLFunc = max(self.GetTextExtent(funcText)[0], self.GetColumnWidth(3))
-        
-        self._data = {}
+
         idx = 0
         while idx < len(data):
             frameinfo = data[-(1 + idx)]
-            
+
             filename = os.path.normcase(frameinfo[0])
             lineno = frameinfo[1]
             function = frameinfo[2]
 
             efilename = unicode(filename)
             efunction = unicode(function)
-            self._data[idx] = (unicode(idx), efilename, unicode(lineno), efunction)
             minLFile = max(minLFile, self.GetTextExtent(efilename)[0])
             minLFunc = max(minLFunc, self.GetTextExtent(efunction)[0])
-            self.Append(self._data[idx])
-            self.SetItemData(idx, idx)
-
+            self.Append((unicode(idx), efilename, unicode(lineno), efunction))
             idx += 1
-            
-        self.SetColumnWidth(1, minLFile)
-        self.SetColumnWidth(3, minLFunc)
+
+        self.SetColumnWidth(StackFrameList.COL_FILE, minLFile)
+        self.SetColumnWidth(StackFrameList.COL_FUNCT, minLFunc)
         self.previndex = None
         self.Select(0)
-
-    @staticmethod
-    def _printListCtrl(ctrl):
-        for row in xrange(0, ctrl.GetItemCount()):
-            for column in xrange(0, ctrl.GetColumnCount()):
-                print ctrl.GetItem(row, column).GetText(), "\t",
-            print ""

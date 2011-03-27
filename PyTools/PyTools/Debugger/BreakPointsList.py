@@ -64,17 +64,16 @@ class BreakPointsList(eclib.EToggleEditListCtrl):
     def OnItemActivated(self, evt):
         """Go to the file"""
         idx = evt.GetIndex()
-        fileName = self.GetItem(idx, 0).GetText()
+        fileName = self.GetItem(idx, BreakPointsList.COL_FILE).GetText()
         if not fileName:
             return
         editor = PyToolsUtils.GetEditorOrOpenFile(self._mainw, fileName)
-        if not editor:
-            return
-        try:
-            lineno = int(self.GetItem(idx, 1).GetText())
-            editor.GotoLine(lineno - 1)
-        except ValueError:
-            pass
+        if editor:
+            try:
+                lineno = int(self.GetItem(idx, BreakPointsList.COL_LINE).GetText())
+                editor.GotoLine(lineno - 1)
+            except ValueError:
+                pass
 
     def OpenEditor(self, col, row):
         """Disable the editor for the first and second columns
