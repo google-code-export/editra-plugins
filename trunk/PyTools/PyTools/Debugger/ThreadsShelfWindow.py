@@ -23,12 +23,15 @@ from PyTools.Debugger import RPDBDEBUGGER
 
 # Globals
 _ = wx.GetTranslation
+
 #-----------------------------------------------------------------------------#
 
 class ThreadsShelfWindow(BaseShelfWindow):
     def __init__(self, parent):
         """Initialize the window"""
         super(ThreadsShelfWindow, self).__init__(parent)
+
+        # Setup
         ctrlbar = self.setup(ThreadsList(self))
         self.layout()
                 
@@ -43,6 +46,7 @@ class ThreadsShelfWindow(BaseShelfWindow):
         self.UpdateThreadList(current_thread, threads_list)
 
     def Unsubscription(self):
+        """Cleanup on Destroy"""
         RPDBDEBUGGER.clearthread = lambda:None
         RPDBDEBUGGER.updatethread = lambda x,y,z:None
         RPDBDEBUGGER.updatethreadlist = lambda x,y:None
@@ -62,6 +66,4 @@ class ThreadsShelfWindow(BaseShelfWindow):
         self.current_thread = None
         self.threads_list = None
         self._listCtrl.Clear()
-        
-    def OnGo(self, event):
-        pass
+       
