@@ -16,15 +16,17 @@ __revision__ = "$Revision$"
 # Imports
 import os.path
 import wx
-from wx.stc import STC_INDIC_PLAIN
 import copy
 
 # Editra Libraries
+import ed_glob
 from profiler import Profile_Get, Profile_Set
 
 # Local imports
 from PyTools.Common import ToolConfig
 from PyTools.Common.PyToolsUtils import PyToolsUtils
+from PyTools.Common.PyToolsUtils import RunProcInThread
+from PyTools.Debugger.ExpressionDialog import ExpressionDialog
 from PyTools.Common.BaseShelfWindow import BaseShelfWindow
 from PyTools.Debugger.ExpressionsList import ExpressionsList
 from PyTools.Debugger import RPDBDEBUGGER
@@ -40,16 +42,27 @@ class ExpressionsShelfWindow(BaseShelfWindow):
         super(ExpressionsShelfWindow, self).__init__(parent)
         ctrlbar = self.setup(ExpressionsList(self))
         ctrlbar.AddStretchSpacer()
-        self.layout("Clear", self.OnClear)
-
+        
         # Attributes
+        self.ignoredwarnings = {}
+        rbmp = wx.ArtProvider.GetBitmap(str(ed_glob.ID_BIN_FILE), wx.ART_MENU)
+        if rbmp.IsNull() or not rbmp.IsOk():
+            rbmp = None
+        self.executebtn = self.AddPlateButton(u"Execute", rbmp, wx.ALIGN_LEFT)
+        self.executebtn.ToolTip = wx.ToolTip(_("Execute"))
         self.expressions = ToolConfig.GetConfigValue(ToolConfig.TLC_EXPRESSIONS)
+        
+        self.layout("Clear", self.OnClear)        
         self._listCtrl.PopulateRows(self.expressions)
         
+        # Debugger Attributes
         RPDBDEBUGGER.restoreexpressions = self.RestoreExpressions
         RPDBDEBUGGER.saveandrestoreexpressions = self.SaveAndRestoreExpressions
         RPDBDEBUGGER.clearexpressionvalues = self._listCtrl.clearexpressionvalues
 
+        # Event Handlers
+        self.Bind(wx.EVT_BUTTON, self.OnExecute, self.executebtn)
+        
     def Unsubscription(self):
         RPDBDEBUGGER.restoreexpressions = lambda:None
         RPDBDEBUGGER.saveandrestoreexpressions = lambda:None
@@ -82,3 +95,43 @@ class ExpressionsShelfWindow(BaseShelfWindow):
     def OnClear(self, evt):
         self.expressions = {}
         self.SaveAndRestoreExpressions()
+
+    def OnExecute(self, event):
+        desc = "This code will be executed at the debuggee:"
+        expr_dialog = ExpressionDialog(self, u"", "Enter Code to Execute", desc, None, (200, 200))
+        pos = self.GetPositionTuple()
+        expr_dialog.SetPosition((pos[0] + 50, pos[1] + 50))
+        r = expr_dialog.ShowModal()
+        if r != wx.ID_OK:
+            expr_dialog.Destroy()
+            return
+
+        _expr = expr_dialog.get_expression()
+
+        expr_dialog.Destroy()
+        
+        worker = RunProcInThread("PyExec", self._oncodeexecuted,
+                                 RPDBDEBUGGER.execute, _expr)
+        worker.start()
+
+    def _oncodeexecuted(self, res):
+        if not res:
+            return
+        
+        if len(res) == 2:
+            warning, error = res
+        else:
+            error = res
+        
+        PyToolsUtils.error_dialog(self, error)
+
+        if warning and not warning in self.ignoredwarnings:
+            dlg = wx.MessageDialog(self, 
+                                   _("%s\n\nClick 'Cancel' to ignore this warning in this session.") % warning,\
+                                   _("Warning"),
+                                   wx.OK|wx.CANCEL|wx.YES_DEFAULT|wx.ICON_WARNING)
+            res = dlg.ShowModal()
+            dlg.Destroy()
+
+            if res == wx.ID_CANCEL:
+                self.ignoredwarnings[warning] = True

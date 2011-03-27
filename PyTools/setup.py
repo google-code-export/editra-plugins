@@ -32,8 +32,7 @@ if setup != None:
         ModuleFinder = PyTools:PyFind
         Debugger = PyTools:PyDebug
         BreakPoints = PyTools:PyBreakPoint
-        StackFrame = PyTools:PyStackFrame
-        Threads = PyTools:PyThread
+        StackThread = PyTools:PyStackThread
         Variables = PyTools:PyVariable
         Expressions = PyTools:PyExpression
         '''

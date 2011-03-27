@@ -26,20 +26,20 @@ _ = wx.GetTranslation
 #----------------------------------------------------------------------------#
 
 class ExpressionDialog(eclib.ECBaseDlg):
-    def __init__(self, parent, default_value):
-        super(ExpressionDialog, self).__init__(parent, wx.ID_ANY, "Enter Expression")    
+    def __init__(self, parent, default_value, title, description, labeltext, ctrlsize):
+        super(ExpressionDialog, self).__init__(parent, wx.ID_ANY, title)    
         
-        label = wx.StaticText(self, -1, \
-        "The new expression will be evaluated at the debuggee and its value will be set to the item.")
+        label = wx.StaticText(self, -1, description)
         self._sizer.Add(label, 0, wx.ALIGN_CENTRE | wx.ALL, 5)
 
         sizerh = wx.BoxSizer(wx.HORIZONTAL)
         self._sizer.Add(sizerh, 0, wx.ALIGN_CENTRE | wx.ALL, 5)
 
-        label = wx.StaticText(self, -1, "New Expression:")
-        sizerh.Add(label, 0, wx.ALIGN_CENTRE | wx.ALL, 5)
+        if labeltext:
+            label = wx.StaticText(self, -1, labeltext)
+            sizerh.Add(label, 0, wx.ALIGN_CENTRE | wx.ALL, 5)
 
-        self.m_entry_expr = wx.TextCtrl(self, value = default_value, size = (200, -1))
+        self.m_entry_expr = wx.TextCtrl(self, value = default_value, size = ctrlsize)
         self.m_entry_expr.SetFocus()
         self.Bind(wx.EVT_TEXT, self.OnText, self.m_entry_expr)
         sizerh.Add(self.m_entry_expr, 0, wx.ALIGN_CENTRE | wx.ALL, 5)
