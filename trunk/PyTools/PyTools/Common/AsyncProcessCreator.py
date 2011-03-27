@@ -26,13 +26,10 @@ class AsyncProcessCreator(eclib.ProcessThreadBase, ProcessCreator):
     def __init__(self, parent, textfn, info, parentPath, cmdline, pythonpath=None):
         eclib.ProcessThreadBase.__init__(self, parent)
         ProcessCreator.__init__(self, info, parentPath, cmdline, pythonpath)
-        self.textfn = textfn
+        self.AddText = textfn
 
     def DoPopen(self):
         return self.createprocess(STDOUT)
-        
-    def AddText(self, text):
-        self.textfn(text)
         
     def GetPID(self):
         return self.Process.pid
