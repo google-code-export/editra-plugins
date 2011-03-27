@@ -70,8 +70,10 @@ running) on local or remote machine:"""
         btn.SetDefault()
         sizerh.Add(btn, 0, wx.ALIGN_CENTRE | wx.ALL, 5)
 
-        self.m_listbox_scripts = eclib.EBaseListCtrl(parent=self, style=wx.LC_REPORT|wx.LC_SINGLE_SEL, size = (-1, 300))
-        self.m_listbox_scripts.InsertColumn(0, _("PID") + '    ')
+        self.m_listbox_scripts = eclib.EBaseListCtrl(parent=self,
+                                                     style=wx.LC_REPORT|wx.LC_SINGLE_SEL, 
+                                                     size=(-1, 300))
+        self.m_listbox_scripts.InsertColumn(0, _("PID") + u'    ')
         self.m_listbox_scripts.InsertColumn(1, _("Filename"))
 
         sizerv.Add(self.m_listbox_scripts, 0, wx.EXPAND | wx.ALL, 5)
@@ -82,44 +84,46 @@ running) on local or remote machine:"""
         self.SetInitialSize()
 
         # Event Handlers
-        self.Bind(wx.EVT_CLOSE, self.OnCloseWindow)
         self.Bind(wx.EVT_LIST_ITEM_SELECTED, self.OnItemSelected, self.m_listbox_scripts)
-        self.Bind(wx.EVT_LIST_ITEM_DESELECTED, self.OnItemDeselected, self.m_listbox_scripts)
         self.Bind(wx.EVT_LIST_ITEM_ACTIVATED, self.OnItemActivated, self.m_listbox_scripts)
         self.Bind(wx.EVT_UPDATE_UI,
                   lambda evt: evt.Enable(bool(self.m_listbox_scripts.GetSelectedItemCount())),
                   id=wx.ID_OK)
-        wx.CallAfter(self.init2)
+        self.Bind(wx.EVT_SHOW, self.OnShow, self)
 
-    def init2(self):
-        pwd_dialog = PasswordDialog(self, self.Parent._lastpwd)
-        pos = self.GetPositionTuple()
-        pwd_dialog.SetPosition((pos[0] + 50, pos[1] + 50))
-        if pwd_dialog.ShowModal() != wx.ID_OK:
+    def OnShow(self, event):
+        """Show Password entry dialog"""
+        def Authenticate():
+            pwd_dialog = PasswordDialog(self, self.Parent._lastpwd)
+            pos = self.GetPositionTuple()
+            pwd_dialog.CenterOnParent()
+            if pwd_dialog.ShowModal() != wx.ID_OK:
+                pwd_dialog.Destroy()
+                self.Close()
+                return
+
+            self.Parent._lastpwd = pwd_dialog.get_password()
             pwd_dialog.Destroy()
-            self.Close()
-            return
 
-        self.Parent._lastpwd = pwd_dialog.get_password()
-        pwd_dialog.Destroy()
+            RPDBDEBUGGER.set_password(self.Parent._lastpwd)
+            self.do_refresh()
 
-        RPDBDEBUGGER.set_password(self.Parent._lastpwd)
-        self.do_refresh()
+        # If showing the dialog popup the authentication dialot
+        if event.IsShown():
+            wx.CallAfter(Authenticate)
+        event.Skip()
 
     def set_cursor(self, id):
         cursor = wx.StockCursor(id)
         self.SetCursor(cursor)
         self.m_listbox_scripts.SetCursor(cursor)
 
-    def OnCloseWindow(self, event):
-        event.Skip()
-
     def get_server(self):
         return self.m_server_list[self.m_index]
 
-    def do_refresh(self, event = None):
-        host = self.m_entry_host.GetValue()
-        if host == '':
+    def do_refresh(self, event=None):
+        host = self.m_entry_host.Value
+        if not host:
             host = 'localhost'
         self.Parent._lasthost = host
         worker = RunProcInThread("DbgAttach", self._onserverlist,
@@ -127,6 +131,9 @@ running) on local or remote machine:"""
         worker.start()
 
     def _onserverlist(self, res):
+        """Callback from do_refresh thread"""
+        assert wx.Thread_IsMain(), "Must Update UI from Main Thread!!"
+
         if not res:
             return
         (self.m_server_list, self.m_errors) = res
@@ -151,6 +158,8 @@ running) on local or remote machine:"""
 
         self.m_listbox_scripts.DeleteAllItems()
 
+        # TODO: change this to not use sys.maxint, this is a bad example from
+        #       wxPython demo.
         for i, s in enumerate(self.m_server_list):
             index = self.m_listbox_scripts.InsertStringItem(sys.maxint, repr(s.m_pid))
             self.m_listbox_scripts.SetStringItem(index, 1, s.m_filename)
@@ -166,10 +175,6 @@ running) on local or remote machine:"""
         self.m_index = event.GetIndex()
         event.Skip()
 
-    def OnItemDeselected(self, event):
-        event.Skip()
-
     def OnItemActivated(self, event):
         self.m_index = event.GetIndex()
-
         self.EndModal(wx.ID_OK)
