@@ -30,35 +30,6 @@ from PyTools.Common.PythonDirectoryVariables import PythonDirectoryVariables
 
 # Globals
 _ = wx.GetTranslation
-#-----------------------------------------------------------------------------#
-
-def MakeThemeTool(tool_id):
-    """Makes a themed bitmap for the tool book of the plugin dialog.
-    @param tool_id: An art identifier id
-    @return: 32x32 bitmap
-    @todo: why does drawing a bitmap overlay on gtk not draw on transparent area
-
-    """
-    osize = Profile_Get('ICON_SZ', default=(24, 24))
-    Profile_Set('ICON_SZ', (32, 32))
-    base = wx.ArtProvider.GetBitmap(str(tool_id), wx.ART_TOOLBAR)
-    Profile_Set('ICON_SZ', osize)
-    if not base.IsOk():
-        base = wx.ArtProvider.GetBitmap(wx.ART_WARNING,
-                                        wx.ART_TOOLBAR,
-                                        size=(32, 32))
-
-    over = wx.ArtProvider.GetBitmap(str(ed_glob.ID_PLUGMGR), wx.ART_MENU)
-    if over.IsOk():
-        # Draw overlay onto button
-        mdc = wx.MemoryDC()
-        mdc.SelectObject(base)
-        mdc.SetBrush(wx.TRANSPARENT_BRUSH)
-        mdc.SetPen(wx.TRANSPARENT_PEN)
-        mdc.DrawBitmap(over, 15, 15, False)
-        mdc.SelectObject(wx.NullBitmap)
-
-    return base
 
 #-----------------------------------------------------------------------------#
 
@@ -89,13 +60,7 @@ class BaseShelfWindow(ed_basewin.EdBaseCtrlBox):
             self._imglst = list()
             dorefresh = True
 
-        self._imglst.append(MakeThemeTool(ed_glob.ID_PREF))
-        self._imglst.append(MakeThemeTool(ed_glob.ID_WEB))
-        self._imglst.append(MakeThemeTool(ed_glob.ID_PACKAGE))
-        bmp = wx.ArtProvider.GetBitmap(wx.ART_ERROR, wx.ART_TOOLBAR, (32, 32))
-        self._imglst.append(bmp)
-        bmp = wx.ArtProvider.GetBitmap(str(ed_glob.ID_PREF),
-                                       wx.ART_TOOLBAR, (32, 32))
+        bmp = wx.ArtProvider.GetBitmap(str(ed_glob.ID_PREF), wx.ART_MENU)
         self._imglst.append(bmp)
         self._nb.SetImageList(self._imglst)
         self._nb.SetUsePyImageList(True)
@@ -113,8 +78,8 @@ class BaseShelfWindow(ed_basewin.EdBaseCtrlBox):
         if len(args) == 0:
             self._listCtrl.set_mainwindow(self._mw)            
         else:
-            for listCtrl in args:
-                listCtrl.set_mainwindow(self._mw)            
+            for ctrl in args:
+                ctrl.set_mainwindow(self._mw)            
                 
         self.ctrlbar = self.CreateControlBar(wx.TOP)
         self.cfgbtn = self.AddPlateButton(u"", ed_glob.ID_PREF, wx.ALIGN_LEFT)
