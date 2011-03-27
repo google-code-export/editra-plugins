@@ -51,22 +51,6 @@ class BaseShelfWindow(ed_basewin.EdBaseCtrlBox):
         def do_nothing():
             pass
         self.destroyfn = do_nothing
-
-    def _InitImageList(self):
-        """Initialize the segmentbooks image list"""
-        dorefresh = False
-        if len(self._imglst):
-            del self._imglst
-            self._imglst = list()
-            dorefresh = True
-
-        bmp = wx.ArtProvider.GetBitmap(str(ed_glob.ID_PREF), wx.ART_MENU)
-        self._imglst.append(bmp)
-        self._nb.SetImageList(self._imglst)
-        self._nb.SetUsePyImageList(True)
-
-        if dorefresh:
-            self._nb.Refresh()
             
     def setup(self, listCtrl, *args):
         self._listCtrl = listCtrl

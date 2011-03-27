@@ -17,6 +17,7 @@ __revision__ = "$Revision$"
 import wx
 
 # Editra Libraries
+import ed_glob
 import eclib
 
 # Local imports
@@ -35,24 +36,24 @@ class StackThreadShelfWindow(BaseShelfWindow):
         """Initialize the window"""
         super(StackThreadShelfWindow, self).__init__(parent)
 
-        bstyle = eclib.SEGBOOK_STYLE_NO_DIVIDERS|eclib.SEGBOOK_STYLE_LABELS
         # Attributes
         self.prevstack = None
         self.current_thread = None
-        self.threads_list = None        
-        self._nb = eclib.SegmentBook(self, style=bstyle)        
+        self.threads_list = None
+        bstyle = eclib.SEGBOOK_STYLE_NO_DIVIDERS|eclib.SEGBOOK_STYLE_LEFT
+        self._nb = eclib.SegmentBook(self, style=bstyle)
         self._stackframe = StackFrameList(self._nb)
         self._threads = ThreadsList(self._nb)
-        
+
         # Setup
         self._InitImageList()
         self._nb.AddPage(self._stackframe, _("Stack Frame"), img_id=0)
-        self._nb.AddPage(self._threads, _("Threads"), img_id=0)
+        self._nb.AddPage(self._threads, _("Threads"), img_id=1)
         ctrlbar = self.setup(self._nb, self._stackframe,
                              self._threads)
         ctrlbar.AddStretchSpacer()
         self.layout()
-                
+
         # Debugger Attributes
         RPDBDEBUGGER.clearframe = self.ClearStackList
         RPDBDEBUGGER.selectframe = self._stackframe.select_frame
@@ -64,6 +65,25 @@ class StackThreadShelfWindow(BaseShelfWindow):
         RPDBDEBUGGER.update_stack()
         current_thread, threads_list = RPDBDEBUGGER.get_thread_list()
         self.UpdateThreadList(current_thread, threads_list)
+
+    def _InitImageList(self):
+        """Initialize the segmentbooks image list"""
+        dorefresh = False
+        if len(self._imglst):
+            del self._imglst
+            self._imglst = list()
+            dorefresh = True
+
+        # TODO: add find better Bitmaps
+        bmp = wx.ArtProvider.GetBitmap(str(ed_glob.ID_VARIABLE_TYPE), wx.ART_MENU)
+        self._imglst.append(bmp)
+        bmp = wx.ArtProvider.GetBitmap(str(ed_glob.ID_CLASS_TYPE), wx.ART_MENU)
+        self._imglst.append(bmp)
+        self._nb.SetImageList(self._imglst)
+        self._nb.SetUsePyImageList(True)
+
+        if dorefresh:
+            self._nb.Refresh()
 
     def Unsubscription(self):
         """Cleanup on Destroy"""
@@ -98,9 +118,8 @@ class StackThreadShelfWindow(BaseShelfWindow):
         self._threads.Clear()
         self._threads.PopulateRows(current_thread, threads_list)
         self._threads.RefreshRows()
-        
+
     def ClearThreadList(self):
         self.current_thread = None
         self.threads_list = None
         self._threads.Clear()
-       
