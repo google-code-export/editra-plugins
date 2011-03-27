@@ -11,11 +11,6 @@ __author__ = "Mike Rans"
 __svnid__ = "$Id: DummyProcessCreator.py 1174 2011-03-26 13:23:04Z rans@email.com $"
 __revision__ = "$Revision: 1174 $"
 
-#-----------------------------------------------------------------------------#
-# Editra Libraries
-import eclib
-#-----------------------------------------------------------------------------#
-
 class DummyProcessCreator(object):
     def __init__(self, pid, textfn, abortfn):
         super(DummyProcessCreator, self).__init__()
