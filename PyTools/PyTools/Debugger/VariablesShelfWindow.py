@@ -38,26 +38,29 @@ class VariablesShelfWindow(BaseShelfWindow):
     EXCEPTIONSSTR = u"rpdb_exception_info"
     ANALYZELBL = "Analyze Exception"
     STOPANALYZELBL = "Stop Analysis"
-    
+
     def __init__(self, parent):
         """Initialize the window"""
         super(VariablesShelfWindow, self).__init__(parent)
+
+        # Attributes
         bstyle = eclib.SEGBOOK_STYLE_NO_DIVIDERS|eclib.SEGBOOK_STYLE_LABELS
         self._nb = eclib.SegmentBook(self, style=bstyle)
         self._locals = VariablesList(self._nb, self.LOCALSSTR, 0)
         self._globals = VariablesList(self._nb, self.GLOBALSSTR, 0)
         self._exceptions = VariablesList(self._nb, self.EXCEPTIONSSTR, 0)
+
         # Setup
         self._InitImageList()
         self._nb.AddPage(self._locals, _("Locals"), img_id=0)
         self._nb.AddPage(self._globals, _("Globals"), img_id=0)
         self._nb.AddPage(self._exceptions, _("Exceptions"), img_id=0)
-
-        ctrlbar = self.setup(self._nb, self._locals, self._globals, self._exceptions)
+        ctrlbar = self.setup(self._nb, self._locals,
+                             self._globals, self._exceptions)
         ctrlbar.AddStretchSpacer()
         self.layout(self.ANALYZELBL, self.OnAnalyze)
-        
-        # attributes
+
+        # Debugger attributes
         RPDBDEBUGGER.clearlocalvariables = self._locals.Clear
         RPDBDEBUGGER.updatelocalvariables = self._locals.update_namespace
         RPDBDEBUGGER.clearglobalvariables = self._globals.Clear
@@ -68,6 +71,7 @@ class VariablesShelfWindow(BaseShelfWindow):
         RPDBDEBUGGER.updateanalyze = self.UpdateAnalyze
 
     def Unsubscription(self):
+        """Cleanup on Destroy"""
         RPDBDEBUGGER.clearlocalvariables = lambda:None
         RPDBDEBUGGER.updatelocalvariables = lambda x,y:(None,None)
         RPDBDEBUGGER.clearglobalvariables = lambda:None
@@ -81,20 +85,21 @@ class VariablesShelfWindow(BaseShelfWindow):
     def UnhandledException(self):
         RPDBDEBUGGER.unhandledexception = True
         wx.CallAfter(self._unhandledexception)
-        
-    def _unhandledexception(self):        
-        dlg = wx.MessageDialog(self, "An unhandled exception was caught. Would you like to analyze it?",\
-        "Warning", wx.YES_NO | wx.YES_DEFAULT | wx.ICON_QUESTION)
+
+    def _unhandledexception(self):
+        dlg = wx.MessageDialog(self,
+                               _("An unhandled exception was caught. Would you like to analyze it?"),
+                               _("Warning"),
+                               wx.YES_NO|wx.YES_DEFAULT|wx.ICON_QUESTION)
         res = dlg.ShowModal()
         dlg.Destroy()
 
         if res != wx.ID_YES:
             RPDBDEBUGGER.unhandledexception = False
             RPDBDEBUGGER.do_go()
-            return
+        else:
+            RPDBDEBUGGER.set_analyze(True)
 
-        RPDBDEBUGGER.set_analyze(True)
-        
     def OnAnalyze(self, event):
         if self.taskbtn.GetLabel() == self.ANALYZELBL:
             RPDBDEBUGGER.set_analyze(True)
