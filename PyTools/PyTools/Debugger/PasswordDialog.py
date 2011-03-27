@@ -30,20 +30,23 @@ _ = wx.GetTranslation
 
 class PasswordDialog(eclib.ECBaseDlg):
     def __init__(self, parent, current_password):
-        super(PasswordDialog, self).__init__(parent, wx.ID_ANY, "Password")    
-        
+        super(PasswordDialog, self).__init__(parent, title=_("Password"))
+
         # Layout
         sizerv = wx.BoxSizer(wx.VERTICAL)
 
-        pwddesc = "The password is used to secure communication between the debugger console"
-        pwddesc += "and the debuggee. Debuggees with un-matching passwords will not appear in the attach query list."
-        label = wx.StaticText(self, -1, pwddesc, size = (300, -1))
+        pwddesc = _("The password is used to secure communication between the "
+                    "debugger console and the debuggee. Debuggees with "
+                    "un-matching passwords will not appear in the attach "
+                    "query list.")
+        label = wx.StaticText(self, label=pwddesc, size=(300, -1))
         try:
             label.Wrap(300)
         except:
-            pwddesc = """The password is used to secure communication 
-between the debugger console and the debuggee. 
-Debuggees with un-matching passwords will not 
+            # TODO: TRANSLATE _()
+            pwddesc = """The password is used to secure communication
+between the debugger console and the debuggee.
+Debuggees with un-matching passwords will not
 appear in the attach query list."""
             label.SetLabel(pwddesc)
 
@@ -52,40 +55,27 @@ appear in the attach query list."""
         sizerh = wx.BoxSizer(wx.HORIZONTAL)
         sizerv.Add(sizerh, 0, wx.ALIGN_CENTRE | wx.ALL, 5)
 
-        label = wx.StaticText(self, -1, "Set password:")
+        label = wx.StaticText(self, label=_("Set password:"))
         sizerh.Add(label, 0, wx.ALIGN_CENTRE | wx.ALL, 5)
         pwd = [current_password, ''][current_password is None]
 
-        self.m_entry_pwd = wx.TextCtrl(self, value = pwd, size = (200, -1))
+        self.m_entry_pwd = wx.TextCtrl(self, value=pwd, size=(200, -1))
         self.m_entry_pwd.SetFocus()
-        self.Bind(wx.EVT_TEXT, self.OnText, self.m_entry_pwd)
         sizerh.Add(self.m_entry_pwd, 0, wx.ALIGN_CENTRE | wx.ALL, 5)
-        
-        btnsizer = wx.StdDialogButtonSizer()
-        sizerv.Add(btnsizer, 0, wx.ALIGN_RIGHT | wx.ALL, 5)
-        
-        self.m_ok = wx.Button(self, wx.ID_OK)
-        self.m_ok.SetDefault()
-        self.Bind(wx.EVT_BUTTON, self.do_ok, self.m_ok)
-        if pwd == '':
-            self.m_ok.Disable()
-        btnsizer.AddButton(self.m_ok)
 
-        btn = wx.Button(self, wx.ID_CANCEL)
-        btnsizer.AddButton(btn)
-        btnsizer.Realize()
+        # Setup Buttons
+        btnsizer = self.CreateStdDialogButtonSizer(wx.OK|wx.CANCEL)
+        sizerv.Add(btnsizer, 0, wx.ALIGN_RIGHT|wx.ALL, 5)
 
+        # Finalize Layout
         self.SetSizer(sizerv)
-        sizerv.Fit(self)        
+        self.SetInitialSize()
 
-    def OnText(self, event):
-        if event.GetString() == '':
-            self.m_ok.Disable()
-        else:
-            self.m_ok.Enable()
+        # Event Handlers
+        self.Bind(wx.EVT_UPDATE_UI,
+                  lambda evt: evt.Enable(bool(self.m_entry_pwd.Value)),
+                  id=wx.ID_OK)
 
-        event.Skip()        
-                   
     def get_password(self):
         pwd = self.m_entry_pwd.GetValue()
         return pwd
@@ -94,15 +84,13 @@ appear in the attach query list."""
         if rpdb2.is_valid_pwd(self.get_password()):
             return True
 
-        baddpwd = "The password should begin with a letter and continue with any combination of digits,"
-        baddpwd += "letters or underscores (\'_\'). Only English characters are accepted for letters."
+        baddpwd = _("The password should begin with a letter and continue "
+                    "with any combination of digits, letters or underscores "
+                    "(\'_\'). Only English characters are accepted for letters.")
         PyToolsUtils.error_dialog(self, baddpwd)
-        
         return False
 
     def do_ok(self, event):
-        f = self.do_validate()
-        if not f:
+        if not self.do_validate():
             return
-
         event.Skip()
