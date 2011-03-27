@@ -24,17 +24,21 @@ from PyTools.Debugger import RPDBDEBUGGER
 
 # Globals
 _ = wx.GetTranslation
+
 #----------------------------------------------------------------------------#
 
 class ThreadsList(eclib.EBaseListCtrl):
     """List control for displaying thread thread results"""
+    COL_ID = 0
+    COL_NAME = 1
+    COL_STATE = 2
     def __init__(self, parent):
         super(ThreadsList, self).__init__(parent)
 
         # Setup
-        self.InsertColumn(0, _("Thread Id"))
-        self.InsertColumn(1, _("Name"))
-        self.InsertColumn(2, _("State"))
+        self.InsertColumn(ThreadsList.COL_ID, _("Thread Id"))
+        self.InsertColumn(ThreadsList.COL_NAME, _("Name"))
+        self.InsertColumn(ThreadsList.COL_STATE, _("State"))
         
         # Attributes
         self.previndex = None
@@ -46,19 +50,24 @@ class ThreadsList(eclib.EBaseListCtrl):
         self._mainw = mw
 
     def update_thread(self, thread_id, thread_name, fBroken):
-        index = self.FindItemData(-1, thread_id)
-        if index < 0:
-            return
+        for index in range(self.GetItemCount()):
+            tid = self.GetItem(index, ThreadsList.COL_ID).GetText()
+            try:
+                tid = int(tid)
+                if tid == thread_id:
+                    self.SetStringItem(index, ThreadsList.COL_NAME, thread_name)
+                    self.SetStringItem(index, ThreadsList.COL_STATE, 
+                                       [_("running"), _("waiting at breakpoint")][fBroken])
+                    break
+            except ValueError:
+                pass # TODO: log it
 
-        self.SetStringItem(index, 1, thread_name)
-        self.SetStringItem(index, 2, [u"running", u"waiting at breakpoint"][fBroken])
-        
     def OnThreadSelected(self, evt):
-        index = evt.m_itemIndex
+        index = evt.GetIndex()
         if self.previndex == index:
             return
         self.previndex = index
-        tid = self.GetItemData(index)
+        tid = int(self.GetItem(index, ThreadsList.COL_ID).GetText())
         RPDBDEBUGGER.set_thread(tid)
         
     def Clear(self):
@@ -77,7 +86,6 @@ class ThreadsList(eclib.EBaseListCtrl):
         minLName = max(self.GetTextExtent(nameText)[0], self.GetColumnWidth(1))
         minLState = max(self.GetTextExtent(stateText)[0], self.GetColumnWidth(2))
         
-        self._data = {}
         selectedidx = None
         for idx, threadinfo in enumerate(threads_list):
             tid = threadinfo["tid"]
@@ -85,24 +93,16 @@ class ThreadsList(eclib.EBaseListCtrl):
             fBroken = threadinfo["broken"]
 
             ename = unicode(name)
-            estate = [u"running", u"waiting at breakpoint"][fBroken]
-            self._data[idx] = (unicode(tid), ename, estate)
+            estate = [_("running"), _("waiting at breakpoint")][fBroken]
             minLName = max(minLName, self.GetTextExtent(ename)[0])
             minLState = max(minLState, self.GetTextExtent(estate)[0])
-            self.Append(self._data[idx])
+            self.Append((unicode(tid), ename, estate))
             self.SetItemData(idx, tid)
             if tid == current_thread:
                 selectedidx = idx
             
-        self.SetColumnWidth(1, minLName)
-        self.SetColumnWidth(2, minLState)
+        self.SetColumnWidth(ThreadsList.COL_NAME, minLName)
+        self.SetColumnWidth(ThreadsList.COL_STATE, minLState)
         if selectedidx is not None:
             self.previndex = None
             self.Select(selectedidx)
-
-    @staticmethod
-    def _printListCtrl(ctrl):
-        for row in xrange(0, ctrl.GetItemCount()):
-            for column in xrange(0, ctrl.GetColumnCount()):
-                print ctrl.GetItem(row, column).GetText(), "\t",
-            print ""
