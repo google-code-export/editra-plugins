@@ -44,10 +44,12 @@ class FindShelfWindow(BaseShelfWindow):
     def __init__(self, parent):
         """Initialize the window"""
         super(FindShelfWindow, self).__init__(parent)
+
+        # Setup
         ctrlbar = self.setup(FindResultsList(self))
         ctrlbar.AddStretchSpacer()
         txtentrysize = wx.Size(256, wx.DefaultSize.GetHeight())
-        self.textentry = eclib.CommandEntryBase(ctrlbar, wx.ID_ANY, size=txtentrysize,
+        self.textentry = eclib.CommandEntryBase(ctrlbar, size=txtentrysize,
                                            style=wx.TE_PROCESS_ENTER|wx.WANTS_CHARS)
         ctrlbar.AddControl(self.textentry, wx.ALIGN_RIGHT)
         self.layout("Find", self.OnFindModule, self.OnJobTimer)
@@ -98,22 +100,20 @@ class FindShelfWindow(BaseShelfWindow):
         self._jobtimer.Start(250, True)
 
     def _OnFindData(self, data):
-        # Data is something like
-        # [('Find Error', '__all__ = ["CSVSMonitorThread"]', 7)]
-        if len(data) != 0:
-            self._listCtrl.PopulateRows(data)
-            self._listCtrl.RefreshRows()
+        """Find job callback
+        @param data: PythonModuleFinder.FindResults
+
+        """
+        self._listCtrl.PopulateRows(data)
+        self._listCtrl.RefreshRows()
         mwid = self.GetMainWindow().GetId()
         ed_msg.PostMessage(ed_msg.EDMSG_PROGRESS_SHOW, (mwid, False))
 
     def OnJobTimer(self, evt):
         """Start a module find job"""
         if self._finder:
-            util.Log("[PyFind][info] module %s" % (self._module))
+            util.Log("[PyFind][info] module %s" % self._module)
             mwid = self.GetMainWindow().GetId()
             ed_msg.PostMessage(ed_msg.EDMSG_PROGRESS_SHOW, (mwid, True))
             ed_msg.PostMessage(ed_msg.EDMSG_PROGRESS_STATE, (mwid, -1, -1))
             self._finder.Find(self._OnFindData)
-
-
-

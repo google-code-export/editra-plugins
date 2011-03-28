@@ -47,4 +47,4 @@ class AbstractModuleFinder(object):
 
     #---- Properties ----#
     ModuleToFind = property(lambda self: self.moduletofind,
-                        lambda self, name: setattr(self, 'moduletofind', name))
+                            lambda self, name: setattr(self, 'moduletofind', name))

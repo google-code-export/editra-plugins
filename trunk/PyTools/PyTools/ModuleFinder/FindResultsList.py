@@ -14,16 +14,38 @@ __revision__ = "$Revision$"
 
 #----------------------------------------------------------------------------#
 # Imports
+import os
 import wx
 
 # Editra Libraries
 import eclib
 
 # Local Imports
+from PyTools.ModuleFinder import PythonModuleFinder
 from PyTools.Common.PyToolsUtils import PyToolsUtils
 
 # Globals
 _ = wx.GetTranslation
+
+#----------------------------------------------------------------------------#
+
+def GetErrorMessage(msgid):
+    """Get error string from Message ID"""
+    smap = { PythonModuleFinder.ERROR_NO_FINDMODULE : _("Internal Search Error"),
+             PythonModuleFinder.ERROR_UNKNOWN : _("Unknown Error") }
+    return smap.get(msgid, _("Unknown Error"))
+
+def GetInfoMessage(msgid, data):
+    """Get an information message
+    @param msgid: message ID
+    @param data: message data string
+
+    """
+    smap = { PythonModuleFinder.INFO_USED_PATH : _("INFO: Using PYTHONPATH + %s"),
+             PythonModuleFinder.INFO_COMMAND_LINE : _("INFO: PyFind command line: %s"),
+             PythonModuleFinder.INFO_DIRVARS : _("INFO: Directory Variables file: %s") }
+    msg = smap.get(msgid, u"%s")
+    return msg % data
 
 #----------------------------------------------------------------------------#
 
@@ -45,9 +67,8 @@ class FindResultsList(eclib.EBaseListCtrl):
         """Go to the file"""
         idx = evt.GetIndex()
         fname = self.GetItem(idx, 0).GetText()
-        if fname.find("INFO:") != -1:
-            return
-        editor = PyToolsUtils.GetEditorOrOpenFile(self._mainw, fname)
+        if os.path.exists(fname):
+            PyToolsUtils.GetEditorOrOpenFile(self._mainw, fname)
 
     def Clear(self):
         """Delete all the rows """
@@ -55,19 +76,21 @@ class FindResultsList(eclib.EBaseListCtrl):
 
     def PopulateRows(self, data):
         """Populate the list with the data
-        @param data: list(file)
+        @param data: PythonModuleFinder.FindResults
 
         """
-        self._data = {}
-        for idx, eText in enumerate(data):
-            eText = unicode(eText).rstrip()
-            self._data[idx] = (eText,)
-            self.Append(self._data[idx])
-            self.SetItemData(idx, idx)
+        has_err = len(data.Errors)
+        for info in data.Info:
+            if len(info) == 2:
+                msg = GetInfoMessage(info[0], info[1])
+                self.Append((msg,))
 
-    @staticmethod
-    def _printListCtrl(ctrl):
-        for row in xrange(0, ctrl.GetItemCount()):
-            for column in xrange(0, ctrl.GetColumnCount()):
-                print ctrl.GetItem(row, column).GetText(), "\t",
-            print ""
+        if has_err:
+            for err in data.Errors:
+                if isinstance(err, int):
+                    err = GetErrorMessage(err)
+                self.Append((err,))
+        else:
+            for eText in data.Results:
+                eText = unicode(eText).rstrip()
+                self.Append((eText,))
