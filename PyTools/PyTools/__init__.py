@@ -31,6 +31,7 @@ from PyTools.Common import Images
 from PyTools.Common.ToolConfig import ToolConfigPanel
 from PyTools.Common.BaseShelfPlugin import BaseShelfPlugin
 from PyTools.SyntaxChecker.LintShelfWindow import LintShelfWindow
+from PyTools.ModuleFinder.FindTabMenu import FindTabMenu
 from PyTools.ModuleFinder.FindShelfWindow import FindShelfWindow
 from PyTools.Debugger.DebugShelfWindow import DebugShelfWindow
 from PyTools.Debugger.BreakPointsShelfWindow import BreakPointsShelfWindow
@@ -68,6 +69,14 @@ class PyFind(BaseShelfPlugin):
         """
         bmp = wx.ArtProvider.GetBitmap(str(ed_glob.ID_FIND), wx.ART_MENU)
         return bmp
+
+    def InstallComponents(self, parent):
+        """Initialize and install"""
+        setattr(self, '_installed', True)
+        FindTabMenu() # Initialize singleton tab menu handler
+
+    def IsInstalled(self):
+        return getattr(self, '_installed', False)
 
 class PyDebug(BaseShelfPlugin):
     """Script Launcher and output viewer"""

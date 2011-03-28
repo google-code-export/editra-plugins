@@ -18,6 +18,7 @@ import os
 import wx
 
 # Editra Libraries
+import ebmlib
 import util
 import ed_msg
 from syntax import syntax
@@ -35,6 +36,7 @@ ID_COPY_MODULEPATH = wx.NewId()
 
 class FindTabMenu(object):
     """Handles customization of buffer tab menu"""
+    __metaclass__ = ebmlib.Singleton
     def __init__(self):
         super(FindTabMenu, self).__init__()
 
