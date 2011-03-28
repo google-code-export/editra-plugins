@@ -13,6 +13,7 @@ __revision__ = "$Revision$"
 
 #-----------------------------------------------------------------------------#
 # Imports
+import wx
 import os
 import pkg_resources
 
@@ -26,6 +27,17 @@ from PyTools.ModuleFinder.AbstractModuleFinder import AbstractModuleFinder
 import util
 import ebmlib
 
+_ = wx.GetTranslation
+
+#-----------------------------------------------------------------------------#
+# Error Ids
+ERROR_NO_FINDMODULE, \
+ERROR_UNKNOWN = range(0, 2)
+
+INFO_USED_PATH, \
+INFO_COMMAND_LINE, \
+INFO_DIRVARS = range(0, 3)
+
 #-----------------------------------------------------------------------------#
 
 class PythonModuleFinder(AbstractModuleFinder):
@@ -35,20 +47,23 @@ class PythonModuleFinder(AbstractModuleFinder):
         # Attributes
         self.dirvarfile = variabledict.get("DIRVARFILE")
         self.pythonpath = variabledict.get("PYTHONPATH")
-        self.nopythonerror = u"***  FATAL ERROR: No local Python configured or found"
 
     def RunModuleFind(self):
-        """Run Module Finder"""
-
+        """Run Module Finder
+        @note: runs on background thread
+        """
+        results = FindResults()
         flag, localpythonpath = ToolConfig.GetPythonExecutablePath("PyFind")
 
         if not flag:
             # No configured Python
-            return [localpythonpath]
+            results.Errors.add(localpythonpath)
+            return results
 
         # No findmodule found in plugin
         if not pkg_resources.resource_exists("PyTools.ModuleFinder", "findmodule.py"):
-            return ["No findmodule found"]
+            results.Errors.add(ERROR_NO_FINDMODULE)
+            return results
 
         findmodule_script = pkg_resources.resource_filename("PyTools.ModuleFinder", "findmodule.py")
 
@@ -64,15 +79,45 @@ class PythonModuleFinder(AbstractModuleFinder):
         util.Log("[PyFind][info] PyFind command finished running")
         try:
             stdoutrows = eval(stdoutdata.rstrip('\r\n'))
-            rows = []
             if self.pythonpath:
-                rows.append(u"INFO: Using PYTHONPATH + %s"\
-                              % u", ".join(self.pythonpath))
-            rows.append(u"INFO: PyFind command line: %s" % " ".join(finder_cmd))
-            rows.append(u"INFO: Directory Variables file: %s" % self.dirvarfile)
-            return rows + stdoutrows
+                results.Info.append((INFO_USED_PATH, u", ".join(self.pythonpath)))
+            results.Info.append((INFO_COMMAND_LINE, " ".join(finder_cmd)))
+            if self.dirvarfile:
+                results.Info.append((INFO_DIRVARS, self.dirvarfile))
+            results.SetResults(stdoutrows)
+            return results
         except Exception, ex:
             msg = repr(ex)
             util.Log("[PyFind][info] Error: %s" % msg)
-            return [msg]
-        return ["Unknown error!"]
+            results.Errors.add(msg)
+            return results
+        results.Errors.add(ERROR_UNKNOWN)
+        return results
+
+#-----------------------------------------------------------------------------#
+
+class FindResults(object):
+    """Container class for find results"""
+    def __init__(self):
+        super(FindResults, self).__init__()
+
+        # Attributes
+        self._results = set() # List of tuples
+        self._errors = set() # Set of errors
+        self._info = list() # Info messages tuple(MSG_ID, string data)
+
+    Results = property(lambda self: self._results)
+    Errors = property(lambda self: self._errors)
+    Info = property(lambda self: self._info)
+
+    def SetResults(self, data):
+        """Set the results"""
+        tmpdata = [ f.lower() for f in data ]
+        tmpdata = list(set(tmpdata))
+        finaldata = list()
+        for fname in tmpdata:
+            for rname in data:
+                if rname.lower() == fname:
+                    finaldata.append(rname)
+                    break
+        self.Results.update(finaldata)
