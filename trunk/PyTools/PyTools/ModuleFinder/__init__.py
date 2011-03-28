@@ -14,9 +14,6 @@ __revision__ = "$Revision$"
 
 #----------------------------------------------------------------------------#
 # Local Imports
-from PyTools.ModuleFinder.FindTabMenu import FindTabMenu
 
-# Globals
-FINDTABMENU = FindTabMenu()
 #----------------------------------------------------------------------------#
 
