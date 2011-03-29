@@ -29,8 +29,8 @@ from PyTools.Common import ToolConfig
 from PyTools.Common.PyToolsUtils import PyToolsUtils
 from PyTools.Common.BaseShelfWindow import BaseShelfWindow
 from PyTools.Debugger.BreakPointsList import BreakPointsList
-from PyTools.Debugger import RPDBDEBUGGER
-from PyTools.Debugger import MESSAGEHANDLER
+from PyTools.Debugger.RpdbDebugger import RpdbDebugger
+from PyTools.Debugger.MessageHandler import MessageHandler
 
 # Globals
 _ = wx.GetTranslation
@@ -55,17 +55,20 @@ class BreakPointsShelfWindow(BaseShelfWindow):
         self.layout(None, None)
 
         # Attributes
-        RPDBDEBUGGER.breakpoints = ToolConfig.GetConfigValue(ToolConfig.TLC_BREAKPOINTS)
-        RPDBDEBUGGER.saveandrestorebreakpoints = self.SaveAndRestoreBreakpoints
+        bpoints = ToolConfig.GetConfigValue(ToolConfig.TLC_BREAKPOINTS)
+        if bpoints is None:
+            bpoints = {}
+        RpdbDebugger().breakpoints = bpoints
+        RpdbDebugger().saveandrestorebreakpoints = self.SaveAndRestoreBreakpoints
         
-        self._listCtrl.PopulateRows(RPDBDEBUGGER.breakpoints)
+        self._listCtrl.PopulateRows(RpdbDebugger().breakpoints)
         editor = wx.GetApp().GetCurrentBuffer()
         if editor:
-            RPDBDEBUGGER.restorestepmarker(editor)
-        RPDBDEBUGGER.install_breakpoints()
-        MESSAGEHANDLER.AddMenuItem(0, False, ID_TOGGLE_BREAKPOINT, 
-                                   _("Toggle Breakpoint"), 
-                                   self.ToggleBreakpoint)
+            RpdbDebugger().restorestepmarker(editor)
+        RpdbDebugger().install_breakpoints()
+        MessageHandler().AddMenuItem(0, False, ID_TOGGLE_BREAKPOINT, 
+                                     _("Toggle Breakpoint"), 
+                                     self.ToggleBreakpoint)
 
         # Event Handlers
         self.Bind(wx.EVT_BUTTON, self.OnButton, self.addbtn)
@@ -77,18 +80,18 @@ class BreakPointsShelfWindow(BaseShelfWindow):
         editor = wx.GetApp().GetCurrentBuffer()
         if editor:
             editor.DeleteAllBreakpoints()
-            RPDBDEBUGGER.restorestepmarker(editor)
-        RPDBDEBUGGER.breakpoints = {}
-        RPDBDEBUGGER.saveandrestorebreakpoints = lambda:None
-        RPDBDEBUGGER.install_breakpoints()
-        MESSAGEHANDLER.DeleteMenuItem(0)
+            RpdbDebugger().restorestepmarker(editor)
+        RpdbDebugger().breakpoints = {}
+        RpdbDebugger().saveandrestorebreakpoints = lambda:None
+        RpdbDebugger().install_breakpoints()
+        MessageHandler().DeleteMenuItem(0)
 
     def DeleteBreakpoint(self, filepath, lineno):
         """Remove a breakpoint from the list"""
         if not os.path.isfile(filepath) or \
-           not filepath in RPDBDEBUGGER.breakpoints:
+           not filepath in RpdbDebugger().breakpoints:
             return None
-        linenos = RPDBDEBUGGER.breakpoints[filepath]
+        linenos = RpdbDebugger().breakpoints[filepath]
         if not lineno in linenos:
             return None
 
@@ -96,8 +99,8 @@ class BreakPointsShelfWindow(BaseShelfWindow):
         enabled, exprstr = linenos[lineno]
         del linenos[lineno]
         if len(linenos) == 0:
-            del RPDBDEBUGGER.breakpoints[filepath]
-        RPDBDEBUGGER.delete_breakpoint(filepath, lineno)
+            del RpdbDebugger().breakpoints[filepath]
+        RpdbDebugger().delete_breakpoint(filepath, lineno)
         self.SaveBreakpoints()
         return lineno
         
@@ -109,39 +112,39 @@ class BreakPointsShelfWindow(BaseShelfWindow):
         """
         if not os.path.isfile(filepath):
             return
-        if filepath in RPDBDEBUGGER.breakpoints:
-            linenos = RPDBDEBUGGER.breakpoints[filepath]
+        if filepath in RpdbDebugger().breakpoints:
+            linenos = RpdbDebugger().breakpoints[filepath]
         else:
             linenos = {}
-            RPDBDEBUGGER.breakpoints[filepath] = linenos
+            RpdbDebugger().breakpoints[filepath] = linenos
         linenos[lineno] = (enabled, exprstr)
         util.Log("[DbgBp][info] SetBreakpoint %s, %d, %s, %s" % \
                  (filepath, lineno, enabled, exprstr))
         if enabled:
-            RPDBDEBUGGER.set_breakpoint(filepath, lineno, exprstr)
+            RpdbDebugger().set_breakpoint(filepath, lineno, exprstr)
         self.SaveBreakpoints()
         return lineno
         
     def RestoreBreakPoints(self):
         """Restore breakpoints"""
         self._listCtrl.Clear()
-        self._listCtrl.PopulateRows(RPDBDEBUGGER.breakpoints)
+        self._listCtrl.PopulateRows(RpdbDebugger().breakpoints)
         self._listCtrl.RefreshRows()
         editor = wx.GetApp().GetCurrentBuffer()
         if editor:
-            RPDBDEBUGGER.restorestepmarker(editor)
+            RpdbDebugger().restorestepmarker(editor)
 
     def SaveBreakpoints(self):
         """Save currently set breakpoints in the user configuration"""
         config = Profile_Get(ToolConfig.PYTOOL_CONFIG, default=dict())
-        config[ToolConfig.TLC_BREAKPOINTS] = copy.deepcopy(RPDBDEBUGGER.breakpoints)
+        config[ToolConfig.TLC_BREAKPOINTS] = copy.deepcopy(RpdbDebugger().breakpoints)
         Profile_Set(ToolConfig.PYTOOL_CONFIG, config)
     
     def ToggleBreakpoint(self, editor, event):
         """Toggle the breakpoint at the current line"""
         filepath = os.path.normcase(editor.GetFileName())
-        if not self.DeleteBreakpoint(filepath, MESSAGEHANDLER.contextlineno):
-            self.SetBreakpoint(filepath, MESSAGEHANDLER.contextlineno, "", True)
+        if not self.DeleteBreakpoint(filepath, MessageHandler().ContextLine):
+            self.SetBreakpoint(filepath, MessageHandler().ContextLine, "", True)
         self.RestoreBreakPoints()
 
     def SaveAndRestoreBreakpoints(self):
@@ -170,5 +173,5 @@ class BreakPointsShelfWindow(BaseShelfWindow):
 
     def OnClear(self, event):
         """Clear all breakpoints"""
-        RPDBDEBUGGER.breakpoints = {}
+        RpdbDebugger().breakpoints = {}
         self.SaveAndRestoreBreakpoints()

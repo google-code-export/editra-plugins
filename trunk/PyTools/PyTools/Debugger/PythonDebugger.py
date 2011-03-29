@@ -24,11 +24,11 @@ from PyTools.Common.PyToolsUtils import RunProcInThread
 from PyTools.Common.AsyncProcessCreator import AsyncProcessCreator
 from PyTools.Debugger.AbstractDebugger import AbstractDebugger
 from PyTools.Debugger.RpdbDebugger import RpdbDebugger
-from PyTools.Debugger import RPDBDEBUGGER
 
 # Editra Libraries
 import util
 import ebmlib
+
 #-----------------------------------------------------------------------------#
 
 class PythonDebugger(AbstractDebugger):
@@ -103,5 +103,5 @@ class PythonDebugger(AbstractDebugger):
         self.debuggeewindow.calldebugger = None
         self.processcreator.restorepath()
         self.debuggeewindow.AddText("Debuggee running. Attaching Debugger.\n")
-        worker = RunProcInThread("Debug", None, RPDBDEBUGGER.attach, self.processcreator)
+        worker = RunProcInThread("Debug", None, RpdbDebugger().attach, self.processcreator)
         worker.start()

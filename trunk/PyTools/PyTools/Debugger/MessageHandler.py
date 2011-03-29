@@ -21,8 +21,10 @@ import wx
 import util
 import ed_msg
 import syntax.synglob as synglob
+import ebmlib
 
 # Local imports
+from PyTools.Debugger.RpdbDebugger import RpdbDebugger
 from PyTools.Common.PyToolsUtils import PyToolsUtils
 
 # Globals
@@ -34,12 +36,12 @@ ID_ON_JUMP = wx.NewId()
 
 class MessageHandler(object):
     """Module Message Handler"""
-    def __init__(self, rpdbdebugger):
+    __metaclass__ = ebmlib.Singleton
+    def __init__(self):
         """Initialize"""
         super(MessageHandler, self).__init__()
 
         # Attributes
-        self.rpdbdebugger = rpdbdebugger
         self._prevfile = u""
         self.editor = None
         self.editorlineno = None
@@ -47,6 +49,9 @@ class MessageHandler(object):
         self.contextmenus = {1:(True, ID_ON_RUNTOLINE, _("Run To Line"), self.OnRunToLine), 
                              2:(True, ID_ON_JUMP, _("Jump"), self.OnJump)}
         self.debugeditorupdate = lambda x,y,z:None
+
+        # Setup debugger hooks
+        rpdbdebugger = RpdbDebugger() # singleton don't keep ref
         rpdbdebugger.conflictingmodules = self.ConflictingModules
         rpdbdebugger.clearstepmarker = self.ClearStepMarker
         rpdbdebugger.setstepmarker = self.SetStepMarker
@@ -57,6 +62,12 @@ class MessageHandler(object):
         ed_msg.Subscribe(self.OnFileSave, ed_msg.EDMSG_FILE_SAVED)
         ed_msg.Subscribe(self.OnPageChanged, ed_msg.EDMSG_UI_NB_CHANGED)        
         ed_msg.Subscribe(self.OnContextMenu, ed_msg.EDMSG_UI_STC_CONTEXT_MENU)
+
+    # Properties
+    ContextLine = property(lambda self: self.contextlineno,
+                           lambda self, line: setattr(self, 'contextlineno', line))
+    PreviousFile = property(lambda self: self._prevfile,
+                            lambda self, fname: setattr(self, '_prevfile', fname))
 
     @property
     def mainwindow(self):
@@ -94,8 +105,8 @@ class MessageHandler(object):
         filename = os.path.normcase(editor.GetFileName())
         self.debugeditorupdate(ispython, filename, force)
         self._prevfile = filename
-        self.rpdbdebugger.saveandrestoreexpressions()
-        self.rpdbdebugger.saveandrestorebreakpoints()
+        RpdbDebugger().saveandrestoreexpressions()
+        RpdbDebugger().saveandrestorebreakpoints()
         self.RestoreStepMarker(editor)
 
     def OnPageChanged(self, msg):
@@ -139,13 +150,13 @@ class MessageHandler(object):
         menu.AppendSeparator()
         for pos in sorted(self.contextmenus.keys()):
             reqattach, wxid, menutitle, menufncallback = self.contextmenus[pos]
-            if reqattach and not self.rpdbdebugger.attached:
+            if reqattach and not RpdbDebugger().attached:
                 continue
             menu.Append(wxid, menutitle)
             ctxmgr.AddHandler(wxid, menufncallback)
 
     def OnRunToLine(self, editor, event):
-        self.rpdbdebugger.run_toline(editor.GetFileName(), self.contextlineno)
+        RpdbDebugger().run_toline(editor.GetFileName(), self.contextlineno)
 
     def OnJump(self, editor, event):
-        self.rpdbdebugger.do_jump(self.contextlineno)
+        RpdbDebugger().do_jump(self.contextlineno)

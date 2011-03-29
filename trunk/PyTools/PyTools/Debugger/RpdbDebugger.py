@@ -20,6 +20,7 @@ from time import sleep
 import util
 from profiler import Profile_Get
 import ed_msg
+import ebmlib
 
 # Local Imports
 import rpdb2
@@ -33,6 +34,8 @@ from PyTools.Debugger.RpdbVariablesManager import RpdbVariablesManager
 #----------------------------------------------------------------------------#
 
 class RpdbDebugger(object):
+    __metaclass__ = ebmlib.Singleton
+
     fAllowUnencrypted = True
     fRemote = False
     host = "localhost"
@@ -42,6 +45,8 @@ class RpdbDebugger(object):
 
     def __init__(self):
         super(RpdbDebugger, self).__init__()
+
+        # Setup
         self.sessionmanager = rpdb2.CSessionManager(RpdbDebugger.password, \
             RpdbDebugger.fAllowUnencrypted, RpdbDebugger.fRemote, RpdbDebugger.host)
         self.breakpointmanager = RpdbBreakpointsManager(self)

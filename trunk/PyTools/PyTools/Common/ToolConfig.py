@@ -24,7 +24,7 @@ import util
 
 # Local Imports
 from PyTools.Common.PyToolsUtils import PyToolsUtils
-from PyTools.Debugger import RPDBDEBUGGER
+from PyTools.Debugger.RpdbDebugger import RpdbDebugger
 
 #-----------------------------------------------------------------------------#
 # Configuration Keys
@@ -258,12 +258,12 @@ class DebugConfigPanel(wx.Panel):
         self._trapcb = wx.CheckBox(self, label=_("Trap Unhandled Exceptions"))
         trap = config.get(TLC_TRAP_EXCEPTIONS, True)
         self._trapcb.SetValue(trap)
-        RPDBDEBUGGER.set_trap_unhandled_exceptions(trap)
+        RpdbDebugger().set_trap_unhandled_exceptions(trap)
 
         self._synccb = wx.CheckBox(self, label=_("Allow Synchronicity"))
         synchronicity = config.get(TLC_SYNCHRONICITY, True)
         self._synccb.SetValue(synchronicity)
-        RPDBDEBUGGER.set_synchronicity(synchronicity)
+        RpdbDebugger().set_synchronicity(synchronicity)
 
         self._forkcb = wx.CheckBox(self, label=_("Pause before fork"))
         autofork = config.get(TLC_AUTO_FORK, True)
@@ -272,7 +272,7 @@ class DebugConfigPanel(wx.Panel):
         self._forkchildcb = wx.CheckBox(self, label=_("Fork into Child"))
         forkmode = config.get(TLC_FORK_MODE, False)
         self._forkchildcb.SetValue(forkmode)
-        RPDBDEBUGGER.set_fork_mode(forkmode, autofork)
+        RpdbDebugger().set_fork_mode(forkmode, autofork)
 
         self._enclbl = wx.StaticText(self, label=_("Source Encoding:"))
         encodings = eclib.GetAllEncodings()
@@ -285,7 +285,7 @@ class DebugConfigPanel(wx.Panel):
         self._esccb = wx.CheckBox(self, label=_("Escape Non-Ascii Characters for Execute/Evaluate"))
         escaping = config.get(TLC_EXECEVALESCAPING, True)
         self._esccb.SetValue(escaping)
-        RPDBDEBUGGER.set_encoding(encoding, escaping)
+        RpdbDebugger().set_encoding(encoding, escaping)
 
         # Layout
         self.__DoLayout()
@@ -326,7 +326,7 @@ class DebugConfigPanel(wx.Panel):
         if evt.GetEventObject() is self._trapcb:
             trap = self._trapcb.GetValue()
             config[TLC_TRAP_EXCEPTIONS] = trap
-            RPDBDEBUGGER.set_trap_unhandled_exceptions(trap)
+            RpdbDebugger().set_trap_unhandled_exceptions(trap)
         else:
             evt.Skip()
             return
@@ -339,7 +339,7 @@ class DebugConfigPanel(wx.Panel):
         if evt_obj is self._synccb:
             synchronicity = self._synccb.GetValue()
             config[TLC_SYNCHRONICITY] = synchronicity
-            RPDBDEBUGGER.set_synchronicity(synchronicity)
+            RpdbDebugger().set_synchronicity(synchronicity)
         else:
             evt.Skip()
             return
@@ -354,7 +354,7 @@ class DebugConfigPanel(wx.Panel):
             config[TLC_AUTO_FORK] = autofork
             forkmode = self._forkchildcb.GetValue()
             config[TLC_FORK_MODE] = forkmode
-            RPDBDEBUGGER.set_fork_mode(forkmode, autofork)
+            RpdbDebugger().set_fork_mode(forkmode, autofork)
         else:
             evt.Skip()
             return
@@ -369,7 +369,7 @@ class DebugConfigPanel(wx.Panel):
             config[TLC_EXECEVALENCODING] = encoding
             escaping = self._esccb.GetValue()
             config[TLC_EXECEVALESCAPING] = escaping
-            RPDBDEBUGGER.set_encoding(encoding, escaping)
+            RpdbDebugger().set_encoding(encoding, escaping)
         else:
             evt.Skip()
             return
@@ -384,7 +384,7 @@ class DebugConfigPanel(wx.Panel):
             config[TLC_EXECEVALENCODING] = encoding
             escaping = self._esccb.GetValue()
             config[TLC_EXECEVALESCAPING] = escaping
-            RPDBDEBUGGER.set_encoding(encoding, escaping)
+            RpdbDebugger().set_encoding(encoding, escaping)
         else:
             evt.Skip()
             return

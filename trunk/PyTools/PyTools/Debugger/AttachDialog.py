@@ -23,7 +23,7 @@ import eclib
 # Local imports
 import rpdb2
 from PyTools.Common.PyToolsUtils import RunProcInThread
-from PyTools.Debugger import RPDBDEBUGGER
+from PyTools.Debugger.RpdbDebugger import RpdbDebugger
 from PyTools.Debugger.PasswordDialog import PasswordDialog
 
 # Globals
@@ -105,7 +105,7 @@ running) on local or remote machine:"""
             self.Parent._lastpwd = pwd_dialog.get_password()
             pwd_dialog.Destroy()
 
-            RPDBDEBUGGER.set_password(self.Parent._lastpwd)
+            RpdbDebugger().set_password(self.Parent._lastpwd)
             self.do_refresh()
 
         # If showing the dialog popup the authentication dialot
@@ -127,7 +127,7 @@ running) on local or remote machine:"""
             host = 'localhost'
         self.Parent._lasthost = host
         worker = RunProcInThread("DbgAttach", self._onserverlist,
-                                 RPDBDEBUGGER.get_server_list, host)
+                                 RpdbDebugger().get_server_list, host)
         worker.start()
 
     def _onserverlist(self, res):
@@ -153,7 +153,7 @@ running) on local or remote machine:"""
                     for (t, v, tb) in el:
                         self.report_attach_warning(rpdb2.STR_BAD_VERSION % {'value': v})
 
-        host = RPDBDEBUGGER.get_host()
+        host = RpdbDebugger().get_host()
         self.m_entry_host.SetValue(host)
 
         self.m_listbox_scripts.DeleteAllItems()

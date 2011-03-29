@@ -29,7 +29,7 @@ from PyTools.Common.PyToolsUtils import RunProcInThread
 from PyTools.Debugger.ExpressionDialog import ExpressionDialog
 from PyTools.Common.BaseShelfWindow import BaseShelfWindow
 from PyTools.Debugger.ExpressionsList import ExpressionsList
-from PyTools.Debugger import RPDBDEBUGGER
+from PyTools.Debugger.RpdbDebugger import RpdbDebugger
 
 # Globals
 _ = wx.GetTranslation
@@ -40,6 +40,7 @@ class ExpressionsShelfWindow(BaseShelfWindow):
     def __init__(self, parent):
         """Initialize the window"""
         super(ExpressionsShelfWindow, self).__init__(parent)
+
         ctrlbar = self.setup(ExpressionsList(self))
         ctrlbar.AddStretchSpacer()
         
@@ -56,17 +57,17 @@ class ExpressionsShelfWindow(BaseShelfWindow):
         self._listCtrl.PopulateRows(self.expressions)
         
         # Debugger Attributes
-        RPDBDEBUGGER.restoreexpressions = self.RestoreExpressions
-        RPDBDEBUGGER.saveandrestoreexpressions = self.SaveAndRestoreExpressions
-        RPDBDEBUGGER.clearexpressionvalues = self._listCtrl.clearexpressionvalues
+        RpdbDebugger().restoreexpressions = self.RestoreExpressions
+        RpdbDebugger().saveandrestoreexpressions = self.SaveAndRestoreExpressions
+        RpdbDebugger().clearexpressionvalues = self._listCtrl.clearexpressionvalues
 
         # Event Handlers
         self.Bind(wx.EVT_BUTTON, self.OnExecute, self.executebtn)
         
     def Unsubscription(self):
-        RPDBDEBUGGER.restoreexpressions = lambda:None
-        RPDBDEBUGGER.saveandrestoreexpressions = lambda:None
-        RPDBDEBUGGER.clearexpressionvalues = lambda:None
+        RpdbDebugger().restoreexpressions = lambda:None
+        RpdbDebugger().saveandrestoreexpressions = lambda:None
+        RpdbDebugger().clearexpressionvalues = lambda:None
         
     def DeleteExpression(self, expression):
         if not expression in self.expressions:
@@ -111,7 +112,7 @@ class ExpressionsShelfWindow(BaseShelfWindow):
         expr_dialog.Destroy()
         
         worker = RunProcInThread("DbgExec", self._oncodeexecuted,
-                                 RPDBDEBUGGER.execute, _expr)
+                                 RpdbDebugger().execute, _expr)
         worker.start()
 
     def _oncodeexecuted(self, res):

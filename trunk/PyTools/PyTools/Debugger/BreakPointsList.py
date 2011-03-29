@@ -14,7 +14,7 @@ __revision__ = "$Revision$"
 
 #----------------------------------------------------------------------------#
 # Imports
-import os.path
+import os
 import wx
 
 # Editra Libraries
@@ -157,6 +157,7 @@ class BreakPointsList(eclib.EToggleEditListCtrl):
         minLType = max(self.GetTextExtent(filenameText)[0], self.GetColumnWidth(0))
         minLText = max(self.GetTextExtent(exprText)[0], self.GetColumnWidth(2))
 
+        
         idx = 0
         for filepath in data.keys():
             linenos = data.get(filepath)
