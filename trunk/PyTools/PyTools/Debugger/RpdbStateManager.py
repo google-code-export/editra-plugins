@@ -19,7 +19,7 @@ import wx
 
 # Local Imports
 import rpdb2
-from PyTools.Common.PyToolsUtils import RunProcInThread
+
 #----------------------------------------------------------------------------#
 
 class RpdbStateManager(object):
@@ -43,12 +43,6 @@ class RpdbStateManager(object):
     def update_state(self, event):
         wx.CallAfter(self.callback_state, event.m_state)
 
-    def finalmessage(self):
-        sleep(1)
-        self.rpdb2debugger.processcreator.AddText("\nDebugger detached.")
-        sleep(1)
-        self.rpdb2debugger.processcreator = None
-    
     def callback_state(self, state):
         old_state = self.m_state
         self.m_state = state
@@ -60,9 +54,8 @@ class RpdbStateManager(object):
             self.rpdb2debugger.broken = False
             if self.rpdb2debugger.breakpoints_installed:
                 # clear all debugging stuff as we have finished
+                self.rpdb2debugger.processcreator.AddText(self.rpdb2debugger.debuggerdetachedtext)
                 self.rpdb2debugger.clear_all()
-                worker = RunProcInThread("Detach", None, self.finalmessage)
-                worker.start()
         elif (old_state in [rpdb2.STATE_DETACHED, rpdb2.STATE_DETACHING, rpdb2.STATE_SPAWNING, rpdb2.STATE_ATTACHING]) and (self.m_state not in [rpdb2.STATE_DETACHED, rpdb2.STATE_DETACHING, rpdb2.STATE_SPAWNING, rpdb2.STATE_ATTACHING]):
             self.rpdb2debugger.attached = True
 

@@ -29,9 +29,15 @@ from PyTools.Debugger.RpdbDebugger import RpdbDebugger
 import util
 import ebmlib
 
+# Globals
+_ = wx.GetTranslation
+
 #-----------------------------------------------------------------------------#
 
 class PythonDebugger(AbstractDebugger):
+    DEBUGGERATTACHEDTEXT = _("Debugger attached. Debuggee output starts now...\n\n")
+    DEBUGGERDETACHEDTEXT = _("")
+
     def __init__(self, variabledict, debuggerargs, programargs, 
         filename, debuggeewindow):
         super(PythonDebugger, self).__init__(variabledict, debuggerargs, 
@@ -90,18 +96,19 @@ class PythonDebugger(AbstractDebugger):
         rpdb2_cmd = [localpythonpath, "-u", rpdb2_script] + allargs
         text = ""
         if self.pythonpath:
-            text += u"Using PYTHONPATH + %s\n" % u", ".join(self.pythonpath)
-        text += u"Rpdb2 command line: %s" % " ".join(rpdb2_cmd)
-        text += u"\nDirectory Variables file: %s" % self.dirvarfile
-        self.debuggeewindow.AddText(text)
+            text += "Using PYTHONPATH + %s\n" % u", ".join(self.pythonpath)
+        text += "Rpdb2 command line: %s" % " ".join(rpdb2_cmd)
+        text += "\nDirectory Variables file: %s\n\n" % self.dirvarfile
+        self.debuggeewindow.SetText(_(text))
         self.debuggeewindow.calldebugger = self.RunDebugger
-        self.processcreator = AsyncProcessCreator(self.debuggeewindow, self.debuggeewindow.AddText, "PyDbg", parentPath, rpdb2_cmd, self.pythonpath)
+        RpdbDebugger().debuggerattachedtext = self.DEBUGGERATTACHEDTEXT
+        RpdbDebugger().debuggerdetachedtext = self.DEBUGGERDETACHEDTEXT
+        self.processcreator = AsyncProcessCreator(self.debuggeewindow, self.debuggeewindow.AppendUpdate, "PyDbg", parentPath, rpdb2_cmd, self.pythonpath)
         self.processcreator.start()
         util.Log("[PyDbg][info] Rpdb2 command running")
 
     def RunDebugger(self):                    
         self.debuggeewindow.calldebugger = None
         self.processcreator.restorepath()
-        self.debuggeewindow.AddText("Debuggee running. Attaching Debugger.\n")
         worker = RunProcInThread("Debug", None, RpdbDebugger().attach, self.processcreator)
         worker.start()

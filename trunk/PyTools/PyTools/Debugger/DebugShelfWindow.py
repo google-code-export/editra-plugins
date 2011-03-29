@@ -49,6 +49,11 @@ class DebugShelfWindow(BaseShelfWindow):
         synglob.ID_LANG_PYTHON: PythonDebugger
     }
 
+    DISABLINGPYLINTTEXT = _("Disabling Pylint Autorun during Debug.\n")
+    ENABLINGPYLINTTEXT = _("Reenabling Pylint Autorun.\n")
+    DEBUGGERATTACHEDTEXTREMOTE = _("Debugger attached.\n\n")
+    DEBUGGERDETACHEDTEXT = _("\n\nDebugger detached.")
+    
     def __init__(self, parent):
         """Initialize the window"""
         super(DebugShelfWindow, self).__init__(parent)
@@ -100,6 +105,7 @@ class DebugShelfWindow(BaseShelfWindow):
         # For remote attachment
         self._lastpwd = ""
         self._lasthost = "localhost"
+        self._remotetext = None
 
         # Debugger Attributes
         RpdbDebugger().mainwindow = self._mw #TODO
@@ -268,7 +274,7 @@ class DebugShelfWindow(BaseShelfWindow):
         config = Profile_Get(ToolConfig.PYTOOL_CONFIG, default=dict())
         config[ToolConfig.TLC_LINT_AUTORUN] = True
         Profile_Set(ToolConfig.PYTOOL_CONFIG, config)
-        self._listCtrl.AddText(_("Reenabling Pylint Autorun."))
+        self._listCtrl.AppendUpdate(self.ENABLINGPYLINTTEXT)
     
     def _setdebuggerdefaults(self):
         RpdbDebugger().set_default_password()
@@ -290,7 +296,7 @@ class DebugShelfWindow(BaseShelfWindow):
         if mode:
             config[ToolConfig.TLC_LINT_AUTORUN] = False
             Profile_Set(ToolConfig.PYTOOL_CONFIG, config)
-            self._listCtrl.AddText(_("Disabling Pylint Autorun during Debug."))
+            self._listCtrl.AppendUpdate(self.DISABLINGPYLINTTEXT)
             self._listCtrl.restoreautorun = self.restorepylint_autorun
         else:
             self._listCtrl.restoreautorun = lambda:None
@@ -328,6 +334,7 @@ class DebugShelfWindow(BaseShelfWindow):
     def _detach(self):
         """Detach debugger"""
         RpdbDebugger().do_detach()
+        self._listCtrl.Stop()
 
     def OnStepIn(self, event):
         """Step in to the code on the current line"""
@@ -357,8 +364,12 @@ class DebugShelfWindow(BaseShelfWindow):
             if not debugger:
                 return []
             self._debugger = debugger
-            self._listCtrl.SetText("Debugging remote debuggee %s\n" % server.m_filename)
-            dpc = DummyProcessCreator(server.m_rid, self._listCtrl.AddText)
+            self._remotetext = _("Debugging remote debuggee %s\n\n" % server.m_filename)
+            self._listCtrl.SetText(self._remotetext)
+            self._listCtrl.Start(100)
+            RpdbDebugger().debuggerattachedtext = self.DEBUGGERATTACHEDTEXTREMOTE
+            RpdbDebugger().debuggerdetachedtext = self.DEBUGGERDETACHEDTEXT
+            dpc = DummyProcessCreator(server.m_rid, self._listCtrl.AppendUpdate)
             dpc.restorepath = lambda:None
             self._debugger.processcreator = dpc
             self._setdebuggeroptions()

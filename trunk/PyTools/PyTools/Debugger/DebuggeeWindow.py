@@ -30,6 +30,9 @@ _ = wx.GetTranslation
 class DebuggeeWindow(eclib.OutputBuffer,
                        eclib.ProcessBufferMixin):
     """Debuggee Window"""
+    
+    DEBUGGEEFINISHEDTEXT = _("\n\nDebuggee finished.")
+    
     def __init__(self, *args, **kwargs):
         eclib.OutputBuffer.__init__(self, *args, **kwargs)
         eclib.ProcessBufferMixin.__init__(self)
@@ -39,10 +42,6 @@ class DebuggeeWindow(eclib.OutputBuffer,
     def set_mainwindow(self, mw):
         self._mainw = mw
 
-    def AddText(self, text):
-        newtext = u"%s\n%s\n" % (self.GetText(), text)
-        self.SetText(newtext)
-    
     def DoProcessStart(self, cmd=''):
         """Override this method to do any pre-processing before starting
         a processes output.
@@ -61,7 +60,7 @@ class DebuggeeWindow(eclib.OutputBuffer,
         @return: None
 
         """
-        self.AddText(_("Debuggee finished."))
+        self.AppendUpdate(self.DEBUGGEEFINISHEDTEXT)
         self.restoreautorun()
         self.Stop()
         
