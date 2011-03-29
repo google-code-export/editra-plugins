@@ -12,7 +12,7 @@ __svnid__ = "$Id$"
 __revision__ = "$Revision$"
 
 #-----------------------------------------------------------------------------#
-# Dependencies
+# Imports
 import os
 import sys
 import re
@@ -37,20 +37,21 @@ class ModuleFinder(object):
 
     """
 
-    # TODO: the extensions for source files could also be retrieved from
-    #       syntax.syntax.ExtensionRegister
     _SRC_EXT = '.py', '.pyw'
     _BYTECODE_EXT = '.pyc', '.pyo'
 
     # a path we can safely skip for better performance
     _WXLOCALE = os.path.join('wx', 'locale')
 
-    def __init__(self, searchpath=sys.path):
+    def __init__(self, searchpath=None):
         """
         @param searchpath: list of modules search path
         """
         super(ModuleFinder, self).__init__()
 
+        if searchpath is None:
+            searchpath = list(sys.path) # copy
+        assert isinstance(searchpath, list)
         self._searchpath = searchpath
         self._sources = []
 
@@ -60,10 +61,10 @@ class ModuleFinder(object):
         @return: a list with the module sources path if any, an empty list
         otherwise
         """
-        if not text:
-            return []
-        else:
-            return self._Find(text);
+        rval = list()
+        if text:
+            rval = self._Find(text);
+        return rval
 
     def _Find(self, text):
         """Find pure python modules matching text by walking the search path
@@ -93,7 +94,7 @@ class ModuleFinder(object):
 
         for path in self._searchpath:
             if os.path.isdir(path):
-                #print 'Analysing search path %s' % path
+                #print 'Analyzing search path %s' % path
                 pkgs = parts[:-1]
                 if pkgs:
                     self._PackageSearch(path, pattern, text, pkgs)
@@ -110,13 +111,15 @@ class ModuleFinder(object):
         @param path: the current directory absolute path
         @param text: the module name to match
         """
+        join = os.path.join # optimization
+        exists = os.path.exists
         for filename in os.listdir(path):
-            fqdn = os.path.join(path, filename)
+            fqdn = join(path, filename)
             if os.path.isfile(fqdn) and self._IsPatternMatch(filename, pattern):
                 self._sources.append(fqdn)
             elif os.path.isdir(fqdn) and not self._Skip(fqdn):
-                pkgsource = os.path.join(fqdn, '__init__.py')
-                if filename == text and os.path.exists(pkgsource):
+                pkgsource = join(fqdn, '__init__.py')
+                if filename == text and exists(pkgsource):
                     self._sources.append(pkgsource)
                 else:
                     self._FreeSearch(fqdn, pattern, text)
@@ -144,28 +147,32 @@ class ModuleFinder(object):
         else:
             pkg = None
 
+        join = os.path.join # optimization
+        exists = os.path.exists
         for filename in os.listdir(path):
-            fqdn = os.path.join(path, filename)
+            fqdn = join(path, filename)
             if os.path.isfile(fqdn):
                 if not pkg and self._IsPatternMatch(filename, pattern) or self._IsExactMatch(filename, pkg):
                     self._sources.append(fqdn)
             elif os.path.isdir(fqdn) and not self._Skip(fqdn):
-                pkgsource = os.path.join(fqdn, '__init__.py')
-                if filename == text and os.path.exists(pkgsource):
+                pkgsource = join(fqdn, '__init__.py')
+                if filename == text and exists(pkgsource):
                     self._sources.append(pkgsource)
-                    break # definately looking for this
+                    break # definitely looking for this
                 elif filename == pkg:
                     self._PackageSearch(fqdn, pattern, text, ns)
 
     def _IsExactMatch(self, filename, text):
-        """ @return: true if filename is a source module and its name
-        without extension is equals to text"""
+        """@return: true if filename is a source module and its name
+        without extension is equals to text
+        """
         parts = os.path.splitext(filename)
         return parts[1] in ModuleFinder._SRC_EXT and text == parts[0]
 
     def _IsPatternMatch(self, filename, pattern):
-        """ @return: true if filename is a source module and its name
-        without extension matches pattern"""
+        """@return: True if filename is a source module and its name
+        without extension matches pattern
+        """
         parts = os.path.splitext(filename)
         return parts[1] in ModuleFinder._SRC_EXT and pattern.match(parts[0])
 
@@ -173,11 +180,8 @@ class ModuleFinder(object):
         return path in self._searchpath or path.endswith(ModuleFinder._WXLOCALE)
 
 #--------------------------------------------------------------------------#
-# Test
-
+# Main
 if __name__ == '__main__':
     mf = ModuleFinder()
     result = mf.Find(sys.argv[1])
     print result
-
-
