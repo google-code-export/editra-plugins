@@ -1,5 +1,7 @@
 #! /usr/bin/env python
 
+# Modified by Michael Rans, 29 March 2011 to apply patch: http://code.google.com/r/trebor74hr-winpdb-rpdb2-own/source/browse/rpdb2.py
+# and comment out import of popen2 removing startup deprecation warnings
 """
     rpdb2.py - version 2.4.8
 
@@ -305,14 +307,13 @@ except:
 
 try:
     import compiler
-    import sets
 except:
     pass
 
-try:
-    import popen2
-except:
-    pass
+#try:
+#    import popen2
+#except:
+#    pass
 
 try:
     from Crypto.Cipher import DES
@@ -2410,16 +2411,18 @@ if not hasattr(g_builtins_module, 'bytes'):
     g_builtins_module.bytes = _rpdb2_bytes
 
 
-if is_py3k():
-    class sets:
-        Set = _stub_type
-        BaseSet = _stub_type
-        ImmutableSet = _stub_type
+#if is_py3k():
+#    class sets:
+#        Set = _stub_type
+#        # BaseSet = _stub_type
+#        ImmutableSet = _stub_type
 
 
 
 if sys.version_info[:2] <= (2, 3):
+    import sets
     set = sets.Set
+    frozenset = sets.ImmutableSet
 
 
 
@@ -2744,21 +2747,21 @@ def repr_ltd(x, length, encoding, is_valid = [True]):
     try:
         length = max(0, length)
 
-        try:
-            if isinstance(x, frozenset):
-                return repr_list('frozenset([%s])', x, length, encoding, is_valid)
+        # try:
+        #     if isinstance(x, frozenset):
+        #         return repr_list('frozenset([%s])', x, length, encoding, is_valid)
 
-            if isinstance(x, set):
-                return repr_list('set([%s])', x, length, encoding, is_valid)
+        #     if isinstance(x, set):
+        #         return repr_list('set([%s])', x, length, encoding, is_valid)
 
-        except NameError:
-            pass
+        # except NameError:
+        #     pass
 
-        if isinstance(x, sets.Set):
-            return repr_list('sets.Set([%s])', x, length, encoding, is_valid)
+        if isinstance(x, set):
+            return repr_list('set([%s])', x, length, encoding, is_valid)
 
-        if isinstance(x, sets.ImmutableSet):
-            return repr_list('sets.ImmutableSet([%s])', x, length, encoding, is_valid)
+        if isinstance(x, frozenset):
+            return repr_list('frozenset([%s])', x, length, encoding, is_valid)
 
         if isinstance(x, list):
             return repr_list('[%s]', x, length, encoding, is_valid)
@@ -8648,7 +8651,7 @@ class CDebuggerEngine(CDebuggerCore):
             except NameError:
                 pass
 
-            if isinstance(r, sets.BaseSet):
+            if isinstance(r, (set, frozenset)):
                 return len(r)
 
             if isinstance(r, dict):
@@ -8702,7 +8705,7 @@ class CDebuggerEngine(CDebuggerCore):
         except NameError:
             pass
         
-        if isinstance(r, sets.BaseSet):
+        if isinstance(r, (set, frozenset)):
             if len(r) > MAX_SORTABLE_LENGTH:
                 g = r
             else:

@@ -150,7 +150,7 @@ class MessageHandler(object):
         menu.AppendSeparator()
         for pos in sorted(self.contextmenus.keys()):
             reqattach, wxid, menutitle, menufncallback = self.contextmenus[pos]
-            if reqattach and not RpdbDebugger().attached:
+            if reqattach and not RpdbDebugger().attached and not RpdbDebugger().broken:
                 continue
             menu.Append(wxid, menutitle)
             ctxmgr.AddHandler(wxid, menufncallback)
