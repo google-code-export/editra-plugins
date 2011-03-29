@@ -24,7 +24,7 @@ import eclib
 from PyTools.Common.BaseShelfWindow import BaseShelfWindow
 from PyTools.Debugger.StackFrameList import StackFrameList
 from PyTools.Debugger.ThreadsList import ThreadsList
-from PyTools.Debugger import RPDBDEBUGGER
+from PyTools.Debugger.RpdbDebugger import RpdbDebugger
 
 # Globals
 _ = wx.GetTranslation
@@ -55,15 +55,15 @@ class StackThreadShelfWindow(BaseShelfWindow):
         self.layout()
 
         # Debugger Attributes
-        RPDBDEBUGGER.clearframe = self.ClearStackList
-        RPDBDEBUGGER.selectframe = self._stackframe.select_frame
-        RPDBDEBUGGER.updatestacklist = self.UpdateStackList
-        RPDBDEBUGGER.clearthread = self.ClearThreadList
-        RPDBDEBUGGER.updatethread = self._threads.update_thread
-        RPDBDEBUGGER.updatethreadlist = self.UpdateThreadList
+        RpdbDebugger().clearframe = self.ClearStackList
+        RpdbDebugger().selectframe = self._stackframe.select_frame
+        RpdbDebugger().updatestacklist = self.UpdateStackList
+        RpdbDebugger().clearthread = self.ClearThreadList
+        RpdbDebugger().updatethread = self._threads.update_thread
+        RpdbDebugger().updatethreadlist = self.UpdateThreadList
 
-        RPDBDEBUGGER.update_stack()
-        current_thread, threads_list = RPDBDEBUGGER.get_thread_list()
+        RpdbDebugger().update_stack()
+        current_thread, threads_list = RpdbDebugger().get_thread_list()
         self.UpdateThreadList(current_thread, threads_list)
 
     def _InitImageList(self):
@@ -87,12 +87,12 @@ class StackThreadShelfWindow(BaseShelfWindow):
 
     def Unsubscription(self):
         """Cleanup on Destroy"""
-        RPDBDEBUGGER.clearframe = lambda:None
-        RPDBDEBUGGER.selectframe = lambda x:None
-        RPDBDEBUGGER.updatestacklist = lambda x:None
-        RPDBDEBUGGER.clearthread = lambda:None
-        RPDBDEBUGGER.updatethread = lambda x,y,z:None
-        RPDBDEBUGGER.updatethreadlist = lambda x,y:None
+        RpdbDebugger().clearframe = lambda:None
+        RpdbDebugger().selectframe = lambda x:None
+        RpdbDebugger().updatestacklist = lambda x:None
+        RpdbDebugger().clearthread = lambda:None
+        RpdbDebugger().updatethread = lambda x,y,z:None
+        RpdbDebugger().updatethreadlist = lambda x,y:None
 
     def UpdateStackList(self, stack):
         """Update stack information ListCtrl"""

@@ -25,7 +25,7 @@ import wx.gizmos
 from PyTools.Common.PyToolsUtils import PyToolsUtils
 from PyTools.Common.PyToolsUtils import RunProcInThread
 from PyTools.Debugger.ExpressionDialog import ExpressionDialog
-from PyTools.Debugger import RPDBDEBUGGER
+from PyTools.Debugger.RpdbDebugger import RpdbDebugger
 
 # Globals
 _ = wx.GetTranslation
@@ -107,7 +107,7 @@ class VariablesList(wx.gizmos.TreeListCtrl):
             expressionlist = [(self.listtype, True)]
 
         worker = RunProcInThread(self.listtype, self.UpdateVariablesList,
-                                 RPDBDEBUGGER.catchexc_get_namespace, 
+                                 RpdbDebugger().catchexc_get_namespace, 
                                  expressionlist, self.filterlevel)
         worker.start()
         return (old_key, old_expressionlist)
@@ -151,7 +151,7 @@ class VariablesList(wx.gizmos.TreeListCtrl):
         _suite = "%s = %s" % (expr, _expr)
 
         worker = RunProcInThread(self.listtype, self._onitemactivatedcallback,
-                                 RPDBDEBUGGER.execute, _suite)
+                                 RpdbDebugger().execute, _suite)
         worker.start()
         
     def _onitemactivatedcallback(self, res):
@@ -204,7 +204,7 @@ class VariablesList(wx.gizmos.TreeListCtrl):
             return
       
         worker = RunProcInThread(self.listtype, self._itemexpandingcallback,
-                                 RPDBDEBUGGER.get_namespace, [(expr, True)], 
+                                 RpdbDebugger().get_namespace, [(expr, True)], 
                                  self.filterlevel)
         worker.pass_parameter(item)
         worker.start()

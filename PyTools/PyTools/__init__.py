@@ -38,10 +38,13 @@ from PyTools.Debugger.BreakPointsShelfWindow import BreakPointsShelfWindow
 from PyTools.Debugger.StackThreadShelfWindow import StackThreadShelfWindow
 from PyTools.Debugger.VariablesShelfWindow import VariablesShelfWindow
 from PyTools.Debugger.ExpressionsShelfWindow import ExpressionsShelfWindow
+from PyTools.Debugger.MessageHandler import MessageHandler
+from PyTools.Debugger.RpdbDebugger import RpdbDebugger
 
 #-----------------------------------------------------------------------------#
 # Globals
 _ = wx.GetTranslation
+
 #-----------------------------------------------------------------------------#
 
 # Implementation
@@ -89,6 +92,16 @@ class PyDebug(BaseShelfPlugin):
 
         """
         return Images.Bug.Bitmap
+
+    def InstallComponents(self, parent):
+        """Initialize and install"""
+        setattr(self, '_installed', True)
+        # Initialize singletons
+        RpdbDebugger()
+        MessageHandler()
+
+    def IsInstalled(self):
+        return getattr(self, '_installed', False)
 
 class PyBreakPoint(BaseShelfPlugin):
     """Script Launcher and output viewer"""

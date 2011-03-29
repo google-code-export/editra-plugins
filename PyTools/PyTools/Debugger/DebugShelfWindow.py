@@ -35,8 +35,8 @@ from PyTools.Common.DummyProcessCreator import DummyProcessCreator
 from PyTools.Debugger.DebuggeeWindow import DebuggeeWindow
 from PyTools.Debugger.PythonDebugger import PythonDebugger
 from PyTools.Debugger.AttachDialog import AttachDialog
-from PyTools.Debugger import RPDBDEBUGGER
-from PyTools.Debugger import MESSAGEHANDLER
+from PyTools.Debugger.RpdbDebugger import RpdbDebugger
+from PyTools.Debugger.MessageHandler import MessageHandler
 
 # Globals
 _ = wx.GetTranslation
@@ -92,7 +92,7 @@ class DebugShelfWindow(BaseShelfWindow):
         self.layout("Remote", self.OnRemote, self.OnJobTimer)
 
         # Attributes
-        MESSAGEHANDLER.debugeditorupdate = self.OnEditorUpdate
+        MessageHandler().debugeditorupdate = self.OnEditorUpdate
         self._debugger = None
         self._debugrun = False
         self._debugargs = ""
@@ -102,9 +102,9 @@ class DebugShelfWindow(BaseShelfWindow):
         self._lasthost = "localhost"
 
         # Debugger Attributes
-        RPDBDEBUGGER.mainwindow = self._mw
-        RPDBDEBUGGER.debugbuttonsupdate = self.OnButtonsUpdate
-        RPDBDEBUGGER.disabledebugbuttons = self.DisableButtons
+        RpdbDebugger().mainwindow = self._mw #TODO
+        RpdbDebugger().debugbuttonsupdate = self.OnButtonsUpdate
+        RpdbDebugger().disabledebugbuttons = self.DisableButtons
 
         # Event Handlers
         self.Bind(wx.EVT_BUTTON, self.OnGo, self.gobtn)
@@ -118,11 +118,11 @@ class DebugShelfWindow(BaseShelfWindow):
 
     def Unsubscription(self):
         """Cleanup message handlers on Destroy"""
-        if RPDBDEBUGGER.attached:
-            RPDBDEBUGGER.do_detach()
-        RPDBDEBUGGER.debugbuttonsupdate = lambda:None
-        RPDBDEBUGGER.disabledebugbuttons = lambda:None
-        MESSAGEHANDLER.debugeditorupdate = lambda x,y,z:None
+        if RpdbDebugger().attached:
+            RpdbDebugger().do_detach()
+        RpdbDebugger().debugbuttonsupdate = lambda:None
+        RpdbDebugger().disabledebugbuttons = lambda:None
+        MessageHandler().debugeditorupdate = lambda x,y,z:None
 
     def OnCancelSearch(self, event):
         """Clear the text from the text control"""
@@ -149,9 +149,9 @@ class DebugShelfWindow(BaseShelfWindow):
     
     def _onbuttonsupdate(self, ispython):
         """Update button states based on debugger state"""
-        attached = RPDBDEBUGGER.attached
+        attached = RpdbDebugger().attached
         self.taskbtn.Enable(not attached)
-        broken = RPDBDEBUGGER.broken
+        broken = RpdbDebugger().broken
         attachedandbroken = attached and broken
         ispythonandnotattached = ispython and not attached
         self.gobtn.Enable(attachedandbroken or ispythonandnotattached)
@@ -163,7 +163,7 @@ class DebugShelfWindow(BaseShelfWindow):
         self.stepinbtn.Enable(attachedandbroken)
         self.stepovbtn.Enable(attachedandbroken)
         self.stepoutbtn.Enable(attachedandbroken)
-        self.breakbtn.Enable(attached and not broken and not RPDBDEBUGGER.analyzing)
+        self.breakbtn.Enable(attached and not broken and not RpdbDebugger().analyzing)
         self.combo.Enable(ispythonandnotattached)
         self.search.Enable(ispythonandnotattached)
 
@@ -180,17 +180,17 @@ class DebugShelfWindow(BaseShelfWindow):
         self._onbuttonsupdate(ispython)
         self.combotexts[self.combocurrent_selection] = self.search.GetValue()
         config = Profile_Get(ToolConfig.PYTOOL_CONFIG, default=dict())
-        if MESSAGEHANDLER._prevfile:
+        if MessageHandler().PreviousFile:
             emptycombotexts = True
             for key in self.combotexts:
                 combotext = self.combotexts[key]
                 if combotext:
                     emptycombotexts = False
                     break
-            key = "DEBUG_%s" % MESSAGEHANDLER._prevfile
+            key = "DEBUG_%s" % MessageHandler().PreviousFile
             if emptycombotexts:
                 if key in config:
-                    del config["DEBUG_%s" % MESSAGEHANDLER._prevfile]
+                    del config["DEBUG_%s" % MessageHandler().PreviousFile]
             else:
                 debuginfo = (self.combocurrent_selection, self.combotexts)
                 config[key] = copy.deepcopy(debuginfo)
@@ -242,8 +242,8 @@ class DebugShelfWindow(BaseShelfWindow):
         lets program run till next breakpoint is hit.
 
         """
-        if RPDBDEBUGGER.attached:
-            RPDBDEBUGGER.do_go()
+        if RpdbDebugger().attached:
+            RpdbDebugger().do_go()
             return
             
         self.combotexts[self.combocurrent_selection] = self.search.GetValue()
@@ -271,21 +271,21 @@ class DebugShelfWindow(BaseShelfWindow):
         self._listCtrl.AddText(_("Reenabling Pylint Autorun."))
     
     def _setdebuggerdefaults(self):
-        RPDBDEBUGGER.set_default_password()
-        RPDBDEBUGGER.set_default_host()
+        RpdbDebugger().set_default_password()
+        RpdbDebugger().set_default_host()
     
     def _setdebuggeroptions(self):
         config = Profile_Get(ToolConfig.PYTOOL_CONFIG, default=dict())
         trap = config.get(ToolConfig.TLC_TRAP_EXCEPTIONS, True)
-        RPDBDEBUGGER.set_trap_unhandled_exceptions(trap)
+        RpdbDebugger().set_trap_unhandled_exceptions(trap)
         synchronicity = config.get(ToolConfig.TLC_SYNCHRONICITY, True)
-        RPDBDEBUGGER.set_synchronicity(synchronicity)
+        RpdbDebugger().set_synchronicity(synchronicity)
         autofork = config.get(ToolConfig.TLC_AUTO_FORK, True)
         forkmode = config.get(ToolConfig.TLC_FORK_MODE, False)
-        RPDBDEBUGGER.set_fork_mode(forkmode, autofork)
+        RpdbDebugger().set_fork_mode(forkmode, autofork)
         encoding = config.get(ToolConfig.TLC_EXECEVALENCODING, "auto")
         escaping = config.get(ToolConfig.TLC_EXECEVALESCAPING, True)
-        RPDBDEBUGGER.set_encoding(encoding, escaping)
+        RpdbDebugger().set_encoding(encoding, escaping)
         mode = config.get(ToolConfig.TLC_LINT_AUTORUN, False)
         if mode:
             config[ToolConfig.TLC_LINT_AUTORUN] = False
@@ -323,31 +323,31 @@ class DebugShelfWindow(BaseShelfWindow):
 
     def _abort(self):
         """Stop debugging"""
-        RPDBDEBUGGER.do_abort()
+        RpdbDebugger().do_abort()
 
     def _detach(self):
         """Detach debugger"""
-        RPDBDEBUGGER.do_detach()
+        RpdbDebugger().do_detach()
 
     def OnStepIn(self, event):
         """Step in to the code on the current line"""
-        RPDBDEBUGGER.do_step()
+        RpdbDebugger().do_step()
 
     def OnStepOver(self, event):
         """Step over the code on the current line"""
-        RPDBDEBUGGER.do_next()
+        RpdbDebugger().do_next()
 
     def OnStepOut(self, event):
         """Step out of the current scope"""
-        RPDBDEBUGGER.do_return()
+        RpdbDebugger().do_return()
 
     def OnBreak(self, event):
         """Break now"""
-        RPDBDEBUGGER.do_break()
+        RpdbDebugger().do_break()
 
     def OnRemote(self, event):
         """Remote debug"""
-        if RPDBDEBUGGER.attached:
+        if RpdbDebugger().attached:
             return
         attach_dialog = AttachDialog(self)
         r = attach_dialog.ShowModal()

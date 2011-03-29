@@ -28,7 +28,7 @@ from PyTools.Common.PyToolsUtils import PyToolsUtils
 from PyTools.Common.PyToolsUtils import RunProcInThread
 from PyTools.Common.BaseShelfWindow import BaseShelfWindow
 from PyTools.Debugger.VariablesLists import VariablesList
-from PyTools.Debugger import RPDBDEBUGGER
+from PyTools.Debugger.RpdbDebugger import RpdbDebugger
 
 # Globals
 _ = wx.GetTranslation
@@ -86,21 +86,21 @@ class VariablesShelfWindow(BaseShelfWindow):
         self.layout(self.ANALYZELBL, self.OnAnalyze)
 
         # Debugger attributes
-        RPDBDEBUGGER.clearlocalvariables = self._locals.Clear
-        RPDBDEBUGGER.updatelocalvariables = self._locals.update_namespace
-        RPDBDEBUGGER.clearglobalvariables = self._globals.Clear
-        RPDBDEBUGGER.updateglobalvariables = self._globals.update_namespace
-        RPDBDEBUGGER.clearexceptions = self._exceptions.Clear
-        RPDBDEBUGGER.updateexceptions = self._exceptions.update_namespace
-        RPDBDEBUGGER.catchunhandledexception = self.UnhandledException
-        RPDBDEBUGGER.updateanalyze = self.UpdateAnalyze
+        RpdbDebugger().clearlocalvariables = self._locals.Clear
+        RpdbDebugger().updatelocalvariables = self._locals.update_namespace
+        RpdbDebugger().clearglobalvariables = self._globals.Clear
+        RpdbDebugger().updateglobalvariables = self._globals.update_namespace
+        RpdbDebugger().clearexceptions = self._exceptions.Clear
+        RpdbDebugger().updateexceptions = self._exceptions.update_namespace
+        RpdbDebugger().catchunhandledexception = self.UnhandledException
+        RpdbDebugger().updateanalyze = self.UpdateAnalyze
         
         # Event Handlers
         self.Bind(wx.EVT_COMBOBOX, self.SetFilterLevelLocals, self.filterlevellocals)
         self.Bind(wx.EVT_COMBOBOX, self.SetFilterLevelGlobals, self.filterlevelglobals)
         self.Bind(wx.EVT_COMBOBOX, self.SetFilterLevelExceptions, self.filterlevelexceptions)
 
-        RPDBDEBUGGER.update_namespace()
+        RpdbDebugger().update_namespace()
 
     def _InitImageList(self):
         """Initialize the segmentbooks image list"""
@@ -124,18 +124,18 @@ class VariablesShelfWindow(BaseShelfWindow):
 
     def Unsubscription(self):
         """Cleanup on Destroy"""
-        RPDBDEBUGGER.clearlocalvariables = lambda:None
-        RPDBDEBUGGER.updatelocalvariables = lambda x,y:(None,None)
-        RPDBDEBUGGER.clearglobalvariables = lambda:None
-        RPDBDEBUGGER.updateglobalvariables = lambda x,y:(None,None)
-        RPDBDEBUGGER.clearexceptions = lambda:None
-        RPDBDEBUGGER.updateexceptions = lambda x,y:(None,None)
-        RPDBDEBUGGER.unhandledexception = False
-        RPDBDEBUGGER.catchunhandledexception = lambda:None
-        RPDBDEBUGGER.updateanalyze = lambda:None
+        RpdbDebugger().clearlocalvariables = lambda:None
+        RpdbDebugger().updatelocalvariables = lambda x,y:(None,None)
+        RpdbDebugger().clearglobalvariables = lambda:None
+        RpdbDebugger().updateglobalvariables = lambda x,y:(None,None)
+        RpdbDebugger().clearexceptions = lambda:None
+        RpdbDebugger().updateexceptions = lambda x,y:(None,None)
+        RpdbDebugger().unhandledexception = False
+        RpdbDebugger().catchunhandledexception = lambda:None
+        RpdbDebugger().updateanalyze = lambda:None
 
     def UnhandledException(self):
-        RPDBDEBUGGER.unhandledexception = True
+        RpdbDebugger().unhandledexception = True
         wx.CallAfter(self._unhandledexception)
 
     def _unhandledexception(self):
@@ -147,19 +147,19 @@ class VariablesShelfWindow(BaseShelfWindow):
         dlg.Destroy()
 
         if res != wx.ID_YES:
-            RPDBDEBUGGER.unhandledexception = False
-            RPDBDEBUGGER.do_go()
+            RpdbDebugger().unhandledexception = False
+            RpdbDebugger().do_go()
         else:
-            RPDBDEBUGGER.set_analyze(True)
+            RpdbDebugger().set_analyze(True)
 
     def OnAnalyze(self, event):
         if self.taskbtn.GetLabel() == self.ANALYZELBL:
-            RPDBDEBUGGER.set_analyze(True)
+            RpdbDebugger().set_analyze(True)
         else:
-            RPDBDEBUGGER.set_analyze(False)
+            RpdbDebugger().set_analyze(False)
 
     def UpdateAnalyze(self):
-        if RPDBDEBUGGER.analyzing:
+        if RpdbDebugger().analyzing:
             self.taskbtn.SetLabel(self.STOPANALYZELBL)
         else:
             self.taskbtn.SetLabel(self.ANALYZELBL)
@@ -168,7 +168,7 @@ class VariablesShelfWindow(BaseShelfWindow):
         config = Profile_Get(ToolConfig.PYTOOL_CONFIG, default=dict())
         config[key] = value
         Profile_Set(ToolConfig.PYTOOL_CONFIG, config)
-        RPDBDEBUGGER.update_namespace()
+        RpdbDebugger().update_namespace()
     
     def SetFilterLevelLocals(self, evt):
         combocurrent_selection = self.filterlevellocals.GetSelection()

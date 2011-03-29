@@ -14,10 +14,5 @@ __revision__ = "$Revision$"
 
 #----------------------------------------------------------------------------#
 # Local Imports
-from PyTools.Debugger.MessageHandler import MessageHandler
-from PyTools.Debugger.RpdbDebugger import RpdbDebugger
 
-# Globals
-RPDBDEBUGGER = RpdbDebugger()
-MESSAGEHANDLER = MessageHandler(RPDBDEBUGGER)
 #----------------------------------------------------------------------------#

@@ -21,7 +21,7 @@ import eclib
 
 # Local Imports
 from PyTools.Common.PyToolsUtils import RunProcInThread
-from PyTools.Debugger import RPDBDEBUGGER
+from PyTools.Debugger.RpdbDebugger import RpdbDebugger
 
 # Globals
 _ = wx.GetTranslation
@@ -75,7 +75,7 @@ class ExpressionsList(eclib.EToggleEditListCtrl):
         if not enabled or not expression:
             return
         worker = RunProcInThread("Expr", self.fillexpressionvalue, \
-                                 RPDBDEBUGGER.evaluate, expression)
+                                 RpdbDebugger().evaluate, expression)
         worker.pass_parameter(idx)
         worker.start()
     

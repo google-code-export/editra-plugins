@@ -20,7 +20,7 @@ import wx
 import eclib
 
 # Local Imports
-from PyTools.Debugger import RPDBDEBUGGER
+from PyTools.Debugger.RpdbDebugger import RpdbDebugger
 
 # Globals
 _ = wx.GetTranslation
@@ -68,7 +68,7 @@ class ThreadsList(eclib.EBaseListCtrl):
             return
         self.previndex = index
         tid = int(self.GetItem(index, ThreadsList.COL_ID).GetText())
-        RPDBDEBUGGER.set_thread(tid)
+        RpdbDebugger().set_thread(tid)
         
     def Clear(self):
         """Delete all the rows """

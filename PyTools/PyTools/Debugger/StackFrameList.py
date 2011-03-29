@@ -22,7 +22,7 @@ import util
 import eclib
 
 # Local Imports
-from PyTools.Debugger import RPDBDEBUGGER
+from PyTools.Debugger.RpdbDebugger import RpdbDebugger
 from PyTools.Common.PyToolsUtils import PyToolsUtils
 
 # Globals
@@ -65,12 +65,8 @@ class StackFrameList(eclib.EBaseListCtrl):
         if self.previndex == index:
             return
         self.previndex = index
-        RPDBDEBUGGER.set_frameindex(index)
-        # TODO: should probably break at this frame
+        RpdbDebugger().set_frameindex(index)
 
-        # Navigate to the selected frame
-        # TODO: find out why it jumps back to the other tab seems like
-        #       the debugger does a Go after activating an item in the stack.
         fileName = self.GetItem(index, StackFrameList.COL_FILE).GetText()
         if not fileName:
             return
