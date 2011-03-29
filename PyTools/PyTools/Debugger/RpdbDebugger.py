@@ -15,6 +15,7 @@ __revision__ = "$Revision$"
 # Imports
 import traceback
 from time import sleep
+import wx
 
 # Editra Libraries
 import util
@@ -30,6 +31,9 @@ from PyTools.Debugger.RpdbBreakpointsManager import RpdbBreakpointsManager
 from PyTools.Debugger.RpdbStackFrameManager import RpdbStackFrameManager
 from PyTools.Debugger.RpdbThreadsManager import RpdbThreadsManager
 from PyTools.Debugger.RpdbVariablesManager import RpdbVariablesManager
+
+# Globals
+_ = wx.GetTranslation
 
 #----------------------------------------------------------------------------#
 
@@ -65,6 +69,8 @@ class RpdbDebugger(object):
         self.breakpoints_installed = False
         self.curstack = {}
         self.unhandledexception = False
+        self.debuggerattachedtext = None
+        self.debuggerdetachedtext = None
         
         # functions that will be set later
 
@@ -108,6 +114,9 @@ class RpdbDebugger(object):
         self.attached = False
         self.analyzing = False
         self.broken = False
+        self.processcreator = None
+        self.debuggerattachedtext = None
+        self.debuggerdetachedtext = None
         self.clearstepmarker()
         self.clearframe()
         self.clearthread()
@@ -157,11 +166,11 @@ class RpdbDebugger(object):
             err = rpdb2.g_error_mapping.get(type(ex), repr(ex))
             err = "Failed to attach. Error: %s" % err
             util.Log("[PyDbg][err] %s" % err)
-            processcreator.AddText("\n%s" % err)
+            processcreator.AddText(_("\n%s\n" % err))
             PyToolsUtils.error_dialog(self.mainwindow, err)
             return
         util.Log("[PyDbg][info] Running")
-        processcreator.AddText("\nDebugger attached. Program output starts now...\n")
+        processcreator.AddText(self.debuggerattachedtext)
 
     def attached_callsessionmanagerfn(self, fn, *args, **kwargs):
         if not self.attached:
