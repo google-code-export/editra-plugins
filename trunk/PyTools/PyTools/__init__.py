@@ -34,7 +34,7 @@ from PyTools.SyntaxChecker.LintShelfWindow import LintShelfWindow
 from PyTools.ModuleFinder.FindTabMenu import FindTabMenu
 from PyTools.ModuleFinder.FindShelfWindow import FindShelfWindow
 from PyTools.Debugger.DebugShelfWindow import DebugShelfWindow
-from PyTools.Debugger.BreakPointsShelfWindow import BreakPointsShelfWindow
+from PyTools.Debugger.BreakPointsShelfWindow import BreakPointsShelfWindow, BreakpointController
 from PyTools.Debugger.StackThreadShelfWindow import StackThreadShelfWindow
 from PyTools.Debugger.VariablesShelfWindow import VariablesShelfWindow
 from PyTools.Debugger.ExpressionsShelfWindow import ExpressionsShelfWindow
@@ -99,6 +99,7 @@ class PyDebug(BaseShelfPlugin):
         # Initialize singletons
         RpdbDebugger()
         MessageHandler()
+        BreakpointController()
 
     def IsInstalled(self):
         return getattr(self, '_installed', False)

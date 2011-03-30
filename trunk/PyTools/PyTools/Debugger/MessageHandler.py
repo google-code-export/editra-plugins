@@ -84,7 +84,7 @@ class MessageHandler(object):
         
     def ClearStepMarker(self):
         if self.editor:
-            self.editor.ShowStepMarker(1, show=False)
+            self.editor.ShowStepMarker(show=False)
             self.editor = None
         
     def SetStepMarker(self, fileName, lineNo):
