@@ -84,20 +84,6 @@ class BreakPointsList(eclib.EToggleEditListCtrl):
         if col == BreakPointsList.COL_EXPR:
             super(BreakPointsList, self).OpenEditor(col, row)
 
-    def _seteditorbreakpoint(self, filepath, lineno, enabled, delete=False):
-        """Set a breakpoint the the current editor"""
-        editor = wx.GetApp().GetCurrentBuffer()
-        if editor:
-            curpath = os.path.normcase(editor.GetFileName())
-            if filepath == curpath:
-                editorlineno = lineno - 1
-                if delete:
-                    editor.DeleteBreakpoint(editorlineno)
-                elif enabled:
-                    editor.SetBreakpoint(editorlineno)
-                else:
-                    editor.SetBreakpointDisabled(editorlineno)
-
     def OnItemEdited(self, evt):
         if evt.IsEditCancelled():
             evt.Veto()
@@ -114,14 +100,14 @@ class BreakPointsList(eclib.EToggleEditListCtrl):
             try:
                 lineno = int(linenostr)
                 self.Parent.DeleteBreakpoint(filepath, lineno)
-                self._seteditorbreakpoint(filepath, lineno, False, True)
+                self.Parent.SetEditorBreakpoint(filepath, lineno, False, True)
             except ValueError:
                 pass
         exprstr = newval
         enabled = self.IsChecked(idx)
         if filepath and lineno:
             self.Parent.SetBreakpoint(filepath, lineno, exprstr, enabled)
-            self._seteditorbreakpoint(filepath, lineno, enabled)
+            self.Parent.SetEditorBreakpoint(filepath, lineno, enabled)
 
     def OnCheckItem(self, idx, enabled):
         wx.CallAfter(self._oncheckitem, idx, enabled)
@@ -136,7 +122,6 @@ class BreakPointsList(eclib.EToggleEditListCtrl):
                 lineno = int(linenostr)
                 self.Parent.DeleteBreakpoint(filepath, lineno)
                 self.Parent.SetBreakpoint(filepath, lineno, exprstr, enabled)
-                self._seteditorbreakpoint(filepath, lineno, enabled)
             except ValueError:
                 pass
 
@@ -157,7 +142,6 @@ class BreakPointsList(eclib.EToggleEditListCtrl):
         minLType = max(self.GetTextExtent(filenameText)[0], self.GetColumnWidth(0))
         minLText = max(self.GetTextExtent(exprText)[0], self.GetColumnWidth(2))
 
-        
         idx = 0
         for filepath in data.keys():
             linenos = data.get(filepath)
@@ -169,7 +153,7 @@ class BreakPointsList(eclib.EToggleEditListCtrl):
                     continue
                 enabled, exprstr = bpline
                 if filepath and lineno:
-                    self._seteditorbreakpoint(filepath, lineno, enabled)
+                    self.Parent.SetEditorBreakpoint(filepath, lineno, enabled)
                 minLType = max(minLType, self.GetTextExtent(filepath)[0])
                 minLText = max(minLText, self.GetTextExtent(exprstr)[0])
                 self.Append((unicode(filepath), unicode(lineno), unicode(exprstr)))
