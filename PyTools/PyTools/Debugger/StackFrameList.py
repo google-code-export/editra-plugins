@@ -64,13 +64,16 @@ class StackFrameList(eclib.EBaseListCtrl):
         index = evt.GetIndex()
         if self.previndex == index:
             return
+        filename = self.GetItem(index, StackFrameList.COL_FILE).GetText()
+        if index > self.GetItemCount() - 4:
+            if filename and os.path.basename(filename) == "rpdb2.py":
+                return
         self.previndex = index
         RpdbDebugger().set_frameindex(index)
 
-        fileName = self.GetItem(index, StackFrameList.COL_FILE).GetText()
-        if not fileName:
+        if not filename:
             return
-        editor = PyToolsUtils.GetEditorOrOpenFile(self._mainw, fileName)
+        editor = PyToolsUtils.GetEditorOrOpenFile(self._mainw, filename)
         if editor:
             try:
                 lineno = int(self.GetItem(index, StackFrameList.COL_LINE).GetText())
@@ -106,6 +109,13 @@ class StackFrameList(eclib.EBaseListCtrl):
             minLFile = max(minLFile, self.GetTextExtent(efilename)[0])
             minLFunc = max(minLFunc, self.GetTextExtent(efunction)[0])
             self.Append((unicode(idx), efilename, unicode(lineno), efunction))
+            if idx < len(data) - 3:
+                enable = True
+            elif os.path.basename(filename) == "rpdb2.py":
+                enable = False
+            else:
+                enable = True
+            self.EnableRow(idx, enable=enable)
             idx += 1
 
         self.SetColumnWidth(StackFrameList.COL_FILE, minLFile)

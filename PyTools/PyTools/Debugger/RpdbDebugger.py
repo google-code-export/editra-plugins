@@ -370,6 +370,8 @@ class RpdbDebugger(object):
             pass
         except IOError:
             pass
+        except rpdb2.CException:
+            pass
     
     def clear_breakpoints(self):
         self.attached_callsessionmanagerfn(self.sessionmanager.delete_breakpoint, [], True)
