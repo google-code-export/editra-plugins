@@ -9,12 +9,12 @@
 """Editra Shelf display window"""
 
 __author__ = "Mike Rans"
-__svnid__ = "$Id $"
-__revision__ = "$Revision $"
+__svnid__ = "$Id$"
+__revision__ = "$Revision$"
 
 #-----------------------------------------------------------------------------#
 # Imports
-import os.path
+import os
 import wx
 
 # Editra Libraries
@@ -43,6 +43,7 @@ class LintShelfWindow(BaseShelfWindow):
     def __init__(self, parent):
         """Initialize the window"""
         super(LintShelfWindow, self).__init__(parent)
+
         ctrlbar = self.setup(CheckResultsList(self))
         self._lbl = wx.StaticText(ctrlbar)
         ctrlbar.AddControl(self._lbl)
