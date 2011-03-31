@@ -127,12 +127,6 @@ class CheckResultsList(eclib.EBaseListCtrl):
                     PyToolsUtils.set_indic(lineNo - 1, self.editor)
             except ValueError:
                 pass
+
         self.SetColumnWidth(0, minLType)
         self.SetColumnWidth(2, minLText)
-
-    @staticmethod
-    def _printListCtrl(ctrl):
-        for row in xrange(0, ctrl.GetItemCount()):
-            for column in xrange(0, ctrl.GetColumnCount()):
-                print ctrl.GetItem(row, column).GetText(), "\t",
-            print ""
