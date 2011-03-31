@@ -224,16 +224,16 @@ class DebugShelfWindow(BaseShelfWindow):
         @param editor: EditraStc
 
         """
+        self._listCtrl.Clear()
+
         # With the text control (ed_stc.EditraStc) this will return the full
         # path of the file or a wx.EmptyString if the buffer does not contain
         # an on disk file
-        filename = os.path.normcase(editor.GetFileName())
-        self._listCtrl.Clear()
-
+        filename = editor.GetFileName()
         if not filename:
             return
-
         filename = os.path.abspath(filename)
+        
         filetype = editor.GetLangId()
         directoryvariables = self.get_directory_variables(filetype)
         if directoryvariables:

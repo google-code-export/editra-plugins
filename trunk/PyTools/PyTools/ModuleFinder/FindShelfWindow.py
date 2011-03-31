@@ -58,21 +58,19 @@ class FindShelfWindow(BaseShelfWindow):
         self._finder = None
 
     def _onmodulefind(self, editor, moduletofind):
-        # With the text control (ed_stc.EditraStc) this will return the full
-        # path of the file or a wx.EmptyString if the buffer does not contain
-        # an on disk file
-        filename = os.path.normcase(editor.GetFileName())
         self._listCtrl.Clear()
 
         vardict = {}
+        # With the text control (ed_stc.EditraStc) this will return the full
+        # path of the file or a wx.EmptyString if the buffer does not contain
+        # an on disk file
+        filename = editor.GetFileName()
         if filename:
             filename = os.path.abspath(filename)
-            fileext = os.path.splitext(filename)[1]
-            if fileext:
-                filetype = syntax.GetIdFromExt(fileext[1:]) # pass in file extension
-                directoryvariables = self.get_directory_variables(filetype)
-                if directoryvariables:
-                    vardict = directoryvariables.read_dirvarfile(filename)
+            filetype = editor.GetLangId()
+            directoryvariables = self.get_directory_variables(filetype)
+            if directoryvariables:
+                vardict = directoryvariables.read_dirvarfile(filename)
 
         self._findmodule(synglob.ID_LANG_PYTHON, vardict, moduletofind)
         self._hasrun = True
