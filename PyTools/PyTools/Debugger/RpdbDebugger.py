@@ -166,12 +166,15 @@ class RpdbDebugger(object):
             err = rpdb2.g_error_mapping.get(type(ex), repr(ex))
             err = "Failed to attach. Error: %s" % err
             util.Log("[PyDbg][err] %s" % err)
-            processcreator.AddText(_("\n%s\n" % err))
+            wx.CallAfter(self.printerror, processcreator, err)
             PyToolsUtils.error_dialog(self.mainwindow, err)
             return
         util.Log("[PyDbg][info] Running")
         processcreator.AddText(self.debuggerattachedtext)
 
+    def printerror(self, processcreator, err):
+        processcreator.AddText(_("\n%s\n" % err))
+    
     def attached_callsessionmanagerfn(self, fn, *args, **kwargs):
         if not self.attached:
             return None
