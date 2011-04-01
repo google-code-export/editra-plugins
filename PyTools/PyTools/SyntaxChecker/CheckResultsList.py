@@ -18,6 +18,7 @@ import wx
 
 # Editra Libraries
 import ed_msg
+import ed_marker
 import eclib
 
 # Local imports
@@ -97,7 +98,7 @@ class CheckResultsList(eclib.EBaseListCtrl):
             if fname in CheckResultsList._cache:
                 del CheckResultsList._cache[fname]
             self.DeleteAllItems()
-            self.editor.RemoveAllLintMarks()
+            self.editor.RemoveAllMarkers(ed_marker.LintMarker())
 
     def ClearMarkers(self):
         if self._mw:
@@ -105,7 +106,7 @@ class CheckResultsList(eclib.EBaseListCtrl):
             ctrls = nb.GetTextControls()
             for ctrl in ctrls:
                 if ctrl.GetFileName() in CheckResultsList._cache:
-                    ctrl.RemoveAllLintMarks()
+                    ctrl.RemoveAllMarkers(ed_marker.LintMarker())
 
     def LoadData(self, data):
         """Load data into the cache and display it in the list
@@ -134,7 +135,8 @@ class CheckResultsList(eclib.EBaseListCtrl):
             minLText = max(minLText, self.GetTextExtent(row[2])[0])
             self.Append(row)
             try:
-                self.editor.AddLintMark(int(row[1]) - 1) # TODO: store handles
+                self.editor.AddMarker(ed_marker.LintMarker(),
+                                      int(row[1]) - 1) # TODO: store handles
             except ValueError:
                 pass
 
