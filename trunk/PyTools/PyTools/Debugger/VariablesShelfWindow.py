@@ -53,8 +53,7 @@ class VariablesShelfWindow(BaseShelfWindow):
         exceptionsfilterlevel = config.get(ToolConfig.TLC_EXCEPTIONS_FILTERLEVEL, 0)
         
         # Attributes
-        bstyle = eclib.SEGBOOK_STYLE_NO_DIVIDERS|\
-                 eclib.SEGBOOK_STYLE_LEFT
+        bstyle = eclib.SEGBOOK_STYLE_NO_DIVIDERS|eclib.SEGBOOK_STYLE_LEFT
         self._nb = eclib.SegmentBook(self, style=bstyle)
         self._locals = VariablesList(self._nb, self.LOCALSSTR, localsfilterlevel)
         self._globals = VariablesList(self._nb, self.GLOBALSSTR, globalsfilterlevel)
@@ -68,19 +67,25 @@ class VariablesShelfWindow(BaseShelfWindow):
         ctrlbar = self.setup(self._nb, self._locals,
                              self._globals, self._exceptions)
         ctrlbar.AddStretchSpacer()
-        self.filterlevellocals = wx.ComboBox(ctrlbar, wx.ID_ANY, \
-        value=self.FILTER_LEVELS[localsfilterlevel], choices=self.FILTER_LEVELS, style=wx.CB_READONLY|eclib.PB_STYLE_NOBG)
-        self.filterlevelglobals = wx.ComboBox(ctrlbar, wx.ID_ANY, \
-        value=self.FILTER_LEVELS[globalsfilterlevel], choices=self.FILTER_LEVELS, style=wx.CB_READONLY|eclib.PB_STYLE_NOBG)
-        self.filterlevelexceptions = wx.ComboBox(ctrlbar, wx.ID_ANY, \
-        value=self.FILTER_LEVELS[exceptionsfilterlevel], choices=self.FILTER_LEVELS, style=wx.CB_READONLY|eclib.PB_STYLE_NOBG)
-        text = wx.StaticText(ctrlbar, wx.ID_ANY, "Filter Levels           Locals")
+        self.filterlevellocals = wx.Choice(ctrlbar, wx.ID_ANY,
+                                           choices=self.FILTER_LEVELS)
+        self.filterlevellocals.SetStringSelection(self.FILTER_LEVELS[localsfilterlevel])
+        self.filterlevelglobals = wx.Choice(ctrlbar, wx.ID_ANY,
+                                            choices=self.FILTER_LEVELS)
+        self.filterlevelglobals.SetStringSelection(self.FILTER_LEVELS[globalsfilterlevel])
+        self.filterlevelexceptions = wx.Choice(ctrlbar, wx.ID_ANY,
+                                               choices=self.FILTER_LEVELS)
+        self.filterlevelexceptions.SetStringSelection(self.FILTER_LEVELS[exceptionsfilterlevel])
+        text = wx.StaticText(ctrlbar, label=_("Filter Levels:"))
+        ctrlbar.AddControl(text, wx.ALIGN_RIGHT)
+        ctrlbar.AddSpacer(20,-1)
+        text = wx.StaticText(ctrlbar, label=_("Locals:"))
         ctrlbar.AddControl(text, wx.ALIGN_RIGHT)
         ctrlbar.AddControl(self.filterlevellocals, wx.ALIGN_RIGHT)
-        text = wx.StaticText(ctrlbar, wx.ID_ANY, "Globals")
+        text = wx.StaticText(ctrlbar, wx.ID_ANY, _("Globals:"))
         ctrlbar.AddControl(text, wx.ALIGN_RIGHT)
         ctrlbar.AddControl(self.filterlevelglobals, wx.ALIGN_RIGHT)
-        text = wx.StaticText(ctrlbar, wx.ID_ANY, "Exceptions")
+        text = wx.StaticText(ctrlbar, wx.ID_ANY, _("Exceptions:"))
         ctrlbar.AddControl(text, wx.ALIGN_RIGHT)
         ctrlbar.AddControl(self.filterlevelexceptions, wx.ALIGN_RIGHT)
         self.layout(self.ANALYZELBL, self.OnAnalyze)
@@ -96,9 +101,9 @@ class VariablesShelfWindow(BaseShelfWindow):
         RpdbDebugger().updateanalyze = self.UpdateAnalyze
         
         # Event Handlers
-        self.Bind(wx.EVT_COMBOBOX, self.SetFilterLevelLocals, self.filterlevellocals)
-        self.Bind(wx.EVT_COMBOBOX, self.SetFilterLevelGlobals, self.filterlevelglobals)
-        self.Bind(wx.EVT_COMBOBOX, self.SetFilterLevelExceptions, self.filterlevelexceptions)
+        self.Bind(wx.EVT_CHOICE, self.SetFilterLevelLocals, self.filterlevellocals)
+        self.Bind(wx.EVT_CHOICE, self.SetFilterLevelGlobals, self.filterlevelglobals)
+        self.Bind(wx.EVT_CHOICE, self.SetFilterLevelExceptions, self.filterlevelexceptions)
 
         RpdbDebugger().update_namespace()
 
