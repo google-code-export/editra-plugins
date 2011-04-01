@@ -24,7 +24,9 @@ import util
 import ed_glob
 from profiler import Profile_Get, Profile_Set
 import ed_marker
+import ed_msg
 import ebmlib
+import syntax.synglob as synglob
 
 # Local imports
 from PyTools.Common import ToolConfig
@@ -52,10 +54,22 @@ class BreakpointController(object):
         MessageHandler().AddMenuItem(0, False, ID_TOGGLE_BREAKPOINT, 
                                      _("Toggle Breakpoint"), 
                                      self.ToggleBreakpoint)
+        ed_msg.Subscribe(self.OnMarginClick, ed_msg.EDMSG_UI_STC_MARGIN_CLICK)
 
     # Properties
     BreakpointWindow = property(lambda self: self._ui,
                                 lambda self, win: setattr(self, '_ui', win))
+
+    def OnMarginClick(self, msg):
+        """Handle margin clicks for setting/disabling breakpoints"""
+        data = msg.GetData()
+        buff = data.get('stc', None)
+        line = data.get('line', -1)
+        if buff and line > 0:
+            if buff.GetLangId() == synglob.ID_LANG_PYTHON:
+                MessageHandler().ContextLine = line + 1
+                self.ToggleBreakpoint(buff, None)
+                data['handled'] = True
 
     @staticmethod
     def DeleteBreakpoint(filepath, lineno):
