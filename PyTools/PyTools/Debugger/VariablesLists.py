@@ -14,12 +14,14 @@ __revision__ = "$Revision$"
 
 #----------------------------------------------------------------------------#
 # Imports
-import os.path
+import os
+import types
 import threading
 import wx
 import wx.gizmos
 
 # Editra Libraries
+import ed_glob
 
 # Local Imports
 from PyTools.Common.PyToolsUtils import PyToolsUtils
@@ -37,8 +39,20 @@ class VariablesList(wx.gizmos.TreeListCtrl):
     COL_NAME = 0
     COL_REPR = 1
     COL_TYPE = 2
+    # Image IDs
+    IMG_CLASS, \
+    IMG_FUNCT, \
+    IMG_VAR = range(3)
     def __init__(self, parent, listtype, filterlevel):
         super(VariablesList, self).__init__(parent)
+
+        # Attributes
+        self.listtype = listtype
+        self.filterlevel = filterlevel
+        self.key = None
+        self.ignoredwarnings = {'': True}
+        self._imglst = wx.ImageList(16, 16)
+        self._imgmap = dict() # type -> imgidx
 
         # Setup
         self.AddColumn(_("Name"))
@@ -46,12 +60,17 @@ class VariablesList(wx.gizmos.TreeListCtrl):
         self.AddColumn(_("Type"))
         self.SetMainColumn(0) 
         self.SetLineSpacing(0)
-        
-        # Attributes
-        self.listtype = listtype
-        self.filterlevel = filterlevel
-        self.key = None
-        self.ignoredwarnings = {'': True}
+        ## Setup ImageList
+        bmp = wx.ArtProvider.GetBitmap(str(ed_glob.ID_CLASS_TYPE), wx.ART_MENU)
+        idx = self._imglst.Add(bmp)
+        self._imgmap[VariablesList.IMG_CLASS] = idx
+        bmp = wx.ArtProvider.GetBitmap(str(ed_glob.ID_METHOD_TYPE), wx.ART_MENU)
+        idx = self._imglst.Add(bmp)
+        self._imgmap[VariablesList.IMG_FUNCT] = idx
+        bmp = wx.ArtProvider.GetBitmap(str(ed_glob.ID_VARIABLE_TYPE), wx.ART_MENU)
+        idx = self._imglst.Add(bmp)
+        self._imgmap[VariablesList.IMG_VAR] = idx
+        self.SetImageList(self._imglst)
         
         # Event Handlers
         self.Bind(wx.EVT_TREE_ITEM_EXPANDING, self.OnItemExpanding)
@@ -295,10 +314,18 @@ class VariablesList(wx.gizmos.TreeListCtrl):
             _repr = unicode(subnode["repr"])
 
             child = self.AppendItem(item, _name)
-            self.SetItemText(child, ' ' + _repr, VariablesList.COL_REPR)
-            self.SetItemText(child, ' ' + _type, VariablesList.COL_TYPE)
+            self.SetItemText(child, u' ' + _repr, VariablesList.COL_REPR)
+            self.SetItemText(child, u' ' + _type, VariablesList.COL_TYPE)
             self.SetItemPyData(child, (subnode["expr"], subnode["fvalid"]))
             self.SetItemHasChildren(child, (subnode["n_subnodes"] > 0))
+            # Add some bitmaps depending on the object type
+            if subnode["type"] in ('type', 'module'):
+                self.SetItemImage(child, self._imgmap[VariablesList.IMG_CLASS])
+            elif subnode["type"] in ('function', 'builtin_function_or_method',
+                                     'instancemethod'):
+                self.SetItemImage(child, self._imgmap[VariablesList.IMG_FUNCT])
+            else:
+                self.SetItemImage(child, self._imgmap[VariablesList.IMG_VAR])
 
         self.Expand(item)
 
