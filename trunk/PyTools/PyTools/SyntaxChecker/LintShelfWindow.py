@@ -19,6 +19,7 @@ import wx
 
 # Editra Libraries
 import util
+import ed_glob
 import ed_msg
 from syntax import syntax
 import syntax.synglob as synglob
@@ -48,6 +49,7 @@ class LintShelfWindow(BaseShelfWindow):
         self._lbl = wx.StaticText(ctrlbar)
         ctrlbar.AddControl(self._lbl)
         ctrlbar.AddStretchSpacer()
+        self.clearbtn = self.AddPlateButton(_("Clear"), ed_glob.ID_DELETE, wx.ALIGN_RIGHT)
         self.layout("Lint", self.OnRunLint, self.OnJobTimer)
 
         # Attributes
@@ -57,6 +59,9 @@ class LintShelfWindow(BaseShelfWindow):
         ed_msg.Subscribe(self.OnFileLoad, ed_msg.EDMSG_FILE_OPENED)
         ed_msg.Subscribe(self.OnFileSave, ed_msg.EDMSG_FILE_SAVED)
         ed_msg.Subscribe(self.OnPageChanged, ed_msg.EDMSG_UI_NB_CHANGED)
+
+        # Event Handlers
+        self.Bind(wx.EVT_BUTTON, self.OnClear, self.clearbtn)
 
     def Unsubscription(self):
         ed_msg.Unsubscribe(self.OnFileLoad)
@@ -90,13 +95,12 @@ class LintShelfWindow(BaseShelfWindow):
         ispython = langid == synglob.ID_LANG_PYTHON
         self.taskbtn.Enable(ispython)
         if force or not self._hasrun:
-#            fname = getattr(editor, 'GetFileName', lambda: u"")()
-#            if ispython:
-#                self._lbl.SetLabel(fname)
-#            else:
-#                self._lbl.SetLabel(u"")
             ctrlbar = self.GetControlBar(wx.TOP)
             ctrlbar.Layout()
+
+    def OnClear(self, evt):
+        """Clear the results"""
+        self._listCtrl.Clear()
 
     def OnPageChanged(self, msg):
         """ Notebook tab was changed """
@@ -154,7 +158,7 @@ class LintShelfWindow(BaseShelfWindow):
         # Data is something like
         # [('Syntax Error', '__all__ = ["CSVSMonitorThread"]', 7)]
         if len(data) != 0:
-            self._listCtrl.PopulateRows(data)
+            self._listCtrl.LoadData(data)
             self._listCtrl.RefreshRows()
         mwid = self.GetMainWindow().GetId()
         ed_msg.PostMessage(ed_msg.EDMSG_PROGRESS_SHOW, (mwid, False))
