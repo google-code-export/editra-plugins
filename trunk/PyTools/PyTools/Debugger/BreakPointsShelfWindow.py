@@ -90,7 +90,7 @@ class BreakpointController(object):
                 elif enabled:
                     editor.SetBreakpoint(editorlineno)
                 else:
-                    editor.SetBreakpointDisabled(editorlineno)
+                    editor.SetBreakpoint(editorlineno, disable=True)
 
     @staticmethod
     def SetBreakpoint(filepath, lineno, exprstr, enabled):
