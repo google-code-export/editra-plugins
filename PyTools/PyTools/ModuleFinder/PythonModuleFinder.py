@@ -41,12 +41,15 @@ INFO_DIRVARS = range(0, 3)
 #-----------------------------------------------------------------------------#
 
 class PythonModuleFinder(AbstractModuleFinder):
-    def __init__(self, variabledict, moduletofind):
+    def __init__(self, variabledict, moduletofind,
+                 quickfind=False, localpath=None):
         super(PythonModuleFinder, self).__init__(variabledict, moduletofind)
 
         # Attributes
         self.dirvarfile = variabledict.get("DIRVARFILE")
         self.pythonpath = variabledict.get("PYTHONPATH")
+        self.quickfind = quickfind
+        self.localpath = localpath
 
     def RunModuleFind(self):
         """Run Module Finder
@@ -68,7 +71,12 @@ class PythonModuleFinder(AbstractModuleFinder):
         findmodule_script = pkg_resources.resource_filename("PyTools.ModuleFinder", "findmodule.py")
 
         # Start find module
-        finder_cmd = [localpythonpath, findmodule_script, self.moduletofind]
+        finder_cmd = [localpythonpath, findmodule_script]
+        if self.localpath:
+            finder_cmd.append(self.localpath)
+        finder_cmd.append(self.moduletofind)
+        if self.quickfind:
+            finder_cmd.append('firstmatch')
         processcreator = ProcessCreator("PyFind", ".", finder_cmd, self.pythonpath)
         process = processcreator.createprocess()
         stdoutdata, stderrdata = process.communicate()
