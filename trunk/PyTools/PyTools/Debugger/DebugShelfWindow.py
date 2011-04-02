@@ -78,8 +78,8 @@ class DebugShelfWindow(BaseShelfWindow):
         self.breakbtn.ToolTip = wx.ToolTip(_("Break"))
         ctrlbar.AddStretchSpacer()
         self.choices = [_("Program Args"), _("Debugger Args")]
-        self.combo = wx.ComboBox(ctrlbar, value=self.choices[0], 
-                                 choices=self.choices, style=wx.CB_READONLY)
+        self.combo = wx.Choice(ctrlbar, choices=self.choices)
+        self.combo.SetStringSelection(self.choices[0])
         self.combo.Enable(False)
         ctrlbar.AddControl(self.combo, wx.ALIGN_RIGHT)
         self.combocurrent_selection = 0
@@ -119,8 +119,9 @@ class DebugShelfWindow(BaseShelfWindow):
         self.Bind(wx.EVT_BUTTON, self.OnStepOver, self.stepovbtn)
         self.Bind(wx.EVT_BUTTON, self.OnStepOut, self.stepoutbtn)
         self.Bind(wx.EVT_BUTTON, self.OnBreak, self.breakbtn)
-        self.Bind(wx.EVT_COMBOBOX, self.OnComboSelect, self.combo)
+        self.Bind(wx.EVT_CHOICE, self.OnComboSelect, self.combo)
         self.Bind(wx.EVT_SEARCHCTRL_CANCEL_BTN, self.OnCancelSearch, self.search)
+        self.Bind(wx.EVT_SHOW, lambda evt: self.OnButtonsUpdate(), self)
 
     def Unsubscription(self):
         """Cleanup message handlers on Destroy"""
