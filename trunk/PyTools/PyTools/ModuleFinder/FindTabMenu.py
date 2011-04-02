@@ -107,10 +107,11 @@ class FindTabMenu(object):
     def OnOpenModule(self, editor, evt):
         """Handle open module context menu event"""
         if self._modname:
-            vardict = dict() # TODO: add file path to python path for search?
-            self._finder = PythonModuleFinder(vardict, self._modname)
+            vardict = dict()
+            path = os.path.dirname(editor.GetFileName())
+            self._finder = PythonModuleFinder(vardict, self._modname,
+                                              quickfind=True, localpath=path)
             self._finder.Find(self.DoOpenModule) # Async call
-            # TODO: check if we should block until return?
 
     def DoOpenModule(self, data):
         """Callback for module finder job
@@ -123,12 +124,8 @@ class FindTabMenu(object):
             path = list(data.Results)[0]
             util.Log("[Finder][info] Opening Module file in editor: %s" % path)
             app.OpenFile(path)
-        elif len(data.Results) > 1:
-            util.Log("[Finder][info] Resolve ambiguity for %d results" % len(data.Results))
-            # TODO: open dialog with all choices and ask user to resolve ambiguity
         else:
             util.Log("[Finder][warn] Failed to find module to open")
-            # TODO: log that no data was found / error reporting
 
     def GetModuleName(self, line):
         """Get the name of the module to open from the given line

@@ -43,7 +43,7 @@ class ModuleFinder(object):
     # a path we can safely skip for better performance
     _WXLOCALE = os.path.join('wx', 'locale')
 
-    def __init__(self, searchpath=None):
+    def __init__(self, searchpath=None, firstmatch=False):
         """
         @param searchpath: list of modules search path
         """
@@ -54,6 +54,7 @@ class ModuleFinder(object):
         assert isinstance(searchpath, list)
         self._searchpath = searchpath
         self._sources = []
+        self._exit_on_first = firstmatch
 
     def Find(self, text):
         """ Find the source files of modules matching text.
@@ -113,6 +114,8 @@ class ModuleFinder(object):
         """
         join = os.path.join # optimization
         exists = os.path.exists
+        if self._exit_on_first and len(self._sources):
+            return
         for filename in os.listdir(path):
             fqdn = join(path, filename)
             if os.path.isfile(fqdn) and self._IsPatternMatch(filename, pattern):
@@ -182,6 +185,19 @@ class ModuleFinder(object):
 #--------------------------------------------------------------------------#
 # Main
 if __name__ == '__main__':
-    mf = ModuleFinder()
+    # TODO: more proper command line argument handling...
+    # modulefinder localdir modulename
+    # modulefinder modulename
+    path = list(sys.path)
+    firstmatch = False
+    if 'firstmatch' in sys.argv:
+        firstmatch = True
+        sys.argv.remove('firstmatch')
+    if len(sys.argv) == 3:
+        dpath = sys.argv[1]
+        assert os.path.isdir(dpath)
+        path.insert(0, dpath)
+        sys.argv.pop(1)
+    mf = ModuleFinder(path, firstmatch)
     result = mf.Find(sys.argv[1])
     print result
