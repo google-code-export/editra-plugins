@@ -121,7 +121,7 @@ class DebugShelfWindow(BaseShelfWindow):
         self.Bind(wx.EVT_BUTTON, self.OnBreak, self.breakbtn)
         self.Bind(wx.EVT_CHOICE, self.OnComboSelect, self.combo)
         self.Bind(wx.EVT_SEARCHCTRL_CANCEL_BTN, self.OnCancelSearch, self.search)
-        self.Bind(wx.EVT_SHOW, lambda evt: self.OnButtonsUpdate(), self)
+        self.Bind(wx.EVT_SHOW, self.OnShow, self)
 
     def Unsubscription(self):
         """Cleanup message handlers on Destroy"""
@@ -141,6 +141,11 @@ class DebugShelfWindow(BaseShelfWindow):
         self.combotexts[self.combocurrent_selection] = self.search.GetValue()
         self.combocurrent_selection = self.combo.GetSelection()
         self.search.SetValue(self.combotexts[self.combocurrent_selection])
+
+    def OnShow(self, evt):
+        """Handle EVT_SHOW"""
+        if evt.IsShown():
+            self.OnButtonsUpdate()
 
     def DisableButtons(self):
         """Disable all debugger buttons"""
