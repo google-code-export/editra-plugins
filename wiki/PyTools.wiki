@@ -1,0 +1,15 @@
+#summary Python Integrated Development Solution
+#labels IDE
+
+= Introduction =
+
+Provides a collection of tools to aid in the development of Python applications.
+
+= Features =
+
+  * PyDebugger (Remote Python Debugger)
+  * PyFind (Python Module Finder)
+  * PyAnalysis (Code Analysis via PyLint)
+
+= Details =
+
