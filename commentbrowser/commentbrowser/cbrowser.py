@@ -26,6 +26,7 @@ import wx
 
 # Editra Library Modules
 import syntax
+import ed_basewin
 import ed_msg
 import profiler
 import eclib
@@ -82,7 +83,7 @@ class CBrowserPane(eclib.ControlBox):
 
         #---- private attr ----#
 
-        self._mainwin = self.__FindMainWindow()
+        self._mainwin = ed_basewin.FindMainWindow(self)
         self._mi = menu
         self.__log = wx.GetApp().GetLog()
 
@@ -137,27 +138,6 @@ class CBrowserPane(eclib.ControlBox):
         ed_msg.Subscribe(self.OnKey, ed_msg.EDMSG_UI_STC_KEYUP)
 
     #---- Private Methods ----#
-
-    def __FindMainWindow(self):
-        """Find the mainwindow of this control. The mainwindow will either be
-        the Top Level Window or if the panel is undocked it will be the parent
-        of the miniframe the panel is in.
-        @return: MainWindow or None
-
-        """
-        def IsMainWin(win):
-            """Is the window a mainwindow"""
-            return getattr(win, '__name__', '') == 'MainWindow'
-
-        tlw = self.GetTopLevelParent()
-        if IsMainWin(tlw):
-            return tlw
-        elif hasattr(tlw, 'GetParent'):
-            tlw = tlw.GetParent()
-            if IsMainWin(tlw):
-                return tlw
-
-        return None
 
     def _log(self, msg):
         """

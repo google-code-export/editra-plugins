@@ -70,7 +70,7 @@ class CommentBrowserPanel(plugin.Plugin):
         """Shelf Interface"""
         return True
 
-    ### MainWindowI Implemention ###
+    ### MainWindowI Implementation ###
     def PlugIt(self, parent):
         """ Adds the view menu entry and registers the event handler"""
         self._mainwin = parent

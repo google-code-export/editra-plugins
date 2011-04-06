@@ -24,6 +24,7 @@ import ed_msg
 from profiler import Profile_Get, Profile_Set
 import util
 import eclib
+import ed_basewin
 
 # Local Imports
 import IconFile
@@ -35,7 +36,6 @@ import ftpfile
 # Globals
 CONFIG_KEY = u"FtpEdit.Sites"
 ID_SITES = wx.NewId()
-ID_CONNECT = wx.NewId()
 
 # Context Menu
 ID_REFRESH = wx.NewId()
@@ -55,13 +55,13 @@ _ = wx.GetTranslation
 
 #-----------------------------------------------------------------------------#
 
-class FtpWindow(eclib.ControlBox):
+class FtpWindow(ed_basewin.EdBaseCtrlBox):
     """Ftp file window"""
     def __init__(self, parent, id_=wx.ID_ANY):
         super(FtpWindow, self).__init__(parent, id_)
 
         # Attributes
-        self._mw = self.__FindMainWindow()
+        self._mw = ed_basewin.FindMainWindow(self)
         self._config = ftpconfig.ConfigData
         self._config.SetData(Profile_Get(CONFIG_KEY, default=dict()))
         self._connected = False
@@ -74,6 +74,7 @@ class FtpWindow(eclib.ControlBox):
         self._cbar = None     # ControlBar
         self._list = None     # FtpList
         self._sites = None    # wx.Choice
+        self.prefbtn = None
         self._username = None # wx.TextCtrl
         self._password = None # wx.TextCtrl
 
@@ -83,8 +84,8 @@ class FtpWindow(eclib.ControlBox):
         self.RefreshControlBar()
 
         # Event Handlers
-        self.Bind(wx.EVT_BUTTON, self.OnButton, id=wx.ID_PREFERENCES)
-        self.Bind(wx.EVT_BUTTON, self.OnButton, id=ID_CONNECT)
+        self.Bind(wx.EVT_BUTTON, self.OnButton, self.prefbtn)
+        self.Bind(wx.EVT_BUTTON, self.OnButton, self.cbtn)
         self.Bind(wx.EVT_CHOICE, self.OnChoice, id=ID_SITES)
         self.Bind(wx.EVT_MENU, self.OnMenu)
         self.Bind(wx.EVT_LIST_ITEM_ACTIVATED, self.OnItemActivated)
@@ -115,16 +116,11 @@ class FtpWindow(eclib.ControlBox):
 
     def __DoLayout(self):
         """Layout the window"""
-        self._cbar = eclib.ControlBar(self, style=eclib.CTRLBAR_STYLE_GRADIENT)
-        if wx.Platform == '__WXGTK__':
-            self._cbar.SetWindowStyle(eclib.CTRLBAR_STYLE_DEFAULT)
+        self._cbar = self.CreateControlBar(wx.TOP)
 
         # Preferences
-        bmp = wx.ArtProvider.GetBitmap(str(ed_glob.ID_PREF), wx.ART_MENU)
-        btn = eclib.PlateButton(self._cbar, wx.ID_PREFERENCES,
-                                bmp=bmp, style=eclib.PB_STYLE_NOBG)
+        self.prefbtn = self.AddPlateButton(u"", ed_glob.ID_PREF, wx.ALIGN_LEFT)
         btn.SetToolTipString(_("Configuration"))
-        self._cbar.AddControl(btn, wx.ALIGN_LEFT)
 
         # Sites
         self._cbar.AddControl(wx.StaticText(self._cbar, label=_("Sites:")), wx.ALIGN_LEFT)
@@ -144,40 +140,17 @@ class FtpWindow(eclib.ControlBox):
         # Connect
         self._cbar.AddStretchSpacer()
         bmp = IconFile.Connect.GetBitmap()
-        connect = eclib.PlateButton(self._cbar, ID_CONNECT, bmp=bmp,
-                                    label=_("Connect"), style=eclib.PB_STYLE_NOBG)
-        self._cbar.AddControl(connect, wx.ALIGN_RIGHT)
+        self.cbtn = self.AddPlateButton(_("Connect"), bmp, wx.ALIGN_RIGHT)
 
         # Setup Window
-        self.SetControlBar(self._cbar, wx.TOP)
         self._list = FtpList(self, wx.ID_ANY)
         self.SetWindow(self._list)
-
-    def __FindMainWindow(self):
-        """Find the mainwindow of this control
-        @return: MainWindow or None
-
-        """
-        def IsMainWin(tlw):
-            """Check if the given window is a main window"""
-            return getattr(tlw, '__name__', '') == 'MainWindow'
-
-        tlw = self.GetTopLevelParent()
-        if IsMainWin(tlw):
-            return tlw
-        elif hasattr(tlw, 'GetParent'):
-            tlw = tlw.GetParent()
-            if IsMainWin(tlw):
-                return tlw
-
-        return None
 
     def _HandleDisconnect(self):
         """Handle having to disconnect from the server"""
         self._connected = False
-        btn = self.FindWindowById(ID_CONNECT)
-        btn.SetLabel(_("Connect"))
-        btn.SetBitmap(IconFile.Connect.GetBitmap())
+        self.cbtn.SetLabel(_("Connect"))
+        self.cbtn.SetBitmap(IconFile.Connect.GetBitmap())
         self._list.DeleteAllItems()
 #        self.__DisconnectFiles()
         self.EnableOptions(True)
@@ -218,7 +191,7 @@ class FtpWindow(eclib.ControlBox):
 
         """
         for child in self._cbar.GetChildren():
-            if child.GetId() != ID_CONNECT:
+            if child is not self.cbtn:
                 child.Enable(enable)
 
     def NotifyFtpFileDeleted(self, name):
@@ -235,8 +208,8 @@ class FtpWindow(eclib.ControlBox):
     def OnButton(self, evt):
         """Handle Button click events"""
         e_id = evt.GetId()
-        if e_id == ID_CONNECT:
-            e_obj = evt.GetEventObject()
+        e_obj = evt.GetEventObject()
+        if e_obj is self.cbtn:
             if self._connected:
                 # Warn if any ftp files are open
 #                num = len(self._open)
@@ -279,8 +252,8 @@ class FtpWindow(eclib.ControlBox):
                     self._client.ClearLastError()
                 else:
                     self._connected = True
-                    e_obj.SetLabel(_("Disconnect"))
-                    e_obj.SetBitmap(IconFile.Disconnect.GetBitmap())
+                    self.cbtn.SetLabel(_("Disconnect"))
+                    self.cbtn.SetBitmap(IconFile.Disconnect.GetBitmap())
 
                     self.RefreshFiles()
                     self.EnableOptions(False)

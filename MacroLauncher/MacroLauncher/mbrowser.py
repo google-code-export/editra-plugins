@@ -48,11 +48,8 @@ import ed_glob
 import eclib
 import eclib.outbuff as outbuff
 import ed_basestc
-#Editra v.0.85
-try:
-    import ebmlib
-except:
-    pass
+import ed_basewin
+import ebmlib
 
 
 #--------------------------------------------------------------------------#
@@ -95,12 +92,12 @@ def doreload():
 
 #-----------------------------------------------------------------------------#
 
-class MacroLauncherPane(ctrlbox.ControlBox):
+class MacroLauncherPane(ed_basewin.EdBaseCtrlBox):
     """Creates a Macro Launcher panel"""
     def __init__(self, parent, id=wx.ID_ANY, pos=wx.DefaultPosition,
                  size=wx.DefaultSize, style=wx.NO_BORDER, menu=None):
         """ Initializes the MacroLauncherPane class"""
-        ctrlbox.ControlBox.__init__(self, parent, id, pos, size, style)
+        super(MacroLauncherPane, self).__init__(parent, id, pos, size, style)
 
 
         #---- main configuration ----#
@@ -110,7 +107,7 @@ class MacroLauncherPane(ctrlbox.ControlBox):
         self._macros = {}
 
         #---- private attr ----#
-        self._mainwin = self.__FindMainWindow()
+        self._mainwin = ed_basewin.FindMainWindow(self)
         self._mi = menu
         self.__log = wx.GetApp().GetLog()
         self._timer = wx.Timer(self, ID_TIMER)
@@ -124,11 +121,7 @@ class MacroLauncherPane(ctrlbox.ControlBox):
 
         #---- Gui ----#
 
-        ctrlbar = ctrlbox.ControlBar(self, style=ctrlbox.CTRLBAR_STYLE_GRADIENT)
-        if wx.Platform == '__WXGTK__':
-            ctrlbar.SetWindowStyle(ctrlbox.CTRLBAR_STYLE_DEFAULT)
-
-        self.SetControlBar(ctrlbar)
+        ctrlbar = self.CreateControlBar(wx.TOP)
         self._listctrl = CustomListCtrl(self)
         self.SetWindow(self._listctrl)
 
@@ -190,9 +183,7 @@ class MacroLauncherPane(ctrlbox.ControlBox):
 
         #---- Status Bar -----#
 
-        statusctrl = ctrlbox.ControlBar(self, style=ctrlbox.CTRLBAR_STYLE_GRADIENT)
-        statusctrl.SetVMargin(2, 2)
-        self.SetControlBar(statusctrl, pos=wx.BOTTOM)
+        statusctrl = self.CreateControlBar(wx.BOTTOM)
         self._statusMsgBox = wx.StaticText(statusctrl, label='')
         self._statusMsgBox.SetToolTipString(_("R: running, F: finished, C: cancelled or failed"))
         statusctrl.AddControl(self._statusMsgBox)
@@ -211,6 +202,7 @@ class MacroLauncherPane(ctrlbox.ControlBox):
         self.Bind(wx.EVT_BUTTON, lambda evt: self.OnEditMacro(), btn_edit)
         self.Bind(wx.EVT_BUTTON, lambda evt: self.OnDelMacro(), btn_del)
         self.Bind(wx.EVT_BUTTON, lambda evt: self.OnRunMacro(), btn_run)
+        self.Bind(wx.EVT_WINDOW_DESTROY, self.OnDestroy, self)
 
         #threads (started macros)
         self.Bind(outbuff.EVT_TASK_START, self._OnTaskStart)
@@ -221,6 +213,10 @@ class MacroLauncherPane(ctrlbox.ControlBox):
         ed_msg.Subscribe(self.OnFileSave, ed_msg.EDMSG_FILE_SAVED)
 
         self.UpdateMacroBrowser()
+
+    def OnDestroy(self, evt):
+        if self:
+            ed_msg.Unsubscribe(self.OnFileSave)
 
     #-------------------------- Methods -------------------------#
 

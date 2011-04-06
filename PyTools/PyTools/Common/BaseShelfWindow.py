@@ -44,7 +44,7 @@ class BaseShelfWindow(ed_basewin.EdBaseCtrlBox):
 
         # Attributes
         # Parent is ed_shelf.EdShelfBook
-        self._mw = self.__FindMainWindow()
+        self._mw = ed_basewin.FindMainWindow(self)
         self._log = wx.GetApp().GetLog()
         self._imglst = list()
         
@@ -109,24 +109,6 @@ class BaseShelfWindow(ed_basewin.EdBaseCtrlBox):
     def _StopTimer(self):
         if self._jobtimer.IsRunning():
             self._jobtimer.Stop()
-
-    def __FindMainWindow(self):
-        """Find the mainwindow of this control
-        @return: MainWindow or None
-        """
-        def IsMainWin(win):
-            """Check if the given window is a main window"""
-            return getattr(tlw, '__name__', '') == 'MainWindow'
-
-        tlw = self.GetTopLevelParent()
-        if IsMainWin(tlw):
-            return tlw
-        elif hasattr(tlw, 'GetParent'):
-            tlw = tlw.GetParent()
-            if IsMainWin(tlw):
-                return tlw
-
-        return None
 
     def OnThemeChanged(self, msg):
         """Icon theme has changed so update button"""
