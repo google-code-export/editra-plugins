@@ -80,7 +80,7 @@ class FtpEdit(plugin.Plugin):
 
     def GetMinVersion(self):
         """Get the minimum version of Editra that this plugin supports"""
-        return "0.4.28"
+        return "0.6.26"
 
     def GetName(self):
         """Return the name of this control"""

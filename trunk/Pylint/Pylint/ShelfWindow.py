@@ -22,6 +22,7 @@ import ed_glob
 import util
 import eclib
 import ed_msg
+import ed_basewin
 from profiler import Profile_Get
 from syntax import syntax
 import syntax.synglob as synglob
@@ -55,7 +56,7 @@ class ShelfWindow(eclib.ControlBox):
 
         # Attributes
         # Parent is ed_shelf.EdShelfBook
-        self._mw = self.__FindMainWindow()
+        self._mw = ed_basewin.FindMainWindow(self)
         self._log = wx.GetApp().GetLog()
         self._listCtrl = CheckResultsList(self,
                                           style=wx.LC_REPORT|wx.BORDER_NONE)
@@ -117,25 +118,6 @@ class ShelfWindow(eclib.ControlBox):
     def _StopTimer(self):
         if self._jobtimer.IsRunning():
             self._jobtimer.Stop()
-
-    def __FindMainWindow(self):
-        """Find the mainwindow of this control
-        @return: MainWindow or None
-
-        """
-        def IsMainWin(win):
-            """Check if the given window is a main window"""
-            return getattr(tlw, '__name__', '') == 'MainWindow'
-
-        tlw = self.GetTopLevelParent()
-        if IsMainWin(tlw):
-            return tlw
-        elif hasattr(tlw, 'GetParent'):
-            tlw = tlw.GetParent()
-            if IsMainWin(tlw):
-                return tlw
-
-        return None
 
     def _onfileaccess(self, editor):
         # With the text control (ed_stc.EditraStc) this will return the full

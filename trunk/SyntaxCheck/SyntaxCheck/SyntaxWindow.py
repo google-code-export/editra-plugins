@@ -20,6 +20,7 @@ import wx.lib.mixins.listctrl as mixins
 
 # Editra Libraries
 import util
+import ed_basewin
 import ed_msg
 import syntax.synglob as synglob
 import eclib.elistmix as elistmix
@@ -116,7 +117,7 @@ class CheckResultsList(wx.ListCtrl,
         elistmix.ListRowHighlighter.__init__(self)
 
         # Attributes
-        self._mainw = self.__FindMainWindow()
+        self._mainw = ed_basewin.FindMainWindow(self)
         self._charWidth = self.GetCharWidth()
 
         # Setup
@@ -129,25 +130,6 @@ class CheckResultsList(wx.ListCtrl,
 
         # Event Handlers
         self.Bind(wx.EVT_LIST_ITEM_ACTIVATED, self.OnItemActivate)
-
-    def __FindMainWindow(self):
-        """Find the mainwindow of this control
-        @return: MainWindow or None
-
-        """
-        def IsMainWin(win):
-            """Check if the given window is a main window"""
-            return getattr(tlw, '__name__', '') == 'MainWindow'
-
-        tlw = self.GetTopLevelParent()
-        if IsMainWin(tlw):
-            return tlw
-        elif hasattr(tlw, 'GetParent'):
-            tlw = tlw.GetParent()
-            if IsMainWin(tlw):
-                return tlw
-
-        return None
 
     def OnItemActivate(self, evt):
         """Go to the error in the file"""
