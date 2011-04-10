@@ -101,12 +101,14 @@ class CheckResultsList(eclib.EBaseListCtrl):
             self.editor.RemoveAllMarkers(ed_marker.LintMarker())
 
     def ClearMarkers(self):
+        """Clear markers from all buffers"""
         if self._mw:
             nb = self._mw.GetNotebook()
-            ctrls = nb.GetTextControls()
-            for ctrl in ctrls:
-                if ctrl.GetFileName() in CheckResultsList._cache:
-                    ctrl.RemoveAllMarkers(ed_marker.LintMarker())
+            if nb:
+                ctrls = nb.GetTextControls()
+                for ctrl in ctrls:
+                    if ctrl and ctrl.GetFileName() in CheckResultsList._cache:
+                        ctrl.RemoveAllMarkers(ed_marker.LintMarker())
 
     def LoadData(self, data):
         """Load data into the cache and display it in the list
