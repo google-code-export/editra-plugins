@@ -81,7 +81,7 @@ class ToolConfigDialog(eclib.ECBaseDlg):
 
         # Setup
         self.SetPanel(ToolConfigPanel(self))
-        self.SetInitialSize()
+        self.SetInitialSize((350, -1))
 
 #-----------------------------------------------------------------------------#
 
@@ -108,7 +108,7 @@ class ConfigBook(wx.Notebook):
         # Setup
         self.AddPage(self._general, _("General"))
         self.AddPage(self._debug, _("Debugger"))
-        self.AddPage(self._lint, _("PyLint"))
+        self.AddPage(self._lint, _("Code Analysis"))
 
 #-----------------------------------------------------------------------------#
 
@@ -177,7 +177,7 @@ class LintConfigPanel(wx.Panel):
         self._lintmanualrb.SetValue(not mode)
 
         ## Message configuration
-        msgbox = wx.StaticBox(self, label=_("Messages"))
+        msgbox = wx.StaticBox(self, label=_("PyLint Checkers"))
         self._msgsz = wx.StaticBoxSizer(msgbox, wx.VERTICAL)
         self._msgtype = wx.Choice(self, choices=_GetPyLintMessageTypes())
         self._msglst = MessageIDList(self, style=wx.LC_REPORT)
