@@ -50,7 +50,7 @@ class LintShelfWindow(BaseShelfWindow):
         ctrlbar.AddControl(self._lbl)
         ctrlbar.AddStretchSpacer()
         self.clearbtn = self.AddPlateButton(_("Clear"), ed_glob.ID_DELETE, wx.ALIGN_RIGHT)
-        self.layout("Lint", self.OnRunLint, self.OnJobTimer)
+        self.layout("Analyze", self.OnRunLint, self.OnJobTimer)
 
         # Attributes
         self._checker = None
