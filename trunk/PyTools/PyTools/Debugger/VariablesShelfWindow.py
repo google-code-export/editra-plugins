@@ -67,27 +67,12 @@ class VariablesShelfWindow(BaseShelfWindow):
         ctrlbar = self.setup(self._nb, self._locals,
                              self._globals, self._exceptions)
         ctrlbar.AddStretchSpacer()
-        self.filterlevellocals = wx.Choice(ctrlbar, wx.ID_ANY,
-                                           choices=self.FILTER_LEVELS)
-        self.filterlevellocals.SetStringSelection(self.FILTER_LEVELS[localsfilterlevel])
-        self.filterlevelglobals = wx.Choice(ctrlbar, wx.ID_ANY,
-                                            choices=self.FILTER_LEVELS)
-        self.filterlevelglobals.SetStringSelection(self.FILTER_LEVELS[globalsfilterlevel])
-        self.filterlevelexceptions = wx.Choice(ctrlbar, wx.ID_ANY,
-                                               choices=self.FILTER_LEVELS)
-        self.filterlevelexceptions.SetStringSelection(self.FILTER_LEVELS[exceptionsfilterlevel])
-        text = wx.StaticText(ctrlbar, label=_("Filter Levels:"))
+        self.filterlevel = wx.Choice(ctrlbar, wx.ID_ANY,
+                                     choices=self.FILTER_LEVELS)
+        self.filterlevel.SetStringSelection(self.FILTER_LEVELS[localsfilterlevel])
+        text = wx.StaticText(ctrlbar, label=_("Filter Level:"))
         ctrlbar.AddControl(text, wx.ALIGN_RIGHT)
-        ctrlbar.AddSpacer(20,-1)
-        text = wx.StaticText(ctrlbar, label=_("Locals:"))
-        ctrlbar.AddControl(text, wx.ALIGN_RIGHT)
-        ctrlbar.AddControl(self.filterlevellocals, wx.ALIGN_RIGHT)
-        text = wx.StaticText(ctrlbar, wx.ID_ANY, _("Globals:"))
-        ctrlbar.AddControl(text, wx.ALIGN_RIGHT)
-        ctrlbar.AddControl(self.filterlevelglobals, wx.ALIGN_RIGHT)
-        text = wx.StaticText(ctrlbar, wx.ID_ANY, _("Exceptions:"))
-        ctrlbar.AddControl(text, wx.ALIGN_RIGHT)
-        ctrlbar.AddControl(self.filterlevelexceptions, wx.ALIGN_RIGHT)
+        ctrlbar.AddControl(self.filterlevel, wx.ALIGN_RIGHT)
         self.layout(self.ANALYZELBL, self.OnAnalyze)
 
         # Debugger attributes
@@ -101,9 +86,8 @@ class VariablesShelfWindow(BaseShelfWindow):
         RpdbDebugger().updateanalyze = self.UpdateAnalyze
         
         # Event Handlers
-        self.Bind(wx.EVT_CHOICE, self.SetFilterLevelLocals, self.filterlevellocals)
-        self.Bind(wx.EVT_CHOICE, self.SetFilterLevelGlobals, self.filterlevelglobals)
-        self.Bind(wx.EVT_CHOICE, self.SetFilterLevelExceptions, self.filterlevelexceptions)
+        self.Bind(eclib.EVT_SB_PAGE_CHANGED, self.OnPageChanged, self._nb)
+        self.Bind(wx.EVT_CHOICE, self.OnSetFilterLevel, self.filterlevel)
 
         RpdbDebugger().update_namespace()
 
@@ -170,23 +154,28 @@ class VariablesShelfWindow(BaseShelfWindow):
             self.taskbtn.SetLabel(self.ANALYZELBL)
 
     def UpdateConfig(self, key, value):
+        """Update the persisted configuration information"""
         config = Profile_Get(ToolConfig.PYTOOL_CONFIG, default=dict())
         config[key] = value
         Profile_Set(ToolConfig.PYTOOL_CONFIG, config)
         RpdbDebugger().update_namespace()
-    
-    def SetFilterLevelLocals(self, evt):
-        combocurrent_selection = self.filterlevellocals.GetSelection()
-        self._locals.SetFilterLevel(combocurrent_selection)
-        self.UpdateConfig(ToolConfig.TLC_LOCALS_FILTERLEVEL, combocurrent_selection)
-        
-    def SetFilterLevelGlobals(self, evt):
-        combocurrent_selection = self.filterlevelglobals.GetSelection()
-        self._globals.SetFilterLevel(combocurrent_selection)
-        self.UpdateConfig(ToolConfig.TLC_GLOBALS_FILTERLEVEL, combocurrent_selection)        
-        
-    def SetFilterLevelExceptions(self, evt):
-        combocurrent_selection = self.filterlevelexceptions.GetSelection()
-        self._exceptions.SetFilterLevel(combocurrent_selection)
-        self.UpdateConfig(ToolConfig.TLC_EXCEPTIONS_FILTERLEVEL, combocurrent_selection)
-        
+
+    def OnPageChanged(self, evt):
+        """Update ControlBar based on current selected page"""
+        cpage = self._nb.GetPage(evt.GetSelection())
+        self.filterlevel.SetSelection(cpage.FilterLevel)
+
+    def OnSetFilterLevel(self, evt):
+        """Update the filter level for the current display"""
+        # NOTE: page order must be kept in sync with this map
+        pmap = { 0 : (ToolConfig.TLC_LOCALS_FILTERLEVEL, self._locals),
+                 1 : (ToolConfig.TLC_GLOBALS_FILTERLEVEL, self._globals),
+                 2 : (ToolConfig.TLC_EXCEPTIONS_FILTERLEVEL, self._exceptions)
+               }
+        cpage = self._nb.GetSelection()
+        if cpage in pmap:
+            cfgkey, lst = pmap.get(cpage)
+            cur_sel = evt.GetSelection()
+            lst.FilterLevel = cur_sel
+            self.UpdateConfig(cfgkey, cur_sel)
+       

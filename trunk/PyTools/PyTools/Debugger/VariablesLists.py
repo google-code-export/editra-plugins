@@ -44,6 +44,12 @@ class VariablesList(wx.gizmos.TreeListCtrl):
     IMG_FUNCT, \
     IMG_VAR = range(3)
     def __init__(self, parent, listtype, filterlevel):
+        """Create a variable display list
+        @param parent: parent window
+        @param listtype: type of list
+        @param filterlevel: initial filtering level
+
+        """
         super(VariablesList, self).__init__(parent)
 
         # Attributes
@@ -81,8 +87,9 @@ class VariablesList(wx.gizmos.TreeListCtrl):
     def set_mainwindow(self, mw):
         self._mainw = mw
 
-    def SetFilterLevel(self, filterlevel):
-        self.filterlevel = filterlevel
+    # Properties
+    FilterLevel = property(lambda self: self.filterlevel,
+                           lambda self, val: setattr(self, 'filterlevel', val))
 
     def Clear(self):
         """Delete all the rows """
@@ -127,7 +134,7 @@ class VariablesList(wx.gizmos.TreeListCtrl):
 
         worker = RunProcInThread(self.listtype, self.UpdateVariablesList,
                                  RpdbDebugger().catchexc_get_namespace, 
-                                 expressionlist, self.filterlevel)
+                                 expressionlist, self.FilterLevel)
         worker.start()
         return (old_key, old_expressionlist)
 
@@ -224,7 +231,7 @@ class VariablesList(wx.gizmos.TreeListCtrl):
       
         worker = RunProcInThread(self.listtype, self._itemexpandingcallback,
                                  RpdbDebugger().get_namespace, [(expr, True)], 
-                                 self.filterlevel)
+                                 self.FilterLevel)
         worker.pass_parameter(item)
         worker.start()
 
