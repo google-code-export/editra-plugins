@@ -41,7 +41,6 @@ class VariablesShelfWindow(BaseShelfWindow):
     EXCEPTIONSSTR = u"rpdb_exception_info"
     ANALYZELBL = "Analyze Exception"
     STOPANALYZELBL = "Stop Analysis"
-    FILTER_LEVELS = ('0:Off', '1:Medium', '2:Maximum')
     
     def __init__(self, parent):
         """Initialize the window"""
@@ -68,9 +67,9 @@ class VariablesShelfWindow(BaseShelfWindow):
                              self._globals, self._exceptions)
         ctrlbar.AddStretchSpacer()
         self.filterlevel = wx.Choice(ctrlbar, wx.ID_ANY,
-                                     choices=self.FILTER_LEVELS)
-        self.filterlevel.SetStringSelection(self.FILTER_LEVELS[localsfilterlevel])
-        text = wx.StaticText(ctrlbar, label=_("Filter Level:"))
+                                     choices=(_("Off"), _("Medium"), _("Maximum")))
+        self.filterlevel.SetSelection(localsfilterlevel)
+        text = wx.StaticText(ctrlbar, label=_("Filtering:"))
         ctrlbar.AddControl(text, wx.ALIGN_RIGHT)
         ctrlbar.AddControl(self.filterlevel, wx.ALIGN_RIGHT)
         self.layout(self.ANALYZELBL, self.OnAnalyze)
