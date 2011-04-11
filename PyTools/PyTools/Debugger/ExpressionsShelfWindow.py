@@ -49,7 +49,7 @@ class ExpressionsShelfWindow(BaseShelfWindow):
         rbmp = wx.ArtProvider.GetBitmap(str(ed_glob.ID_BIN_FILE), wx.ART_MENU)
         if rbmp.IsNull() or not rbmp.IsOk():
             rbmp = None
-        self.executebtn = self.AddPlateButton(u"Execute", rbmp, wx.ALIGN_LEFT)
+        self.executebtn = self.AddPlateButton(_("Execute"), rbmp, wx.ALIGN_LEFT)
         self.executebtn.ToolTip = wx.ToolTip(_("Execute"))
         self.expressions = ToolConfig.GetConfigValue(ToolConfig.TLC_EXPRESSIONS)
         
@@ -85,6 +85,7 @@ class ExpressionsShelfWindow(BaseShelfWindow):
         self._listCtrl.RefreshRows()
 
     def SaveExpressions(self):
+        """Store expressions to the users persistent configuration"""
         config = Profile_Get(ToolConfig.PYTOOL_CONFIG, default=dict())
         config[ToolConfig.TLC_EXPRESSIONS] = copy.deepcopy(self.expressions)
         Profile_Set(ToolConfig.PYTOOL_CONFIG, config)

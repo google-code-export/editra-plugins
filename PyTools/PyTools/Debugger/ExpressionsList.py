@@ -88,6 +88,8 @@ class ExpressionsList(eclib.EToggleEditListCtrl):
         @param data: dictionary of expressions
 
         """
+        if not data:
+            return
         exprText = _("Expression")
         minLText = max(self.GetTextExtent(exprText)[0], self.GetColumnWidth(0))
         self._data = {}
