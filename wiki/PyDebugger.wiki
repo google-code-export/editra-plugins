@@ -1,0 +1,15 @@
+#summary Python Debugger component of PyTools plugin
+#labels IDE
+
+= Introduction =
+
+This page contains detailed information about the PyDebugger component of the PyTools plugin.
+
+== Components ==
+  * PyBreakPoint
+  * PyDebug
+  * PyExpression
+  * PyStackThread
+  * PyVariable
+
+= Details =
