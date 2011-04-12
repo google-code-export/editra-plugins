@@ -1,22 +1,26 @@
 #summary Python Debugger component of PyTools plugin
 #labels IDE
+
 <wiki:toc max_depth="2" />
 
 = Introduction =
 
 This page contains detailed information about the PyDebugger component of the PyTools plugin.
 
-== PyBreakPoint ==
+= !PyDebugger Components =
+
+
+== !PyBreakPoint ==
 Information about Breakpoint Window
 
-== PyDebug ==
+== !PyDebug ==
 Information about main Debug window
 
-== PyExpression ==
+== !PyExpression ==
 Information about Expressions window
 
-== PyStackThread ==
+== !PyStackThread ==
 Information about Stack and Thread information window
 
-== PyVariable ==
+== !PyVariable ==
 Information about variable and exceptions display windows
