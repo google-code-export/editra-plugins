@@ -65,6 +65,7 @@ class ExpressionsShelfWindow(BaseShelfWindow):
         self.Bind(wx.EVT_BUTTON, self.OnExecute, self.executebtn)
         
     def Unsubscription(self):
+        """Cleanup callbacks when window is destroyed"""
         RpdbDebugger().restoreexpressions = lambda:None
         RpdbDebugger().saveandrestoreexpressions = lambda:None
         RpdbDebugger().clearexpressionvalues = lambda:None
@@ -95,12 +96,15 @@ class ExpressionsShelfWindow(BaseShelfWindow):
         self.RestoreExpressions()
     
     def OnClear(self, evt):
+        """Clear the expressions"""
         self.expressions = {}
         self.SaveAndRestoreExpressions()
 
     def OnExecute(self, event):
-        desc = "This code will be executed at the debuggee:"
-        expr_dialog = ExpressionDialog(self, u"", "Enter Code to Execute", desc, None, (200, 200))
+        """Execute an expression"""
+        desc = _("This code will be executed at the debuggee:")
+        expr_dialog = ExpressionDialog(self, u"", _("Enter Code to Execute"), 
+                                       desc, None, (200, 200))
         pos = self.GetPositionTuple()
         expr_dialog.SetPosition((pos[0] + 50, pos[1] + 50))
         r = expr_dialog.ShowModal()
