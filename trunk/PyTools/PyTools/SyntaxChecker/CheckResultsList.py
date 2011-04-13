@@ -81,6 +81,7 @@ class CheckResultsList(eclib.EBaseListCtrl):
 
     def OnItemActivate(self, evt):
         """Go to the error in the file"""
+        # TODO: make sure buffer is the same as the one for the results being displayed
         editor = wx.GetApp().GetCurrentBuffer()
         if editor:
             idx = evt.GetIndex()
@@ -123,15 +124,16 @@ class CheckResultsList(eclib.EBaseListCtrl):
             data = None
         return fname, data
 
-    def LoadData(self, data):
+    def LoadData(self, data, fname=None):
         """Load data into the cache and display it in the list
         @param fname: filename
         @param data: Lint data [(errorType, errorText, errorLine),]
 
         """
-        if not self.editor:
-            return # TODO: Log
-        fname = self.editor.GetFileName()
+        if fname is None:
+            if not self.editor:
+                return # TODO: Log
+            fname = self.editor.GetFileName()
         CheckResultsList._cache[fname] = LintData(data)
         self._PopulateRows(CheckResultsList._cache[fname])
 
@@ -149,12 +151,12 @@ class CheckResultsList(eclib.EBaseListCtrl):
             minLType = max(minLType, self.GetTextExtent(row[0])[0])
             minLText = max(minLText, self.GetTextExtent(row[2])[0])
             self.Append(row)
-            try:
-                self.editor.AddMarker(ed_marker.LintMarker(),
-                                      int(row[1]) - 1) # TODO: store handles
-            except ValueError:
-                pass
-
+            if self.editor: # TODO: ensure editor is set
+                try:
+                    self.editor.AddMarker(ed_marker.LintMarker(),
+                                          int(row[1]) - 1) # TODO: store handles
+                except ValueError:
+                    pass
         self.SetColumnWidth(0, minLType)
         self.SetColumnWidth(2, minLText)
 
