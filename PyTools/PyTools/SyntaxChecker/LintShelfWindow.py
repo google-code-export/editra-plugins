@@ -30,9 +30,11 @@ from PyTools.Common.PyToolsUtils import PyToolsUtils
 from PyTools.Common.BaseShelfWindow import BaseShelfWindow
 from PyTools.SyntaxChecker.CheckResultsList import CheckResultsList
 from PyTools.SyntaxChecker.PythonSyntaxChecker import PythonSyntaxChecker
+from PyTools.SyntaxChecker.CAResultsXml import AnalysisResults
 
 # Globals
 _ = wx.GetTranslation
+
 #-----------------------------------------------------------------------------#
 
 class LintShelfWindow(BaseShelfWindow):
@@ -46,6 +48,10 @@ class LintShelfWindow(BaseShelfWindow):
         super(LintShelfWindow, self).__init__(parent)
 
         ctrlbar = self.setup(CheckResultsList(self))
+        self.savebtn = self.AddPlateButton(u"", ed_glob.ID_SAVE, wx.ALIGN_LEFT)
+        self.savebtn.ToolTip = wx.ToolTip(_("Save Results"))
+        self.openbtn = self.AddPlateButton(u"", ed_glob.ID_OPEN, wx.ALIGN_LEFT)
+        self.openbtn.ToolTip = wx.ToolTip(_("Load Results"))
         self._lbl = wx.StaticText(ctrlbar)
         ctrlbar.AddControl(self._lbl)
         ctrlbar.AddStretchSpacer()
@@ -61,6 +67,8 @@ class LintShelfWindow(BaseShelfWindow):
         ed_msg.Subscribe(self.OnPageChanged, ed_msg.EDMSG_UI_NB_CHANGED)
 
         # Event Handlers
+        self.Bind(wx.EVT_BUTTON, self.OnSaveResults, self.savebtn)
+        self.Bind(wx.EVT_BUTTON, self.OnOpenResults, self.openbtn)
         self.Bind(wx.EVT_BUTTON, self.OnClear, self.clearbtn)
 
     def Unsubscription(self):
@@ -111,6 +119,31 @@ class LintShelfWindow(BaseShelfWindow):
             self.UpdateForEditor(editor, True)
         else:
             self.UpdateForEditor(editor)
+
+    def OnSaveResults(self, evt):
+        """Export the results to XML"""
+        data = self._listCtrl.GetCachedData()
+        if data[1]:
+            dlg = wx.FileDialog(self.GetTopLevelParent(),
+                                _("Save Results"),
+                                wildcard="XML(*.xml)|*.xml",
+                                style=wx.FD_SAVE|wx.FD_CHANGE_DIR|wx.FD_OVERWRITE_PROMPT)
+            if dlg.ShowModal() == wx.ID_OK:
+                outpath = dlg.GetPath()
+                if not outpath.endswith('.xml'):
+                    outpath += u'.xml'
+                results = AnalysisResults()
+                results.path = data[0]
+                for result in data[1].GetOrderedData():
+                    # errType, line, errText
+                    results.AddResult(result[1], result[0], result[2])
+                results.Write(outpath)
+            # TODO notify successful save to statusbar
+        # TODO: notify failure to save to statusbar
+
+    def OnOpenResults(self, evt):
+        """Load the analysis results from xml"""
+        pass
 
     def OnFileLoad(self, msg):
         """Load File message"""

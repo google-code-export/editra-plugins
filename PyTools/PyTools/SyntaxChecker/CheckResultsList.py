@@ -110,6 +110,19 @@ class CheckResultsList(eclib.EBaseListCtrl):
                     if ctrl and ctrl.GetFileName() in CheckResultsList._cache:
                         ctrl.RemoveAllMarkers(ed_marker.LintMarker())
 
+    def GetCachedData(self):
+        """Get the cached Lint data for the current editor
+        @return: tuple(filename, LintData)
+
+        """
+        if self.editor:
+            fname = self.editor.GetFileName()
+            data = CheckResultsList._cache.get(fname, None)
+        else:
+            fname = u""
+            data = None
+        return fname, data
+
     def LoadData(self, data):
         """Load data into the cache and display it in the list
         @param fname: filename
@@ -148,6 +161,7 @@ class CheckResultsList(eclib.EBaseListCtrl):
 #-----------------------------------------------------------------------------#
 
 class LintData(object):
+    """PyLint output data management object"""
     def __init__(self, data):
         """@param data: [(type, text, line),]"""
         super(LintData, self).__init__()
@@ -162,6 +176,8 @@ class LintData(object):
             if line not in self._data:
                 self._data[line] = list()
             self._data[line].append((unicode(val[0]), unicode(val[1]).rstrip()))
+
+    Data = property(lambda self: self._data)
 
     def GetOrderedData(self):
         """Iterate over the data ordered by line number
