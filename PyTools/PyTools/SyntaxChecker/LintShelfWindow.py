@@ -138,12 +138,28 @@ class LintShelfWindow(BaseShelfWindow):
                     # errType, line, errText
                     results.AddResult(result[1], result[0], result[2])
                 results.Write(outpath)
+            dlg.Destroy()
             # TODO notify successful save to statusbar
         # TODO: notify failure to save to statusbar
 
     def OnOpenResults(self, evt):
         """Load the analysis results from xml"""
-        pass
+        dlg = wx.FileDialog(self.GetTopLevelParent(),
+                            _("Load Results"),
+                            wildcard="XML(*.xml)|*.xml",
+                            style=wx.FD_OPEN|wx.FD_CHANGE_DIR)
+        if dlg.ShowModal() == wx.ID_OK:
+            path = dlg.GetPath()
+            results = AnalysisResults.Load(path)
+            if results:
+                data = list()
+                for result in results.results:
+                    data.append((result.errType, result.errMsg, result.line))
+                self._listCtrl.LoadData(data, fname=results.path)
+                self._listCtrl.RefreshRows()
+            else:
+                pass # TODO: notify failure to Load XML
+        dlg.Destroy()
 
     def OnFileLoad(self, msg):
         """Load File message"""
