@@ -48,6 +48,8 @@ class LintShelfWindow(BaseShelfWindow):
         super(LintShelfWindow, self).__init__(parent)
 
         ctrlbar = self.setup(CheckResultsList(self))
+        ctrlbar.AddControl(wx.StaticLine(ctrlbar, size=(-1, 16), style=wx.LI_VERTICAL),
+                           wx.ALIGN_LEFT)
         self.savebtn = self.AddPlateButton(u"", ed_glob.ID_SAVE, wx.ALIGN_LEFT)
         self.savebtn.ToolTip = wx.ToolTip(_("Save Results"))
         self.openbtn = self.AddPlateButton(u"", ed_glob.ID_OPEN, wx.ALIGN_LEFT)
