@@ -80,6 +80,16 @@ class LintShelfWindow(BaseShelfWindow):
         ed_msg.Unsubscribe(self.OnFileSave)
         ed_msg.Unsubscribe(self.OnPageChanged)
 
+    def OnThemeChanged(self, msg):
+        """Update Icons"""
+        super(LintShelfWindow, self).OnThemeChanged(msg)
+        for btn, bmp in ((self.savebtn, ed_glob.ID_SAVE),
+                         (self.openbtn, ed_glob.ID_OPEN),
+                         (self.clearbtn, ed_glob.ID_DELETE)):
+            bitmap = wx.ArtProvider.GetBitmap(str(bmp), wx.ART_MENU)
+            btn.SetBitmap(bitmap)
+            btn.Refresh()
+
     def _onfileaccess(self, editor):
         self._listCtrl.set_editor(editor)
         self._listCtrl.Clear()

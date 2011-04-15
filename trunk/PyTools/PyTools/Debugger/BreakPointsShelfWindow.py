@@ -186,13 +186,21 @@ class BreakPointsShelfWindow(BaseShelfWindow):
     def Unsubscription(self):
         """Cleanup items on destroy"""
         editor = wx.GetApp().GetCurrentBuffer()
-#        if editor:
-#            RpdbDebugger().restorestepmarker(editor)
         RpdbDebugger().saveandrestorebreakpoints = lambda:None
         RpdbDebugger().install_breakpoints()
         if BreakpointController.BreakpointWindow is self:
             BreakpointController.BreakpointWindow = None
-        
+
+    def OnThemeChanged(self, msg):
+        """Update Icons"""
+        super(BreakPointsShelfWindow, self).OnThemeChanged(msg)
+        for btn, bmp in ((self.addbtn, ed_glob.ID_ADD),
+                         (self.delbtn, ed_glob.ID_REMOVE),
+                         (self.delallbtn, ed_glob.ID_DELETE)):
+            bitmap = wx.ArtProvider.GetBitmap(str(bmp), wx.ART_MENU)
+            btn.SetBitmap(bitmap)
+            btn.Refresh()
+
     def RestoreBreakPoints(self):
         """Restore breakpoints"""
         self._listCtrl.Clear()
