@@ -81,14 +81,12 @@ class CheckResultsList(eclib.EBaseListCtrl):
 
     def OnItemActivate(self, evt):
         """Go to the error in the file"""
-        # TODO: make sure buffer is the same as the one for the results being displayed
-        editor = wx.GetApp().GetCurrentBuffer()
-        if editor:
+        if self.editor:
             idx = evt.GetIndex()
             itm = self.GetItem(idx, 1).GetText()
             try:
                 lineNo = int(itm)
-                editor.GotoLine(max(0, lineNo - 1))
+                self.editor.GotoLine(max(0, lineNo - 1))
             except ValueError:
                 pass
 
@@ -134,6 +132,8 @@ class CheckResultsList(eclib.EBaseListCtrl):
             if not self.editor:
                 return # TODO: Log
             fname = self.editor.GetFileName()
+        else:
+            self.editor = PyToolsUtils.GetEditorOrOpenFile(self._mw, fname)
         CheckResultsList._cache[fname] = LintData(data)
         self._PopulateRows(CheckResultsList._cache[fname])
 
