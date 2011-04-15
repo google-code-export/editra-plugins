@@ -20,6 +20,7 @@ from time import sleep
 import wx
 
 # Editra Libraries
+import ed_glob
 import util
 import eclib
 import ed_msg
@@ -86,8 +87,7 @@ class DebugShelfWindow(BaseShelfWindow):
         self.combotexts = {}
         for i, ignore in enumerate(self.choices):
             self.combotexts[i] = ""
-        self.search = eclib.CommandEntryBase(ctrlbar,
-                                             style=wx.TE_PROCESS_ENTER|wx.WANTS_CHARS)
+        self.search = eclib.CommandEntryBase(ctrlbar, style=wx.TE_PROCESS_ENTER)
         self.search.Enable(False)
         self.search.SetDescriptiveText(u"")
         self.search.ShowSearchButton(False)
@@ -130,6 +130,13 @@ class DebugShelfWindow(BaseShelfWindow):
         RpdbDebugger().debugbuttonsupdate = lambda:None
         RpdbDebugger().disabledebugbuttons = lambda:None
         MessageHandler().debugeditorupdate = lambda x,y,z:None
+
+    def OnThemeChanged(self, msg):
+        """Update Icons"""
+        super(DebugShelfWindow, self).OnThemeChanged(msg)
+        bmp = wx.ArtProvider.GetBitmap(str(ed_glob.ID_BIN_FILE), wx.ART_MENU)
+        self.taskbtn.SetBitmap(bmp)
+        self.taskbtn.Refresh()
 
     def OnCancelSearch(self, event):
         """Clear the text from the text control"""
