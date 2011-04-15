@@ -26,6 +26,7 @@ import syntax.synglob as synglob
 
 # Local imports
 from PyTools.Common import ToolConfig
+from PyTools.Common import Images
 from PyTools.Common.PyToolsUtils import PyToolsUtils
 from PyTools.Common.BaseShelfWindow import BaseShelfWindow
 from PyTools.SyntaxChecker.CheckResultsList import CheckResultsList
@@ -59,6 +60,7 @@ class LintShelfWindow(BaseShelfWindow):
         ctrlbar.AddStretchSpacer()
         self.clearbtn = self.AddPlateButton(_("Clear"), ed_glob.ID_DELETE, wx.ALIGN_RIGHT)
         self.layout("Analyze", self.OnRunLint, self.OnJobTimer)
+        self.taskbtn.SetBitmap(Images.Lint.Bitmap)
 
         # Attributes
         self._checker = None
@@ -192,6 +194,7 @@ class LintShelfWindow(BaseShelfWindow):
         """Run PyLint Code Analysis on the current buffer"""
         editor = wx.GetApp().GetCurrentBuffer()
         if editor:
+            self.taskbtn.Enable(False)
             wx.CallAfter(self._onfileaccess, editor)
 
     def get_syntax_checker(self, filetype, vardict, filename):
@@ -215,6 +218,7 @@ class LintShelfWindow(BaseShelfWindow):
     def _OnSyntaxData(self, data):
         # Data is something like
         # [('Syntax Error', '__all__ = ["CSVSMonitorThread"]', 7)]
+        self.taskbtn.Enable(True)
         if len(data) != 0:
             self._listCtrl.LoadData(data)
             self._listCtrl.RefreshRows()
