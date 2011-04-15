@@ -24,6 +24,7 @@ from profiler import Profile_Get, Profile_Set
 
 # Local imports
 from PyTools.Common import ToolConfig
+from PyTools.Common import Images
 from PyTools.Common.PyToolsUtils import PyToolsUtils
 from PyTools.Common.PyToolsUtils import RunProcInThread
 from PyTools.Common.BaseShelfWindow import BaseShelfWindow
@@ -73,6 +74,7 @@ class VariablesShelfWindow(BaseShelfWindow):
         ctrlbar.AddControl(text, wx.ALIGN_RIGHT)
         ctrlbar.AddControl(self.filterlevel, wx.ALIGN_RIGHT)
         self.layout(self.ANALYZELBL, self.OnAnalyze)
+        self.taskbtn.SetBitmap(Images.Inspect.Bitmap)
 
         # Debugger attributes
         RpdbDebugger().clearlocalvariables = self._locals.Clear
@@ -109,6 +111,15 @@ class VariablesShelfWindow(BaseShelfWindow):
 
         if dorefresh:
             self._nb.Refresh()
+
+    def OnThemeChanged(self, msg):
+        """Update Icons"""
+        super(VariablesShelfWindow, self).OnThemeChanged(msg)
+        self._InitImageList()
+        # Update children
+        for pgnum in range(self._nb.GetPageCount()):
+            page = self._nb.GetPage(pgnum)
+            getattr(page, 'SetupImageList', lambda:None)()
 
     def Unsubscription(self):
         """Cleanup on Destroy"""
