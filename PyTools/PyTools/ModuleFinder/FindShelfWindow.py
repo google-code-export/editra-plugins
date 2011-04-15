@@ -56,11 +56,17 @@ class FindShelfWindow(BaseShelfWindow):
         self.textentry.EnterCallback = self.DoFindModule
         self.layout("Find", self.OnFindModule, self.OnJobTimer)
         bmp = wx.ArtProvider.GetBitmap(str(ed_glob.ID_FIND), wx.ART_MENU)
-        if bmp.IsOk():
-            self.taskbtn.SetBitmap(bmp)
+        self.taskbtn.SetBitmap(bmp)
 
         # Attributes
         self._finder = None
+
+    def OnThemeChanged(self, msg):
+        """Update Icons"""
+        super(FindShelfWindow, self).OnThemeChanged(msg)
+        bmp = wx.ArtProvider.GetBitmap(str(ed_glob.ID_FIND), wx.ART_MENU)
+        self.taskbtn.SetBitmap(bmp)
+        self.taskbtn.Refresh()
 
     def _onmodulefind(self, editor, moduletofind):
         self._listCtrl.Clear()
