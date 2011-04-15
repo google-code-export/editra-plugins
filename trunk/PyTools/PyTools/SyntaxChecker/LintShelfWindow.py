@@ -58,9 +58,9 @@ class LintShelfWindow(BaseShelfWindow):
         self._lbl = wx.StaticText(ctrlbar)
         ctrlbar.AddControl(self._lbl)
         ctrlbar.AddStretchSpacer()
-        self.clearbtn = self.AddPlateButton(_("Clear"), ed_glob.ID_DELETE, wx.ALIGN_RIGHT)
         self.layout("Analyze", self.OnRunLint, self.OnJobTimer)
         self.taskbtn.SetBitmap(Images.Lint.Bitmap)
+        self.clearbtn = self.AddPlateButton(_("Clear"), ed_glob.ID_DELETE, wx.ALIGN_RIGHT)
 
         # Attributes
         self._checker = None
