@@ -14,7 +14,7 @@ __revision__ = "$Revision$"
 
 #-----------------------------------------------------------------------------#
 # Imports
-from PyTools.Common.PyToolsUtils import RunProcInThread
+from PyTools.Common.PyToolsUtils import RunAsyncTask
 
 #-----------------------------------------------------------------------------#
 
@@ -42,8 +42,7 @@ class AbstractModuleFinder(object):
         @param callback: callable(data) callback to receive data
 
         """
-        worker = RunProcInThread("Find", callback, self.RunModuleFind)
-        worker.start()
+        RunAsyncTask("Find", callback, self.RunModuleFind)
 
     #---- Properties ----#
     ModuleToFind = property(lambda self: self.moduletofind,

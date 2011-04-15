@@ -18,6 +18,7 @@ import os.path
 import wx
 
 # Editra Libraries
+import ed_glob
 import util
 import eclib
 import ed_msg
@@ -48,11 +49,15 @@ class FindShelfWindow(BaseShelfWindow):
         # Setup
         ctrlbar = self.setup(FindResultsList(self))
         ctrlbar.AddStretchSpacer()
-        txtentrysize = wx.Size(256, wx.DefaultSize.GetHeight())
-        self.textentry = eclib.CommandEntryBase(ctrlbar, size=txtentrysize,
-                                           style=wx.TE_PROCESS_ENTER|wx.WANTS_CHARS)
+        self.textentry = eclib.CommandEntryBase(ctrlbar, size=(256, -1),
+                                                style=wx.TE_PROCESS_ENTER)
         ctrlbar.AddControl(self.textentry, wx.ALIGN_RIGHT)
+        self.textentry.ToolTip = wx.ToolTip(_("Enter module name to search for"))
+        self.textentry.EnterCallback = self.DoFindModule
         self.layout("Find", self.OnFindModule, self.OnJobTimer)
+        bmp = wx.ArtProvider.GetBitmap(str(ed_glob.ID_FIND), wx.ART_MENU)
+        if bmp.IsOk():
+            self.taskbtn.SetBitmap(bmp)
 
         # Attributes
         self._finder = None
@@ -76,6 +81,11 @@ class FindShelfWindow(BaseShelfWindow):
         self._hasrun = True
 
     def OnFindModule(self, event):
+        DoFindModule()
+
+    def DoFindModule(self):
+        self.taskbtn.Enable(False)
+        self.textentry.Enable(False)
         editor = wx.GetApp().GetCurrentBuffer()
         wx.CallAfter(self._onmodulefind, editor, self.textentry.GetValue())
 
@@ -102,6 +112,8 @@ class FindShelfWindow(BaseShelfWindow):
         @param data: PythonModuleFinder.FindResults
 
         """
+        self.taskbtn.Enable(True)
+        self.textentry.Enable(True)
         self._listCtrl.PopulateRows(data)
         self._listCtrl.RefreshRows()
         mwid = self.GetMainWindow().GetId()
