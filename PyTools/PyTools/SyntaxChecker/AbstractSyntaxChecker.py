@@ -14,7 +14,7 @@ __revision__ = "$Revision$"
 
 #-----------------------------------------------------------------------------#
 # Imports
-from PyTools.Common.PyToolsUtils import RunProcInThread
+from PyTools.Common.PyToolsUtils import RunAsyncTask
 
 #-----------------------------------------------------------------------------#
 
@@ -42,8 +42,7 @@ class AbstractSyntaxChecker(object):
         @param callback: callable(data) callback to receive data
 
         """
-        worker = RunProcInThread("Lint", callback, self.RunSyntaxCheck)
-        worker.start()
+        RunAsyncTask("Lint", callback, self.RunSyntaxCheck)
 
     #---- Properties ----#
     FileName = property(lambda self: self.filename,
