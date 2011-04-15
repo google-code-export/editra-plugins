@@ -157,6 +157,7 @@ class LintShelfWindow(BaseShelfWindow):
                 data = list()
                 for result in results.results:
                     data.append((result.errType, result.errMsg, result.line))
+                self._lbl.Label = results.path
                 self._listCtrl.LoadData(data, fname=results.path)
                 self._listCtrl.RefreshRows()
             else:
