@@ -6,7 +6,7 @@
 Adds Python syntax checking using Pylint and debugging using Winpdb with results in a Shelf window.
 
 """
-__author__ = "Mike Rans"
+__author__ = "Mike Rans, Cody Precord"
 
 try:
     from setuptools import setup
