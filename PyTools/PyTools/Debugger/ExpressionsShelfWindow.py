@@ -6,7 +6,7 @@
 # License: wxWindows License
 ###############################################################################
 
-"""Editra Shelf display window"""
+"""Editra Shelf display window for debugger expressions"""
 
 __author__ = "Mike Rans"
 __svnid__ = "$Id$"
@@ -41,21 +41,19 @@ class ExpressionsShelfWindow(BaseShelfWindow):
         """Initialize the window"""
         super(ExpressionsShelfWindow, self).__init__(parent)
 
+        # Attributes
         ctrlbar = self.setup(ExpressionsList(self))
         ctrlbar.AddStretchSpacer()
-        
-        # Attributes
         self.ignoredwarnings = {}
-        rbmp = wx.ArtProvider.GetBitmap(str(ed_glob.ID_BIN_FILE), wx.ART_MENU)
-        if rbmp.IsNull() or not rbmp.IsOk():
-            rbmp = None
-        self.executebtn = self.AddPlateButton(_("Execute"), rbmp, wx.ALIGN_LEFT)
+        self.executebtn = self.AddPlateButton(_("Execute"), ed_glob.ID_BIN_FILE, wx.ALIGN_LEFT)
         self.executebtn.ToolTip = wx.ToolTip(_("Execute"))
         self.expressions = ToolConfig.GetConfigValue(ToolConfig.TLC_EXPRESSIONS)
-        
-        self.layout("Clear", self.OnClear)        
+
+        self.layout("Clear", self.OnClear)
+        bmp = wx.ArtProvider.GetBitmap(str(ed_glob.ID_DELETE), wx.ART_MENU)
+        self.taskbtn.SetBitmap(bmp)
         self._listCtrl.PopulateRows(self.expressions)
-        
+
         # Debugger Attributes
         RpdbDebugger().restoreexpressions = self.RestoreExpressions
         RpdbDebugger().saveandrestoreexpressions = self.SaveAndRestoreExpressions
@@ -63,23 +61,31 @@ class ExpressionsShelfWindow(BaseShelfWindow):
 
         # Event Handlers
         self.Bind(wx.EVT_BUTTON, self.OnExecute, self.executebtn)
-        
+
     def Unsubscription(self):
         """Cleanup callbacks when window is destroyed"""
         RpdbDebugger().restoreexpressions = lambda:None
         RpdbDebugger().saveandrestoreexpressions = lambda:None
         RpdbDebugger().clearexpressionvalues = lambda:None
-        
+
+    def OnThemeChanged(self, msg):
+        """Update Icons"""
+        super(VariablesShelfWindow, self).OnThemeChanged(msg)
+        for btn, bmp in ((self.executebtn, ed_glob.ID_BIN_FILE),
+                         (self.taskbtn, ed_glob.ID_DELETE)):
+            bitmap = wx.ArtProvider.GetBitmap(str(bmp), wx.ART_MENU)
+            btn.SetBitmap(bitmap)
+
     def DeleteExpression(self, expression):
         if not expression in self.expressions:
             return None
         del self.expressions[expression]
         self.SaveExpressions()
-        
+
     def SetExpression(self, expression, enabled):
         self.expressions[expression] = enabled
         self.SaveExpressions()
-                
+
     def RestoreExpressions(self):
         self._listCtrl.Clear()
         self._listCtrl.PopulateRows(self.expressions)
@@ -94,7 +100,7 @@ class ExpressionsShelfWindow(BaseShelfWindow):
     def SaveAndRestoreExpressions(self):
         self.SaveExpressions()
         self.RestoreExpressions()
-    
+
     def OnClear(self, evt):
         """Clear the expressions"""
         self.expressions = {}
@@ -103,41 +109,33 @@ class ExpressionsShelfWindow(BaseShelfWindow):
     def OnExecute(self, event):
         """Execute an expression"""
         desc = _("This code will be executed at the debuggee:")
-        expr_dialog = ExpressionDialog(self, u"", _("Enter Code to Execute"), 
+        expr_dialog = ExpressionDialog(self, u"", _("Enter Code to Execute"),
                                        desc, None, (200, 200))
         pos = self.GetPositionTuple()
         expr_dialog.SetPosition((pos[0] + 50, pos[1] + 50))
-        r = expr_dialog.ShowModal()
-        if r != wx.ID_OK:
-            expr_dialog.Destroy()
-            return
-
-        _expr = expr_dialog.get_expression()
-
+        if expr_dialog.ShowModal() == wx.ID_OK:
+            _expr = expr_dialog.get_expression()
+            worker = RunProcInThread("DbgExec", self._oncodeexecuted,
+                                     RpdbDebugger().execute, _expr)
+            worker.start()
         expr_dialog.Destroy()
-        
-        worker = RunProcInThread("DbgExec", self._oncodeexecuted,
-                                 RpdbDebugger().execute, _expr)
-        worker.start()
 
     def _oncodeexecuted(self, res):
+        """Expression execution callback"""
         if not res:
             return
-        
         if len(res) == 2:
             warning, error = res
         else:
             error = res
-        
+            warning = None
+
         PyToolsUtils.error_dialog(self, error)
-
         if warning and not warning in self.ignoredwarnings:
-            dlg = wx.MessageDialog(self, 
-                                   _("%s\n\nClick 'Cancel' to ignore this warning in this session.") % warning,\
-                                   _("Warning"),
-                                   wx.OK|wx.CANCEL|wx.YES_DEFAULT|wx.ICON_WARNING)
-            res = dlg.ShowModal()
-            dlg.Destroy()
-
-            if res == wx.ID_CANCEL:
+            dlg = wx.MessageDialog(self,
+                                   _("Would you like to ignore this warning for the rest of this session?\n\n%s") % warning,\
+                                   _("Ignore Warning"),
+                                   wx.YES_NO|wx.YES_DEFAULT|wx.ICON_WARNING)
+            if dlg.ShowModal() == wx.ID_YES:
                 self.ignoredwarnings[warning] = True
+            dlg.Destroy()
