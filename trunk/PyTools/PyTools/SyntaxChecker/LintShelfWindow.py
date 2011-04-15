@@ -139,10 +139,14 @@ class LintShelfWindow(BaseShelfWindow):
                 for result in data[1].GetOrderedData():
                     # errType, line, errText
                     results.AddResult(result[1], result[0], result[2])
-                results.Write(outpath)
+                if results.Write(outpath):
+                    msg = _("Saved PyLint results to: %s") % outpath
+                else:
+                    msg = _("Failed to save PyLint Results")
+                self._mw.PushStatusText(msg, 0)
             dlg.Destroy()
-            # TODO notify successful save to statusbar
-        # TODO: notify failure to save to statusbar
+        else:
+            self._mw.PushStatusText(_("No data to save!"), 0)
 
     def OnOpenResults(self, evt):
         """Load the analysis results from xml"""
@@ -160,8 +164,9 @@ class LintShelfWindow(BaseShelfWindow):
                 self._lbl.Label = results.path
                 self._listCtrl.LoadData(data, fname=results.path)
                 self._listCtrl.RefreshRows()
+                self._mw.PushStatusText(_("Loaded code analysis data: %s") % path, 0)
             else:
-                pass # TODO: notify failure to Load XML
+                self._mw.PushStatusText(_("Failed to load results data: %s") % path, 0)
         dlg.Destroy()
 
     def OnFileLoad(self, msg):
@@ -184,6 +189,7 @@ class LintShelfWindow(BaseShelfWindow):
             self.UpdateForEditor(editor)
 
     def OnRunLint(self, event):
+        """Run PyLint Code Analysis on the current buffer"""
         editor = wx.GetApp().GetCurrentBuffer()
         if editor:
             wx.CallAfter(self._onfileaccess, editor)

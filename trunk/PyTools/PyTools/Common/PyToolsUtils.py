@@ -19,6 +19,7 @@ import wx
 from wx.stc import STC_INDIC2_MASK
 
 # Editra Libraries
+import ed_msg
 import ebmlib
 import util
 
@@ -90,6 +91,10 @@ class PyToolsUtils():
         
     @staticmethod
     def GetEditorOrOpenFile(mainw, fname):
+        """Get an existing editor instance for the file or open it
+        if it isn't currently open.
+
+        """
         editor = PyToolsUtils.GetEditorForFile(mainw, fname)
         nb = mainw.GetNotebook()
         if editor:
