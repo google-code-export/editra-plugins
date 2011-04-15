@@ -20,6 +20,7 @@ from wx.stc import STC_INDIC2_MASK
 
 # Editra Libraries
 import ed_msg
+import ed_thread
 import ebmlib
 import util
 
@@ -170,16 +171,14 @@ class RunProcInThread(threading.Thread):
             else:
                 wx.CallAfter(self.target, data)
 
-class FreezeDrawer(object):
-    """To be used in 'with' statements. Upon enter freezes the drawing
-    and thaws upon exit.
-
-    """
-    def __init__(self, wnd):
-        self._wnd = wnd
-
-    def __enter__(self):
-        self._wnd.Freeze()
-
-    def __exit__(self, eT, eV, tB):
-        self._wnd.Thaw()
+def RunAsyncTask(desc, target, fn, *args, **kwargs):
+    """Delegate a long running task to Editra's threadpool"""
+    def DoTask():
+        try:
+            data = fn(*args, **kwargs)
+        except Exception, msg:
+            util.Log("[%s][err] %s Failure: %s" % (desc, desc, msg))
+            data = [(u"Error", unicode(msg), -1)]
+        if target:
+            wx.CallAfter(target, data)
+    ed_thread.EdThreadPool().QueueJob(DoTask)
