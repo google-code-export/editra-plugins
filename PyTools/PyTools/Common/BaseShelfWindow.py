@@ -114,12 +114,9 @@ class BaseShelfWindow(ed_basewin.EdBaseCtrlBox):
 
     def OnThemeChanged(self, msg):
         """Icon theme has changed so update button"""
-        rbmp = wx.ArtProvider.GetBitmap(str(ed_glob.ID_BIN_FILE), wx.ART_MENU)
-        if rbmp.IsNull() or not rbmp.IsOk():
-            return
-        else:
-            self.taskbtn.SetBitmap(rbmp)
-            self.taskbtn.Refresh()
+        bmp = wx.ArtProvider.GetBitmap(str(ed_glob.ID_PREF), wx.ART_MENU)
+        self.cfgbtn.SetBitmap(bmp)
+        self.cfgbtn.Refresh()
 
     def OnShowConfig(self, event):
         """Show the configuration dialog"""

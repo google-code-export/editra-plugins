@@ -67,16 +67,7 @@ class VariablesList(wx.gizmos.TreeListCtrl):
         self.SetMainColumn(0) 
         self.SetLineSpacing(0)
         ## Setup ImageList
-        bmp = wx.ArtProvider.GetBitmap(str(ed_glob.ID_CLASS_TYPE), wx.ART_MENU)
-        idx = self._imglst.Add(bmp)
-        self._imgmap[VariablesList.IMG_CLASS] = idx
-        bmp = wx.ArtProvider.GetBitmap(str(ed_glob.ID_METHOD_TYPE), wx.ART_MENU)
-        idx = self._imglst.Add(bmp)
-        self._imgmap[VariablesList.IMG_FUNCT] = idx
-        bmp = wx.ArtProvider.GetBitmap(str(ed_glob.ID_VARIABLE_TYPE), wx.ART_MENU)
-        idx = self._imglst.Add(bmp)
-        self._imgmap[VariablesList.IMG_VAR] = idx
-        self.SetImageList(self._imglst)
+        self.SetupImageList()
         
         # Event Handlers
         self.Bind(wx.EVT_TREE_ITEM_EXPANDING, self.OnItemExpanding)
@@ -90,6 +81,21 @@ class VariablesList(wx.gizmos.TreeListCtrl):
     # Properties
     FilterLevel = property(lambda self: self.filterlevel,
                            lambda self, val: setattr(self, 'filterlevel', val))
+
+    def SetupImageList(self):
+        """Update all images"""
+        self._imglst.RemoveAll()
+        bmp = wx.ArtProvider.GetBitmap(str(ed_glob.ID_CLASS_TYPE), wx.ART_MENU)
+        idx = self._imglst.Add(bmp)
+        self._imgmap[VariablesList.IMG_CLASS] = idx
+        bmp = wx.ArtProvider.GetBitmap(str(ed_glob.ID_METHOD_TYPE), wx.ART_MENU)
+        idx = self._imglst.Add(bmp)
+        self._imgmap[VariablesList.IMG_FUNCT] = idx
+        bmp = wx.ArtProvider.GetBitmap(str(ed_glob.ID_VARIABLE_TYPE), wx.ART_MENU)
+        idx = self._imglst.Add(bmp)
+        self._imgmap[VariablesList.IMG_VAR] = idx
+        self.SetImageList(self._imglst)
+        self.Refresh()
 
     def Clear(self):
         """Delete all the rows """
