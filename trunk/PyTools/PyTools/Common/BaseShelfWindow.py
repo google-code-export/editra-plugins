@@ -46,6 +46,8 @@ class BaseShelfWindow(ed_basewin.EdBaseCtrlBox):
         # Parent is ed_shelf.EdShelfBook
         self._mw = ed_basewin.FindMainWindow(self)
         self._log = wx.GetApp().GetLog()
+        self.taskbtn = None
+        self._listCtrl = None
         self._imglst = list()
         
         def do_nothing():
