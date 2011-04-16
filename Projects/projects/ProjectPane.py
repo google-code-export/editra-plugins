@@ -82,7 +82,6 @@ import wx.lib.delayedresult
 import ConfigDialog
 import ScCommand
 import FileIcons
-import Trash
 from HistWin import HistoryWindow
 import ProjCmnDlg
 
@@ -92,6 +91,7 @@ import ed_event
 import ed_msg
 import profiler
 import util
+import ebmlib
 import eclib
 
 #-----------------------------------------------------------------------------#
@@ -1657,7 +1657,7 @@ class ProjectTree(wx.Panel):
             # Delete previously cut files
             for node, path in selections:
                 try:
-                    Trash.moveToTrash(path)
+                    ebmlib.MoveToTrash(path)
                 except Exception, msg:
                     rc = wx.MessageDialog(self,
                       _('An error occurred when attempting to remove ') + \
