@@ -4,12 +4,21 @@
 
 This page contains information about how to use and configure the code analysis features provided by the PyTools plugin for analyzing Python code. This component provides a fully integrated user interface for performing code analysis on Python code.
 
+= Configuration =
+
+Configuration options for the code analysis tools are located in the PyTools configuration dialog, for general configuration information please see the PyTools page. PyLint specific configuration options are discussed below.
+
+[http://editra-plugins.googlecode.com/svn/wiki/images/PyTools/pytools_config_code_analysis.png]
+
+The code analysis can run in one of two modes, Automatic or Manual. The default setting is Manual which means the analysis is only run when the Analysis button is clicked. Setting the option to Automatic will tell it to run after every time a file is saved.
+
+The PyLint Checkers configuration allows for turning specific issue checkers on and off. This allows you to fine tune the kinds of issues you want to check for in you code. The default configuration is with everything enabled.
 
 = Basic Usage =
 
 This section contains the basic usage information for this component, the screenshot below will be used for reference throughout the next part of this section.
 
-[http://editra-plugins.googlecode.com/svn/wiki/images/PyTools/pytools_pylint.png]
+[http://editra-plugins.googlecode.com/svn/wiki/images/PyTools/pylint_main.png]
 
 *Buttons*
   * The first button on the left hand side will bring up the PyTools Configuration dialog.
@@ -31,3 +40,6 @@ If you want to save the results of the analysis to use later or for gathering me
 [http://editra-plugins.googlecode.com/svn/wiki/images/PyTools/pylint_export_xml.png]
 
 This file can be imported back in and displayed in the shelf window at a future time as well to continue with resolving issues noted by the analysis.
+
+= Related Pages =
+PyTools
