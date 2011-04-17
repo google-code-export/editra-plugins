@@ -7,9 +7,18 @@ Provides a collection of tools to aid in the development of Python applications.
 
 = Features =
 
-  * PyDebugger (Remote Python Debugger)
+  * PyDebugger (Integrated Remote Python Debugger via WinDbg)
   * PyFind (Python Module Finder)
-  * PyAnalysis (Code Analysis via PyLint)
+  * PyAnalysis (Integrated Code Analysis via PyLint)
 
 = Details =
 
+PyTools is a collection of tools for working with and developing Python code. This page contains the general information about the plugin, please see the links to the various features of the plugin for more detailed information.
+
+= General Configuration =
+
+The PyTools configuration dialog can be accessed from any of the plugins Shelf windows as well as from the PluginManager dialog. The screenshot below shows the General configuration page.
+
+[http://editra-plugins.googlecode.com/svn/wiki/image/PyTools/pytools_config_general.png]
+
+The PyTools plugin tries to automatically detect what Python your using on your system but to get started you should make sure that this path is pointing to the Python that 
