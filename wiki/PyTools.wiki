@@ -7,9 +7,9 @@ Provides a collection of tools to aid in the development of Python applications.
 
 = Features =
 
-  * PyDebugger (Integrated Remote Python Debugger via WinDbg)
+  * PyDebugger (Integrated Remote Python Debugger via [http://winpdb.org/ Winpdb] backend)
   * PyFind (Python Module Finder)
-  * PyAnalysis (Integrated Code Analysis via PyLint)
+  * PyAnalysis (Integrated Code Analysis via [http://www.logilab.org/857 PyLint])
 
 = Details =
 
