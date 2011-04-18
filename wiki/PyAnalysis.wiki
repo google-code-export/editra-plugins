@@ -6,6 +6,8 @@
 
 This page contains information about how to use and configure the code analysis features provided by the PyTools plugin for analyzing Python code. This component provides a fully integrated user interface for performing code analysis on Python code.
 
+*NOTE:* If you have previously installed the standalone PyLintPlugin it is suggested to uninstall it prior to installing PyTools as the functionality of that plugin has been deprecated based on the new improved functionality provided by the PyTools plugin
+
 = Configuration =
 
 Configuration options for the code analysis tools are located in the PyTools configuration dialog, for general configuration information please see the PyTools page. PyLint specific configuration options are discussed below.
