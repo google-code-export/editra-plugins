@@ -1,6 +1,8 @@
 #summary Python Integrated Development Solution
 #labels IDE
 
+<wiki:toc max_depth="2" />
+
 = Introduction =
 
 Provides a collection of tools to aid in the development of Python applications.
@@ -10,6 +12,9 @@ Provides a collection of tools to aid in the development of Python applications.
   * PyDebugger (Integrated Remote Python Debugger via [http://winpdb.org/ Winpdb] backend)
   * PyFind (Python Module Finder)
   * [PyAnalysis Code Analysis] (Integrated Code Analysis via [http://www.logilab.org/857 PyLint])
+
+= Minor Features =
+
 
 = Details =
 
