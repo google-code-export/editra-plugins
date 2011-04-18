@@ -42,4 +42,4 @@ Information about Expressions window
 Information about Stack and Thread information window
 
 == !PyVariable ==
-[http://editra-plugins.googlecode.com/svn/wiki/images/PyTools/pydebug_variable.png]
+[http://editra-plugins.googlecode.com/svn/wiki/images/PyTools/pydebug_variables.png]
