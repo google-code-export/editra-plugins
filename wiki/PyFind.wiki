@@ -15,5 +15,9 @@ The screenshot below shows what the PyFind window looks like.
   * The text field near the right edge of the window is a free form text field for entering the module name you wish to search for. The enter key can be used to initiate a search.
   * The Find button on the far right will start a search job for the module name entered in the text field.
 
+= Usage =
+
+Once a search is complete the results will be shown in the list. Double clicking on any of the results in the list will open that file in the editor.
+
 = Related Pages =
   * PyTools
