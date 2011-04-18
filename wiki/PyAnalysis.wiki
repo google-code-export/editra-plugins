@@ -1,5 +1,7 @@
 #summary Integrated Python code analysis using PyLint
 
+<wiki:toc max_depth="2" />
+
 = Introduction =
 
 This page contains information about how to use and configure the code analysis features provided by the PyTools plugin for analyzing Python code. This component provides a fully integrated user interface for performing code analysis on Python code.
