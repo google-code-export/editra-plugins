@@ -15,7 +15,7 @@ Provides a collection of tools to aid in the development of Python applications.
 
 = Minor Features =
 
-  *[OpenModule Right click Open Module]
+  * [#OpenModule Right click Open Module]
 
 = Details =
 
