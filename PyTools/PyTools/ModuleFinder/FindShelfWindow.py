@@ -87,7 +87,7 @@ class FindShelfWindow(BaseShelfWindow):
         self._hasrun = True
 
     def OnFindModule(self, event):
-        DoFindModule()
+        self.DoFindModule()
 
     def DoFindModule(self):
         self.taskbtn.Enable(False)
