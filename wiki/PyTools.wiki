@@ -15,7 +15,7 @@ Provides a collection of tools to aid in the development of Python applications.
 
 = Minor Features =
 
-  * [PyTools#OpenModule Right click Open Module]
+  * [PyTools#Open_Module Right click Open Module]
 
 = Details =
 
@@ -27,7 +27,8 @@ The PyTools configuration dialog can be accessed from any of the plugins Shelf w
 
 [http://editra-plugins.googlecode.com/svn/wiki/images/PyTools/pytools_config_general.png]
 
-= OpenModule =
-
-
 The PyTools plugin tries to automatically detect what Python your using on your system but to get started you should make sure that this path is pointing to the Python that you want to work with. Most features of this plugin rely on this setting when running Python related commands.
+
+= Open Module =
+
+[http://editra-plugins.googlecode.com/svn/wiki/images/PyTools/open_module_ctx_menu.png]
