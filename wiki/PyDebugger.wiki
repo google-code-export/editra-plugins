@@ -30,8 +30,10 @@ The remaining two buttons on the Shelf Windows control bar can be used to remove
 
 In addition to being able to add and delete breakpoints, breakpoints can also be disabled and re-enabled by clicking on the red breakpoint marker that is shown in the list.
 
+Double clicking on a breakpoint will cause the cursor to jump to that point.
+
 == !PyDebug ==
-Information about main Debug window
+[http://editra-plugins.googlecode.com/svn/wiki/images/PyTools/pydebug_debugger.png]
 
 == !PyExpression ==
 Information about Expressions window
@@ -40,4 +42,4 @@ Information about Expressions window
 Information about Stack and Thread information window
 
 == !PyVariable ==
-Information about variable and exceptions display windows
+[http://editra-plugins.googlecode.com/svn/wiki/images/PyTools/pydebug_variable.png]
