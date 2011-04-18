@@ -7,13 +7,19 @@
 
 This page contains detailed information about the PyDebugger component of the PyTools plugin. PyDebugger is a debugger based off of the same rpdb2 Python debugger that is used by Winpdb. This component contains a collection of various shelf windows and editor integration for debugging Python programs and scripts. See the sections below for an introduction to each part of the debugger.
 
+= Configuration =
+
+This section contains information specific to the configuration of the debugger, for general configuration see the main PyTools page.
+
+[http://editra-plugins.googlecode.com/svn/wiki/Pytools/pytools_config_debugger.png]
+
 = !PyDebugger Components =
 
 
 == !PyBreakPoint ==
 PyBreakPoint is a Shelf window for displaying and managing breakpoints. The screenshot below shows the PyBreakPoint window and how the breakpoints are displayed in the editor.
 
-[http://editra-plugins.googlecode.com/svn/wiki/images/pydebug_breakpoint.png]
+[http://editra-plugins.googlecode.com/svn/wiki/images/PyTools/pydebug_breakpoint.png]
 
 Breakpoints can be added to any line of code in the editor. There are Three ways to add a breakpoint to a line.
   # Click in the marker margin on the far left of the editor window. Clicking again will toggle the breakpoint off.
