@@ -19,7 +19,7 @@ Provides a collection of tools to aid in the development of Python applications.
 
 = Installation Notes =
 
-*NOTE:* If you have previously installed the standalone PyLintPlugin it is suggested to uninstall it prior to installing !PyTools as the functionality of that plugin has been deprecated based on the new improved functionality provided by the !PyTools plugin
+*NOTE:* If you have previously installed the standalone PylintPlugin it is suggested to uninstall it prior to installing !PyTools as the functionality of that plugin has been deprecated based on the new improved functionality provided by the !PyTools plugin
 
 = Details =
 
