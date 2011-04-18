@@ -15,7 +15,6 @@ This page contains a list of links to pages about individual plugins and their r
 ||FtpEdit || FTP browser for editing files over FTP ||
 ||[Launch Launch] || Launch scripts and programs from within Editra ||
 ||ProjectsPlugin || _Project management plugin with integrated source control_ ||
-||PyRun || Launch python scripts from Editra and see their output in shelf buffer ||
 ||PyTools|| Fully integrated development environment for Python ||
 ||TerminalPlugin    || Built in system shell window ||
 ||[IPythonShellPlugin IPythonShellPlugin] || IPython interactive shell window ||
