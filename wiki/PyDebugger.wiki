@@ -71,17 +71,32 @@ Information about Expressions window
 ----
 
 == !PyStackThread ==
-Information about Stack and Thread information window
+
+The !PyStackThread Shelf window provides a view of the current execution stack and thread statuses of the program being debugged. The screenshot below shows this window in the Stack view.
+
+[http://editra-plugins.googlecode.com/svn/wiki/images/PyTools/pydebug_stack.png]
+
+*Views*
+
+Using the vertical control bar on the left this window can display one of two views.
+
+  * Stack - Shows the current execution stack
+  * Threads - Shows the status of the running threads
+
+*Actions*
+  * Preferences Button - Opens the PyTools configuration dialog
+  * Double clicking on an item in the stack list will jump to that point in the code.
 
 ----
 
 == !PyVariable ==
 
-The PyVariable Shelf window provides a way to inspect the local and global variables that are present in the current debug context. In addition to this it also allows you to inspect any exceptions that may have been thrown by the debuggee.
+The !PyVariable Shelf window provides a way to inspect the local and global variables that are present in the current debug context. In addition to this it also allows you to inspect any exceptions that may have been thrown by the debuggee.
 
 [http://editra-plugins.googlecode.com/svn/wiki/images/PyTools/pydebug_variables.png]
 
 *Views*
+
 The control bar on the left contains buttons to activate one of the three possible views. Hovering over the button will show a tooltip describing the view but from top to bottom the views are.
 
   * locals()
