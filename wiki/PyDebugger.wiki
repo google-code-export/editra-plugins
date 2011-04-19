@@ -11,7 +11,7 @@ This page contains detailed information about the PyDebugger component of the Py
 
 = Configuration =
 
-This section contains information specific to the configuration of the debugger, for general configuration see the main PyTools page.
+This section contains information specific to the configuration of the debugger, for [PyTools#General_Configuration general configuration] see the main PyTools page.
 
 [http://editra-plugins.googlecode.com/svn/wiki/images/PyTools/pytools_config_debugger.png]
 
