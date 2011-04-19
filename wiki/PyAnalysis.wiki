@@ -10,7 +10,7 @@ This page contains information about how to use and configure the code analysis 
 
 = Configuration =
 
-Configuration options for the code analysis tools are located in the PyTools configuration dialog, for general configuration information please see the PyTools page. PyLint specific configuration options are discussed below.
+Configuration options for the code analysis tools are located in the PyTools configuration dialog, for [PyTools#General_Configuration general configuration] information please see the PyTools page. PyLint specific configuration options are discussed below.
 
 [http://editra-plugins.googlecode.com/svn/wiki/images/PyTools/pytools_config_code_analysis.png]
 
