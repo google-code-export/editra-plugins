@@ -7,6 +7,8 @@
 
 Provides a collection of tools to aid in the development of Python applications.
 
+----
+
 = Main Features =
 
   * PyDebugger (Integrated Remote Python Debugger via [http://winpdb.org/ Winpdb] backend)
@@ -46,3 +48,7 @@ The PyTools plugin tries to automatically detect what Python your using on your 
 The Open Module feature allows you to right click on an import statement and open the corresponding module. When an import statement is clicked on the buffers context menu will include the "Open Module" menu item as shown in the below screenshot.
 
 [http://editra-plugins.googlecode.com/svn/wiki/images/PyTools/open_module_ctx_menu.png]
+
+----
+
+= Future Features =
