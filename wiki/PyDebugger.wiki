@@ -7,6 +7,8 @@
 
 This page contains detailed information about the PyDebugger component of the PyTools plugin. PyDebugger is a debugger based off of the same rpdb2 Python debugger that is used by Winpdb. This component contains a collection of various shelf windows and editor integration for debugging Python programs and scripts. See the sections below for an introduction to each part of the debugger.
 
+----
+
 = Configuration =
 
 This section contains information specific to the configuration of the debugger, for general configuration see the main PyTools page.
@@ -20,6 +22,8 @@ This section contains information specific to the configuration of the debugger,
   * Fork into Child: (TODO - description)
   * Source Encoding: Set the encoding of the files being debugged
   * Escape non ascii characters for Execute/Evaluate
+
+----
 
 = !PyDebugger Components =
 
@@ -39,6 +43,8 @@ In addition to being able to add and delete breakpoints, breakpoints can also be
 
 Double clicking on a breakpoint will cause the cursor to jump to that point.
 
+----
+
 == !PyDebug ==
 
 The !PyDebug Shelf window is the main control window for attaching to programs and stepping through the code. The screenshot below shows what the debug window looks like.
@@ -57,11 +63,32 @@ The !PyDebug Shelf window is the main control window for attaching to programs a
   * Text Field - enter arguments to pass to the program or debugger based on selection in previous field.
   * Remote Button - Attach to an already running process
 
+----
+
 == !PyExpression ==
 Information about Expressions window
+
+----
 
 == !PyStackThread ==
 Information about Stack and Thread information window
 
+----
+
 == !PyVariable ==
+
+The PyVariable Shelf window provides a way to inspect the local and global variables that are present in the current debug context. In addition to this it also allows you to inspect any exceptions that may have been thrown by the debuggee.
+
 [http://editra-plugins.googlecode.com/svn/wiki/images/PyTools/pydebug_variables.png]
+
+*Views*
+The control bar on the left contains buttons to activate one of the three possible views. Hovering over the button will show a tooltip describing the view but from top to bottom the views are.
+
+  * locals()
+  * globals()
+  * Exceptions
+
+*Actions*
+  * Preferences - opens the PyTools configuration dialog
+  * Filter - Set the verbosity of how much data is shown in each view
+  * Analyze Exception
