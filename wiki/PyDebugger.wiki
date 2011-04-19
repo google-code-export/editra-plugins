@@ -13,8 +13,15 @@ This section contains information specific to the configuration of the debugger,
 
 [http://editra-plugins.googlecode.com/svn/wiki/images/PyTools/pytools_config_debugger.png]
 
-= !PyDebugger Components =
+*Options*
+  * Trap Unhandled Exceptions: (TODO - description)
+  * Enable Synchrocity: (TODO - description)
+  * Pause Before Fork:(TODO - description)
+  * Fork into Child: (TODO - description)
+  * Source Encoding: Set the encoding of the files being debugged
+  * Escape non ascii characters for Execute/Evaluate
 
+= !PyDebugger Components =
 
 == !PyBreakPoint ==
 PyBreakPoint is a Shelf window for displaying and managing breakpoints. The screenshot below shows the PyBreakPoint window and how the breakpoints are displayed in the editor.
@@ -33,7 +40,22 @@ In addition to being able to add and delete breakpoints, breakpoints can also be
 Double clicking on a breakpoint will cause the cursor to jump to that point.
 
 == !PyDebug ==
+
+The !PyDebug Shelf window is the main control window for attaching to programs and stepping through the code. The screenshot below shows what the debug window looks like.
+
 [http://editra-plugins.googlecode.com/svn/wiki/images/PyTools/pydebug_debugger.png]
+
+*Actions* (from left to right)
+  * Preferences Button - open the PyTools configuration dialog
+  * Go Button - Start debugging the current script or tell the program that is already being debugged to run to the next breakpoint.
+  * Stop Button - Abort the debug session
+  * Step In Button - Step into the call on the current line
+  * Step Over Button - Step over the current line
+  * Step Out Button - Step out of the current scope
+  * Break All Button - Break a the current point of execution
+  * Program/Debugger Args Choice Control
+  * Text Field - enter arguments to pass to the program or debugger based on selection in previous field.
+  * Remote Button - Attach to an already running process
 
 == !PyExpression ==
 Information about Expressions window
