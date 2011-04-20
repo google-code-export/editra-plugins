@@ -382,7 +382,7 @@ class DebugShelfWindow(BaseShelfWindow):
             self._listCtrl.Start(100)
             RpdbDebugger().debuggerattachedtext = self.DEBUGGERATTACHEDTEXTREMOTE
             RpdbDebugger().debuggerdetachedtext = self.DEBUGGERDETACHEDTEXT
-            dpc = DummyProcessCreator(server.m_rid, self._listCtrl.AppendUpdate)
+            dpc = DummyProcessCreator(server.m_rid, self.UpdateOutput)
             dpc.restorepath = lambda:None
             self._debugger.processcreator = dpc
             self._setdebuggeroptions()
@@ -391,4 +391,8 @@ class DebugShelfWindow(BaseShelfWindow):
             self._debugger.RunDebugger()
         
         attach_dialog.Destroy()
-        
+
+    def UpdateOutput(self, txt):
+        """Check to prevent PyDeadObjectErrors"""
+        if self._listCtrl:
+            self._listCtrl.AppendUpdate(txt)

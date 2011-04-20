@@ -103,9 +103,14 @@ class PythonDebugger(AbstractDebugger):
         self.debuggeewindow.calldebugger = self.RunDebugger
         RpdbDebugger().debuggerattachedtext = self.DEBUGGERATTACHEDTEXT
         RpdbDebugger().debuggerdetachedtext = self.DEBUGGERDETACHEDTEXT
-        self.processcreator = AsyncProcessCreator(self.debuggeewindow, self.debuggeewindow.AppendUpdate, "PyDbg", parentPath, rpdb2_cmd, self.pythonpath)
+        self.processcreator = AsyncProcessCreator(self.debuggeewindow, self.UpdateOutput, "PyDbg", parentPath, rpdb2_cmd, self.pythonpath)
         self.processcreator.start()
         util.Log("[PyDbg][info] Rpdb2 command running")
+
+    def UpdateOutput(self, txt):
+        """Check to prevent PyDeadObjectErrors"""
+        if self.debuggeewindow:
+            self.debuggeewindow.AppendUpdate(txt)
 
     def RunDebugger(self):                    
         self.debuggeewindow.calldebugger = None
