@@ -58,7 +58,10 @@ class MessageHandler(object):
         rpdbdebugger.restorestepmarker = self.RestoreStepMarker
         
         # Editra Message Handlers
-        ed_msg.Subscribe(self.OnFileLoad, ed_msg.EDMSG_FILE_OPENED)
+        # TODO: Disabled this handler as a page changed message will be
+        #       sent after an opened message. Make sure that its not needed
+        #       as disabling it greatly improves startup performance.
+#        ed_msg.Subscribe(self.OnFileLoad, ed_msg.EDMSG_FILE_OPENED)
         ed_msg.Subscribe(self.OnFileSave, ed_msg.EDMSG_FILE_SAVED)
         ed_msg.Subscribe(self.OnPageChanged, ed_msg.EDMSG_UI_NB_CHANGED)        
         ed_msg.Subscribe(self.OnContextMenu, ed_msg.EDMSG_UI_STC_CONTEXT_MENU)
