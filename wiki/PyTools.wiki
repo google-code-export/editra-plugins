@@ -58,7 +58,7 @@ The syntax error check option (defaults to on) will automatically check files fo
 
 The screenshot below shows the syntax error checker marking an error it found in the file due to a missing ':'.
 
-[http://editra-plugins.googlecode.com/svn/wiki/images/PyTools/syntax_error_check.png]
+[http://editra-plugins.googlecode.com/svn/wiki/images/PyTools/syntax_error_checker.png]
 
 Hovering over the line with the error will show a tooltip providing more details about the error.
 
