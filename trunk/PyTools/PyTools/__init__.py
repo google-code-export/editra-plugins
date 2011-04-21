@@ -31,6 +31,7 @@ from PyTools.Common import Images
 from PyTools.Common.ToolConfig import ToolConfigPanel
 from PyTools.Common.BaseShelfPlugin import BaseShelfPlugin
 from PyTools.SyntaxChecker.LintShelfWindow import LintShelfWindow
+from PyTools.SyntaxChecker.CompileChecker import CompileEntryPoint
 from PyTools.ModuleFinder.FindTabMenu import FindTabMenu
 from PyTools.ModuleFinder.FindShelfWindow import FindShelfWindow
 from PyTools.Debugger.DebugShelfWindow import DebugShelfWindow
@@ -52,6 +53,11 @@ class PyLint(BaseShelfPlugin):
     """Script Launcher and output viewer"""
     def __init__(self, pluginmgr):
         super(PyLint, self).__init__(pluginmgr, "PyLint", LintShelfWindow)
+
+    def InstallComponents(self, parent):
+        """Initialize and install"""
+        setattr(self, '_installed', True)
+        CompileEntryPoint()
 
     def GetBitmap(self):
         """Get the tab bitmap
