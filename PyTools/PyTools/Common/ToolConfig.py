@@ -30,6 +30,7 @@ from PyTools.Debugger.RpdbDebugger import RpdbDebugger
 # Configuration Keys
 PYTOOL_CONFIG = "PyTool.Config"
 TLC_PYTHON_PATH = "PythonPath"
+TLC_COMPILE_ON_SAVE = "CheckCompileOnSave"
 TLC_TRAP_EXCEPTIONS = "TrapExceptions"
 TLC_SYNCHRONICITY = "Synchronicity"
 TLC_AUTO_FORK = "AutoFork"
@@ -50,10 +51,10 @@ NOPYTHONERROR = u"***  FATAL ERROR: No local Python configured or found"
 
 #-----------------------------------------------------------------------------#
 
-def GetConfigValue(key):
+def GetConfigValue(key, default=None):
     """Get a value from the config"""
     config = Profile_Get(PYTOOL_CONFIG, default=dict())
-    return config.get(key, None)
+    return config.get(key, default)
 
 def GetPythonExecutablePath(info):
     # Figure out what Python to use
@@ -118,11 +119,13 @@ class GeneralConfigPanel(wx.Panel):
 
         # Attributes
         self._python_path_pk = None
+        self._check_on_save_cb = None
 
         # Setup
         self.__DoLayout()
 
         # Event Handlers
+        self.Bind(wx.EVT_CHECKBOX, self.OnCheckBox, self._check_on_save_cb)
         self.Bind(wx.EVT_FILEPICKER_CHANGED, self.OnPythonPathChanged, self._python_path_pk)
 
     def __DoLayout(self):
@@ -142,7 +145,19 @@ class GeneralConfigPanel(wx.Panel):
                    0, wx.ALIGN_CENTER_VERTICAL)
         hsizer.Add(self._python_path_pk, 1, wx.EXPAND|wx.ALL, 3)
         sizer.Add(hsizer, 0, wx.EXPAND|wx.ALL, 8)
+        self._check_on_save_cb = wx.CheckBox(self, label=_("Compile code on save"))
+        self._check_on_save_cb.ToolTip = wx.ToolTip(_("Check for syntax errors and typos when a file is saved"))
+        self._check_on_save_cb.SetValue(GetConfigValue(TLC_COMPILE_ON_SAVE, True))
+        sizer.Add(self._check_on_save_cb, 0, wx.ALL, 5)
         self.SetSizer(sizer)
+
+    def OnCheckBox(self, event):
+        """Update checkbox linked configuration options"""
+        e_obj = event.GetEventObject()
+        if e_obj is self._check_on_save_cb:
+            config = Profile_Get(PYTOOLS_CONFIG, default=dict())
+            config[TLC_COMPILE_ON_SAVE] = e_obj.GetValue()
+            Profile_Set(PYTOOL_CONFIG, config)
 
     def OnPythonPathChanged(self, event):
         """Update the configured pylint path"""

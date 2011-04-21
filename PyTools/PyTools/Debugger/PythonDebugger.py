@@ -35,6 +35,8 @@ _ = wx.GetTranslation
 #-----------------------------------------------------------------------------#
 
 class PythonDebugger(AbstractDebugger):
+    # TODO: these need to be moved to be evaluated at run time instead of
+    #       import time
     DEBUGGERATTACHEDTEXT = _("Debugger attached. Debuggee output starts now...\n\n")
     DEBUGGERDETACHEDTEXT = _("")
 
@@ -54,9 +56,9 @@ class PythonDebugger(AbstractDebugger):
 
     def RunDebuggee(self):
         """Run rpdb2args"""
-
         flag, localpythonpath = ToolConfig.GetPythonExecutablePath("PyDbg")
-
+        # TODO: convert errors to error codes and translate to meaningful
+        #       messages on main thread.
         if not flag:
             # No configured Python
             return [(u"No Python", localpythonpath, u"NA"),]
