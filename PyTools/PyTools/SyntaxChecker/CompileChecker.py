@@ -9,8 +9,8 @@
 """CompileChecker"""
 
 __author__ = "Cody Precord <cprecord@editra.org>"
-__svnid__ = "$Id:  $"
-__revision__ = "$Revision:  $"
+__svnid__ = "$Id$"
+__revision__ = "$Revision$"
 
 #-----------------------------------------------------------------------------#
 # Imports
