@@ -18,6 +18,7 @@ Provides a collection of tools to aid in the development of Python applications.
 = Minor Features =
 
   * [PyTools#Open_Module Right click Open Module]
+  * [PyTools#Syntax_Error_Check Syntax Error Check]
 
 ----
 
@@ -48,6 +49,18 @@ The PyTools plugin tries to automatically detect what Python your using on your 
 The Open Module feature allows you to right click on an import statement and open the corresponding module. When an import statement is clicked on the buffers context menu will include the "Open Module" menu item as shown in the below screenshot.
 
 [http://editra-plugins.googlecode.com/svn/wiki/images/PyTools/open_module_ctx_menu.png]
+
+----
+
+= Syntax Error Check =
+
+The syntax error check option (defaults to on) will automatically check files for syntax errors and other typos when the file is saved.
+
+The screenshot below shows the syntax error checker marking an error it found in the file due to a missing ':'.
+
+[http://editra-plugins.googlecode.com/svn/wiki/images/PyTools/syntax_error_check.png]
+
+Hovering over the line with the error will show a tooltip providing more details about the error.
 
 ----
 
