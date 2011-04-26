@@ -42,6 +42,27 @@ The PyTools configuration dialog can be accessed from any of the plugins Shelf w
 
 The PyTools plugin tries to automatically detect what Python your using on your system but to get started you should make sure that this path is pointing to the Python that you want to work with. Most features of this plugin rely on this setting when running Python related commands.
 
+== Configuration File ==
+
+It is possible to specify an optional configuration file (sometimes called a directory variables file). It must be named: {{{__dirvar_py__.cfg}}}
+
+When the tools are activated, they look for this file automatically (without user intervention) in the Python script's current directory, its parent, its parent's parent and so on up the directory tree. Hence, __dirvar_py__.cfg could, for example, be put in a project's src folder so that the settings apply to all scripts in src and its subfolders.
+
+Currently, 3 parameters are supported in {{{__dirvar_py__.cfg}}}:
+
+  * PYTHONPATH, a comma separated list of paths to add to the PYTHONPATH for tools to use
+  * PYLINTRC, the path to a Pylint configuration file. This takes precedence over messages settings in the PyTools configuration dialog.
+  * DEBUGGERARGS, arguments to the debugger. The PyTools configuration dialog setting "Debugger Args" takes precedence over this setting. %SCRIPT% can be used to refer to the current Python script or %MODULE% if it is required in module form (ie. xxx.yyy.zzz).
+
+Relative paths are allowed, for example: . or ..
+
+An example {{{__dirvar_py__.cfg}}} might be:
+{{{
+PYTHONPATH=./src,./test
+PYLINTRC=../.pylintrc
+DEBUGGERARGS=./src/run.py %MODULE%
+}}}
+
 ----
 
 = Open Module =
