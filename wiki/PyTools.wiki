@@ -46,7 +46,7 @@ The PyTools plugin tries to automatically detect what Python your using on your 
 
 It is possible to specify an optional configuration file (sometimes called a directory variables file). It must be named: {{{__dirvar_py__.cfg}}}
 
-When the tools are activated, they look for this file automatically (without user intervention) in the Python script's current directory, its parent, its parent's parent and so on up the directory tree. Hence, __dirvar_py__.cfg could, for example, be put in a project's src folder so that the settings apply to all scripts in src and its subfolders.
+When the tools are activated, they look for this file automatically (without user intervention) in the Python script's current directory, its parent, its parent's parent and so on up the directory tree. Hence, {{{__dirvar_py__.cfg}}} could, for example, be put in a project's src folder so that the settings apply to all scripts in src and its subfolders.
 
 Currently, 3 parameters are supported in {{{__dirvar_py__.cfg}}}:
 
