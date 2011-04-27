@@ -1,0 +1,15 @@
+#summary List of minor TODOs for PyTools
+
+= Introduction =
+
+This page contains a list of open TODO issues for the listed version of the PyTools Plugin.
+
+== Version 0.1 ==
+
+=== General Issues ====
+  * Correct any remaining crashes reported at (http://code.google.com/p/editra-plugins/issues/detail?id=166)
+
+=== Code Analysis (PyLint) ===
+  * Make ListCtrl columns sortable in the [PyAnalysis PyLint] output window.
+  * Store references to marker handles to use instead of line numbers when possible in code analysis tool, since line numbers can change while editing the file.
+  * Make rest of interface strings translatable in the code analysis tool.
