@@ -16,12 +16,33 @@ This section contains information specific to the configuration of the debugger,
 [http://editra-plugins.googlecode.com/svn/wiki/images/PyTools/pytools_config_debugger.png]
 
 *Options*
-  * Trap Unhandled Exceptions: (TODO - description)
-  * Enable Synchrocity: (TODO - description)
-  * Pause Before Fork:(TODO - description)
-  * Fork into Child: (TODO - description)
-  * Source Encoding: Set the encoding of the files being debugged
+  * Trap Unhandled Exceptions
+  * Enable Synchrocity
+  * Pause Before Fork
+  * Fork into Child
+  * Source Encoding
   * Escape non ascii characters for Execute/Evaluate
+
+== Trap Unhandled Exceptions ==
+
+If enabled, debuggee will pause on unhandled exceptions for inspection, otherwise it will ignore them.
+
+== Enable Synchronicity ==
+
+Traditional Python debuggers that use the inspected thread (usually the main thread) to query or modify the script name-space have to wait until the script hits a break-point. Synchronicity allows the debugger to query and modify the script name-space even if its threads are still running or blocked in C library code by using special worker threads. In some rare cases querying or modifying data in synchronicity can crash the script. For example in some Linux builds of wxPython querying the state of wx objects from a thread other than the GUI thread can crash the script. If this happens or if you want to restrict these operations to the inspected thread, turn synchronicity off. On the other hand when synchronicity is off it is possible to accidentally deadlock or block indefinitely the script threads by querying or modifying particular data structures.
+
+== Pause Before Fork ==
+
+If enabled, debugger will pause before doing a fork, otherwise it will automatically fork into the parent or child process depending upon the option Fork into Child.
+
+== Fork into Child ==
+
+If enabled, the debugger will switch to debug the forked
+child process after a fork, otherwise it will continue to debug the original parent process after a fork.
+
+== Source Encoding ==
+
+Set the encoding of the files being debugged.
 
 ----
 
