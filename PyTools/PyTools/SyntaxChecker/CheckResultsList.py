@@ -90,6 +90,13 @@ class CheckResultsList(eclib.EBaseListCtrl):
             except ValueError:
                 pass
 
+    @staticmethod
+    def DeleteEditorMarkers(editor):
+        """Remove lint markers from the given editor"""
+        editor.RemoveAllMarkers(ed_marker.LintMarker())
+        editor.RemoveAllMarkers(ed_marker.LintMarkerError())
+        editor.RemoveAllMarkers(ed_marker.LintMarkerWarning())
+
     def Clear(self):
         """Delete all the rows """
         if self.editor:
@@ -97,7 +104,7 @@ class CheckResultsList(eclib.EBaseListCtrl):
             if fname in CheckResultsList._cache:
                 del CheckResultsList._cache[fname]
             self.DeleteAllItems()
-            self.editor.RemoveAllMarkers(ed_marker.LintMarker())
+            self.DeleteEditorMarkers(self.editor)
 
     def ClearMarkers(self):
         """Clear markers from all buffers"""
@@ -107,7 +114,7 @@ class CheckResultsList(eclib.EBaseListCtrl):
                 ctrls = nb.GetTextControls()
                 for ctrl in ctrls:
                     if ctrl and ctrl.GetFileName() in CheckResultsList._cache:
-                        ctrl.RemoveAllMarkers(ed_marker.LintMarker())
+                        self.DeleteEditorMarkers(ctrl)
 
     def GetCachedData(self):
         """Get the cached Lint data for the current editor
@@ -153,7 +160,13 @@ class CheckResultsList(eclib.EBaseListCtrl):
             self.Append(row)
             if self.editor: # TODO: ensure editor is set
                 try:
-                    self.editor.AddMarker(ed_marker.LintMarker(),
+                    if row[0] == 'Error':
+                        mark = ed_marker.LintMarkerError()
+                    elif row[0] == 'Warning':
+                        mark = ed_marker.LintMarkerWarning()
+                    else:
+                        mark = ed_marker.LintMarker()
+                    self.editor.AddMarker(mark,
                                           int(row[1]) - 1) # TODO: store handles
                 except ValueError:
                     pass
