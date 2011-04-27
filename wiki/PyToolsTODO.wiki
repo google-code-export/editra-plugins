@@ -14,14 +14,14 @@ This page contains a list of open TODO issues for the listed version of the PyTo
   * Correct any remaining crashes reported at (http://code.google.com/p/editra-plugins/issues/detail?id=166)
   * Change configuration to allow for multiple paths to different installed pythons to be configured and chosen via a Choice control.
 
-=== PyVariable ===
+=== !PyVariable ===
   * OSX - need to set smaller font for column headers as they are too large and don't look correct when run on this platform.
 
-=== PyBreakPoint ===
+=== !PyBreakPoint ===
   * Try to find some better icons to use for the Add/Del/Delete all
   * Make column headers sortable (at least for the 'file' column)
 
-=== PyStackThread ===
+=== !PyStackThread ===
   * OSX - need to set smaller font for column headers as they are too large and don't look correct when run on this platform.
 
 === Code Analysis (PyLint) ===
@@ -29,7 +29,7 @@ This page contains a list of open TODO issues for the listed version of the PyTo
   * Store references to marker objects and use their Handle property to get the current line number instead of line numbers when possible in code analysis tool, since line numbers can change while editing the file. Note: similar functionality will likely also be needed by the debugger.
   * Make rest of interface strings translatable in the code analysis tool.
 
-=== PyFind ===
+=== !PyFind ===
   * Test and handle additional import statement formats more accurately.
   * Make column header sortable
 
