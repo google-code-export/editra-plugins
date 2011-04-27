@@ -14,7 +14,6 @@ __revision__ = "$Revision$"
 #-----------------------------------------------------------------------------#
 # Imports
 import os
-import sys
 import re
 
 # Local Imports
@@ -25,11 +24,11 @@ from PyTools.SyntaxChecker.AbstractSyntaxChecker import AbstractSyntaxChecker
 
 # Editra Libraries
 import util
-import ebmlib
 
 #-----------------------------------------------------------------------------#
 
 class PythonSyntaxChecker(AbstractSyntaxChecker):
+    """Python syntax checker wrapper for PyLint"""
     def __init__(self, variabledict, filename):
         super(PythonSyntaxChecker, self).__init__(variabledict, filename)
 
@@ -50,6 +49,7 @@ class PythonSyntaxChecker(AbstractSyntaxChecker):
                     disable = dlist[0]
                 self.pylintargs += ["-d", disable]
         self.pythonpath = variabledict.get("PYTHONPATH")
+        # TODO: need to make translateable
         self.nopythonerror = u"***  FATAL ERROR: No local Python configured or found"
         self.nopylinterror = u"***  FATAL ERROR: No Pylint configured or found"
 
@@ -82,10 +82,11 @@ class PythonSyntaxChecker(AbstractSyntaxChecker):
             if stderrlower.find("pylint", ind) != -1:
                 return [(u"No Pylint", self.nopylinterror, u"NA"),]
 
-        # The parseable line format is '%(path)s:%(line)s: [%(sigle)s%(obj)s] %(msg)s'
-        # NOTE: This would be cleaner if we added an Emacs reporter to pylint.reporters.text ..
+        # The parseable line format is:
+        #       '%(path)s:%(line)s: [%(sigle)s%(obj)s] %(msg)s'
         regex = re.compile(r"(.*):(.*): \[([A-Z])[, ]*(.*)\] (.*)%s" % os.linesep)
         rows = []
+        # TODO: returned messages need to be translateable
         if self.pythonpath:
             rows.append((u"***", u"Using PYTHONPATH + %s"\
                           % u", ".join(self.pythonpath), u"NA"))
@@ -97,15 +98,21 @@ class PythonSyntaxChecker(AbstractSyntaxChecker):
                 continue
             mtypeabr = matcher.group(3)
             linenostr = matcher.group(2)
-            classmethod = matcher.group(4)
+            classmeth = matcher.group(4)
             mtext = matcher.group(5)
-            if mtypeabr == u"E" or mtypeabr == u"F":
+            if mtypeabr in (u"E", u"F"):
                 mtype = u"Error"
-            else:
+            elif mtypeabr == u"C":
+                mtype = u"Convention"
+            elif mtypeabr == u"R":
+                mtype = u"Refactor"
+            else: #TODO: add more specific filtering? / do translations on display
                 mtype = u"Warning"
+
             outtext = mtext
-            if classmethod:
-                outtext = u"[%s] %s" % (classmethod, outtext)
+            if classmeth:
+                outtext = u"[%s] %s" % (classmeth, outtext)
+
             try:
                 lineno = int(linenostr)
                 mtyperows = rowsdict.get(mtype)
