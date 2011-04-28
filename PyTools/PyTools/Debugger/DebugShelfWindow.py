@@ -59,7 +59,7 @@ class DebugShelfWindow(BaseShelfWindow):
         """Initialize the window"""
         super(DebugShelfWindow, self).__init__(parent)
 
-        # Attributes
+        # Setup
         ctrlbar = self.setup(DebuggeeWindow(self))
         ctrlbar.AddControl(wx.StaticLine(ctrlbar, size=(-1, 16), style=wx.SL_VERTICAL),
                            wx.ALIGN_LEFT)
@@ -101,6 +101,7 @@ class DebugShelfWindow(BaseShelfWindow):
         self._debugger = None
         self._debugrun = False
         self._debugargs = ""
+        self.abortfn = lambda:None
         
         # For remote attachment
         self._lastpwd = ""
