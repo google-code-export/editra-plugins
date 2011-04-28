@@ -33,6 +33,9 @@ class ExpressionsList(eclib.EToggleEditListCtrl):
     def __init__(self, parent):
         super(ExpressionsList, self).__init__(parent)
 
+        # Attributes
+        self._data = {}
+        
         # Setup
         self.InsertColumn(0, _("Expression"))
         self.InsertColumn(1, _("Value"))
@@ -117,6 +120,8 @@ class ExpressionsList(eclib.EToggleEditListCtrl):
         self.SetStringItem(idx, 1, unicode(value))        
 
     def clearexpressionvalues(self):
+        if not self._data:
+            return
         for idx in range(len(self._data)):
             self.SetStringItem(idx, 1, u"")
         
