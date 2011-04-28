@@ -16,10 +16,12 @@ This page contains a list of open TODO issues for the listed version of the PyTo
 
 === !PyVariable ===
   * OSX - need to set smaller font for column headers as they are too large and don't look correct when run on this platform.
+  * Make columns use whole width
 
 === !PyBreakPoint ===
   * Try to find some better icons to use for the Add/Del/Delete all
   * Make column headers sortable (at least for the 'file' column)
+  * Make columns use whole width
 
 === !PyStackThread ===
   * OSX - need to set smaller font for column headers as they are too large and don't look correct when run on this platform.
