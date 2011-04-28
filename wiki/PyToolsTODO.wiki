@@ -13,7 +13,6 @@ This page contains a list of open TODO issues for the listed version of the PyTo
 === General ====
   * Correct any remaining crashes reported at (http://code.google.com/p/editra-plugins/issues/detail?id=166)
   * Change configuration to allow for multiple paths to different installed pythons to be configured and chosen via a Choice control.
-  * On first opening of Editra with Debug shelf already opened previously, when opening a Python file, buttons are not updated (ghosted) until you click to another shelf then back to Debug shelf.
   * Should ghost buttons until fully detached when clicking Stop button.
   * Add handlers for EDMSG_DSP_FONT in order to update and set the user specified UI font for subwindows and controls.
 
