@@ -17,7 +17,6 @@ This page contains a list of open TODO issues for the listed version of the PyTo
   * Add handlers for EDMSG_DSP_FONT in order to update and set the user specified UI font for subwindows and controls.
 
 === !PyVariable ===
-  * OSX - need to set smaller font for column headers as they are too large and don't look correct when run on this platform.
   * Make columns use whole width
 
 === !PyBreakPoint ===
@@ -26,7 +25,7 @@ This page contains a list of open TODO issues for the listed version of the PyTo
   * Make columns use whole width
 
 === !PyStackThread ===
-  * OSX - need to set smaller font for column headers as they are too large and don't look correct when run on this platform.
+
 
 === Code Analysis (PyLint) ===
   * Make ListCtrl columns sortable in the [PyAnalysis PyLint] output window.
