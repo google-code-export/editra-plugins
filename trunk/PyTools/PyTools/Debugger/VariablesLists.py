@@ -39,6 +39,11 @@ class VariablesList(wx.gizmos.TreeListCtrl):
     COL_NAME = 0
     COL_REPR = 1
     COL_TYPE = 2
+    
+    COLNAME_NAME = _("Name")
+    COLNAME_REPR = _("Repr")
+    COLNAME_TYPE = _("Type")
+    
     # Image IDs
     IMG_CLASS, \
     IMG_FUNCT, \
@@ -53,6 +58,7 @@ class VariablesList(wx.gizmos.TreeListCtrl):
         super(VariablesList, self).__init__(parent)
 
         # Attributes
+        self.tenspaces = self.GetTextExtent("          ")[0]
         self.listtype = listtype
         self.filterlevel = filterlevel
         self.key = None
@@ -61,9 +67,9 @@ class VariablesList(wx.gizmos.TreeListCtrl):
         self._imgmap = dict() # type -> imgidx
 
         # Setup
-        self.AddColumn(_("Name"))
-        self.AddColumn(_("Repr"))
-        self.AddColumn(_("Type"))
+        self.AddColumn(VariablesList.COLNAME_NAME)
+        self.AddColumn(VariablesList.COLNAME_REPR)
+        self.AddColumn(VariablesList.COLNAME_TYPE)
         if wx.Platform == '__WXMAC__':
             self.SetWindowVariant(wx.WINDOW_VARIANT_SMALL)
         self.SetMainColumn(0) 
@@ -103,6 +109,17 @@ class VariablesList(wx.gizmos.TreeListCtrl):
         """Delete all the rows """
         self.DeleteAllItems()
 
+    def setcolumnwidths(self):
+        self.SetColumnWidth(VariablesList.COL_NAME, wx.LIST_AUTOSIZE)
+        self.SetColumnWidth(VariablesList.COL_REPR, wx.LIST_AUTOSIZE)
+        self.SetColumnWidth(VariablesList.COL_TYPE, wx.LIST_AUTOSIZE)
+        namecolwidth = max(self.GetTextExtent(VariablesList.COLNAME_NAME + "          ")[0], self.GetColumnWidth(VariablesList.COL_NAME) + self.tenspaces)
+        reprcolwidth = max(self.GetTextExtent(VariablesList.COLNAME_REPR + "          ")[0], self.GetColumnWidth(VariablesList.COL_REPR) + self.tenspaces)
+        typecolwidth = max(self.GetTextExtent(VariablesList.COLNAME_TYPE + "          ")[0], self.GetColumnWidth(VariablesList.COL_TYPE) + self.tenspaces)
+        self.SetColumnWidth(VariablesList.COL_NAME, namecolwidth)
+        self.SetColumnWidth(VariablesList.COL_REPR, reprcolwidth)
+        self.SetColumnWidth(VariablesList.COL_TYPE, typecolwidth)
+    
     def PopulateRows(self, data):
         """Populate the list with the data
         @param data: dictionary of variables info
@@ -120,6 +137,8 @@ class VariablesList(wx.gizmos.TreeListCtrl):
             
             items = self.get_children(item)
             variablelist = items + variablelist
+
+        self.setcolumnwidths()
 
     def UpdateVariablesList(self, variables):
         if not variables:
@@ -272,6 +291,7 @@ class VariablesList(wx.gizmos.TreeListCtrl):
             children = self.get_children(item)
             self.SelectItem(children[0])
 
+        self.setcolumnwidths()
         self.Refresh()
         
     # Helper functions

@@ -30,6 +30,13 @@ _ = wx.GetTranslation
 
 class ExpressionsList(eclib.EToggleEditListCtrl):
     """List control for displaying breakpoints results"""
+
+    COL_EXPR = 0
+    COL_VALUE = 1
+    
+    COLNAME_EXPR = _("Expression")
+    COLNAME_VALUE = _("Value")
+    
     def __init__(self, parent):
         super(ExpressionsList, self).__init__(parent)
 
@@ -37,8 +44,8 @@ class ExpressionsList(eclib.EToggleEditListCtrl):
         self._data = {}
         
         # Setup
-        self.InsertColumn(0, _("Expression"))
-        self.InsertColumn(1, _("Value"))
+        self.InsertColumn(ExpressionsList.COL_EXPR, ExpressionsList.COLNAME_EXPR)
+        self.InsertColumn(ExpressionsList.COL_VALUE, ExpressionsList.COLNAME_VALUE)
 
         # Event Handlers
         self.Bind(wx.EVT_LIST_END_LABEL_EDIT, self.OnItemEdited)
@@ -46,6 +53,20 @@ class ExpressionsList(eclib.EToggleEditListCtrl):
     def set_mainwindow(self, mw):
         self._mainw = mw
 
+    def GetSelectedExpressions(self):
+        """Get a list of selected breakpoints
+        @return: [(fname, line, expr),]
+
+        """
+        rval = list()
+        for index in self.GetSelections():
+            rval.append(self.GetRowData(index))
+        return rval
+
+    def OpenEditor(self, col, row):
+        if col == 0:
+            super(ExpressionsList, self).OpenEditor(col, row)
+    
     def OnItemEdited(self, evt):
         if evt.IsEditCancelled():
             evt.Veto()
@@ -61,11 +82,6 @@ class ExpressionsList(eclib.EToggleEditListCtrl):
         self.Parent.SetExpression(expression, enabled)
         self._data[idx] = [unicode(expression),]
         self.Evaluate(enabled, expression, idx)        
-        if expression:
-            idx = idx + 1
-            if idx == len(self._data):
-                self._data[idx] = [u""]
-                self.Append(self._data[idx] + [u""])
 
     def OnCheckItem(self, idx, enabled):
         expression, = self._data[idx]
@@ -93,8 +109,6 @@ class ExpressionsList(eclib.EToggleEditListCtrl):
         """
         if not data:
             return
-        exprText = _("Expression")
-        minLText = max(self.GetTextExtent(exprText)[0], self.GetColumnWidth(0))
         self._data = {}
         idx = 0
         for expression in data:
@@ -102,14 +116,14 @@ class ExpressionsList(eclib.EToggleEditListCtrl):
             self._data[idx] = [unicode(expression),]
             self.Evaluate(enabled, expression, idx)
             
-            minLText = max(minLText, self.GetTextExtent(expression)[0])
             self.Append(self._data[idx] + [u""])
             self.SetItemData(idx, idx)
             self.CheckItem(idx, enabled)
             idx += 1
-        self._data[idx] = [u""]        
-        self.Append(self._data[idx] + [u""])
-        self.SetColumnWidth(0, minLText)
+
+        self.SetColumnWidth(ExpressionsList.COL_EXPR, wx.LIST_AUTOSIZE)
+        exprcolwidth = max(self.GetTextExtent(ExpressionsList.COLNAME_EXPR + "          ")[0], self.GetColumnWidth(ExpressionsList.COL_EXPR))
+        self.SetColumnWidth(ExpressionsList.COL_EXPR, exprcolwidth)
 
     def fillexpressionvalue(self, res, idx):
         if not res:
