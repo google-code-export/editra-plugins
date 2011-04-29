@@ -34,9 +34,6 @@ class ExpressionsList(eclib.EToggleEditListCtrl):
     COL_EXPR = 0
     COL_VALUE = 1
     
-    COLNAME_EXPR = _("Expression")
-    COLNAME_VALUE = _("Value")
-    
     def __init__(self, parent):
         super(ExpressionsList, self).__init__(parent)
 
@@ -44,8 +41,11 @@ class ExpressionsList(eclib.EToggleEditListCtrl):
         self._data = {}
         
         # Setup
-        self.InsertColumn(ExpressionsList.COL_EXPR, ExpressionsList.COLNAME_EXPR)
-        self.InsertColumn(ExpressionsList.COL_VALUE, ExpressionsList.COLNAME_VALUE)
+        self.colname_expr = _("Expression")
+        self.colname_value = _("Value")
+    
+        self.InsertColumn(ExpressionsList.COL_EXPR, self.colname_expr)
+        self.InsertColumn(ExpressionsList.COL_VALUE, self.colname_value)
 
         # Event Handlers
         self.Bind(wx.EVT_LIST_END_LABEL_EDIT, self.OnItemEdited)
@@ -122,7 +122,7 @@ class ExpressionsList(eclib.EToggleEditListCtrl):
             idx += 1
 
         self.SetColumnWidth(ExpressionsList.COL_EXPR, wx.LIST_AUTOSIZE)
-        exprcolwidth = max(self.GetTextExtent(ExpressionsList.COLNAME_EXPR + "          ")[0], self.GetColumnWidth(ExpressionsList.COL_EXPR))
+        exprcolwidth = max(self.GetTextExtent(self.colname_expr + "          ")[0], self.GetColumnWidth(ExpressionsList.COL_EXPR))
         self.SetColumnWidth(ExpressionsList.COL_EXPR, exprcolwidth)
 
     def fillexpressionvalue(self, res, idx):

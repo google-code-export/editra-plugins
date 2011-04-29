@@ -35,17 +35,16 @@ class BreakPointsList(eclib.EToggleEditListCtrl):
     COL_LINE = 1
     COL_EXPR = 2
     
-    COLNAME_FILE = _("File")
-    COLNAME_LINE = _("Line")
-    COLNAME_EXPR = _("Expression")
-    
     def __init__(self, parent):
         super(BreakPointsList, self).__init__(parent)
 
         # Setup
-        self.InsertColumn(BreakPointsList.COL_FILE, BreakPointsList.COLNAME_FILE)
-        self.InsertColumn(BreakPointsList.COL_LINE, BreakPointsList.COLNAME_LINE)
-        self.InsertColumn(BreakPointsList.COL_EXPR, BreakPointsList.COLNAME_EXPR)
+        self.colname_file = _("File")
+        self.colname_line = _("Line")
+        self.colname_expr = _("Expression")
+        self.InsertColumn(BreakPointsList.COL_FILE, self.colname_file)
+        self.InsertColumn(BreakPointsList.COL_LINE, self.colname_line)
+        self.InsertColumn(BreakPointsList.COL_EXPR, self.colname_expr)
         self.SetCheckedBitmap(ed_marker.Breakpoint().Bitmap)
         self.SetUnCheckedBitmap(ed_marker.BreakpointDisabled().Bitmap)
 
@@ -161,7 +160,7 @@ class BreakPointsList(eclib.EToggleEditListCtrl):
         self.SetColumnWidth(BreakPointsList.COL_FILE, wx.LIST_AUTOSIZE)
         self.SetColumnWidth(BreakPointsList.COL_EXPR, wx.LIST_AUTOSIZE)
         self.SendSizeEvent()
-        filenamecolwidth = max(self.GetTextExtent(BreakPointsList.COLNAME_FILE + "          ")[0], self.GetColumnWidth(BreakPointsList.COL_FILE))
-        exprcolwidth = max(self.GetTextExtent(BreakPointsList.COLNAME_EXPR + "          ")[0], self.GetColumnWidth(BreakPointsList.COL_EXPR))
+        filenamecolwidth = max(self.GetTextExtent(self.colname_file + "          ")[0], self.GetColumnWidth(BreakPointsList.COL_FILE))
+        exprcolwidth = max(self.GetTextExtent(self.colname_expr + "          ")[0], self.GetColumnWidth(BreakPointsList.COL_EXPR))
         self.SetColumnWidth(BreakPointsList.COL_FILE, filenamecolwidth)
         self.SetColumnWidth(BreakPointsList.COL_EXPR, exprcolwidth)

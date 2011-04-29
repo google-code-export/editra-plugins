@@ -37,19 +37,19 @@ class StackFrameList(eclib.EBaseListCtrl):
     COL_LINE = 2
     COL_FUNCT = 3
     
-    COLNAME_FRAME = _("Frame")
-    COLNAME_FILE = _("File")
-    COLNAME_LINE = _("Line")
-    COLNAME_FUNCT = _("Function")
-
     def __init__(self, parent):
         super(StackFrameList, self).__init__(parent)
 
         # Setup
-        self.InsertColumn(StackFrameList.COL_FRAME, StackFrameList.COLNAME_FRAME)
-        self.InsertColumn(StackFrameList.COL_FILE, StackFrameList.COLNAME_FILE)
-        self.InsertColumn(StackFrameList.COL_LINE, StackFrameList.COLNAME_LINE)
-        self.InsertColumn(StackFrameList.COL_FUNCT, StackFrameList.COLNAME_FUNCT)
+        self.colname_frame = _("Frame")
+        self.colname_file = _("File")
+        self.colname_line = _("Line")
+        self.colname_funct = _("Function")
+
+        self.InsertColumn(StackFrameList.COL_FRAME, self.colname_frame)
+        self.InsertColumn(StackFrameList.COL_FILE, self.colname_file)
+        self.InsertColumn(StackFrameList.COL_LINE, self.colname_line)
+        self.InsertColumn(StackFrameList.COL_FUNCT, self.colname_funct)
         if wx.Platform == '__WXMAC__':
             self.SetWindowVariant(wx.WINDOW_VARIANT_SMALL)
 
@@ -119,8 +119,8 @@ class StackFrameList(eclib.EBaseListCtrl):
 
         self.SetColumnWidth(StackFrameList.COL_FILE, wx.LIST_AUTOSIZE)
         self.SetColumnWidth(StackFrameList.COL_FUNCT, wx.LIST_AUTOSIZE)
-        filenamecolwidth = max(self.GetTextExtent(StackFrameList.COLNAME_FILE + "          ")[0], self.GetColumnWidth(StackFrameList.COL_FILE))
-        functcolwidth = max(self.GetTextExtent(StackFrameList.COLNAME_FUNCT + "          ")[0], self.GetColumnWidth(StackFrameList.COL_FUNCT))
+        filenamecolwidth = max(self.GetTextExtent(self.colname_file + "          ")[0], self.GetColumnWidth(StackFrameList.COL_FILE))
+        functcolwidth = max(self.GetTextExtent(self.colname_funct + "          ")[0], self.GetColumnWidth(StackFrameList.COL_FUNCT))
         self.SetColumnWidth(StackFrameList.COL_FILE, filenamecolwidth)
         self.SetColumnWidth(StackFrameList.COL_FUNCT, functcolwidth)
         self.previndex = None
