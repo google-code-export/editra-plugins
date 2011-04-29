@@ -35,17 +35,14 @@ _ = wx.GetTranslation
 #-----------------------------------------------------------------------------#
 
 class PythonDebugger(AbstractDebugger):
-    # TODO: these need to be moved to be evaluated at run time instead of
-    #       import time
-    DEBUGGERATTACHEDTEXT = _("Debugger attached. Debuggee output starts now...\n\n")
-    DEBUGGERDETACHEDTEXT = _("")
-
     def __init__(self, variabledict, debuggerargs, programargs, 
         filename, debuggeewindow):
         super(PythonDebugger, self).__init__(variabledict, debuggerargs, 
             programargs, filename, debuggeewindow)
 
         # Attributes
+        self.debuggerattachedtext = _("Debugger attached. Debuggee output starts now...\n\n")
+        self.debuggerdetachedtext = _("")
         self.dirvarfile = variabledict.get("DIRVARFILE")
         self.rpdb2args = ["-d"]
         if not self.debuggerargs:
@@ -103,8 +100,8 @@ class PythonDebugger(AbstractDebugger):
         text += "\nDirectory Variables file: %s\n\n" % self.dirvarfile
         self.debuggeewindow.SetText(_(text))
         self.debuggeewindow.calldebugger = self.RunDebugger
-        RpdbDebugger().debuggerattachedtext = self.DEBUGGERATTACHEDTEXT
-        RpdbDebugger().debuggerdetachedtext = self.DEBUGGERDETACHEDTEXT
+        RpdbDebugger().debuggerattachedtext = self.debuggerattachedtext
+        RpdbDebugger().debuggerdetachedtext = self.debuggerdetachedtext
         self.processcreator = AsyncProcessCreator(self.debuggeewindow, self.UpdateOutput, "PyDbg", parentPath, rpdb2_cmd, self.pythonpath)
         self.processcreator.start()
         util.Log("[PyDbg][info] Rpdb2 command running")

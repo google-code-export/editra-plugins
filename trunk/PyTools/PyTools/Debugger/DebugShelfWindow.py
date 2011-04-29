@@ -50,11 +50,6 @@ class DebugShelfWindow(BaseShelfWindow):
         synglob.ID_LANG_PYTHON: PythonDebugger
     }
 
-    DISABLINGPYLINTTEXT = _("Disabling Pylint Autorun during Debug.\n")
-    ENABLINGPYLINTTEXT = _("Reenabling Pylint Autorun.\n")
-    DEBUGGERATTACHEDTEXTREMOTE = _("Debugger attached.\n\n")
-    DEBUGGERDETACHEDTEXT = _("\n\nDebugger detached.")
-    
     def __init__(self, parent):
         """Initialize the window"""
         super(DebugShelfWindow, self).__init__(parent)
@@ -97,6 +92,11 @@ class DebugShelfWindow(BaseShelfWindow):
         self.layout("Remote", self.OnRemote, self.OnJobTimer)
 
         # Attributes
+        self.disablingpylinttext = _("Disabling Pylint Autorun during Debug.\n")
+        self.enablingpylinttext = _("Reenabling Pylint Autorun.\n")
+        self.debuggerattachedtextremote = _("Debugger attached.\n\n")
+        self.debuggerdetachedtext = _("\n\nDebugger detached.")
+        
         MessageHandler().debugeditorupdate = self.OnEditorUpdate
         self._debugger = None
         self._debugrun = False
@@ -288,7 +288,7 @@ class DebugShelfWindow(BaseShelfWindow):
         config = Profile_Get(ToolConfig.PYTOOL_CONFIG, default=dict())
         config[ToolConfig.TLC_LINT_AUTORUN] = True
         Profile_Set(ToolConfig.PYTOOL_CONFIG, config)
-        self._listCtrl.AppendUpdate(self.ENABLINGPYLINTTEXT)
+        self._listCtrl.AppendUpdate(self.enablingpylinttext)
     
     def _setdebuggerdefaults(self):
         RpdbDebugger().set_default_password()
@@ -310,7 +310,7 @@ class DebugShelfWindow(BaseShelfWindow):
         if mode:
             config[ToolConfig.TLC_LINT_AUTORUN] = False
             Profile_Set(ToolConfig.PYTOOL_CONFIG, config)
-            self._listCtrl.AppendUpdate(self.DISABLINGPYLINTTEXT)
+            self._listCtrl.AppendUpdate(self.disablingpylinttext)
             self._listCtrl.restoreautorun = self.restorepylint_autorun
         else:
             self._listCtrl.restoreautorun = lambda:None
@@ -381,8 +381,8 @@ class DebugShelfWindow(BaseShelfWindow):
             self._remotetext = _("Debugging remote debuggee %s\n\n" % server.m_filename)
             self._listCtrl.SetText(self._remotetext)
             self._listCtrl.Start(100)
-            RpdbDebugger().debuggerattachedtext = self.DEBUGGERATTACHEDTEXTREMOTE
-            RpdbDebugger().debuggerdetachedtext = self.DEBUGGERDETACHEDTEXT
+            RpdbDebugger().debuggerattachedtext = self.debuggerattachedtextremote
+            RpdbDebugger().debuggerdetachedtext = self.debuggerdetachedtext
             dpc = DummyProcessCreator(server.m_rid, self.UpdateOutput)
             dpc.restorepath = lambda:None
             self._debugger.processcreator = dpc
