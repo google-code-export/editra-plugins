@@ -44,6 +44,8 @@ class StackFrameList(eclib.EBaseListCtrl):
         self.InsertColumn(StackFrameList.COL_FILE, _("File"))
         self.InsertColumn(StackFrameList.COL_LINE, _("Line"))
         self.InsertColumn(StackFrameList.COL_FUNCT, _("Function"))
+        if wx.Platform == '__WXMAC__':
+            self.SetWindowVariant(wx.WINDOW_VARIANT_SMALL)
 
         # Attributes
         self.previndex = None
