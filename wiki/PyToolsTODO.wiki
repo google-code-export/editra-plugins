@@ -17,12 +17,10 @@ This page contains a list of open TODO issues for the listed version of the PyTo
   * Add handlers for EDMSG_DSP_FONT in order to update and set the user specified UI font for subwindows and controls.
 
 === !PyVariable ===
-  * Make columns use whole width
 
 === !PyBreakPoint ===
   * Try to find some better icons to use for the Add/Del/Delete all
   * Make column headers sortable (at least for the 'file' column)
-  * Make columns use whole width
 
 === !PyStackThread ===
 
