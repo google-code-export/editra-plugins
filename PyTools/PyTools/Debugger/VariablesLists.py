@@ -64,6 +64,8 @@ class VariablesList(wx.gizmos.TreeListCtrl):
         self.AddColumn(_("Name"))
         self.AddColumn(_("Repr"))
         self.AddColumn(_("Type"))
+        if wx.Platform == '__WXMAC__':
+            self.SetWindowVariant(wx.WINDOW_VARIANT_SMALL)
         self.SetMainColumn(0) 
         self.SetLineSpacing(0)
         ## Setup ImageList
