@@ -15,6 +15,8 @@ This page contains a list of open TODO issues for the listed version of the PyTo
   * Change configuration to allow for multiple paths to different installed pythons to be configured and chosen via a Choice control.
   * Should ghost buttons until fully detached when clicking Stop button.
   * Add handlers for EDMSG_DSP_FONT in order to update and set the user specified UI font for subwindows and controls.
+  * Ensure all strings shown in interface are translatable
+  * Check all message handlers to see if they can be made to return any faster. (i.e delay handling until on idle or after timer event for messages that can come in quick succession (page change, file open, save).
 
 === !PyVariable ===
 
@@ -28,7 +30,6 @@ This page contains a list of open TODO issues for the listed version of the PyTo
 === Code Analysis (PyLint) ===
   * Make ListCtrl columns sortable in the [PyAnalysis PyLint] output window.
   * Store references to marker objects and use their Handle property to get the current line number instead of line numbers when possible in code analysis tool, since line numbers can change while editing the file. Note: similar functionality will likely also be needed by the debugger.
-  * Make rest of interface strings translatable in the code analysis tool.
 
 === !PyFind ===
   * Test and handle additional import statement formats more accurately.
