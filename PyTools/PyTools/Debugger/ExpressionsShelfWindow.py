@@ -41,26 +41,35 @@ class ExpressionsShelfWindow(BaseShelfWindow):
         """Initialize the window"""
         super(ExpressionsShelfWindow, self).__init__(parent)
 
-        # Attributes
+        # setup
         ctrlbar = self.setup(ExpressionsList(self))
+        self.addbtn = self.AddPlateButton(u"", ed_glob.ID_ADD, wx.ALIGN_LEFT)
+        self.addbtn.ToolTip = wx.ToolTip(_("Set Expression"))
+        self.delbtn = self.AddPlateButton(u"", ed_glob.ID_REMOVE, wx.ALIGN_LEFT)
+        self.delbtn.ToolTip = wx.ToolTip(_("Delete Expression"))
+        self.delallbtn = self.AddPlateButton(u"", ed_glob.ID_DELETE, wx.ALIGN_LEFT)
+        self.delallbtn.ToolTip = wx.ToolTip(_("Delete All Expressions"))
         ctrlbar.AddStretchSpacer()
-        self.ignoredwarnings = {}
-        self.executebtn = self.AddPlateButton(_("Execute"), ed_glob.ID_BIN_FILE, wx.ALIGN_LEFT)
-        self.executebtn.ToolTip = wx.ToolTip(_("Execute"))
-        self.expressions = ToolConfig.GetConfigValue(ToolConfig.TLC_EXPRESSIONS)
-
-        self.layout("Clear", self.OnClear)
-        bmp = wx.ArtProvider.GetBitmap(str(ed_glob.ID_DELETE), wx.ART_MENU)
+        self.layout("Execute", self.OnExecute)
+        bmp = wx.ArtProvider.GetBitmap(str(ed_glob.ID_BIN_FILE), wx.ART_MENU)
         self.taskbtn.SetBitmap(bmp)
-        self._listCtrl.PopulateRows(self.expressions)
+        self.taskbtn.ToolTip = wx.ToolTip(_("Execute"))
 
+        # Attributes
+        self.expressions = ToolConfig.GetConfigValue(ToolConfig.TLC_EXPRESSIONS)
+        self.ignoredwarnings = {}
+        
         # Debugger Attributes
         RpdbDebugger().restoreexpressions = self.RestoreExpressions
         RpdbDebugger().saveandrestoreexpressions = self.SaveAndRestoreExpressions
         RpdbDebugger().clearexpressionvalues = self._listCtrl.clearexpressionvalues
 
+        self._listCtrl.PopulateRows(self.expressions)
+
         # Event Handlers
-        self.Bind(wx.EVT_BUTTON, self.OnExecute, self.executebtn)
+        self.Bind(wx.EVT_BUTTON, self.OnButton, self.addbtn)
+        self.Bind(wx.EVT_BUTTON, self.OnButton, self.delbtn)
+        self.Bind(wx.EVT_BUTTON, self.OnClear, self.delallbtn)
 
     def Unsubscription(self):
         """Cleanup callbacks when window is destroyed"""
@@ -100,6 +109,20 @@ class ExpressionsShelfWindow(BaseShelfWindow):
     def SaveAndRestoreExpressions(self):
         self.SaveExpressions()
         self.RestoreExpressions()
+
+    def OnButton(self, event):
+        """Handle control bar button clicks"""
+        eobj = event.GetEventObject()
+        if eobj is self.addbtn:
+            self.SetExpression("", False)
+            self.RestoreExpressions()
+        elif eobj is self.delbtn:
+            for item in self._listCtrl.GetSelectedExpressions():
+                if len(item) > 1:
+                    self.DeleteExpression(item[0])
+                    self.RestoreExpressions()
+        else:
+            event.Skip()
 
     def OnClear(self, evt):
         """Clear the expressions"""

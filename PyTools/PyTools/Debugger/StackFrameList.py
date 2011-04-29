@@ -36,14 +36,20 @@ class StackFrameList(eclib.EBaseListCtrl):
     COL_FILE = 1
     COL_LINE = 2
     COL_FUNCT = 3
+    
+    COLNAME_FRAME = _("Frame")
+    COLNAME_FILE = _("File")
+    COLNAME_LINE = _("Line")
+    COLNAME_FUNCT = _("Function")
+
     def __init__(self, parent):
         super(StackFrameList, self).__init__(parent)
 
         # Setup
-        self.InsertColumn(StackFrameList.COL_FRAME, _("Frame"))
-        self.InsertColumn(StackFrameList.COL_FILE, _("File"))
-        self.InsertColumn(StackFrameList.COL_LINE, _("Line"))
-        self.InsertColumn(StackFrameList.COL_FUNCT, _("Function"))
+        self.InsertColumn(StackFrameList.COL_FRAME, StackFrameList.COLNAME_FRAME)
+        self.InsertColumn(StackFrameList.COL_FILE, StackFrameList.COLNAME_FILE)
+        self.InsertColumn(StackFrameList.COL_LINE, StackFrameList.COLNAME_LINE)
+        self.InsertColumn(StackFrameList.COL_FUNCT, StackFrameList.COLNAME_FUNCT)
         if wx.Platform == '__WXMAC__':
             self.SetWindowVariant(wx.WINDOW_VARIANT_SMALL)
 
@@ -93,11 +99,6 @@ class StackFrameList(eclib.EBaseListCtrl):
         @param data: dictionary of stack info
 
         """
-        fileText = _("File")
-        funcText = _("Function")
-        minLFile = max(self.GetTextExtent(fileText)[0], self.GetColumnWidth(1))
-        minLFunc = max(self.GetTextExtent(funcText)[0], self.GetColumnWidth(3))
-
         idx = 0
         while idx < len(data):
             frameinfo = data[-(1 + idx)]
@@ -106,11 +107,7 @@ class StackFrameList(eclib.EBaseListCtrl):
             lineno = frameinfo[1]
             function = frameinfo[2]
 
-            efilename = unicode(filename)
-            efunction = unicode(function)
-            minLFile = max(minLFile, self.GetTextExtent(efilename)[0])
-            minLFunc = max(minLFunc, self.GetTextExtent(efunction)[0])
-            self.Append((unicode(idx), efilename, unicode(lineno), efunction))
+            self.Append((unicode(idx), unicode(filename), unicode(lineno), unicode(function)))
             if idx < len(data) - 3:
                 enable = True
             elif os.path.basename(filename) == "rpdb2.py":
@@ -120,7 +117,11 @@ class StackFrameList(eclib.EBaseListCtrl):
             self.EnableRow(idx, enable=enable)
             idx += 1
 
-        self.SetColumnWidth(StackFrameList.COL_FILE, minLFile)
-        self.SetColumnWidth(StackFrameList.COL_FUNCT, minLFunc)
+        self.SetColumnWidth(StackFrameList.COL_FILE, wx.LIST_AUTOSIZE)
+        self.SetColumnWidth(StackFrameList.COL_FUNCT, wx.LIST_AUTOSIZE)
+        filenamecolwidth = max(self.GetTextExtent(StackFrameList.COLNAME_FILE + "          ")[0], self.GetColumnWidth(StackFrameList.COL_FILE))
+        functcolwidth = max(self.GetTextExtent(StackFrameList.COLNAME_FUNCT + "          ")[0], self.GetColumnWidth(StackFrameList.COL_FUNCT))
+        self.SetColumnWidth(StackFrameList.COL_FILE, filenamecolwidth)
+        self.SetColumnWidth(StackFrameList.COL_FUNCT, functcolwidth)
         self.previndex = None
         self.Select(0)

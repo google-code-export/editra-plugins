@@ -174,6 +174,7 @@ class VariablesShelfWindow(BaseShelfWindow):
         """Update ControlBar based on current selected page"""
         cpage = self._nb.GetPage(evt.GetSelection())
         self.filterlevel.SetSelection(cpage.FilterLevel)
+        cpage.setcolumnwidths()
 
     def OnSetFilterLevel(self, evt):
         """Update the filter level for the current display"""
