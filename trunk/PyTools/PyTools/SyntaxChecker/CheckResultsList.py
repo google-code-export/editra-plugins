@@ -155,14 +155,17 @@ class CheckResultsList(eclib.EBaseListCtrl):
         minLText = max(self.GetTextExtent(errorText)[0], self.GetColumnWidth(2))
         for row in data.GetOrderedData():
             assert len(row) == 3
-            minLType = max(minLType, self.GetTextExtent(row[0])[0])
+            mtype = row[0]
+            dspmsg = LintData.GetDisplayString(mtype)
+            minLType = max(minLType, self.GetTextExtent(dspmsg)[0])
             minLText = max(minLText, self.GetTextExtent(row[2])[0])
+            row[0] = dspmsg
             self.Append(row)
-            if self.editor: # TODO: ensure editor is set
+            if self.editor:
                 try:
-                    if row[0] == 'Error':
+                    if mtype == 'Error':
                         mark = ed_marker.LintMarkerError()
-                    elif row[0] == 'Warning':
+                    elif mtype == 'Warning':
                         mark = ed_marker.LintMarkerWarning()
                     else:
                         mark = ed_marker.LintMarker()
@@ -203,9 +206,9 @@ class LintData(object):
         for key in sorted(self._data.keys()):
             for data in self._data[key]:
                 if isinstance(key, basestring):
-                    rdata.insert(0, (data[0], unicode(key), data[1]))
+                    rdata.insert(0, [data[0], unicode(key), data[1]])
                 else:
-                    rdata.append((data[0], unicode(key), data[1]))
+                    rdata.append([data[0], unicode(key), data[1]])
         return rdata
 
     def GetLineData(self, line):
@@ -215,3 +218,12 @@ class LintData(object):
 
         """
         return self._data.get(line, None)
+
+    @staticmethod
+    def GetDisplayString(mtype):
+        """Get the display string for the given mesage type"""
+        msgmap = { 'Error' : _("Error"),
+                   'Warning' : _("Warning"),
+                   'Convention' : _("Convention"),
+                   'Refactor' : _("Refactor") }
+        return msgmap.get(mtype, _("Warning"))
