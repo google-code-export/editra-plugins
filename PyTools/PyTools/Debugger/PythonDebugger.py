@@ -102,6 +102,7 @@ class PythonDebugger(AbstractDebugger):
         self.debuggeewindow.calldebugger = self.RunDebugger
         RpdbDebugger().debuggerattachedtext = self.debuggerattachedtext
         RpdbDebugger().debuggerdetachedtext = self.debuggerdetachedtext
+        RpdbDebugger().remoteprocess = False
         self.processcreator = AsyncProcessCreator(self.debuggeewindow, self.UpdateOutput, "PyDbg", parentPath, rpdb2_cmd, self.pythonpath)
         self.processcreator.start()
         util.Log("[PyDbg][info] Rpdb2 command running")
