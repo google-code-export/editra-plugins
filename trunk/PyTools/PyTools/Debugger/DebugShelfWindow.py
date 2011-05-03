@@ -126,8 +126,10 @@ class DebugShelfWindow(BaseShelfWindow):
 
     def Unsubscription(self):
         """Cleanup message handlers on Destroy"""
-        if RpdbDebugger().attached:
-            RpdbDebugger().do_detach()
+        RpdbDebugger().abortattach = True
+        processcreator = RpdbDebugger().processcreator
+        if processcreator:
+            processcreator.Abort()
         RpdbDebugger().debugbuttonsupdate = lambda:None
         RpdbDebugger().disabledebugbuttons = lambda:None
         MessageHandler().debugeditorupdate = lambda x,y,z:None
@@ -383,7 +385,8 @@ class DebugShelfWindow(BaseShelfWindow):
             self._listCtrl.Start(100)
             RpdbDebugger().debuggerattachedtext = self.debuggerattachedtextremote
             RpdbDebugger().debuggerdetachedtext = self.debuggerdetachedtext
-            dpc = DummyProcessCreator(server.m_rid, self.UpdateOutput)
+            RpdbDebugger().remoteprocess = True
+            dpc = DummyProcessCreator(server.m_rid, self.UpdateOutput, RpdbDebugger().do_detach)
             dpc.restorepath = lambda:None
             self._debugger.processcreator = dpc
             self._setdebuggeroptions()

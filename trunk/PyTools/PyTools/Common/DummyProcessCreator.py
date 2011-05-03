@@ -12,10 +12,11 @@ __svnid__ = "$Id: DummyProcessCreator.py 1174 2011-03-26 13:23:04Z rans@email.co
 __revision__ = "$Revision: 1174 $"
 
 class DummyProcessCreator(object):
-    def __init__(self, pid, textfn):
+    def __init__(self, pid, textfn, abortfn):
         super(DummyProcessCreator, self).__init__()
         self.pid = pid
         self.AddText = textfn
+        self.Abort = abortfn
 
     def GetPID(self):
         return self.pid
