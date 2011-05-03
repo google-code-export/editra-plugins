@@ -127,7 +127,6 @@ class RpdbDebugger(object):
         self.saveandrestoreexpressions()
         self.saveandrestorebreakpoints()
         self.updateanalyze()
-        self.debugbuttonsupdate()
         
     def isrpdbbreakpoint(self, filepath, lineno):
         if filepath.find("rpdb2.py") == -1:
