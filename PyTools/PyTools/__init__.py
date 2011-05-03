@@ -54,6 +54,10 @@ class PyLint(BaseShelfPlugin):
     def __init__(self, pluginmgr):
         super(PyLint, self).__init__(pluginmgr, "PyLint", LintShelfWindow)
 
+    def AllowMultiple(self):
+        """Plugin allows multiple instances"""
+        return True
+
     def InstallComponents(self, parent):
         """Initialize and install"""
         setattr(self, '_installed', True)
@@ -70,6 +74,10 @@ class PyFind(BaseShelfPlugin):
     """Script Launcher and output viewer"""
     def __init__(self, pluginmgr):
         super(PyFind, self).__init__(pluginmgr, "PyFind", FindShelfWindow)
+
+    def AllowMultiple(self):
+        """Plugin allows multiple instances"""
+        return True
 
     def GetBitmap(self):
         """Get the tab bitmap

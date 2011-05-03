@@ -53,7 +53,7 @@ class BaseShelfPlugin(plugin.Plugin):
 
     def AllowMultiple(self):
         """Plugin allows multiple instances"""
-        return True
+        return False
 
     def CreateItem(self, parent):
         """Create a panel"""
