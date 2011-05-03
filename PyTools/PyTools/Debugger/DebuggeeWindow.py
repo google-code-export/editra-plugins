@@ -21,6 +21,7 @@ import eclib
 
 # Local Imports
 from PyTools.Common.PyToolsUtils import PyToolsUtils
+from PyTools.Debugger.RpdbDebugger import RpdbDebugger
 
 # Globals
 _ = wx.GetTranslation
@@ -63,4 +64,5 @@ class DebuggeeWindow(eclib.OutputBuffer,
         self.AppendUpdate(self.DEBUGGEEFINISHEDTEXT)
         self.restoreautorun()
         self.Stop()
+        RpdbDebugger().debugbuttonsupdate()
         
