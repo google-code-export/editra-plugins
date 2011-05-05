@@ -96,6 +96,7 @@ class DebugShelfWindow(BaseShelfWindow):
         self.enablingpylinttext = _("Reenabling Pylint Autorun.\n")
         self.debuggerattachedtextremote = _("Debugger attached.\n\n")
         self.debuggerdetachedtext = _("\n\nDebugger detached.")
+        self.emptytext = _("")
         
         MessageHandler().debugeditorupdate = self.OnEditorUpdate
         self._debugger = None
@@ -349,7 +350,9 @@ class DebugShelfWindow(BaseShelfWindow):
 
     def _detach(self):
         """Detach debugger"""
+        RpdbDebugger().debuggerdetachedtext = self.emptytext
         RpdbDebugger().do_detach()
+        self._listCtrl.AppendUpdate(self.debuggerdetachedtext)
         self._listCtrl.Stop()
 
     def OnStepIn(self, event):
@@ -386,7 +389,7 @@ class DebugShelfWindow(BaseShelfWindow):
             RpdbDebugger().debuggerattachedtext = self.debuggerattachedtextremote
             RpdbDebugger().debuggerdetachedtext = self.debuggerdetachedtext
             RpdbDebugger().remoteprocess = True
-            dpc = DummyProcessCreator(server.m_rid, self.UpdateOutput, RpdbDebugger().do_detach)
+            dpc = DummyProcessCreator(server.m_rid, self.UpdateOutput, lambda:None)
             dpc.restorepath = lambda:None
             self._debugger.processcreator = dpc
             self._setdebuggeroptions()
