@@ -386,6 +386,7 @@ class DebugShelfWindow(BaseShelfWindow):
             self._remotetext = _("Debugging remote debuggee %s\n\n" % server.m_filename)
             self._listCtrl.SetText(self._remotetext)
             self._listCtrl.Start(100)
+            RpdbDebugger().do_abort()
             RpdbDebugger().debuggerattachedtext = self.debuggerattachedtextremote
             RpdbDebugger().debuggerdetachedtext = self.debuggerdetachedtext
             RpdbDebugger().remoteprocess = True
