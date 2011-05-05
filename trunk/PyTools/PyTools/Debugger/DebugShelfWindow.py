@@ -398,5 +398,5 @@ class DebugShelfWindow(BaseShelfWindow):
 
     def UpdateOutput(self, txt):
         """Check to prevent PyDeadObjectErrors"""
-        if self._listCtrl:
+        if self and self._listCtrl:
             self._listCtrl.AppendUpdate(txt)
