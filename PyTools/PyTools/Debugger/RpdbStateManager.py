@@ -55,7 +55,7 @@ class RpdbStateManager(object):
             if self.rpdb2debugger.breakpoints_installed:
                 # clear all debugging stuff as we have finished
                 self.rpdb2debugger.processcreator.AddText(self.rpdb2debugger.debuggerdetachedtext)
-                if self.rpdb2debugger.remoteprocess:
+                if self.rpdb2debugger.remoteprocess or self.rpdb2debugger.abortattach:
                     self.rpdb2debugger.debugbuttonsupdate()
                 else:
                     self.rpdb2debugger.disabledebugbuttons()
