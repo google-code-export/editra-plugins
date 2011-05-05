@@ -61,7 +61,8 @@ class RpdbStackFrameManager(object):
 
 
     def do_set_position(self, index):
-        if index is None:
+        if self.rpdb2debugger.abortattach:
+            self.rpdb2debugger.do_abort()
             return
         s = self.rpdb2debugger.curstack[rpdb2.DICT_KEY_STACK]
         e = s[-(1 + index)]

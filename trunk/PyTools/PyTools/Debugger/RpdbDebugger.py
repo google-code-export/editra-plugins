@@ -140,21 +140,14 @@ class RpdbDebugger(object):
         if not bpinfile.get(lineno):
             return True
         return False
-
+    
     def attach(self, processcreator):
         if not processcreator:
             return
+        self.processcreator = processcreator
         pid = str(processcreator.GetPID())
         tries = 0
         ex = None
-        
-        def abortattaching():
-            self.attached = False
-            self.analyzing = False
-            self.broken = False
-            self.debugbuttonsupdate()
-            processcreator.Abort()
-            self.abortattach = False
         
         while tries != 5:
             sleep(1)
@@ -162,17 +155,16 @@ class RpdbDebugger(object):
             ex = None
             try:
                 if self.abortattach:
-                    abortattaching()
+                    self.do_abort()
                     break
                 self.sessionmanager.attach(pid, encoding = rpdb2.detect_locale())
                 self.attached = True
-                self.processcreator = processcreator
                 break
             except Exception, ex:
                 tries = tries + 1
         ed_msg.PostMessage(ed_msg.EDMSG_PROGRESS_SHOW, (self.mainwindow.GetId(), False))
         if ex:
-            abortattaching()
+            self.do_abort()
             err = rpdb2.g_error_mapping.get(type(ex), repr(ex))
             err = "Failed to attach. Error: %s" % err
             util.Log("[PyDbg][err] %s" % err)
@@ -212,6 +204,7 @@ class RpdbDebugger(object):
         return None
 
     def do_abort(self):
+        self.do_detach()
         if not self.processcreator:
             return
         self.attached = False
@@ -220,6 +213,7 @@ class RpdbDebugger(object):
         self.debugbuttonsupdate()
         self.clearstepmarker()
         self.processcreator.Abort()
+        self.abortattach = False
         
     def do_detach(self):
         self.attached_callsessionmanagerfn(self.sessionmanager.detach)
