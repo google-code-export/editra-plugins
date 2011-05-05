@@ -205,6 +205,7 @@ class RpdbDebugger(object):
 
     def do_abort(self):
         self.do_detach()
+        self.abortattach = False
         if not self.processcreator:
             return
         self.attached = False

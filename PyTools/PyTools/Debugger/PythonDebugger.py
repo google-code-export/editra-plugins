@@ -100,6 +100,7 @@ class PythonDebugger(AbstractDebugger):
         text += "\nDirectory Variables file: %s\n\n" % self.dirvarfile
         self.debuggeewindow.SetText(_(text))
         self.debuggeewindow.calldebugger = self.RunDebugger
+        RpdbDebugger().do_abort()
         RpdbDebugger().debuggerattachedtext = self.debuggerattachedtext
         RpdbDebugger().debuggerdetachedtext = self.debuggerdetachedtext
         RpdbDebugger().remoteprocess = False
