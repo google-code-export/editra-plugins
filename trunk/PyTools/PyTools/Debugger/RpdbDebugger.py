@@ -213,7 +213,6 @@ class RpdbDebugger(object):
         self.debugbuttonsupdate()
         self.clearstepmarker()
         self.processcreator.Abort()
-        self.abortattach = False
         
     def do_detach(self):
         self.attached_callsessionmanagerfn(self.sessionmanager.detach)
