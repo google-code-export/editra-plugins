@@ -15,7 +15,7 @@ This page contains a list of open TODO issues for the listed version of the PyTo
   * Change configuration to allow for multiple paths to different installed pythons to be configured and chosen via a Choice control.
   * Add handlers for EDMSG_DSP_FONT in order to update and set the user specified UI font for subwindows and controls.
   * Ensure all strings shown in interface are translatable (STILL RELEVANT?)
-  * Check all message handlers to see if they can be made to return any faster. (i.e delay handling until on idle or after timer event for messages that can come in quick succession (page change, file open, save).
+  * Check all message handlers to see if they can be made to return any faster. (i.e delay handling until on idle or after timer event for messages that can come in quick succession (page change, file open, save). (USES Threading.Timer - IS THIS OK?)
 
 === !PyVariable ===
 
