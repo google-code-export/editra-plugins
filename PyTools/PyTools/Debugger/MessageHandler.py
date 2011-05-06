@@ -16,6 +16,7 @@ __revision__ = "$Revision$"
 # Imports
 import os.path
 import wx
+import threading
 
 # Editra Libraries
 import util
@@ -49,7 +50,13 @@ class MessageHandler(object):
         self.contextmenus = {1:(True, ID_ON_RUNTOLINE, _("Run To Line"), self.OnRunToLine), 
                              2:(True, ID_ON_JUMP, _("Jump"), self.OnJump)}
         self.debugeditorupdate = lambda x,y,z:None
-
+        
+        class tmpjobtimer(object):
+            @staticmethod
+            def cancel():
+                pass
+        self._jobtimer = tmpjobtimer
+        
         # Setup debugger hooks
         rpdbdebugger = RpdbDebugger() # singleton don't keep ref
         rpdbdebugger.conflictingmodules = self.ConflictingModules
@@ -73,6 +80,10 @@ class MessageHandler(object):
     def mainwindow(self):
         mw = wx.GetApp().GetActiveWindow() # Gets main window if one created
         return mw
+
+    def _StopTimer(self):
+        if self._jobtimer.IsRunning():
+            self._jobtimer.Stop()
 
     def ConflictingModules(self, moduleslist):
         dlg = wx.MessageDialog(self, 
@@ -109,22 +120,28 @@ class MessageHandler(object):
         RpdbDebugger().saveandrestorebreakpoints()
         self.RestoreStepMarker(editor)
 
+    def _starttimer(self, editor):
+        self._jobtimer.cancel()
+        self._jobtimer = threading.Timer(0.25, self.UpdateForEditor, [editor])
+        # Start job timer
+        self._jobtimer.start()
+    
     def OnPageChanged(self, msg):
         """ Notebook tab was changed """
         notebook, pg_num = msg.GetData()
         editor = notebook.GetPage(pg_num)
-        self.UpdateForEditor(editor)
+        self._starttimer(editor)
 
     def OnFileLoad(self, msg):
         """Load File message"""
         editor = PyToolsUtils.GetEditorForFile(self.mainwindow, msg.GetData())
-        self.UpdateForEditor(editor)
+        self._starttimer(editor)
 
     def OnFileSave(self, msg):
         """Load File message"""
         filename, tmp = msg.GetData()
         editor = PyToolsUtils.GetEditorForFile(self.mainwindow, filename)
-        self.UpdateForEditor(editor)
+        self._starttimer(editor)
 
     def AddMenuItem(self, pos, reqattach, wxid, menutitle, menufncallback):
         self.contextmenus[pos] = (reqattach, wxid, menutitle, menufncallback)
