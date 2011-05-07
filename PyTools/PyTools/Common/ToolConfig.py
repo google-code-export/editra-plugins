@@ -16,6 +16,7 @@ __revision__ = "$Revision$"
 #-----------------------------------------------------------------------------#
 # Imports
 import wx
+import os.path
 
 # Editra Libraries
 from profiler import Profile_Get, Profile_Set
@@ -30,6 +31,7 @@ from PyTools.Debugger.RpdbDebugger import RpdbDebugger
 # Configuration Keys
 PYTOOL_CONFIG = "PyTool.Config"
 TLC_PYTHON_PATH = "PythonPath"
+TLC_ALL_PYTHON_PATHS = "AllPythonPaths"
 TLC_COMPILE_ON_SAVE = "CheckCompileOnSave"
 TLC_TRAP_EXCEPTIONS = "TrapExceptions"
 TLC_SYNCHRONICITY = "Synchronicity"
@@ -118,32 +120,58 @@ class GeneralConfigPanel(wx.Panel):
         super(GeneralConfigPanel, self).__init__(parent)
 
         # Attributes
-        self._python_path_pk = None
+        self._python_path_fd = None
+        self._python_path_combo = None
+        self._textentry = None
         self._check_on_save_cb = None
+        self._allpythonchoices = []
+        self._combocurrent_selection = 0
+        self._python_path_index = None
+        self._add_new_python_path = _("New")
 
         # Setup
         self.__DoLayout()
 
         # Event Handlers
         self.Bind(wx.EVT_CHECKBOX, self.OnCheckBox, self._check_on_save_cb)
-        self.Bind(wx.EVT_FILEPICKER_CHANGED, self.OnPythonPathChanged, self._python_path_pk)
+        self.Bind(wx.EVT_CHOICE, self.OnComboSelect, self._python_path_combo)
+        self.Bind(wx.EVT_SEARCHCTRL_SEARCH_BTN, self.OnShowFileDialog, self._textentry)
+        self.Bind(wx.EVT_SEARCHCTRL_CANCEL_BTN, self.OnCancelText, self._textentry)
 
     def __DoLayout(self):
         sizer = wx.BoxSizer(wx.VERTICAL)
+        sizer.Add(wx.StaticText(self, label=_("Python Path:")),
+                   0, wx.ALL, 5)
         config = Profile_Get(PYTOOL_CONFIG, default=dict())
         pythonpath = config.get(TLC_PYTHON_PATH, None)
         if not pythonpath:
             pythonpath = PyToolsUtils.GetDefaultPython()
-        self._python_path_pk = wx.FilePickerCtrl(self, path=pythonpath,
-                                                 style=wx.FLP_USE_TEXTCTRL|\
-                                                       wx.FLP_CHANGE_DIR|\
-                                                       wx.FLP_FILE_MUST_EXIST)
-        self._python_path_pk.SetPickerCtrlGrowable(True)
-        self._python_path_pk.SetToolTipString(_("Path to python executable"))
+        self._allpythonchoices = config.get(TLC_ALL_PYTHON_PATHS, [])
+        if pythonpath:
+            pythonpath = os.path.normcase(pythonpath)
+            config[TLC_PYTHON_PATH] = pythonpath
+            if not pythonpath in self._allpythonchoices:
+                self._allpythonchoices.append(pythonpath)        
+        config[TLC_ALL_PYTHON_PATHS] = self._allpythonchoices[:]
+        Profile_Set(PYTOOL_CONFIG, config)
         hsizer = wx.BoxSizer(wx.HORIZONTAL)
-        hsizer.Add(wx.StaticText(self, label=_("Python Path:")),
+        pythonchoices = range(0, len(self._allpythonchoices))
+        pythonchoices = [unicode(i) for i in pythonchoices]
+        pythonchoices.append(self._add_new_python_path)
+        self._python_path_combo = wx.Choice(self, choices=pythonchoices)
+        try:
+            self._combocurrent_selection = self._allpythonchoices.index(pythonpath)
+        except ValueError:
+            pass
+        self._python_path_combo.SetStringSelection(unicode(self._combocurrent_selection))
+        self._textentry = eclib.CommandEntryBase(self, style=wx.TE_PROCESS_ENTER)
+        self._textentry.SetDescriptiveText(u"")
+        self._textentry.SetValue(self._allpythonchoices[self._combocurrent_selection])
+        self._textentry.ShowSearchButton(True)
+        self._textentry.ShowCancelButton(True)
+        hsizer.Add(self._python_path_combo,
                    0, wx.ALIGN_CENTER_VERTICAL)
-        hsizer.Add(self._python_path_pk, 1, wx.EXPAND|wx.ALL, 3)
+        hsizer.Add(self._textentry, 1, wx.EXPAND|wx.ALL, 3)
         sizer.Add(hsizer, 0, wx.EXPAND|wx.ALL, 8)
         self._check_on_save_cb = wx.CheckBox(self, label=_("Check for syntax errors on save"))
         self._check_on_save_cb.ToolTip = wx.ToolTip(_("Mark syntax errors in buffer after save"))
@@ -159,13 +187,70 @@ class GeneralConfigPanel(wx.Panel):
             config[TLC_COMPILE_ON_SAVE] = e_obj.GetValue()
             Profile_Set(PYTOOL_CONFIG, config)
 
-    def OnPythonPathChanged(self, event):
-        """Update the configured pylint path"""
-        path = self._python_path_pk.GetPath()
-        if path and os.path.exists(path):
-            config = Profile_Get(PYTOOL_CONFIG, default=dict())
+    def OnComboSelect(self, event):
+        """Handle change of combo choice"""
+        new_selection = self._python_path_combo.GetSelection()
+        if new_selection == self._combocurrent_selection:
+            return
+        self._combocurrent_selection = new_selection
+        if new_selection == len(self._allpythonchoices):
+            self.OnShowFileDialog(event)
+            return            
+        path = self._allpythonchoices[new_selection]
+        config = Profile_Get(PYTOOL_CONFIG, default=dict())
+        config[TLC_PYTHON_PATH] = path
+        Profile_Set(PYTOOL_CONFIG, config)
+        self._textentry.SetValue(path)
+
+    def OnShowFileDialog(self, event):
+        """Show file dialog"""
+        if self._combocurrent_selection == len(self._allpythonchoices):
+            path = ""
+        else:
+            path = self._allpythonchoices[self._combocurrent_selection]
+        dlg = wx.FileDialog(self, _("Path to python executable"), path, "", "*.*", wx.OPEN | wx.FD_CHANGE_DIR)
+        if dlg.ShowModal() == wx.ID_OK:
+            path = dlg.GetPath()
+            if path and os.path.exists(path):
+                path = os.path.normcase(path)
+                config = Profile_Get(PYTOOL_CONFIG, default=dict())
+                self._textentry.SetValue(path)
+                config[TLC_PYTHON_PATH] = path
+                if self._combocurrent_selection == len(self._allpythonchoices):
+                    cursel = unicode(self._combocurrent_selection)
+                    self._python_path_combo.Insert(cursel, self._combocurrent_selection)
+                    self._python_path_combo.SetStringSelection(cursel)
+                    self._allpythonchoices.append(path)
+                else:
+                    self._allpythonchoices[self._combocurrent_selection] = path
+                config[TLC_ALL_PYTHON_PATHS] = self._allpythonchoices[:]
+                Profile_Set(PYTOOL_CONFIG, config)
+        dlg.Destroy()
+        
+    def OnCancelText(self, event):
+        """Clear the text from the text control"""
+        config = Profile_Get(PYTOOL_CONFIG, default=dict())
+        lenpychoices = len(self._allpythonchoices)
+        if lenpychoices == 1:
+            self._textentry.SetValue(u"")
+            if TLC_PYTHON_PATH in config:
+                del config[TLC_PYTHON_PATH]
+            if TLC_ALL_PYTHON_PATHS in config:
+                del config[TLC_ALL_PYTHON_PATHS]
+            self._combocurrent_selection = 0
+            self._allpythonchoices = [u""]
+        else:
+            self._allpythonchoices.pop(self._combocurrent_selection)
+            lenpychoices -= 1 
+            self._python_path_combo.Delete(lenpychoices)
+            if lenpychoices == self._combocurrent_selection:
+                self._combocurrent_selection -= 1
+                self._python_path_combo.SetStringSelection(unicode(self._combocurrent_selection))
+            path = self._allpythonchoices[self._combocurrent_selection]
+            self._textentry.SetValue(path)
             config[TLC_PYTHON_PATH] = path
-            Profile_Set(PYTOOL_CONFIG, config)
+            config[TLC_ALL_PYTHON_PATHS] = self._allpythonchoices[:]
+        Profile_Set(PYTOOL_CONFIG, config)
 
 #-----------------------------------------------------------------------------#
 
