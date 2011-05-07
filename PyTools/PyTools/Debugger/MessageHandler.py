@@ -44,18 +44,15 @@ class MessageHandler(object):
 
         # Attributes
         self._prevfile = u""
+        self._evthandler = wx.EvtHandler()
+        self._jobtimer = wx.Timer(self._evthandler)
+        self._updateeditor = None
         self.editor = None
         self.editorlineno = None
         self.contextlineno = None
         self.contextmenus = {1:(True, ID_ON_RUNTOLINE, _("Run To Line"), self.OnRunToLine), 
                              2:(True, ID_ON_JUMP, _("Jump"), self.OnJump)}
         self.debugeditorupdate = lambda x,y,z:None
-        
-        class tmpjobtimer(object):
-            @staticmethod
-            def cancel():
-                pass
-        self._jobtimer = tmpjobtimer
         
         # Setup debugger hooks
         rpdbdebugger = RpdbDebugger() # singleton don't keep ref
@@ -69,6 +66,8 @@ class MessageHandler(object):
         ed_msg.Subscribe(self.OnFileSave, ed_msg.EDMSG_FILE_SAVED)
         ed_msg.Subscribe(self.OnPageChanged, ed_msg.EDMSG_UI_NB_CHANGED)        
         ed_msg.Subscribe(self.OnContextMenu, ed_msg.EDMSG_UI_STC_CONTEXT_MENU)
+        self._evthandler.Bind(wx.EVT_TIMER,
+                              lambda evt: self.UpdateForEditor(self._updateeditor))
 
     # Properties
     ContextLine = property(lambda self: self.contextlineno,
@@ -111,6 +110,10 @@ class MessageHandler(object):
         self.editor.ShowStepMarker(self.editorlineno, show=True)
         
     def UpdateForEditor(self, editor, force=False):
+        """Update the context based on the current editor."""
+        self._updateeditor = None
+        if not editor:
+            return
         langid = getattr(editor, 'GetLangId', lambda: -1)()
         ispython = langid == synglob.ID_LANG_PYTHON
         filename = os.path.normcase(editor.GetFileName())
@@ -121,10 +124,9 @@ class MessageHandler(object):
         self.RestoreStepMarker(editor)
 
     def _starttimer(self, editor):
-        self._jobtimer.cancel()
-        self._jobtimer = threading.Timer(0.25, self.UpdateForEditor, [editor])
-        # Start job timer
-        self._jobtimer.start()
+        self._StopTimer()
+        self._updateeditor = editor
+        self._jobtimer.Start(250, True)
     
     def OnPageChanged(self, msg):
         """ Notebook tab was changed """
