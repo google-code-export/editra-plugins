@@ -159,6 +159,7 @@ class GeneralConfigPanel(wx.Panel):
         hsizer = wx.BoxSizer(wx.HORIZONTAL)
         self._python_path_combo.Items = all_pythons
         self._python_path_combo.StringSelection = pythonpath
+        self._python_path_combo.ToolTip = wx.ToolTip(_("Currently active Python"))
         hsizer.Add(wx.StaticText(self, label=_("Python Path:")), 0, wx.ALL, 5)
         hsizer.Add(self._python_path_combo, 1, wx.EXPAND|wx.ALIGN_CENTER_VERTICAL)
         hsizer.Add(self._add_path, 0, wx.ALIGN_CENTER_VERTICAL|wx.LEFT, 5)
