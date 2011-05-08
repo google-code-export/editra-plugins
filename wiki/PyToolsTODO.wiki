@@ -18,18 +18,3 @@ This page contains a list of open TODO issues for the listed version of the PyTo
   * Test and handle additional import statement formats more accurately.
 
 ----
-
-== Version 0.2 ==
-
-=== !PyBreakPoint ===
-  * Try to find some better icons to use for the Add/Del/Delete all
-  * Make column headers sortable (at least for the 'file' column)
-
-=== Code Analysis (PyLint) ===
-  * Make ListCtrl columns sortable in the [PyAnalysis PyLint] output window.
-  * Store references to marker objects and use their Handle property to get the current line number instead of line numbers when possible in code analysis tool, since line numbers can change while editing the file. Note: similar functionality will likely also be needed by the debugger.
-
-=== !PyFind ===
-  * Make column header sortable
-
-----
