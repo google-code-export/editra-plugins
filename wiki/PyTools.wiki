@@ -87,8 +87,7 @@ Hovering over the line with the error will show a tooltip providing more details
 
 = TODO List =
 
-[PyToolsTODO TODO List]
+[PyToolsTODO TODO List for Upcoming Release]
+[PyToolsFuture TODO List for Future Release]
 
 = Future Features =
-
-[PyToolsFuture Future Features]
