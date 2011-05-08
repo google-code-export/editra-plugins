@@ -13,23 +13,23 @@ This page contains a list of open TODO issues for the listed version of the PyTo
 === General ====
   * Correct any remaining crashes reported at (http://code.google.com/p/editra-plugins/issues/detail?id=166) CURRENTLY ALL FIXED
   * Add handlers for EDMSG_DSP_FONT in order to update and set the user specified UI font for subwindows and controls.
-  * Ensure all strings shown in interface are translatable (STILL RELEVANT?)
 
-=== !PyVariable ===
+=== !PyFind ===
+  * Test and handle additional import statement formats more accurately.
+
+----
+
+== Version 0.2 ==
 
 === !PyBreakPoint ===
   * Try to find some better icons to use for the Add/Del/Delete all
   * Make column headers sortable (at least for the 'file' column)
-
-=== !PyStackThread ===
-
 
 === Code Analysis (PyLint) ===
   * Make ListCtrl columns sortable in the [PyAnalysis PyLint] output window.
   * Store references to marker objects and use their Handle property to get the current line number instead of line numbers when possible in code analysis tool, since line numbers can change while editing the file. Note: similar functionality will likely also be needed by the debugger.
 
 === !PyFind ===
-  * Test and handle additional import statement formats more accurately.
   * Make column header sortable
 
 ----
