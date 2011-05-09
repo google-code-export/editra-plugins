@@ -94,6 +94,7 @@ class BaseShelfWindow(ed_basewin.EdBaseCtrlBox):
 
         # Editra Message Handlers
         ed_msg.Subscribe(self.OnThemeChanged, ed_msg.EDMSG_THEME_CHANGED)
+        ed_msg.Subscribe(self.OnFontChanged, ed_msg.EDMSG_DSP_FONT)
 
     def GetMainWindow(self):
         return self._mw
@@ -106,6 +107,7 @@ class BaseShelfWindow(ed_basewin.EdBaseCtrlBox):
         """Stop timer and disconnect message handlers"""
         self._StopTimer()
         ed_msg.Unsubscribe(self.OnThemeChanged)
+        ed_msg.Unsubscribe(self.OnFontChanged)
         self.Unsubscription()
 
     def _StopTimer(self):
@@ -117,6 +119,14 @@ class BaseShelfWindow(ed_basewin.EdBaseCtrlBox):
         bmp = wx.ArtProvider.GetBitmap(str(ed_glob.ID_PREF), wx.ART_MENU)
         self.cfgbtn.SetBitmap(bmp)
         self.cfgbtn.Refresh()
+
+    def OnFontChanged(self, msg):
+        """Update for user font"""
+        font = msg.GetData()
+        if isinstance(font, wx.Font) and not font.IsNull():
+            self.SetFont(font)
+            if self._listCtrl:
+                self._listCtrl.SetFont(font)
 
     def OnShowConfig(self, event):
         """Show the configuration dialog"""
