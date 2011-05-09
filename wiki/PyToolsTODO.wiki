@@ -11,8 +11,6 @@ This page contains a list of open TODO issues for the listed version of the PyTo
 == Version 0.1 ==
 
 === General ====
-  * Correct any remaining crashes reported at (http://code.google.com/p/editra-plugins/issues/detail?id=166) CURRENTLY ALL FIXED
-  * Add handlers for EDMSG_DSP_FONT in order to update and set the user specified UI font for subwindows and controls.
 
 === !PyFind ===
   * Test and handle additional import statement formats more accurately.
