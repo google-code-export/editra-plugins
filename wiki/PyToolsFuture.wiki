@@ -10,6 +10,10 @@ This page contains a list of open TODO issues for a future version of the PyTool
 
 == Version 0.2 ==
 
+=== !PyDebug ===
+
+  * Debugger output window should also probably use the Primary Editor font setting for its output 
+
 === !PyBreakPoint ===
   * Try to find some better icons to use for the Add/Del/Delete all
   * Make column headers sortable (at least for the 'file' column)
