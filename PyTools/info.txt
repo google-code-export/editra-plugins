@@ -1,4 +1,0 @@
-Name=PyTools
-Author=Mike Rans, Cody Precord
-Description=Adds Python syntax checking using Pylint and debugging using Winpdb with results in a Shelf window.
-Version=0.1
