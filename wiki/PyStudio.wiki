@@ -17,30 +17,30 @@ Provides a collection of tools to aid in the development of Python applications.
 
 = Minor Features =
 
-  * [PyTools#Open_Module Right click Open Module]
-  * [PyTools#Syntax_Error_Check Syntax Error Check]
+  * [PyStudio#Open_Module Right click Open Module]
+  * [PyStudio#Syntax_Error_Check Syntax Error Check]
 
 ----
 
 = Installation Notes =
 
-*NOTE:* If you have previously installed the standalone PylintPlugin it is suggested to uninstall it prior to installing !PyTools as the functionality of that plugin has been deprecated based on the new improved functionality provided by the !PyTools plugin
+*NOTE:* If you have previously installed the standalone PylintPlugin it is suggested to uninstall it prior to installing !PyStudio as the functionality of that plugin has been deprecated based on the new improved functionality provided by the !PyStudio plugin
 
 ----
 
 = Details =
 
-PyTools is a collection of tools for working with and developing Python code. This page contains the general information about the plugin, please see the links to the various features of the plugin for more detailed information.
+PyStudio is a collection of tools for working with and developing Python code. This page contains the general information about the plugin, please see the links to the various features of the plugin for more detailed information.
 
 ----
 
 = General Configuration =
 
-The PyTools configuration dialog can be accessed from any of the plugins Shelf windows as well as from the PluginManager dialog. The screenshot below shows the General configuration page.
+The PyStudio configuration dialog can be accessed from any of the plugins Shelf windows as well as from the PluginManager dialog. The screenshot below shows the General configuration page.
 
-[http://editra-plugins.googlecode.com/svn/wiki/images/PyTools/pytools_config_general.png]
+[http://editra-plugins.googlecode.com/svn/wiki/images/PyStudio/PyStudio_config_general.png]
 
-The PyTools plugin tries to automatically detect what Python your using on your system but to get started you should make sure that this path is pointing to the Python that you want to work with. Most features of this plugin rely on this setting when running Python related commands.
+The PyStudio plugin tries to automatically detect what Python your using on your system but to get started you should make sure that this path is pointing to the Python that you want to work with. Most features of this plugin rely on this setting when running Python related commands.
 
 == Configuration File ==
 
@@ -51,8 +51,8 @@ When the tools are activated, they look for this file automatically (without use
 Currently, 3 parameters are supported in {{{__dirvar_py__.cfg}}}:
 
   * PYTHONPATH, a comma separated list of paths to add to the PYTHONPATH for tools to use
-  * PYLINTRC, the path to a Pylint configuration file. This takes precedence over messages settings in the PyTools configuration dialog.
-  * DEBUGGERARGS, arguments to the debugger. The PyTools configuration dialog setting "Debugger Args" takes precedence over this setting. %SCRIPT% can be used to refer to the current Python script or %MODULE% if it is required in module form (ie. xxx.yyy.zzz).
+  * PYLINTRC, the path to a Pylint configuration file. This takes precedence over messages settings in the PyStudio configuration dialog.
+  * DEBUGGERARGS, arguments to the debugger. The PyStudio configuration dialog setting "Debugger Args" takes precedence over this setting. %SCRIPT% can be used to refer to the current Python script or %MODULE% if it is required in module form (ie. xxx.yyy.zzz).
 
 Relative paths are allowed, for example: . or ..
 
@@ -69,7 +69,7 @@ DEBUGGERARGS=./src/run.py %MODULE%
 
 The Open Module feature allows you to right click on an import statement and open the corresponding module. When an import statement is clicked on the buffers context menu will include the "Open Module" menu item as shown in the below screenshot.
 
-[http://editra-plugins.googlecode.com/svn/wiki/images/PyTools/open_module_ctx_menu.png]
+[http://editra-plugins.googlecode.com/svn/wiki/images/PyStudio/open_module_ctx_menu.png]
 
 ----
 
@@ -79,7 +79,7 @@ The syntax error check option (defaults to on) will automatically check files fo
 
 The screenshot below shows the syntax error checker marking an error it found in the file due to a missing ':'.
 
-[http://editra-plugins.googlecode.com/svn/wiki/images/PyTools/syntax_error_checker.png]
+[http://editra-plugins.googlecode.com/svn/wiki/images/PyStudio/syntax_error_checker.png]
 
 Hovering over the line with the error will show a tooltip providing more details about the error.
 
@@ -87,8 +87,8 @@ Hovering over the line with the error will show a tooltip providing more details
 
 = TODO List =
 
-[PyToolsTODO TODO List for Upcoming Release]
+[PyStudioTODO TODO List for Upcoming Release]
 
-[PyToolsFuture TODO List for Future Release]
+[PyStudioFuture TODO List for Future Release]
 
 = Future Features =

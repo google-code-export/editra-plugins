@@ -1,10 +1,10 @@
-#summary List of minor TODOs for PyTools
+#summary List of minor TODOs for PyStudio
 
 <wiki:toc max_depth="3" />
 
 = Introduction =
 
-This page contains a list of open TODO issues for the listed version of the PyTools Plugin.
+This page contains a list of open TODO issues for the listed version of the PyStudio Plugin.
 
 ----
 

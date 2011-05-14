@@ -1,19 +1,19 @@
-#summary Python Debugger component of PyTools plugin
+#summary Python Debugger component of PyStudio plugin
 #labels IDE
 
 <wiki:toc max_depth="2" />
 
 = Introduction =
 
-This page contains detailed information about the PyDebugger component of the PyTools plugin. PyDebugger is a debugger based off of the same rpdb2 Python debugger that is used by Winpdb. This component contains a collection of various shelf windows and editor integration for debugging Python programs and scripts. See the sections below for an introduction to each part of the debugger.
+This page contains detailed information about the PyDebugger component of the PyStudio plugin. PyDebugger is a debugger based off of the same rpdb2 Python debugger that is used by Winpdb. This component contains a collection of various shelf windows and editor integration for debugging Python programs and scripts. See the sections below for an introduction to each part of the debugger.
 
 ----
 
 = Configuration =
 
-This section contains information specific to the configuration of the debugger, for [PyTools#General_Configuration general configuration] see the main PyTools page.
+This section contains information specific to the configuration of the debugger, for [PyStudio#General_Configuration general configuration] see the main PyStudio page.
 
-[http://editra-plugins.googlecode.com/svn/wiki/images/PyTools/pytools_config_debugger.png]
+[http://editra-plugins.googlecode.com/svn/wiki/images/PyStudio/PyStudio_config_debugger.png]
 
 *Options*
   * Trap Unhandled Exceptions
@@ -51,7 +51,7 @@ Set the encoding of the files being debugged.
 == !PyBreakPoint ==
 PyBreakPoint is a Shelf window for displaying and managing breakpoints. The screenshot below shows the PyBreakPoint window and how the breakpoints are displayed in the editor.
 
-[http://editra-plugins.googlecode.com/svn/wiki/images/PyTools/pydebug_breakpoint.png]
+[http://editra-plugins.googlecode.com/svn/wiki/images/PyStudio/pydebug_breakpoint.png]
 
 Breakpoints can be added to any line of code in the editor. There are Three ways to add a breakpoint to a line.
   # Click in the marker margin on the far left of the editor window. Clicking again will toggle the breakpoint off.
@@ -70,10 +70,10 @@ Double clicking on a breakpoint will cause the cursor to jump to that point.
 
 The !PyDebug Shelf window is the main control window for attaching to programs and stepping through the code. The screenshot below shows what the debug window looks like.
 
-[http://editra-plugins.googlecode.com/svn/wiki/images/PyTools/pydebug_debugger.png]
+[http://editra-plugins.googlecode.com/svn/wiki/images/PyStudio/pydebug_debugger.png]
 
 *Actions* (from left to right)
-  * Preferences Button - open the PyTools configuration dialog
+  * Preferences Button - open the PyStudio configuration dialog
   * Go Button - Start debugging the current script or tell the program that is already being debugged to run to the next breakpoint.
   * Stop Button - Abort the debug session
   * Step In Button - Step into the call on the current line
@@ -88,7 +88,7 @@ The !PyDebug Shelf window is the main control window for attaching to programs a
 
 == !PyExpression ==
 
-[http://editra-plugins.googlecode.com/svn/wiki/images/PyTools/pydebug_expression.png]
+[http://editra-plugins.googlecode.com/svn/wiki/images/PyStudio/pydebug_expression.png]
 
 ----
 
@@ -96,7 +96,7 @@ The !PyDebug Shelf window is the main control window for attaching to programs a
 
 The !PyStackThread Shelf window provides a view of the current execution stack and thread statuses of the program being debugged. The screenshot below shows this window in the Stack view.
 
-[http://editra-plugins.googlecode.com/svn/wiki/images/PyTools/pydebug_stack.png]
+[http://editra-plugins.googlecode.com/svn/wiki/images/PyStudio/pydebug_stack.png]
 
 *Views*
 
@@ -106,7 +106,7 @@ Using the vertical control bar on the left this window can display one of two vi
   * Threads - Shows the status of the running threads
 
 *Actions*
-  * Preferences Button - Opens the PyTools configuration dialog
+  * Preferences Button - Opens the PyStudio configuration dialog
   * Double clicking on an item in the stack list will jump to that point in the code.
 
 ----
@@ -115,7 +115,7 @@ Using the vertical control bar on the left this window can display one of two vi
 
 The !PyVariable Shelf window provides a way to inspect the local and global variables that are present in the current debug context. In addition to this it also allows you to inspect any exceptions that may have been thrown by the debuggee.
 
-[http://editra-plugins.googlecode.com/svn/wiki/images/PyTools/pydebug_variables.png]
+[http://editra-plugins.googlecode.com/svn/wiki/images/PyStudio/pydebug_variables.png]
 
 *Views*
 
@@ -126,6 +126,6 @@ The control bar on the left contains buttons to activate one of the three possib
   * Exceptions
 
 *Actions*
-  * Preferences - opens the PyTools configuration dialog
+  * Preferences - opens the PyStudio configuration dialog
   * Filter - Set the verbosity of how much data is shown in each view
   * Analyze Exception
