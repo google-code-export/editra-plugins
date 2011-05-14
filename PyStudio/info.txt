@@ -1,0 +1,4 @@
+Name=PyStudio
+Author=Mike Rans, Cody Precord
+Description=Upgrades Editra into a Python IDE, including syntax checking using Pylint, module search and debugging using Winpdb backend
+Version=0.1

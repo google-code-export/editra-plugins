@@ -1,0 +1,39 @@
+# -*- coding: utf-8 -*-
+# Setup script to build the PyStudio plugin. To build the plugin
+# just run 'python setup.py bdist_egg' and an egg will be built and put into
+# the dist directory of this folder.
+"""
+Adds Python syntax checking using Pylint and debugging using Winpdb with results in a Shelf window.
+
+"""
+__author__ = "Mike Rans, Cody Precord"
+
+try:
+    from setuptools import setup
+except ImportError:
+    print "You must have setup tools installed in order to build this plugin"
+    setup = None
+
+if setup != None:
+    setup(
+        name='PyStudio',
+        version='0.1',
+        description=__doc__,
+        author=__author__,
+        author_email="rans@email.com",
+        license="wxWindows",
+        url="http://editra.org",
+        platforms=["Linux", "OS X", "Windows"],
+        packages=['','PyStudio','PyStudio.Common','PyStudio.SyntaxChecker',
+                  'PyStudio.ModuleFinder','PyStudio.Debugger'],
+        entry_points='''
+        [Editra.plugins]
+        SyntaxChecker = PyStudio:PyLint
+        ModuleFinder = PyStudio:PyFind
+        Debugger = PyStudio:PyDebug
+        BreakPoints = PyStudio:PyBreakPoint
+        StackThread = PyStudio:PyStackThread
+        Variables = PyStudio:PyVariable
+        Expressions = PyStudio:PyExpression
+        '''
+        )
