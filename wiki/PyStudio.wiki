@@ -77,7 +77,7 @@ The Open Module feature allows you to right click on an import statement and ope
 
 The syntax error check option (defaults to on) will automatically check files for syntax errors and other typos when the file is saved.
 
-The screenshot below shows the syntax error checker marking an error it found in the file with a red cross and the line highlighted in red.
+The screenshot below shows the syntax error checker marking an error it found in the file with a white cross on red background and the line highlighted in red.
 
 [http://editra-plugins.googlecode.com/svn/wiki/images/PyStudio/syntax_error_checker.png]
 
