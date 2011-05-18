@@ -62,7 +62,7 @@ The remaining two buttons on the Shelf Windows control bar can be used to remove
 
 In addition to being able to add and delete breakpoints, breakpoints can also be disabled and re-enabled by clicking on the red breakpoint marker that is shown in the list.
 
-A conditional breakpoint can be made by creating a normal breakpoint as above and then clicking on the Expression column for the appropriate breakpoint in the Shelf Window.
+A conditional breakpoint can be made by creating a normal breakpoint as above and then clicking on the Expression column for the appropriate breakpoint in the Shelf Window. The expression text can then be entered.
 
 Double clicking on a breakpoint will cause the cursor to jump to that point.
 
@@ -90,8 +90,11 @@ The !PyDebug Shelf window is the main control window for attaching to programs a
 
 == !PyExpression ==
 
+PyExpression is a Shelf window for displaying and managing expressions. The screenshot below shows the PyExpression window.
+
 [http://editra-plugins.googlecode.com/svn/wiki/images/PyStudio/pydebug_expression.png]
 
+Enter an Expression by clicking on the column and typing the desired expression. It will be evaluated while the program is being debugged.
 ----
 
 == !PyStackThread ==
