@@ -53,10 +53,10 @@ PyBreakPoint is a Shelf window for displaying and managing breakpoints. The scre
 
 [http://editra-plugins.googlecode.com/svn/wiki/images/PyStudio/pydebug_breakpoint.png]
 
-Breakpoints can be added to any line of code in the editor. There are Three ways to add a breakpoint to a line.
+Breakpoints can be added to any line of code in the editor. There are three ways to add a breakpoint to a line.
   # Click in the marker margin on the far left of the editor window. Clicking again will toggle the breakpoint off.
   # Right clicking on the line and selecting the Toggle Breakpoint option to toggle a breakpoint on the line.
-  # Clicking the + button that is displayed on the breakpoint windows control bar will add a breakpoint to the line in the text buffer that the cursor is currently active on.
+  # Clicking the + button that is displayed on the breakpoint window's control bar will add a breakpoint to the line in the text buffer that the cursor is currently active on.
 
 The remaining two buttons on the Shelf Windows control bar can be used to remove breakpoints. The - button will delete the breakpoint on the current line. The last button on the right can be used to delete all breakpoints in the list.
 
@@ -90,11 +90,13 @@ The !PyDebug Shelf window is the main control window for attaching to programs a
 
 == !PyExpression ==
 
-PyExpression is a Shelf window for displaying and managing expressions. The screenshot below shows the PyExpression window.
+PyExpression is a Shelf window for managing expressions and displaying their evaluated results. The screenshot below shows the PyExpression window.
 
 [http://editra-plugins.googlecode.com/svn/wiki/images/PyStudio/pydebug_expression.png]
 
-Enter an Expression by clicking on the column and typing the desired expression. It will be evaluated while the program is being debugged.
+To add an expression:
+  # Clicking the + button that is displayed on the expression window's control bar will add an empty expression. Enter an expression by clicking on the column and typing the desired expression. It will be evaluated while the program is being debugged.
+
 ----
 
 == !PyStackThread ==
