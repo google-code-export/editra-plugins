@@ -62,6 +62,8 @@ The remaining two buttons on the Shelf Windows control bar can be used to remove
 
 In addition to being able to add and delete breakpoints, breakpoints can also be disabled and re-enabled by clicking on the red breakpoint marker that is shown in the list.
 
+Conditional breakpoints can be made by creating a normal breakpoint as above and then clicking on the Expression column for the appropriate breakpoint in the Shelf Window.
+
 Double clicking on a breakpoint will cause the cursor to jump to that point.
 
 ----
