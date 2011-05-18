@@ -37,6 +37,12 @@ http://editra-plugins.googlecode.com/svn/wiki/images/PyStudio/pylint_analyze.png
 
 When the analysis is run it will list all of its results in the Shelf window. Double clicking on any item in the list will jump to the corresponding line in the buffer. In addition to this small bug markers are added to the text buffer to quickly show where issues where noted by the analysis. Hovering the mouse over a line that has one of these markers will show a tooltip that contains the details of the findings for that line.
 
+There are three kinds of analysis markers that can be shown in the left most column. The markers are color coded depending upon the severity.
+
+  # Green Marker - Convention or other low priority issue
+  # Yellow Marker - Warning message
+  # Red Marker - Error message
+
 = Exporting/Importing Results =
 
 If you want to save the results of the analysis to use later or for gathering metrics between runs the PyLint shelf window provides the option to export the results list to an XML file. The resulting XML is formated as shown in the screenshot below.
