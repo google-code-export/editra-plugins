@@ -95,7 +95,7 @@ PyExpression is a Shelf window for managing expressions and displaying their eva
 [http://editra-plugins.googlecode.com/svn/wiki/images/PyStudio/pydebug_expression.png]
 
 To add an expression:
-  # Clicking the + button that is displayed on the expression window's control bar will add an empty expression. Enter an expression by clicking on the column and typing the desired expression. It will be evaluated while the program is being debugged.
+  * Click the + button that is displayed on the expression window's control bar will add an empty expression. Enter an expression by clicking on the column and typing the desired expression. It will be evaluated while the program is being debugged.
 
 ----
 
