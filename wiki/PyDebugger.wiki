@@ -75,7 +75,7 @@ The !PyDebug Shelf window is the main control window for attaching to programs a
 [http://editra-plugins.googlecode.com/svn/wiki/images/PyStudio/pydebug_debugger.png]
 
 *Actions* (from left to right)
-  * Preferences Button - open the PyStudio configuration dialog
+  * Preferences Button - Open the PyStudio configuration dialog
   * Go Button - Start debugging the current script or tell the program that is already being debugged to run to the next breakpoint.
   * Stop Button - Abort the debug session
   * Step In Button - Step into the call on the current line
@@ -113,7 +113,7 @@ Using the vertical control bar on the left this window can display one of two vi
   * Threads - Shows the status of the running threads
 
 *Actions*
-  * Preferences Button - Opens the PyStudio configuration dialog
+  * Preferences Button - Open the PyStudio configuration dialog
   * Double clicking on an item in the stack list will jump to that point in the code.
 
 ----
@@ -133,6 +133,6 @@ The control bar on the left contains buttons to activate one of the three possib
   * Exceptions
 
 *Actions*
-  * Preferences - opens the PyStudio configuration dialog
+  * Preferences - Open the PyStudio configuration dialog
   * Filter - Set the verbosity of how much data is shown in each view
-  * Analyze Exception
+  * Analyze Exception - Set the program state back to when the exception was raised and left uncaught 
