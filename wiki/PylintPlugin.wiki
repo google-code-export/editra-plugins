@@ -1,5 +1,7 @@
 #summary Syntax Checker for Python using Pylint
 
+*NOTE* This plugin has been deprecated in favor of the more enhanced version included in the new PyStudio plugin.
+
 = Introduction =
 
 The purpose of this plugin is to enable the syntax of Python source code to be checked. It can be configured to perform checking automatically on file open/save and change tab or manually by clicking a button. Messages such as Warnings and Errors can be turned on or off in the graphical configuration. Alternatively, there is an optional configuration file in which new paths can be appended to the PYTHONPATH and in which the path to a Pylint configuration file can be specified. 
