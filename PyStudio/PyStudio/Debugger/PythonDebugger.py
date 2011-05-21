@@ -42,7 +42,7 @@ class PythonDebugger(AbstractDebugger):
 
         # Attributes
         self.debuggerattachedtext = _("Debugger attached. Debuggee output starts now...\n\n")
-        self.debuggerdetachedtext = _("")
+        self.debuggerdetachedtext = u"")
         self.dirvarfile = variabledict.get("DIRVARFILE")
         self.rpdb2args = ["-d"]
         if not self.debuggerargs:
