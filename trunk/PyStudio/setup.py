@@ -3,7 +3,7 @@
 # just run 'python setup.py bdist_egg' and an egg will be built and put into
 # the dist directory of this folder.
 """
-Adds Python syntax checking using Pylint and debugging using Winpdb with results in a Shelf window.
+Upgrades Editra into a Python IDE, including syntax checking, module search and debugging
 
 """
 __author__ = "Mike Rans, Cody Precord"
