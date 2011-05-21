@@ -96,7 +96,7 @@ class DebugShelfWindow(BaseShelfWindow):
         self.enablingpylinttext = _("Reenabling Pylint Autorun.\n")
         self.debuggerattachedtextremote = _("Debugger attached.\n\n")
         self.debuggerdetachedtext = _("\n\nDebugger detached.")
-        self.emptytext = _("")
+        self.emptytext = u""
         
         MessageHandler().debugeditorupdate = self.OnEditorUpdate
         self._debugger = None
