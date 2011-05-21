@@ -13,7 +13,7 @@ Upgrades Editra into a Python IDE, including syntax checking, module search and 
 """
 
 __version__ = "0.1"
-__author__ = "Mike Rans"
+__author__ = "Mike Rans, Cody Precord"
 __svnid__ = "$Id$"
 __revision__ = "$Revision$"
 
@@ -49,10 +49,10 @@ _ = wx.GetTranslation
 #-----------------------------------------------------------------------------#
 
 # Implementation
-class PyLint(BaseShelfPlugin):
+class PyAnalysis(BaseShelfPlugin):
     """Script Launcher and output viewer"""
     def __init__(self, pluginmgr):
-        super(PyLint, self).__init__(pluginmgr, "PyLint", LintShelfWindow)
+        super(PyAnalysis, self).__init__(pluginmgr, "PyAnalysis", LintShelfWindow)
 
     def AllowMultiple(self):
         """Plugin allows multiple instances"""
@@ -173,7 +173,7 @@ def GetConfigObject():
     return ConfigObject()
 
 class ConfigObject(plugin.PluginConfigObject):
-    """Plugin configuration object for PyLint
+    """Plugin configuration object for PyStudio
     Provides configuration panel for plugin dialog.
 
     """
