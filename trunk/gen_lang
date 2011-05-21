@@ -91,24 +91,29 @@ print_help () {
 ###############################################################################
 # generate_src_list:
 #   Parameter 1: Directory to search from
+#   Parameter 2: Relative Path for export file
 #
 # Recrusivly searches for source files from the given top level directory and
 # appends all matches to the temporary app.fil file.
 ###############################################################################
 generate_src_list () {
+    local RELPATH
     RELPATH=$1
-    for FNAME in $(ls $RELPATH); do
+    for FNAME in $(ls .); do
         if ! [ -z `echo $FNAME | grep "^.*\.py$"` ]; then
-            if [ -a "$RELPATH/$FNAME" ]; then
+            if [ -a "$FNAME" ]; then
                 echo "  ${GREEN}Found${OFF}: $RELPATH/$FNAME"
-                echo "$RELPATH/$FNAME" >> $APPLIST
+                echo "$RELPATH/$FNAME" >> $2
             fi
         elif [ -d "$FNAME" ]; then
-            generate_src_list "$RELPATH/$FNAME"
+            echo "  ${CYAN}Recursing into${OFF} $RELPATH/$FNAME"
+            cd "$FNAME"
+            generate_src_list "$RELPATH/$FNAME" $2
         else
             continue
         fi
     done
+    cd ..
 }
 
 
@@ -186,7 +191,11 @@ do_one_build () {
     PO="$WORKPATH/$SCRIPTDIR"
     if [ "$BUILD_PO" -eq "1" ]; then
         echo "${CYAN}Generating${OFF} file list for ${CYAN}$WORKPATH${OFF}"
-        generate_src_list "$WORKPATH"
+        CURDIR=$(pwd)
+        cd $WORKPATH
+        OUTPATH="$CURDIR/$APPLIST"
+        generate_src_list "$WORKPATH" "$OUTPATH"
+        cd $CURDIR
         echo "${CYAN}Outputting${OFF} catalogs to ${GREEN}$PO${OFF}..."
         $(python mki18n.py  -pv --domain=$WORKPATH --podir=$PO) 2>/dev/null
         CLOCATION=$(pwd)
