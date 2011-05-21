@@ -28,7 +28,7 @@ if setup != None:
                   'PyStudio.ModuleFinder','PyStudio.Debugger'],
         entry_points='''
         [Editra.plugins]
-        SyntaxChecker = PyStudio:PyLint
+        SyntaxChecker = PyStudio:PyAnalysis
         ModuleFinder = PyStudio:PyFind
         Debugger = PyStudio:PyDebug
         BreakPoints = PyStudio:PyBreakPoint
