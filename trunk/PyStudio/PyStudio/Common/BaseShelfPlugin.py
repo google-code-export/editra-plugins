@@ -82,7 +82,7 @@ class BaseShelfPlugin(plugin.Plugin):
 
     def GetMinVersion(self):
         """Minimum version of Editra this plugin is compatible with"""
-        return "5.99"
+        return "0.6.48"
 
     def GetName(self):
         """The name of this plugin"""
