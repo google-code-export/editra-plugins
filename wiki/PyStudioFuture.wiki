@@ -11,7 +11,6 @@ This page contains a list of open TODO issues for a future version of the PyStud
 == Version 0.2 ==
 
 === !PyDebug ===
-
   * Debugger output window should also probably use the Primary Editor font setting for its output 
 
 === !PyBreakPoint ===
@@ -24,5 +23,9 @@ This page contains a list of open TODO issues for a future version of the PyStud
 
 === !PyFind ===
   * Make column header sortable
+  * Test and handle additional import statement formats more accurately.
+
+=== !PyProject ===
+  * Add project management support
 
 ----
