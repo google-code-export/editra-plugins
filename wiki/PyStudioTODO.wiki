@@ -12,7 +12,5 @@ This page contains a list of open TODO issues for the listed version of the PySt
 
 === General ====
 
-=== !PyFind ===
-  * Test and handle additional import statement formats more accurately.
 
 ----
