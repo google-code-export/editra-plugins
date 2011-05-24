@@ -100,6 +100,7 @@ class ExpressionsList(eclib.EToggleEditListCtrl):
     
     def Clear(self):
         """Delete all the rows """
+        self._data = {}
         self.DeleteAllItems()
 
     def PopulateRows(self, data):

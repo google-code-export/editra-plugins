@@ -56,7 +56,7 @@ class ExpressionsShelfWindow(BaseShelfWindow):
         self.taskbtn.ToolTip = wx.ToolTip(_("Execute"))
 
         # Attributes
-        self.expressions = ToolConfig.GetConfigValue(ToolConfig.TLC_EXPRESSIONS
+        self.expressions = ToolConfig.GetConfigValue(ToolConfig.TLC_EXPRESSIONS, 
                                                      default=dict())
         self.ignoredwarnings = {}
         
