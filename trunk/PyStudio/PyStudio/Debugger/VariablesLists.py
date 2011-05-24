@@ -39,7 +39,7 @@ class VariablesList(wx.gizmos.TreeListCtrl):
     COL_NAME = 0
     COL_REPR = 1
     COL_TYPE = 2
-    
+
     # Image IDs
     IMG_CLASS, \
     IMG_FUNCT, \
@@ -58,7 +58,7 @@ class VariablesList(wx.gizmos.TreeListCtrl):
         self.colname_name = _("Name")
         self.colname_repr = _("Repr")
         self.colname_type = _("Type")
-    
+
         self.listtype = listtype
         self.filterlevel = filterlevel
         self.key = None
@@ -72,17 +72,17 @@ class VariablesList(wx.gizmos.TreeListCtrl):
         self.AddColumn(self.colname_type)
         if wx.Platform == '__WXMAC__':
             self.SetWindowVariant(wx.WINDOW_VARIANT_SMALL)
-        self.SetMainColumn(0) 
+        self.SetMainColumn(0)
         self.SetLineSpacing(0)
         ## Setup ImageList
         self.SetupImageList()
-        
+
         # Event Handlers
         self.Bind(wx.EVT_TREE_ITEM_EXPANDING, self.OnItemExpanding)
         self.Bind(wx.EVT_TREE_ITEM_COLLAPSING, self.OnItemCollapsing)
         self.Bind(wx.EVT_TREE_ITEM_ACTIVATED, self.OnItemActivated)
         self.Bind(wx.EVT_TREE_ITEM_GETTOOLTIP, self.OnItemToolTip)
-            
+
     def set_mainwindow(self, mw):
         self._mainw = mw
 
@@ -119,7 +119,7 @@ class VariablesList(wx.gizmos.TreeListCtrl):
         self.SetColumnWidth(VariablesList.COL_NAME, namecolwidth)
         self.SetColumnWidth(VariablesList.COL_REPR, reprcolwidth)
         self.SetColumnWidth(VariablesList.COL_TYPE, typecolwidth)
-    
+
     def PopulateRows(self, data):
         """Populate the list with the data
         @param data: dictionary of variables info
@@ -134,8 +134,8 @@ class VariablesList(wx.gizmos.TreeListCtrl):
         while len(variablelist) > 0:
             item = variablelist.pop(0)
             self.expand_item(item, data, item is root)
-            
-            items = self.get_children(item)
+
+            items = self.GetChildNodes(item)
             variablelist = items + variablelist
 
         self.setcolumnwidths()
@@ -160,7 +160,7 @@ class VariablesList(wx.gizmos.TreeListCtrl):
             expressionlist = [(self.listtype, True)]
 
         worker = RunProcInThread(self.listtype, self.UpdateVariablesList,
-                                 RpdbDebugger().catchexc_get_namespace, 
+                                 RpdbDebugger().catchexc_get_namespace,
                                  expressionlist, self.FilterLevel)
         worker.start()
         return (old_key, old_expressionlist)
@@ -169,7 +169,7 @@ class VariablesList(wx.gizmos.TreeListCtrl):
         item = event.GetItem()
         tooltip = self.GetItemText(item, VariablesList.COL_REPR)[1:]
         event.SetToolTip(tooltip)
-       
+
     def OnItemCollapsing(self, event):
         item = event.GetItem()
         event.Skip()
@@ -177,18 +177,18 @@ class VariablesList(wx.gizmos.TreeListCtrl):
     def OnItemActivated(self, event):
         item = event.GetItem()
         (expr, is_valid) = self.GetPyData(item)
-        if expr in [_("Loading..."), _("Data Retrieval Timeout"), 
+        if expr in [_("Loading..."), _("Data Retrieval Timeout"),
                     _("Namespace Warning")]:
             return
         wx.CallAfter(self._onitemactivated, item, expr, is_valid)
-        
+
     def _onitemactivated(self, item, expr, is_valid):
         if is_valid:
             default_value = self.GetItemText(item, VariablesList.COL_REPR)[1:]
         else:
             default_value = ""
 
-        desc = "The new expression will be evaluated at the debuggee and its value will be set to the item."    
+        desc = "The new expression will be evaluated at the debuggee and its value will be set to the item."
         expr_dialog = ExpressionDialog(self, default_value, "Enter Expression", desc, "New Expression:", (200, -1))
         pos = self.GetPositionTuple()
         expr_dialog.SetPosition((pos[0] + 50, pos[1] + 50))
@@ -206,20 +206,20 @@ class VariablesList(wx.gizmos.TreeListCtrl):
         worker = RunProcInThread(self.listtype, self._onitemactivatedcallback,
                                  RpdbDebugger().execute, _suite)
         worker.start()
-        
+
     def _onitemactivatedcallback(self, res):
         if not res:
             return
-        
+
         if len(res) == 2:
             warning, error = res
         else:
             error = res
-        
+
         PyStudioUtils.error_dialog(self, error)
 
         if not warning in self.ignoredwarnings:
-            dlg = wx.MessageDialog(self, 
+            dlg = wx.MessageDialog(self,
                                    _("%s\n\nClick 'Cancel' to ignore this warning in this session.") % warning,\
                                    _("Warning"),
                                    wx.OK|wx.CANCEL|wx.YES_DEFAULT|wx.ICON_WARNING)
@@ -228,23 +228,23 @@ class VariablesList(wx.gizmos.TreeListCtrl):
 
             if res == wx.ID_CANCEL:
                 self.ignoredwarnings[warning] = True
-                
+
     def OnItemExpanding(self, event):
-        item = event.GetItem()        
+        item = event.GetItem()
         if not self.ItemHasChildren(item):
             event.Skip()
             return
-        
+
         if self.get_numberofchildren(item) > 0:
             event.Skip()
             self.Refresh();
             return
-        
+
         wx.CallAfter(self._onitemexpanding, item)
-    
+
     def _onitemexpanding(self, item):
         self.DeleteChildren(item)
-        
+
         child = self.AppendItem(item, _("Loading..."))
         self.SetItemText(child, u' ' + _("Loading..."), VariablesList.COL_REPR)
         self.SetItemText(child, ' ' + _("Loading..."), VariablesList.COL_TYPE)
@@ -255,52 +255,48 @@ class VariablesList(wx.gizmos.TreeListCtrl):
         item = self.find_item(expr)
         if item == None:
             return
-      
+
         worker = RunProcInThread(self.listtype, self._itemexpandingcallback,
-                                 RpdbDebugger().get_namespace, [(expr, True)], 
+                                 RpdbDebugger().get_namespace, [(expr, True)],
                                  self.FilterLevel)
         worker.pass_parameter(item)
         worker.start()
 
     def _itemexpandingcallback(self, variables, item):
+        """Callback for when tree node is expanding"""
+        children = self.GetChildNodes(item)
+        preselect_child = len(children) != 0 and children[0] == self.GetSelection()
+        self.DeleteChildren(item)
+
         if not variables:
             child = self.AppendItem(item, _("Data Retrieval Timeout"))
-            self.SetItemText(child, u' ' + _("Data Retrieval Timeout"), 
+            self.SetItemText(child, u' ' + _("Data Retrieval Timeout"),
                              VariablesList.COL_REPR)
-            self.SetItemText(child, u' ' + _("Data Retrieval Timeout"), 
+            self.SetItemText(child, u' ' + _("Data Retrieval Timeout"),
                              VariablesList.COL_TYPE)
             self.SetItemPyData(child, (_("Data Retrieval Timeout"), False))
             self.Expand(item)
 
-            if freselect_child:
+            if preselect_child:
                 self.SelectItem(child)
             return
-        #
-        # When expanding a tree item with arrow-keys on wxPython 2.6, the 
-        # temporary "loading" child is automatically selected. After 
-        # replacement with real children we need to reselect the first child.
-        #
-        children = self.get_children(item)
-        freselect_child = len(children) != 0 and children[0] == self.GetSelection()
-            
-        self.DeleteChildren(item)
-                
-        self.expand_item(item, variables, False, True)  
 
-        if freselect_child:
-            children = self.get_children(item)
+        self.expand_item(item, variables, False, True)
+
+        if preselect_child:
+            children = self.GetChildNodes(item)
             self.SelectItem(children[0])
 
         self.setcolumnwidths()
         self.Refresh()
-        
+
     # Helper functions
     def get_numberofchildren(self, item):
         nochildren = self.GetChildrenCount(item)
         if nochildren != 1:
-            return nochildren 
+            return nochildren
 
-        child = self.get_children(item)[0]
+        child = self.GetChildNodes(item)[0]
         (expr, is_valid) = self.GetPyData(child)
 
         if expr in [_("Loading..."), _("Data Retrieval Timeout")]:
@@ -311,29 +307,29 @@ class VariablesList(wx.gizmos.TreeListCtrl):
     def expand_item(self, item, variables, froot=False, fskip_expansion_check=False):
         if not self.ItemHasChildren(item):
             return
-        
+
         if not froot and not fskip_expansion_check and self.IsExpanded(item):
             return
 
         if self.get_numberofchildren(item) > 0:
             return
-        
+
         (expr, is_valid) = self.GetPyData(item)
 
         variables_with_expr = []
         for expression in variables:
-            if hasattr(expression, "get") and expression.get("expr", None) == expr: 
+            if hasattr(expression, "get") and expression.get("expr", None) == expr:
                 variables_with_expr.append(expression)
         if variables_with_expr == []:
             return
 
-        first_variable_with_expr = variables_with_expr[0] 
+        first_variable_with_expr = variables_with_expr[0]
         if first_variable_with_expr is None:
-            return   
+            return
 
         if "error" in first_variable_with_expr:
             return
-        
+
         if first_variable_with_expr["n_subnodes"] == 0:
             self.SetItemHasChildren(item, False)
             return
@@ -369,21 +365,21 @@ class VariablesList(wx.gizmos.TreeListCtrl):
         while item:
             (expr2, is_valid) = self.GetPyData(item)
             if expr2 == expr:
-                return item               
-                
+                return item
+
             item = self.GetNext(item)
 
-        return None    
-    
-    def get_children(self, item):
+        return None
+
+    def GetChildNodes(self, item):
         (child, cookie) = self.GetFirstChild(item)
         children = []
-        
+
         while child and child.IsOk():
             children.append(child)
             (child, cookie) = self.GetNextChild(item, cookie)
 
-        return children    
+        return children
 
     def get_expression_list(self):
         if self.GetCount() == 0:
@@ -402,7 +398,7 @@ class VariablesList(wx.gizmos.TreeListCtrl):
                 continue
 
             expressionlist.append((expr, True))
-            items = self.get_children(item)
+            items = self.GetChildNodes(item)
             variablelist = items + variablelist
 
-        return expressionlist    
+        return expressionlist

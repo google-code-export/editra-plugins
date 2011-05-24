@@ -1,0 +1,17 @@
+PyStudio Plugin
+Changelog
+
+#-----------------------------------------------------------------------------#
+
+Version 0.2
+Released:
+
++Fix missing resource file on Linux/OSX
++Fix crash in VariableList when getting attributes of a variable times out.
+
+#-----------------------------------------------------------------------------#
+
+Version 0.1
+Released: 05/22/2011
+
+Initial Release
