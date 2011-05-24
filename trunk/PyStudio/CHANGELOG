@@ -8,6 +8,7 @@ Released:
 
 +Fix missing resource file on Linux/OSX
 +Fix crash in VariableList when getting attributes of a variable times out.
++Fix crash in ExpressionsList when expressions data is not present in profile.
 
 #-----------------------------------------------------------------------------#
 
