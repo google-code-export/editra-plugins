@@ -56,7 +56,8 @@ class ExpressionsShelfWindow(BaseShelfWindow):
         self.taskbtn.ToolTip = wx.ToolTip(_("Execute"))
 
         # Attributes
-        self.expressions = ToolConfig.GetConfigValue(ToolConfig.TLC_EXPRESSIONS)
+        self.expressions = ToolConfig.GetConfigValue(ToolConfig.TLC_EXPRESSIONS
+                                                     default=dict())
         self.ignoredwarnings = {}
         
         # Debugger Attributes
@@ -87,7 +88,7 @@ class ExpressionsShelfWindow(BaseShelfWindow):
 
     def DeleteExpression(self, expression):
         if not expression in self.expressions:
-            return None
+            return
         del self.expressions[expression]
         self.SaveExpressions()
 
