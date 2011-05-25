@@ -17,7 +17,7 @@ except ImportError:
 if setup != None:
     setup(
         name='PyStudio',
-        version='0.1',
+        version='0.2',
         description=__doc__,
         author=__author__,
         author_email="rans@email.com",
