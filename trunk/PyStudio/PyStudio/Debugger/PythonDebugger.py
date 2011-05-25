@@ -14,7 +14,7 @@ __revision__ = "$Revision$"
 #-----------------------------------------------------------------------------#
 # Imports
 import wx
-import os.path
+import os
 import pkg_resources
 
 # Local Imports
@@ -31,6 +31,21 @@ import ebmlib
 
 # Globals
 _ = wx.GetTranslation
+
+#-----------------------------------------------------------------------------#
+
+def GetPwdFile(pword):
+    """Create the password file for running rpdb2"""
+    cpath = util.ResolvConfigDir('cache', False)
+    ppath = os.path.join(cpath, "rpdbpw.txt")
+    if not os.path.exists(ppath):
+        try:
+            handle = open(ppath, 'w')
+            handle.write(pword)
+            handle.close()
+        except Exception, msg:
+            util.Log("[PyDbg][err] %s" % msg) 
+    return ppath
 
 #-----------------------------------------------------------------------------#
 
@@ -69,7 +84,7 @@ class PythonDebugger(AbstractDebugger):
         if wx.Platform == "__WXMSW__":        
             self.rpdb2args += ["--pwd=%s" % RpdbDebugger.password]
         else:
-            rpdb2_pw = os.path.join(os.path.dirname(rpdb2_script), "rpdbpw.txt")
+            rpdb2_pw = GetPwdFile("editra123")
             self.rpdb2args += ["--rid=%s" % rpdb2_pw]
         
         childPath, parentPath = PyStudioUtils.get_packageroot(self.filename)

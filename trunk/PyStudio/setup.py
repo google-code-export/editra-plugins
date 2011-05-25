@@ -14,6 +14,8 @@ except ImportError:
     print "You must have setup tools installed in order to build this plugin"
     setup = None
 
+import os
+
 if setup != None:
     setup(
         name='PyStudio',
@@ -26,7 +28,6 @@ if setup != None:
         platforms=["Linux", "OS X", "Windows"],
         packages=['','PyStudio','PyStudio.Common','PyStudio.SyntaxChecker',
                   'PyStudio.ModuleFinder','PyStudio.Debugger'],
-        data_files=[('', ['rpdbpw.txt'])],
         entry_points='''
         [Editra.plugins]
         SyntaxChecker = PyStudio:PyAnalysis
