@@ -84,7 +84,7 @@ class PythonDebugger(AbstractDebugger):
         if wx.Platform == "__WXMSW__":        
             self.rpdb2args += ["--pwd=%s" % RpdbDebugger.password]
         else:
-            rpdb2_pw = GetPwdFile("editra123")
+            rpdb2_pw = GetPwdFile(RpdbDebugger.password)
             self.rpdb2args += ["--rid=%s" % rpdb2_pw]
         
         childPath, parentPath = PyStudioUtils.get_packageroot(self.filename)
