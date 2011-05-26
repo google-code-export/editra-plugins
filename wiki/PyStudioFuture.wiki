@@ -8,7 +8,7 @@ This page contains a list of open TODO issues for a future version of the PyStud
 
 ----
 
-== Version 0.2 ==
+== Version 0.3 ==
 
 === !PyDebug ===
   * Debugger output window should also probably use the Primary Editor font setting for its output 
