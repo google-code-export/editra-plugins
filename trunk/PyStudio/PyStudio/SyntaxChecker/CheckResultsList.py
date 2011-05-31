@@ -41,12 +41,17 @@ class CheckResultsList(eclib.EBaseListCtrl):
         # Attributes
         self.editor = None
         self._mw = None
+        self._il = wx.ImageList(16, 16)
 
         # Setup
         self.InsertColumn(0, _("Type"))
         self.InsertColumn(1, _("Line"))
         self.InsertColumn(2, _("Error"))
         self.SetColumnWidth(1, wx.LIST_AUTOSIZE_USEHEADER)
+        for aid in (wx.ART_ERROR, wx.ART_WARNING, wx.ART_INFORMATION):
+            bmp = wx.ArtProvider.GetBitmap(aid, wx.ART_MENU, (16,16))
+            self._il.Add(bmp)
+        self.SetImageList(self._il, wx.IMAGE_LIST_SMALL)
 
         # Event Handlers
         self.Bind(wx.EVT_LIST_ITEM_ACTIVATED, self.OnItemActivate)
@@ -153,6 +158,7 @@ class CheckResultsList(eclib.EBaseListCtrl):
         errorText = _("Error")
         minLType = max(self.GetTextExtent(typeText)[0], self.GetColumnWidth(0))
         minLText = max(self.GetTextExtent(errorText)[0], self.GetColumnWidth(2))
+        tmap = dict(Error=0, Warning=1)
         for row in data.GetOrderedData():
             assert len(row) == 3
             mtype = row[0]
@@ -161,6 +167,8 @@ class CheckResultsList(eclib.EBaseListCtrl):
             minLText = max(minLText, self.GetTextExtent(row[2])[0])
             row[0] = dspmsg
             self.Append(row)
+            img = tmap.get(mtype.strip(), 2)
+            self.SetItemImage(self.ItemCount - 1, img)
             if self.editor:
                 try:
                     if mtype == 'Error':
@@ -225,5 +233,6 @@ class LintData(object):
         msgmap = { 'Error' : _("Error"),
                    'Warning' : _("Warning"),
                    'Convention' : _("Convention"),
-                   'Refactor' : _("Refactor") }
+                   'Refactor' : _("Refactor"),
+                   '***' : _("Information") }
         return msgmap.get(mtype, _("Warning"))
