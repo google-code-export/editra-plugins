@@ -19,7 +19,7 @@ import os
 if setup != None:
     setup(
         name='PyStudio',
-        version='0.2',
+        version='0.3',
         description=__doc__,
         author=__author__,
         author_email="rans@email.com",

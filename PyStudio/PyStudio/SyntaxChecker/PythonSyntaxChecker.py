@@ -49,7 +49,7 @@ class PythonSyntaxChecker(AbstractSyntaxChecker):
                     disable = dlist[0]
                 self.pylintargs += ["-d", disable]
         self.pythonpath = variabledict.get("PYTHONPATH")
-        # TODO: need to make translateable
+        # TODO: need to make translatable
         self.nopythonerror = u"***  FATAL ERROR: No local Python configured or found"
         self.nopylinterror = u"***  FATAL ERROR: No Pylint configured or found"
 
@@ -86,7 +86,7 @@ class PythonSyntaxChecker(AbstractSyntaxChecker):
         #       '%(path)s:%(line)s: [%(sigle)s%(obj)s] %(msg)s'
         regex = re.compile(r"(.*):(.*): \[([A-Z])[, ]*(.*)\] (.*)%s" % os.linesep)
         rows = []
-        # TODO: returned messages need to be translateable
+        # TODO: returned messages need to be translatable
         if self.pythonpath:
             rows.append((u"***", u"Using PYTHONPATH + %s"\
                           % u", ".join(self.pythonpath), u"NA"))
@@ -126,6 +126,7 @@ class PythonSyntaxChecker(AbstractSyntaxChecker):
                 linenorows.add(outtext)
             except:
                 rows.append((mtype, outtext, linenostr))
+
         for mtype in sorted(rowsdict):
             mtyperows = rowsdict[mtype]
             for lineno in sorted(mtyperows):
