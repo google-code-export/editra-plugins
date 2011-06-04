@@ -7,6 +7,7 @@ Version 0.3
 Released:
 
 +Add indicator icons to PyAnalysis output list
++Fix bug with not being able to debug GUI programs on Linux.
 
 #-----------------------------------------------------------------------------#
 
