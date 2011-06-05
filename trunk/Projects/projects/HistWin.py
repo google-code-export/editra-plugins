@@ -26,17 +26,18 @@ __revision__ = "$Revision$"
 import wx
 import re
 import sys
-import wx.lib.mixins.listctrl as listmix
 
 # Local Imports
-from SourceControl import DecodeString
-import ScCommand
-import ProjCmnDlg
+from projects.SourceControl import DecodeString
+import projects.ScCommand as ScCommand
+import projects.ProjCmnDlg as ProjCmnDlg
 
 # Editra Library Imports
 import util
 import eclib
 
+#--------------------------------------------------------------------------#
+# Globals
 _ = wx.GetTranslation
 
 #--------------------------------------------------------------------------#
@@ -48,7 +49,7 @@ EVT_UPDATE_ITEMS = wx.PyEventBinder(edEVT_UPDATE_ITEMS, 1)
 class UpdateItemsEvent(wx.PyCommandEvent):
     """Event to signal that items need updating"""
     def __init__(self, etype, eid, value=[]):
-        wx.PyCommandEvent.__init__(self, etype, eid)
+        super(UpdateItemsEvent, self).__init__(etype, eid)
         self._value = value
 
     def GetValue(self):
@@ -62,8 +63,8 @@ SB_PROG = 1
 class HistoryWindow(wx.Frame):
     """Window for displaying the Revision History of a file"""
     def __init__(self, parent, title, node, data):
-        wx.Frame.__init__(self, parent, title=title,
-                          style=wx.DEFAULT_DIALOG_STYLE)
+        super(HistoryWindow, self).__init__(parent, title=title,
+                                            style=wx.DEFAULT_DIALOG_STYLE)
 
         # Set Frame Icon
         if wx.Platform == '__WXMAC__':
@@ -112,7 +113,7 @@ class HistoryWindow(wx.Frame):
     def Show(self, show=True):
         """Show and center the dialog"""
         self.CenterOnScreen()
-        wx.Frame.Show(self, show)
+        super(HistoryWindow, self).Show(show)
 
     def StartBusy(self):
         """Start the window as busy"""
@@ -129,7 +130,7 @@ class HistoryWindow(wx.Frame):
 class HistoryPane(wx.Panel):
     """Panel for housing the the history window controls"""
     def __init__(self, parent, node, data):
-        wx.Panel.__init__(self, parent)
+        super(HistoryPane, self).__init__(parent)
 
         # Attributes
         self.srcCtrl = ScCommand.SourceController(self)
@@ -217,8 +218,6 @@ class HistoryPane(wx.Panel):
             # Check for error in running diff command
             if evt.GetError() == ScCommand.SC_ERROR_RETRIEVAL_FAIL:
                 ProjCmnDlg.RetrievalErrorDlg(self)
-#        else:
-#            cmd = evt.GetValue()
 
     def getSelectedItems(self):
         """ Get the selected items """
@@ -286,9 +285,7 @@ class HistoryPane(wx.Panel):
 
 #-----------------------------------------------------------------------------#
 
-class HistList(wx.ListCtrl,
-               listmix.ListCtrlAutoWidthMixin,
-               eclib.ListRowHighlighter):
+class HistList(eclib.EBaseListCtrl):
     """List for displaying a files revision history"""
     REV_COL  = 0
     DATE_COL = 1
@@ -296,11 +293,8 @@ class HistList(wx.ListCtrl,
     COM_COL  = 3
     def __init__(self, parent):
         """ Create the list control """
-        wx.ListCtrl.__init__(self, parent,
-                             style=wx.LC_REPORT | \
-                                   wx.LC_SORT_ASCENDING | \
-                                   wx.LC_VRULES)
-        eclib.ListRowHighlighter.__init__(self)
+        super(HistList, self).__init__(parent, 
+                                       style=wx.LC_REPORT|wx.LC_VRULES)
 
         # Attributes
         self._frame = parent.GetTopLevelParent()
@@ -314,7 +308,6 @@ class HistList(wx.ListCtrl,
         self.InsertColumn(self.DATE_COL, _("Date"))
         self.InsertColumn(self.AUTH_COL, _("Author"))
         self.InsertColumn(self.COM_COL, _("Log Message"))
-        listmix.ListCtrlAutoWidthMixin.__init__(self)
 
         self.SendSizeEvent()
 
@@ -335,7 +328,7 @@ class HistList(wx.ListCtrl,
         index = -1
         append = False
         self.Freeze()
-        for item in evt.GetValue():
+        for item in self._data:
             # Shorten log message for list item
             if 'shortlog' not in item:
                 item['shortlog'] = log = item['log'].strip()
@@ -383,6 +376,8 @@ class HistList(wx.ListCtrl,
 
     def Populate(self, data):
         """Populate the list with the history data"""
+        if data:
+           data.sort(key=lambda x: x['date'], reverse=True) 
         self._data = data
         wx.PostEvent(self, UpdateItemsEvent(edEVT_UPDATE_ITEMS, -1, data))
         wx.CallAfter(self._frame.StopBusy)
@@ -413,7 +408,8 @@ class LogSearch(wx.SearchCtrl):
                  pos=wx.DefaultPosition, size=wx.DefaultSize, \
                  style=wx.TE_PROCESS_ENTER | wx.TE_RICH2):
         """Initializes the Search Control"""
-        wx.SearchCtrl.__init__(self, parent, wx.ID_ANY, value, pos, size, style)
+        super(LogSearch, self).__init__(parent, wx.ID_ANY, value,
+                                        pos, size, style)
 
         # Attributes
 
@@ -444,29 +440,3 @@ class LogSearch(wx.SearchCtrl):
         self.GetParent().GetHistoryList().Filter(self.GetValue())
 
 #-----------------------------------------------------------------------------#
-
-if __name__ == '__main__':
-    from datetime import datetime
-    DATA = [
-        {'revision':'a',
-         'date':datetime([int(x) for x in '2007/17/01'.split('/')]),
-         'author':'Kevin Smith',
-         'log':'Just Testing'},
-        {'revision':'b',
-         'date':datetime([int(x) for x in '2007/17/02'.split('/')]),
-         'author':'Kevin Smith',
-         'log':'Test again with some longer text'},
-        {'revision':'c',
-         'date':datetime([int(x) for x in '2007/17/03'.split('/')]),
-         'author':'Kevin Smith',
-         'log':'Just Testing'},
-        {'revision':'d',
-         'date':datetime([int(x) for x in '2007/17/04'.split('/')]),
-         'author':'Kevin Smith',
-         'log':'Log message with lots of text to test the truncation of long messages and their display in the text control.'}
-    ]
-    APP = wx.PySimpleApp(False)
-    WIN = HistoryWindow(None, "History Window Test", DATA)
-    WIN.Show()
-    APP.MainLoop()
-

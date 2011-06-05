@@ -1071,9 +1071,8 @@ class ProjectTree(wx.Panel):
     def OnUpdateStatus(self, evt):
         """ Apply status updates to tree view """
         # The event value is a method for preparing the update data
-        args = evt.GetValue()
-        if args is not None:
-            updates = self.prepUpdates(*args)
+        if evt.Value is not None:
+            updates = self.prepUpdates(*evt.Value)
         else:
             updates = list()
 
@@ -1165,13 +1164,10 @@ class ProjectTree(wx.Panel):
     def OnScCommandFinish(self, evt):
         """ Stops progress indicator when source control command is finished """
         UnusedArg(evt)
-
         try:
             self.GetParent().StopBusy()
         except wx.PyDeadObjectError:
             pass
-
-#        cmd = evt.GetValue()
 
     def endPaste(self, delayedresult):
         """ Stops progress indicator when paste is finished """
