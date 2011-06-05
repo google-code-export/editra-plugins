@@ -25,25 +25,27 @@ import wx
 import wx.lib.mixins.listctrl as listmix
 
 # Local Imports
-import FileIcons
-import SVN
-import CVS
-import GIT
-import BZR
-import HG
-import crypto
+import projects.FileIcons as FileIcons
+import projects.SVN as SVN
+import projects.CVS as CVS
+import projects.GIT as GIT
+import projects.BZR as BZR
+import projects.HG as HG
+import projects.crypto as crypto
 
 # Editra Libraries
 import ed_glob
 import util
 import ed_msg
+import eclib
+import ebmlib
 
 #-----------------------------------------------------------------------------#
 # Globals
 
 _ = wx.GetTranslation
 
-# Messages for syncronizing views
+# Messages for synchronizing views
 # msgdata == path of project
 MSG_PROJ_ADDED = ('Projects', 'Added')
 MSG_PROJ_REMOVED = ('Projects', 'Removed')
@@ -53,8 +55,8 @@ MSG_PROJ_REMOVED = ('Projects', 'Removed')
 class ConfigDialog(wx.Frame):
     """Dialog for configuring the Projects plugin settings"""
     def __init__(self, parent, id_, data, size=wx.DefaultSize):
-        wx.Frame.__init__(self, parent, id_, _("Projects Configuration"), 
-                          size=size, style=wx.DEFAULT_DIALOG_STYLE|wx.CLOSE_BOX)
+        super(ConfigDialog, self).__init__(parent, id_, _("Projects Configuration"), 
+                                           size=size, style=wx.DEFAULT_DIALOG_STYLE|wx.CLOSE_BOX)
 
         # Set title bar icon win/gtk
         util.SetWindowIcon(self)
@@ -95,16 +97,20 @@ class ConfigNotebook(wx.Notebook):
     """Main configuration dialog notebook"""
     def __init__(self, parent, id_, data):
         """Create the notebook and initialize the two pages"""
-        wx.Notebook.__init__(self, parent, id_, 
-                             size=(450, -1), style=wx.BK_DEFAULT )
+        super(ConfigNotebook, self).__init__(parent, id_, 
+                                             size=(450, -1), 
+                                             style=wx.BK_DEFAULT )
         self.AddPage(GeneralConfigTab(self, -1, data), _("General"))
         self.AddPage(SourceControlConfigTab(self, -1, data),
                      _("Source Control"))
         self.data = data
 
-    def __del__(self):
+        self.Bind(wx.EVT_WINDOW_DESTROY, self.OnDestroy)
+
+    def OnDestroy(self, evt):
         """Notify of closer"""
-        self.data.save()
+        if self and evt.GetEventObject() is self:
+            self.data.save()
 
 #-----------------------------------------------------------------------------#
 
@@ -118,7 +124,7 @@ class GeneralConfigTab(wx.Panel):
 
     def __init__(self, parent, id_, data):
         """Create the General configuration page"""
-        wx.Panel.__init__(self, parent, id_)
+        super(GeneralConfigTab, self).__init__(parent, id_)
         self._data = data
         
         # Layout
@@ -240,7 +246,7 @@ class SourceControlConfigTab(wx.Panel):
 
     def __init__(self, parent, id_, data):
         """Create the Source control configuration page"""
-        wx.Panel.__init__(self, parent, id_)
+        super(SourceControlConfigTab, self).__init__(parent, id_)
 
         # Attributes
         self._data = data
@@ -343,7 +349,7 @@ class SourceControlConfigTab(wx.Panel):
         self.FindWindowById(self.ID_SC_COMMAND).SetPath(command)
 
     def populateEnvironment(self):
-        """Populate the enviromental variable list with the values from
+        """Populate the environmental variable list with the values from
         the current config data.
 
         """
@@ -385,11 +391,11 @@ class SourceControlConfigTab(wx.Panel):
         sc = self.currentSystem
         rep = self.FindWindowById(self.ID_SC_REP_CHOICE)
         rep.Clear()
-        items = ['Default'] + \
+        items = [_("Default")] + \
                 sorted([x.strip() 
                         for x in self._data.getSCRepositories(sc).keys()
-                        if x != 'Default']) + \
-                ['','Add Repository...','Remove Repository...']
+                        if x != _("Default")]) + \
+                ['',_("Add Repository..."),_("Remove Repository...")]
         rep.AppendItems(items)
         rep.SetSelection(0)
         self.populateEnvironment()
@@ -518,22 +524,20 @@ class SourceControlConfigTab(wx.Panel):
 
 #-----------------------------------------------------------------------------#
 
-class AutoWidthListCtrl(listmix.TextEditMixin,
-                        listmix.ListCtrlAutoWidthMixin,
-                        wx.ListCtrl):
+class AutoWidthListCtrl(eclib.EEditListCtrl):
     ''' List control for showing and editing environmental variables '''
     def __init__(self, *args, **kwargs):
-        wx.ListCtrl.__init__(self, *args, **kwargs)
-        listmix.ListCtrlAutoWidthMixin.__init__(self)
-        listmix.TextEditMixin.__init__(self)
+        super(AutoWidthListCtrl, self).__init__(*args, **kwargs)
 
         # Attributes
         self.col_locs = [0]
                 
     def OnLeftDown(self, evt=None):
-        ''' Examine the click and double
+        """Examine the click and double
         click events to see if a row has been click on twice. If so,
-        determine the current row and columnn and open the editor.'''
+        determine the current row and column and open the editor.
+
+        """
         from bisect import bisect        
 
         if self.editor.IsShown():
@@ -568,49 +572,34 @@ class AutoWidthListCtrl(listmix.TextEditMixin,
 
 class ConfigData(dict):
     """ Configuration data storage class """
-    _instance = None
-    _created = False
-
+    __metaclass__ = ebmlib.Singleton
     def __init__(self, data=dict()):
         """ Create the config data object """
-        if not ConfigData._created:
-            dict.__init__(self)
+        super(ConfigData, self).__init__(self)
 
-            self['source-control'] = {}
-            self['general'] = {}
-            self['projects'] = {}
+        self['source-control'] = {}
+        self['general'] = {}
+        self['projects'] = {}
 
-            self.setFilters(sorted(['CVS', 'dntnd', '.DS_Store', '.dpp', '.newpp',
-                                    '*~', '*.a', '*.o', '.poem', '.dll', '._*',
-                                    '.localized', '.svn', '*.pyc', '*.bak', '#*',
-                                    '*.pyo','*%*', '.git', '*.previous', '*.swp',
-                                    '.#*', '.bzr', '.hg']))
-            self.setBuiltinDiff(True)
-            if wx.Platform == '__WXMAC__':
-                self.setDiffProgram('opendiff')
-            else:
-                self.setDiffProgram('')
-            self.setSyncWithNotebook(True)
-            
-            self.addSCSystem(CVS.CVS())
-            self.addSCSystem(SVN.SVN())
-            self.addSCSystem(GIT.GIT())
-            self.addSCSystem(BZR.BZR())
-            self.addSCSystem(HG.HG())
-            
-            self.load()
-            ConfigData._created = True
+        self.setFilters(sorted(['CVS', 'dntnd', '.DS_Store', '.dpp', '.newpp',
+                                '*~', '*.a', '*.o', '.poem', '.dll', '._*',
+                                '.localized', '.svn', '*.pyc', '*.bak', '#*',
+                                '*.pyo','*%*', '.git', '*.previous', '*.swp',
+                                '.#*', '.bzr', '.hg']))
+        self.setBuiltinDiff(True)
+        if wx.Platform == '__WXMAC__':
+            self.setDiffProgram('opendiff')
         else:
-            pass
-
-    def __new__(cls, *args, **kargs):
-        """Singleton instance
-        @return: instance of this class
-
-        """
-        if cls._instance is None:
-            cls._instance = dict.__new__(cls, *args, **kargs)
-        return cls._instance
+            self.setDiffProgram('')
+        self.setSyncWithNotebook(True)
+        
+        self.addSCSystem(CVS.CVS())
+        self.addSCSystem(SVN.SVN())
+        self.addSCSystem(GIT.GIT())
+        self.addSCSystem(BZR.BZR())
+        self.addSCSystem(HG.HG())
+        
+        self.load()
 
     @property
     def salt(self):
@@ -853,15 +842,3 @@ def recursiveupdate(dest, src):
         else:
             dest[key] = value
     return dest
-
-#-----------------------------------------------------------------------------#
-
-if __name__ == '__main__':
-    APP = wx.PySimpleApp(False)
-    FRAME = wx.Frame(None, title="Config Dialog Parent Frame", size=(480, 335))
-    CFG = ConfigDialog(FRAME, wx.ID_ANY, ConfigData())
-    #cfg = GeneralConfigTab(frame, -1, ConfigData())
-    #cfg = SourceControlConfigTab(frame, -1, ConfigData())
-    FRAME.Show()
-    CFG.Show()
-    APP.MainLoop()
