@@ -35,6 +35,7 @@ import ed_glob
 from profiler import Profile_Get
 import ed_msg
 import eclib
+import ed_basewin
 import ed_thread
 
 #--------------------------------------------------------------------------#
@@ -60,10 +61,10 @@ _ = wx.GetTranslation
 
 #--------------------------------------------------------------------------#
 
-class RepoModBox(eclib.ControlBox):
+class RepoModBox(ed_basewin.EdBaseCtrlBox):
     """Repository modification list container window"""
     def __init__(self, parent):
-        eclib.ControlBox.__init__(self, parent)
+        super(RepoModBox, self).__init__(parent)
 
         # Attributes
         self._list = RepoModList(self)
@@ -72,18 +73,23 @@ class RepoModBox(eclib.ControlBox):
         self._ctrl = ScCommand.SourceController(self)
         self._repos = self.FindRepos(self._config['projects'].keys())
         self._repo_ch = None
+        self._commit = None # Created in __DoLayout
+        self._refresh = None
+        self._update = None
+        self._revert = None
 
         # Setup
         self.__DoLayout()
 
         # Event Handlers
-        self.Bind(wx.EVT_BUTTON, lambda evt: self.DoCommit(), id=ID_COMMIT)
-        self.Bind(wx.EVT_BUTTON, lambda evt: self.DoUpdate(), id=ID_UPDATE)
+        self.Bind(wx.EVT_BUTTON, lambda evt: self.DoCommit(), self._commit)
+        self.Bind(wx.EVT_BUTTON, lambda evt: self.DoUpdate(), self._update)
         self.Bind(wx.EVT_BUTTON,
-                  lambda evt: self.DoStatusRefresh(), id=wx.ID_REFRESH)
+                  lambda evt: self.DoStatusRefresh(), self._refresh)
         self.Bind(wx.EVT_BUTTON,
-                  lambda evt: self.DoRevert(), id=wx.ID_REVERT)
+                  lambda evt: self.DoRevert(), self._revert)
         self.Bind(wx.EVT_CHOICE, self.OnChoice, id=ID_REPO_CHOICE)
+        self.Bind(wx.EVT_WINDOW_DESTROY, self.OnDestroy, self)
 #        self.Bind(wx.EVT_UPDATE_UI, self.OnUpdateUI)
 
         # Handlers for projects messages sent over editra message bus
@@ -93,16 +99,15 @@ class RepoModBox(eclib.ControlBox):
         # Do a refresh when first shown
         wx.CallLater(500, self.DoStatusRefresh)
 
-    def __del__(self):
+    def OnDestroy(self, evt):
         """Destructor"""
-        ed_msg.Unsubscribe(self.OnProjectAdded)
-        ed_msg.Unsubscribe(self.OnProjectRemoved)
+        if self:
+            ed_msg.Unsubscribe(self.OnProjectAdded)
+            ed_msg.Unsubscribe(self.OnProjectRemoved)
 
     def __DoLayout(self):
         """Layout and setup the results screen ui"""
-        ctrlbar = eclib.ControlBar(self, style=eclib.CTRLBAR_STYLE_GRADIENT)
-        if wx.Platform == '__WXGTK__':
-            ctrlbar.SetWindowStyle(eclib.CTRLBAR_STYLE_DEFAULT)
+        ctrlbar = self.CreateControlBar(wx.TOP)
 
         # Repository
         labels = self._RefreshRepos()
@@ -115,31 +120,21 @@ class RepoModBox(eclib.ControlBox):
         ctrlbar.AddStretchSpacer()
 
         # Refresh Button
-        refresh = eclib.PlateButton(ctrlbar, wx.ID_REFRESH, _("Refresh"),
-                                    FileIcons.getScStatusBitmap(),
-                                    style=eclib.PB_STYLE_NOBG)
-        ctrlbar.AddControl(refresh, wx.ALIGN_RIGHT)
-
+        self._refresh = self.AddPlateButton(_("Refresh"),
+                                            FileIcons.getScStatusBitmap(),
+                                            wx.ALIGN_RIGHT)
         # Update
-        update = eclib.PlateButton(ctrlbar, ID_UPDATE, _("Update"),
-                                   FileIcons.getScUpdateBitmap(),
-                                   style=eclib.PB_STYLE_NOBG)
-        ctrlbar.AddControl(update, wx.ALIGN_RIGHT)
-
+        self._update = self.AddPlateButton(_("Update"),
+                                           FileIcons.getScUpdateBitmap(),
+                                           wx.ALIGN_RIGHT)
         # Commit
-        commit = eclib.PlateButton(ctrlbar, ID_COMMIT, _("Commit"),
-                                   FileIcons.getScCommitBitmap(),
-                                   style=eclib.PB_STYLE_NOBG)
-        ctrlbar.AddControl(commit, wx.ALIGN_RIGHT)
-
+        self._commit = self.AddPlateButton(_("Commit"),
+                                           FileIcons.getScCommitBitmap(),
+                                           wx.ALIGN_RIGHT)
         # Clear Button
-        revert = eclib.PlateButton(ctrlbar, wx.ID_REVERT, _("Revert"),
-                                   FileIcons.getScRevertBitmap(),
-                                   style=eclib.PB_STYLE_NOBG)
-        ctrlbar.AddControl(revert, wx.ALIGN_RIGHT)
-
-        ctrlbar.SetVMargin(1, 1)
-        self.SetControlBar(ctrlbar)
+        self._revert = self.AddPlateButton(_("Revert"),
+                                           FileIcons.getScRevertBitmap(),
+                                           wx.ALIGN_RIGHT)
         self.SetWindow(self._list)
 
     def _RefreshRepos(self):
@@ -283,12 +278,12 @@ class RepoModBox(eclib.ControlBox):
                so that the overridden method would be called.
 
         """
-        e_id = evt.GetId()
-        if e_id in (wx.ID_REVERT, ID_COMMIT):
+        e_obj = evt.GetEventObject()
+        if e_obj in (self._commit, self._revert):
             evt.Enable(self._list.GetSelectedItemCount())
-        elif e_id == ID_REPO_CHOICE:
+        elif evt.Id == ID_REPO_CHOICE:
             evt.Enable(self._repo_ch.GetCount())
-        elif e_id == wx.ID_REFRESH:
+        elif e_obj is self._refresh:
             evt.Enable(len(self._repo_ch.GetStringSelection()))
         else:
             evt.Skip()

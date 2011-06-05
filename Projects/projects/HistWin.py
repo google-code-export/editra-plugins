@@ -375,7 +375,10 @@ class HistList(eclib.EBaseListCtrl):
             return wx.EmptyString
 
     def Populate(self, data):
-        """Populate the list with the history data"""
+        """Populate the list with the history data
+        @note: called from background thread!
+
+        """
         if data:
            data.sort(key=lambda x: x['date'], reverse=True) 
         self._data = data
