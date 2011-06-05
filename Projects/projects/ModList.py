@@ -2,7 +2,7 @@
 # Name: ModList.py                                                            #
 # Purpose: Enumerate modified, added, deleted files in a list                 #
 # Author: Cody Precord <cprecord@editra.org>                                  #
-# Copyright: (c) 2008 Cody Precord <staff@editra.org>                         #
+# Copyright: (c) 2008-2011 Cody Precord <staff@editra.org>                    #
 # License: wxWindows License                                                  #
 ###############################################################################
 
@@ -21,9 +21,7 @@ __revision__ = "$Revision$"
 #--------------------------------------------------------------------------#
 # Imports
 import os
-import threading
 import wx
-import wx.lib.mixins.listctrl as listmix
 
 # Local Imports
 import FileIcons
@@ -37,6 +35,7 @@ import ed_glob
 from profiler import Profile_Get
 import ed_msg
 import eclib
+import ed_thread
 
 #--------------------------------------------------------------------------#
 # Globals
@@ -296,9 +295,7 @@ class RepoModBox(eclib.ControlBox):
 
 #--------------------------------------------------------------------------#
 
-class RepoModList(wx.ListCtrl,
-                  eclib.ListRowHighlighter,
-                  listmix.ListCtrlAutoWidthMixin):
+class RepoModList(eclib.EBaseListCtrl):
     """List for managing and listing files under SourceControl.
     Specifically it displays the summary of modified files under a given
     repository.
@@ -308,10 +305,7 @@ class RepoModList(wx.ListCtrl,
     FILENAME_COL = 1
     def __init__(self, parent, id=wx.ID_ANY):
         """Create the list control"""
-        wx.ListCtrl.__init__(self, parent, id,
-                             style=wx.LC_REPORT|wx.LC_VRULES|wx.BORDER)
-        listmix.ListCtrlAutoWidthMixin.__init__(self)
-        eclib.ListRowHighlighter.__init__(self)
+        super(RepoModList, self).__init__(parent, id, style=wx.LC_REPORT|wx.LC_VRULES|wx.BORDER)
 
         # Attributes
         self._menu = None
@@ -336,12 +330,14 @@ class RepoModList(wx.ListCtrl,
         self.Bind(wx.EVT_MENU, self.OnMenu)
         self.Bind(ScCommand.EVT_STATUS, self.OnStatus)
         self.Bind(ScCommand.EVT_CMD_COMPLETE, self.OnCommandComplete)
+        self.Bind(wx.EVT_WINDOW_DESTROY, self.OnDestroy, self)
 
         # Editra Message Handlers
         ed_msg.Subscribe(self.OnUpdateFont, ed_msg.EDMSG_DSP_FONT)
 
-    def __del__(self):
-        ed_msg.Unsubscribe(self.OnUpdateFont)
+    def OnDestroy(self, evt):
+        if self and evt.GetEventObject() is self:
+            ed_msg.Unsubscribe(self.OnUpdateFont)
 
     def __ConstructNodes(self):
         """Make the node's list from the selected list items
@@ -509,10 +505,9 @@ class RepoModList(wx.ListCtrl,
         src_c = self._ctrl.GetSCSystem(path)
         if src_c is not None:
             self._path = path
-            t = threading.Thread(target=self._ctrl.StatusWithTimeout,
-                                 args=(src_c, None, dict(path=path)),
-                                 kwargs=dict(recursive=True))
-            t.start()
+            ed_thread.EdThreadPool().QueueJob(self._ctrl.StatusWithTimeout,
+                                              src_c, None, dict(path=path),
+                                              dict(recursive=True))
 
     def UpdateRepository(self, path):
         """Update the repository
@@ -534,8 +529,6 @@ class RepoModList(wx.ListCtrl,
 
     def OnCommandComplete(self, evt):
         """Handle when a source control command has completed."""
-#        print evt.GetValue()
-#        print evt.GetError()
         self.RefreshStatus()
         self.SetCommandRunning(False)
 
@@ -593,7 +586,7 @@ class RepoModList(wx.ListCtrl,
         the status of the files from the selected repository.
 
         """
-        status = evt.GetValue()[1:]
+        status = evt.Value[1:]
 
         path = None
         if len(status):

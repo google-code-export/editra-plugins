@@ -24,14 +24,17 @@ __revision__ = "$Revision$"
 import time
 import wx
 import os
-import shutil
 import threading
+import shutil
 import subprocess
 import tempfile
 
+# Editra Libraries
+import ed_thread
+
 # Local Imports
-from ConfigDialog import ConfigData
-import diffwin
+from projects.ConfigDialog import ConfigData
+import projects.diffwin as diffwin
 
 #--------------------------------------------------------------------------#
 # Globals
@@ -58,27 +61,16 @@ EVT_STATUS = wx.PyEventBinder(ppEVT_STATUS, 1)
 class SourceControlEvent(wx.PyCommandEvent):
     """Base event to signal source controller events"""
     def __init__(self, etype, eid, value=None, err=SC_ERROR_NONE):
-        wx.PyCommandEvent.__init__(self, etype, eid)
+        super(SourceControlEvent, self).__init__(etype, eid)
 
         # Attributes
         self._value = value
         self._err = err
 
-    def GetError(self):
-        """Get the error status code"""
-        return self._err
-
-    def GetValue(self):
-        """Get the events value"""
-        return self._value
-
-    def SetError(self, err):
-        """Set the error status"""
-        self._err = err
-
-    def SetValue(self, val):
-        """Set the events value"""
-        self._value = val
+    Error = property(lambda self: self._err,
+                     lambda self, err: setattr(self, '_err', err))
+    Value = property(lambda self: self._value,
+                     lambda self, v: setattr(self, '_value', v))
 
 #--------------------------------------------------------------------------#
 
@@ -94,7 +86,7 @@ class ScCommandThread(threading.Thread):
         @param etype: callback event type to post
 
         """
-        threading.Thread.__init__(self)
+        super(ScCommandThread, self).__init__()
 
         # Attributes
         self.cancel = False         # Abort task
@@ -124,7 +116,7 @@ class SourceController(object):
         @param owner: Owner window
 
         """
-        object.__init__(self)
+        super(SourceController, self).__init__()
 
         # Attributes
         self._parent = owner
