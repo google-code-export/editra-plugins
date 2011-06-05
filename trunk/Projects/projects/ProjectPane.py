@@ -79,11 +79,11 @@ import shutil
 import wx.lib.delayedresult
 
 # Local Imports
-import ConfigDialog
-import ScCommand
-import FileIcons
-from HistWin import HistoryWindow
-import ProjCmnDlg
+import projects.ConfigDialog as ConfigDialog
+import projects.ScCommand as ScCommand
+import projects.FileIcons as FileIcons
+from projects.HistWin import HistoryWindow
+import projects.ProjCmnDlg as ProjCmnDlg
 
 # Editra Imports
 import ed_glob
