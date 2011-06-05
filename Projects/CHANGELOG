@@ -12,6 +12,8 @@ Released:
 Enhancements:
 
 Bug Fixes:
++Fix crash that could occur in move to trash feature due to UI access from
+background thread.
 
 #-----------------------------------------------------------------------------#
 Version 1.7

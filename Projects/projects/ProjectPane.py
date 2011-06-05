@@ -89,6 +89,7 @@ import projects.ProjCmnDlg as ProjCmnDlg
 import ed_glob
 import ed_event
 import ed_msg
+import ed_thread
 import profiler
 import util
 import ebmlib
@@ -196,7 +197,7 @@ class SyncNodesEvent(SimpleEvent):
 class WatcherThread(threading.Thread):
     """Thread class for monitoring directories for changes"""
     def __init__(self, parent, path, flag=True, data=None, delay=2):
-        threading.Thread.__init__(self)
+        super(WatcherThread, self).__init__()
 
         # Attributes
         self.parent = parent
@@ -1659,14 +1660,14 @@ class ProjectTree(wx.Panel):
                 try:
                     ebmlib.MoveToTrash(path)
                 except Exception, msg:
-                    rc = wx.MessageDialog(self,
-                      _('An error occurred when attempting to remove ') + \
-                      unicode(msg) + _('. Do you wish to continue?'),
-                      _('Error occurred when removing files'),
-                      style=wx.YES_NO|wx.YES_DEFAULT|wx.ICON_ERROR).ShowModal()
-                    if rc == wx.ID_NO:
-                        break
-                    continue
+                    def showError():
+                        wx.MessageDialog(self,
+                          _('An error occurred when attempting to delete the selected file(s): \n') + \
+                          unicode(msg),
+                          _('Error occurred when removing files'),
+                          style=wx.OK|wx.ICON_ERROR).ShowModal()
+                    wx.CallAfter(showError)
+                    return # bail
 
                 # If node is a project, remove it
                 if node in projects:
@@ -1675,7 +1676,7 @@ class ProjectTree(wx.Panel):
                     self.saveProjects()
 
         if selections:
-            threading.Thread(target=delete).start()
+            ed_thread.EdThreadPool().QueueJob(delete)
 
     def OnActivate(self, event):
         """
