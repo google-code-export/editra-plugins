@@ -216,7 +216,7 @@ class HistoryPane(wx.Panel):
             self._btn.Enable(True)
             self.GetParent().StopBusy()
             # Check for error in running diff command
-            if evt.GetError() == ScCommand.SC_ERROR_RETRIEVAL_FAIL:
+            if evt.Error == ScCommand.SC_ERROR_RETRIEVAL_FAIL:
                 ProjCmnDlg.RetrievalErrorDlg(self)
 
     def getSelectedItems(self):
