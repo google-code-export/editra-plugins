@@ -69,7 +69,7 @@ class Projects(plugin.Plugin):
 
     def GetMinVersion(self):
         """Get the minimum version of Editra that this plugin supports"""
-        return "0.6.27"
+        return "0.6.48"
 
     def GetUIHandlers(self):
         """Returns handlers for UpdateUI events"""

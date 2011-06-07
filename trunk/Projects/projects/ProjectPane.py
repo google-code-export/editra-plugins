@@ -30,7 +30,7 @@ access to source control operations such as status updates, committing,
 removing, and reverting to the repository revision.
 
 But it doesn't end there.  Probably the most powerful feature of the ProjectPane
-is its diffing utitility and history window.  You can compare your copy
+is its diffing utility and history window.  You can compare your copy
 of a file to any previous revision using the history window.  You can also
 compare any two repository revisions.  Locating revisions is easy using the
 interactive search that filters the visible revisions based on the commit log
@@ -48,7 +48,7 @@ to your needs.  The general options are listed below:
         notebook, you can have the ProjectPane automatically show this file
         in the current projects by enabling this feature.
 
-    Diff Program -- you can choose to use an internal visuall diffing program
+    Diff Program -- you can choose to use an internal visual diffing program
         or specify an external command.
 
 The source control options are even more extensive.  Each source control
@@ -94,6 +94,7 @@ import profiler
 import util
 import ebmlib
 import eclib
+import ed_basewin
 
 #-----------------------------------------------------------------------------#
 # Globals
@@ -261,7 +262,7 @@ class MyTreeCtrl(wx.TreeCtrl):
     """Base class used for displaying the project files"""
     def __init__(self, parent, id_, pos, size, style, log):
         """ Create the tree control for viewing the projects """
-        wx.TreeCtrl.__init__(self, parent, id_, pos, size, style)
+        super(MyTreeCtrl, self).__init__(parent, id_, pos, size, style)
         self.log = log
 
     def OnCompareItems(self, item1, item2):
@@ -294,8 +295,8 @@ class ProjectTree(wx.Panel):
     """ Tree control for holding project nodes """
     def __init__(self, parent, log):
         # Use the WANTS_CHARS style so the panel doesn't eat the Return key.
-        wx.Panel.__init__(self, parent, -1,
-                          style=wx.WANTS_CHARS|wx.SUNKEN_BORDER)
+        super(ProjectTree, self).__init__(parent, -1,
+                                          style=wx.WANTS_CHARS|wx.SUNKEN_BORDER)
 
         self._mainw = None  # MainWindow
         self.log = log
@@ -358,12 +359,13 @@ class ProjectTree(wx.Panel):
         self.Bind(wx.EVT_CONTEXT_MENU, self.OnContextMenu)
 
         self.Bind(wx.EVT_TIMER, self.OnThreadCleanup)
+        self.Bind(wx.EVT_WINDOW_DESTROY, self.OnDestroy, self)
 
         self.Bind(EVT_SYNC_NODES, self.OnSyncNode)
         self.Bind(ScCommand.EVT_STATUS, self.OnUpdateStatus)
         self.Bind(ScCommand.EVT_CMD_COMPLETE, self.OnScCommandFinish)
 
-        # Notebook syncronization
+        # Notebook synchronization
         self._mainw = self.GetGrandParent()
         nbook = self._mainw.GetNotebook()
         ed_msg.Subscribe(self.OnPageChanged, ed_msg.EDMSG_UI_NB_CHANGED)
@@ -423,17 +425,17 @@ class ProjectTree(wx.Panel):
 
         self.loadProjects()
 
-
-    def __del__(self):
+    def OnDestroy(self, evt):
         """ Clean up resources """
-        ed_msg.Unsubscribe(self.OnThemeChange)
-        ed_msg.Unsubscribe(self.OnUpdateFont)
-        ed_msg.Unsubscribe(self.OnPageChanged)
-        ed_msg.Unsubscribe(self.OnPageClosing)
+        if self:
+            ed_msg.Unsubscribe(self.OnThemeChange)
+            ed_msg.Unsubscribe(self.OnUpdateFont)
+            ed_msg.Unsubscribe(self.OnPageChanged)
+            ed_msg.Unsubscribe(self.OnPageClosing)
 
-        # Kill all watcher threads
-        for watcher in self.watchers.keys():
-            watcher.flag = False
+            # Kill all watcher threads
+            for watcher in self.watchers.keys():
+                watcher.flag = False
 
     def _setupIcons(self):
         """ Setup the icons used by the tree and menus """
@@ -1724,19 +1726,14 @@ class ProjectTree(wx.Panel):
 
 #-----------------------------------------------------------------------------#
 
-class ProjectPane(eclib.ControlBox):
+class ProjectPane(ed_basewin.EdBaseCtrlBox):
     """Creates a project pane"""
-    ID_REMOVE_PROJECT = wx.NewId()
-    ID_ADD_PROJECT = wx.NewId()
-    ID_CONFIG = wx.NewId()
     ID_CFGDLG = wx.NewId()
     ID_PROJECTS = wx.NewId()
     PANE_NAME = u'Projects'
 
-    def __init__(self, parent, id_=wx.ID_ANY, pos=wx.DefaultPosition,
-                 size=wx.DefaultSize, style=wx.NO_BORDER):
-        eclib.ControlBox.__init__(self, parent, id_, pos, size)
-        UnusedArg(style)
+    def __init__(self, parent):
+        super(ProjectPane, self).__init__(parent)
 
         # Attributes
         self._mw = parent       # Save ref to owner window
@@ -1754,54 +1751,40 @@ class ProjectPane(eclib.ControlBox):
         self._ignore = False # Toggle ignoring update notifications on/off
 
         # Layout Panes
-        self.ctrlbar = eclib.ControlBar(self, style=eclib.CTRLBAR_STYLE_GRADIENT)
-        if wx.Platform == '__WXGTK__':
-            self.ctrlbar.SetWindowStyle(eclib.CTRLBAR_STYLE_DEFAULT)
-        self.ctrlbar.SetToolSpacing(0)
-        self.ctrlbar.AddSpacer(5, 5)
-
-        cfgbmp = wx.ArtProvider.GetBitmap(str(ed_glob.ID_PREF), wx.ART_MENU)
-        configbutton = eclib.PlateButton(self.ctrlbar, self.ID_CONFIG,
-                                         bmp=cfgbmp, style=eclib.PB_STYLE_NOBG)
-        configbutton.SetToolTipString(_("Configure"))
-        self.ctrlbar.AddControl(configbutton, wx.ALIGN_LEFT)
-
+        self.ctrlbar = self.CreateControlBar(wx.TOP)
+        self.cfgbtn = self.AddPlateButton(bmp=ed_glob.ID_PREF, align=wx.ALIGN_LEFT)
+        self.cfgbtn.SetToolTipString(_("Configure"))
         addbmp = self.projects.il.GetBitmap(self.projects.icons['project-add'])
-        addbutton = eclib.PlateButton(self.ctrlbar, self.ID_ADD_PROJECT,
-                                         bmp=addbmp, style=eclib.PB_STYLE_NOBG)
-        addbutton.SetToolTipString(_("Add Project"))
-        self.ctrlbar.AddControl(addbutton, wx.ALIGN_LEFT)
-
+        self.addbtn = self.AddPlateButton(bmp=addbmp, align=wx.ALIGN_LEFT)
+        self.addbtn.SetToolTipString(_("Add Project"))
         rembmp = self.projects.il.GetBitmap(self.projects.icons['project-delete'])
-        removebutton = eclib.PlateButton(self.ctrlbar, self.ID_REMOVE_PROJECT,
-                                         bmp=rembmp, style=eclib.PB_STYLE_NOBG)
-        removebutton.SetToolTipString(_("Remove Project"))
-        self.ctrlbar.AddControl(removebutton, wx.ALIGN_LEFT)
-
+        self.delbtn = self.AddPlateButton(bmp=rembmp, align=wx.ALIGN_LEFT)
+        self.delbtn.SetToolTipString(_("Remove Project"))
         self.ctrlbar.AddStretchSpacer()
         self.busy = wx.Gauge(self, size=(50, 16), style=wx.GA_HORIZONTAL)
         self.ctrlbar.AddControl(self.busy, wx.ALIGN_RIGHT)
         self.ctrlbar.AddSpacer(5, 5)
         self.busy.Hide()
 
-        self.SetControlBar(self.ctrlbar)
         self.SetWindow(self.projects)
 
         # Event Handlers
         self.Bind(wx.EVT_BUTTON, self.OnPress)
         self.Bind(wx.EVT_TIMER, self.OnTick)
         self.Bind(ed_event.EVT_MAINWINDOW_EXIT, self.OnMainExit)
+        self.Bind(wx.EVT_WINDOW_DESTROY, self.OnDestroy, self)
 
         # Editra Message Handlers
         ed_msg.Subscribe(self.OnProjectAdded, ConfigDialog.MSG_PROJ_ADDED)
         ed_msg.Subscribe(self.OnProjectRemoved, ConfigDialog.MSG_PROJ_REMOVED)
 
-    def __del__(self):
+    def OnDestroy(self, evt):
         """Make sure the timer is stopped"""
-        ed_msg.Unsubscribe(self.OnProjectAdded)
-        ed_msg.Unsubscribe(self.OnProjectRemoved)
-        if self.timer.IsRunning():
-            self.timer.Stop()
+        if self:
+            ed_msg.Unsubscribe(self.OnProjectAdded)
+            ed_msg.Unsubscribe(self.OnProjectRemoved)
+            if self.timer.IsRunning():
+                self.timer.Stop()
 
     def GetOwnerWindow(self):
         """Return reference to mainwindow that created this panel"""
@@ -1815,8 +1798,8 @@ class ProjectPane(eclib.ControlBox):
 
     def OnPress(self, evt):
         """ Add/Remove projects """
-        e_id = evt.GetId()
-        if e_id == self.ID_ADD_PROJECT:
+        e_obj = evt.GetEventObject()
+        if e_obj is self.addbtn:
             dialog = wx.DirDialog(self, _('Choose a Project Directory'))
             if dialog.ShowModal() == wx.ID_OK:
                 path = dialog.GetPath()
@@ -1824,12 +1807,12 @@ class ProjectPane(eclib.ControlBox):
                 self._ignore = True
                 ed_msg.PostMessage(ConfigDialog.MSG_PROJ_ADDED, (path,))
                 self._ignore = False
-        elif e_id == self.ID_REMOVE_PROJECT:
+        elif e_obj is self.delbtn:
             paths = self.projects.removeSelectedProject()
             self._ignore = True
             ed_msg.PostMessage(ConfigDialog.MSG_PROJ_REMOVED, (paths,))
             self._ignore = False
-        elif e_id == self.ID_CONFIG:
+        elif e_obj is self.cfgbtn:
             if not self.FindWindowById(self.ID_CFGDLG):
                 cfg = ConfigDialog.ConfigDialog(self, self.ID_CFGDLG,
                                                 self.projects.config)
@@ -1902,6 +1885,7 @@ class ProjectPane(eclib.ControlBox):
         if self.timer.IsRunning():
             self.timer.Stop()
 
-        self.busy.SetValue(0)
-        wx.CallLater(1200, self.busy.Hide)
+        if self.busy:
+            self.busy.SetValue(0)
+            wx.CallLater(1200, self.busy.Hide)
 
