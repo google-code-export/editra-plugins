@@ -16,6 +16,7 @@ Bug Fixes:
 +Fix crash that could occur in move to trash feature due to UI access from
 background thread.
 +Fix sorting issue in History Window
++Fix handling of ed_msg handler cleanup
 
 #-----------------------------------------------------------------------------#
 Version 1.7
