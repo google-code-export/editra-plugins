@@ -85,7 +85,7 @@ class MessageHandler(object):
             self._jobtimer.Stop()
 
     def ConflictingModules(self, moduleslist):
-        dlg = wx.MessageDialog(self, 
+        dlg = wx.MessageDialog(self.mainwindow, 
         _("The modules: %s, which are incompatible with the debugger were "
         "detected and can possibly cause the debugger to fail.") % moduleslist,
         _("Warning"), wx.OK|wx.ICON_WARNING)
