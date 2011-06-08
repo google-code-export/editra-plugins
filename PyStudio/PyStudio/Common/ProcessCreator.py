@@ -65,7 +65,7 @@ class ProcessCreator(object):
                 self.environment["PYTHONPATH"] = str(os.pathsep.join(self.pythonpath))
         if wx.Platform != "__WXMSW__":
             self.environment["PATH"] = str(self.get_path())
-            # If not frozen binary inheirit the shell environment
+            # If not frozen binary inherit the shell environment
             if not getattr(sys, 'frozen', False):
                 self.environment.update(os.environ)
 

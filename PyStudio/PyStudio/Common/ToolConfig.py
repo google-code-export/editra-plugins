@@ -176,7 +176,7 @@ class GeneralConfigPanel(wx.Panel):
         """Update checkbox linked configuration options"""
         e_obj = event.GetEventObject()
         if e_obj is self._check_on_save_cb:
-            config = Profile_Get(PYSTUDIO_CONFIG, default=dict())
+            config = Profile_Get(PYTOOL_CONFIG, default=dict())
             config[TLC_COMPILE_ON_SAVE] = e_obj.GetValue()
             Profile_Set(PYTOOL_CONFIG, config)
 
