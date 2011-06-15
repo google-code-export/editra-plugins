@@ -86,7 +86,7 @@ class PyStudioUtils():
         for page in nb.GetTextControls():
             tabfile = os.path.normcase(page.GetFileName())
             if tabfile == filepath:
-                return nb.GetPage(page.GetTabIndex())
+                return page
 
         return None
         
