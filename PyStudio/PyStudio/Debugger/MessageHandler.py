@@ -99,6 +99,9 @@ class MessageHandler(object):
         
     def SetStepMarker(self, fileName, lineNo):
         self.editor = PyStudioUtils.GetEditorOrOpenFile(self.mainwindow, fileName)
+        if not self.editor:
+            util.Log("[PyStudio][err] Unable to get editor for file: %s" % fileName)
+            return
         self.editorlineno = lineNo - 1
         self.editor.GotoLine(self.editorlineno)
         self.editor.ShowStepMarker(self.editorlineno, show=True)
