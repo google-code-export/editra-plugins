@@ -78,7 +78,10 @@ class ExpressionsList(eclib.EToggleEditListCtrl):
         self.Parent.DeleteExpression(expression)
         if column == 0:
             expression = newval
-        enabled = self.IsChecked(idx)
+            enabled = True
+            self.CheckItem(idx)
+        else:
+            enabled = self.IsChecked(idx)
         self.Parent.SetExpression(expression, enabled)
         self._data[idx] = [unicode(expression),]
         self.Evaluate(enabled, expression, idx)        
