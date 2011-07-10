@@ -82,6 +82,7 @@ class VariablesList(wx.gizmos.TreeListCtrl):
         self.Bind(wx.EVT_TREE_ITEM_COLLAPSING, self.OnItemCollapsing)
         self.Bind(wx.EVT_TREE_ITEM_ACTIVATED, self.OnItemActivated)
         self.Bind(wx.EVT_TREE_ITEM_GETTOOLTIP, self.OnItemToolTip)
+        self.Bind(wx.EVT_TREE_ITEM_RIGHT_CLICK ,self.OnItemRightClick)
 
     def set_mainwindow(self, mw):
         self._mainw = mw
@@ -165,6 +166,19 @@ class VariablesList(wx.gizmos.TreeListCtrl):
         worker.start()
         return (old_key, old_expressionlist)
 
+    def OnItemRightClick(self, event):
+        item = event.GetItem()
+        (expr, is_valid) = self.GetPyData(item)
+        if expr in [_("Loading..."), _("Data Retrieval Timeout"),
+                    _("Namespace Warning")]:
+            return
+        wx.CallAfter(self._onitemrightclick, item)
+
+    def _onitemrightclick(self, item):
+        varname = self.GetItemText(item, VariablesList.COL_NAME)
+        RpdbDebugger().setexpression(varname, True)
+        RpdbDebugger().restoreexpressions()
+            
     def OnItemToolTip(self, event):
         item = event.GetItem()
         tooltip = self.GetItemText(item, VariablesList.COL_REPR)[1:]

@@ -105,6 +105,7 @@ class RpdbDebugger(object):
         self.catchunhandledexception = lambda:None
         self.updateanalyze = lambda:None
         # expressions shelf
+        self.setexpression = lambda x,y:None
         self.restoreexpressions = lambda:None
         self.saveandrestoreexpressions = lambda:None
         self.clearexpressionvalues = lambda:None

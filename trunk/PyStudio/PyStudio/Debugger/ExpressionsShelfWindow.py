@@ -61,6 +61,7 @@ class ExpressionsShelfWindow(BaseShelfWindow):
         self.ignoredwarnings = {}
         
         # Debugger Attributes
+        RpdbDebugger().setexpression = self.SetExpression
         RpdbDebugger().restoreexpressions = self.RestoreExpressions
         RpdbDebugger().saveandrestoreexpressions = self.SaveAndRestoreExpressions
         RpdbDebugger().clearexpressionvalues = self._listCtrl.clearexpressionvalues
@@ -74,6 +75,7 @@ class ExpressionsShelfWindow(BaseShelfWindow):
 
     def Unsubscription(self):
         """Cleanup callbacks when window is destroyed"""
+        RpdbDebugger().setexpression = lambda x,y:None
         RpdbDebugger().restoreexpressions = lambda:None
         RpdbDebugger().saveandrestoreexpressions = lambda:None
         RpdbDebugger().clearexpressionvalues = lambda:None
