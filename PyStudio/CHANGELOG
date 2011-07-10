@@ -12,6 +12,7 @@ Released:
 +Fix crash when setting configuration (caused by PYSTUDIO_CONFIG: should be PYTOOL_CONFIG)
 +Fix conflicting modules crash (MessageDialog needs self.mainwindow not self)
 editor instance from main application.
++Adding an new expression should "check" the check box
 
 #-----------------------------------------------------------------------------#
 
