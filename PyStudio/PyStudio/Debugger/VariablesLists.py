@@ -178,6 +178,11 @@ class VariablesList(wx.gizmos.TreeListCtrl):
         varname = self.GetItemText(item, VariablesList.COL_NAME)
         RpdbDebugger().setexpression(varname, True)
         RpdbDebugger().restoreexpressions()
+        dlg = wx.MessageDialog(self, 
+        _("Added %s to PyExpression shelf.") % varname,
+        _("Info"), wx.OK|wx.ICON_WARNING)
+        dlg.ShowModal()
+        dlg.Destroy()
             
     def OnItemToolTip(self, event):
         item = event.GetItem()
