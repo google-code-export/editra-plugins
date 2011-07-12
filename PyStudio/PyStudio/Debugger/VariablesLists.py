@@ -22,6 +22,7 @@ import wx.gizmos
 
 # Editra Libraries
 import ed_glob
+import ed_msg
 
 # Local Imports
 from PyStudio.Common.PyStudioUtils import PyStudioUtils
@@ -178,11 +179,7 @@ class VariablesList(wx.gizmos.TreeListCtrl):
         varname = self.GetItemText(item, VariablesList.COL_NAME)
         RpdbDebugger().setexpression(varname, True)
         RpdbDebugger().restoreexpressions()
-        dlg = wx.MessageDialog(self, 
-        _("Added %s to PyExpression shelf.") % varname,
-        _("Info"), wx.OK|wx.ICON_WARNING)
-        dlg.ShowModal()
-        dlg.Destroy()
+        ed_msg.PostMessage(ed_msg.EDMSG_UI_SB_TXT, (ed_glob.SB_INFO, _("Added %s to PyExpression shelf.") % varname))
             
     def OnItemToolTip(self, event):
         item = event.GetItem()
