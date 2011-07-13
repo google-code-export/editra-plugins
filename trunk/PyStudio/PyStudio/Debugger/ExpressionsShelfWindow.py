@@ -49,6 +49,8 @@ class ExpressionsShelfWindow(BaseShelfWindow):
         self.delbtn.ToolTip = wx.ToolTip(_("Delete Expression"))
         self.delallbtn = self.AddPlateButton(u"", ed_glob.ID_DELETE, wx.ALIGN_LEFT)
         self.delallbtn.ToolTip = wx.ToolTip(_("Delete All Expressions"))
+        self.refreshbtn = self.AddPlateButton(u"", ed_glob.ID_REFRESH, wx.ALIGN_LEFT)
+        self.refreshbtn.ToolTip = wx.ToolTip(_("Refresh Expressions"))
         ctrlbar.AddStretchSpacer()
         self.layout("Execute", self.OnExecute)
         bmp = wx.ArtProvider.GetBitmap(str(ed_glob.ID_BIN_FILE), wx.ART_MENU)
@@ -72,6 +74,7 @@ class ExpressionsShelfWindow(BaseShelfWindow):
         self.Bind(wx.EVT_BUTTON, self.OnButton, self.addbtn)
         self.Bind(wx.EVT_BUTTON, self.OnButton, self.delbtn)
         self.Bind(wx.EVT_BUTTON, self.OnClear, self.delallbtn)
+        self.Bind(wx.EVT_BUTTON, self.OnRefresh, self.refreshbtn)
 
     def Unsubscription(self):
         """Cleanup callbacks when window is destroyed"""
@@ -131,6 +134,10 @@ class ExpressionsShelfWindow(BaseShelfWindow):
         """Clear the expressions"""
         self.expressions = {}
         self.SaveAndRestoreExpressions()
+
+    def OnRefresh(self, evt):
+        """Refresh the expressions"""
+        self.RestoreExpressions()
 
     def OnExecute(self, event):
         """Execute an expression"""
