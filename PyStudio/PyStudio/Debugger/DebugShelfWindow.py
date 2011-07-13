@@ -267,6 +267,7 @@ class DebugShelfWindow(BaseShelfWindow):
         """
         if RpdbDebugger().attached:
             RpdbDebugger().do_go()
+            RpdbDebugger().clearexpressionvalues()
             return
             
         self.combotexts[self.combocurrent_selection] = self.search.GetValue()

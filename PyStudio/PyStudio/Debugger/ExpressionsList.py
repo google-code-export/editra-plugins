@@ -94,7 +94,7 @@ class ExpressionsList(eclib.EToggleEditListCtrl):
             self.SetStringItem(idx, 1, u"")        
 
     def Evaluate(self, enabled, expression, idx):
-        if not enabled or not expression:
+        if not enabled or not expression or not RpdbDebugger().broken:
             return
         worker = RunProcInThread("Expr", self.fillexpressionvalue, \
                                  RpdbDebugger().evaluate, expression)
