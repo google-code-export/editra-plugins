@@ -7,11 +7,12 @@ Version 0.3
 Released:
 
 +Add indicator icons to PyAnalysis output list
-+Fix bug with not being able to debug GUI programs on Linux.
++Fix bug with not being able to debug GUI programs on Linux
 +Fix crash that could occur while debugging when plugin is unable to retrieve
 +Fix crash when setting configuration (caused by PYSTUDIO_CONFIG: should be PYTOOL_CONFIG)
 +Fix conflicting modules crash (MessageDialog needs self.mainwindow not self)
-editor instance from main application.
+editor instance from main application
++Fix crash when switching between variables subshelves when not debugging
 +Adding a new expression "checks" the check box
 +Right click on pyVariable tree item to add a variable to pyExpression
 

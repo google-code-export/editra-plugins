@@ -112,6 +112,9 @@ class VariablesList(wx.gizmos.TreeListCtrl):
         self.DeleteAllItems()
 
     def setcolumnwidths(self):
+        root = self.GetRootItem()
+        if not root:
+            return
         self.SetColumnWidth(VariablesList.COL_NAME, wx.LIST_AUTOSIZE)
         self.SetColumnWidth(VariablesList.COL_REPR, wx.LIST_AUTOSIZE)
         self.SetColumnWidth(VariablesList.COL_TYPE, wx.LIST_AUTOSIZE)
