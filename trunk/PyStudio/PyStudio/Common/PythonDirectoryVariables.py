@@ -64,7 +64,7 @@ class PythonDirectoryVariables(AbstractDirectoryVariables):
                 for path in allnewpaths:
                     self.pythonpath.append(self.get_abspath(dirvarfile, path))
             elif key == "PYLINTRC":
-                vardict[key] = '"%s"' % self.get_abspath(dirvarfile, val)
+                vardict[key] = self.get_abspath(dirvarfile, val)
             elif key == "DEBUGGERARGS":
                 parts = val.split(" ")
                 for i, part in enumerate(parts):
