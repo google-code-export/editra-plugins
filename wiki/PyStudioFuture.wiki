@@ -33,7 +33,7 @@ This page contains a list of open TODO issues for a future version of the PyStud
 
 === !PyProject ===
   * Add project management support
-  * Refactoring support eg. rename all occurances of a variable/class/method name in all project files
+  * Refactoring support eg. rename all occurrances of a variable/class/method name in all project files
   * Ctrl click to go to function
 
 ----
