@@ -21,7 +21,7 @@ This page contains a list of open TODO issues for a future version of the PyStud
   * Add a search or filter to find a variable of interest
 
 === !PyExpression ===
-  * See if it's possible to add a type column
+  * See if it's possible to add a type column (DONE)
 
 === Code Analysis (PyLint) ===
   * Make ListCtrl columns sortable in the [PyAnalysis PyLint] output window.
