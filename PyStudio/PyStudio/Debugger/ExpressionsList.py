@@ -32,7 +32,8 @@ class ExpressionsList(eclib.EToggleEditListCtrl):
     """List control for displaying breakpoints results"""
 
     COL_EXPR = 0
-    COL_VALUE = 1
+    COL_TYPE = 1
+    COL_VALUE = 2
     
     def __init__(self, parent):
         super(ExpressionsList, self).__init__(parent)
@@ -42,9 +43,11 @@ class ExpressionsList(eclib.EToggleEditListCtrl):
         
         # Setup
         self.colname_expr = _("Expression")
+        self.colname_type = _("Type")
         self.colname_value = _("Value")
     
         self.InsertColumn(ExpressionsList.COL_EXPR, self.colname_expr)
+        self.InsertColumn(ExpressionsList.COL_TYPE, self.colname_type)
         self.InsertColumn(ExpressionsList.COL_VALUE, self.colname_value)
 
         # Event Handlers
@@ -91,15 +94,20 @@ class ExpressionsList(eclib.EToggleEditListCtrl):
         self.Parent.SetExpression(expression, enabled)
         self.Evaluate(enabled, expression, idx)
         if not enabled:
-            self.SetStringItem(idx, 1, u"")        
+            self.SetStringItem(idx, ExpressionsList.COL_TYPE, u"")        
+            self.SetStringItem(idx, ExpressionsList.COL_VALUE, u"")        
 
     def Evaluate(self, enabled, expression, idx):
         if not enabled or not expression or not RpdbDebugger().broken:
             return
-        worker = RunProcInThread("Expr", self.fillexpressionvalue, \
-                                 RpdbDebugger().evaluate, expression)
+        worker = RunProcInThread("Expr", self.fillexpressiontype, \
+                                 RpdbDebugger().evaluate, "type(%s).__name__" % expression)
         worker.pass_parameter(idx)
         worker.start()
+        worker2 = RunProcInThread("Expr", self.fillexpressionvalue, \
+                                 RpdbDebugger().evaluate, expression)
+        worker2.pass_parameter(idx)
+        worker2.start()
     
     def Clear(self):
         """Delete all the rows """
@@ -126,22 +134,35 @@ class ExpressionsList(eclib.EToggleEditListCtrl):
             idx += 1
 
         self.SetColumnWidth(ExpressionsList.COL_EXPR, wx.LIST_AUTOSIZE)
+        self.SetColumnWidth(ExpressionsList.COL_TYPE, wx.LIST_AUTOSIZE)
         exprcolwidth = max(self.GetTextExtent(self.colname_expr + "          ")[0], self.GetColumnWidth(ExpressionsList.COL_EXPR))
+        typecolwidth = max(exprcolwidth, self.GetTextExtent(self.colname_type + "          ")[0], self.GetColumnWidth(ExpressionsList.COL_TYPE))
         self.SetColumnWidth(ExpressionsList.COL_EXPR, exprcolwidth)
+        self.SetColumnWidth(ExpressionsList.COL_TYPE, typecolwidth)
 
+    def fillexpressiontype(self, res, idx):
+        if not res:
+            return
+        value, w, error = res
+        if error:
+            value = error
+        self.SetStringItem(idx, ExpressionsList.COL_TYPE, unicode(value))        
+        
     def fillexpressionvalue(self, res, idx):
         if not res:
             return
         value, w, error = res
         if error:
             value = error
-        self.SetStringItem(idx, 1, unicode(value))        
+        self.SetStringItem(idx, ExpressionsList.COL_VALUE, unicode(value))        
 
     def clearexpressionvalues(self):
         if not self._data:
             return
         for idx in range(len(self._data)):
-            self.SetStringItem(idx, 1, u"")
+            self.SetStringItem(idx, ExpressionsList.COL_EXPR, u"")
+            self.SetStringItem(idx, ExpressionsList.COL_TYPE, u"")
+            self.SetStringItem(idx, ExpressionsList.COL_VALUE, u"")
         
     @staticmethod
     def _printListCtrl(ctrl):
