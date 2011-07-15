@@ -19,6 +19,7 @@ editor instance from main application
 +Add refresh button to Expressions shelf for use when pausing wx apps
 +Adding a new expression "checks" the check box
 +Right click on pyVariable tree item to add a variable to pyExpression
++Type column added to pyExpression
 
 #-----------------------------------------------------------------------------#
 
