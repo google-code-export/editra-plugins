@@ -99,7 +99,10 @@ class CompileEntryPoint(object):
 
     def OnCheckComplete(self, data):
         """Callback for when compile check"""
-        assert len(data) == 2
+        if len(data) != 2:
+            util.Log("[PyTools][err] OnCheckComplete Invalid Data %s" % repr(data))
+            return
+
         path = data[0]
         err = data[1]
         if err:
