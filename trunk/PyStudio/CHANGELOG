@@ -20,6 +20,7 @@ editor instance from main application
 +Adding a new expression "checks" the check box
 +Right click on pyVariable tree item to add a variable to pyExpression
 +Type column added to pyExpression
++Fix crash that could occur in compile check during file save.
 
 #-----------------------------------------------------------------------------#
 
