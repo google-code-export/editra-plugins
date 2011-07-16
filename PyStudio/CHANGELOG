@@ -13,7 +13,7 @@ Released:
 +Fix conflicting modules crash (MessageDialog needs self.mainwindow not self)
 editor instance from main application
 +Fix crash when switching between variables subshelves when not debugging
-+Remove quotes around pylintrc file that stopped it being recognised
++Remove quotes around pylintrc file that stopped it being recognized
 +Clear expression values when Go button pressed
 +Only evaluate expressions when debugger is broken to prevent "Debuggee has to be waiting at a breakpoint to complete this command" dialog
 +Add refresh button to Expressions shelf for use when pausing wx apps
