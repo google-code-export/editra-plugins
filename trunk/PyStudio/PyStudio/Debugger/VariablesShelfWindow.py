@@ -64,14 +64,27 @@ class VariablesShelfWindow(BaseShelfWindow):
         self._nb.AddPage(self._locals, _("Locals"), img_id=0)
         self._nb.AddPage(self._globals, _("Globals"), img_id=1)
         self._nb.AddPage(self._exceptions, _("Exceptions"), img_id=2)
+        # NOTE: page order must be kept in sync with this map
+        self.pmap = { 0 : (ToolConfig.TLC_LOCALS_FILTERLEVEL, self._locals),
+                 1 : (ToolConfig.TLC_GLOBALS_FILTERLEVEL, self._globals),
+                 2 : (ToolConfig.TLC_EXCEPTIONS_FILTERLEVEL, self._exceptions)
+               }
         ctrlbar = self.setup(self._nb, self._locals,
                              self._globals, self._exceptions)
+        self.refreshbtn = self.AddPlateButton(u"", ed_glob.ID_REFRESH, wx.ALIGN_LEFT)
+        self.refreshbtn.ToolTip = wx.ToolTip(_("Refresh Variables"))
         ctrlbar.AddStretchSpacer()
         self.filterlevel = wx.Choice(ctrlbar, wx.ID_ANY,
                                      choices=(_("Off"), _("Medium"), _("Maximum")))
         self.filterlevel.SetSelection(localsfilterlevel)
         text = wx.StaticText(ctrlbar, label=_("Filtering:"))
         ctrlbar.AddControl(text, wx.ALIGN_RIGHT)
+        self.search = eclib.CommandEntryBase(ctrlbar, style=wx.TE_PROCESS_ENTER)
+        self.search.Enable(True)
+        self.search.SetDescriptiveText(u"Enter Regular Expression")
+        self.search.ShowSearchButton(True)
+        self.search.ShowCancelButton(True)
+        ctrlbar.AddControl(self.search, wx.ALIGN_RIGHT, 2)
         ctrlbar.AddControl(self.filterlevel, wx.ALIGN_RIGHT)
         self.layout(self.ANALYZELBL, self.OnAnalyze)
         self.taskbtn.SetBitmap(Images.Inspect.Bitmap)
@@ -88,7 +101,10 @@ class VariablesShelfWindow(BaseShelfWindow):
         
         # Event Handlers
         self.Bind(eclib.EVT_SB_PAGE_CHANGED, self.OnPageChanged, self._nb)
+        self.Bind(wx.EVT_BUTTON, self.OnRefresh, self.refreshbtn)
         self.Bind(wx.EVT_CHOICE, self.OnSetFilterLevel, self.filterlevel)
+        self.Bind(wx.EVT_SEARCHCTRL_SEARCH_BTN, self.OnRefresh, self.search)
+        self.Bind(wx.EVT_SEARCHCTRL_CANCEL_BTN, self.OnCancelSearch, self.search)
 
         RpdbDebugger().update_namespace()
 
@@ -173,20 +189,32 @@ class VariablesShelfWindow(BaseShelfWindow):
     def OnPageChanged(self, evt):
         """Update ControlBar based on current selected page"""
         cpage = self._nb.GetPage(evt.GetSelection())
+        self.search.SetValue(cpage.FilterVar)
         self.filterlevel.SetSelection(cpage.FilterLevel)
         cpage.setcolumnwidths()
 
     def OnSetFilterLevel(self, evt):
         """Update the filter level for the current display"""
-        # NOTE: page order must be kept in sync with this map
-        pmap = { 0 : (ToolConfig.TLC_LOCALS_FILTERLEVEL, self._locals),
-                 1 : (ToolConfig.TLC_GLOBALS_FILTERLEVEL, self._globals),
-                 2 : (ToolConfig.TLC_EXCEPTIONS_FILTERLEVEL, self._exceptions)
-               }
         cpage = self._nb.GetSelection()
-        if cpage in pmap:
-            cfgkey, lst = pmap.get(cpage)
+        if cpage in self.pmap:
+            cfgkey, lst = self.pmap.get(cpage)
             cur_sel = evt.GetSelection()
             lst.FilterLevel = cur_sel
             self.UpdateConfig(cfgkey, cur_sel)
+
+    def OnRefresh(self, event):
+        """Search for variables according to the text from the text control"""
+        cpage = self._nb.GetSelection()
+        if cpage in self.pmap:
+            cfgkey, lst = self.pmap.get(cpage)
+            lst.FilterVar = self.search.GetValue()
+            RpdbDebugger().update_namespace()
        
+    def OnCancelSearch(self, event):
+        """Clear the text from the text control"""
+        self.search.SetValue("")
+        cpage = self._nb.GetSelection()
+        if cpage in self.pmap:
+            cfgkey, lst = self.pmap.get(cpage)
+            lst.FilterVar = ""
+            RpdbDebugger().update_namespace()
