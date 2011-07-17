@@ -21,6 +21,7 @@ editor instance from main application
 +Right click on pyVariable tree item to add a variable to pyExpression
 +Type column added to pyExpression
 +Fix crash that could occur in compile check during file save.
++Add filtering of variables by regular expression
 
 #-----------------------------------------------------------------------------#
 
