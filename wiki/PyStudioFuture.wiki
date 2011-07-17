@@ -18,7 +18,7 @@ This page contains a list of open TODO issues for a future version of the PyStud
   * Make column headers sortable (at least for the 'file' column)
 
 === !PyVariable ===
-  * Add a search or filter to find a variable of interest
+  * Add a search or filter to find a variable of interest (DONE)
 
 === !PyExpression ===
   * See if it's possible to add a type column (DONE)
