@@ -39,7 +39,7 @@ _ = wx.GetTranslation
 class VariablesList(wx.gizmos.TreeListCtrl):
     """List control for displaying stack frame results"""
     COL_NAME = 0
-    COL_REPR = 1
+    COL_VALUE = 1
     COL_TYPE = 2
 
     # Image IDs
@@ -58,7 +58,7 @@ class VariablesList(wx.gizmos.TreeListCtrl):
         # Attributes
         self.tenspaces = self.GetTextExtent("          ")[0]
         self.colname_name = _("Name")
-        self.colname_repr = _("Repr")
+        self.colname_value = _("Value")
         self.colname_type = _("Type")
 
         self.listtype = listtype
@@ -71,7 +71,7 @@ class VariablesList(wx.gizmos.TreeListCtrl):
 
         # Setup
         self.AddColumn(self.colname_name)
-        self.AddColumn(self.colname_repr)
+        self.AddColumn(self.colname_value)
         self.AddColumn(self.colname_type)
         if wx.Platform == '__WXMAC__':
             self.SetWindowVariant(wx.WINDOW_VARIANT_SMALL)
@@ -120,13 +120,13 @@ class VariablesList(wx.gizmos.TreeListCtrl):
         if not root:
             return
         self.SetColumnWidth(VariablesList.COL_NAME, wx.LIST_AUTOSIZE)
-        self.SetColumnWidth(VariablesList.COL_REPR, wx.LIST_AUTOSIZE)
+        self.SetColumnWidth(VariablesList.COL_VALUE, wx.LIST_AUTOSIZE)
         self.SetColumnWidth(VariablesList.COL_TYPE, wx.LIST_AUTOSIZE)
         namecolwidth = max(self.GetTextExtent(self.colname_name + "          ")[0], self.GetColumnWidth(VariablesList.COL_NAME) + self.tenspaces)
-        reprcolwidth = max(self.GetTextExtent(self.colname_repr + "          ")[0], self.GetColumnWidth(VariablesList.COL_REPR) + self.tenspaces)
+        reprcolwidth = max(self.GetTextExtent(self.colname_value + "          ")[0], self.GetColumnWidth(VariablesList.COL_VALUE) + self.tenspaces)
         typecolwidth = max(self.GetTextExtent(self.colname_type + "          ")[0], self.GetColumnWidth(VariablesList.COL_TYPE) + self.tenspaces)
         self.SetColumnWidth(VariablesList.COL_NAME, namecolwidth)
-        self.SetColumnWidth(VariablesList.COL_REPR, reprcolwidth)
+        self.SetColumnWidth(VariablesList.COL_VALUE, reprcolwidth)
         self.SetColumnWidth(VariablesList.COL_TYPE, typecolwidth)
 
     def PopulateRows(self, data):
@@ -190,7 +190,7 @@ class VariablesList(wx.gizmos.TreeListCtrl):
             
     def OnItemToolTip(self, event):
         item = event.GetItem()
-        tooltip = self.GetItemText(item, VariablesList.COL_REPR)[1:]
+        tooltip = self.GetItemText(item, VariablesList.COL_VALUE)[1:]
         event.SetToolTip(tooltip)
 
     def OnItemCollapsing(self, event):
@@ -207,7 +207,7 @@ class VariablesList(wx.gizmos.TreeListCtrl):
 
     def _onitemactivated(self, item, expr, is_valid):
         if is_valid:
-            default_value = self.GetItemText(item, VariablesList.COL_REPR)[1:]
+            default_value = self.GetItemText(item, VariablesList.COL_VALUE)[1:]
         else:
             default_value = ""
 
@@ -269,7 +269,7 @@ class VariablesList(wx.gizmos.TreeListCtrl):
         self.DeleteChildren(item)
 
         child = self.AppendItem(item, _("Loading..."))
-        self.SetItemText(child, u' ' + _("Loading..."), VariablesList.COL_REPR)
+        self.SetItemText(child, u' ' + _("Loading..."), VariablesList.COL_VALUE)
         self.SetItemText(child, ' ' + _("Loading..."), VariablesList.COL_TYPE)
         self.SetItemPyData(child, (_("Loading..."), False))
 
@@ -294,7 +294,7 @@ class VariablesList(wx.gizmos.TreeListCtrl):
         if not variables:
             child = self.AppendItem(item, _("Data Retrieval Timeout"))
             self.SetItemText(child, u' ' + _("Data Retrieval Timeout"),
-                             VariablesList.COL_REPR)
+                             VariablesList.COL_VALUE)
             self.SetItemText(child, u' ' + _("Data Retrieval Timeout"),
                              VariablesList.COL_TYPE)
             self.SetItemPyData(child, (_("Data Retrieval Timeout"), False))
@@ -367,10 +367,15 @@ class VariablesList(wx.gizmos.TreeListCtrl):
             if not re.match(self.FilterVar, _name):
                 continue
             _type = unicode(subnode["type"])
-            _repr = unicode(subnode["repr"])
+            _value = subnode["repr"]
+            try:
+                _value = eval(_value)
+            except:
+                pass
+            _value = unicode(_value)
 
             child = self.AppendItem(item, _name)
-            self.SetItemText(child, u' ' + _repr, VariablesList.COL_REPR)
+            self.SetItemText(child, u' ' + _value, VariablesList.COL_VALUE)
             self.SetItemText(child, u' ' + _type, VariablesList.COL_TYPE)
             self.SetItemPyData(child, (subnode["expr"], subnode["fvalid"]))
             self.SetItemHasChildren(child, (subnode["n_subnodes"] > 0))

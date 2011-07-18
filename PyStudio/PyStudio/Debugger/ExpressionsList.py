@@ -32,8 +32,8 @@ class ExpressionsList(eclib.EToggleEditListCtrl):
     """List control for displaying breakpoints results"""
 
     COL_EXPR = 0
-    COL_TYPE = 1
-    COL_VALUE = 2
+    COL_VALUE = 1
+    COL_TYPE = 2
     
     def __init__(self, parent):
         super(ExpressionsList, self).__init__(parent)
@@ -43,12 +43,12 @@ class ExpressionsList(eclib.EToggleEditListCtrl):
         
         # Setup
         self.colname_expr = _("Expression")
-        self.colname_type = _("Type")
         self.colname_value = _("Value")
+        self.colname_type = _("Type")
     
         self.InsertColumn(ExpressionsList.COL_EXPR, self.colname_expr)
-        self.InsertColumn(ExpressionsList.COL_TYPE, self.colname_type)
         self.InsertColumn(ExpressionsList.COL_VALUE, self.colname_value)
+        self.InsertColumn(ExpressionsList.COL_TYPE, self.colname_type)
 
         # Event Handlers
         self.Bind(wx.EVT_LIST_END_LABEL_EDIT, self.OnItemEdited)
@@ -92,20 +92,21 @@ class ExpressionsList(eclib.EToggleEditListCtrl):
     def OnCheckItem(self, idx, enabled):
         expression, = self._data[idx]
         self.Parent.SetExpression(expression, enabled)
-        self.Evaluate(enabled, expression, idx)
-        if not enabled:
-            self.SetStringItem(idx, ExpressionsList.COL_TYPE, u"")        
+        if enabled:
+            self.Evaluate(enabled, expression, idx)
+        else:
             self.SetStringItem(idx, ExpressionsList.COL_VALUE, u"")        
+            self.SetStringItem(idx, ExpressionsList.COL_TYPE, u"")        
 
     def Evaluate(self, enabled, expression, idx):
         if not enabled or not expression or not RpdbDebugger().broken:
             return
-        worker = RunProcInThread("Expr", self.fillexpressiontype, \
-                                 RpdbDebugger().evaluate, "type(%s).__name__" % expression)
+        worker = RunProcInThread("Expr", self.fillexpressionvalue, \
+                                 RpdbDebugger().evaluate, expression)
         worker.pass_parameter(idx)
         worker.start()
-        worker2 = RunProcInThread("Expr", self.fillexpressionvalue, \
-                                 RpdbDebugger().evaluate, expression)
+        worker2 = RunProcInThread("Expr", self.fillexpressiontype, \
+                                 RpdbDebugger().evaluate, "type(%s).__name__" % expression)
         worker2.pass_parameter(idx)
         worker2.start()
     
@@ -134,20 +135,12 @@ class ExpressionsList(eclib.EToggleEditListCtrl):
             idx += 1
 
         self.SetColumnWidth(ExpressionsList.COL_EXPR, wx.LIST_AUTOSIZE)
-        self.SetColumnWidth(ExpressionsList.COL_TYPE, wx.LIST_AUTOSIZE)
+        self.SetColumnWidth(ExpressionsList.COL_VALUE, wx.LIST_AUTOSIZE)
         exprcolwidth = max(self.GetTextExtent(self.colname_expr + "          ")[0], self.GetColumnWidth(ExpressionsList.COL_EXPR))
-        typecolwidth = max(exprcolwidth, self.GetTextExtent(self.colname_type + "          ")[0], self.GetColumnWidth(ExpressionsList.COL_TYPE))
+        valuecolwidth = max(self.GetTextExtent(self.colname_value + "          ")[0], self.GetColumnWidth(ExpressionsList.COL_VALUE))
         self.SetColumnWidth(ExpressionsList.COL_EXPR, exprcolwidth)
-        self.SetColumnWidth(ExpressionsList.COL_TYPE, typecolwidth)
+        self.SetColumnWidth(ExpressionsList.COL_VALUE, valuecolwidth)
 
-    def fillexpressiontype(self, res, idx):
-        if not res:
-            return
-        value, w, error = res
-        if error:
-            value = error
-        self.SetStringItem(idx, ExpressionsList.COL_TYPE, unicode(value))        
-        
     def fillexpressionvalue(self, res, idx):
         if not res:
             return
@@ -155,14 +148,28 @@ class ExpressionsList(eclib.EToggleEditListCtrl):
         if error:
             value = error
         self.SetStringItem(idx, ExpressionsList.COL_VALUE, unicode(value))        
+        self.SetColumnWidth(ExpressionsList.COL_VALUE, wx.LIST_AUTOSIZE)
 
+    def fillexpressiontype(self, res, idx):
+        if not res:
+            return
+        value, w, error = res
+        if error:
+            value = error
+        else:
+            try:
+                value = eval(value)
+            except:
+                pass
+        self.SetStringItem(idx, ExpressionsList.COL_TYPE, unicode(value))        
+        
     def clearexpressionvalues(self):
         if not self._data:
             return
         for idx in range(len(self._data)):
             self.SetStringItem(idx, ExpressionsList.COL_EXPR, u"")
-            self.SetStringItem(idx, ExpressionsList.COL_TYPE, u"")
             self.SetStringItem(idx, ExpressionsList.COL_VALUE, u"")
+            self.SetStringItem(idx, ExpressionsList.COL_TYPE, u"")
         
     @staticmethod
     def _printListCtrl(ctrl):
