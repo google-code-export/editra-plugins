@@ -147,6 +147,11 @@ class ExpressionsList(eclib.EToggleEditListCtrl):
         value, w, error = res
         if error:
             value = error
+        else:
+            try:
+                value = eval(value)
+            except:
+                pass
         self.SetStringItem(idx, ExpressionsList.COL_VALUE, unicode(value))        
         self.SetColumnWidth(ExpressionsList.COL_VALUE, wx.LIST_AUTOSIZE)
 
