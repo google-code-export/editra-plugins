@@ -1,4 +1,4 @@
-#summary List of minor TODOs for a future release of PyStudio
+#summary List of TODOs for a future release of PyStudio
 
 <wiki:toc max_depth="3" />
 
