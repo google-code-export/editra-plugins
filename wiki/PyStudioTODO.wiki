@@ -8,7 +8,7 @@ This page contains a list of open TODO issues for the listed version of the PySt
 
 ----
 
-== Version 0.2 ==
+== Version 0.3 ==
 
 === General ====
 
