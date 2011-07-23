@@ -94,8 +94,14 @@ PyExpression is a Shelf window for managing expressions and displaying their eva
 
 [http://editra-plugins.googlecode.com/svn/wiki/images/PyStudio/pydebug_expression.png]
 
-To add an expression:
-  * Click the + button that is displayed on the expression window's control bar to add an empty expression. Enter an expression by clicking on the column and typing the desired expression. It will be evaluated while the program is being debugged.
+Expressions are evaluated while the program is being debugged when it is stopped at a breakpoint.
+
+*Actions*
+  * Preferences Button - Open the PyStudio configuration dialog
+  * Add expression - Click the + button that is displayed on the expression window's control bar to add an empty expression
+  * Change expression - Click on the column and type the desired expression to enter an expression
+  * Enabled/disable expression - Click the checkbox next to an expression to enable or disable its evaluation
+  * Execute user code - Press the Execute button to execute some Python code (when stopped at a breakpoint)
 
 ----
 
@@ -114,8 +120,9 @@ Using the vertical control bar on the left this window can display one of two vi
 
 *Actions*
   * Preferences Button - Open the PyStudio configuration dialog
-  * Double clicking on an item in the stack list will jump to that point in the code.
-
+  * Move up/down stack - Double clicking on an item in the stack list will jump to that point in the code
+  * Move between threads - Double clicking on an item in the thread list jumps to that thread
+ 
 ----
 
 == !PyVariable ==
@@ -134,5 +141,7 @@ The control bar on the left contains buttons to activate one of the three possib
 
 *Actions*
   * Preferences - Open the PyStudio configuration dialog
-  * Filter - Set the verbosity of how much data is shown in each view
-  * Analyze Exception - Set the program state back to when the exception was raised and left uncaught 
+  * Filter - Show only data that matches a regular expression and/or set the verbosity of how much data is shown in each view
+  * Analyze Exception - Set the program state back to when the exception was raised and left uncaught
+  * Change variable - Double clicking on a variable allows its value to be changed
+  * Add variable - Right clicking on a variable adds it to the PyExpression shelf
