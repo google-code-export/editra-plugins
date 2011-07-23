@@ -61,7 +61,7 @@ The !PyDebug Shelf window is the main control window for attaching to programs a
   * Step In Button - Step into the call on the current line
   * Step Over Button - Step over the current line
   * Step Out Button - Step out of the current scope
-  * Break All Button - Break a the current point of execution
+  * Break All Button - Break at the current point of execution
   * Program/Debugger Args Choice Control
   * Text Field - enter arguments to pass to the program or debugger based on selection in previous field.
   * Remote Button - Attach to an already running process
