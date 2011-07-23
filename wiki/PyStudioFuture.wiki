@@ -8,7 +8,7 @@ This page contains a list of open TODO issues for a future version of the PyStud
 
 ----
 
-== Version 0.3 ==
+== Version 0.4 ==
 
 === !PyDebug ===
   * Debugger output window should also probably use the Primary Editor font setting for its output 
@@ -16,12 +16,6 @@ This page contains a list of open TODO issues for a future version of the PyStud
 === !PyBreakPoint ===
   * Try to find some better icons to use for the Add/Del/Delete all
   * Make column headers sortable (at least for the 'file' column)
-
-=== !PyVariable ===
-  * Add a search or filter to find a variable of interest (DONE)
-
-=== !PyExpression ===
-  * See if it's possible to add a type column (DONE)
 
 === Code Analysis (PyLint) ===
   * Make ListCtrl columns sortable in the [PyAnalysis PyLint] output window.
