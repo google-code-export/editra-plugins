@@ -46,10 +46,11 @@ class VariablesList(wx.gizmos.TreeListCtrl):
     IMG_CLASS, \
     IMG_FUNCT, \
     IMG_VAR = range(3)
-    def __init__(self, parent, listtype, filterlevel):
+    def __init__(self, parent, listtype, filterexpr, filterlevel):
         """Create a variable display list
         @param parent: parent window
         @param listtype: type of list
+        @param filterexpr: initial filtering expression
         @param filterlevel: initial filtering level
 
         """
@@ -62,7 +63,7 @@ class VariablesList(wx.gizmos.TreeListCtrl):
         self.colname_type = _("Type")
 
         self.listtype = listtype
-        self.filtervar = ""
+        self.filterexpr = filterexpr
         self.filterlevel = filterlevel
         self.key = None
         self.ignoredwarnings = {'': True}
@@ -91,8 +92,8 @@ class VariablesList(wx.gizmos.TreeListCtrl):
         self._mainw = mw
 
     # Properties
-    FilterVar = property(lambda self: self.filtervar,
-                           lambda self, val: setattr(self, 'filtervar', val))
+    FilterExpr = property(lambda self: self.filterexpr,
+                           lambda self, val: setattr(self, 'filterexpr', val))
     FilterLevel = property(lambda self: self.filterlevel,
                            lambda self, val: setattr(self, 'filterlevel', val))
 
@@ -364,7 +365,7 @@ class VariablesList(wx.gizmos.TreeListCtrl):
         #
         for subnode in first_variable_with_expr["subnodes"]:
             _name = unicode(subnode["name"])
-            if not re.match(self.FilterVar, _name):
+            if not re.match(self.FilterExpr, _name):
                 continue
             _type = unicode(subnode["type"])
             _value = PyStudioUtils.get_unicodevalue(subnode["repr"])

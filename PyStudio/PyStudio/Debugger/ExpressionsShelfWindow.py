@@ -24,6 +24,7 @@ from profiler import Profile_Get, Profile_Set
 
 # Local imports
 from PyStudio.Common import ToolConfig
+from PyStudio.Common.ordereddict import OrderedDict
 from PyStudio.Common.PyStudioUtils import PyStudioUtils
 from PyStudio.Common.PyStudioUtils import RunProcInThread
 from PyStudio.Debugger.ExpressionDialog import ExpressionDialog
@@ -58,8 +59,12 @@ class ExpressionsShelfWindow(BaseShelfWindow):
         self.taskbtn.ToolTip = wx.ToolTip(_("Execute"))
 
         # Attributes
-        self.expressions = ToolConfig.GetConfigValue(ToolConfig.TLC_EXPRESSIONS, 
-                                                     default=dict())
+        expressionslist = ToolConfig.GetConfigValue(ToolConfig.TLC_EXPRESSIONS)
+        self.expressions = OrderedDict()
+        if expressionslist:
+            for expression, enabled in expressionslist:
+                self.expressions[expression] = enabled
+
         self.ignoredwarnings = {}
         
         # Debugger Attributes
@@ -108,7 +113,10 @@ class ExpressionsShelfWindow(BaseShelfWindow):
     def SaveExpressions(self):
         """Store expressions to the users persistent configuration"""
         config = Profile_Get(ToolConfig.PYTOOL_CONFIG, default=dict())
-        config[ToolConfig.TLC_EXPRESSIONS] = copy.deepcopy(self.expressions)
+        expressionslist = []
+        for expression in self.expressions:
+            expressionslist.append((expression, self.expressions[expression]))
+        config[ToolConfig.TLC_EXPRESSIONS] = expressionslist
         Profile_Set(ToolConfig.PYTOOL_CONFIG, config)
 
     def SaveAndRestoreExpressions(self):
@@ -131,7 +139,7 @@ class ExpressionsShelfWindow(BaseShelfWindow):
 
     def OnClear(self, evt):
         """Clear the expressions"""
-        self.expressions = {}
+        self.expressions = OrderedDict()
         self.SaveAndRestoreExpressions()
 
     def OnRefresh(self, evt):

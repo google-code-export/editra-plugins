@@ -48,6 +48,9 @@ class VariablesShelfWindow(BaseShelfWindow):
         super(VariablesShelfWindow, self).__init__(parent)
 
         config = Profile_Get(ToolConfig.PYTOOL_CONFIG, default=dict())
+        localsfilterexpr = config.get(ToolConfig.TLC_LOCALS_FILTEREXPR, "")
+        globalsfilterexpr = config.get(ToolConfig.TLC_GLOBALS_FILTEREXPR, "")
+        exceptionsfilterexpr = config.get(ToolConfig.TLC_EXCEPTIONS_FILTEREXPR, "")
         localsfilterlevel = config.get(ToolConfig.TLC_LOCALS_FILTERLEVEL, 0)
         globalsfilterlevel = config.get(ToolConfig.TLC_GLOBALS_FILTERLEVEL, 0)
         exceptionsfilterlevel = config.get(ToolConfig.TLC_EXCEPTIONS_FILTERLEVEL, 0)
@@ -55,9 +58,9 @@ class VariablesShelfWindow(BaseShelfWindow):
         # Attributes
         bstyle = eclib.SEGBOOK_STYLE_NO_DIVIDERS|eclib.SEGBOOK_STYLE_LEFT
         self._nb = eclib.SegmentBook(self, style=bstyle)
-        self._locals = VariablesList(self._nb, self.LOCALSSTR, localsfilterlevel)
-        self._globals = VariablesList(self._nb, self.GLOBALSSTR, globalsfilterlevel)
-        self._exceptions = VariablesList(self._nb, self.EXCEPTIONSSTR, exceptionsfilterlevel)
+        self._locals = VariablesList(self._nb, self.LOCALSSTR, localsfilterexpr, localsfilterlevel)
+        self._globals = VariablesList(self._nb, self.GLOBALSSTR, globalsfilterexpr, globalsfilterlevel)
+        self._exceptions = VariablesList(self._nb, self.EXCEPTIONSSTR, exceptionsfilterexpr, exceptionsfilterlevel)
         
         # Setup
         self._InitImageList()
@@ -65,9 +68,9 @@ class VariablesShelfWindow(BaseShelfWindow):
         self._nb.AddPage(self._globals, _("Globals"), img_id=1)
         self._nb.AddPage(self._exceptions, _("Exceptions"), img_id=2)
         # NOTE: page order must be kept in sync with this map
-        self.pmap = { 0 : (ToolConfig.TLC_LOCALS_FILTERLEVEL, self._locals),
-                 1 : (ToolConfig.TLC_GLOBALS_FILTERLEVEL, self._globals),
-                 2 : (ToolConfig.TLC_EXCEPTIONS_FILTERLEVEL, self._exceptions)
+        self.pmap = { 0 : (ToolConfig.TLC_LOCALS_FILTEREXPR, ToolConfig.TLC_LOCALS_FILTERLEVEL, self._locals),
+                 1 : (ToolConfig.TLC_GLOBALS_FILTEREXPR, ToolConfig.TLC_GLOBALS_FILTERLEVEL, self._globals),
+                 2 : (ToolConfig.TLC_EXCEPTIONS_FILTEREXPR, ToolConfig.TLC_EXCEPTIONS_FILTERLEVEL, self._exceptions)
                }
         ctrlbar = self.setup(self._nb, self._locals,
                              self._globals, self._exceptions)
@@ -82,6 +85,8 @@ class VariablesShelfWindow(BaseShelfWindow):
         self.search = eclib.CommandEntryBase(ctrlbar, style=wx.TE_PROCESS_ENTER)
         self.search.Enable(True)
         self.search.SetDescriptiveText(u"Enter Regular Expression")
+        if localsfilterexpr:
+            self.search.SetValue(localsfilterexpr)
         self.search.ShowSearchButton(True)
         self.search.ShowCancelButton(True)
         ctrlbar.AddControl(self.search, wx.ALIGN_RIGHT, 2)
@@ -104,6 +109,7 @@ class VariablesShelfWindow(BaseShelfWindow):
         self.Bind(wx.EVT_BUTTON, self.OnRefresh, self.refreshbtn)
         self.Bind(wx.EVT_CHOICE, self.OnSetFilterLevel, self.filterlevel)
         self.Bind(wx.EVT_SEARCHCTRL_SEARCH_BTN, self.OnRefresh, self.search)
+        self.Bind(wx.EVT_TEXT_ENTER, self.OnRefresh, self.search)
         self.Bind(wx.EVT_SEARCHCTRL_CANCEL_BTN, self.OnCancelSearch, self.search)
 
         RpdbDebugger().update_namespace()
@@ -189,7 +195,7 @@ class VariablesShelfWindow(BaseShelfWindow):
     def OnPageChanged(self, evt):
         """Update ControlBar based on current selected page"""
         cpage = self._nb.GetPage(evt.GetSelection())
-        self.search.SetValue(cpage.FilterVar)
+        self.search.SetValue(cpage.FilterExpr)
         self.filterlevel.SetSelection(cpage.FilterLevel)
         cpage.setcolumnwidths()
 
@@ -197,7 +203,7 @@ class VariablesShelfWindow(BaseShelfWindow):
         """Update the filter level for the current display"""
         cpage = self._nb.GetSelection()
         if cpage in self.pmap:
-            cfgkey, lst = self.pmap.get(cpage)
+            temp, cfgkey, lst = self.pmap.get(cpage)
             cur_sel = evt.GetSelection()
             lst.FilterLevel = cur_sel
             self.UpdateConfig(cfgkey, cur_sel)
@@ -206,15 +212,17 @@ class VariablesShelfWindow(BaseShelfWindow):
         """Search for variables according to the text from the text control"""
         cpage = self._nb.GetSelection()
         if cpage in self.pmap:
-            cfgkey, lst = self.pmap.get(cpage)
-            lst.FilterVar = self.search.GetValue()
-            RpdbDebugger().update_namespace()
+            cfgkey, temp, lst = self.pmap.get(cpage)
+            cur_sel = self.search.GetValue()
+            lst.FilterExpr = cur_sel
+            self.UpdateConfig(cfgkey, cur_sel)
        
     def OnCancelSearch(self, event):
         """Clear the text from the text control"""
         self.search.SetValue("")
         cpage = self._nb.GetSelection()
         if cpage in self.pmap:
-            cfgkey, lst = self.pmap.get(cpage)
-            lst.FilterVar = ""
-            RpdbDebugger().update_namespace()
+            cfgkey, temp, lst = self.pmap.get(cpage)
+            cur_sel = ""
+            lst.FilterExpr = cur_sel
+            self.UpdateConfig(cfgkey, cur_sel)
