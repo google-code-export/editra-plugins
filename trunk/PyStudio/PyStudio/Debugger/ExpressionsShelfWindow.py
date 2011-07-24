@@ -99,7 +99,6 @@ class ExpressionsShelfWindow(BaseShelfWindow):
 
     def SetExpression(self, expression, enabled):
         self.expressions[expression] = enabled
-        self.SaveExpressions()
 
     def RestoreExpressions(self):
         self._listCtrl.Clear()
@@ -120,7 +119,7 @@ class ExpressionsShelfWindow(BaseShelfWindow):
         """Handle control bar button clicks"""
         eobj = event.GetEventObject()
         if eobj is self.addbtn:
-            self.SetExpression("", False)
+            self.SetExpression(u"", False)
             self.RestoreExpressions()
         elif eobj is self.delbtn:
             for item in self._listCtrl.GetSelectedExpressions():
