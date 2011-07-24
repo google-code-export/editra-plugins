@@ -20,6 +20,7 @@ import wx
 import eclib
 
 # Local Imports
+from PyStudio.Common.PyStudioUtils import PyStudioUtils
 from PyStudio.Common.PyStudioUtils import RunProcInThread
 from PyStudio.Debugger.RpdbDebugger import RpdbDebugger
 
@@ -147,12 +148,7 @@ class ExpressionsList(eclib.EToggleEditListCtrl):
         value, w, error = res
         if error:
             value = error
-        else:
-            try:
-                value = eval(value)
-            except:
-                pass
-        self.SetStringItem(idx, ExpressionsList.COL_VALUE, unicode(value))        
+        self.SetStringItem(idx, ExpressionsList.COL_VALUE, PyStudioUtils.get_unicodevalue(value))        
         self.SetColumnWidth(ExpressionsList.COL_VALUE, wx.LIST_AUTOSIZE)
 
     def fillexpressiontype(self, res, idx):
@@ -161,12 +157,7 @@ class ExpressionsList(eclib.EToggleEditListCtrl):
         value, w, error = res
         if error:
             value = error
-        else:
-            try:
-                value = eval(value)
-            except:
-                pass
-        self.SetStringItem(idx, ExpressionsList.COL_TYPE, unicode(value))        
+        self.SetStringItem(idx, ExpressionsList.COL_TYPE, PyStudioUtils.get_unicodevalue(value))        
         
     def clearexpressionvalues(self):
         if not self._data:

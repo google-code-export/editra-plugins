@@ -14,6 +14,7 @@ __revision__ = "$Revision$"
 #-----------------------------------------------------------------------------#
 # Imports
 import os.path
+import codecs
 import threading
 import wx
 from wx.stc import STC_INDIC2_MASK
@@ -44,6 +45,27 @@ class PyStudioUtils():
     def get_modulepath(childPath):
         return os.path.splitext(childPath)[0].replace(os.path.sep, ".")
 
+    @staticmethod
+    def get_unicodevalue(_value):
+        try:
+            _value = eval(_value)
+        except:
+            pass
+        try:
+            return unicode(_value)
+        except UnicodeDecodeError:
+            # Don't change this to a map, because it is ordered
+            encodings = [ ( codecs.BOM_UTF32, 'utf-32' ),
+                ( codecs.BOM_UTF16, 'utf-16' ),
+                ( codecs.BOM_UTF8, 'utf-8' ) ]
+            encoding = 'ascii'
+            if _value is not None:
+                for h, e in encodings:
+                    if _value.startswith(h):
+                        encoding = e
+                        break
+            return unicode(_value, encoding=encoding)
+                
     @staticmethod
     def GetDefaultPython():
         if wx.Platform == "__WXMSW__":
