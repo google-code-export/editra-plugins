@@ -142,11 +142,11 @@ class BreakPointsList(eclib.EToggleEditListCtrl):
 
         """
         idx = 0
-        for filepath in data.keys():
+        for filepath in sorted(data.keys()):
             linenos = data.get(filepath)
             if not linenos:
                 continue
-            for lineno in linenos.keys():
+            for lineno in sorted(linenos.keys()):
                 bpline = linenos.get(lineno)
                 if not bpline:
                     continue
