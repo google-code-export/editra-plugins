@@ -24,7 +24,7 @@ from profiler import Profile_Get, Profile_Set
 
 # Local imports
 from PyStudio.Common import ToolConfig
-from PyStudio.Common.ordereddict import OrderedDict
+from PyStudio.Common.odict import OrderedDict
 from PyStudio.Common.PyStudioUtils import PyStudioUtils
 from PyStudio.Common.PyStudioUtils import RunProcInThread
 from PyStudio.Debugger.ExpressionDialog import ExpressionDialog
@@ -102,8 +102,13 @@ class ExpressionsShelfWindow(BaseShelfWindow):
         del self.expressions[expression]
         self.SaveExpressions()
 
-    def SetExpression(self, expression, enabled):
+    def SetExpression(self, expression, enabled, oldexpression = None):
+        if oldexpression is not None and oldexpression in self.expressions:
+            if expression in self.expressions:
+                return False
+            self.expressions.rename(oldexpression, expression)
         self.expressions[expression] = enabled
+        return True
 
     def RestoreExpressions(self):
         self._listCtrl.Clear()

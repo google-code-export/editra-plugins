@@ -79,13 +79,15 @@ class ExpressionsList(eclib.EToggleEditListCtrl):
             return
         idx = evt.GetIndex()
         self.CheckItem(idx)
-        expression, = self._data[idx]
-        self.Parent.DeleteExpression(expression)
-        expression = unicode(evt.GetLabel())
-        self._data[idx] = [expression,]
+        oldexpression, = self._data[idx]
+        newexpression = unicode(evt.GetLabel())
         enabled = True
-        self.Parent.SetExpression(expression, enabled)
-        self.Evaluate(enabled, expression, idx)        
+        success = self.Parent.SetExpression(newexpression, enabled, oldexpression)
+        if success:
+            self._data[idx] = [newexpression,]
+            self.Evaluate(enabled, newexpression, idx)
+        else:
+            evt.Veto()
 
     def OnCheckItem(self, idx, enabled):
         expression, = self._data[idx]
