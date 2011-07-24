@@ -3,8 +3,21 @@ Changelog
 
 #-----------------------------------------------------------------------------#
 
+Version 0.4
+Released: 
+
++Fix for unicode errors when program exits using sys.exit()
++Stop blank expression appearing when breakpoint hit
++Store expressions in OrderedDict to maintain the order the user entered them
++Don't allow same expression to be entered twice
++Store filter regular expressions (for locals, globals...) in config so that they are reloaded
++Allow Enter to be pressed to confirm filter expressions (same as pressing Search button)
++Display breakpoints sorted by filename and line number
+
+#-----------------------------------------------------------------------------#
+
 Version 0.3
-Released:
+Released: 07/23/2011
 
 +Add indicator icons to PyAnalysis output list
 +Fix bug with not being able to debug GUI programs on Linux
