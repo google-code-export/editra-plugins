@@ -367,12 +367,7 @@ class VariablesList(wx.gizmos.TreeListCtrl):
             if not re.match(self.FilterVar, _name):
                 continue
             _type = unicode(subnode["type"])
-            _value = subnode["repr"]
-            try:
-                _value = eval(_value)
-            except:
-                pass
-            _value = unicode(_value)
+            _value = PyStudioUtils.get_unicodevalue(subnode["repr"])
 
             child = self.AppendItem(item, _name)
             self.SetItemText(child, u' ' + _value, VariablesList.COL_VALUE)
