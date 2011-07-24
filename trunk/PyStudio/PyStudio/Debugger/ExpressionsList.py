@@ -81,8 +81,8 @@ class ExpressionsList(eclib.EToggleEditListCtrl):
         self.CheckItem(idx)
         expression, = self._data[idx]
         self.Parent.DeleteExpression(expression)
-        self._data[idx] = [unicode(evt.GetLabel()),]
         expression = unicode(evt.GetLabel())
+        self._data[idx] = [expression,]
         enabled = True
         self.Parent.SetExpression(expression, enabled)
         self.Evaluate(enabled, expression, idx)        
