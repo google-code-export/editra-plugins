@@ -61,9 +61,11 @@ class ExpressionsShelfWindow(BaseShelfWindow):
         # Attributes
         expressionslist = ToolConfig.GetConfigValue(ToolConfig.TLC_EXPRESSIONS)
         self.expressions = OrderedDict()
-        if expressionslist:
-            for expression, enabled in expressionslist:
-                self.expressions[expression] = enabled
+        if isinstance(expressionslist, list):
+            for tup in expressionslist:
+                if isinstance(tup, tuple) and len(tup) == 2:
+                    expression, enabled = tup
+                    self.expressions[expression] = enabled
 
         self.ignoredwarnings = {}
         

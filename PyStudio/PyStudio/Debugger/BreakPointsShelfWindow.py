@@ -165,9 +165,11 @@ class BreakPointsShelfWindow(BaseShelfWindow):
         self.layout(None, None)
 
         # Attributes
-        bpoints = ToolConfig.GetConfigValue(ToolConfig.TLC_BREAKPOINTS, 
-                                            default=dict())
-        RpdbDebugger().breakpoints = bpoints
+        bpoints = ToolConfig.GetConfigValue(ToolConfig.TLC_BREAKPOINTS)
+        if isinstance(bpoints, dict):
+            RpdbDebugger().breakpoints = bpoints
+        else:
+            RpdbDebugger().breakpoints = dict()        
         RpdbDebugger().saveandrestorebreakpoints = self.SaveAndRestoreBreakpoints
         
         self._listCtrl.PopulateRows(RpdbDebugger().breakpoints)
