@@ -56,6 +56,9 @@ class CompileEntryPoint(object):
 
         mw = wx.GetApp().GetActiveWindow()
         buff = PyStudioUtils.GetEditorForFile(mw, data[0])
+        if not buff:
+            return
+
         buff.RemoveAllMarkers(ed_marker.ErrorMarker())
         if data[0] in self._errdata:
             del self._errdata[data[0]]
