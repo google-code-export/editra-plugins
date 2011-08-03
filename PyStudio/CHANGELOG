@@ -13,6 +13,7 @@ Released:
 +Store filter regular expressions (for locals, globals...) in config so that they are reloaded
 +Allow Enter to be pressed to confirm filter expressions (same as pressing Search button)
 +Display breakpoints sorted by filename and line number
++Fix crash when editor emits save message during shutdown.
 
 #-----------------------------------------------------------------------------#
 
