@@ -65,4 +65,8 @@ class DebuggeeWindow(eclib.OutputBuffer,
         self.restoreautorun()
         self.Stop()
         RpdbDebugger().debugbuttonsupdate()
+        RpdbDebugger().clearlocalvariables()
+        RpdbDebugger().clearglobalvariables()
+        RpdbDebugger().clearexceptions()
+
         
