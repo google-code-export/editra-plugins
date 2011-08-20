@@ -366,7 +366,7 @@ class VariablesList(wx.gizmos.TreeListCtrl):
         #
         for subnode in first_variable_with_expr["subnodes"]:
             _name = unicode(subnode["name"])
-            if not self.isexceptiontype and not re.match(self.FilterExpr, _name):
+            if not re.match(self.FilterExpr, _name):
                 continue
             _type = unicode(subnode["type"])
             _value = PyStudioUtils.get_unicodevalue(subnode["repr"])
