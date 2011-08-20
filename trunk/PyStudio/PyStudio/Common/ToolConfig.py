@@ -373,7 +373,9 @@ class DebugConfigPanel(wx.Panel):
         escaping = config.get(TLC_EXECEVALESCAPING, True)
         self._esccb.SetValue(escaping)
         RpdbDebugger().set_encoding(encoding, escaping)
-
+        
+        Profile_Set(PYTOOL_CONFIG, config)
+        
         # Layout
         self.__DoLayout()
 
