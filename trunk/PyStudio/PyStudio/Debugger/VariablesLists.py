@@ -366,13 +366,13 @@ class VariablesList(wx.gizmos.TreeListCtrl):
         #
         for subnode in first_variable_with_expr["subnodes"]:
             _name = unicode(subnode["name"])
-            if not re.match(self.FilterExpr, _name):
-                continue
             _type = unicode(subnode["type"])
             _value = PyStudioUtils.get_unicodevalue(subnode["repr"])
             if self.isexceptiontype and _name == u"type":
                 if _value.find(u"SystemExit") != -1:
                     RpdbDebugger().issysexit = True
+            if not re.match(self.FilterExpr, _name):
+                continue
 
             child = self.AppendItem(item, _name)
             self.SetItemText(child, u' ' + _value, VariablesList.COL_VALUE)
