@@ -340,25 +340,29 @@ class DebugConfigPanel(wx.Panel):
         self._trapcb = wx.CheckBox(self, label=_("Trap Unhandled Exceptions"))
         trap = config.get(TLC_TRAP_EXCEPTIONS, True)
         self._trapcb.SetValue(trap)
+        config[TLC_TRAP_EXCEPTIONS] = trap
         RpdbDebugger().set_trap_unhandled_exceptions(trap)
 
-        self._igsyscb = wx.CheckBox(self, label=_("Ignore SystemExit when Variables shelf open"))
+        self._igsyscb = wx.CheckBox(self, label=_("Ignore SystemExit Exception"))
         igsys = config.get(TLC_IGNORE_SYSEXIT, True)
         self._igsyscb.SetValue(igsys)
-        RpdbDebugger().ignoresysexit = igsys
+        config[TLC_IGNORE_SYSEXIT] = igsys
         
         self._synccb = wx.CheckBox(self, label=_("Allow Synchronicity"))
         synchronicity = config.get(TLC_SYNCHRONICITY, True)
         self._synccb.SetValue(synchronicity)
         RpdbDebugger().set_synchronicity(synchronicity)
+        config[TLC_SYNCHRONICITY] = synchronicity
 
         self._forkcb = wx.CheckBox(self, label=_("Pause before fork"))
         autofork = config.get(TLC_AUTO_FORK, True)
         self._forkcb.SetValue(not autofork)
+        config[TLC_AUTO_FORK] = autofork
 
         self._forkchildcb = wx.CheckBox(self, label=_("Fork into Child"))
         forkmode = config.get(TLC_FORK_MODE, False)
         self._forkchildcb.SetValue(forkmode)
+        config[TLC_FORK_MODE] = forkmode
         RpdbDebugger().set_fork_mode(forkmode, autofork)
 
         self._enclbl = wx.StaticText(self, label=_("Source Encoding:"))
@@ -368,10 +372,12 @@ class DebugConfigPanel(wx.Panel):
         self._encch.SetToolTipString(_("Source Encoding for Execute/Evaluate"))
         encoding = config.get(TLC_EXECEVALENCODING, "auto")
         self._encch.SetStringSelection(encoding)
+        config[TLC_EXECEVALENCODING] = encoding
 
         self._esccb = wx.CheckBox(self, label=_("Escape Non-Ascii Characters for Execute/Evaluate"))
         escaping = config.get(TLC_EXECEVALESCAPING, True)
         self._esccb.SetValue(escaping)
+        config[TLC_EXECEVALESCAPING] = escaping
         RpdbDebugger().set_encoding(encoding, escaping)
         
         Profile_Set(PYTOOL_CONFIG, config)
@@ -421,7 +427,6 @@ class DebugConfigPanel(wx.Panel):
         if evt.GetEventObject() is self._igsyscb:
             igsys = self._igsyscb.GetValue()
             config[TLC_IGNORE_SYSEXIT] = igsys
-            RpdbDebugger().ignoresysexit = igsys
         else:
             evt.Skip()
             return

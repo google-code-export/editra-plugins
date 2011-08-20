@@ -46,7 +46,7 @@ class VariablesList(wx.gizmos.TreeListCtrl):
     IMG_CLASS, \
     IMG_FUNCT, \
     IMG_VAR = range(3)
-    def __init__(self, parent, listtype, filterexpr, filterlevel, isexceptiontype=False):
+    def __init__(self, parent, listtype, filterexpr, filterlevel):
         """Create a variable display list
         @param parent: parent window
         @param listtype: type of list
@@ -63,7 +63,6 @@ class VariablesList(wx.gizmos.TreeListCtrl):
         self.colname_type = _("Type")
 
         self.listtype = listtype
-        self.isexceptiontype = isexceptiontype
         self.filterexpr = filterexpr
         self.filterlevel = filterlevel
         self.key = None
@@ -366,13 +365,10 @@ class VariablesList(wx.gizmos.TreeListCtrl):
         #
         for subnode in first_variable_with_expr["subnodes"]:
             _name = unicode(subnode["name"])
-            _type = unicode(subnode["type"])
-            _value = PyStudioUtils.get_unicodevalue(subnode["repr"])
-            if self.isexceptiontype and _name == u"type":
-                if _value.find(u"SystemExit") != -1:
-                    RpdbDebugger().issysexit = True
             if not re.match(self.FilterExpr, _name):
                 continue
+            _type = unicode(subnode["type"])
+            _value = PyStudioUtils.get_unicodevalue(subnode["repr"])
 
             child = self.AppendItem(item, _name)
             self.SetItemText(child, u' ' + _value, VariablesList.COL_VALUE)
