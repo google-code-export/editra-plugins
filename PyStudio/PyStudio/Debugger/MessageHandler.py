@@ -116,7 +116,7 @@ class MessageHandler(object):
         self.editor.ShowStepMarker(self.editorlineno, show=True)
 
     def CatchUnhandledException(self):
-        if not ToolConfig.GetConfigValue(ToolConfig.TLC_IGNORE_SYSEXIT):
+        if not ToolConfig.GetConfigValue(ToolConfig.TLC_IGNORE_SYSEXIT, True):
             wx.CallAfter(self._unhandledexception)
             return
             
