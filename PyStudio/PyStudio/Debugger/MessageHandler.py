@@ -26,11 +26,13 @@ import ebmlib
 
 # Local imports
 from PyStudio.Debugger.RpdbDebugger import RpdbDebugger
+from PyStudio.Common import ToolConfig
 from PyStudio.Common.PyStudioUtils import PyStudioUtils
+from PyStudio.Common.PyStudioUtils import RunProcInThread
 
 # Globals
 _ = wx.GetTranslation
-
+RPDBEXCEPTIONSSTR = u"rpdb_exception_info"
 ID_ON_RUNTOLINE = wx.NewId()
 ID_ON_JUMP = wx.NewId()
 #-----------------------------------------------------------------------------#
@@ -60,6 +62,7 @@ class MessageHandler(object):
         rpdbdebugger.clearstepmarker = self.ClearStepMarker
         rpdbdebugger.setstepmarker = self.SetStepMarker
         rpdbdebugger.restorestepmarker = self.RestoreStepMarker
+        rpdbdebugger.catchunhandledexception = self.CatchUnhandledException
         
         # Editra Message Handlers
         ed_msg.Subscribe(self.OnFileLoad, ed_msg.EDMSG_FILE_OPENED)
@@ -111,7 +114,74 @@ class MessageHandler(object):
             return
         self.editor.GotoLine(self.editorlineno)
         self.editor.ShowStepMarker(self.editorlineno, show=True)
+
+    def CatchUnhandledException(self):
+        if not ToolConfig.GetConfigValue(ToolConfig.TLC_IGNORE_SYSEXIT):
+            wx.CallAfter(self._unhandledexception)
+            return
+            
+        expressionlist = [(RPDBEXCEPTIONSSTR, True)]
+
+        worker = RunProcInThread(RPDBEXCEPTIONSSTR, self._issysexit,
+                                 RpdbDebugger().catchexc_get_namespace,
+                                 expressionlist, 0)
+        worker.start()
         
+    def _issysexit(self, variables):
+        if not variables:
+            wx.CallAfter(self._unhandledexception)
+            return
+        variables_with_expr = []
+        for expression in variables:
+            if hasattr(expression, "get"):
+                variables_with_expr.append(expression)
+        if variables_with_expr == []:
+            wx.CallAfter(self._unhandledexception)
+            return
+
+        first_variable_with_expr = variables_with_expr[0]
+        if first_variable_with_expr is None:
+            wx.CallAfter(self._unhandledexception)
+            return
+
+        if "error" in first_variable_with_expr:
+            wx.CallAfter(self._unhandledexception)
+            return
+
+        if first_variable_with_expr["n_subnodes"] == 0:
+            wx.CallAfter(self._unhandledexception)
+            return
+
+        #
+        # Create a list of the subitems.
+        # The list is indexed by name or directory key.
+        # In case of a list, no sorting is needed.
+        #
+        for subnode in first_variable_with_expr["subnodes"]:
+            _name = unicode(subnode["name"])
+            _type = unicode(subnode["type"])
+            _value = PyStudioUtils.get_unicodevalue(subnode["repr"])
+            if _name == u"type" and _value.find(u"SystemExit") != -1:
+                RpdbDebugger().unhandledexception = False
+                RpdbDebugger().do_go()
+                return
+
+        wx.CallAfter(self._unhandledexception)
+
+    def _unhandledexception(self):
+        dlg = wx.MessageDialog(self.mainwindow,
+                               _("An unhandled exception was caught. Would you like to analyze it?"),
+                               _("Warning"),
+                               wx.YES_NO|wx.YES_DEFAULT|wx.ICON_QUESTION)
+        res = dlg.ShowModal()
+        dlg.Destroy()
+
+        if res != wx.ID_YES:
+            RpdbDebugger().unhandledexception = False
+            RpdbDebugger().do_go()
+        else:
+            RpdbDebugger().set_analyze(True)
+
     def UpdateForEditor(self, editor, force=False):
         """Update the context based on the current editor."""
         self._updateeditor = None
