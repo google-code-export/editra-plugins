@@ -73,6 +73,8 @@ class RpdbDebugger(object):
         self.debuggerdetachedtext = None
         self.remoteprocess = False
         self.abortattach = False
+        self.ignoresysexit = True
+        self.issysexit = False
         
         # functions that will be set later
 
@@ -121,6 +123,7 @@ class RpdbDebugger(object):
         self.processcreator = None
         self.debuggerattachedtext = None
         self.debuggerdetachedtext = None
+        self.issysexit = False
         self.clearstepmarker()
         self.clearframe()
         self.clearthread()
@@ -212,6 +215,7 @@ class RpdbDebugger(object):
         self.attached = False
         self.analyzing = False
         self.broken = False
+        self.issysexit = False
         self.debugbuttonsupdate()
         self.clearstepmarker()
         self.processcreator.Abort()

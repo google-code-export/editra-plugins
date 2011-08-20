@@ -36,6 +36,7 @@ TLC_PYTHON_PATH = "PythonPath"
 TLC_ALL_PYTHON_PATHS = "AllPythonPaths"
 TLC_COMPILE_ON_SAVE = "CheckCompileOnSave"
 TLC_TRAP_EXCEPTIONS = "TrapExceptions"
+TLC_IGNORE_SYSEXIT = "IgnoreSysExit"
 TLC_SYNCHRONICITY = "Synchronicity"
 TLC_AUTO_FORK = "AutoFork"
 TLC_FORK_MODE = "ForkMode"
@@ -341,6 +342,11 @@ class DebugConfigPanel(wx.Panel):
         self._trapcb.SetValue(trap)
         RpdbDebugger().set_trap_unhandled_exceptions(trap)
 
+        self._igsyscb = wx.CheckBox(self, label=_("Ignore SystemExit Exception"))
+        igsys = config.get(TLC_IGNORE_SYSEXIT, True)
+        self._igsyscb.SetValue(igsys)
+        RpdbDebugger().ignoresysexit = igsys
+        
         self._synccb = wx.CheckBox(self, label=_("Allow Synchronicity"))
         synchronicity = config.get(TLC_SYNCHRONICITY, True)
         self._synccb.SetValue(synchronicity)
@@ -373,6 +379,7 @@ class DebugConfigPanel(wx.Panel):
 
         # Event Handlers
         self.Bind(wx.EVT_CHECKBOX, self.OnTrapExceptionsCheckBox, self._trapcb)
+        self.Bind(wx.EVT_CHECKBOX, self.OnIgnoreSysExitCheckBox, self._igsyscb)
         self.Bind(wx.EVT_CHECKBOX, self.OnSynchronicityCheckBox, self._synccb)
         self.Bind(wx.EVT_CHECKBOX, self.OnForkCheckBox, self._forkcb)
         self.Bind(wx.EVT_RADIOBUTTON, self.OnForkCheckBox, self._forkchildcb)
@@ -385,6 +392,11 @@ class DebugConfigPanel(wx.Panel):
 
         # Unhandled exception configuration
         sizer.Add(self._trapcb, 0, wx.ALL|wx.EXPAND, 5)
+        excsz = wx.BoxSizer(wx.HORIZONTAL)
+        excsz.Add((3,3),0)
+        # Ignore SystemExit exception configuration
+        excsz.Add(self._igsyscb, 0, wx.ALL|wx.EXPAND, 5)
+        sizer.Add(excsz, 0, wx.ALL|wx.EXPAND, 5)
         # Synchronicity configuration
         sizer.Add(self._synccb, 0, wx.ALL|wx.EXPAND, 5)
         # Auto fork configuration
@@ -401,6 +413,18 @@ class DebugConfigPanel(wx.Panel):
         sizer.Add(self._esccb, 0, wx.ALL|wx.EXPAND, 5)
 
         self.SetSizer(sizer)
+
+    def OnIgnoreSysExitCheckBox(self, evt):
+        config = Profile_Get(PYTOOL_CONFIG, default=dict())
+        if evt.GetEventObject() is self._igsyscb:
+            igsys = self._igsyscb.GetValue()
+            config[TLC_IGNORE_SYSEXIT] = igsys
+            RpdbDebugger().ignoresysexit = igsys
+        else:
+            evt.Skip()
+            return
+
+        Profile_Set(PYTOOL_CONFIG, config)
 
     def OnTrapExceptionsCheckBox(self, evt):
         config = Profile_Get(PYTOOL_CONFIG, default=dict())

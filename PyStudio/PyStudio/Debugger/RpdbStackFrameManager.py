@@ -67,11 +67,10 @@ class RpdbStackFrameManager(object):
         s = self.rpdb2debugger.curstack[rpdb2.DICT_KEY_STACK]
         e = s[-(1 + index)]
         
-        filename = os.path.normcase(e[0])
-        lineno = e[1]
+        self.rpdb2debugger.filename = os.path.normcase(e[0])
+        self.rpdb2debugger.lineno = e[1]
 
         fBroken = self.rpdb2debugger.curstack[rpdb2.DICT_KEY_BROKEN]
-        #event = self.rpdb2debugger.curstack[rpdb2.DICT_KEY_EVENT]
         if not fBroken:
             return
         if not self.rpdb2debugger.breakpoints_installed:
@@ -79,11 +78,13 @@ class RpdbStackFrameManager(object):
             self.rpdb2debugger.breakpoints_installed = True
             self.rpdb2debugger.do_go()
             return            
-        if self.rpdb2debugger.isrpdbbreakpoint(filename, lineno):
+        if self.rpdb2debugger.isrpdbbreakpoint(self.rpdb2debugger.filename, self.rpdb2debugger.lineno):
             if not self.rpdb2debugger.unhandledexception:
                 self.rpdb2debugger.do_go()
             return
-        self.rpdb2debugger.setstepmarker(filename, lineno)
+        self.rpdb2debugger.setstepmarker(self.rpdb2debugger.filename, self.rpdb2debugger.lineno)
         self.rpdb2debugger.restoreexpressions()
+        if self.rpdb2debugger.unhandledexception:
+            self.rpdb2debugger.catchunhandledexception()
 
 
