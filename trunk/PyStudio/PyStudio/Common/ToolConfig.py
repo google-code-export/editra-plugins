@@ -342,7 +342,7 @@ class DebugConfigPanel(wx.Panel):
         self._trapcb.SetValue(trap)
         RpdbDebugger().set_trap_unhandled_exceptions(trap)
 
-        self._igsyscb = wx.CheckBox(self, label=_("Ignore SystemExit Exception"))
+        self._igsyscb = wx.CheckBox(self, label=_("Ignore SystemExit when Variables shelf open"))
         igsys = config.get(TLC_IGNORE_SYSEXIT, True)
         self._igsyscb.SetValue(igsys)
         RpdbDebugger().ignoresysexit = igsys
