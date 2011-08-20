@@ -60,7 +60,7 @@ class VariablesShelfWindow(BaseShelfWindow):
         self._nb = eclib.SegmentBook(self, style=bstyle)
         self._locals = VariablesList(self._nb, self.LOCALSSTR, localsfilterexpr, localsfilterlevel)
         self._globals = VariablesList(self._nb, self.GLOBALSSTR, globalsfilterexpr, globalsfilterlevel)
-        self._exceptions = VariablesList(self._nb, self.EXCEPTIONSSTR, exceptionsfilterexpr, exceptionsfilterlevel)
+        self._exceptions = VariablesList(self._nb, self.EXCEPTIONSSTR, exceptionsfilterexpr, exceptionsfilterlevel, True)
         
         # Setup
         self._InitImageList()
@@ -101,7 +101,7 @@ class VariablesShelfWindow(BaseShelfWindow):
         RpdbDebugger().updateglobalvariables = self._globals.update_namespace
         RpdbDebugger().clearexceptions = self._exceptions.Clear
         RpdbDebugger().updateexceptions = self._exceptions.update_namespace
-        RpdbDebugger().catchunhandledexception = self.UnhandledException
+        RpdbDebugger().catchunhandledexception = self.CatchUnhandledException
         RpdbDebugger().updateanalyze = self.UpdateAnalyze
         
         # Event Handlers
@@ -155,11 +155,18 @@ class VariablesShelfWindow(BaseShelfWindow):
         RpdbDebugger().catchunhandledexception = lambda:None
         RpdbDebugger().updateanalyze = lambda:None
 
-    def UnhandledException(self):
-        RpdbDebugger().unhandledexception = True
-        wx.CallAfter(self._unhandledexception)
+    def CatchUnhandledException(self):
+        if RpdbDebugger().ignoresysexit and RpdbDebugger().issysexit:
+            RpdbDebugger().issysexit = False
+            wx.CallAfter(self._turnoffanalyze)
+        else:
+            wx.CallAfter(self._catchunhandledexception)
 
-    def _unhandledexception(self):
+    def _turnoffanalyze(self):
+        RpdbDebugger().set_analyze(False)
+        RpdbDebugger().unhandledexception = False
+    
+    def _catchunhandledexception(self):
         dlg = wx.MessageDialog(self,
                                _("An unhandled exception was caught. Would you like to analyze it?"),
                                _("Warning"),
@@ -168,10 +175,7 @@ class VariablesShelfWindow(BaseShelfWindow):
         dlg.Destroy()
 
         if res != wx.ID_YES:
-            RpdbDebugger().unhandledexception = False
-            RpdbDebugger().do_go()
-        else:
-            RpdbDebugger().set_analyze(True)
+            self._turnoffanalyze()
 
     def OnAnalyze(self, event):
         if self.taskbtn.GetLabel() == self.ANALYZELBL:
