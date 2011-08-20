@@ -101,7 +101,7 @@ class VariablesShelfWindow(BaseShelfWindow):
         RpdbDebugger().updateglobalvariables = self._globals.update_namespace
         RpdbDebugger().clearexceptions = self._exceptions.Clear
         RpdbDebugger().updateexceptions = self._exceptions.update_namespace
-        RpdbDebugger().catchunhandledexception = self.CatchUnhandledException
+        RpdbDebugger().catchunhandledexception = self.UnhandledException
         RpdbDebugger().updateanalyze = self.UpdateAnalyze
         
         # Event Handlers
@@ -155,18 +155,13 @@ class VariablesShelfWindow(BaseShelfWindow):
         RpdbDebugger().catchunhandledexception = lambda:None
         RpdbDebugger().updateanalyze = lambda:None
 
-    def CatchUnhandledException(self):
+    def UnhandledException(self):
         if RpdbDebugger().ignoresysexit and RpdbDebugger().issysexit:
-            RpdbDebugger().issysexit = False
-            wx.CallAfter(self._turnoffanalyze)
-        else:
-            wx.CallAfter(self._catchunhandledexception)
+            return
+        RpdbDebugger().unhandledexception = True
+        wx.CallAfter(self._unhandledexception)
 
-    def _turnoffanalyze(self):
-        RpdbDebugger().set_analyze(False)
-        RpdbDebugger().unhandledexception = False
-    
-    def _catchunhandledexception(self):
+    def _unhandledexception(self):
         dlg = wx.MessageDialog(self,
                                _("An unhandled exception was caught. Would you like to analyze it?"),
                                _("Warning"),
@@ -175,7 +170,10 @@ class VariablesShelfWindow(BaseShelfWindow):
         dlg.Destroy()
 
         if res != wx.ID_YES:
-            self._turnoffanalyze()
+            RpdbDebugger().unhandledexception = False
+            RpdbDebugger().do_go()
+        else:
+            RpdbDebugger().set_analyze(True)
 
     def OnAnalyze(self, event):
         if self.taskbtn.GetLabel() == self.ANALYZELBL:

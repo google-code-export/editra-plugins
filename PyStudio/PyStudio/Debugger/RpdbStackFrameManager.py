@@ -84,7 +84,5 @@ class RpdbStackFrameManager(object):
             return
         self.rpdb2debugger.setstepmarker(self.rpdb2debugger.filename, self.rpdb2debugger.lineno)
         self.rpdb2debugger.restoreexpressions()
-        if self.rpdb2debugger.unhandledexception:
-            self.rpdb2debugger.catchunhandledexception()
 
 

@@ -35,9 +35,9 @@ class RpdbVariablesManager(object):
         self.variableskey_map = {}
         
     def update_unhandled_exception(self, event):
-        self.rpdb2debugger.unhandledexception = True
-        self.rpdb2debugger.set_analyze(True)
-
+        self.update_exception_ns()
+        self.rpdb2debugger.catchunhandledexception()
+            
     def update_variables(self, event):
         wx.CallAfter(self.update_namespace)
 
@@ -59,6 +59,9 @@ class RpdbVariablesManager(object):
         (key1, el1) = self.rpdb2debugger.updateglobalvariables(key, expressionlist)
         self.variableskey_map[key1] = el1
         
+        self.update_exception_ns()
+
+    def update_exception_ns(self):
         key = 'exception'
         expressionlist = self.variableskey_map.get(key, None)
         (key1, el1) = self.rpdb2debugger.updateexceptions(key, expressionlist)
