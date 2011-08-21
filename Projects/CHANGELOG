@@ -17,6 +17,7 @@ Bug Fixes:
 background thread.
 +Fix sorting issue in History Window
 +Fix handling of ed_msg handler cleanup
++Fix crash in addPath when invalid data is stored in the tree.
 
 #-----------------------------------------------------------------------------#
 Version 1.7
