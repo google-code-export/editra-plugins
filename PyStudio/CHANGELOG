@@ -14,6 +14,7 @@ Released:
 +Allow Enter to be pressed to confirm filter expressions (same as pressing Search button)
 +Display breakpoints sorted by filename and line number
 +Fix crash when editor emits save message during shutdown
++Make exception trapping work when Variables shelf not open
 +Add config to ignore SystemExit when trapping exceptions
 
 #-----------------------------------------------------------------------------#
