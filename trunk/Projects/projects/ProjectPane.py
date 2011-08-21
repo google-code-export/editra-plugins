@@ -1257,7 +1257,8 @@ class ProjectTree(wx.Panel):
         except wx.PyAssertionError:
             data = None
 
-        if data is None:
+        if not isinstance(data, dict):
+            self.log("[projects][err] addPath - invalid data: %s" % repr(data))
             return
 
         parentpath = data['path']
