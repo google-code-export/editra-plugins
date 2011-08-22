@@ -1,0 +1,1073 @@
+# Russian translation for editra
+# Copyright (c) 2011 Rosetta Contributors and Canonical Ltd 2011
+# This file is distributed under the same license as the editra package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, 2011.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: editra\n"
+"Report-Msgid-Bugs-To: FULL NAME <EMAIL@ADDRESS>\n"
+"POT-Creation-Date: 2011-05-21 15:02-0500\n"
+"PO-Revision-Date: 2011-07-03 05:29+0000\n"
+"Last-Translator: amin radjabov <Unknown>\n"
+"Language-Team: Russian <ru@li.org>\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"X-Launchpad-Export-Date: 2011-08-22 00:12+0000\n"
+"X-Generator: Launchpad (build 13697)\n"
+
+#: PyStudio/PyStudio/Debugger/DebuggeeWindow.py:35
+msgid ""
+"\n"
+"\n"
+"Debuggee finished."
+msgstr ""
+
+#: PyStudio/PyStudio/Debugger/DebugShelfWindow.py:98
+msgid ""
+"\n"
+"\n"
+"Debugger detached."
+msgstr ""
+
+#: PyStudio/PyStudio/Debugger/RpdbDebugger.py:178
+#, python-format
+msgid ""
+"\n"
+"%s\n"
+msgstr ""
+
+#: PyStudio/PyStudio/Debugger/VariablesLists.py:223
+#, python-format
+msgid ""
+"%s\n"
+"\n"
+"Click 'Cancel' to ignore this warning in this session."
+msgstr ""
+
+#: PyStudio/PyStudio/Common/ToolConfig.py:668
+msgid "(error prevented analysis)"
+msgstr ""
+
+#: PyStudio/PyStudio/Common/ToolConfig.py:633
+msgid "(syntax error raised for a module)"
+msgstr ""
+
+#: PyStudio/PyStudio/Common/ToolConfig.py:611
+msgid "(warning notes in code comments)"
+msgstr ""
+
+#: PyStudio/PyStudio/Common/ToolConfig.py:576
+msgid "Abstract class is only referenced a few times"
+msgstr ""
+
+#: PyStudio/PyStudio/Common/ToolConfig.py:575
+msgid "Abstract class not referenced"
+msgstr ""
+
+#: PyStudio/PyStudio/Common/ToolConfig.py:592
+msgid "Access to a protected member of a client class"
+msgstr ""
+
+#: PyStudio/PyStudio/Common/ToolConfig.py:644
+msgid "Accessing method before it is defined"
+msgstr ""
+
+#: PyStudio/PyStudio/Common/ToolConfig.py:128
+msgid "Add python executable"
+msgstr ""
+
+#: PyStudio/PyStudio/Common/ToolConfig.py:341
+msgid "Allow Synchronicity"
+msgstr ""
+
+#: PyStudio/PyStudio/Debugger/VariablesShelfWindow.py:142
+msgid "An unhandled exception was caught. Would you like to analyze it?"
+msgstr ""
+
+#: PyStudio/PyStudio/Common/ToolConfig.py:593
+msgid "Arguments number differs from super method"
+msgstr ""
+
+#: PyStudio/PyStudio/Common/ToolConfig.py:664
+msgid "Assigning to function call which doesn't return"
+msgstr ""
+
+#: PyStudio/PyStudio/Common/ToolConfig.py:629
+msgid "Assigning to function call which only returns None"
+msgstr ""
+
+#: PyStudio/PyStudio/Debugger/AttachDialog.py:36
+msgid "Attach"
+msgstr ""
+
+#: PyStudio/PyStudio/Debugger/AttachDialog.py:46
+msgid ""
+"Attach to a script (that has the debugger engine running) on local or remote "
+"machine:"
+msgstr ""
+
+#: PyStudio/PyStudio/Common/ToolConfig.py:590
+msgid "Attribute defined outside __init__"
+msgstr ""
+
+#: PyStudio/PyStudio/Common/ToolConfig.py:247
+msgid "Automatic"
+msgstr ""
+
+#: PyStudio/PyStudio/Common/ToolConfig.py:248
+msgid "Automatically rerun on save, document change, and file load"
+msgstr ""
+
+#: PyStudio/PyStudio/Common/ToolConfig.py:655
+msgid "Bad except clauses order"
+msgstr ""
+
+#: PyStudio/PyStudio/Common/ToolConfig.py:660
+msgid "Bad first argument given to super class"
+msgstr ""
+
+#: PyStudio/PyStudio/Common/ToolConfig.py:600
+msgid "Bad indentation"
+msgstr ""
+
+#: PyStudio/PyStudio/Common/ToolConfig.py:635
+msgid "Bad option value"
+msgstr ""
+
+#: PyStudio/PyStudio/Common/ToolConfig.py:538
+msgid "Black listed name"
+msgstr ""
+
+#: PyStudio/PyStudio/Debugger/DebugShelfWindow.py:74
+msgid "Break"
+msgstr "Прервать"
+
+#: PyStudio/PyStudio/Common/ToolConfig.py:625
+msgid "Catch \"Exception\""
+msgstr ""
+
+#: PyStudio/PyStudio/Common/ToolConfig.py:132
+msgid "Check for syntax errors on save"
+msgstr ""
+
+#: PyStudio/PyStudio/Common/ToolConfig.py:597
+msgid "Class has no __init__ method"
+msgstr ""
+
+#: PyStudio/PyStudio/Common/ToolConfig.py:543
+msgid "Class method should have \"cls\" as first argument"
+msgstr ""
+
+#: PyStudio/PyStudio/SyntaxChecker/LintShelfWindow.py:63
+msgid "Clear"
+msgstr ""
+
+#: PyStudio/PyStudio/Common/ToolConfig.py:116
+msgid "Code Analysis"
+msgstr ""
+
+#: PyStudio/PyStudio/Common/ToolConfig.py:550
+msgid "Comma not followed by a space"
+msgstr ""
+
+#: PyStudio/PyStudio/Common/BaseShelfWindow.py:72
+msgid "Configure"
+msgstr ""
+
+#: PyStudio/PyStudio/Common/ToolConfig.py:526
+#: PyStudio/PyStudio/SyntaxChecker/CheckResultsList.py:227
+msgid "Convention"
+msgstr ""
+
+#: PyStudio/PyStudio/ModuleFinder/FindTabMenu.py:72
+msgid "Copy Module Path"
+msgstr ""
+
+#: PyStudio/PyStudio/Common/ToolConfig.py:162
+msgid "Currently active Python"
+msgstr ""
+
+#: PyStudio/PyStudio/Common/ToolConfig.py:560
+msgid "Cyclic import"
+msgstr ""
+
+#: PyStudio/PyStudio/Common/ToolConfig.py:582
+msgid "Dangerous default value used as an argument"
+msgstr ""
+
+#: PyStudio/PyStudio/Debugger/VariablesLists.py:180
+#: PyStudio/PyStudio/Debugger/VariablesLists.py:267
+#: PyStudio/PyStudio/Debugger/VariablesLists.py:268
+#: PyStudio/PyStudio/Debugger/VariablesLists.py:270
+#: PyStudio/PyStudio/Debugger/VariablesLists.py:272
+#: PyStudio/PyStudio/Debugger/VariablesLists.py:306
+msgid "Data Retrieval Timeout"
+msgstr ""
+
+#: PyStudio/PyStudio/Common/ToolConfig.py:115
+msgid "Debugger"
+msgstr ""
+
+#: PyStudio/PyStudio/Debugger/DebugShelfWindow.py:76
+msgid "Debugger Args"
+msgstr ""
+
+#: PyStudio/PyStudio/Debugger/DebugShelfWindow.py:97
+msgid ""
+"Debugger attached.\n"
+"\n"
+msgstr ""
+
+#: PyStudio/PyStudio/Debugger/PythonDebugger.py:44
+msgid ""
+"Debugger attached. Debuggee output starts now...\n"
+"\n"
+msgstr ""
+
+#: PyStudio/PyStudio/Debugger/DebugShelfWindow.py:386
+#, python-format
+msgid ""
+"Debugging remote debuggee %s\n"
+"\n"
+msgstr ""
+
+#: PyStudio/PyStudio/Debugger/BreakPointsShelfWindow.py:164
+msgid "Delete All Breakpoints"
+msgstr ""
+
+#: PyStudio/PyStudio/Debugger/ExpressionsShelfWindow.py:51
+msgid "Delete All Expressions"
+msgstr ""
+
+#: PyStudio/PyStudio/Debugger/BreakPointsShelfWindow.py:162
+msgid "Delete Breakpoint"
+msgstr ""
+
+#: PyStudio/PyStudio/Debugger/ExpressionsShelfWindow.py:49
+msgid "Delete Expression"
+msgstr ""
+
+#: PyStudio/PyStudio/Common/ToolConfig.py:485
+msgid "Description"
+msgstr ""
+
+#: PyStudio/PyStudio/Debugger/DebugShelfWindow.py:95
+msgid "Disabling Pylint Autorun during Debug.\n"
+msgstr ""
+
+#: PyStudio/PyStudio/Common/ToolConfig.py:564
+msgid "Duplication"
+msgstr ""
+
+#: PyStudio/PyStudio/Common/ToolConfig.py:541
+msgid "Empty docstring"
+msgstr ""
+
+#: PyStudio/PyStudio/Common/ToolConfig.py:484
+msgid "Enabled"
+msgstr ""
+
+#: PyStudio/PyStudio/Debugger/ExpressionsShelfWindow.py:135
+msgid "Enter Code to Execute"
+msgstr ""
+
+#: PyStudio/PyStudio/ModuleFinder/FindShelfWindow.py:55
+msgid "Enter module name to search for"
+msgstr ""
+
+#: PyStudio/PyStudio/Common/PyStudioUtils.py:134
+#: PyStudio/PyStudio/Common/ToolConfig.py:529
+#: PyStudio/PyStudio/SyntaxChecker/CheckResultsList.py:48
+#: PyStudio/PyStudio/SyntaxChecker/CheckResultsList.py:153
+#: PyStudio/PyStudio/SyntaxChecker/CheckResultsList.py:225
+msgid "Error"
+msgstr ""
+
+#: PyStudio/PyStudio/Common/ToolConfig.py:555
+msgid "Errors / warnings by module"
+msgstr ""
+
+#: PyStudio/PyStudio/Common/ToolConfig.py:363
+msgid "Escape Non-Ascii Characters for Execute/Evaluate"
+msgstr ""
+
+#: PyStudio/PyStudio/Common/ToolConfig.py:626
+msgid "Except doesn't do anything"
+msgstr ""
+
+#: PyStudio/PyStudio/Common/ToolConfig.py:627
+msgid "Exception doesn't inherit from standard \"Exception\" class"
+msgstr ""
+
+#: PyStudio/PyStudio/Debugger/VariablesShelfWindow.py:66
+msgid "Exceptions"
+msgstr ""
+
+#: PyStudio/PyStudio/Debugger/ExpressionsShelfWindow.py:56
+msgid "Execute"
+msgstr ""
+
+#: PyStudio/PyStudio/Common/ToolConfig.py:637
+msgid "Explicit return in __init__"
+msgstr ""
+
+#: PyStudio/PyStudio/Debugger/BreakPointsList.py:44
+#: PyStudio/PyStudio/Debugger/ExpressionsList.py:44
+msgid "Expression"
+msgstr ""
+
+#: PyStudio/PyStudio/Common/ToolConfig.py:561
+msgid "External dependencies"
+msgstr ""
+
+#: PyStudio/PyStudio/SyntaxChecker/LintShelfWindow.py:181
+#, python-format
+msgid "Failed to load results data: %s"
+msgstr ""
+
+#: PyStudio/PyStudio/SyntaxChecker/LintShelfWindow.py:157
+msgid "Failed to save PyLint Results"
+msgstr ""
+
+#: PyStudio/PyStudio/Common/ToolConfig.py:530
+msgid "Fatal"
+msgstr ""
+
+#: PyStudio/PyStudio/Debugger/BreakPointsList.py:42
+#: PyStudio/PyStudio/Debugger/StackFrameList.py:45
+#: PyStudio/PyStudio/ModuleFinder/FindResultsList.py:58
+msgid "File"
+msgstr ""
+
+#: PyStudio/PyStudio/Debugger/AttachDialog.py:77
+msgid "Filename"
+msgstr ""
+
+#: PyStudio/PyStudio/Debugger/VariablesShelfWindow.py:73
+msgid "Filtering:"
+msgstr ""
+
+#: PyStudio/PyStudio/Common/ToolConfig.py:350
+msgid "Fork into Child"
+msgstr ""
+
+#: PyStudio/PyStudio/Common/ToolConfig.py:674
+msgid "Format detection error"
+msgstr ""
+
+#: PyStudio/PyStudio/Common/ToolConfig.py:601
+msgid "Found inconsistent indentation"
+msgstr ""
+
+#: PyStudio/PyStudio/Debugger/StackFrameList.py:44
+msgid "Frame"
+msgstr ""
+
+#: PyStudio/PyStudio/Debugger/StackFrameList.py:47
+msgid "Function"
+msgstr ""
+
+#: PyStudio/PyStudio/Common/ToolConfig.py:114
+msgid "General"
+msgstr ""
+
+#: PyStudio/PyStudio/Common/ToolConfig.py:557
+msgid "Global evaluation"
+msgstr ""
+
+#: PyStudio/PyStudio/Common/ToolConfig.py:613
+msgid "Global statement used but no assignment is done"
+msgstr ""
+
+#: PyStudio/PyStudio/Common/ToolConfig.py:612
+msgid "Global variable undefined at the module level"
+msgstr ""
+
+#: PyStudio/PyStudio/Debugger/VariablesShelfWindow.py:65
+msgid "Globals"
+msgstr ""
+
+#: PyStudio/PyStudio/Debugger/AttachDialog.py:61
+msgid "Host:"
+msgstr ""
+
+#: PyStudio/PyStudio/ModuleFinder/FindResultsList.py:46
+#, python-format
+msgid "INFO: Directory Variables file: %s"
+msgstr ""
+
+#: PyStudio/PyStudio/ModuleFinder/FindResultsList.py:45
+#, python-format
+msgid "INFO: PyFind command line: %s"
+msgstr ""
+
+#: PyStudio/PyStudio/ModuleFinder/FindResultsList.py:44
+#, python-format
+msgid "INFO: Using PYTHONPATH + %s"
+msgstr ""
+
+#: PyStudio/PyStudio/Debugger/ExpressionsShelfWindow.py:160
+msgid "Ignore Warning"
+msgstr ""
+
+#: PyStudio/PyStudio/Common/ToolConfig.py:647
+msgid "Interface is not a class"
+msgstr ""
+
+#: PyStudio/PyStudio/Common/ToolConfig.py:577
+msgid "Interface not implemented"
+msgstr ""
+
+#: PyStudio/PyStudio/ModuleFinder/FindResultsList.py:34
+msgid "Internal Search Error"
+msgstr ""
+
+#: PyStudio/PyStudio/Common/ToolConfig.py:539
+msgid "Invalid name"
+msgstr ""
+
+#: PyStudio/PyStudio/Debugger/MessageHandler.py:54
+msgid "Jump"
+msgstr ""
+
+#: PyStudio/PyStudio/Common/ToolConfig.py:586
+msgid "Lambda may not be necessary"
+msgstr ""
+
+#: PyStudio/PyStudio/Debugger/BreakPointsList.py:43
+#: PyStudio/PyStudio/Debugger/StackFrameList.py:46
+#: PyStudio/PyStudio/SyntaxChecker/CheckResultsList.py:47
+msgid "Line"
+msgstr ""
+
+#: PyStudio/PyStudio/Common/ToolConfig.py:545
+msgid "Line too long"
+msgstr ""
+
+#: PyStudio/PyStudio/Common/ToolConfig.py:245
+msgid "Lint Run Mode"
+msgstr ""
+
+#: PyStudio/PyStudio/SyntaxChecker/LintShelfWindow.py:57
+#: PyStudio/PyStudio/SyntaxChecker/LintShelfWindow.py:166
+msgid "Load Results"
+msgstr ""
+
+#: PyStudio/PyStudio/SyntaxChecker/LintShelfWindow.py:179
+#, python-format
+msgid "Loaded code analysis data: %s"
+msgstr ""
+
+#: PyStudio/PyStudio/Debugger/VariablesLists.py:180
+#: PyStudio/PyStudio/Debugger/VariablesLists.py:248
+#: PyStudio/PyStudio/Debugger/VariablesLists.py:249
+#: PyStudio/PyStudio/Debugger/VariablesLists.py:250
+#: PyStudio/PyStudio/Debugger/VariablesLists.py:251
+#: PyStudio/PyStudio/Debugger/VariablesLists.py:306
+msgid "Loading..."
+msgstr ""
+
+#: PyStudio/PyStudio/Debugger/VariablesShelfWindow.py:64
+msgid "Locals"
+msgstr ""
+
+#: PyStudio/PyStudio/Common/ToolConfig.py:250
+msgid "Manual"
+msgstr ""
+
+#: PyStudio/PyStudio/Common/ToolConfig.py:169
+msgid "Mark syntax errors in buffer after save"
+msgstr ""
+
+#: PyStudio/PyStudio/Debugger/VariablesShelfWindow.py:71
+msgid "Maximum"
+msgstr ""
+
+#: PyStudio/PyStudio/Debugger/VariablesShelfWindow.py:71
+msgid "Medium"
+msgstr ""
+
+#: PyStudio/PyStudio/Common/ToolConfig.py:284
+msgid "Message Type: "
+msgstr ""
+
+#: PyStudio/PyStudio/Common/ToolConfig.py:556
+msgid "Messages"
+msgstr ""
+
+#: PyStudio/PyStudio/Common/ToolConfig.py:554
+msgid "Messages by category"
+msgstr ""
+
+#: PyStudio/PyStudio/Common/ToolConfig.py:544
+msgid "Metaclass method should have \"mcs\" as first argument"
+msgstr ""
+
+#: PyStudio/PyStudio/Common/ToolConfig.py:559
+msgid "Method could be a function"
+msgstr ""
+
+#: PyStudio/PyStudio/Common/ToolConfig.py:645
+msgid "Method has no argument"
+msgstr ""
+
+#: PyStudio/PyStudio/Common/ToolConfig.py:643
+msgid "Method hidden by instance attribute"
+msgstr ""
+
+#: PyStudio/PyStudio/Common/ToolConfig.py:595
+msgid "Method of an abstract class is not overridden"
+msgstr ""
+
+#: PyStudio/PyStudio/Common/ToolConfig.py:646
+msgid "Method should have \"self\" as first argument"
+msgstr ""
+
+#: PyStudio/PyStudio/Common/ToolConfig.py:540
+msgid "Missing docstring"
+msgstr ""
+
+#: PyStudio/PyStudio/Common/ToolConfig.py:648
+msgid "Missing method from interface"
+msgstr ""
+
+#: PyStudio/PyStudio/Common/ToolConfig.py:542
+msgid "Missing required attribute"
+msgstr ""
+
+#: PyStudio/PyStudio/Common/ToolConfig.py:609
+msgid "Module import itself"
+msgstr ""
+
+#: PyStudio/PyStudio/Common/ToolConfig.py:562
+msgid "Modules dependencies graph"
+msgstr ""
+
+#: PyStudio/PyStudio/Common/ToolConfig.py:547
+msgid "More than one statement on a single line"
+msgstr ""
+
+#: PyStudio/PyStudio/Debugger/ThreadsList.py:40
+#: PyStudio/PyStudio/Debugger/ThreadsList.py:84
+#: PyStudio/PyStudio/Debugger/VariablesLists.py:58
+msgid "Name"
+msgstr ""
+
+#: PyStudio/PyStudio/Common/ToolConfig.py:654
+msgid "Name not defined in module"
+msgstr ""
+
+#: PyStudio/PyStudio/Debugger/VariablesLists.py:181
+msgid "Namespace Warning"
+msgstr ""
+
+#: PyStudio/PyStudio/SyntaxChecker/LintShelfWindow.py:161
+msgid "No data to save!"
+msgstr ""
+
+#: PyStudio/PyStudio/Common/ToolConfig.py:624
+msgid "No exception type(s) specified"
+msgstr ""
+
+#: PyStudio/PyStudio/Common/ToolConfig.py:649
+msgid "Non ascii characters found but no encoding specified (PEP 263)"
+msgstr ""
+
+#: PyStudio/PyStudio/Common/ToolConfig.py:662
+msgid "Object is not callable"
+msgstr ""
+
+#: PyStudio/PyStudio/Debugger/VariablesShelfWindow.py:71
+msgid "Off"
+msgstr ""
+
+#: PyStudio/PyStudio/Common/ToolConfig.py:251
+msgid "Only run when requested"
+msgstr ""
+
+#: PyStudio/PyStudio/ModuleFinder/FindTabMenu.py:103
+#, python-format
+msgid "Open module '%s'"
+msgstr ""
+
+#: PyStudio/PyStudio/Common/ToolConfig.py:549
+msgid "Operator not followed by a space"
+msgstr ""
+
+#: PyStudio/PyStudio/Common/ToolConfig.py:548
+msgid "Operator not preceded by a space"
+msgstr ""
+
+#: PyStudio/PyStudio/Debugger/AttachDialog.py:76
+msgid "PID"
+msgstr ""
+
+#: PyStudio/PyStudio/Debugger/PasswordDialog.py:33
+msgid "Password"
+msgstr ""
+
+#: PyStudio/PyStudio/Common/ToolConfig.py:346
+msgid "Pause before fork"
+msgstr ""
+
+#: PyStudio/PyStudio/Debugger/DebugShelfWindow.py:76
+msgid "Program Args"
+msgstr ""
+
+#: PyStudio/PyStudio/Common/ToolConfig.py:258
+msgid "PyLint Checkers"
+msgstr ""
+
+#: PyStudio/PyStudio/__init__.py:193
+msgid "PyStudio"
+msgstr ""
+
+#: PyStudio/PyStudio/Common/ToolConfig.py:84
+msgid "PyStudio Config"
+msgstr ""
+
+#: PyStudio/PyStudio/Common/ToolConfig.py:163
+msgid "Python Path:"
+msgstr ""
+
+#: PyStudio/PyStudio/Common/ToolConfig.py:656
+#, python-format
+msgid "Raising %s while only classes, instances or string are allowed"
+msgstr ""
+
+#: PyStudio/PyStudio/Common/ToolConfig.py:657
+msgid "Raising a new style class which doesn't inherit from BaseException"
+msgstr ""
+
+#: PyStudio/PyStudio/Common/ToolConfig.py:623
+msgid "Raising a string exception"
+msgstr ""
+
+#: PyStudio/PyStudio/Common/ToolConfig.py:563
+msgid "Raw metrics"
+msgstr ""
+
+#: PyStudio/PyStudio/Common/ToolConfig.py:621
+msgid "Redefining built-in"
+msgstr ""
+
+#: PyStudio/PyStudio/Common/ToolConfig.py:620
+msgid "Redefining name from outer scope"
+msgstr ""
+
+#: PyStudio/PyStudio/Common/ToolConfig.py:638
+msgid "Redefinition of method"
+msgstr ""
+
+#: PyStudio/PyStudio/Debugger/DebugShelfWindow.py:96
+msgid "Reenabling Pylint Autorun.\n"
+msgstr ""
+
+#: PyStudio/PyStudio/Common/ToolConfig.py:527
+#: PyStudio/PyStudio/SyntaxChecker/CheckResultsList.py:228
+msgid "Refactor"
+msgstr ""
+
+#: PyStudio/PyStudio/Debugger/AttachDialog.py:68
+msgid "Refresh"
+msgstr ""
+
+#: PyStudio/PyStudio/Common/ToolConfig.py:608
+msgid "Reimport of module"
+msgstr ""
+
+#: PyStudio/PyStudio/Common/ToolConfig.py:607
+msgid "Relative import"
+msgstr ""
+
+#: PyStudio/PyStudio/Common/ToolConfig.py:131
+msgid "Remove selected python executable"
+msgstr ""
+
+#: PyStudio/PyStudio/Debugger/VariablesLists.py:59
+msgid "Repr"
+msgstr ""
+
+#: PyStudio/PyStudio/Common/ToolConfig.py:640
+msgid "Return outside function"
+msgstr ""
+
+#: PyStudio/PyStudio/Common/ToolConfig.py:642
+msgid "Return with argument inside generator"
+msgstr ""
+
+#: PyStudio/PyStudio/Debugger/DebugShelfWindow.py:62
+msgid "Run"
+msgstr ""
+
+#: PyStudio/PyStudio/Debugger/MessageHandler.py:53
+msgid "Run To Line"
+msgstr ""
+
+#: PyStudio/PyStudio/SyntaxChecker/LintShelfWindow.py:55
+#: PyStudio/PyStudio/SyntaxChecker/LintShelfWindow.py:142
+msgid "Save Results"
+msgstr ""
+
+#: PyStudio/PyStudio/SyntaxChecker/LintShelfWindow.py:155
+#, python-format
+msgid "Saved PyLint results to: %s"
+msgstr ""
+
+#: PyStudio/PyStudio/Common/ToolConfig.py:196
+msgid "Select Python Executable"
+msgstr ""
+
+#: PyStudio/PyStudio/Debugger/BreakPointsShelfWindow.py:160
+msgid "Set Breakpoint"
+msgstr ""
+
+#: PyStudio/PyStudio/Debugger/ExpressionsShelfWindow.py:47
+msgid "Set Expression"
+msgstr ""
+
+#: PyStudio/PyStudio/Debugger/PasswordDialog.py:58
+msgid "Set password:"
+msgstr ""
+
+#: PyStudio/PyStudio/Common/BaseShelfPlugin.py:79
+#, python-format
+msgid "Show %s"
+msgstr ""
+
+#: PyStudio/PyStudio/Common/ToolConfig.py:594
+msgid "Signature differs from super method"
+msgstr ""
+
+#: PyStudio/PyStudio/Common/ToolConfig.py:565
+msgid "Similar lines in other files"
+msgstr ""
+
+#: PyStudio/PyStudio/Common/ToolConfig.py:359
+msgid "Source Encoding for Execute/Evaluate"
+msgstr ""
+
+#: PyStudio/PyStudio/Common/ToolConfig.py:355
+msgid "Source Encoding:"
+msgstr ""
+
+#: PyStudio/PyStudio/Debugger/StackThreadShelfWindow.py:50
+msgid "Stack Frame"
+msgstr ""
+
+#: PyStudio/PyStudio/Debugger/ThreadsList.py:41
+#: PyStudio/PyStudio/Debugger/ThreadsList.py:85
+msgid "State"
+msgstr ""
+
+#: PyStudio/PyStudio/Common/ToolConfig.py:583
+msgid "Statement seems to have no effect"
+msgstr ""
+
+#: PyStudio/PyStudio/Common/ToolConfig.py:591
+msgid "Static method with self or class as first argument"
+msgstr ""
+
+#: PyStudio/PyStudio/Common/ToolConfig.py:558
+msgid "Statistics by type"
+msgstr ""
+
+#: PyStudio/PyStudio/Debugger/DebugShelfWindow.py:68
+msgid "Step In"
+msgstr ""
+
+#: PyStudio/PyStudio/Debugger/DebugShelfWindow.py:72
+msgid "Step Out"
+msgstr ""
+
+#: PyStudio/PyStudio/Debugger/DebugShelfWindow.py:70
+msgid "Step Over"
+msgstr ""
+
+#: PyStudio/PyStudio/Debugger/DebugShelfWindow.py:64
+msgid "Stop debugging"
+msgstr ""
+
+#: PyStudio/PyStudio/Common/ToolConfig.py:584
+msgid "String statement has no effect"
+msgstr ""
+
+#: PyStudio/PyStudio/Debugger/MessageHandler.py:89
+#, python-format
+msgid ""
+"The modules: %s, which are incompatible with the debugger were detected and "
+"can possibly cause the debugger to fail."
+msgstr ""
+
+#: PyStudio/PyStudio/Debugger/PasswordDialog.py:38
+msgid "The password is used to secure communication between the "
+msgstr ""
+
+#: PyStudio/PyStudio/Debugger/PasswordDialog.py:87
+msgid "The password should begin with a letter and continue "
+msgstr ""
+
+#: PyStudio/PyStudio/Debugger/ExpressionsShelfWindow.py:134
+msgid "This code will be executed at the debuggee:"
+msgstr ""
+
+#: PyStudio/PyStudio/Debugger/ThreadsList.py:39
+msgid "Thread Id"
+msgstr ""
+
+#: PyStudio/PyStudio/Debugger/StackThreadShelfWindow.py:51
+msgid "Threads"
+msgstr ""
+
+#: PyStudio/PyStudio/Debugger/BreakPointsShelfWindow.py:55
+msgid "Toggle Breakpoint"
+msgstr ""
+
+#: PyStudio/PyStudio/Common/ToolConfig.py:568
+msgid "Too few public methods"
+msgstr ""
+
+#: PyStudio/PyStudio/Common/ToolConfig.py:566
+msgid "Too many ancestors"
+msgstr ""
+
+#: PyStudio/PyStudio/Common/ToolConfig.py:572
+msgid "Too many arguments"
+msgstr ""
+
+#: PyStudio/PyStudio/Common/ToolConfig.py:571
+msgid "Too many branches"
+msgstr ""
+
+#: PyStudio/PyStudio/Common/ToolConfig.py:567
+msgid "Too many instance attributes"
+msgstr ""
+
+#: PyStudio/PyStudio/Common/ToolConfig.py:546
+msgid "Too many lines in module"
+msgstr ""
+
+#: PyStudio/PyStudio/Common/ToolConfig.py:573
+msgid "Too many local variables"
+msgstr ""
+
+#: PyStudio/PyStudio/Common/ToolConfig.py:569
+msgid "Too many public methods"
+msgstr ""
+
+#: PyStudio/PyStudio/Common/ToolConfig.py:570
+msgid "Too many return statements"
+msgstr ""
+
+#: PyStudio/PyStudio/Common/ToolConfig.py:574
+msgid "Too many statements"
+msgstr ""
+
+#: PyStudio/PyStudio/Common/ToolConfig.py:336
+msgid "Trap Unhandled Exceptions"
+msgstr ""
+
+#: PyStudio/PyStudio/Debugger/VariablesLists.py:60
+#: PyStudio/PyStudio/SyntaxChecker/CheckResultsList.py:46
+#: PyStudio/PyStudio/SyntaxChecker/CheckResultsList.py:152
+msgid "Type"
+msgstr ""
+
+#: PyStudio/PyStudio/Common/ToolConfig.py:672
+msgid "Unable to check methods signature"
+msgstr ""
+
+#: PyStudio/PyStudio/Common/ToolConfig.py:675
+msgid "Unable to import module"
+msgstr ""
+
+#: PyStudio/PyStudio/Common/ToolConfig.py:661
+msgid "Undefined class member"
+msgstr ""
+
+#: PyStudio/PyStudio/Common/ToolConfig.py:663
+msgid "Undefined class member (but some types could not be inferred)"
+msgstr ""
+
+#: PyStudio/PyStudio/Common/ToolConfig.py:653
+msgid "Undefined variable"
+msgstr ""
+
+#: PyStudio/PyStudio/Common/ToolConfig.py:669
+msgid "Unexpected error"
+msgstr ""
+
+#: PyStudio/PyStudio/ModuleFinder/FindResultsList.py:35
+#: PyStudio/PyStudio/ModuleFinder/FindResultsList.py:36
+msgid "Unknown Error"
+msgstr ""
+
+#: PyStudio/PyStudio/Common/ToolConfig.py:651
+msgid "Unknown encoding specified"
+msgstr ""
+
+#: PyStudio/PyStudio/Common/ToolConfig.py:585
+msgid "Unnecessary pass statement"
+msgstr ""
+
+#: PyStudio/PyStudio/Common/ToolConfig.py:599
+msgid "Unnecessary semicolon"
+msgstr ""
+
+#: PyStudio/PyStudio/Common/ToolConfig.py:581
+msgid "Unreachable code"
+msgstr ""
+
+#: PyStudio/PyStudio/Common/ToolConfig.py:634
+msgid "Unrecognized file option"
+msgstr ""
+
+#: PyStudio/PyStudio/Common/ToolConfig.py:618
+msgid "Unused argument"
+msgstr ""
+
+#: PyStudio/PyStudio/Common/ToolConfig.py:616
+msgid "Unused import"
+msgstr ""
+
+#: PyStudio/PyStudio/Common/ToolConfig.py:619
+msgid "Unused import from wildcard import"
+msgstr ""
+
+#: PyStudio/PyStudio/Common/ToolConfig.py:617
+msgid "Unused variable"
+msgstr ""
+
+#: PyStudio/PyStudio/Common/ToolConfig.py:658
+msgid "Use __slots__ on an old style class"
+msgstr ""
+
+#: PyStudio/PyStudio/Common/ToolConfig.py:603
+msgid "Use l as long integer identifier"
+msgstr ""
+
+#: PyStudio/PyStudio/Common/ToolConfig.py:628
+msgid "Use of \"property\" on an old style class"
+msgstr ""
+
+#: PyStudio/PyStudio/Common/ToolConfig.py:602
+msgid "Use of the <> operator"
+msgstr ""
+
+#: PyStudio/PyStudio/Common/ToolConfig.py:604
+msgid "Use of the `` operator"
+msgstr ""
+
+#: PyStudio/PyStudio/Common/ToolConfig.py:587
+msgid "Use of the exec statement"
+msgstr ""
+
+#: PyStudio/PyStudio/Common/ToolConfig.py:659
+msgid "Use super on an old style class"
+msgstr ""
+
+#: PyStudio/PyStudio/Common/ToolConfig.py:589
+msgid "Used * or ** magic"
+msgstr ""
+
+#: PyStudio/PyStudio/Common/ToolConfig.py:588
+msgid "Used builtin function"
+msgstr ""
+
+#: PyStudio/PyStudio/Common/ToolConfig.py:606
+msgid "Uses of a deprecated module"
+msgstr ""
+
+#: PyStudio/PyStudio/Common/ToolConfig.py:622
+msgid "Using possibly undefined loop variable"
+msgstr ""
+
+#: PyStudio/PyStudio/Common/ToolConfig.py:614
+msgid "Using the global statement"
+msgstr ""
+
+#: PyStudio/PyStudio/Common/ToolConfig.py:615
+msgid "Using the global statement at the module level"
+msgstr ""
+
+#: PyStudio/PyStudio/Common/ToolConfig.py:652
+msgid "Using variable before assignment"
+msgstr ""
+
+#: PyStudio/PyStudio/Debugger/ExpressionsList.py:45
+msgid "Value"
+msgstr ""
+
+#: PyStudio/PyStudio/Common/ToolConfig.py:528
+#: PyStudio/PyStudio/Debugger/AttachDialog.py:169
+#: PyStudio/PyStudio/Debugger/MessageHandler.py:91
+#: PyStudio/PyStudio/Debugger/VariablesLists.py:224
+#: PyStudio/PyStudio/Debugger/VariablesShelfWindow.py:143
+#: PyStudio/PyStudio/SyntaxChecker/CheckResultsList.py:226
+#: PyStudio/PyStudio/SyntaxChecker/CheckResultsList.py:229
+msgid "Warning"
+msgstr ""
+
+#: PyStudio/PyStudio/Common/ToolConfig.py:605
+msgid "Wildcard import"
+msgstr ""
+
+#: PyStudio/PyStudio/Debugger/ExpressionsShelfWindow.py:159
+#, python-format
+msgid ""
+"Would you like to ignore this warning for the rest of this session?\n"
+"\n"
+"%s"
+msgstr ""
+
+#: PyStudio/PyStudio/Common/ToolConfig.py:650
+msgid "Wrong encoding specified"
+msgstr ""
+
+#: PyStudio/PyStudio/Common/ToolConfig.py:641
+msgid "Yield outside function"
+msgstr ""
+
+#: PyStudio/PyStudio/Common/ToolConfig.py:610
+msgid "__future__ import is not the first non docstring statement"
+msgstr ""
+
+#: PyStudio/PyStudio/Common/ToolConfig.py:598
+msgid "__init__ method from a non direct base class is called"
+msgstr ""
+
+#: PyStudio/PyStudio/Common/ToolConfig.py:596
+msgid "__init__ method from base class is not called"
+msgstr ""
+
+#: PyStudio/PyStudio/Common/ToolConfig.py:636
+msgid "__init__ method is a generator"
+msgstr ""
+
+#: PyStudio/PyStudio/Common/ToolConfig.py:639
+msgid "break or continue used outside a loop"
+msgstr ""
+
+#: PyStudio/PyStudio/Common/ToolConfig.py:673
+msgid "failed to resolve interfaces"
+msgstr ""
+
+#: PyStudio/PyStudio/Common/ToolConfig.py:670
+msgid "ignored builtin module"
+msgstr ""
+
+#: PyStudio/PyStudio/Debugger/ThreadsList.py:60
+#: PyStudio/PyStudio/Debugger/ThreadsList.py:96
+msgid "running"
+msgstr ""
+
+#: PyStudio/PyStudio/Common/ToolConfig.py:671
+msgid "unexpected inferred value"
+msgstr ""
+
+#: PyStudio/PyStudio/Debugger/ThreadsList.py:60
+#: PyStudio/PyStudio/Debugger/ThreadsList.py:96
+msgid "waiting at breakpoint"
+msgstr ""
