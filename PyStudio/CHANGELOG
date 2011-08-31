@@ -16,6 +16,7 @@ Released:
 +Fix crash when editor emits save message during shutdown
 +Make exception trapping work when Variables shelf not open
 +Add config to ignore SystemExit when trapping exceptions
++Add partial translations for Greek, Japanese, Latvian, and Russian.
 
 #-----------------------------------------------------------------------------#
 
