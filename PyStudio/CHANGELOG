@@ -3,8 +3,14 @@ Changelog
 
 #-----------------------------------------------------------------------------#
 
+Version 0.5
+Released:
+
+
+#-----------------------------------------------------------------------------#
+
 Version 0.4
-Released: 
+Released: 08/30/2011
 
 +Fix for unicode errors when program exits using sys.exit()
 +Stop blank expression appearing when breakpoint hit
