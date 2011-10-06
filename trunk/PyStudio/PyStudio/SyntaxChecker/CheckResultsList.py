@@ -49,7 +49,7 @@ class CheckResultsList(eclib.EBaseListCtrl):
         self.InsertColumn(2, _("Error"))
         self.SetColumnWidth(1, wx.LIST_AUTOSIZE_USEHEADER)
         for aid in (wx.ART_ERROR, wx.ART_WARNING, wx.ART_INFORMATION):
-            bmp = wx.ArtProvider.GetBitmap(aid, wx.ART_MENU, (16,16))
+            bmp = wx.ArtProvider.GetBitmap(aid, wx.ART_MENU, (16, 16))
             self._il.Add(bmp)
         self.SetImageList(self._il, wx.IMAGE_LIST_SMALL)
 
@@ -61,14 +61,17 @@ class CheckResultsList(eclib.EBaseListCtrl):
         self.Bind(wx.EVT_WINDOW_DESTROY, self.OnDestroy)
 
     def OnDestroy(self, evt):
+        """Cleanup handlers on destroy"""
         if evt.GetEventObject() is self:
             ed_msg.Unsubscribe(self.OnDwellStart)
             self.ClearMarkers()
 
     def set_mainwindow(self, mw):
+        """Set this lists mainwindow"""
         self._mw = mw
 
     def set_editor(self, editor):
+        """Set the current editor"""
         self.editor = editor
 
     def OnDwellStart(self, msg):
@@ -110,6 +113,9 @@ class CheckResultsList(eclib.EBaseListCtrl):
                 del CheckResultsList._cache[fname]
             self.DeleteAllItems()
             self.DeleteEditorMarkers(self.editor)
+        else:
+            # Editor has already been closed so just clear the list
+            self.DeleteAllItems()
 
     def ClearMarkers(self):
         """Clear markers from all buffers"""

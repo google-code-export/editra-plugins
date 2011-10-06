@@ -113,6 +113,7 @@ class LintShelfWindow(BaseShelfWindow):
         self._hasrun = True
 
     def UpdateForEditor(self, editor, force=False):
+        """Update the ControlBar for the given editor instance"""
         langid = getattr(editor, 'GetLangId', lambda: -1)()
         ispython = langid == synglob.ID_LANG_PYTHON
         self.taskbtn.Enable(ispython)
@@ -215,6 +216,7 @@ class LintShelfWindow(BaseShelfWindow):
         return None
 
     def _checksyntax(self, filetype, vardict, filename):
+        """Start the syntax checker job"""
         syntaxchecker = self.get_syntax_checker(filetype, vardict, filename)
         if not syntaxchecker:
             return
