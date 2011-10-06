@@ -55,6 +55,7 @@ TLC_EXPRESSIONS = "Expressions"
 
 # Globals
 _ = wx.GetTranslation
+# TODO: support translations
 NOPYTHONERROR = u"***  FATAL ERROR: No local Python configured or found"
 
 #-----------------------------------------------------------------------------#
