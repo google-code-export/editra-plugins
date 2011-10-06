@@ -7,6 +7,7 @@ Version 0.5
 Released:
 
 +Fix use case where debugger settings were not getting stored into profile.
++Fix Clear button on Code Analysis window not working after file has been closed.
 
 #-----------------------------------------------------------------------------#
 
