@@ -6,6 +6,7 @@ Changelog
 Version 0.5
 Released:
 
++Fix use case where debugger settings were not getting stored into profile.
 
 #-----------------------------------------------------------------------------#
 
