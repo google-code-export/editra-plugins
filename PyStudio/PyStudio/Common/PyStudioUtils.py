@@ -23,6 +23,7 @@ from wx.stc import STC_INDIC2_MASK
 import ed_msg
 import ed_thread
 import ebmlib
+import ed_txt
 import util
 
 # Globals
@@ -47,24 +48,13 @@ class PyStudioUtils():
 
     @staticmethod
     def get_unicodevalue(_value):
-        try:
-            _value = eval(_value)
-        except:
-            pass
-        try:
-            return unicode(_value)
-        except UnicodeDecodeError:
-            # Don't change this to a map, because it is ordered
-            encodings = [ ( codecs.BOM_UTF32, 'utf-32' ),
-                ( codecs.BOM_UTF16, 'utf-16' ),
-                ( codecs.BOM_UTF8, 'utf-8' ) ]
-            encoding = 'ascii'
-            if _value is not None:
-                for h, e in encodings:
-                    if _value.startswith(h):
-                        encoding = e
-                        break
-            return unicode(_value, encoding=encoding)
+        if not isinstance(_value, basestring):
+            _value = repr(_value)
+        _value = ed_txt.DecodeString(_value)
+        if not ebmlib.IsUnicode(_value):
+            # Give up and do what we can
+            _value = unicode(_value, 'latin1', errors='replace')
+        return _value
                 
     @staticmethod
     def GetDefaultPython():
