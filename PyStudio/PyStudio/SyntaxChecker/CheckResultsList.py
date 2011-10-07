@@ -15,6 +15,7 @@ __revision__ = "$Revision$"
 #----------------------------------------------------------------------------#
 # Imports
 import wx
+import wx.lib.mixins.listctrl as listmix
 
 # Editra Libraries
 import ed_msg
@@ -29,7 +30,8 @@ _ = wx.GetTranslation
 
 #----------------------------------------------------------------------------#
 
-class CheckResultsList(eclib.EBaseListCtrl):
+class CheckResultsList(eclib.EBaseListCtrl,
+                       listmix.ColumnSorterMixin):
     """List control for displaying syntax check results
     @todo: decouple marks and data from UI
 
@@ -53,12 +55,19 @@ class CheckResultsList(eclib.EBaseListCtrl):
             self._il.Add(bmp)
         self.SetImageList(self._il, wx.IMAGE_LIST_SMALL)
 
+        # ColumnSorterMixin has very poor api...
+        self.itemDataMap = dict()
+        listmix.ColumnSorterMixin.__init__(self, 3)
+
         # Event Handlers
         self.Bind(wx.EVT_LIST_ITEM_ACTIVATED, self.OnItemActivate)
 
         # Message Handler
         ed_msg.Subscribe(self.OnDwellStart, ed_msg.EDMSG_UI_STC_DWELL_START)
         self.Bind(wx.EVT_WINDOW_DESTROY, self.OnDestroy)
+
+    def GetListCtrl(self):
+        return self
 
     def OnDestroy(self, evt):
         """Cleanup handlers on destroy"""
@@ -97,6 +106,47 @@ class CheckResultsList(eclib.EBaseListCtrl):
                 self.editor.GotoLine(max(0, lineNo - 1))
             except ValueError:
                 pass
+
+    def __LineSorter(self, key1, key2):
+        """Sorter for the line number column, keeps the information messages
+        from the analysis at the top regardless of sort order.
+
+        """
+        col, ascending = self.GetSortState()
+        item1 = self.itemDataMap[key1][col]
+        item2 = self.itemDataMap[key2][col]
+
+        if item1.isdigit() and item2.isdigit():
+            cmpVal = cmp(int(item1), int(item2))
+        elif item1.isdigit():
+            if ascending:
+                cmpVal = 1
+            else:
+                cmpVal = -1
+        elif item2.isdigit():
+            if ascending:
+                cmpVal = -1
+            else:
+                cmpVal = 1
+        else:
+            cmpVal = 0
+
+        if ascending:
+            return cmpVal
+        else:
+            return -cmpVal
+
+    def GetColumnSorter(self):
+        """ColumnSorter Override"""
+        col, ascending = self.GetSortState()
+        if col == 1:
+            return self.__LineSorter
+        else:
+            return super(CheckResultsList, self).GetColumnSorter()
+
+    def OnSortOrderChanged(self):
+        """ColumnSorter override"""
+        self.RefreshRows()
 
     @staticmethod
     def DeleteEditorMarkers(editor):
@@ -165,7 +215,8 @@ class CheckResultsList(eclib.EBaseListCtrl):
         minLType = max(self.GetTextExtent(typeText)[0], self.GetColumnWidth(0))
         minLText = max(self.GetTextExtent(errorText)[0], self.GetColumnWidth(2))
         tmap = dict(Error=0, Warning=1)
-        for row in data.GetOrderedData():
+        self.itemDataMap.clear()
+        for idx, row in enumerate(data.GetOrderedData()):
             assert len(row) == 3
             mtype = row[0]
             dspmsg = LintData.GetDisplayString(mtype)
@@ -173,6 +224,10 @@ class CheckResultsList(eclib.EBaseListCtrl):
             minLText = max(minLText, self.GetTextExtent(row[2])[0])
             row[0] = dspmsg
             self.Append(row)
+            # Column Sorter
+            self.itemDataMap[idx] = row
+            self.SetItemData(self.ItemCount-1, idx)
+            # End Column Sorter
             img = tmap.get(mtype.strip(), 2)
             self.SetItemImage(self.ItemCount - 1, img)
             if self.editor:
