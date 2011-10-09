@@ -22,6 +22,7 @@ __revision__ = "$Revision$"
 import wx
 
 # Editra Libraries
+import ed_fmgr
 import ed_glob
 import iface
 import plugin
@@ -41,6 +42,7 @@ from PyStudio.Debugger.VariablesShelfWindow import VariablesShelfWindow
 from PyStudio.Debugger.ExpressionsShelfWindow import ExpressionsShelfWindow
 from PyStudio.Debugger.MessageHandler import MessageHandler
 from PyStudio.Debugger.RpdbDebugger import RpdbDebugger
+from PyStudio.Project.ProjectMgr import ProjectManager
 
 #-----------------------------------------------------------------------------#
 # Globals
@@ -133,7 +135,8 @@ class PyBreakPoint(BaseShelfPlugin):
 class PyStackThread(BaseShelfPlugin):
     """Script Launcher and output viewer"""
     def __init__(self, pluginmgr):
-        super(PyStackThread, self).__init__(pluginmgr, "PyStackThread", StackThreadShelfWindow)
+        super(PyStackThread, self).__init__(pluginmgr, "PyStackThread", 
+                                            StackThreadShelfWindow)
 
     def GetBitmap(self):
         """Get the tab bitmap
@@ -145,7 +148,8 @@ class PyStackThread(BaseShelfPlugin):
 class PyVariable(BaseShelfPlugin):
     """Script Launcher and output viewer"""
     def __init__(self, pluginmgr):
-        super(PyVariable, self).__init__(pluginmgr, "PyVariable", VariablesShelfWindow)
+        super(PyVariable, self).__init__(pluginmgr, "PyVariable", 
+                                         VariablesShelfWindow)
 
     def GetBitmap(self):
         """Get the tab bitmap
@@ -157,7 +161,8 @@ class PyVariable(BaseShelfPlugin):
 class PyExpression(BaseShelfPlugin):
     """Script Launcher and output viewer"""
     def __init__(self, pluginmgr):
-        super(PyExpression, self).__init__(pluginmgr, "PyExpression", ExpressionsShelfWindow)
+        super(PyExpression, self).__init__(pluginmgr, "PyExpression",
+                                           ExpressionsShelfWindow)
 
     def GetBitmap(self):
         """Get the tab bitmap
@@ -165,6 +170,32 @@ class PyExpression(BaseShelfPlugin):
 
         """
         return Images.Bug.Bitmap
+
+class PyProject(plugin.Plugin):
+    """Python Project component of PyStudio
+    Implements the MainWindowI to provide a file management window.
+
+    """
+    plugin.Implements(iface.MainWindowI)
+    def PlugIt(self, mainw):
+        """Install the components provided by this plugin"""
+        pmgr = ProjectManager(mainw)
+        info = ed_fmgr.EdPaneInfo()
+        info = info.Name("PyProject").\
+                    Caption(u"PyProject").Left().Layer(1).\
+                    CloseButton(True).MaximizeButton(True).\
+                    BestSize(wx.Size(215, 350))
+        mainw.PanelMgr.AddPane(pmgr, info)
+        mainw.PanelMgr.Update()
+
+    def GetMenuHandlers(self):
+        """Pass even handler for menu item to main window for management"""
+        return []
+
+    def GetUIHandlers(self):
+        """Pass Ui handlers to main window for management"""
+        return []
+
 
 #-----------------------------------------------------------------------------#
 # Configuration Interface

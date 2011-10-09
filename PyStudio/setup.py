@@ -37,5 +37,6 @@ if setup != None:
         StackThread = PyStudio:PyStackThread
         Variables = PyStudio:PyVariable
         Expressions = PyStudio:PyExpression
+        Project = PyStudio:PyProject
         '''
         )
