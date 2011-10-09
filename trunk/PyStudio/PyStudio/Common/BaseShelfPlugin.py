@@ -38,8 +38,15 @@ class BaseShelfPlugin(plugin.Plugin):
     plugin.Implements(iface.ShelfI)
     
     def __init__(self, pluginmgr, pluginname, shelfwindow):
-        """@todo: document arguments"""
+        """Plugin interface base class for all Shelf plugins
+        @param pluginmgr: Editra plugin manager instance
+        @param pluginname: This plugin's name
+        @param shelwindow: Window class object
+
+        """
         super(BaseShelfPlugin, self).__init__()
+
+        # Attributes
         self.pluginmgr = pluginmgr
         self.pluginname = pluginname
         self.shelfwindow = shelfwindow
@@ -96,7 +103,7 @@ class BaseShelfPlugin(plugin.Plugin):
         pass
 
     def IsInstalled(self):
-        """Check whether PyDebug has been installed yet or not
+        """Check whether the plugin has been installed yet or not
         @note: overridden from Plugin
         @return bool
 

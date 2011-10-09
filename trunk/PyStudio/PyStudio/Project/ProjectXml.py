@@ -21,8 +21,8 @@ Project File
 """
 
 __author__ = "Cody Precord <cprecord@editra.org>"
-__svnid__ = "$Id:  $"
-__revision__ = "$Revision:  $"
+__svnid__ = "$Id$"
+__revision__ = "$Revision$"
 
 #-----------------------------------------------------------------------------#
 # Imports
@@ -44,7 +44,7 @@ class Option(ed_xml.EdXml):
 
 class Folder(ed_xml.EdXml):
     """General folder container
-    <folder path="/foo/test"
+    <folder path="/foo/test></folder>"
 
     """
     class meta:
