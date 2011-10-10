@@ -22,10 +22,12 @@ __revision__ = "$Revision$"
 import wx
 
 # Editra Libraries
-import ed_fmgr
 import ed_glob
+import ed_fmgr
+import ed_main
 import iface
 import plugin
+import util
 
 # Local Imports
 from PyStudio.Common import Images
@@ -177,25 +179,47 @@ class PyProject(plugin.Plugin):
 
     """
     plugin.Implements(iface.MainWindowI)
+    ID_PYPROJECT = wx.NewId()
     def PlugIt(self, mainw):
         """Install the components provided by this plugin"""
         pmgr = ProjectManager(mainw)
         info = ed_fmgr.EdPaneInfo()
-        info = info.Name("PyProject").\
+        info = info.Name(ProjectManager.PANE_NAME).\
                     Caption(u"PyProject").Left().Layer(1).\
                     CloseButton(True).MaximizeButton(True).\
                     BestSize(wx.Size(215, 350))
         mainw.PanelMgr.AddPane(pmgr, info)
         mainw.PanelMgr.Update()
 
+        # Setup Menu(s)
+        viewm = mainw.MenuBar.GetMenuByName("view")
+        viewm.InsertAlpha(PyProject.ID_PYPROJECT,
+                          _("PyStudio Project"), 
+                          _("Open PyStudio Project side panel"),
+                          wx.ITEM_CHECK,
+                          after=ed_glob.ID_PRE_MARK)
+
     def GetMenuHandlers(self):
         """Pass even handler for menu item to main window for management"""
-        return []
+        return [(PyProject.ID_PYPROJECT, self.OnShowProjectWindow)]
 
     def GetUIHandlers(self):
         """Pass Ui handlers to main window for management"""
         return []
 
+    def OnShowProjectWindow(self, evt):
+        """Show the project window in the current MainWindow."""
+        if evt.Id == PyProject.ID_PYPROJECT:
+            mainw = wx.GetApp().GetActiveWindow()
+            if mainw and isinstance(mainw, ed_main.MainWindow):
+                pane = mainw.PanelMgr.GetPane(ProjectManager.PANE_NAME)
+                if pane.IsShown():
+                    pane.Hide()
+                else:
+                    pane.Show()
+                mainw.PanelMgr.Update()
+        else:
+            util.Log("[PyStudio][warn] Can't show PyProject panel")
 
 #-----------------------------------------------------------------------------#
 # Configuration Interface
