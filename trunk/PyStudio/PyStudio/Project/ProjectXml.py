@@ -27,7 +27,7 @@ __revision__ = "$Revision$"
 #-----------------------------------------------------------------------------#
 # Imports
 import sys
-sys.path.append(r"C:\Users\n\Desktop\Editra\src")
+#sys.path.append(r"C:\Users\n\Desktop\Editra\src")
 import ed_xml
 
 #-----------------------------------------------------------------------------#

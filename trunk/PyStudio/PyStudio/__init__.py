@@ -194,7 +194,7 @@ class PyProject(plugin.Plugin):
         # Setup Menu(s)
         viewm = mainw.MenuBar.GetMenuByName("view")
         viewm.InsertAlpha(PyProject.ID_PYPROJECT,
-                          _("PyStudio Project"), 
+                          _("PyProject"), 
                           _("Open PyStudio Project side panel"),
                           wx.ITEM_CHECK,
                           after=ed_glob.ID_PRE_MARK)
