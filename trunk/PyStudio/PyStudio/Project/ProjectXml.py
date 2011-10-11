@@ -9,11 +9,17 @@
 """
 Project File
 
-<project path="/foo">
-    <package path"/foo/bar">
+"""
+
+xml_str = """
+<project path="./foo">
+    <package path="./foo/bar">
         <option type="" value=""/>
+        <package path="./foo/bar/test">
+            <option type="" value=""/>
+        </package>
     </package>
-    <folder path"/foo/bar">
+    <folder path="/foo/bar">
         <option type="" value=""/>
     </folder>
 </project>
@@ -27,7 +33,7 @@ __revision__ = "$Revision$"
 #-----------------------------------------------------------------------------#
 # Imports
 import sys
-#sys.path.append(r"C:\Users\n\Desktop\Editra\src")
+sys.path.append(r"C:\Users\n\Desktop\Editra\src")
 import ed_xml
 
 #-----------------------------------------------------------------------------#
@@ -51,6 +57,8 @@ class Folder(ed_xml.EdXml):
         tagname = "folder"
     path = ed_xml.String(required=True)
     options = ed_xml.List(ed_xml.Model(type=Option))
+    packages = ed_xml.List(ed_xml.Model("package"), required=False)
+    folders = ed_xml.List(ed_xml.Model("folder"), required=False)
 
 class PyPackage(Folder):
     """Python package directory. Container for python modules."""
@@ -65,6 +73,7 @@ class ProjectXml(Folder):
     # Child nodes
     folders = ed_xml.List(ed_xml.Model(type=Folder))
     packages = ed_xml.List(ed_xml.Model(type=PyPackage))
+    options = ed_xml.List(ed_xml.Model(type=Option))
 
 #-----------------------------------------------------------------------------#
 # Test
@@ -85,4 +94,7 @@ if __name__ == '__main__':
     pp.type = "PYTHONPATH"
     pp.value = r"C:\Python26;C:\Desktop"
     proj.options.append(pp)
+    print proj.PrettyXml
+    print "------------------------"
+    proj = ProjectXml.LoadString(xml_str)
     print proj.PrettyXml
