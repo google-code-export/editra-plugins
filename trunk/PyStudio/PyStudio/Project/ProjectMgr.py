@@ -29,6 +29,7 @@ import syntax.synglob as synglob
 # Local libs
 import PyStudio.Common.Images as Images
 import PyStudio.Project.ProjectXml as ProjectXml
+import PyStudio.Project.NewProjectDlg as NewProjectDlg
 
 #-----------------------------------------------------------------------------#
 # Globals
@@ -111,7 +112,11 @@ class ProjectManager(ed_basewin.EdBaseCtrlBox):
 
     def NewProject(self):
         """Create a new project"""
-        pass
+        dlg = NewProjectDlg.NewProjectDlg(self.MainWindow)
+        dlg.CenterOnParent()
+        if dlg.ShowModal() == wx.ID_OK:
+            pass
+        dlg.Destroy()
 
     def OpenProject(self):
         """Show the project open dialog"""
