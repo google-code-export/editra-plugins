@@ -12,7 +12,7 @@ Project File
 """
 
 xml_str = """
-<project path="./foo">
+<project name="FooBar">
     <package path="./foo/bar">
         <option type="" value=""/>
         <package path="./foo/bar/test">
@@ -33,7 +33,7 @@ __revision__ = "$Revision$"
 #-----------------------------------------------------------------------------#
 # Imports
 import sys
-sys.path.append(r"C:\Users\n\Desktop\Editra\src")
+#sys.path.append(r"C:\Users\n\Desktop\Editra\src")
 import ed_xml
 
 #-----------------------------------------------------------------------------#
@@ -56,7 +56,7 @@ class Folder(ed_xml.EdXml):
     class meta:
         tagname = "folder"
     path = ed_xml.String(required=True)
-    options = ed_xml.List(ed_xml.Model(type=Option))
+    options = ed_xml.List(ed_xml.Model(type=Option), required=False)
     packages = ed_xml.List(ed_xml.Model("package"), required=False)
     folders = ed_xml.List(ed_xml.Model("folder"), required=False)
 
@@ -70,16 +70,19 @@ class ProjectXml(Folder):
     class meta:
         tagname = "project"
 
+    # Attributes
+    name = ed_xml.String(required=True)
+
     # Child nodes
-    folders = ed_xml.List(ed_xml.Model(type=Folder))
-    packages = ed_xml.List(ed_xml.Model(type=PyPackage))
-    options = ed_xml.List(ed_xml.Model(type=Option))
+    folders = ed_xml.List(ed_xml.Model(type=Folder), required=False)
+    packages = ed_xml.List(ed_xml.Model(type=PyPackage), required=False)
+    options = ed_xml.List(ed_xml.Model(type=Option), required=False)
 
 #-----------------------------------------------------------------------------#
 # Test
 if __name__ == '__main__':
     proj = ProjectXml()
-    proj.path = r"C:\FooBar"
+    proj.name = "FooBar"
     pkg = PyPackage()
     pkg.path = "/foo/bar"
     opt = Option()
