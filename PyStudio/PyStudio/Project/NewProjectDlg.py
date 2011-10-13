@@ -25,6 +25,9 @@ import wx
 import eclib
 import ed_basewin
 
+# Local Modules
+import PyStudio.Project.ProjectTemplate as ProjectTemplate
+
 #-----------------------------------------------------------------------------#
 # Globals
 _ = wx.GetTranslation
@@ -84,7 +87,6 @@ class NewProjectPanel(wx.Panel):
         gszr.Add(nlbl, 0, wx.ALIGN_CENTER_VERTICAL)
         gszr.Add(self._pname, 1, wx.EXPAND)
         llbl = wx.StaticText(self, label=_("Project Location:"))
-        lblb.SetFont(wx.SMALL_FONT)
         gszr.Add(llbl, 0, wx.ALIGN_CENTER_VERTICAL)
         gszr.Add(self._pdir, 1, wx.EXPAND)
         sizer.Add(gszr, 0, wx.EXPAND|wx.ALL, 10)
@@ -111,7 +113,10 @@ class ProjectTypePanel(wx.Panel):
         descBox = wx.StaticBox(self, label=_("Description"), size=(300,200))
         self._dbox = wx.StaticBoxSizer(descBox, wx.VERTICAL)
         self._dlbl = wx.StaticText(self)
-        self._tlist = wx.ListBox(self, style=wx.LB_SINGLE) # TODO: load types
+        self._dlbl.SetFont(wx.SMALL_FONT)
+        self._templates = ProjectTemplate.GetDefaultTemplates() # TODO: load from user config
+        names = self._templates.GetTemplateNames()
+        self._tlist = wx.ListBox(self, choices=names, style=wx.LB_SINGLE)
 
         # Setup
         self.__DoLayout()
