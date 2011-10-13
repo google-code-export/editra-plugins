@@ -11,6 +11,7 @@ Project File
 
 """
 
+# Test example xml
 xml_str = """
 <project name="FooBar">
     <package path="./foo/bar">
@@ -33,7 +34,9 @@ __revision__ = "$Revision$"
 #-----------------------------------------------------------------------------#
 # Imports
 import sys
-#sys.path.append(r"C:\Users\n\Desktop\Editra\src")
+
+# Editra Imports
+#sys.path.append(r"C:\Users\n\Desktop\Editra\src") # TEST
 import ed_xml
 
 #-----------------------------------------------------------------------------#
