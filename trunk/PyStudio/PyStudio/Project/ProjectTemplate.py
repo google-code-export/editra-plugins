@@ -14,7 +14,7 @@ Data class for defining project templates
 """
 
 xml_str = """
-<template projName='FooBar'>
+<template id='FooBar'>
     <file name="__init__.py"/>
     <file name="LICENCE">
         <data>Test data field</data>
@@ -33,21 +33,30 @@ __revision__ = "$Revision$"
 # Imports
 
 # Editra Imports
-import sys
+#import sys
 #sys.path.append(r"..\..\..\..\..\src") # TEST
 import ed_xml
+
+#-----------------------------------------------------------------------------#
+# Special keys for xml attribute values
+
+# Automatically insert project name
+PROJECT_NAME = u"%(projName)s"
 
 #-----------------------------------------------------------------------------#
 
 class ProjectTemplate(ed_xml.EdXml):
     """Project template XML
-    <template projName='FooBar'>
+    The template id is used as the template name for user defined templates
+    and as an internal identifier for the default provided ones.
+
+    <template id='TemplateID'>
     </template>
 
     """
     class meta:
         tagname = "template"
-    projName = ed_xml.String(required=True)
+    id = ed_xml.String(required=True)
     # Optional default files and directories
     files = ed_xml.List(ed_xml.Model("file"), required=False)
     dirs = ed_xml.List(ed_xml.Model("dir"), required=False)
@@ -108,8 +117,43 @@ class Directory(ed_xml.EdXml):
 
 #-----------------------------------------------------------------------------#
 
+def GetDefaultTemplates():
+    """Get the TemplateCollection of default project recipes
+    @return: TemplateCollection
+
+    """
+    plist = TemplateCollection()
+    ## Empty Project
+    empty = ProjectTemplate(id=u"__EMPTY__")
+    plist.templates.append(empty)
+
+    ## Basic project
+    simple = ProjectTemplate(id=u"__BASIC__")
+    for fname in ('CHANGELOG', 'README', 'setup.py', 'LICENSE'):
+        simple.files.append(File(name=fname))
+    sdir = Directory(name=PROJECT_NAME)
+    sdir.files.append(File(name="__init__.py"))
+    simple.dirs.append(sdir)
+    plist.templates.append(simple)
+
+    return plist
+
+def MapDisplayName(templateId):
+    """Get the display name for the given template ID
+    @return: unicode or None
+
+    """
+    name_map = { u"__EMPTY__" : _("Empty Project"),
+                 u"__BASIC__" : _("Basic Project") }
+    return name_map.get(templateId, None)
+
+#-----------------------------------------------------------------------------#
+
+
+#-----------------------------------------------------------------------------#
+
 if __name__ == '__main__':
     pto = ProjectTemplate.LoadString(xml_str)
     for f in pto.files:
         print f.name, repr(f.data)
-    
+    print GetDefaultTemplates().PrettyXml

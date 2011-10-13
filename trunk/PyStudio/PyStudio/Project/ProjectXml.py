@@ -14,6 +14,7 @@ Project File
 # Test example xml
 xml_str = """
 <project name="FooBar">
+    <option type="" value=""/>
     <package path="./foo/bar">
         <option type="" value=""/>
         <package path="./foo/bar/test">
@@ -33,7 +34,7 @@ __revision__ = "$Revision$"
 
 #-----------------------------------------------------------------------------#
 # Imports
-import sys
+#import sys
 
 # Editra Imports
 #sys.path.append(r"C:\Users\n\Desktop\Editra\src") # TEST
