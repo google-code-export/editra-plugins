@@ -59,7 +59,7 @@ class Folder(ed_xml.EdXml):
     """
     class meta:
         tagname = "folder"
-    path = ed_xml.String(required=True)
+    name = ed_xml.String(required=True)
     options = ed_xml.List(ed_xml.Model(type=Option), required=False)
     packages = ed_xml.List(ed_xml.Model("package"), required=False)
     folders = ed_xml.List(ed_xml.Model("folder"), required=False)
