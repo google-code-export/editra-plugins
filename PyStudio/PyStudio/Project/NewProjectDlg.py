@@ -22,6 +22,7 @@ __revision__ = "$Revision$"
 import wx
 
 # Editra Libraries
+import eclib
 import ed_basewin
 
 #-----------------------------------------------------------------------------#
@@ -83,6 +84,7 @@ class NewProjectPanel(wx.Panel):
         gszr.Add(nlbl, 0, wx.ALIGN_CENTER_VERTICAL)
         gszr.Add(self._pname, 1, wx.EXPAND)
         llbl = wx.StaticText(self, label=_("Project Location:"))
+        lblb.SetFont(wx.SMALL_FONT)
         gszr.Add(llbl, 0, wx.ALIGN_CENTER_VERTICAL)
         gszr.Add(self._pdir, 1, wx.EXPAND)
         sizer.Add(gszr, 0, wx.EXPAND|wx.ALL, 10)
