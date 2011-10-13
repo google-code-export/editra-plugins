@@ -31,13 +31,18 @@ __revision__ = "$Revision$"
 
 #-----------------------------------------------------------------------------#
 # Imports
+import wx
+import sys
+import os
 
 # Editra Imports
-#import sys
 #sys.path.append(r"..\..\..\..\..\src") # TEST
 import ed_xml
 
 #-----------------------------------------------------------------------------#
+# Globals
+_ = wx.GetTranslation
+
 # Special keys for xml attribute values
 
 # Automatically insert project name
@@ -61,6 +66,53 @@ class ProjectTemplate(ed_xml.EdXml):
     files = ed_xml.List(ed_xml.Model("file"), required=False)
     dirs = ed_xml.List(ed_xml.Model("dir"), required=False)
 
+    def GetDisplayName(self):
+        """Get this templates display name
+        @return: unicode
+
+        """
+        name = u""
+        if self.id.startswith(u'__') and self.id.endswith(u'__'):
+            name = MapDisplayName(self.id)
+            if not name:
+                name = self.id
+        else:
+            name = self.id
+        return name
+
+    def Create(self, basepath, projName):
+        """Create the project on disk based on the template information.
+        @param basepath: path to write project to
+        @param projName: Project Name
+
+        """
+        # TODO: deal with already existing folder of same name
+        # TODO: create parent directories as necessary?
+        assert os.path.exists(basepath)
+        def CreateItems(obj, cpath):
+            """Recursively create items"""
+            # Create all files
+            for fobj in obj.files:
+                handle = open(os.path.join(cpath, fobj.name), 'wb')
+                if fobj.data:
+                    handle.write(fobj.data.encode('utf-8'))
+            # Recurse into each directory
+            for dobj in obj.dirs:
+                dname = dobj.name % dict(projName=projName)
+                npath = os.path.join(cpath, dname)
+                os.mkdir(npath)
+                CreateItems(dobj, npath)
+
+        try:
+            # Make toplevel project directory
+            ppath = os.path.join(basepath, projName)
+            os.mkdir(ppath)
+            # Recursively execute template creation
+            CreateItems(self, ppath)
+        except OSError, msg:
+            return False # TODO error reporting
+        return True
+
 class TemplateCollection(ed_xml.EdXml):
     """List of ProjectTemplates
     <projectTemplates>
@@ -76,15 +128,19 @@ class TemplateCollection(ed_xml.EdXml):
     templates = ed_xml.List(ed_xml.Model(type=ProjectTemplate))
 
     def FindTemplate(self, name):
-        """Find a template based on the given name
+        """Find a template based on the given display name
         @param name: string
         @return: ProjectTemplateXml or None
 
         """
         for t in self.templates:
-            if t.name == name:
+            if t.GetDisplayName() == name:
                 return t
         return None
+
+    def GetTemplateNames(self):
+        """Get a list of template display names"""
+        return [t.GetDisplayName() for t in self.templates]
 
 #---- Subelements of a template ----#
 
@@ -151,9 +207,8 @@ def MapDisplayName(templateId):
 
 
 #-----------------------------------------------------------------------------#
-
+# TEST
 if __name__ == '__main__':
-    pto = ProjectTemplate.LoadString(xml_str)
-    for f in pto.files:
-        print f.name, repr(f.data)
-    print GetDefaultTemplates().PrettyXml
+    defaults = GetDefaultTemplates()
+    b = defaults.FindTemplate(_("Basic Project"))
+    b.Create(r"C:\Documents and Settings\cjprecord\Desktop", "TestFooProj")
