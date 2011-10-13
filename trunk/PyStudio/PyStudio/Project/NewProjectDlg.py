@@ -19,6 +19,7 @@ __revision__ = "$Revision$"
 
 #-----------------------------------------------------------------------------#
 # Imports
+import os
 import wx
 
 # Editra Libraries
@@ -57,6 +58,8 @@ class NewProjectDlg(ed_basewin.EdBaseDialog):
         """Enable/Disable the Ok button depending on field state"""
         evt.Enable(self.Panel.IsValid())
 
+#-----------------------------------------------------------------------------#
+
 class NewProjectPanel(wx.Panel):
     """Main dialog panel"""
     def __init__(self, parent):
@@ -64,7 +67,7 @@ class NewProjectPanel(wx.Panel):
 
         # Attributes
         self._ptype = ProjectTypePanel(self)
-        self._pname = wx.TextCtrl(self) # TODO validator alpa-numeric only
+        self._pname = wx.TextCtrl(self) # TODO validator alpha-numeric only
         self._pdir = wx.DirPickerCtrl(self) # TODO: default path
 
         # Setup
@@ -93,6 +96,13 @@ class NewProjectPanel(wx.Panel):
 
         self.SetSizer(sizer)
 
+    @eclib.expose(NewProjectDlg)
+    def GetProjectData(self):
+        """Get the project data"""
+        return ProjectData(self._ptype.GetSelectedTemplate(),
+                           self._pname.Value,
+                           self._pdir.Path)
+
     def IsValid(self):
         """Check if all the required fields are valid
         @return: bool
@@ -101,6 +111,8 @@ class NewProjectPanel(wx.Panel):
         return all([self._pname.Value, 
                     self._pdir.Path, 
                     self._ptype.HasSelection()])
+
+#-----------------------------------------------------------------------------#
 
 class ProjectTypePanel(wx.Panel):
     """Sub-Panel for selecting the type of project to create"""
@@ -138,6 +150,15 @@ class ProjectTypePanel(wx.Panel):
 
         self.SetSizer(sizer)
 
+    def GetSelectedTemplate(self):
+        """Get the template for the selected project
+        @return: ProjectTemplate
+
+        """
+        tname = self._tlist.StringSelection
+        template = self._templates.FindTemplate(tname)
+        return template
+
     def OnTypeList(self, evt):
         """Handle when an item is selected in the type list"""
         pass # TODO update desc box
@@ -148,3 +169,26 @@ class ProjectTypePanel(wx.Panel):
 
         """
         return self._tlist.Selection != -1
+
+#-----------------------------------------------------------------------------#
+
+class ProjectData(object):
+    """Simple data container for the new project configuration data"""
+    def __init__(self, template, name, path):
+        super(ProjectData, self).__init__()
+
+        # Attributes
+        self._template = template
+        self._name = name
+        self._path = path
+
+    ProjectName = property(lambda self: self._name)
+    ProjectPath = property(lambda self: os.path.join(self._path, self._name))
+    Template = property(lambda self: self._template)
+
+    def CreateProject(self):
+        """Create the project
+        @return: bool
+
+        """
+        return self._template.Create(self._path, self.ProjectName)

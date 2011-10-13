@@ -17,6 +17,7 @@ __revision__ = "$Revision$"
 
 #-----------------------------------------------------------------------------#
 # Dependencies
+import os
 import wx
 
 # Editra libs
@@ -29,6 +30,7 @@ import syntax.synglob as synglob
 # Local libs
 import PyStudio.Common.Images as Images
 import PyStudio.Project.ProjectXml as ProjectXml
+import PyStudio.Project.ProjectFile as ProjectFile
 import PyStudio.Project.NewProjectDlg as NewProjectDlg
 
 #-----------------------------------------------------------------------------#
@@ -115,12 +117,46 @@ class ProjectManager(ed_basewin.EdBaseCtrlBox):
         dlg = NewProjectDlg.NewProjectDlg(self.MainWindow)
         dlg.CenterOnParent()
         if dlg.ShowModal() == wx.ID_OK:
-            pass
+            proj = dlg.GetProjectData()
+            if proj.CreateProject():
+                # Create the project file
+                pxml = ProjectXml.ProjectXml(name=proj.ProjectName)
+                def GenProject(obj, basepath):
+                    """Recursively populate the project file based on the
+                    project that was created.
+
+                    """
+                    for item in os.listdir(basepath):
+                        fpath = os.path.join(basepath, item)
+                        if os.path.isdir(fpath):
+                            nobj = ProjectXml.Folder(name=item)
+                            obj.folders.append(nobj)
+                            GenProject(nobj, fpath) # recurse
+                GenProject(pxml, proj.ProjectPath)
+                # Write the project file out to the new project directory
+                ppath = os.path.join(proj.ProjectPath, u"%s.psp" % proj.ProjectName)
+                pfile = ProjectFile.ProjectFile(pxml, ppath)
+                pfile.Save()
+                self.Tree.LoadProject(pfile) # Load the view
+            else:
+                pass # TODO: error handling
         dlg.Destroy()
 
     def OpenProject(self):
         """Show the project open dialog"""
-        pass
+        dname = u""
+        cbuf = wx.GetApp().GetCurrentBuffer()
+        if cbuf and hasattr(cbuf, 'GetFileName'):
+            fname = cbuf.GetFileName()
+            dname = os.path.dirname(fname)
+        dlg = wx.FileDialog(self.MainWindow, _("Open Project"),
+                            defaultDir=dname,
+                            wildcard=u"PyStudio Project (*.psp)|*.psp", # TODO: decide file extension
+                            style=wx.FD_OPEN)
+        dlg.CenterOnParent()
+        if dlg.ShowModal() == wx.ID_OK:
+            pass
+        dlg.Destroy()
 
     def ShowConfig(self):
         """Show the configuration for the current project"""
@@ -159,7 +195,13 @@ class ProjectTree(eclib.FileTree):
 
     def DoGetFileImage(self, path):
         """Get the image for the given item"""
-        pass
+        if os.path.isdir(path):
+            return ProjectTree.IMG_FOLDER
+        lpath = path.lower()
+        if lpath.endswith(u".py") or lpath.endswith(u".pyw"):
+            return ProjectTree.IMG_PYTHON
+        else:
+            return ProjectTree.IMG_FILE
 
     def DoSetupImageList(self):
         """Setup the image list for this control"""
@@ -172,7 +214,12 @@ class ProjectTree(eclib.FileTree):
 
     def LoadProject(self, proj):
         """Load the given project
-        @param proj: ProjectXml instance
+        @param proj: ProjectFile instance
 
         """
-        pass
+        self.DeleteChildren(self.RootItem)
+        self._proj = proj
+
+        # Repopulate root of tree
+        self.AddWatchDirectory(self._proj.ProjectRoot)
+
