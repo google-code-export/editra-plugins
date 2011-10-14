@@ -29,6 +29,7 @@ import syntax.synglob as synglob
 
 # Local libs
 import PyStudio.Common.Images as Images
+from PyStudio.Common.PyStudioUtils import PyStudioUtils
 import PyStudio.Project.ProjectXml as ProjectXml
 import PyStudio.Project.ProjectFile as ProjectFile
 import PyStudio.Project.NewProjectDlg as NewProjectDlg
@@ -196,6 +197,40 @@ class ProjectTree(eclib.FileTree):
                        lambda self, proj: self.LoadProject(proj))
 
     #---- Overrides ----#
+
+    def DoItemActivated(self, item):
+        """Override to handle item activation
+        @param item: TreeItem
+
+        """
+        path = self.GetPyData(item)
+        if path and os.path.exists(path):
+            if not os.path.isdir(path):
+                PyStudioUtils.GetEditorOrOpenFile(self.Parent.MainWindow, path)
+
+    def DoItemExpanding(self, item):
+        """Handle when an item is expanding to display the folder contents
+        @param item: TreeItem
+
+        """
+        d = self.GetPyData(item)
+        if d and os.path.exists(d):
+            contents = ProjectTree.GetDirContents(d)
+            # Filter contents
+            dirs = list()
+            files = list()
+            for p in contents:
+                if os.path.isdir(p):
+                    dirs.append(p)
+                else:
+                    ext = ebmlib.GetFileExtension(p)
+                    if ext not in (u'pyc', u'pyo', u'psp'): # TODO use configuration
+                        files.append(p)
+            dirs.sort()
+            files.sort()
+            dirs.extend(files)
+            for p in dirs:
+                self.AppendFileNode(item, p)
 
     def DoGetFileImage(self, path):
         """Get the image for the given item"""
