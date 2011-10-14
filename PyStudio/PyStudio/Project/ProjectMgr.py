@@ -155,7 +155,11 @@ class ProjectManager(ed_basewin.EdBaseCtrlBox):
                             style=wx.FD_OPEN)
         dlg.CenterOnParent()
         if dlg.ShowModal() == wx.ID_OK:
-            pass
+            path = dlg.Path
+            # TODO: check NULL
+            pxml = ProjectXml.ProjectXml.Load(path)
+            pfile = ProjectFile.ProjectFile(pxml, path)
+            self.Tree.LoadProject(pfile)
         dlg.Destroy()
 
     def ShowConfig(self):
