@@ -39,6 +39,9 @@ import os
 #sys.path.append(r"..\..\..\..\..\src") # TEST
 import ed_xml
 
+# Local Imports
+import PyStudio.Project.ProjectXml as ProjectXml
+
 #-----------------------------------------------------------------------------#
 # Globals
 _ = wx.GetTranslation
@@ -63,8 +66,9 @@ class ProjectTemplate(ed_xml.EdXml):
         tagname = "template"
     id = ed_xml.String(required=True)
     # Optional default files and directories
-    files = ed_xml.List(ed_xml.Model("file"), required=False)
-    dirs = ed_xml.List(ed_xml.Model("dir"), required=False)
+    files = ed_xml.List(ed_xml.Model(type=ProjectXml.File), required=False)
+    folders = ed_xml.List(ed_xml.Model(type=ProjectXml.Folder), required=False)
+    packages = ed_xml.List(ed_xml.Model(type=ProjectXml.PyPackage), required=False)
 
     def GetDisplayName(self):
         """Get this templates display name
@@ -90,16 +94,19 @@ class ProjectTemplate(ed_xml.EdXml):
         # TODO: create parent directories as necessary?
         assert os.path.exists(basepath)
         def CreateItems(obj, cpath):
-            """Recursively create items"""
+            """Recursively execute the template"""
             # Create all files
             for fobj in obj.files:
                 handle = open(os.path.join(cpath, fobj.name), 'wb')
                 if fobj.data:
                     handle.write(fobj.data.encode('utf-8'))
             # Recurse into each directory
-            for dobj in obj.dirs:
-                dname = dobj.name % dict(projName=projName)
-                npath = os.path.join(cpath, dname)
+            dirs = list()
+            dirs.extend(obj.folders)
+            dirs.extend(obj.packages)
+            for dobj in dirs:
+                dobj.name = dobj.name % dict(projName=projName)
+                npath = os.path.join(cpath, dobj.name)
                 os.mkdir(npath)
                 CreateItems(dobj, npath)
 
@@ -144,32 +151,32 @@ class TemplateCollection(ed_xml.EdXml):
 
 #---- Subelements of a template ----#
 
-class File(ed_xml.EdXml):
-    """Xml element to represent a file item
-    <file name='__init__.py'>
-        # File: __init__.py
-        ''' docstring '''
-    </file>
+#class File(ed_xml.EdXml):
+#    """Xml element to represent a file item
+#    <file name='__init__.py'>
+#        # File: __init__.py
+#        ''' docstring '''
+#    </file>
 
-    """
-    class meta:
-        tagname = "file"
-    name = ed_xml.String(required=True)
-    data = ed_xml.String(tagname="data", required=False) # optional specify initial file contents
+#    """
+#    class meta:
+#        tagname = "file"
+#    name = ed_xml.String(required=True)
+#    data = ed_xml.String(tagname="data", required=False) # optional specify initial file contents
 
-class Directory(ed_xml.EdXml):
-    """Xml element to represent a directory item
-    <dir name='src'>
-        <file ...>
-        <file ...>
-    </dir>
+#class Directory(ed_xml.EdXml):
+#    """Xml element to represent a directory item
+#    <dir name='src'>
+#        <file ...>
+#        <file ...>
+#    </dir>
 
-    """
-    class meta:
-        tagname = "dir"
-    name = ed_xml.String(required=True)
-    files = ed_xml.List(ed_xml.Model(type=File), required=False)
-    dirs = ed_xml.List(ed_xml.Model("dir"), required=False)
+#    """
+#    class meta:
+#        tagname = "dir"
+#    name = ed_xml.String(required=True)
+#    files = ed_xml.List(ed_xml.Model(type=File), required=False)
+#    dirs = ed_xml.List(ed_xml.Model("dir"), required=False)
 
 #-----------------------------------------------------------------------------#
 
@@ -186,10 +193,11 @@ def GetDefaultTemplates():
     ## Basic project
     simple = ProjectTemplate(id=u"__BASIC__")
     for fname in ('CHANGELOG', 'README', 'setup.py', 'LICENSE'):
-        simple.files.append(File(name=fname))
-    sdir = Directory(name=PROJECT_NAME)
-    sdir.files.append(File(name="__init__.py"))
-    simple.dirs.append(sdir)
+        simple.files.append(ProjectXml.File(name=fname))
+    sdir = ProjectXml.PyPackage(name=PROJECT_NAME)
+    sdir.files.append(ProjectXml.File(name="__init__.py"))
+    simple.packages.append(sdir)
+    simple.folders.append(ProjectXml.Folder(name="tests"))
     plist.templates.append(simple)
 
     return plist

@@ -123,18 +123,16 @@ class ProjectManager(ed_basewin.EdBaseCtrlBox):
             if proj.CreateProject():
                 # Create the project file
                 pxml = ProjectXml.ProjectXml(name=proj.ProjectName)
-                def GenProject(obj, basepath):
-                    """Recursively populate the project file based on the
-                    project that was created.
-
-                    """
-                    for item in os.listdir(basepath):
-                        fpath = os.path.join(basepath, item)
-                        if os.path.isdir(fpath):
-                            nobj = ProjectXml.Folder(name=item)
-                            obj.folders.append(nobj)
-                            GenProject(nobj, fpath) # recurse
-                GenProject(pxml, proj.ProjectPath)
+                pxml.folders = proj.Template.folders
+                pxml.packages = proj.Template.packages
+                def CleanFiles(fold):
+                    """Remove template files from project configuration"""
+                    for d in fold:
+                        d.files = list()
+                        CleanFiles(d.folders)
+                        CleanFiles(d.packages)
+                CleanFiles(pxml.folders)
+                CleanFiles(pxml.packages)
                 # Write the project file out to the new project directory
                 ppath = os.path.join(proj.ProjectPath, u"%s.psp" % proj.ProjectName)
                 pfile = ProjectFile.ProjectFile(pxml, ppath)
@@ -334,4 +332,6 @@ class ProjectTree(eclib.FileTree):
 
         # Repopulate root of tree
         item = self.AddWatchDirectory(self._proj.ProjectRoot)
+        # TODO: could be None
         self.SetItemImage(item, ProjectTree.IMG_PROJECT)
+        self.Expand(item)
