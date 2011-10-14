@@ -25,6 +25,7 @@ import ed_glob
 import ebmlib
 import eclib
 import ed_basewin
+import ed_menu
 import syntax.synglob as synglob
 
 # Local libs
@@ -181,15 +182,29 @@ class ProjectTree(eclib.FileTree):
                IMG_PACKAGE : ed_glob.ID_PACKAGE,
                IMG_FILE    : ed_glob.ID_FILE,
                IMG_PYTHON  : synglob.ID_LANG_PYTHON }
+    # Non-themed images
+    IMG_PROJECT = IMG_PYTHON + 1
+
+    # Context Menu Ids
+    ID_OPEN_FILE   = wx.NewId()
+    ID_NEW_SUBMENU = wx.NewId()
+    ID_NEW_FILE    = wx.NewId()
+    ID_NEW_FOLDER  = wx.NewId()
+    ID_PROPERTIES  = wx.NewId()
 
     def __init__(self, parent):
         super(ProjectTree, self).__init__(parent)
 
         # Attributes
         self._proj = None
+        self._menu = ebmlib.ContextMenuManager()
 
         # Setup
         self.SetupImageList()
+
+        # Event Handlers
+        self.Bind(wx.EVT_MENU, self.OnContextMenu)
+        self.Bind(wx.EVT_WINDOW_DESTROY, self.OnDestroy)
 
     #---- Properties ----#
 
@@ -248,6 +263,64 @@ class ProjectTree(eclib.FileTree):
             imgid = ProjectTree.IMGMAP[img]
             bmp = wx.ArtProvider_GetBitmap(str(imgid), wx.ART_MENU)
             self.ImageList.Add(bmp)
+        # Non themed images
+        self.ImageList.Add(Images.Project.Bitmap)
+
+    def DoShowMenu(self, item):
+        """Show a context menu for the selected item
+        @param item: TreeItem
+
+        """
+        path = self.GetPyData(item)
+        self._menu.Clear()
+        menu = ed_menu.EdMenu()
+        # Populate menu for current item with standard options
+        if not os.path.isdir(path):
+            menu.Append(ProjectTree.ID_OPEN_FILE, _("Open"))
+            menu.AppendSeparator()
+        newmenu = ed_menu.EdMenu()
+        item = newmenu.Append(ProjectTree.ID_NEW_FILE, _("New File"))
+        item.SetBitmap(wx.ArtProvider_GetBitmap(str(ed_glob.ID_NEW), wx.ART_MENU))
+        item = newmenu.Append(ProjectTree.ID_NEW_FOLDER, _("New Folder"))
+        item.SetBitmap(wx.ArtProvider_GetBitmap(str(ed_glob.ID_NEW_FOLDER), wx.ART_MENU))
+        menu.AppendMenu(ProjectTree.ID_NEW_SUBMENU, _("New"), newmenu)
+        menu.AppendSeparator()
+        ccount = menu.GetMenuItemCount()
+        # TODO: broadcast for custom menu options
+        ## do broadcast here ##
+        if ccount < menu.GetMenuItemCount():
+            menu.AppendSeparator()
+        item = menu.Append(ProjectTree.ID_PROPERTIES, _("Properties"))
+        item.SetBitmap(wx.ArtProvider_GetBitmap(str(ed_glob.ID_PREF), wx.ART_MENU))
+        self._menu.Menu = menu
+        self._menu.SetUserData('path', path)
+        self.PopupMenu(self._menu.Menu)
+
+    #---- Event Handlers ----#
+  
+    def OnContextMenu(self, evt):
+        """Handle context menu events"""
+        e_id = evt.Id
+        path = self._menu.GetUserData('path')
+        if e_id == ProjectTree.ID_OPEN_FILE:
+            PyStudioUtils.GetEditorOrOpenFile(self.Parent.MainWindow, path)
+        elif e_id == ProjectTree.ID_NEW_FILE:
+            pass
+        elif e_id == ProjectTree.ID_NEW_FOLDER:
+            pass
+        elif e_id == ProjectTree.ID_PROPERTIES:
+            pass
+        else:
+            # Handle Custom Menu options
+            handler = self._menu.GetHandler(e_id)
+            if handler:
+                handler(path)
+
+    def OnDestroy(self, evt):
+        """Cleanup when window is destroyed"""
+        if self:
+            self._menu.Clear()
+        evt.Skip()
 
     #---- Implementation ----#
 
@@ -260,5 +333,5 @@ class ProjectTree(eclib.FileTree):
         self._proj = proj
 
         # Repopulate root of tree
-        self.AddWatchDirectory(self._proj.ProjectRoot)
-
+        item = self.AddWatchDirectory(self._proj.ProjectRoot)
+        self.SetItemImage(item, ProjectTree.IMG_PROJECT)
