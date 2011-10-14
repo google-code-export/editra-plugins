@@ -52,6 +52,19 @@ class Option(ed_xml.EdXml):
     type = ed_xml.String(required=True)
     value = ed_xml.String(required=True)
 
+class File(ed_xml.EdXml):
+    """Xml element to represent a file item (used by ProjectTemplate)
+    <file name='__init__.py'>
+        # File: __init__.py
+        ''' docstring '''
+    </file>
+
+    """
+    class meta:
+        tagname = "file"
+    name = ed_xml.String(required=True)
+    data = ed_xml.String(tagname="data", required=False) # optional specify initial file contents
+
 class Folder(ed_xml.EdXml):
     """General folder container
     <folder path="/foo/test></folder>"
@@ -63,6 +76,7 @@ class Folder(ed_xml.EdXml):
     options = ed_xml.List(ed_xml.Model(type=Option), required=False)
     packages = ed_xml.List(ed_xml.Model("package"), required=False)
     folders = ed_xml.List(ed_xml.Model("folder"), required=False)
+    files = ed_xml.List(ed_xml.Model(type=File), required=False)
 
 class PyPackage(Folder):
     """Python package directory. Container for python modules."""
