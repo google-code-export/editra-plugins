@@ -40,6 +40,7 @@ class ProjectFile(object):
     ProjectRoot = property(lambda self: os.path.dirname(self.Path))
 
     #---- Implementation ---- #
+
     def Save(self):
         """Save the project file to disk"""
         self._pxml.Write(self.Path)
