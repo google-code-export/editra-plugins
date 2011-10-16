@@ -34,6 +34,7 @@ from PyStudio.Common.PyStudioUtils import PyStudioUtils
 import PyStudio.Project.ProjectXml as ProjectXml
 import PyStudio.Project.ProjectFile as ProjectFile
 import PyStudio.Project.NewProjectDlg as NewProjectDlg
+from PyStudio.Controller.FileController import FileController
 
 #-----------------------------------------------------------------------------#
 # Globals
@@ -206,6 +207,13 @@ class ProjectTree(eclib.FileTree):
 
     #---- Properties ----#
 
+    def __GetFileController(self):
+        opt = self._proj.GetOption(u"filesystem")
+        if opt is None:
+            # Default to base controller
+            opt = u"OS"
+        return FileController.FactoryCreate(opt)
+    FileController = property(lambda self: self.__GetFileController())
     Project = property(lambda self: self._proj,
                        lambda self, proj: self.LoadProject(proj))
 
@@ -300,12 +308,22 @@ class ProjectTree(eclib.FileTree):
         """Handle context menu events"""
         e_id = evt.Id
         path = self._menu.GetUserData('path')
+        dname = path
+        if not os.path.isdir(path):
+            dname = os.path.dirname(path)
+
         if e_id == ProjectTree.ID_OPEN_FILE:
             PyStudioUtils.GetEditorOrOpenFile(self.Parent.MainWindow, path)
         elif e_id == ProjectTree.ID_NEW_FILE:
-            pass
+            name = wx.GetTextFromUser(_("Enter file name:"), _("New File"),
+                                      parent=self.Parent.MainWindow)
+            if name:
+                self.FileController.CreateFile(dname, name)
         elif e_id == ProjectTree.ID_NEW_FOLDER:
-            pass
+            name = wx.GetTextFromUser(_("Enter folder name"), _("New Folder"),
+                                      parent=self.Parent.MainWindow)
+            if name:
+                self.FileController.CreateFolder(dname, name)
         elif e_id == ProjectTree.ID_PROPERTIES:
             pass
         else:
