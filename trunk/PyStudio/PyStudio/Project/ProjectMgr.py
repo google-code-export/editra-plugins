@@ -279,6 +279,9 @@ class ProjectTree(eclib.FileTree):
     def DoGetFileImage(self, path):
         """Get the image for the given item"""
         if os.path.isdir(path):
+            for p in ProjectTree.GetDirContents(path):
+                if p.endswith(u"__init__.py"):
+                    return ProjectTree.IMG_PACKAGE
             return ProjectTree.IMG_FOLDER
         lpath = path.lower()
         if lpath.endswith(u".py") or lpath.endswith(u".pyw"):
@@ -348,7 +351,7 @@ class ProjectTree(eclib.FileTree):
             if name:
                 self.FileController.CreateFolder(dname, name)
         elif e_id == ProjectTree.ID_PROPERTIES:
-            pass
+            pass # TODO
         else:
             # Handle Custom Menu options
             handler = self._menu.GetHandler(e_id)
