@@ -46,6 +46,7 @@ class ProjectManager(ed_basewin.EdBaseCtrlBox):
     """Main UI component for the Project feature."""
     PANE_NAME = u"PyProject"
     ID_NEW_PROJECT = wx.NewId()
+    ID_IMPORT_PROJECT = wx.NewId()
     ID_OPEN_PROJECT = wx.NewId()
     ID_CONF_PROJECT = wx.NewId()
     def __init__(self, parent):
@@ -65,6 +66,7 @@ class ProjectManager(ed_basewin.EdBaseCtrlBox):
         self.projbtn = cbar.AddPlateButton(bmp=Images.Project.Bitmap)
         pmenu = wx.Menu()
         pmenu.Append(ProjectManager.ID_NEW_PROJECT, _("New Project"))
+        pmenu.Append(ProjectManager.ID_IMPORT_PROJECT, _("Import Project"))
         pmenu.Append(ProjectManager.ID_OPEN_PROJECT, _("Open Project"))
         pmenu.AppendSeparator()
         item = wx.MenuItem(pmenu, 
@@ -111,9 +113,30 @@ class ProjectManager(ed_basewin.EdBaseCtrlBox):
     def OnMenu(self, evt):
         """Handles menu events for the Project Manager"""
         actions = { ProjectManager.ID_NEW_PROJECT  : self.NewProject,
+                    ProjectManager.ID_IMPORT_PROJECT : self.ImportProject,
                     ProjectManager.ID_OPEN_PROJECT : self.OpenProject,
                     ProjectManager.ID_CONF_PROJECT : self.ShowConfig }
         actions.get(evt.Id, evt.Skip)()
+
+    def ImportProject(self):
+        """Prompt the user to import an existing project"""
+        cbuf = wx.GetApp().GetCurrentBuffer()
+        if cbuf and hasattr(cbuf, 'GetFileName'):
+            fname = cbuf.GetFileName()
+            dname = os.path.dirname(fname)
+        # TODO: Enhancement - support loading/import other project types (i.e pydev)
+        dlg = wx.DirDialog(self.MainWindow, _("Import Project Directory"),
+                           dname)
+        if dlg.ShowModal() == wx.ID_OK:
+            proj = dlg.Path
+            projName = os.path.basename(proj)
+            pxml = ProjectXml.ProjectXml(name=projName)
+            # Write out the new project file
+            # TODO: handling of already existing project file
+            ppath = os.path.join(proj, u"%s.psp" % projName)
+            pfile = ProjectFile.ProjectFile(pxml, ppath)
+            pfile.Save()
+            self.Tree.LoadProject(pfile) # Load the view
 
     def NewProject(self):
         """Create a new project"""
@@ -346,10 +369,13 @@ class ProjectTree(eclib.FileTree):
 
         """
         self.DeleteChildren(self.RootItem)
+        if self._proj and self._proj.ProjectRoot:
+            self.RemoveWatchDirectory(self._proj.ProjectRoot)
         self._proj = proj
 
         # Repopulate root of tree
         item = self.AddWatchDirectory(self._proj.ProjectRoot)
-        # TODO: could be None
-        self.SetItemImage(item, ProjectTree.IMG_PROJECT)
-        self.Expand(item)
+        if item:
+            self.SetItemImage(item, ProjectTree.IMG_PROJECT)
+            self.Expand(item)
+        # TODO: error if not added
