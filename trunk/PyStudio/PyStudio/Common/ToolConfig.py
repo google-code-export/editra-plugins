@@ -35,6 +35,8 @@ PYTOOL_CONFIG = "PyTool.Config"
 TLC_PYTHON_PATH = "PythonPath"
 TLC_ALL_PYTHON_PATHS = "AllPythonPaths"
 TLC_COMPILE_ON_SAVE = "CheckCompileOnSave"
+TLC_LOAD_LAST_PROJECT = "AutoLoadProject"
+TLC_LAST_PROJECT = "LastProjectFile"
 TLC_TRAP_EXCEPTIONS = "TrapExceptions"
 TLC_IGNORE_SYSEXIT = "IgnoreSysExit"
 TLC_SYNCHRONICITY = "Synchronicity"
@@ -64,6 +66,12 @@ def GetConfigValue(key, default=None):
     """Get a value from the config"""
     config = Profile_Get(PYTOOL_CONFIG, default=dict())
     return config.get(key, default)
+
+def SetConfigValue(key, value):
+    """Set a PyStudio config value"""
+    config = Profile_Get(PYTOOL_CONFIG, default=dict())
+    config[key] = value
+    Profile_Set(PYTOOL_CONFIG, config) # store
 
 def GetPythonExecutablePath(info):
     # Figure out what Python to use
@@ -135,6 +143,7 @@ class GeneralConfigPanel(wx.Panel):
         self._rm_path = eclib.PlateButton(self, bmp=bmp)
         self._rm_path.ToolTip = wx.ToolTip(_("Remove selected python executable"))
         self._check_on_save_cb = wx.CheckBox(self, label=_("Check for syntax errors on save"))
+        self._load_proj_cb = wx.CheckBox(self, label=_("Load Last Project"))
 
         # Setup
         self.__DoLayout()
@@ -174,15 +183,23 @@ class GeneralConfigPanel(wx.Panel):
         self._check_on_save_cb.ToolTip = wx.ToolTip(_("Mark syntax errors in buffer after save"))
         self._check_on_save_cb.SetValue(GetConfigValue(TLC_COMPILE_ON_SAVE, True))
         sizer.Add(self._check_on_save_cb, 0, wx.ALL, 5)
+        # Project
+        self._load_proj_cb.ToolTip = wx.ToolTip(_("Automatically reload last project at startup."))
+        self._load_proj_cb.SetValue(GetConfigValue(TLC_LOAD_LAST_PROJECT, True))
+        sizer.Add(self._load_proj_cb, 0, wx.ALL, 5)
+        
 
         self.SetSizer(sizer)
 
     def OnCheckBox(self, event):
         """Update checkbox linked configuration options"""
         e_obj = event.GetEventObject()
+        config = Profile_Get(PYTOOL_CONFIG, default=dict())
         if e_obj is self._check_on_save_cb:
-            config = Profile_Get(PYTOOL_CONFIG, default=dict())
-            config[TLC_COMPILE_ON_SAVE] = e_obj.GetValue()
+            config[TLC_COMPILE_ON_SAVE] = e_obj.Value
+            Profile_Set(PYTOOL_CONFIG, config)
+        elif e_obj is self._load_proj_cb:
+            config[TLC_LOAD_LAST_PROJECT] = e_obj.Value
             Profile_Set(PYTOOL_CONFIG, config)
 
     def OnComboSelect(self, event):
