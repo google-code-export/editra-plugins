@@ -38,6 +38,7 @@ import os
 # Editra Imports
 #sys.path.append(r"..\..\..\..\..\src") # TEST
 import ed_xml
+import util
 
 # Local Imports
 import PyStudio.Project.ProjectXml as ProjectXml
@@ -113,11 +114,16 @@ class ProjectTemplate(ed_xml.EdXml):
         try:
             # Make toplevel project directory
             ppath = os.path.join(basepath, projName)
-            os.mkdir(ppath)
-            # Recursively execute template creation
-            CreateItems(self, ppath)
+            if not os.path.exists(ppath):
+                # Create the project from scratch
+                os.mkdir(ppath)
+                # Recursively execute template creation
+                CreateItems(self, ppath)
+            # else assume importing existing
         except OSError, msg:
-            return False # TODO error reporting
+            util.Log("[PyProject][err] Failed to create new project (%s)" % projName)
+            util.Log("[PyProject][err] %s" % msg)
+            return False # TODO error reporting to user
         return True
 
 class TemplateCollection(ed_xml.EdXml):
