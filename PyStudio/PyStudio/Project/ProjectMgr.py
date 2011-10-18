@@ -22,6 +22,7 @@ import wx
 
 # Editra libs
 import ed_glob
+import util
 import ebmlib
 import eclib
 import ed_basewin
@@ -29,6 +30,7 @@ import ed_menu
 import syntax.synglob as synglob
 
 # Local libs
+from PyStudio.Common import ToolConfig
 import PyStudio.Common.Images as Images
 from PyStudio.Common.PyStudioUtils import PyStudioUtils
 import PyStudio.Project.ProjectXml as ProjectXml
@@ -55,6 +57,7 @@ class ProjectManager(ed_basewin.EdBaseCtrlBox):
 
         """
         super(ProjectManager, self).__init__(parent)
+        util.Log("[PyProject][info] Creating ProjectManager instance")
 
         # Attributes
         self._mw = parent
@@ -88,6 +91,13 @@ class ProjectManager(ed_basewin.EdBaseCtrlBox):
         nfolderbtn.ToolTip = wx.ToolTip(_("New Folder"))
         self.SetWindow(self._tree)
 
+        # Post Initalization
+        if ToolConfig.GetConfigValue(ToolConfig.TLC_LOAD_LAST_PROJECT, True):
+            lproj = ToolConfig.GetConfigValue(ToolConfig.TLC_LAST_PROJECT, None)
+            util.Log("[PyProject][info] Loading last project %s" % repr(lproj))
+            if lproj and os.path.exists(lproj):
+                self.DoOpenProject(lproj)
+
         # Event Handlers
         self.Bind(wx.EVT_BUTTON, self.OnNewFile, nfilebtn)
         self.Bind(wx.EVT_BUTTON, self.OnNewPackage, npkgbtn)
@@ -100,6 +110,15 @@ class ProjectManager(ed_basewin.EdBaseCtrlBox):
     Tree = property(lambda self: self._tree)
 
     #---- Implementation ----#
+
+    def DoOpenProject(self, path):
+        """Open the project file and display it in the L{ProjectTree}
+        @param path: PyStudio Project file path
+
+        """
+        pxml = ProjectXml.ProjectXml.Load(path)
+        pfile = ProjectFile.ProjectFile(pxml, path)
+        self.Tree.LoadProject(pfile)
 
     def OnNewFolder(self, evt):
         pass
@@ -179,11 +198,7 @@ class ProjectManager(ed_basewin.EdBaseCtrlBox):
                             style=wx.FD_OPEN)
         dlg.CenterOnParent()
         if dlg.ShowModal() == wx.ID_OK:
-            path = dlg.Path
-            # TODO: check NULL
-            pxml = ProjectXml.ProjectXml.Load(path)
-            pfile = ProjectFile.ProjectFile(pxml, path)
-            self.Tree.LoadProject(pfile)
+            self.DoOpenProject(dlg.Path)
         dlg.Destroy()
 
     def ShowConfig(self):
@@ -360,8 +375,12 @@ class ProjectTree(eclib.FileTree):
 
     def OnDestroy(self, evt):
         """Cleanup when window is destroyed"""
+        util.Log("[PyProject][info] ProjectTree.OnDestroy")
         if self:
             self._menu.Clear()
+            # Store last project
+            ToolConfig.SetConfigValue(ToolConfig.TLC_LAST_PROJECT,
+                                      self.Project.Path)
         evt.Skip()
 
     #---- Implementation ----#
@@ -382,3 +401,7 @@ class ProjectTree(eclib.FileTree):
             self.SetItemImage(item, ProjectTree.IMG_PROJECT)
             self.Expand(item)
         # TODO: error if not added
+
+        # Update last project info
+        ToolConfig.SetConfigValue(ToolConfig.TLC_LAST_PROJECT,
+                                      self.Project.Path)
