@@ -155,35 +155,6 @@ class TemplateCollection(ed_xml.EdXml):
         """Get a list of template display names"""
         return [t.GetDisplayName() for t in self.templates]
 
-#---- Subelements of a template ----#
-
-#class File(ed_xml.EdXml):
-#    """Xml element to represent a file item
-#    <file name='__init__.py'>
-#        # File: __init__.py
-#        ''' docstring '''
-#    </file>
-
-#    """
-#    class meta:
-#        tagname = "file"
-#    name = ed_xml.String(required=True)
-#    data = ed_xml.String(tagname="data", required=False) # optional specify initial file contents
-
-#class Directory(ed_xml.EdXml):
-#    """Xml element to represent a directory item
-#    <dir name='src'>
-#        <file ...>
-#        <file ...>
-#    </dir>
-
-#    """
-#    class meta:
-#        tagname = "dir"
-#    name = ed_xml.String(required=True)
-#    files = ed_xml.List(ed_xml.Model(type=File), required=False)
-#    dirs = ed_xml.List(ed_xml.Model("dir"), required=False)
-
 #-----------------------------------------------------------------------------#
 
 def GetDefaultTemplates():
