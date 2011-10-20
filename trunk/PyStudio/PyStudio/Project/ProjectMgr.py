@@ -361,12 +361,12 @@ class ProjectTree(eclib.FileTree):
             if name:
                 self.FileController.CreateFile(dname, name)
         elif e_id == ProjectTree.ID_NEW_FOLDER:
-            name = wx.GetTextFromUser(_("Enter folder name"), _("New Folder"),
+            name = wx.GetTextFromUser(_("Enter folder name:"), _("New Folder"),
                                       parent=self.Parent.MainWindow)
             if name:
                 self.FileController.CreateFolder(dname, name)
         elif e_id == ProjectTree.ID_PROPERTIES:
-            pass # TODO
+            pass # TODO: project properties dialog
         else:
             # Handle Custom Menu options
             handler = self._menu.GetHandler(e_id)
