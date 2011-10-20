@@ -45,6 +45,7 @@ class ProjectFile(object):
 
     def __RefreshOptionMap(self):
         """Build the option map"""
+        self._optmap.clear()
         for opt in self._pxml.options:
             self._optmap[opt.name] = opt
 
