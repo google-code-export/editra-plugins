@@ -1,0 +1,12 @@
+#summary PyStudio Project Manager
+#labels IDE
+
+= Introduction =
+
+Coming soon...
+
+[http://editra-plugins.googlecode.com/svn/wiki/images/PyStudio/PyProject.png]
+
+
+= Details =
+
