@@ -48,8 +48,11 @@ import ed_glob
 import eclib
 import eclib.outbuff as outbuff
 import ed_basestc
-import ed_basewin
-import ebmlib
+#Editra v.0.85
+try:
+    import ebmlib
+except:
+    pass
 
 
 #--------------------------------------------------------------------------#
@@ -92,12 +95,12 @@ def doreload():
 
 #-----------------------------------------------------------------------------#
 
-class MacroLauncherPane(ed_basewin.EdBaseCtrlBox):
+class MacroLauncherPane(ctrlbox.ControlBox):
     """Creates a Macro Launcher panel"""
     def __init__(self, parent, id=wx.ID_ANY, pos=wx.DefaultPosition,
                  size=wx.DefaultSize, style=wx.NO_BORDER, menu=None):
         """ Initializes the MacroLauncherPane class"""
-        super(MacroLauncherPane, self).__init__(parent, id, pos, size, style)
+        ctrlbox.ControlBox.__init__(self, parent, id, pos, size, style)
 
 
         #---- main configuration ----#
@@ -107,7 +110,7 @@ class MacroLauncherPane(ed_basewin.EdBaseCtrlBox):
         self._macros = {}
 
         #---- private attr ----#
-        self._mainwin = ed_basewin.FindMainWindow(self)
+        self._mainwin = self.__FindMainWindow()
         self._mi = menu
         self.__log = wx.GetApp().GetLog()
         self._timer = wx.Timer(self, ID_TIMER)
@@ -121,7 +124,11 @@ class MacroLauncherPane(ed_basewin.EdBaseCtrlBox):
 
         #---- Gui ----#
 
-        ctrlbar = self.CreateControlBar(wx.TOP)
+        ctrlbar = ctrlbox.ControlBar(self, style=ctrlbox.CTRLBAR_STYLE_GRADIENT)
+        if wx.Platform == '__WXGTK__':
+            ctrlbar.SetWindowStyle(ctrlbox.CTRLBAR_STYLE_DEFAULT)
+
+        self.SetControlBar(ctrlbar)
         self._listctrl = CustomListCtrl(self)
         self.SetWindow(self._listctrl)
 
@@ -183,7 +190,9 @@ class MacroLauncherPane(ed_basewin.EdBaseCtrlBox):
 
         #---- Status Bar -----#
 
-        statusctrl = self.CreateControlBar(wx.BOTTOM)
+        statusctrl = ctrlbox.ControlBar(self, style=ctrlbox.CTRLBAR_STYLE_GRADIENT)
+        statusctrl.SetVMargin(2, 2)
+        self.SetControlBar(statusctrl, pos=wx.BOTTOM)
         self._statusMsgBox = wx.StaticText(statusctrl, label='')
         self._statusMsgBox.SetToolTipString(_("R: running, F: finished, C: cancelled or failed"))
         statusctrl.AddControl(self._statusMsgBox)
@@ -202,7 +211,6 @@ class MacroLauncherPane(ed_basewin.EdBaseCtrlBox):
         self.Bind(wx.EVT_BUTTON, lambda evt: self.OnEditMacro(), btn_edit)
         self.Bind(wx.EVT_BUTTON, lambda evt: self.OnDelMacro(), btn_del)
         self.Bind(wx.EVT_BUTTON, lambda evt: self.OnRunMacro(), btn_run)
-        self.Bind(wx.EVT_WINDOW_DESTROY, self.OnDestroy, self)
 
         #threads (started macros)
         self.Bind(outbuff.EVT_TASK_START, self._OnTaskStart)
@@ -213,10 +221,6 @@ class MacroLauncherPane(ed_basewin.EdBaseCtrlBox):
         ed_msg.Subscribe(self.OnFileSave, ed_msg.EDMSG_FILE_SAVED)
 
         self.UpdateMacroBrowser()
-
-    def OnDestroy(self, evt):
-        if self:
-            ed_msg.Unsubscribe(self.OnFileSave)
 
     #-------------------------- Methods -------------------------#
 
@@ -803,18 +807,6 @@ def run(txtctrl=None, log=None, **kwargs):
                 else:
                     nbook = self.GetMainWindow().GetNotebook()
                 
-                page_closed = False
-                ctrls = nbook.GetTextControls()
-                for ctrl in ctrls:
-                    if source == ctrl.GetFileName():
-                        index = nbook.GetPageIndex(ctrl)
-                        if ctrl.GetModify():
-                            ctrl.SetSavePoint()
-                        self._log("[info] closing macro before rename operation")
-                        nbook.SetSelection(index)
-                        nbook.ClosePage()
-                        page_closed = True
-
                 target = os.path.normpath(os.path.join(base, new_filename))
                 
                 if os.path.exists(target):
@@ -826,13 +818,27 @@ def run(txtctrl=None, log=None, **kwargs):
                     dlg.Destroy()
                     if answ != wx.ID_YES:
                         return
+                    
+                    
+                macro_closed = False
+                ctrls = nbook.GetTextControls()
+                for ctrl in ctrls:
+                    if source == ctrl.GetFileName():
+                        index = nbook.GetPageIndex(ctrl)
+                        if ctrl.GetModify():
+                            ctrl.SetSavePoint()
+                        self._log("[info] closing macro before rename operation")
+                        nbook.SetSelection(index)
+                        nbook.ClosePage()
+                        macro_closed = True
+
+                
                 
                 os.rename(source, target)
                 del self._macros[macro['File']]
                 self._register_macro(target)
                 
-                # reopen the macro if it was opened before
-                if page_closed:
+                if macro_closed:
                     self.OpenFiles([target])
                     
             except Exception, excp:
@@ -851,13 +857,7 @@ def run(txtctrl=None, log=None, **kwargs):
         macros = self._listctrl.GetSelectedMacros()
         if not len(macros):
             return
-        self.RunMacros(macros)
-        
-    def RunMacros(self, macros):
-        """Runs all the macros in the list
-        @var macros: list of macro objects
-        @return: nothing
-        """
+
         if not self.SomethingIsRunning():
             self.ResetTaskCounter()
             wx.CallAfter(self.SetStatusMsg, '')
@@ -912,7 +912,11 @@ def run(txtctrl=None, log=None, **kwargs):
                         self.SetStatusMsg(msg=_("Macro %s is running") % macro['File'])
 
                         busy = wx.BusyInfo(_("Wait please..."))
-                        module.run(**kwargs)
+                        res = module.run(**kwargs)
+                        
+                        if hasattr(res, 'next'):
+                            list(res)
+                        
                         del busy
 
                         self.TaskCounter(-1, 1, 0)
