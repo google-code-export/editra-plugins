@@ -255,6 +255,9 @@ class ProjectTree(eclib.FileTree):
         self.Bind(wx.EVT_MENU, self.OnContextMenu)
         self.Bind(wx.EVT_WINDOW_DESTROY, self.OnDestroy)
 
+        # Message Handlers
+        ed_msg.Subscribe(self.OnGetProject, PyStudioMessages.PYSTUDIO_PROJECT_GET)
+
     #---- Properties ----#
 
     def __GetFileController(self):
@@ -402,6 +405,17 @@ class ProjectTree(eclib.FileTree):
             ToolConfig.SetConfigValue(ToolConfig.TLC_LAST_PROJECT,
                                       self.Project.Path)
         evt.Skip()
+
+    def GetMainWindow(self):
+        return self.Parent.MainWindow
+
+    @ed_msg.mwcontext
+    def OnGetProject(self, msg):
+        """Return the project file reference to the client that
+        requested it.
+
+        """
+        msg.Data['project'] = self.Project
 
     #---- Implementation ----#
 

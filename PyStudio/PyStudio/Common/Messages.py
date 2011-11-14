@@ -29,3 +29,8 @@ class PyStudioMessages:
     # context menu. MenuManager user data 'path' contains path of file/folder that
     # was clicked on in the ProjectTree.
     PYSTUDIO_PROJECT_MENU = ('PyStudio', 'Project', 'ContextMenu')
+
+    # msgdata == dict(winid=mainwinid) (sent data)
+    #            dict(winid=mainwinid, project=projfile) (return data)
+    # Send this message to get the current
+    PYSTUDIO_PROJECT_GET = ('PyStudio', 'Project', 'Get')
