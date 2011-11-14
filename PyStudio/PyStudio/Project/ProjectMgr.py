@@ -9,6 +9,8 @@
 """
 Project File Manager
 
+Main PyProject UI components for integration into Editra user interface.
+
 """
 
 __author__ = "Cody Precord <cprecord@editra.org>"
@@ -68,9 +70,12 @@ class ProjectManager(ed_basewin.EdBaseCtrlBox):
         # Setup the project button
         self.projbtn = cbar.AddPlateButton(bmp=Images.Project.Bitmap)
         pmenu = wx.Menu()
-        pmenu.Append(ProjectManager.ID_NEW_PROJECT, _("New Project"))
-        pmenu.Append(ProjectManager.ID_IMPORT_PROJECT, _("Import Project"))
-        pmenu.Append(ProjectManager.ID_OPEN_PROJECT, _("Open Project"))
+        pmenu.Append(ProjectManager.ID_NEW_PROJECT, _("New Project"),
+                     _("Create a new project"))
+        pmenu.Append(ProjectManager.ID_IMPORT_PROJECT, _("Import Project"),
+                     _("Import an existing project"))
+        pmenu.Append(ProjectManager.ID_OPEN_PROJECT, _("Open Project"),
+                     _("Open an existing PyProject project file"))
         pmenu.AppendSeparator()
         item = wx.MenuItem(pmenu, 
                            ProjectManager.ID_CONF_PROJECT, 
@@ -91,7 +96,7 @@ class ProjectManager(ed_basewin.EdBaseCtrlBox):
         nfolderbtn.ToolTip = wx.ToolTip(_("New Folder"))
         self.SetWindow(self._tree)
 
-        # Post Initalization
+        # Post Initialization
         if ToolConfig.GetConfigValue(ToolConfig.TLC_LOAD_LAST_PROJECT, True):
             lproj = ToolConfig.GetConfigValue(ToolConfig.TLC_LAST_PROJECT, None)
             util.Log("[PyProject][info] Loading last project %s" % repr(lproj))
@@ -151,8 +156,13 @@ class ProjectManager(ed_basewin.EdBaseCtrlBox):
             projName = os.path.basename(proj)
             pxml = ProjectXml.ProjectXml(name=projName)
             # Write out the new project file
-            # TODO: handling of already existing project file
             ppath = os.path.join(proj, u"%s.psp" % projName)
+            if ebmlib.PathExists(ppath):
+                result = wx.MessageBox(_("The project '%s' already exists.\nDo you wish to overwrite it?") % projName,
+                                       _("Project Exists"),
+                                       style=wx.ICON_WARNING|wx.YES_NO)
+                if result == wx.ID_NO:
+                    return
             pfile = ProjectFile.ProjectFile(pxml, ppath)
             pfile.Save()
             self.Tree.LoadProject(pfile) # Load the view
