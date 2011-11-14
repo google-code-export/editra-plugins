@@ -1344,7 +1344,6 @@ class ProjectTree(wx.Panel):
 
     def OnContextMenu(self, event):
         """ Handle showing context menu to show the commands """
-        #self.log.WriteText("OnContextMenu\n")
         UnusedArg(event)
 
         # Destroy any existing menu
