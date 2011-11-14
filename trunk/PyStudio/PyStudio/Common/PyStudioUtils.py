@@ -26,6 +26,9 @@ import ebmlib
 import ed_txt
 import util
 
+# Local Imports
+from PyStudio.Common.Messages import PyStudioMessages
+
 # Globals
 _ = wx.GetTranslation
 
@@ -115,6 +118,18 @@ class PyStudioUtils():
         else:
             nb.OnDrop([fname])
         return PyStudioUtils.GetEditorForFile(mainw, fname)
+
+    @staticmethod
+    def GetProjectFile(mainw):
+        """Get the currently open project file for the given MainWindow
+        instance. PyProject interface method.
+        @param mainw: MainWindow instance
+        @return: ProjectFile or None
+
+        """
+        data = dict(project=None)
+        ed_msg.PostMessage(PyStudioMessages.PYSTUDIO_PROJECT_GET, data, mainw.Id)
+        return data.get('project', None)
 
     @staticmethod
     def set_indic(lineNo, editor):
