@@ -29,12 +29,14 @@ import ebmlib
 import eclib
 import ed_basewin
 import ed_menu
+import ed_msg
 import syntax.synglob as synglob
 
 # Local libs
 from PyStudio.Common import ToolConfig
 import PyStudio.Common.Images as Images
 from PyStudio.Common.PyStudioUtils import PyStudioUtils
+from PyStudio.Common.Messages import PyStudioMessages
 import PyStudio.Project.ProjectXml as ProjectXml
 import PyStudio.Project.ProjectFile as ProjectFile
 import PyStudio.Project.NewProjectDlg as NewProjectDlg
@@ -204,7 +206,7 @@ class ProjectManager(ed_basewin.EdBaseCtrlBox):
             dname = os.path.dirname(fname)
         dlg = wx.FileDialog(self.MainWindow, _("Open Project"),
                             defaultDir=dname,
-                            wildcard=u"PyStudio Project (*.psp)|*.psp", # TODO: decide file extension
+                            wildcard=u"PyStudio Project (*.psp)|*.psp",
                             style=wx.FD_OPEN)
         dlg.CenterOnParent()
         if dlg.ShowModal() == wx.ID_OK:
@@ -343,12 +345,20 @@ class ProjectTree(eclib.FileTree):
         menu.AppendMenu(ProjectTree.ID_NEW_SUBMENU, _("New"), newmenu)
         menu.AppendSeparator()
         ccount = menu.GetMenuItemCount()
-        # TODO: broadcast for custom menu options
-        ## do broadcast here ##
+
+        # Menu customization interface
+        # Allow other components to add custom menu options
+        self._menu.SetUserData('path', path) # path of item that was clicked on
+        ed_msg.PostMessage(PyStudioMessages.PYSTUDIO_PROJECT_MENU,
+                           self._menu, self.Parent.MainWindow.Id)
+
+        # Add properties
         if ccount < menu.GetMenuItemCount():
             menu.AppendSeparator()
         item = menu.Append(ProjectTree.ID_PROPERTIES, _("Properties"))
         item.SetBitmap(wx.ArtProvider_GetBitmap(str(ed_glob.ID_PREF), wx.ART_MENU))
+
+        # Show the popup Menu
         self._menu.Menu = menu
         self._menu.SetUserData('path', path)
         self.PopupMenu(self._menu.Menu)
