@@ -29,7 +29,10 @@ import ebmlib
 #-----------------------------------------------------------------------------#
 
 class FileController(ebmlib.FactoryMixin):
-    """Base factory for file controllers"""
+    """Base factory for file controllers which implements all interface
+    methods using default filesystem actions.
+
+    """
     def __init__(self):
         super(FileController, self).__init__()
 
