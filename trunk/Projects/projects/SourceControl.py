@@ -84,7 +84,7 @@ class SourceControl(object):
     OUTPUT_HOOK = None
 
     def __init__(self):
-        object.__init__(self)
+        super(SourceControl, self).__init__()
 
         # Attribute
         self._log = wx.GetApp().GetLog()
@@ -252,7 +252,7 @@ class SourceControl(object):
                                     env=environ,
                                     startupinfo=STARTUPINFO)
         except OSError, msg: 
-            self.log(u"[err] run error: %s" % msg)
+            self.log("[err] run error: %s" % msg)
         
     def filterPaths(self, paths):
         """" Filter out paths based on class filters """
