@@ -40,6 +40,7 @@ from PyStudio.Common.Messages import PyStudioMessages
 import PyStudio.Project.ProjectXml as ProjectXml
 import PyStudio.Project.ProjectFile as ProjectFile
 import PyStudio.Project.NewProjectDlg as NewProjectDlg
+import PyStudio.Project.ProjectUtil as ProjectUtil
 from PyStudio.Controller.FileController import FileController
 
 #-----------------------------------------------------------------------------#
@@ -221,19 +222,6 @@ class ProjectManager(ed_basewin.EdBaseCtrlBox):
 
 class ProjectTree(eclib.FileTree):
     """Provides a tree view of all the files and packages in a project."""
-    # ImageList indexes
-    IMAGES = range(4)
-    IMG_FOLDER,\
-    IMG_PACKAGE,\
-    IMG_FILE,\
-    IMG_PYTHON = IMAGES
-    IMGMAP = { IMG_FOLDER  : ed_glob.ID_FOLDER,
-               IMG_PACKAGE : ed_glob.ID_PACKAGE,
-               IMG_FILE    : ed_glob.ID_FILE,
-               IMG_PYTHON  : synglob.ID_LANG_PYTHON }
-    # Non-themed images
-    IMG_PROJECT = IMG_PYTHON + 1
-
     # Context Menu Ids
     ID_OPEN_FILE   = wx.NewId()
     ID_NEW_SUBMENU = wx.NewId()
@@ -281,6 +269,7 @@ class ProjectTree(eclib.FileTree):
         if path and os.path.exists(path):
             if not os.path.isdir(path):
                 PyStudioUtils.GetEditorOrOpenFile(self.Parent.MainWindow, path)
+        # TODO notify failure to open
 
     def DoItemExpanding(self, item):
         """Handle when an item is expanding to display the folder contents
@@ -308,25 +297,21 @@ class ProjectTree(eclib.FileTree):
 
     def DoGetFileImage(self, path):
         """Get the image for the given item"""
+        iconmgr = ProjectUtil.FileIcons
         if os.path.isdir(path):
             for p in ProjectTree.GetDirContents(path):
                 if p.endswith(u"__init__.py"):
-                    return ProjectTree.IMG_PACKAGE
-            return ProjectTree.IMG_FOLDER
+                    return iconmgr.IMG_PACKAGE
+            return iconmgr.IMG_FOLDER
         lpath = path.lower()
         if lpath.endswith(u".py") or lpath.endswith(u".pyw"):
-            return ProjectTree.IMG_PYTHON
+            return iconmgr.IMG_PYTHON
         else:
-            return ProjectTree.IMG_FILE
+            return iconmgr.IMG_FILE
 
     def DoSetupImageList(self):
         """Setup the image list for this control"""
-        for img in ProjectTree.IMAGES:
-            imgid = ProjectTree.IMGMAP[img]
-            bmp = wx.ArtProvider_GetBitmap(str(imgid), wx.ART_MENU)
-            self.ImageList.Add(bmp)
-        # Non themed images
-        self.ImageList.Add(Images.Project.Bitmap)
+        ProjectUtil.FileIcons.PopulateImageList(self.ImageList)
 
     def DoShowMenu(self, item):
         """Show a context menu for the selected item
@@ -431,7 +416,8 @@ class ProjectTree(eclib.FileTree):
         # Repopulate root of tree
         item = self.AddWatchDirectory(self.Project.ProjectRoot)
         if item:
-            self.SetItemImage(item, ProjectTree.IMG_PROJECT)
+            iconmgr = ProjectUtil.FileIcons
+            self.SetItemImage(item, iconmgr.IMG_PROJECT)
             self.Expand(item)
             # Update last project info
             ToolConfig.SetConfigValue(ToolConfig.TLC_LAST_PROJECT, self.Project.Path)
