@@ -401,9 +401,6 @@ class ProjectTree(eclib.FileTree):
         util.Log("[PyProject][info] ProjectTree.OnDestroy")
         if self:
             self._menu.Clear()
-            # Store last project
-            ToolConfig.SetConfigValue(ToolConfig.TLC_LAST_PROJECT,
-                                      self.Project.Path)
         evt.Skip()
 
     def GetMainWindow(self):
@@ -421,21 +418,26 @@ class ProjectTree(eclib.FileTree):
 
     def LoadProject(self, proj):
         """Load the given project
-        @param proj: ProjectFile instance
+        @param proj: ProjectFile instance or None to clear
 
         """
         self.DeleteChildren(self.RootItem)
-        if self._proj and self._proj.ProjectRoot:
+        if self.Project and self.Project.ProjectRoot:
             self.RemoveWatchDirectory(self._proj.ProjectRoot)
         self._proj = proj
+        if not self.Project:
+            return # cleared/closed current project
 
         # Repopulate root of tree
-        item = self.AddWatchDirectory(self._proj.ProjectRoot)
+        item = self.AddWatchDirectory(self.Project.ProjectRoot)
         if item:
             self.SetItemImage(item, ProjectTree.IMG_PROJECT)
             self.Expand(item)
-        # TODO: error if not added
-
-        # Update last project info
-        ToolConfig.SetConfigValue(ToolConfig.TLC_LAST_PROJECT,
-                                      self.Project.Path)
+            # Update last project info
+            ToolConfig.SetConfigValue(ToolConfig.TLC_LAST_PROJECT, self.Project.Path)
+            ed_msg.PostMessage(PyStudioMessages.PYSTUDIO_PROJECT_LOADED, 
+                               self.Project, self.Parent.MainWindow.Id)
+        else:
+            wx.MessageBox(_("Unable to load project: %s") % self.Project.ProjectName,
+                          _("PyStudio Error"), style=wx.OK|wx.CENTER|wx.ICON_ERROR)
+            return

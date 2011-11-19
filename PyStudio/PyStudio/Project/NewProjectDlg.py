@@ -68,7 +68,9 @@ class NewProjectPanel(wx.Panel):
         # Attributes
         self._ptype = ProjectTypePanel(self)
         self._pname = wx.TextCtrl(self) # TODO validator alpha-numeric only
+        self._pname.ToolTip = wx.ToolTip(_("Project directory will be created using this name."))
         self._pdir = wx.DirPickerCtrl(self) # TODO: default path
+        self._pdir.ToolTip = wx.ToolTip(_("Location to create new project."))
 
         # Setup
         self.__DoLayout()
@@ -89,7 +91,7 @@ class NewProjectPanel(wx.Panel):
         nlbl = wx.StaticText(self, label=_("Project Name:"))
         gszr.Add(nlbl, 0, wx.ALIGN_CENTER_VERTICAL)
         gszr.Add(self._pname, 1, wx.EXPAND)
-        llbl = wx.StaticText(self, label=_("Project Location:"))
+        llbl = wx.StaticText(self, label=_("Project Destination:"))
         gszr.Add(llbl, 0, wx.ALIGN_CENTER_VERTICAL)
         gszr.Add(self._pdir, 1, wx.EXPAND)
         sizer.Add(gszr, 0, wx.EXPAND|wx.ALL, 10)
