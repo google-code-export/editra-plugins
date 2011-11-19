@@ -19,11 +19,9 @@ __revision__ = "$Revision$"
 
 #-----------------------------------------------------------------------------#
 
-
-#-----------------------------------------------------------------------------#
-
 class PyStudioMessages:
     """Namespace for message type identifiers"""
+    ######### PROJECT RELATED MESSAGES #######################################
     # msgdata == ContextMenuManager instance
     # Subscribe to this message to add custom options to the PyProject ProjectTree's
     # context menu. MenuManager user data 'path' contains path of file/folder that
@@ -34,3 +32,17 @@ class PyStudioMessages:
     #            dict(winid=mainwinid, project=projfile) (return data)
     # Send this message to get the current
     PYSTUDIO_PROJECT_GET = ('PyStudio', 'Project', 'Get')
+
+    # msgdata == ProjectFile
+    # The project file was saved to the hard disk
+    PYSTUDIO_PROJECT_SAVED = ('PyStudio', 'Project', 'Saved')
+
+    # msgdata == ProjectFile
+    # A project was loaded
+    PYSTUDIO_PROJECT_LOADED = ('PyStudio', 'Project', 'Loaded')
+
+    # msgdata == dict(project=ProjectFile, option=OPTION_NAME)
+    # Context = MainWindow
+    # A project option was changed / added
+    PYSTUDIO_PROJECT_MODIFIED = ('PyStudio', 'Project', 'Modified')
+    ######### END PROJECT RELATED MESSAGES ####################################
