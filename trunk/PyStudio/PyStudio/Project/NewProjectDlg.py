@@ -28,6 +28,8 @@ import ed_basewin
 
 # Local Modules
 import PyStudio.Project.ProjectTemplate as ProjectTemplate
+import PyStudio.Project.ProjectXml as ProjectXml
+from PyStudio.Project.ProjectUtil import FileIcons
 
 #-----------------------------------------------------------------------------#
 # Globals
@@ -49,7 +51,8 @@ class NewProjectDlg(ed_basewin.EdBaseDialog):
         bszr = self.CreateButtonSizer(wx.OK|wx.CANCEL)
         self.Sizer.Add((10, 10), 0)
         self.Sizer.Add(bszr, 0, wx.EXPAND|wx.ALL, 5)
-        self.SetInitialSize(size=(400, 300))
+        self.SetInitialSize(size=(450, 400))
+        self.CenterOnParent()
 
         # Event Handlers
         self.Bind(wx.EVT_UPDATE_UI, self.OnUpdateOkBtn, id=wx.ID_OK)
@@ -124,10 +127,9 @@ class ProjectTypePanel(wx.Panel):
         # Attributes
         typeBox = wx.StaticBox(self, label=_("Project Type"))
         self._tbox = wx.StaticBoxSizer(typeBox, wx.VERTICAL)
-        descBox = wx.StaticBox(self, label=_("Description"), size=(300,200))
+        descBox = wx.StaticBox(self, label=_("Preview"), size=(300,200))
         self._dbox = wx.StaticBoxSizer(descBox, wx.VERTICAL)
-        self._dlbl = wx.StaticText(self)
-        self._dlbl.SetFont(wx.SMALL_FONT)
+        self._preview = TemplatePreview(self)
         self._templates = ProjectTemplate.GetDefaultTemplates() # TODO: load from user config
         names = self._templates.GetTemplateNames()
         self._tlist = wx.ListBox(self, choices=names, style=wx.LB_SINGLE)
@@ -147,7 +149,7 @@ class ProjectTypePanel(wx.Panel):
         sizer.Add(self._tbox, 1, wx.EXPAND|wx.ALL, 10)
 
         # Description Box
-        self._dbox.Add(self._dlbl, 1, wx.EXPAND|wx.ALL, 5)
+        self._dbox.Add(self._preview, 1, wx.EXPAND|wx.ALL, 5)
         sizer.Add(self._dbox, 1, wx.EXPAND|wx.ALL, 10)
 
         self.SetSizer(sizer)
@@ -163,7 +165,9 @@ class ProjectTypePanel(wx.Panel):
 
     def OnTypeList(self, evt):
         """Handle when an item is selected in the type list"""
-        pass # TODO update desc box
+        tplate = self.GetSelectedTemplate()
+        self._preview.DisplayTemplate(tplate)
+        # TODO: update project name based on text entry box?
 
     def HasSelection(self):
         """Check whether a project type has been selected
@@ -171,6 +175,65 @@ class ProjectTypePanel(wx.Panel):
 
         """
         return self._tlist.Selection != -1
+
+#-----------------------------------------------------------------------------#
+
+class TemplatePreview(wx.TreeCtrl):
+    """Used for displaying a preview of what the selected project template
+    will create.
+
+    """
+    def __init__(self, parent):
+        super(TemplatePreview, self).__init__(parent, 
+                                              style=wx.TR_DEFAULT_STYLE|wx.TR_FULL_ROW_HIGHLIGHT)
+
+        # Setup
+        self._il = wx.ImageList(16, 16)
+        self.SetImageList(self._il)
+        FileIcons.PopulateImageList(self.ImageList)
+        self.AddRoot(_("<Project Destination>"), FileIcons.IMG_FOLDER)
+        self._projNameId = None
+
+    def DisplayTemplate(self, template):
+        """Display the given project template in the control
+        @param template: ProjectTemplate
+
+        """
+        self.DeleteChildren(self.RootItem)
+        def PopulateItems(obj, parent):
+            """Recursively walk through the template"""
+            # Recurse into each directory object
+            dirs = list()
+            dirs.extend(obj.folders)
+            dirs.extend(obj.packages)
+            for dobj in dirs:
+                img = FileIcons.IMG_FOLDER
+                if isinstance(dobj, ProjectXml.PyPackage):
+                    img = FileIcons.IMG_PACKAGE
+                dobj.name = dobj.name % dict(projName=_("<Project Name>"))
+                nparent = self.AppendItem(parent, dobj.name, img)
+                PopulateItems(dobj, nparent)
+
+            # Create all files
+            for fobj in obj.files:
+                img = FileIcons.IMG_FILE
+                if fobj.name.endswith('.py') or fobj.name.endswith(u'.pyw'):
+                    img = FileIcons.IMG_PYTHON
+                self.AppendItem(parent, fobj.name, img)
+
+        # Add Main Project Directory
+        self._projNameId = self.AppendItem(self.RootItem, _("<Project Name>"),
+                                           FileIcons.IMG_PROJECT)
+        PopulateItems(template, self._projNameId)
+        self.ExpandAll()
+
+    def UpdateProjectName(self, pname):
+        """Update the display name for the project in the tree
+        @param pname: unicode
+
+        """
+        if self._projNameId != None:
+            self.SetItemText(self._projNameId, pname)
 
 #-----------------------------------------------------------------------------#
 
