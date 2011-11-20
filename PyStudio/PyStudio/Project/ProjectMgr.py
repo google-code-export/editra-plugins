@@ -332,6 +332,9 @@ class ProjectTree(eclib.FileTree):
         item.SetBitmap(wx.ArtProvider_GetBitmap(str(ed_glob.ID_NEW_FOLDER), wx.ART_MENU))
         menu.AppendMenu(ProjectTree.ID_NEW_SUBMENU, _("New"), newmenu)
         menu.AppendSeparator()
+        menu.Append(ed_glob.ID_DELETE, _("Move to trash"))
+        menu.AppendSeparator()
+
         ccount = menu.GetMenuItemCount()
 
         # Menu customization interface
@@ -373,6 +376,17 @@ class ProjectTree(eclib.FileTree):
                                       parent=self.Parent.MainWindow)
             if name:
                 self.FileController.CreateFolder(dname, name)
+        elif e_id == ed_glob.ID_DELETE:
+            # TODO need error handling?
+            if dname == path:
+                cmsg = _("Are you sure you want to delete '%s' and all of its contents?")
+            else:
+                cmsg = _("Are you sure you want to delete '%s'?")
+            name = os.path.basename(path)
+            result = wx.MessageBox(cmsg % name, _("Delete?"), 
+                                   style=wx.YES_NO|wx.CENTER|wx.ICON_QUESTION)
+            if result == wx.YES:
+                self.FileController.MoveToTrash(path)
         elif e_id == ProjectTree.ID_PROPERTIES:
             pass # TODO: project properties dialog
         else:

@@ -41,7 +41,7 @@ class NewProjectDlg(ed_basewin.EdBaseDialog):
     """Dialog for creating a new project"""
     def __init__(self, parent):
         super(NewProjectDlg, self).__init__(parent,
-                                            title=_("New Project"),
+                                            title=_("Create New Project"),
                                             style=wx.DEFAULT_DIALOG_STYLE|wx.RESIZE_BORDER)
 
         # Attributes
