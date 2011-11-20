@@ -66,3 +66,10 @@ class FileController(ebmlib.FactoryMixin):
 
         """
         ebmlib.MakeNewFolder(path, name)
+
+    def MoveToTrash(self, path):
+        """Move the given path to the trash
+        @param path: file/folder path
+
+        """
+        ebmlib.MoveToTrash(path)
