@@ -235,6 +235,9 @@ class ProjectTree(eclib.FileTree):
         # Attributes
         self._proj = None
         self._menu = ebmlib.ContextMenuManager()
+        self._monitor = ebmlib.DirectoryMonitor()
+        self._monitor.SubscribeCallback(self.OnFilesChanged)
+        self._monitor.StartMonitoring()
 
         # Setup
         self.SetupImageList()
@@ -271,12 +274,24 @@ class ProjectTree(eclib.FileTree):
                 PyStudioUtils.GetEditorOrOpenFile(self.Parent.MainWindow, path)
         # TODO notify failure to open
 
+    def DoItemCollapsed(self, item):
+        """Handle when an item is collapsed"""
+        d = self.GetPyData(item)
+        self._monitor.RemoveDirectory(d)
+        super(ProjectTree, self).DoItemCollapsed(item)
+
     def DoItemExpanding(self, item):
         """Handle when an item is expanding to display the folder contents
         @param item: TreeItem
 
         """
-        d = self.GetPyData(item)
+        d = None
+        try:
+            d = self.GetPyData(item)
+        except wx.PyAssertionError:
+            util.Log("[PyStudio][err] ProjectTree.DoItemExpanding")
+            return
+
         if d and os.path.exists(d):
             contents = ProjectTree.GetDirContents(d)
             # Filter contents
@@ -294,6 +309,7 @@ class ProjectTree(eclib.FileTree):
             dirs.extend(files)
             for p in dirs:
                 self.AppendFileNode(item, p)
+            self._monitor.AddDirectory(d)
 
     def DoGetFileImage(self, path):
         """Get the image for the given item"""
@@ -400,7 +416,71 @@ class ProjectTree(eclib.FileTree):
         util.Log("[PyProject][info] ProjectTree.OnDestroy")
         if self:
             self._menu.Clear()
+            self._monitor.Shutdown()
         evt.Skip()
+
+    def OnFilesChanged(self, added, deleted, modified):
+        """DirectoryMonitor callback - synchronize the view
+        with the filesystem.
+
+        """
+        nodes = self.GetExpandedNodes()
+        visible = list()
+        for node in nodes:
+            visible.extend(self.GetChildNodes(node))
+
+        # Remove any deleted file objects
+        for fobj in deleted:
+            for item in visible:
+                path = self.GetPyData(item)
+                if fobj.Path == path:
+                    self.Delete(item)
+                    visible.remove(item)
+                    break
+
+        # Add any new file objects to the view
+        needsort = list()
+        for fobj in added:
+            dpath = os.path.dirname(fobj.Path)
+            for item in nodes:
+                path = self.GetPyData(item)
+                if path == dpath:
+                    self.AppendFileNode(item, fobj.Path)
+                    if item not in needsort:
+                        needsort.append(item)
+                    break
+
+        # Resort display
+        for item in needsort:
+            self.SortChildren(item)
+
+        # TODO: pass modification notifications onto FileController interface
+        #       to handle.
+#        for fobj in modified:
+#            pass
+
+    def OnCompareItems(self, item1, item2):
+        """Handle SortItems"""
+        data = self.GetPyData(item1)
+        if data is not None:
+            path1 = int(not os.path.isdir(data))
+        else:
+            path1 = 0
+        tup1 = (path1, data.lower())
+
+        data2 = self.GetPyData(item2)
+        if data2 is not None:
+            path2 = int(not os.path.isdir(data2))
+        else:
+            path2 = 0
+        tup2 = (path2, data2.lower())
+
+        if tup1 < tup2:
+            return -1
+        elif tup1 == tup2:
+            return 0
+        else:
+            return 1
 
     def GetMainWindow(self):
         return self.Parent.MainWindow
