@@ -228,6 +228,7 @@ class ProjectTree(eclib.FileTree):
     ID_NEW_FILE    = wx.NewId()
     ID_NEW_FOLDER  = wx.NewId()
     ID_PROPERTIES  = wx.NewId()
+    ID_RENAME_FILE = wx.NewId()
 
     def __init__(self, parent):
         super(ProjectTree, self).__init__(parent)
@@ -244,7 +245,7 @@ class ProjectTree(eclib.FileTree):
 
         # Event Handlers
         self.Bind(wx.EVT_MENU, self.OnContextMenu)
-        self.Bind(wx.EVT_WINDOW_DESTROY, self.OnDestroy)
+        self.Bind(wx.EVT_WINDOW_DESTROY, self.OnDestroy, self)
 
         # Message Handlers
         ed_msg.Subscribe(self.OnGetProject, PyStudioMessages.PYSTUDIO_PROJECT_GET)
@@ -262,6 +263,20 @@ class ProjectTree(eclib.FileTree):
                        lambda self, proj: self.LoadProject(proj))
 
     #---- Overrides ----#
+
+    def DoBeginEdit(self, item):
+        """Handle when an item is requested to be edited"""
+        # TODO: pass handling to see if the path can be edited to FileController?
+        if self.IsProjectRoot(item):
+            return False
+        return True
+
+    def DoEndEdit(self, item, newlabel):
+        """Handle after a user has made changes to a label"""
+        path = self.GetPyData(item)
+        # TODO: check access rights and validate input
+        newpath = os.path.join(os.path.dirname(path), newlabel)
+        return self.FileController.Rename(path, newpath)
 
     def DoItemActivated(self, item):
         """Override to handle item activation
@@ -298,7 +313,7 @@ class ProjectTree(eclib.FileTree):
             dirs = list()
             files = list()
             for p in contents:
-                if os.path.isdir(p):
+                if os.path.isdir(p) and not p.startswith('.'): # TODO: config
                     dirs.append(p)
                 else:
                     ext = ebmlib.GetFileExtension(p)
@@ -309,6 +324,7 @@ class ProjectTree(eclib.FileTree):
             dirs.extend(files)
             for p in dirs:
                 self.AppendFileNode(item, p)
+            self.SortChildren(item)
             self._monitor.AddDirectory(d)
 
     def DoGetFileImage(self, path):
@@ -339,31 +355,34 @@ class ProjectTree(eclib.FileTree):
         menu = ed_menu.EdMenu()
         # Populate menu for current item with standard options
         if not os.path.isdir(path):
-            menu.Append(ProjectTree.ID_OPEN_FILE, _("Open"))
+            menu.Append(ProjectTree.ID_OPEN_FILE, _("Open..."))
             menu.AppendSeparator()
         newmenu = ed_menu.EdMenu()
-        item = newmenu.Append(ProjectTree.ID_NEW_FILE, _("New File"))
-        item.SetBitmap(wx.ArtProvider_GetBitmap(str(ed_glob.ID_NEW), wx.ART_MENU))
-        item = newmenu.Append(ProjectTree.ID_NEW_FOLDER, _("New Folder"))
-        item.SetBitmap(wx.ArtProvider_GetBitmap(str(ed_glob.ID_NEW_FOLDER), wx.ART_MENU))
+        mitem = newmenu.Append(ProjectTree.ID_NEW_FILE, _("New File..."))
+        mitem.SetBitmap(wx.ArtProvider_GetBitmap(str(ed_glob.ID_NEW), wx.ART_MENU))
+        mitem = newmenu.Append(ProjectTree.ID_NEW_FOLDER, _("New Folder..."))
+        mitem.SetBitmap(wx.ArtProvider_GetBitmap(str(ed_glob.ID_NEW_FOLDER), wx.ART_MENU))
         menu.AppendMenu(ProjectTree.ID_NEW_SUBMENU, _("New"), newmenu)
         menu.AppendSeparator()
-        menu.Append(ed_glob.ID_DELETE, _("Move to trash"))
-        menu.AppendSeparator()
+        if not self.IsProjectRoot(item):
+            menu.Append(ed_glob.ID_DELETE, _("Move to trash"))
+            menu.Append(ProjectTree.ID_RENAME_FILE, _("Rename"))
+            menu.AppendSeparator()
 
         ccount = menu.GetMenuItemCount()
 
         # Menu customization interface
         # Allow other components to add custom menu options
         self._menu.SetUserData('path', path) # path of item that was clicked on
+        self._menu.SetUserData('itemId', item)
         ed_msg.PostMessage(PyStudioMessages.PYSTUDIO_PROJECT_MENU,
                            self._menu, self.Parent.MainWindow.Id)
 
         # Add properties
         if ccount < menu.GetMenuItemCount():
             menu.AppendSeparator()
-        item = menu.Append(ProjectTree.ID_PROPERTIES, _("Properties"))
-        item.SetBitmap(wx.ArtProvider_GetBitmap(str(ed_glob.ID_PREF), wx.ART_MENU))
+        mitem = menu.Append(ProjectTree.ID_PROPERTIES, _("Properties"))
+        mitem.SetBitmap(wx.ArtProvider_GetBitmap(str(ed_glob.ID_PREF), wx.ART_MENU))
 
         # Show the popup Menu
         self._menu.Menu = menu
@@ -403,6 +422,10 @@ class ProjectTree(eclib.FileTree):
                                    style=wx.YES_NO|wx.CENTER|wx.ICON_QUESTION)
             if result == wx.YES:
                 self.FileController.MoveToTrash(path)
+        elif e_id == ProjectTree.ID_RENAME_FILE:
+            item = self._menu.GetUserData('itemId')
+            if item:
+                self.EditLabel(item)
         elif e_id == ProjectTree.ID_PROPERTIES:
             pass # TODO: project properties dialog
         else:
@@ -414,9 +437,9 @@ class ProjectTree(eclib.FileTree):
     def OnDestroy(self, evt):
         """Cleanup when window is destroyed"""
         util.Log("[PyProject][info] ProjectTree.OnDestroy")
-        if self:
+        if self and evt.Id == self.Id:
+            util.Log("PyProject][info] Doing Cleanup in Destroy...")
             self._menu.Clear()
-            self._monitor.Shutdown()
         evt.Skip()
 
     def OnFilesChanged(self, added, deleted, modified):
@@ -493,6 +516,17 @@ class ProjectTree(eclib.FileTree):
         """
         msg.Data['project'] = self.Project
 
+    def IsProjectRoot(self, item):
+        """Is the given item the current project root
+        @param item: TreeItem
+        @return: bool
+
+        """
+        path = self.GetPyData(item)
+        if self.Project and self.Project.ProjectRoot:
+            return path == self.Project.ProjectRoot
+        return False
+
     #---- Implementation ----#
 
     def LoadProject(self, proj):
@@ -510,6 +544,7 @@ class ProjectTree(eclib.FileTree):
         # Repopulate root of tree
         item = self.AddWatchDirectory(self.Project.ProjectRoot)
         if item:
+            self._projItem = item
             iconmgr = ProjectUtil.FileIcons
             self.SetItemImage(item, iconmgr.IMG_PROJECT)
             self.Expand(item)
@@ -518,6 +553,7 @@ class ProjectTree(eclib.FileTree):
             ed_msg.PostMessage(PyStudioMessages.PYSTUDIO_PROJECT_LOADED, 
                                self.Project, self.Parent.MainWindow.Id)
         else:
+            self._projItem = None
             wx.MessageBox(_("Unable to load project: %s") % self.Project.ProjectName,
                           _("PyStudio Error"), style=wx.OK|wx.CENTER|wx.ICON_ERROR)
             return
