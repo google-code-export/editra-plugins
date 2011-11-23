@@ -73,3 +73,16 @@ class FileController(ebmlib.FactoryMixin):
 
         """
         ebmlib.MoveToTrash(path)
+
+    def Rename(self, old, new):
+        """Rename a file or folder
+        @param old: current file path
+        @param new: new name (path) for old
+        @return: bool (success / fail)
+
+        """
+        try:
+            os.rename(old, new)
+        except OSError:
+            return False
+        return True
