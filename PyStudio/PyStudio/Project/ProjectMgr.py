@@ -227,6 +227,7 @@ class ProjectTree(eclib.FileTree):
     ID_NEW_SUBMENU = wx.NewId()
     ID_NEW_FILE    = wx.NewId()
     ID_NEW_FOLDER  = wx.NewId()
+    ID_NEW_PACKAGE = wx.NewId()
     ID_PROPERTIES  = wx.NewId()
     ID_RENAME_FILE = wx.NewId()
 
@@ -352,16 +353,18 @@ class ProjectTree(eclib.FileTree):
         """
         path = self.GetPyData(item)
         self._menu.Clear()
-        menu = ed_menu.EdMenu()
+        menu = wx.Menu()
         # Populate menu for current item with standard options
         if not os.path.isdir(path):
             menu.Append(ProjectTree.ID_OPEN_FILE, _("Open..."))
             menu.AppendSeparator()
-        newmenu = ed_menu.EdMenu()
-        mitem = newmenu.Append(ProjectTree.ID_NEW_FILE, _("New File..."))
-        mitem.SetBitmap(wx.ArtProvider_GetBitmap(str(ed_glob.ID_NEW), wx.ART_MENU))
-        mitem = newmenu.Append(ProjectTree.ID_NEW_FOLDER, _("New Folder..."))
-        mitem.SetBitmap(wx.ArtProvider_GetBitmap(str(ed_glob.ID_NEW_FOLDER), wx.ART_MENU))
+        newmenu = wx.Menu()
+        for data in ((ProjectTree.ID_NEW_FILE, _("New File..."), ed_glob.ID_NEW),
+                     (ProjectTree.ID_NEW_FOLDER, _("New Folder..."), ed_glob.ID_NEW_FOLDER),
+                     (ProjectTree.ID_NEW_PACKAGE, _("New Package..."), ed_glob.ID_PACKAGE)):
+            mitem = wx.MenuItem(newmenu, data[0], data[1])
+            mitem.SetBitmap(wx.ArtProvider_GetBitmap(str(data[2]), wx.ART_MENU))
+            newmenu.AppendItem(mitem)
         menu.AppendMenu(ProjectTree.ID_NEW_SUBMENU, _("New"), newmenu)
         menu.AppendSeparator()
         if not self.IsProjectRoot(item):
@@ -406,11 +409,21 @@ class ProjectTree(eclib.FileTree):
                                       parent=self.Parent.MainWindow)
             if name:
                 self.FileController.CreateFile(dname, name)
-        elif e_id == ProjectTree.ID_NEW_FOLDER:
-            name = wx.GetTextFromUser(_("Enter folder name:"), _("New Folder"),
+        elif e_id in (ProjectTree.ID_NEW_FOLDER, ProjectTree.ID_NEW_PACKAGE):
+            if e_id == ProjectTree.ID_NEW_FOLDER:
+                msg = _("Enter folder name:")
+                caption = _("New Folder")
+            else:
+                msg = _("Enter package name:")
+                caption = _("New Package")
+            name = wx.GetTextFromUser(msg, caption,
                                       parent=self.Parent.MainWindow)
             if name:
                 self.FileController.CreateFolder(dname, name)
+                # TODO need return val from createfolder
+                if e_id == ProjectTree.ID_NEW_PACKAGE:
+                    path = os.path.join(dname, name)
+                    self.FileController.CreateFile(path, "__init__.py")
         elif e_id == ed_glob.ID_DELETE:
             # TODO need error handling?
             if dname == path:
