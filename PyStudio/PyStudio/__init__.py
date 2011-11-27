@@ -205,7 +205,7 @@ class PyProject(plugin.Plugin):
 
     def GetUIHandlers(self):
         """Pass Ui handlers to main window for management"""
-        return []
+        return [(PyProject.ID_PYPROJECT, self.OnUpdateMenu)]
 
     def OnShowProjectWindow(self, evt):
         """Show the project window in the current MainWindow."""
@@ -220,6 +220,16 @@ class PyProject(plugin.Plugin):
                 mainw.PanelMgr.Update()
         else:
             util.Log("[PyStudio][warn] Can't show PyProject panel")
+
+    def OnUpdateMenu(self, evt):
+        """Update menu state"""
+        if evt.Id == PyProject.ID_PYPROJECT:
+            mainw = wx.GetApp().GetActiveWindow()
+            if mainw and isinstance(mainw, ed_main.MainWindow):
+                pane = mainw.PanelMgr.GetPane(ProjectManager.PANE_NAME)
+                evt.Check(pane.IsShown())
+        else:
+            evt.Skip()
 
 #-----------------------------------------------------------------------------#
 # Configuration Interface
