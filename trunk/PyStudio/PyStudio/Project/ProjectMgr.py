@@ -167,7 +167,7 @@ class ProjectManager(ed_basewin.EdBaseCtrlBox):
                 if result == wx.ID_NO:
                     return
             pfile = ProjectFile.ProjectFile(pxml, ppath)
-            pfile.Save()
+            pfile.Save(force=True)
             self.Tree.LoadProject(pfile) # Load the view
 
     def NewProject(self):
@@ -191,8 +191,9 @@ class ProjectManager(ed_basewin.EdBaseCtrlBox):
                 CleanFiles(pxml.packages)
                 # Write the project file out to the new project directory
                 ppath = os.path.join(proj.ProjectPath, u"%s.psp" % proj.ProjectName)
+                util.Log("[PyStudio][info] New Project File: %s" % ppath)
                 pfile = ProjectFile.ProjectFile(pxml, ppath)
-                pfile.Save()
+                pfile.Save(force=True)
                 self.Tree.LoadProject(pfile) # Load the view
             else:
                 pass # TODO: error handling

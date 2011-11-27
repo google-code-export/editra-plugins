@@ -210,8 +210,8 @@ class TemplatePreview(wx.TreeCtrl):
                 img = FileIcons.IMG_FOLDER
                 if isinstance(dobj, ProjectXml.PyPackage):
                     img = FileIcons.IMG_PACKAGE
-                dobj.name = dobj.name % dict(projName=_("<Project Name>"))
-                nparent = self.AppendItem(parent, dobj.name, img)
+                name = dobj.name % dict(projName=_("<Project Name>"))
+                nparent = self.AppendItem(parent, name, img)
                 PopulateItems(dobj, nparent)
 
             # Create all files

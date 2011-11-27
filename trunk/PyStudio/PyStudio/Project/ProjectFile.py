@@ -64,9 +64,9 @@ class ProjectFile(object):
 
     #---- Implementation ---- #
 
-    def Save(self):
+    def Save(self, force=False):
         """Save the project file to disk"""
-        if self.Dirty:
+        if self.Dirty or force:
             self._pxml.Write(self.Path)
             self._dirty = False
             # Post notification for any observers that project settings have
