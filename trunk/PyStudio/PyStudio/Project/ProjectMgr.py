@@ -314,7 +314,11 @@ class ProjectTree(eclib.FileTree):
             dirs = list()
             files = list()
             for p in contents:
-                if os.path.isdir(p) and not p.startswith('.'): # TODO: config
+                basename = os.path.basename(p)
+                if basename.startswith('.'):# TODO: configuration
+                    continue
+
+                if os.path.isdir(p): 
                     dirs.append(p)
                 else:
                     ext = ebmlib.GetFileExtension(p)
@@ -477,6 +481,10 @@ class ProjectTree(eclib.FileTree):
         # Add any new file objects to the view
         needsort = list()
         for fobj in added:
+            # TODO: use configuration for filtering files in view
+            ext = ebmlib.GetFileExtension(fobj.Path).lower()
+            if fobj.Name.startswith('.') or ext in ('pyc', 'pyo', 'psp'):
+                continue
             dpath = os.path.dirname(fobj.Path)
             for item in nodes:
                 path = self.GetPyData(item)
