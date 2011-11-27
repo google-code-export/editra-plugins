@@ -223,7 +223,9 @@ class ProjectManager(ed_basewin.EdBaseCtrlBox):
 class ProjectTree(eclib.FileTree):
     """Provides a tree view of all the files and packages in a project."""
     # Context Menu Ids
+    ID_EDIT_FILE   = wx.NewId()
     ID_OPEN_FILE   = wx.NewId()
+    ID_REVEL_FILE  = wx.NewId()
     ID_NEW_SUBMENU = wx.NewId()
     ID_NEW_FILE    = wx.NewId()
     ID_NEW_FOLDER  = wx.NewId()
@@ -360,8 +362,10 @@ class ProjectTree(eclib.FileTree):
         menu = wx.Menu()
         # Populate menu for current item with standard options
         if not os.path.isdir(path):
-            menu.Append(ProjectTree.ID_OPEN_FILE, _("Open..."))
-            menu.AppendSeparator()
+            menu.Append(ProjectTree.ID_EDIT_FILE, _("Edit"))
+        menu.Append(ProjectTree.ID_OPEN_FILE, _("Open..."))
+        menu.Append(ProjectTree.ID_REVEL_FILE, _("Open enclosing folder..."))
+        menu.AppendSeparator()
         newmenu = wx.Menu()
         for data in ((ProjectTree.ID_NEW_FILE, _("New File..."), ed_glob.ID_NEW),
                      (ProjectTree.ID_NEW_FOLDER, _("New Folder..."), ed_glob.ID_NEW_FOLDER),
@@ -372,7 +376,11 @@ class ProjectTree(eclib.FileTree):
         menu.AppendMenu(ProjectTree.ID_NEW_SUBMENU, _("New"), newmenu)
         menu.AppendSeparator()
         if not self.IsProjectRoot(item):
-            menu.Append(ed_glob.ID_DELETE, _("Move to trash"))
+            if wx.Platform == '__WXMSW__':
+                trash_str = _("Move to Recycle Bin")
+            else:
+                trash_str = _("Move to Trash")
+            menu.Append(ed_glob.ID_DELETE, trash_str)
             menu.Append(ProjectTree.ID_RENAME_FILE, _("Rename"))
             menu.AppendSeparator()
 
@@ -406,8 +414,10 @@ class ProjectTree(eclib.FileTree):
         if not os.path.isdir(path):
             dname = os.path.dirname(path)
 
-        if e_id == ProjectTree.ID_OPEN_FILE:
+        if e_id == ProjectTree.ID_EDIT_FILE:
             PyStudioUtils.GetEditorOrOpenFile(self.Parent.MainWindow, path)
+        elif e_id in (ProjectTree.ID_OPEN_FILE, ProjectTree.ID_REVEL_FILE):
+            self.OpenPathWithFM(path, revel=e_id == ProjectTree.ID_REVEL_FILE)
         elif e_id == ProjectTree.ID_NEW_FILE:
             name = wx.GetTextFromUser(_("Enter file name:"), _("New File"),
                                       parent=self.Parent.MainWindow)
@@ -578,3 +588,13 @@ class ProjectTree(eclib.FileTree):
             wx.MessageBox(_("Unable to load project: %s") % self.Project.ProjectName,
                           _("PyStudio Error"), style=wx.OK|wx.CENTER|wx.ICON_ERROR)
             return
+
+    def OpenPathWithFM(self, path, revel=False):
+        """Open the given path with the systems filemanager
+        @param path: path to open
+        @keyword revel: revel path in file manager?
+
+        """
+        if revel:
+            path = ebmlib.GetPathName(path)
+        ebmlib.OpenWithFileManager(path)
