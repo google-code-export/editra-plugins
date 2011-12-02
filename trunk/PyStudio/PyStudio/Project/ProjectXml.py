@@ -15,13 +15,13 @@ Project File
 xml_str = """
 <project name="FooBar">
     <option type="" value=""/>
-    <package path="./foo/bar">
+    <package name="FooPy" path="./foo/bar">
         <option type="" value=""/>
-        <package path="./foo/bar/test">
+        <package name="FooTest" path="./foo/bar/test">
             <option type="" value=""/>
         </package>
     </package>
-    <folder path="/foo/bar">
+    <folder name="FooData" path="/foo/bar">
         <option type="" value=""/>
     </folder>
 </project>
@@ -35,9 +35,9 @@ __revision__ = "$Revision$"
 #-----------------------------------------------------------------------------#
 # Imports
 #import sys
+#sys.path.append(r"/home/jigorou/Editra/src") # TEST
 
 # Editra Imports
-#sys.path.append(r"C:\Users\n\Desktop\Editra\src") # TEST
 import ed_xml
 
 #-----------------------------------------------------------------------------#
@@ -51,6 +51,50 @@ class Option(ed_xml.EdXml):
         tagname = "option"
     type = ed_xml.String(required=True)
     value = ed_xml.String(required=True)
+
+class OptionSet(ed_xml.EdXml):
+    """Collection of Options used for grouping
+    option categories together.
+    <optionset name="analysis">
+        <option name='' value=''/>
+    </optionset>
+
+    """
+    class meta:
+        tagname = "optionset"
+    name = ed_xml.String(required=True)
+    options = ed_xml.List(ed_xml.Model(type=Option))
+
+    def __GetOption(self, optname):
+        for option in self.options:
+            if option.type == optname:
+                return option
+        return None
+
+    def DeleteOption(self, optname):
+        """Remove an option from the set"""
+        opt = self.__GetOption(optname)
+        if opt:
+            self.options.remove(opt)
+
+    def GetOption(self, optname):
+        """Get an option from the set
+        @param optname: option name
+        @return: L{Option}
+
+        """
+        opt = self.__GetOption(optname)
+        return opt
+
+    def SetOption(self, optname, value):
+        """Set an options value"""
+        opt = self.__GetOption(optname)
+        if opt:
+            # Update Existing value
+            opt.value = value
+        else:
+            # Add new option to set
+            self.options.append(Option(type=optname, value=value))
 
 class File(ed_xml.EdXml):
     """Xml element to represent a file item (used by ProjectTemplate)
@@ -73,10 +117,34 @@ class Folder(ed_xml.EdXml):
     class meta:
         tagname = "folder"
     name = ed_xml.String(required=True)
-    options = ed_xml.List(ed_xml.Model(type=Option), required=False)
+    optionsets = ed_xml.List(ed_xml.Model(type=OptionSet), required=False)
     packages = ed_xml.List(ed_xml.Model("package"), required=False)
     folders = ed_xml.List(ed_xml.Model("folder"), required=False)
     files = ed_xml.List(ed_xml.Model(type=File), required=False)
+
+    def CreateOptionSet(self, setname):
+        """Create a new option set. If an existing set of the
+        same name already exists it will be returned instead
+        @param setname: name to associate with the set
+        @return: the option set
+
+        """
+        optset = self.GetOptionSet(setname)
+        if optset is None:
+            optset = OptionSet(name=setname)
+            self.optionsets.append(optset)
+        return optset
+
+    def GetOptionSet(self, setname):
+        """Get the set of options associated with a given name
+        @param setname: name of set
+        @return: L{OptionSet} or None
+
+        """
+        for optset in self.optionsets:
+            if optset.name == setname:
+                return optset
+        return None
 
 class PyPackage(Folder):
     """Python package directory. Container for python modules."""
@@ -88,34 +156,35 @@ class ProjectXml(Folder):
     class meta:
         tagname = "project"
 
-    # Attributes
-    name = ed_xml.String(required=True)
-
-    # Child nodes
-    folders = ed_xml.List(ed_xml.Model(type=Folder), required=False)
-    packages = ed_xml.List(ed_xml.Model(type=PyPackage), required=False)
-    options = ed_xml.List(ed_xml.Model(type=Option), required=False)
-
 #-----------------------------------------------------------------------------#
 # Test
-if __name__ == '__main__':
-    proj = ProjectXml()
-    proj.name = "FooBar"
-    pkg = PyPackage()
-    pkg.path = "/foo/bar"
-    opt = Option()
-    opt.type = "wildcard"
-    opt.value = "*.py"
-    pkg.options.append(opt)
-    proj.packages.append(pkg)
-    tst = Folder()
-    tst.path = r"C:\FooBar\test"
-    proj.folders.append(tst)
-    pp = Option()
-    pp.type = "PYTHONPATH"
-    pp.value = r"C:\Python26;C:\Desktop"
-    proj.options.append(pp)
-    print proj.PrettyXml
-    print "------------------------"
-    proj = ProjectXml.LoadString(xml_str)
-    print proj.PrettyXml
+#if __name__ == '__main__':
+#    proj = ProjectXml()
+#    proj.name = "FooBar"
+
+#    pkg = PyPackage()
+#    pkg.name = "foopackage"
+#    pkg.path = "/foo/bar"
+
+#    opt = Option()
+#    opt.type = "wildcard"
+#    opt.value = "*.py"
+
+#    pkg.options.append(opt)
+#    proj.packages.append(pkg)
+
+#    tst = Folder()
+#    tst.name = "TestFolder"
+#    tst.path = r"C:\FooBar\test"
+
+#    proj.folders.append(tst)
+
+#    pp = Option()
+#    pp.type = "PYTHONPATH"
+#    pp.value = r"C:\Python26;C:\Desktop"
+
+#    proj.options.append(pp)
+#    print proj.PrettyXml
+#    print "------------------------"
+#    proj = ProjectXml.LoadString(xml_str)
+#    print proj.PrettyXml

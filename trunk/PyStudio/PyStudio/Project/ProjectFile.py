@@ -24,7 +24,6 @@ import ed_msg
 import ebmlib
 
 # Local Imports
-import PyStudio.Project.ProjectXml as ProjectXml
 from PyStudio.Common.Messages import PyStudioMessages
 
 #-----------------------------------------------------------------------------#
@@ -43,17 +42,6 @@ class ProjectFile(object):
         self._pxml = pxml  # Project file xml data (serialization)
         self._path = path  # Project file path
         self._dirty = False
-        # Derived attributes
-        self._optmap = dict() # Project option map
-
-        # Setup
-        self.__RefreshOptionMap()
-
-    def __RefreshOptionMap(self):
-        """Build the option map"""
-        self._optmap.clear()
-        for opt in self._pxml.options:
-            self._optmap[opt.name] = opt
 
     #---- Properties ----#
 
@@ -75,36 +63,69 @@ class ProjectFile(object):
 
     #---- Project Data Accessors ----#
 
-    def GetOption(self, optname):
+    def CreateOptionGrouping(self, domain):
+        """Create a sub configuration object for a given set of
+        related options. Associating them under a set with the given
+        domain.
+        @param domain: string
+
+        """
+        self._pxml.CreateOptionSet(domain)
+
+    def GetOption(self, domain, optname):
         """Get the value for a project option
+        @param domain: option set name 
         @param optname: option name
         @return: option value or None
 
         """
-        option = self._optmap.get(optname, None)
-        if option:
-            option = option.value
+        option = None
+        optionset = self.GetRelatedOptions(domain)
+        if optionset is not None:
+            option = optionset.get(optname, None)
         return option
 
-    def SetOption(self, optname, value):
-        """Set a project option
+    def GetRelatedOptions(self, domain):
+        """Get the set of options for a given feature domain
+        @param domain: option set name
+        @return: dict or None
+
+        """
+        optionset = self._pxml.GetOptionSet(domain)
+        if optionset is not None:
+            tset = dict()
+            for opt in optionset.options:
+                tset[opt.type] = opt.value
+            optionset = tset
+        return optionset
+
+    def SetOption(self, domain, optname, value):
+        """Set a project option into the configuration
         @param optname: option name
         @param value: option value
 
         """
-        if optname in self._optmap:
-            if self._optmap[optname].value != value:
-                self._optmap[optname].value = value
+        optionset = self._pxml.GetOptionSet(domain)
+        if optionset is None:
+            # Create the new grouping
+            optionset = self._pxml.CreateOptionSet(domain)
+            self._dirty = True
+
+        # Set the option value in the option set
+        option = optionset.GetOption(optname)
+        if option is not None:
+            if option.value != value:
+                option.value = value
                 self._dirty = True
         else:
             # New option
-            nopt = ProjectXml.Option(name=optname, value=value)
-            self._pxml.options.append(nopt)
-            self.__RefreshOptionMap()
+            optionset.SetOption(optname, value)
             self._dirty = True
+
+        # Notify observers
         if self.Dirty:
             ed_msg.PostMessage(PyStudioMessages.PYSTUDIO_PROJECT_MODIFIED,
-                               dict(project=self, option=optname))
+                               dict(project=self, domain=domain, option=optname))
 
     #---- Project File Accessors ----#
 
