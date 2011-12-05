@@ -21,7 +21,6 @@ import wx
 import util
 import ed_glob
 import ed_msg
-from syntax import syntax
 import syntax.synglob as synglob
 
 # Local imports
@@ -59,7 +58,7 @@ class LintShelfWindow(BaseShelfWindow):
         ctrlbar.AddControl(self._lbl)
         ctrlbar.AddStretchSpacer()
         self.layout("Analyze", self.OnRunLint, self.OnJobTimer)
-        self.taskbtn.SetBitmap(Images.Lint.Bitmap)
+        self.TaskButton.SetBitmap(Images.Lint.Bitmap)
         self.clearbtn = self.AddPlateButton(_("Clear"), ed_glob.ID_DELETE, wx.ALIGN_RIGHT)
 
         # Attributes
