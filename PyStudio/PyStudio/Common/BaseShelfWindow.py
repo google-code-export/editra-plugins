@@ -21,7 +21,6 @@ import ed_glob
 import eclib
 import ed_basewin
 import ed_msg
-from profiler import Profile_Get, Profile_Set
 import syntax.synglob as synglob
 
 # Local imports
@@ -34,6 +33,7 @@ _ = wx.GetTranslation
 #-----------------------------------------------------------------------------#
 
 class BaseShelfWindow(ed_basewin.EdBaseCtrlBox):
+    """Base class for most PyStudio Shelf Extensions"""
     __directoryVariables = {
         synglob.ID_LANG_PYTHON: PythonDirectoryVariables
     }
@@ -46,15 +46,23 @@ class BaseShelfWindow(ed_basewin.EdBaseCtrlBox):
         # Parent is ed_shelf.EdShelfBook
         self._mw = ed_basewin.FindMainWindow(self)
         self._log = wx.GetApp().GetLog()
+        self.ctrlbar = None
         self.taskbtn = None
+        self.cfgbtn = None
         self._listCtrl = None
         self._imglst = list()
-        
-        def do_nothing():
-            pass
-        self.destroyfn = do_nothing
-            
+        self._curfile = u""
+        self._hasrun = False
+        self._jobtimer = None
+        self.destroyfn = lambda : None
+
+    # Properties
+    TaskButton = property(lambda self: self.taskbtn)
+    ConfigButton = property(lambda self: self.cfgbtn)
+    ListWindow = property(lambda self: self.listCtrl)
+
     def setup(self, listCtrl, *args):
+        """Setup the base shelf window"""
         self._listCtrl = listCtrl
         self._curfile = u""
         self._hasrun = False
@@ -73,6 +81,7 @@ class BaseShelfWindow(ed_basewin.EdBaseCtrlBox):
         return self.ctrlbar
 
     def layout(self, taskbtndesc=None, taskfn=None, timerfn=None):
+        """Layout the shelf window"""
         if taskfn:
             rbmp = wx.ArtProvider.GetBitmap(str(ed_glob.ID_BIN_FILE), wx.ART_MENU)
             if rbmp.IsNull() or not rbmp.IsOk():
@@ -97,6 +106,7 @@ class BaseShelfWindow(ed_basewin.EdBaseCtrlBox):
         ed_msg.Subscribe(self.OnFontChanged, ed_msg.EDMSG_DSP_FONT)
 
     def GetMainWindow(self):
+        """Get the Editra main window that owns this shelf object"""
         return self._mw
 
     # Overridden by derived classes
@@ -135,6 +145,7 @@ class BaseShelfWindow(ed_basewin.EdBaseCtrlBox):
         dlg.ShowModal()
 
     def get_directory_variables(self, filetype):
+        """Get the directory variables for the file type."""
         try:
             return self.__directoryVariables[filetype]()
         except Exception:
@@ -142,5 +153,6 @@ class BaseShelfWindow(ed_basewin.EdBaseCtrlBox):
         return None
 
     def Clear(self):
+        """Clear the list view"""
         self._listCtrl.Clear()
         

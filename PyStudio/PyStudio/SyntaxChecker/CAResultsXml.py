@@ -43,8 +43,21 @@ class AnalysisResults(ed_xml.EdXml):
     results = ed_xml.List(ed_xml.Model(Result))
 
     def AddResult(self, line, errType, errMsg):
+        """Add a result to the result list
+        @param line: line number
+        @param errType: error type identifier
+        @param errMsg: error message text
+
+        """
         result = Result()
         result.line = line
         result.errType = errType
         result.errMsg = errMsg
         self.results.append(result)
+
+class ProjectAnalysis(ed_xml.EdXml):
+    """Collection of L{AnalysisResults} for an entire project"""
+    class meta:
+        tagname = "projectanalysis"
+    name = ed_xml.String(require=True) # Project Name
+    resultsets = ed_xml.List(ed_xml.Model(type=AnalysisResults))
