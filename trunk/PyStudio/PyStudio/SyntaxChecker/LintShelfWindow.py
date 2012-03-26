@@ -90,6 +90,8 @@ class LintShelfWindow(BaseShelfWindow):
             btn.Refresh()
 
     def _onfileaccess(self, editor):
+        if not editor:
+            return
         self._listCtrl.set_editor(editor)
         self._listCtrl.Clear()
 
