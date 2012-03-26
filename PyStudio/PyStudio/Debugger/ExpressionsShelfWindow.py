@@ -92,7 +92,7 @@ class ExpressionsShelfWindow(BaseShelfWindow):
 
     def OnThemeChanged(self, msg):
         """Update Icons"""
-        super(VariablesShelfWindow, self).OnThemeChanged(msg)
+        super(ExpressionsShelfWindow, self).OnThemeChanged(msg)
         for btn, bmp in ((self.executebtn, ed_glob.ID_BIN_FILE),
                          (self.taskbtn, ed_glob.ID_DELETE)):
             bitmap = wx.ArtProvider.GetBitmap(str(bmp), wx.ART_MENU)
