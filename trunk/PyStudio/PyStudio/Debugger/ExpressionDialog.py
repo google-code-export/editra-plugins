@@ -30,10 +30,10 @@ class ExpressionDialog(eclib.ECBaseDlg):
         super(ExpressionDialog, self).__init__(parent, wx.ID_ANY, title)    
         
         label = wx.StaticText(self, -1, description)
-        self._sizer.Add(label, 0, wx.ALIGN_CENTRE | wx.ALL, 5)
+        self.Sizer.Add(label, 0, wx.ALIGN_CENTRE | wx.ALL, 5)
 
         sizerh = wx.BoxSizer(wx.HORIZONTAL)
-        self._sizer.Add(sizerh, 0, wx.ALIGN_CENTRE | wx.ALL, 5)
+        self.Sizer.Add(sizerh, 0, wx.ALIGN_CENTRE | wx.ALL, 5)
 
         if labeltext:
             label = wx.StaticText(self, -1, labeltext)
@@ -45,7 +45,7 @@ class ExpressionDialog(eclib.ECBaseDlg):
         sizerh.Add(self.m_entry_expr, 0, wx.ALIGN_CENTRE | wx.ALL, 5)
         
         btnsizer = wx.StdDialogButtonSizer()
-        self._sizer.Add(btnsizer, 0, wx.ALIGN_RIGHT | wx.ALL, 5)
+        self.Sizer.Add(btnsizer, 0, wx.ALIGN_RIGHT | wx.ALL, 5)
         
         self.m_ok = wx.Button(self, wx.ID_OK)
         self.m_ok.SetDefault()
@@ -56,7 +56,7 @@ class ExpressionDialog(eclib.ECBaseDlg):
         btnsizer.AddButton(btn)
         btnsizer.Realize()
 
-        self._sizer.Fit(self)        
+        self.Sizer.Fit(self)        
 
     def OnText(self, evt):
         if evt.GetString() == '':
