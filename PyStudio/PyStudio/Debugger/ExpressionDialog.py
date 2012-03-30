@@ -26,7 +26,7 @@ _ = wx.GetTranslation
 #----------------------------------------------------------------------------#
 
 class ExpressionDialog(eclib.ECBaseDlg):
-    def __init__(self, parent, default_value, title, description, labeltext, ctrlsize):
+    def __init__(self, parent, default_value, title, description, labeltext, ctrlsize, style=wx.TE_MULTILINE):
         super(ExpressionDialog, self).__init__(parent, wx.ID_ANY, title)    
         
         label = wx.StaticText(self, -1, description)
@@ -38,8 +38,8 @@ class ExpressionDialog(eclib.ECBaseDlg):
         if labeltext:
             label = wx.StaticText(self, -1, labeltext)
             sizerh.Add(label, 0, wx.ALIGN_CENTRE | wx.ALL, 5)
-
-        self.m_entry_expr = wx.TextCtrl(self, value = default_value, size = ctrlsize)
+        
+        self.m_entry_expr = wx.TextCtrl(self, value = default_value, style=style, size = ctrlsize)
         self.m_entry_expr.SetFocus()
         self.Bind(wx.EVT_TEXT, self.OnText, self.m_entry_expr)
         sizerh.Add(self.m_entry_expr, 0, wx.ALIGN_CENTRE | wx.ALL, 5)
