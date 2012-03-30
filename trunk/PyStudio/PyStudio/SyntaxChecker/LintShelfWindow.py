@@ -31,6 +31,7 @@ from PyStudio.Common.PyStudioUtils import PyStudioUtils
 from PyStudio.Common.BaseShelfWindow import BaseShelfWindow
 from PyStudio.SyntaxChecker.CheckResultsList import CheckResultsList
 from PyStudio.SyntaxChecker.EvaluationWindow import EvaluationWindow
+from PyStudio.SyntaxChecker.PythonFormatChecker import PythonFormatChecker
 from PyStudio.SyntaxChecker.PythonSyntaxChecker import PythonSyntaxChecker
 from PyStudio.SyntaxChecker.CAResultsXml import AnalysisResults
 
@@ -41,10 +42,13 @@ _ = wx.GetTranslation
 
 class LintShelfWindow(BaseShelfWindow):
     """Syntax Check Results Window"""
+    __formatCheckers = {
+        synglob.ID_LANG_PYTHON: PythonFormatChecker
+    }
+
     __syntaxCheckers = {
         synglob.ID_LANG_PYTHON: PythonSyntaxChecker
     }
-
     def __init__(self, parent):
         """Initialize the window"""
         super(LintShelfWindow, self).__init__(parent)
@@ -72,6 +76,7 @@ class LintShelfWindow(BaseShelfWindow):
         ctrlbar.AddStretchSpacer()
         self.layout("Analyze", self.OnRunLint, self.OnJobTimer)
         self.TaskButton.SetBitmap(Images.Lint.Bitmap)
+        self.formatbtn = self.AddPlateButton(_("CheckFormat"), Images.Lint.Bitmap, wx.ALIGN_RIGHT)
         self.clearbtn = self.AddPlateButton(_("Clear"), ed_glob.ID_DELETE, wx.ALIGN_RIGHT)
 
         # Attributes
@@ -85,6 +90,7 @@ class LintShelfWindow(BaseShelfWindow):
         # Event Handlers
         self.Bind(wx.EVT_BUTTON, self.OnSaveResults, self.savebtn)
         self.Bind(wx.EVT_BUTTON, self.OnOpenResults, self.openbtn)
+        self.Bind(wx.EVT_BUTTON, self.OnChkFormat, self.formatbtn)
         self.Bind(wx.EVT_BUTTON, self.OnClear, self.clearbtn)
 
     def _InitImageList(self):
@@ -121,7 +127,7 @@ class LintShelfWindow(BaseShelfWindow):
             btn.SetBitmap(bitmap)
             btn.Refresh()
 
-    def _onfileaccess(self, editor):
+    def _onfileaccess(self, editor, checkformat=False):
         if not editor:
             return
         self._checkresultslist.set_editor(editor)
@@ -142,13 +148,14 @@ class LintShelfWindow(BaseShelfWindow):
         else:
             vardict = {}
 
-        self._checksyntax(filetype, vardict, filename)
+        self._checksyntax(filetype, vardict, filename, checkformat)
         self._hasrun = True
 
     def UpdateForEditor(self, editor, force=False):
         """Update the ControlBar for the given editor instance"""
         langid = getattr(editor, 'GetLangId', lambda: -1)()
         ispython = langid == synglob.ID_LANG_PYTHON
+        self.formatbtn.Enable(ispython)
         self.taskbtn.Enable(ispython)
         if force or not self._hasrun:
             ctrlbar = self.GetControlBar(wx.TOP)
@@ -241,6 +248,20 @@ class LintShelfWindow(BaseShelfWindow):
             self.taskbtn.Enable(False)
             wx.CallAfter(self._onfileaccess, editor)
 
+    def OnChkFormat(self, event):
+        """Run Pep8 Code Analysis on the current buffer"""
+        editor = wx.GetApp().GetCurrentBuffer()
+        if editor:
+            self.formatbtn.Enable(False)
+            wx.CallAfter(self._onfileaccess, editor, True)
+
+    def get_format_checker(self, filetype, vardict, filename):
+        try:
+            return self.__formatCheckers[filetype](vardict, filename)
+        except Exception:
+            pass
+        return None
+
     def get_syntax_checker(self, filetype, vardict, filename):
         try:
             return self.__syntaxCheckers[filetype](vardict, filename)
@@ -248,9 +269,12 @@ class LintShelfWindow(BaseShelfWindow):
             pass
         return None
 
-    def _checksyntax(self, filetype, vardict, filename):
+    def _checksyntax(self, filetype, vardict, filename, checkformat):
         """Start the syntax checker job"""
-        syntaxchecker = self.get_syntax_checker(filetype, vardict, filename)
+        if checkformat:
+            syntaxchecker = self.get_format_checker(filetype, vardict, filename)
+        else:
+            syntaxchecker = self.get_syntax_checker(filetype, vardict, filename)
         if not syntaxchecker:
             return
         self._checker = syntaxchecker
@@ -263,6 +287,7 @@ class LintShelfWindow(BaseShelfWindow):
     def _OnSyntaxData(self, data):
         # Data is something like
         # [('Syntax Error', '__all__ = ["CSVSMonitorThread"]', 7)]
+        self.formatbtn.Enable(True)
         self.taskbtn.Enable(True)
         if data:
             syntax, report = data
