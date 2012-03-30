@@ -245,6 +245,7 @@ class LintShelfWindow(BaseShelfWindow):
         """Run PyLint Code Analysis on the current buffer"""
         editor = wx.GetApp().GetCurrentBuffer()
         if editor:
+            self.formatbtn.Enable(False)
             self.taskbtn.Enable(False)
             wx.CallAfter(self._onfileaccess, editor)
 
@@ -253,6 +254,7 @@ class LintShelfWindow(BaseShelfWindow):
         editor = wx.GetApp().GetCurrentBuffer()
         if editor:
             self.formatbtn.Enable(False)
+            self.taskbtn.Enable(False)
             wx.CallAfter(self._onfileaccess, editor, True)
 
     def get_format_checker(self, filetype, vardict, filename):
