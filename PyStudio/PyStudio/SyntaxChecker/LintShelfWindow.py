@@ -20,6 +20,7 @@ import wx
 # Editra Libraries
 import util
 import ed_glob
+import eclib
 import ed_msg
 import syntax.synglob as synglob
 
@@ -29,6 +30,7 @@ from PyStudio.Common import Images
 from PyStudio.Common.PyStudioUtils import PyStudioUtils
 from PyStudio.Common.BaseShelfWindow import BaseShelfWindow
 from PyStudio.SyntaxChecker.CheckResultsList import CheckResultsList
+from PyStudio.SyntaxChecker.EvaluationWindow import EvaluationWindow
 from PyStudio.SyntaxChecker.PythonSyntaxChecker import PythonSyntaxChecker
 from PyStudio.SyntaxChecker.CAResultsXml import AnalysisResults
 
@@ -47,7 +49,18 @@ class LintShelfWindow(BaseShelfWindow):
         """Initialize the window"""
         super(LintShelfWindow, self).__init__(parent)
 
-        ctrlbar = self.setup(CheckResultsList(self))
+        # Attributes
+        bstyle = eclib.SEGBOOK_STYLE_NO_DIVIDERS|eclib.SEGBOOK_STYLE_LEFT
+        self._nb = eclib.SegmentBook(self, style=bstyle)
+        self._checkresultslist = CheckResultsList(self._nb)
+        self._evaluation = EvaluationWindow(self._nb)
+        
+        # Setup
+        self._InitImageList()
+        self._nb.AddPage(self._checkresultslist, _("Warnings/Errors"), img_id=0)
+        self._nb.AddPage(self._evaluation, _("Evaluation"), img_id=1)
+        ctrlbar = self.setup(self._nb, self._checkresultslist, self._evaluation)
+                             
         ctrlbar.AddControl(wx.StaticLine(ctrlbar, size=(-1, 16), style=wx.LI_VERTICAL),
                            wx.ALIGN_LEFT)
         self.savebtn = self.AddPlateButton(u"", ed_glob.ID_SAVE, wx.ALIGN_LEFT)
@@ -74,6 +87,25 @@ class LintShelfWindow(BaseShelfWindow):
         self.Bind(wx.EVT_BUTTON, self.OnOpenResults, self.openbtn)
         self.Bind(wx.EVT_BUTTON, self.OnClear, self.clearbtn)
 
+    def _InitImageList(self):
+        """Initialize the segmentbooks image list"""
+        dorefresh = False
+        if len(self._imglst):
+            del self._imglst
+            self._imglst = list()
+            dorefresh = True
+
+        # TODO: add find better Bitmaps
+        bmp = wx.ArtProvider.GetBitmap(str(ed_glob.ID_VARIABLE_TYPE), wx.ART_MENU)
+        self._imglst.append(bmp)
+        bmp = wx.ArtProvider.GetBitmap(str(ed_glob.ID_CLASS_TYPE), wx.ART_MENU)
+        self._imglst.append(bmp)
+        self._nb.SetImageList(self._imglst)
+        self._nb.SetUsePyImageList(True)
+
+        if dorefresh:
+            self._nb.Refresh()
+
     def Unsubscription(self):
         ed_msg.Unsubscribe(self.OnFileLoad)
         ed_msg.Unsubscribe(self.OnFileSave)
@@ -92,8 +124,8 @@ class LintShelfWindow(BaseShelfWindow):
     def _onfileaccess(self, editor):
         if not editor:
             return
-        self._listCtrl.set_editor(editor)
-        self._listCtrl.Clear()
+        self._checkresultslist.set_editor(editor)
+        self._checkresultslist.Clear()
 
         # With the text control (ed_stc.EditraStc) this will return the full
         # path of the file or a wx.EmptyString if the buffer does not contain
@@ -124,7 +156,7 @@ class LintShelfWindow(BaseShelfWindow):
 
     def OnClear(self, evt):
         """Clear the results"""
-        self._listCtrl.Clear()
+        self._checkresultslist.Clear()
 
     def OnPageChanged(self, msg):
         """ Notebook tab was changed """
@@ -138,7 +170,7 @@ class LintShelfWindow(BaseShelfWindow):
 
     def OnSaveResults(self, evt):
         """Export the results to XML"""
-        data = self._listCtrl.GetCachedData()
+        data = self._checkresultslist.GetCachedData()
         if data[1]:
             dlg = wx.FileDialog(self.GetTopLevelParent(),
                                 _("Save Results"),
@@ -176,8 +208,8 @@ class LintShelfWindow(BaseShelfWindow):
                 for result in results.results:
                     data.append((result.errType, result.errMsg, result.line))
                 self._lbl.Label = results.path
-                self._listCtrl.LoadData(data, fname=results.path)
-                self._listCtrl.RefreshRows()
+                self._checkresultslist.LoadData(data, fname=results.path)
+                self._checkresultslist.RefreshRows()
                 self._mw.PushStatusText(_("Loaded code analysis data: %s") % path, 0)
             else:
                 self._mw.PushStatusText(_("Failed to load results data: %s") % path, 0)
@@ -232,9 +264,12 @@ class LintShelfWindow(BaseShelfWindow):
         # Data is something like
         # [('Syntax Error', '__all__ = ["CSVSMonitorThread"]', 7)]
         self.taskbtn.Enable(True)
-        if len(data) != 0:
-            self._listCtrl.LoadData(data)
-            self._listCtrl.RefreshRows()
+        if data:
+            syntax, report = data
+            if len(syntax) != 0:
+                self._checkresultslist.LoadData(syntax)
+                self._checkresultslist.RefreshRows()
+            self._evaluation.SetText(report)
         mwid = self.GetMainWindow().GetId()
         ed_msg.PostMessage(ed_msg.EDMSG_PROGRESS_SHOW, (mwid, False))
 

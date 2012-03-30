@@ -34,7 +34,7 @@ class PythonSyntaxChecker(AbstractSyntaxChecker):
 
         # Attributes
         self.dirvarfile = variabledict.get("DIRVARFILE")
-        self.pylintargs = ["-f", "parseable", "-r", "n"]
+        self.pylintargs = ["-f", "parseable"]
         pylintrc = variabledict.get("PYLINTRC")
         if pylintrc:
             pylintrc = ["--rcfile=%s" % pylintrc]
@@ -93,6 +93,7 @@ class PythonSyntaxChecker(AbstractSyntaxChecker):
         rows.append((u"***", u"Pylint command line: %s" % " ".join(plint_cmd), u"NA"))
         rows.append((u"***", u"Directory Variables file: %s" % self.dirvarfile, u"NA"))
         rowsdict = {}
+        lastmatchindex = 0
         for matcher in regex.finditer(stdoutdata):
             if matcher is None:
                 continue
@@ -100,6 +101,7 @@ class PythonSyntaxChecker(AbstractSyntaxChecker):
             linenostr = matcher.group(2)
             classmeth = matcher.group(4)
             mtext = matcher.group(5)
+            lastmatchindex = matcher.end(5)
             if mtypeabr in (u"E", u"F"):
                 mtype = u"Error"
             elif mtypeabr == u"C":
@@ -133,6 +135,9 @@ class PythonSyntaxChecker(AbstractSyntaxChecker):
                 linenorows = mtyperows[lineno]
                 for outtext in sorted(linenorows):
                     rows.append((mtype, outtext, lineno))
-
+        
+        index = stdoutdata.find("Report", lastmatchindex)
         util.Log("[PyLint][info] Pylint command finished running")
-        return rows
+        if index == -1:
+            return (rows, "")
+        return (rows, stdoutdata[index:].replace("\r", ""))
