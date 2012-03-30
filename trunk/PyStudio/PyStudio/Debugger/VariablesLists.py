@@ -207,13 +207,18 @@ class VariablesList(wx.gizmos.TreeListCtrl):
         wx.CallAfter(self._onitemactivated, item, expr, is_valid)
 
     def _onitemactivated(self, item, expr, is_valid):
-        if is_valid:
-            default_value = self.GetItemText(item, VariablesList.COL_VALUE)[1:]
-        else:
-            default_value = ""
+        default_value = self.GetItemText(item, VariablesList.COL_VALUE)[1:]
 
-        desc = "The new expression will be evaluated at the debuggee and its value will be set to the item."
-        expr_dialog = ExpressionDialog(self, default_value, "Enter Expression", desc, "New Expression:", (200, -1))
+        if is_valid:
+            desc = "The new expression will be evaluated at the debuggee and its value will be set to the item."
+            labeltext = "New Expression:"
+            style=wx.TE_MULTILINE
+        else:
+            desc = "The current value of the expression (read only)."
+            labeltext = "Current Expression:"
+            style=wx.TE_MULTILINE|wx.TE_READONLY
+
+        expr_dialog = ExpressionDialog(self, default_value, "Enter Expression", desc, labeltext, (1000, -1), style)
         pos = self.GetPositionTuple()
         expr_dialog.SetPosition((pos[0] + 50, pos[1] + 50))
         r = expr_dialog.ShowModal()
