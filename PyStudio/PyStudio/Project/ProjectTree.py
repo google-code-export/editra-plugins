@@ -185,7 +185,8 @@ class ProjectTree(eclib.FileTree):
         menu = wx.Menu()
         # Populate menu for current item with standard options
         if not os.path.isdir(path):
-            menu.Append(ProjectTree.ID_EDIT_FILE, _("Edit"))
+            tmpitem = wx.MenuItem(menu, ProjectTree.ID_EDIT_FILE, _("Edit"))
+            menu.AppendItem(tmpitem)
         menu.Append(ProjectTree.ID_OPEN_FILE, _("Open..."))
         menu.Append(ProjectTree.ID_REVEL_FILE, _("Open enclosing folder..."))
         menu.AppendSeparator()
