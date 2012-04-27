@@ -48,6 +48,9 @@ __revision__ = "$Revision$"
 # Editra Imports
 import ed_xml
 
+# Constants
+PYPROJ_XML_SCHEMA_VERSION = "1.0"
+
 #-----------------------------------------------------------------------------#
 
 class Option(ed_xml.EdXml):
@@ -163,6 +166,7 @@ class ProjectXml(Folder):
     """Main project structure"""
     class meta:
         tagname = "project"
+    version = ed_xml.String(default=PYPROJ_XML_SCHEMA_VERSION)
 
 #-----------------------------------------------------------------------------#
 # Test
