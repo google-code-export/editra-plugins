@@ -76,7 +76,7 @@ class LintShelfWindow(BaseShelfWindow):
         ctrlbar.AddStretchSpacer()
         self.layout("Analyze", self.OnRunLint, self.OnJobTimer)
         self.TaskButton.SetBitmap(Images.Lint.Bitmap)
-        self.formatbtn = self.AddPlateButton(_("CheckFormat"), Images.Lint.Bitmap, wx.ALIGN_RIGHT)
+        self.formatbtn = self.AddPlateButton(_("Pep8 Check"), Images.Lint.Bitmap, wx.ALIGN_RIGHT)
         self.clearbtn = self.AddPlateButton(_("Clear"), ed_glob.ID_DELETE, wx.ALIGN_RIGHT)
 
         # Attributes
@@ -101,11 +101,8 @@ class LintShelfWindow(BaseShelfWindow):
             self._imglst = list()
             dorefresh = True
 
-        # TODO: add find better Bitmaps
-        bmp = wx.ArtProvider.GetBitmap(str(ed_glob.ID_VARIABLE_TYPE), wx.ART_MENU)
-        self._imglst.append(bmp)
-        bmp = wx.ArtProvider.GetBitmap(str(ed_glob.ID_CLASS_TYPE), wx.ART_MENU)
-        self._imglst.append(bmp)
+        self._imglst.append(Images.BugWarning.Bitmap)
+        self._imglst.append(Images.Report.Bitmap)
         self._nb.SetImageList(self._imglst)
         self._nb.SetUsePyImageList(True)
 

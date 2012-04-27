@@ -108,7 +108,7 @@ class PythonSyntaxChecker(AbstractSyntaxChecker):
                 mtype = u"Convention"
             elif mtypeabr == u"R":
                 mtype = u"Refactor"
-            else: #TODO: add more specific filtering? / do translations on display
+            else: # TODO: add more specific filtering? / do translations on display
                 mtype = u"Warning"
 
             outtext = mtext
@@ -135,7 +135,7 @@ class PythonSyntaxChecker(AbstractSyntaxChecker):
                 linenorows = mtyperows[lineno]
                 for outtext in sorted(linenorows):
                     rows.append((mtype, outtext, lineno))
-        
+
         index = stdoutdata.find("Report", lastmatchindex)
         util.Log("[PyLint][info] Pylint command finished running")
         if index == -1:
