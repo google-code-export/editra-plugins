@@ -39,17 +39,20 @@ class PythonFormatChecker(AbstractSyntaxChecker):
         self.nopep8error = u"***  FATAL ERROR: No Pep8 configured or found"
 
     def RunSyntaxCheck(self):
-        """Run pep8"""
+        """Run pep8
+        @return: tuple([list_of_rows,], string)
+
+        """
 
         flag, localpythonpath = ToolConfig.GetPythonExecutablePath("Pep8")
 
         if not flag:
             # No configured Python
-            return [(u"No Python", localpythonpath, u"NA"),]
+            return ([(u"No Python", localpythonpath, u"NA")], u"None")
 
         childPath, parentPath = PyStudioUtils.get_packageroot(self.filename)
 
-        # Start pylint
+        # Start pep8 check
         pythoncode = "import sys,pep8;sys.argv=[u'pep8', %s];pep8._main()" % repr(childPath)
         pep8_cmd = [localpythonpath, "-c", pythoncode]
         processcreator = ProcessCreator("Pep8", parentPath, pep8_cmd, self.pythonpath)
@@ -63,7 +66,7 @@ class PythonFormatChecker(AbstractSyntaxChecker):
         ind = stderrlower.find("importerror")
         if ind != -1:
             if stderrlower.find("pep8", ind) != -1:
-                return [(u"No Pep8", self.nopep8error, u"NA"),]
+                return ([(u"No Pep8", self.nopep8error, u"NA")], u"None")
 
         # The parseable line format is:
         #       '%(path)s:%(line)s: [%(sigle)s%(obj)s] %(msg)s'
@@ -82,7 +85,6 @@ class PythonFormatChecker(AbstractSyntaxChecker):
             linenostr = matcher.group(2)
             colnostr = matcher.group(3)
             mtext = matcher.group(5)
-            print mtypeabr, linenostr, colnostr, mtext
             if mtypeabr in (u"E", u"F"):
                 mtype = u"Error"
             else: #TODO: add more specific filtering? / do translations on display
