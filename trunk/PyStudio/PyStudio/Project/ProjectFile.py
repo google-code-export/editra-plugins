@@ -43,6 +43,10 @@ class ProjectFile(object):
         self._path = path  # Project file path
         self._dirty = False
 
+        # Setup
+        # Ensure base data is available in project xml
+        self._pxml.CreateOptionSet(u'general') # Root global option settings container
+
     #---- Properties ----#
 
     Path = property(lambda self: self._path)

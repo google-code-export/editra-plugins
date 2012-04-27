@@ -14,15 +14,23 @@ Project File
 # Test example xml
 xml_str = """
 <project name="FooBar">
-    <option type="" value=""/>
-    <package name="FooPy" path="./foo/bar">
+    <optionset name='general'>
         <option type="" value=""/>
-        <package name="FooTest" path="./foo/bar/test">
+    </optionset>
+    <package name="FooPy" path="./foo/bar">
+        <optionset name="test">
             <option type="" value=""/>
+        </optionset>
+        <package name="FooTest" path="./foo/bar/test">
+            <optionset name="custom">
+                <option type="" value=""/>
+            </optionset>
         </package>
     </package>
     <folder name="FooData" path="/foo/bar">
-        <option type="" value=""/>
+        <optionset name="general">
+            <option type="" value=""/>
+        </optionset>
     </folder>
 </project>
 
