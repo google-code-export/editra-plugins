@@ -60,7 +60,7 @@ class PythonSyntaxChecker(AbstractSyntaxChecker):
 
         if not flag:
             # No configured Python
-            return [(u"No Python", localpythonpath, u"NA"),]
+            return ([(u"No Python", localpythonpath, u"NA")], u"None")
 
         childPath, parentPath = PyStudioUtils.get_packageroot(self.filename)
 
@@ -80,7 +80,7 @@ class PythonSyntaxChecker(AbstractSyntaxChecker):
         ind = stderrlower.find("importerror")
         if ind != -1:
             if stderrlower.find("pylint", ind) != -1:
-                return [(u"No Pylint", self.nopylinterror, u"NA"),]
+                return ([(u"No Pylint", self.nopylinterror, u"NA")], u"None")
 
         # The parseable line format is:
         #       '%(path)s:%(line)s: [%(sigle)s%(obj)s] %(msg)s'
