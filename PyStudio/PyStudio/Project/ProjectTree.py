@@ -79,7 +79,7 @@ class ProjectTree(eclib.FileTree):
 
     def __GetFileController(self):
         """Get FileController for currently configured filesystem"""
-        opt = self._proj.GetOption(u"filesystem")
+        opt = self._proj.GetOption(u"general", u"filesystem")
         if opt is None:
             # Default to base controller
             opt = u"OS"
