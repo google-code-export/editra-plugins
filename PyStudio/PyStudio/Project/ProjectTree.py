@@ -166,8 +166,11 @@ class ProjectTree(eclib.FileTree):
                     return iconmgr.IMG_PACKAGE
             return iconmgr.IMG_FOLDER
         lpath = path.lower()
-        if lpath.endswith(u".py") or lpath.endswith(u".pyw"):
+        fext = ebmlib.GetFileExtension(lpath)
+        if fext in ('py', 'pyw'):
             return iconmgr.IMG_PYTHON
+        elif fext in ('png', 'gif', 'ico', 'jpg', 'jpeg', 'bmp', 'icns'):
+            return iconmgr.IMG_IMAGE
         else:
             return iconmgr.IMG_FILE
 
