@@ -44,6 +44,7 @@ class FileIcons:
                IMG_PYTHON  : synglob.ID_LANG_PYTHON }
     # Non-themed images
     IMG_PROJECT = IMG_PYTHON + 1
+    IMG_IMAGE   = IMG_PROJECT + 1
 
     @classmethod
     def PopulateImageList(cls, imglist):
@@ -58,4 +59,4 @@ class FileIcons:
             imglist.Add(bmp)
         # Non themed images
         imglist.Add(Images.Project.Bitmap)
-
+        imglist.Add(Images.Picture.Bitmap)
