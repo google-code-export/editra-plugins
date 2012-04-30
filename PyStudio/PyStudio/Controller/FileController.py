@@ -124,7 +124,7 @@ class FileOpStatus(object):
         @param err: exception object
 
         """
-        super(FileOpError, self).__init__()
+        super(FileOpStatus, self).__init__()
 
         # Attributes
         self._path = path
