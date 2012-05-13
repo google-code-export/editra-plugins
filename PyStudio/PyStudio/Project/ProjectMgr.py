@@ -36,6 +36,7 @@ import PyStudio.Project.ProjectXml as ProjectXml
 import PyStudio.Project.ProjectFile as ProjectFile
 import PyStudio.Project.NewProjectDlg as NewProjectDlg
 from PyStudio.Project.ProjectTree import ProjectTree
+import PyStudio.Project.ProjectCfgDlg as ProjectCfgDlg
 
 #-----------------------------------------------------------------------------#
 # Globals
@@ -238,5 +239,7 @@ class ProjectManager(ed_basewin.EdBaseCtrlBox):
 
     def ShowConfig(self):
         """Show the configuration for the current project"""
-        pass
+        # TODO: stub...
+        dlg = ProjectCfgDlg.ProjectCfgDlg(self, title=_("Project Settings"))
+        dlg.ShowModal()
 
