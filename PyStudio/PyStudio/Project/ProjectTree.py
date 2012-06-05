@@ -61,7 +61,7 @@ class ProjectTree(eclib.FileTree):
         # Attributes
         self._proj = None
         self._menu = ebmlib.ContextMenuManager()
-        self._monitor = ebmlib.DirectoryMonitor()
+        self._monitor = ebmlib.DirectoryMonitor(checkFreq=1500.0)
         self._monitor.SubscribeCallback(self.OnFilesChanged)
         self._monitor.StartMonitoring()
 
@@ -138,23 +138,28 @@ class ProjectTree(eclib.FileTree):
             # Filter contents
             dirs = list()
             files = list()
+            # loop optimizations
+            isHidden = ebmlib.IsHidden
+            isdir = os.path.isdir
+            appendDir = dirs.append
+            appendFile = files.append
+            getExt = ebmlib.GetFileExtension
             for p in contents:
-                basename = os.path.basename(p)
-                if basename.startswith('.'):# TODO: configuration
+                if isHidden(p):# TODO: configuration
                     continue
 
-                if os.path.isdir(p): 
-                    dirs.append(p)
+                if isdir(p): 
+                    appendDir(p)
                 else:
-                    ext = ebmlib.GetFileExtension(p)
+                    ext = getExt(p)
                     if ext not in (u'pyc', u'pyo', u'psp'): # TODO use configuration
-                        files.append(p)
+                        appendFile(p)
             dirs.sort()
             files.sort()
             dirs.extend(files)
-            for p in dirs:
-                self.AppendFileNode(item, p)
-            self.SortChildren(item)
+            with eclib.Freezer(self):
+                self.AppendFileNodes(item, dirs)
+                self.SortChildren(item)
             self._monitor.AddDirectory(d)
 
     def DoGetFileImage(self, path):
@@ -441,3 +446,7 @@ class ProjectTree(eclib.FileTree):
             if package:
                 path = os.path.join(dirname, name)
                 self.FileController.CreateFile(path, "__init__.py")
+
+    def SuspendChecks(self, suspend=True):
+        """Suspend/Continue background monitoring"""
+        self._monitor.Suspend(suspend)
