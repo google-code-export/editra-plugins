@@ -110,6 +110,7 @@ class ProjectManager(ed_basewin.EdBaseCtrlBox):
 #        for btn in (nfilebtn, npkgbtn, nfolderbtn):
 #            btn.Bind(wx.EVT_UPDATE_UI, self.OnUpdateButtons)
         self.Bind(wx.EVT_MENU, self.OnMenu)
+        self.Bind(wx.EVT_SHOW, self.OnShow)
 
     #---- Properties ----#
 
@@ -161,6 +162,11 @@ class ProjectManager(ed_basewin.EdBaseCtrlBox):
                     ProjectManager.ID_OPEN_PROJECT : self.OpenProject,
                     ProjectManager.ID_CONF_PROJECT : self.ShowConfig }
         actions.get(evt.Id, evt.Skip)()
+
+    def OnShow(self, evt):
+        """Activate/deactivate processing when window is shown/hidden"""
+        self._tree.SuspendChecks(not evt.IsShown())
+        evt.Skip()
 
     def OnUpdateButtons(self, evt):
         """UpdateUI handler for file/folder/package button"""
