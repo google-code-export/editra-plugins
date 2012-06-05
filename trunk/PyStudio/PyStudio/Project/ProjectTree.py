@@ -20,6 +20,7 @@ __revision__ = "$Revision$"
 #-----------------------------------------------------------------------------#
 # Dependencies
 import os
+import fnmatch
 import wx
 
 # Editra imports
@@ -126,6 +127,7 @@ class ProjectTree(eclib.FileTree):
         @param item: TreeItem
 
         """
+        busy = wx.BusyCursor()
         d = None
         try:
             d = self.GetPyData(item)
@@ -135,30 +137,9 @@ class ProjectTree(eclib.FileTree):
 
         if d and os.path.exists(d):
             contents = ProjectTree.GetDirContents(d)
-            # Filter contents
-            dirs = list()
-            files = list()
-            # loop optimizations
-            isHidden = ebmlib.IsHidden
-            isdir = os.path.isdir
-            appendDir = dirs.append
-            appendFile = files.append
-            getExt = ebmlib.GetFileExtension
-            for p in contents:
-                if isHidden(p):# TODO: configuration
-                    continue
-
-                if isdir(p): 
-                    appendDir(p)
-                else:
-                    ext = getExt(p)
-                    if ext not in (u'pyc', u'pyo', u'psp'): # TODO use configuration
-                        appendFile(p)
-            dirs.sort()
-            files.sort()
-            dirs.extend(files)
+            contents = self.FilterFileList(contents)
             with eclib.Freezer(self):
-                self.AppendFileNodes(item, dirs)
+                self.AppendFileNodes(item, contents)
                 self.SortChildren(item)
             self._monitor.AddDirectory(d)
 
@@ -166,9 +147,8 @@ class ProjectTree(eclib.FileTree):
         """Get the image for the given item"""
         iconmgr = ProjectUtil.FileIcons
         if os.path.isdir(path):
-            for p in ProjectTree.GetDirContents(path):
-                if p.endswith(u"__init__.py"):
-                    return iconmgr.IMG_PACKAGE
+            if os.path.exists(os.path.join(path, "__init__.py")):
+                return iconmgr.IMG_PACKAGE
             return iconmgr.IMG_FOLDER
         lpath = path.lower()
         fext = ebmlib.GetFileExtension(lpath)
@@ -306,23 +286,21 @@ class ProjectTree(eclib.FileTree):
 
         # Add any new file objects to the view
         needsort = list()
+        added = self.FilterFileList([fobj.Path for fobj in added])
         for fobj in added:
-            # TODO: use configuration for filtering files in view
-            ext = ebmlib.GetFileExtension(fobj.Path).lower()
-            if fobj.Name.startswith('.') or ext in ('pyc', 'pyo', 'psp'):
-                continue
-            dpath = os.path.dirname(fobj.Path)
+            dpath = os.path.dirname(fobj)
             for item in nodes:
                 path = self.GetPyData(item)
                 if path == dpath:
-                    self.AppendFileNode(item, fobj.Path)
+                    self.AppendFileNode(item, fobj)
                     if item not in needsort:
                         needsort.append(item)
                     break
 
         # Resort display
-        for item in needsort:
-            self.SortChildren(item)
+        with eclib.Freezer(self):
+            for item in needsort:
+                self.SortChildren(item)
 
         # TODO: pass modification notifications onto FileController interface
         #       to handle.
@@ -446,6 +424,27 @@ class ProjectTree(eclib.FileTree):
             if package:
                 path = os.path.join(dirname, name)
                 self.FileController.CreateFile(path, "__init__.py")
+
+    def FilterFileList(self, paths):
+        """Filter a list of files returning only the ones that are valid to
+        display in the tree. Optimized for large lists of paths.
+        @param paths: list of paths
+        @return: filtered list
+
+        """
+        filters = ("*.pyc", "*.pyo", "*.psp") #TODO: add filter configuration
+        isHidden = ebmlib.IsHidden
+        rval = list()
+        rAdd = rval.append
+        getBase = os.path.basename
+        for path in paths:
+            if isHidden(path): #TODO support show hidden files
+                continue
+            name = getBase(path)
+            if filter(lambda x: fnmatch.fnmatchcase(name, x), filters):
+                continue
+            rAdd(path)
+        return rval
 
     def SuspendChecks(self, suspend=True):
         """Suspend/Continue background monitoring"""
