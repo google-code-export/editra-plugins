@@ -76,7 +76,7 @@ class FtpConfigDialog(wx.Dialog):
 class FtpConfigPanel(wx.Panel):
     """Main Configuration Panel"""
     def __init__(self, parent):
-        wx.Panel.__init__(self, parent)
+        super(FtpConfigPanel, self).__init__(parent)
 
         # Attributes
         self._sites = FtpSitesPanel(self)
@@ -470,7 +470,7 @@ class FtpLoginPanel(wx.Panel):
         self._box = wx.StaticBox(self, label=_("Login Settings"))
         self._boxsz = wx.StaticBoxSizer(self._box, wx.HORIZONTAL)
         self._host = wx.TextCtrl(self)
-        self._port = wx.TextCtrl(self, value=u"21")
+        self._port = wx.TextCtrl(self, value=u"21") # TODO: Integer only!
         self._user = wx.TextCtrl(self)
         self._pass = wx.TextCtrl(self, style=wx.TE_PASSWORD)
         self._path = wx.TextCtrl(self)
@@ -547,6 +547,8 @@ class FtpLoginPanel(wx.Panel):
                      pword=self._pass.GetValue(),
                      path=self._path.GetValue(),
                      enc=self._enc.GetStringSelection())
+        if not rdict['port'].isdigit():
+            rdict['port'] = u"21"
         return rdict
 
     def SetLoginInfo(self, info):
@@ -576,6 +578,8 @@ class FtpLoginPanel(wx.Panel):
         @param port: string
 
         """
+        if not port or not port.isdigit():
+            port = u"21"
         self._port.SetValue(port)
 
     def SetUserName(self, name):
@@ -714,7 +718,7 @@ class __ConfigData(object):
 
         """
         data = self.GetSiteData(site)
-        if len(data):
+        if len(data) and data['port'].isdigit():
             rval = int(data['port'])
         else:
             rval = 21
