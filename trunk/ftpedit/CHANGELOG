@@ -9,6 +9,7 @@ Version 0.4
 Released:
 
 +Fix issue with disconnecting message handlers after window has been destroyed.
++Fix validation of Port field in configuration dialog
 
 #-----------------------------------------------------------------------------#
 Version 0.3
