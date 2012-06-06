@@ -96,12 +96,15 @@ class PyStudioUtils():
         @rtype: ed_editv.EdEditorView
 
         """
-        nb = mainw.GetNotebook()
-        filepath = os.path.normcase(fname)
-        for page in nb.GetTextControls():
-            tabfile = os.path.normcase(page.GetFileName())
-            if tabfile == filepath:
-                return page
+        if hasattr(mainw, 'GetNotebook'):
+            nb = mainw.GetNotebook()
+            filepath = os.path.normcase(fname)
+            for page in nb.GetTextControls():
+                tabfile = os.path.normcase(page.GetFileName())
+                if tabfile == filepath:
+                    return page
+        else:
+            util.Log("[PyStudio][warn] invalid object in GetEditorForFile %s" % repr(mainw))
 
         return None
         

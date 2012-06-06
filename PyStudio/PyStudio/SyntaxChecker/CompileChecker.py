@@ -54,8 +54,12 @@ class CompileEntryPoint(object):
         if not data[0] or data[1] != synglob.ID_LANG_PYTHON:
             return
 
-        mw = wx.GetApp().GetActiveWindow()
-        buff = PyStudioUtils.GetEditorForFile(mw, data[0])
+        buff = None
+        for mw in wx.GetApp().GetMainWindows():
+            if mw.Id == msg.Context:
+                buff = PyStudioUtils.GetEditorForFile(mw, data[0])
+                break
+
         if not buff:
             return
 
