@@ -10,6 +10,7 @@ Released:
 +Fix use case where debugger settings were not getting stored into profile.
 +Fix Clear button on Code Analysis window not working after file has been closed.
 +Fix some unicode handling issues in debugger.
++Fix crash in CompileChecker caused by incorrect window type being returned by GetActiveWindow
 
 #-----------------------------------------------------------------------------#
 
