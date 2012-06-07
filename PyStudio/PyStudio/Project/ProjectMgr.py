@@ -74,12 +74,13 @@ class ProjectManager(ed_basewin.EdBaseCtrlBox):
                      _("Import an existing project"))
         pmenu.Append(ProjectManager.ID_OPEN_PROJECT, _("Open Project"),
                      _("Open an existing PyProject project file"))
-        pmenu.AppendSeparator()
-        item = wx.MenuItem(pmenu, 
-                           ProjectManager.ID_CONF_PROJECT, 
-                           _("Project Settings"))
-        item.Bitmap = wx.ArtProvider_GetBitmap(str(ed_glob.ID_PREF), wx.ART_MENU)
-        pmenu.AppendItem(item)
+         # TODO: Future release
+#        pmenu.AppendSeparator()
+#        item = wx.MenuItem(pmenu, 
+#                           ProjectManager.ID_CONF_PROJECT, 
+#                           _("Project Settings"))
+#        item.Bitmap = wx.ArtProvider_GetBitmap(str(ed_glob.ID_PREF), wx.ART_MENU)
+#        pmenu.AppendItem(item)
         self.projbtn.SetMenu(pmenu)
         # Setup additional buttons
         bmp = wx.ArtProvider_GetBitmap(str(synglob.ID_LANG_PYTHON), wx.ART_MENU)

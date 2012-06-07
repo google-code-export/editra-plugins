@@ -199,7 +199,7 @@ class ProjectTree(eclib.FileTree):
                 trash_str = _("Move to Trash")
             menu.Append(ed_glob.ID_DELETE, trash_str)
             menu.Append(ProjectTree.ID_RENAME_FILE, _("Rename"))
-            menu.AppendSeparator()
+#            menu.AppendSeparator()
 
         ccount = menu.GetMenuItemCount()
 
@@ -211,10 +211,11 @@ class ProjectTree(eclib.FileTree):
                            self._menu, self.Parent.MainWindow.Id)
 
         # Add properties
-        if ccount < menu.GetMenuItemCount():
-            menu.AppendSeparator()
-        mitem = menu.Append(ProjectTree.ID_PROPERTIES, _("Properties"))
-        mitem.SetBitmap(wx.ArtProvider_GetBitmap(str(ed_glob.ID_PREF), wx.ART_MENU))
+        # TODO: future release
+#        if ccount < menu.GetMenuItemCount():
+#            menu.AppendSeparator()
+#        mitem = menu.Append(ProjectTree.ID_PROPERTIES, _("Properties"))
+#        mitem.SetBitmap(wx.ArtProvider_GetBitmap(str(ed_glob.ID_PREF), wx.ART_MENU))
 
         # Show the popup Menu
         self._menu.Menu = menu
