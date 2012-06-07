@@ -141,7 +141,10 @@ class ProjectTree(eclib.FileTree):
             with eclib.Freezer(self):
                 self.AppendFileNodes(item, contents)
                 self.SortChildren(item)
-            self._monitor.AddDirectory(d)
+
+            if not self._monitor.AddDirectory(d):
+                self.SetItemImage(item, ProjectUtil.FileIcons.IMG_NO_ACCESS)
+                return
 
     def DoGetFileImage(self, path):
         """Get the image for the given item"""
