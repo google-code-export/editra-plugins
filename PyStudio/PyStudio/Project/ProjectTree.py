@@ -62,7 +62,7 @@ class ProjectTree(eclib.FileTree):
         # Attributes
         self._proj = None
         self._menu = ebmlib.ContextMenuManager()
-        self._monitor = ebmlib.DirectoryMonitor(checkFreq=1500.0)
+        self._monitor = ebmlib.DirectoryMonitor(checkFreq=2000.0)
         self._monitor.SubscribeCallback(self.OnFilesChanged)
         self._monitor.StartMonitoring()
 
@@ -135,7 +135,7 @@ class ProjectTree(eclib.FileTree):
             util.Log("[PyStudio][err] ProjectTree.DoItemExpanding")
             return
 
-        if d and os.path.exists(d):
+        if d and os.path.exists(d) and os.access(d, os.R_OK):
             contents = ProjectTree.GetDirContents(d)
             contents = self.FilterFileList(contents)
             with eclib.Freezer(self):
@@ -146,7 +146,9 @@ class ProjectTree(eclib.FileTree):
     def DoGetFileImage(self, path):
         """Get the image for the given item"""
         iconmgr = ProjectUtil.FileIcons
-        if os.path.isdir(path):
+        if not os.access(path, os.R_OK):
+            return iconmgr.IMG_NO_ACCESS
+        elif os.path.isdir(path):
             if os.path.exists(os.path.join(path, "__init__.py")):
                 return iconmgr.IMG_PACKAGE
             return iconmgr.IMG_FOLDER
@@ -263,6 +265,7 @@ class ProjectTree(eclib.FileTree):
         if self and evt.Id == self.Id:
             util.Log("PyProject][info] Doing Cleanup in Destroy...")
             self._menu.Clear()
+            ed_msg.Unsubscribe(self.OnGetProject)
         evt.Skip()
 
     def OnFilesChanged(self, added, deleted, modified):

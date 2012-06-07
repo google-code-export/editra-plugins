@@ -33,15 +33,17 @@ import PyStudio.Common.Images as Images
 class FileIcons:
     """Namespace object for managing an IconList for a file tree."""
     # ImageList indexes
-    IMAGES = range(4)
+    IMAGES = range(5)
     IMG_FOLDER,\
+    IMG_NO_ACCESS,\
     IMG_PACKAGE,\
     IMG_FILE,\
     IMG_PYTHON = IMAGES
     IMGMAP = { IMG_FOLDER  : ed_glob.ID_FOLDER,
                IMG_PACKAGE : ed_glob.ID_PACKAGE,
                IMG_FILE    : ed_glob.ID_FILE,
-               IMG_PYTHON  : synglob.ID_LANG_PYTHON }
+               IMG_PYTHON  : synglob.ID_LANG_PYTHON,
+               IMG_NO_ACCESS : ed_glob.ID_STOP }
     # Non-themed images
     IMG_PROJECT = IMG_PYTHON + 1
     IMG_IMAGE   = IMG_PROJECT + 1
