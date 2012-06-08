@@ -25,10 +25,11 @@ import wx
 
 # Editra imports
 import ed_glob
+import util
 import eclib
 import ebmlib
 import ed_msg
-import util
+import ed_basewin
 
 # Local Imports
 from PyStudio.Common import ToolConfig
@@ -43,7 +44,7 @@ _ = wx.GetTranslation
 
 #-----------------------------------------------------------------------------#
 
-class ProjectTree(eclib.FileTree):
+class ProjectTree(ed_basewin.EDBaseFileTree):
     """Provides a tree view of all the files and packages in a project."""
     # Context Menu Ids
     ID_EDIT_FILE   = wx.NewId()
@@ -71,7 +72,6 @@ class ProjectTree(eclib.FileTree):
 
         # Event Handlers
         self.Bind(wx.EVT_MENU, self.OnContextMenu)
-        self.Bind(wx.EVT_WINDOW_DESTROY, self.OnDestroy, self)
 
         # Message Handlers
         ed_msg.Subscribe(self.OnGetProject, PyStudioMessages.PYSTUDIO_PROJECT_GET)
@@ -263,14 +263,18 @@ class ProjectTree(eclib.FileTree):
             if handler:
                 handler(path)
 
-    def OnDestroy(self, evt):
+    def DoOnActivate(self, active):
+        """Handle main window activation"""
+        if active and self.IsShown():
+            self.SuspendChecks(False) # Resume
+        elif not active:
+            self.SuspendChecks(True) # Suspend
+
+    def DoOnDestroy(self):
         """Cleanup when window is destroyed"""
-        util.Log("[PyProject][info] ProjectTree.OnDestroy")
-        if self and evt.Id == self.Id:
-            util.Log("PyProject][info] Doing Cleanup in Destroy...")
-            self._menu.Clear()
-            ed_msg.Unsubscribe(self.OnGetProject)
-        evt.Skip()
+        util.Log("PyProject][info] Doing Cleanup in Destroy...")
+        self._menu.Clear()
+        ed_msg.Unsubscribe(self.OnGetProject)
 
     def OnFilesChanged(self, added, deleted, modified):
         """DirectoryMonitor callback - synchronize the view
