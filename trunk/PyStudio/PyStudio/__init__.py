@@ -203,6 +203,9 @@ class PyProject(plugin.Plugin):
         """Pass even handler for menu item to main window for management"""
         return [(PyProject.ID_PYPROJECT, self.OnShowProjectWindow)]
 
+    def GetMinVersion(self):
+        return "0.7.08" # all new file view controls and other interfaces needed
+
     def GetUIHandlers(self):
         """Pass Ui handlers to main window for management"""
         return [(PyProject.ID_PYPROJECT, self.OnUpdateMenu)]

@@ -12,7 +12,6 @@ Base shelf plugin.
 
 """
 
-__version__ = "0.1"
 __author__ = "Mike Rans"
 __svnid__ = "$Id$"
 __revision__ = "$Revision$"
@@ -89,7 +88,7 @@ class BaseShelfPlugin(plugin.Plugin):
 
     def GetMinVersion(self):
         """Minimum version of Editra this plugin is compatible with"""
-        return "0.6.48"
+        return "0.7.08"
 
     def GetName(self):
         """The name of this plugin"""
