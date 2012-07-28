@@ -107,7 +107,7 @@ class PyStudioUtils():
             util.Log("[PyStudio][warn] invalid object in GetEditorForFile %s" % repr(mainw))
 
         return None
-        
+
     @staticmethod
     def GetEditorOrOpenFile(mainw, fname):
         """Get an existing editor instance for the file or open it

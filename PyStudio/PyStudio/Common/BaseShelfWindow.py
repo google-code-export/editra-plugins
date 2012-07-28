@@ -18,6 +18,7 @@ import wx
 
 # Editra Libraries
 import ed_glob
+import util
 import eclib
 import ed_basewin
 import ed_msg
@@ -26,6 +27,7 @@ import syntax.synglob as synglob
 # Local imports
 from PyStudio.Common.ToolConfig import ToolConfigDialog
 from PyStudio.Common.PythonDirectoryVariables import PythonDirectoryVariables
+from PyStudio.Common.Messages import PyStudioMessages
 
 # Globals
 _ = wx.GetTranslation
@@ -55,6 +57,9 @@ class BaseShelfWindow(ed_basewin.EdBaseCtrlBox):
         self._hasrun = False
         self._jobtimer = None
         self.destroyfn = lambda : None
+
+        # PyStudio specific messages
+        ed_msg.Subscribe(self.OnProjectLoaded, PyStudioMessages.PYSTUDIO_PROJECT_LOADED)
 
     # Properties
     TaskButton = property(lambda self: self.taskbtn)
@@ -112,12 +117,22 @@ class BaseShelfWindow(ed_basewin.EdBaseCtrlBox):
     # Overridden by derived classes
     def Unsubscription(self):
         pass
-    
+
+    def DoProjectLoaded(self, projfile):
+        """Called when a project has been loaded
+        @param projfile: ProjectFile
+
+        """
+        pass
+
+    # End Overrides
+
     def OnDestroy(self, evt):
         """Stop timer and disconnect message handlers"""
         self._StopTimer()
         ed_msg.Unsubscribe(self.OnThemeChanged)
         ed_msg.Unsubscribe(self.OnFontChanged)
+        ed_msg.Unsubscribe(self.OnProjectLoaded)
         self.Unsubscription()
 
     def _StopTimer(self):
@@ -143,6 +158,14 @@ class BaseShelfWindow(ed_basewin.EdBaseCtrlBox):
         dlg = ToolConfigDialog(self._mw)
         dlg.CenterOnParent()
         dlg.ShowModal()
+
+    def OnProjectLoaded(self, msg):
+        """Project was loaded in the PyProject window.
+        Handles updates for when the current project changes.
+
+        """
+        util.Log("[PyStudio][info] BaseShelfWindow - project loaded notification")
+        self.DoProjectLoaded(msg.GetData())
 
     def get_directory_variables(self, filetype):
         """Get the directory variables for the file type."""
