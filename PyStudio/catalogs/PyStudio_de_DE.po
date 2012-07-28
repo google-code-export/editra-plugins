@@ -1,4 +1,4 @@
-# Japanese translation for editra
+# German translation for editra
 # Copyright (c) 2011 Rosetta Contributors and Canonical Ltd 2011
 # This file is distributed under the same license as the editra package.
 # FIRST AUTHOR <EMAIL@ADDRESS>, 2011.
@@ -8,9 +8,9 @@ msgstr ""
 "Project-Id-Version: editra\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2012-07-28 12:51-0500\n"
-"PO-Revision-Date: 2011-06-02 19:55+0000\n"
-"Last-Translator: Cody Precord <Unknown>\n"
-"Language-Team: Japanese <ja@li.org>\n"
+"PO-Revision-Date: 2011-11-25 17:23+0000\n"
+"Last-Translator: leo <xenondwb@gmail.com>\n"
+"Language-Team: German <de@li.org>\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
@@ -143,7 +143,7 @@ msgstr ""
 #: PyStudio/PyStudio/Debugger/AttachDialog.py:36
 #: PyStudio/build/lib/PyStudio/Debugger/AttachDialog.py:36
 msgid "Attach"
-msgstr "アタッチ"
+msgstr ""
 
 #: PyStudio/PyStudio/Debugger/AttachDialog.py:46
 #: PyStudio/build/lib/PyStudio/Debugger/AttachDialog.py:46
@@ -158,7 +158,7 @@ msgstr ""
 #: PyStudio/PyStudio/Common/ToolConfig.py:269
 #: PyStudio/build/lib/PyStudio/Common/ToolConfig.py:251
 msgid "Automatic"
-msgstr ""
+msgstr "Automatisch"
 
 #: PyStudio/PyStudio/Common/ToolConfig.py:187
 msgid "Automatically reload last project at startup."
@@ -227,7 +227,7 @@ msgstr ""
 #: PyStudio/PyStudio/SyntaxChecker/LintShelfWindow.py:80
 #: PyStudio/build/lib/PyStudio/SyntaxChecker/LintShelfWindow.py:63
 msgid "Clear"
-msgstr "クリア"
+msgstr ""
 
 #: PyStudio/PyStudio/Common/ToolConfig.py:129
 #: PyStudio/build/lib/PyStudio/Common/ToolConfig.py:120
@@ -242,7 +242,7 @@ msgstr ""
 #: PyStudio/PyStudio/Common/BaseShelfWindow.py:85
 #: PyStudio/build/lib/PyStudio/Common/BaseShelfWindow.py:72
 msgid "Configure"
-msgstr "設定"
+msgstr ""
 
 #: PyStudio/PyStudio/Common/ToolConfig.py:578
 #: PyStudio/PyStudio/SyntaxChecker/CheckResultsList.py:296
@@ -299,7 +299,7 @@ msgstr ""
 #: PyStudio/PyStudio/Common/ToolConfig.py:128
 #: PyStudio/build/lib/PyStudio/Common/ToolConfig.py:119
 msgid "Debugger"
-msgstr "デバッガ"
+msgstr ""
 
 #: PyStudio/PyStudio/Debugger/DebugShelfWindow.py:76
 #: PyStudio/build/lib/PyStudio/Debugger/DebugShelfWindow.py:76
@@ -418,7 +418,7 @@ msgstr ""
 #: PyStudio/build/lib/PyStudio/SyntaxChecker/CheckResultsList.py:158
 #: PyStudio/build/lib/PyStudio/SyntaxChecker/CheckResultsList.py:233
 msgid "Error"
-msgstr "エラー"
+msgstr ""
 
 #: PyStudio/PyStudio/Common/ToolConfig.py:607
 #: PyStudio/build/lib/PyStudio/Common/ToolConfig.py:589
@@ -469,7 +469,7 @@ msgstr ""
 #: PyStudio/PyStudio/Common/ToolConfig.py:613
 #: PyStudio/build/lib/PyStudio/Common/ToolConfig.py:595
 msgid "External dependencies"
-msgstr "外部依存"
+msgstr ""
 
 #: PyStudio/PyStudio/SyntaxChecker/LintShelfWindow.py:219
 #: PyStudio/build/lib/PyStudio/SyntaxChecker/LintShelfWindow.py:181
@@ -494,12 +494,12 @@ msgstr ""
 #: PyStudio/build/lib/PyStudio/Debugger/StackFrameList.py:45
 #: PyStudio/build/lib/PyStudio/ModuleFinder/FindResultsList.py:58
 msgid "File"
-msgstr "ファイル"
+msgstr ""
 
 #: PyStudio/PyStudio/Debugger/AttachDialog.py:77
 #: PyStudio/build/lib/PyStudio/Debugger/AttachDialog.py:77
 msgid "Filename"
-msgstr "ファイル名"
+msgstr ""
 
 #: PyStudio/PyStudio/Debugger/VariablesShelfWindow.py:84
 #: PyStudio/build/lib/PyStudio/Debugger/VariablesShelfWindow.py:84
@@ -559,7 +559,7 @@ msgstr ""
 #: PyStudio/PyStudio/Debugger/AttachDialog.py:61
 #: PyStudio/build/lib/PyStudio/Debugger/AttachDialog.py:61
 msgid "Host:"
-msgstr "ホスト："
+msgstr ""
 
 #: PyStudio/PyStudio/ModuleFinder/FindResultsList.py:46
 #: PyStudio/build/lib/PyStudio/ModuleFinder/FindResultsList.py:46
@@ -629,7 +629,7 @@ msgstr ""
 #: PyStudio/PyStudio/Debugger/MessageHandler.py:56
 #: PyStudio/build/lib/PyStudio/Debugger/MessageHandler.py:56
 msgid "Jump"
-msgstr "ジャンプ"
+msgstr ""
 
 #: PyStudio/PyStudio/Common/ToolConfig.py:638
 #: PyStudio/build/lib/PyStudio/Common/ToolConfig.py:620
@@ -643,12 +643,12 @@ msgstr ""
 #: PyStudio/build/lib/PyStudio/Debugger/StackFrameList.py:46
 #: PyStudio/build/lib/PyStudio/SyntaxChecker/CheckResultsList.py:48
 msgid "Line"
-msgstr "行"
+msgstr ""
 
 #: PyStudio/PyStudio/Common/ToolConfig.py:597
 #: PyStudio/build/lib/PyStudio/Common/ToolConfig.py:579
 msgid "Line too long"
-msgstr "行が長すぎます"
+msgstr ""
 
 #: PyStudio/PyStudio/Common/ToolConfig.py:267
 #: PyStudio/build/lib/PyStudio/Common/ToolConfig.py:249
@@ -687,7 +687,7 @@ msgstr ""
 #: PyStudio/build/lib/PyStudio/Debugger/VariablesLists.py:275
 #: PyStudio/build/lib/PyStudio/Debugger/VariablesLists.py:326
 msgid "Loading..."
-msgstr "読み込み中…"
+msgstr ""
 
 #: PyStudio/PyStudio/Debugger/VariablesShelfWindow.py:68
 #: PyStudio/build/lib/PyStudio/Debugger/VariablesShelfWindow.py:68
@@ -827,9 +827,8 @@ msgid "New"
 msgstr ""
 
 #: PyStudio/PyStudio/Project/ProjectTree.py:412
-#, fuzzy
 msgid "New File"
-msgstr "ファイル"
+msgstr ""
 
 #: PyStudio/PyStudio/Project/ProjectTree.py:187
 msgid "New File..."
@@ -931,12 +930,12 @@ msgstr ""
 #: PyStudio/PyStudio/Debugger/AttachDialog.py:76
 #: PyStudio/build/lib/PyStudio/Debugger/AttachDialog.py:76
 msgid "PID"
-msgstr "プロセスID"
+msgstr ""
 
 #: PyStudio/PyStudio/Debugger/PasswordDialog.py:33
 #: PyStudio/build/lib/PyStudio/Debugger/PasswordDialog.py:33
 msgid "Password"
-msgstr "パスワード"
+msgstr ""
 
 #: PyStudio/PyStudio/Common/ToolConfig.py:375
 #: PyStudio/build/lib/PyStudio/Common/ToolConfig.py:357
@@ -1063,9 +1062,8 @@ msgstr ""
 
 #: PyStudio/PyStudio/Debugger/ExpressionsShelfWindow.py:54
 #: PyStudio/build/lib/PyStudio/Debugger/ExpressionsShelfWindow.py:54
-#, fuzzy
 msgid "Refresh Expressions"
-msgstr "式を設定"
+msgstr ""
 
 #: PyStudio/PyStudio/Debugger/VariablesShelfWindow.py:79
 #: PyStudio/build/lib/PyStudio/Debugger/VariablesShelfWindow.py:79
@@ -1088,9 +1086,8 @@ msgid "Remove selected python executable"
 msgstr ""
 
 #: PyStudio/PyStudio/Project/ProjectTree.py:201
-#, fuzzy
 msgid "Rename"
-msgstr "ファイル名"
+msgstr ""
 
 #: PyStudio/PyStudio/Common/ToolConfig.py:692
 #: PyStudio/build/lib/PyStudio/Common/ToolConfig.py:674
@@ -1105,7 +1102,7 @@ msgstr ""
 #: PyStudio/PyStudio/Debugger/DebugShelfWindow.py:62
 #: PyStudio/build/lib/PyStudio/Debugger/DebugShelfWindow.py:62
 msgid "Run"
-msgstr "実行"
+msgstr ""
 
 #: PyStudio/PyStudio/Debugger/MessageHandler.py:55
 #: PyStudio/build/lib/PyStudio/Debugger/MessageHandler.py:55
@@ -1133,12 +1130,12 @@ msgstr ""
 #: PyStudio/PyStudio/Debugger/BreakPointsShelfWindow.py:160
 #: PyStudio/build/lib/PyStudio/Debugger/BreakPointsShelfWindow.py:160
 msgid "Set Breakpoint"
-msgstr "ブレークポイントを設定"
+msgstr ""
 
 #: PyStudio/PyStudio/Debugger/ExpressionsShelfWindow.py:48
 #: PyStudio/build/lib/PyStudio/Debugger/ExpressionsShelfWindow.py:48
 msgid "Set Expression"
-msgstr "式を設定"
+msgstr ""
 
 #: PyStudio/PyStudio/Debugger/PasswordDialog.py:58
 #: PyStudio/build/lib/PyStudio/Debugger/PasswordDialog.py:58
@@ -1206,12 +1203,12 @@ msgstr ""
 #: PyStudio/PyStudio/Debugger/DebugShelfWindow.py:72
 #: PyStudio/build/lib/PyStudio/Debugger/DebugShelfWindow.py:72
 msgid "Step Out"
-msgstr "ステップアウト"
+msgstr ""
 
 #: PyStudio/PyStudio/Debugger/DebugShelfWindow.py:70
 #: PyStudio/build/lib/PyStudio/Debugger/DebugShelfWindow.py:70
 msgid "Step Over"
-msgstr "ステップオーバー"
+msgstr ""
 
 #: PyStudio/PyStudio/Debugger/DebugShelfWindow.py:64
 #: PyStudio/build/lib/PyStudio/Debugger/DebugShelfWindow.py:64
@@ -1259,7 +1256,7 @@ msgstr ""
 #: PyStudio/PyStudio/Debugger/StackThreadShelfWindow.py:51
 #: PyStudio/build/lib/PyStudio/Debugger/StackThreadShelfWindow.py:51
 msgid "Threads"
-msgstr "スレッド"
+msgstr ""
 
 #: PyStudio/PyStudio/Debugger/BreakPointsShelfWindow.py:55
 #: PyStudio/build/lib/PyStudio/Debugger/BreakPointsShelfWindow.py:55
@@ -1494,7 +1491,7 @@ msgstr ""
 #: PyStudio/build/lib/PyStudio/Debugger/ExpressionsList.py:47
 #: PyStudio/build/lib/PyStudio/Debugger/VariablesLists.py:62
 msgid "Value"
-msgstr "値"
+msgstr ""
 
 #: PyStudio/PyStudio/Common/ToolConfig.py:580
 #: PyStudio/PyStudio/Debugger/AttachDialog.py:169
@@ -1581,7 +1578,7 @@ msgstr ""
 #: PyStudio/build/lib/PyStudio/Debugger/ThreadsList.py:60
 #: PyStudio/build/lib/PyStudio/Debugger/ThreadsList.py:96
 msgid "running"
-msgstr "実行中"
+msgstr ""
 
 #: PyStudio/PyStudio/Common/ToolConfig.py:723
 #: PyStudio/build/lib/PyStudio/Common/ToolConfig.py:705

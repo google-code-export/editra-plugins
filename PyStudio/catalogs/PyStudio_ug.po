@@ -1,16 +1,16 @@
-# Japanese translation for editra
-# Copyright (c) 2011 Rosetta Contributors and Canonical Ltd 2011
+# Uyghur translation for editra
+# Copyright (c) 2012 Rosetta Contributors and Canonical Ltd 2012
 # This file is distributed under the same license as the editra package.
-# FIRST AUTHOR <EMAIL@ADDRESS>, 2011.
+# FIRST AUTHOR <EMAIL@ADDRESS>, 2012.
 #
 msgid ""
 msgstr ""
 "Project-Id-Version: editra\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2012-07-28 12:51-0500\n"
-"PO-Revision-Date: 2011-06-02 19:55+0000\n"
-"Last-Translator: Cody Precord <Unknown>\n"
-"Language-Team: Japanese <ja@li.org>\n"
+"PO-Revision-Date: 2012-04-23 08:37+0000\n"
+"Last-Translator: yasenghupur <yasenghupur@sina.com>\n"
+"Language-Team: Uyghur <ug@li.org>\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
@@ -24,6 +24,9 @@ msgid ""
 "\n"
 "Debuggee finished."
 msgstr ""
+"\n"
+"\n"
+"سازلاش تامام."
 
 #: PyStudio/PyStudio/Debugger/DebugShelfWindow.py:98
 #: PyStudio/build/lib/PyStudio/Debugger/DebugShelfWindow.py:98
@@ -32,6 +35,9 @@ msgid ""
 "\n"
 "Debugger detached."
 msgstr ""
+"\n"
+"\n"
+"سازلىغۇچ ئايرىلدى."
 
 #: PyStudio/PyStudio/Debugger/RpdbDebugger.py:179
 #: PyStudio/build/lib/PyStudio/Debugger/RpdbDebugger.py:179
@@ -40,6 +46,8 @@ msgid ""
 "\n"
 "%s\n"
 msgstr ""
+"\n"
+"%s\n"
 
 #: PyStudio/PyStudio/Debugger/VariablesLists.py:252
 #: PyStudio/build/lib/PyStudio/Debugger/VariablesLists.py:247
@@ -49,21 +57,24 @@ msgid ""
 "\n"
 "Click 'Cancel' to ignore this warning in this session."
 msgstr ""
+"%s\n"
+" \n"
+"\"قالدۇرۇش\"نى چېكىپ بۇ سۆھبەتتىكى ئاگاھلاندۇرۇشقا ئېتىبارسىز قاراش."
 
 #: PyStudio/PyStudio/Common/ToolConfig.py:720
 #: PyStudio/build/lib/PyStudio/Common/ToolConfig.py:702
 msgid "(error prevented analysis)"
-msgstr ""
+msgstr "(خاتالىقتىن ساقلىنىش تەھلىلى)"
 
 #: PyStudio/PyStudio/Common/ToolConfig.py:685
 #: PyStudio/build/lib/PyStudio/Common/ToolConfig.py:667
 msgid "(syntax error raised for a module)"
-msgstr ""
+msgstr "(بۇ بۆلەككە سىنتاكىشلىق خاتالىق كۆرۈلدى)"
 
 #: PyStudio/PyStudio/Common/ToolConfig.py:663
 #: PyStudio/build/lib/PyStudio/Common/ToolConfig.py:645
 msgid "(warning notes in code comments)"
-msgstr ""
+msgstr "(كود ئىزاھاتىغا ئاگاھلاندۇرۇش خاتىرسى)"
 
 #: PyStudio/PyStudio/Project/NewProjectDlg.py:194
 msgid "<Project Destination>"
@@ -77,27 +88,27 @@ msgstr ""
 #: PyStudio/PyStudio/Common/ToolConfig.py:628
 #: PyStudio/build/lib/PyStudio/Common/ToolConfig.py:610
 msgid "Abstract class is only referenced a few times"
-msgstr ""
+msgstr "مەزمۇن تىپى بىرقانچە قېتىم نەقىللەندى"
 
 #: PyStudio/PyStudio/Common/ToolConfig.py:627
 #: PyStudio/build/lib/PyStudio/Common/ToolConfig.py:609
 msgid "Abstract class not referenced"
-msgstr ""
+msgstr "مەزمۇن تىپى نەقىللەنمىدى"
 
 #: PyStudio/PyStudio/Common/ToolConfig.py:644
 #: PyStudio/build/lib/PyStudio/Common/ToolConfig.py:626
 msgid "Access to a protected member of a client class"
-msgstr ""
+msgstr "خېرىدار تىپى ساقلانغان ئەزاسىغا كىرىش"
 
 #: PyStudio/PyStudio/Common/ToolConfig.py:696
 #: PyStudio/build/lib/PyStudio/Common/ToolConfig.py:678
 msgid "Accessing method before it is defined"
-msgstr ""
+msgstr "رەتقىلىنىشتىن بۇرۇنقى كىرىش ئۇسۇلى"
 
 #: PyStudio/PyStudio/Common/ToolConfig.py:141
 #: PyStudio/build/lib/PyStudio/Common/ToolConfig.py:132
 msgid "Add python executable"
-msgstr ""
+msgstr "python ئىجراچانى قوشۇش"
 
 #: PyStudio/PyStudio/Debugger/VariablesLists.py:190
 #: PyStudio/build/lib/PyStudio/Debugger/VariablesLists.py:190
@@ -108,7 +119,7 @@ msgstr ""
 #: PyStudio/PyStudio/Common/ToolConfig.py:369
 #: PyStudio/build/lib/PyStudio/Common/ToolConfig.py:351
 msgid "Allow Synchronicity"
-msgstr ""
+msgstr "ماسقەدەمداشلىققا ئىجازەت"
 
 #: PyStudio/PyStudio/Debugger/MessageHandler.py:173
 #: PyStudio/build/lib/PyStudio/Debugger/MessageHandler.py:173
@@ -143,7 +154,7 @@ msgstr ""
 #: PyStudio/PyStudio/Debugger/AttachDialog.py:36
 #: PyStudio/build/lib/PyStudio/Debugger/AttachDialog.py:36
 msgid "Attach"
-msgstr "アタッチ"
+msgstr "قوشۇمچە"
 
 #: PyStudio/PyStudio/Debugger/AttachDialog.py:46
 #: PyStudio/build/lib/PyStudio/Debugger/AttachDialog.py:46
@@ -158,7 +169,7 @@ msgstr ""
 #: PyStudio/PyStudio/Common/ToolConfig.py:269
 #: PyStudio/build/lib/PyStudio/Common/ToolConfig.py:251
 msgid "Automatic"
-msgstr ""
+msgstr "ئاپتوماتىك"
 
 #: PyStudio/PyStudio/Common/ToolConfig.py:187
 msgid "Automatically reload last project at startup."
@@ -182,12 +193,12 @@ msgstr ""
 #: PyStudio/PyStudio/Common/ToolConfig.py:652
 #: PyStudio/build/lib/PyStudio/Common/ToolConfig.py:634
 msgid "Bad indentation"
-msgstr ""
+msgstr "ناچار ئابزاسبېشى"
 
 #: PyStudio/PyStudio/Common/ToolConfig.py:687
 #: PyStudio/build/lib/PyStudio/Common/ToolConfig.py:669
 msgid "Bad option value"
-msgstr ""
+msgstr "ناچار تاللاش قىممىتى"
 
 #: PyStudio/PyStudio/Project/ProjectTemplate.py:188
 #: PyStudio/PyStudio/Project/ProjectTemplate.py:198
@@ -197,12 +208,12 @@ msgstr ""
 #: PyStudio/PyStudio/Common/ToolConfig.py:590
 #: PyStudio/build/lib/PyStudio/Common/ToolConfig.py:572
 msgid "Black listed name"
-msgstr ""
+msgstr "قارا تىزىم ئىسمى"
 
 #: PyStudio/PyStudio/Debugger/DebugShelfWindow.py:74
 #: PyStudio/build/lib/PyStudio/Debugger/DebugShelfWindow.py:74
 msgid "Break"
-msgstr ""
+msgstr "ئۈزۈش"
 
 #: PyStudio/PyStudio/Common/ToolConfig.py:677
 #: PyStudio/build/lib/PyStudio/Common/ToolConfig.py:659
@@ -212,7 +223,7 @@ msgstr ""
 #: PyStudio/PyStudio/Common/ToolConfig.py:145
 #: PyStudio/build/lib/PyStudio/Common/ToolConfig.py:136
 msgid "Check for syntax errors on save"
-msgstr ""
+msgstr "ساقلانغاندىن سىنتاكىس خاتالىقى تەكشۈرۈش"
 
 #: PyStudio/PyStudio/Common/ToolConfig.py:649
 #: PyStudio/build/lib/PyStudio/Common/ToolConfig.py:631
@@ -227,12 +238,12 @@ msgstr ""
 #: PyStudio/PyStudio/SyntaxChecker/LintShelfWindow.py:80
 #: PyStudio/build/lib/PyStudio/SyntaxChecker/LintShelfWindow.py:63
 msgid "Clear"
-msgstr "クリア"
+msgstr "تازىلاش"
 
 #: PyStudio/PyStudio/Common/ToolConfig.py:129
 #: PyStudio/build/lib/PyStudio/Common/ToolConfig.py:120
 msgid "Code Analysis"
-msgstr ""
+msgstr "كود تەھلىلى"
 
 #: PyStudio/PyStudio/Common/ToolConfig.py:602
 #: PyStudio/build/lib/PyStudio/Common/ToolConfig.py:584
@@ -242,19 +253,19 @@ msgstr ""
 #: PyStudio/PyStudio/Common/BaseShelfWindow.py:85
 #: PyStudio/build/lib/PyStudio/Common/BaseShelfWindow.py:72
 msgid "Configure"
-msgstr "設定"
+msgstr "سەپلەش"
 
 #: PyStudio/PyStudio/Common/ToolConfig.py:578
 #: PyStudio/PyStudio/SyntaxChecker/CheckResultsList.py:296
 #: PyStudio/build/lib/PyStudio/Common/ToolConfig.py:560
 #: PyStudio/build/lib/PyStudio/SyntaxChecker/CheckResultsList.py:235
 msgid "Convention"
-msgstr ""
+msgstr "كېلىشىم"
 
 #: PyStudio/PyStudio/ModuleFinder/FindTabMenu.py:72
 #: PyStudio/build/lib/PyStudio/ModuleFinder/FindTabMenu.py:72
 msgid "Copy Module Path"
-msgstr ""
+msgstr "بۆلەكچە يولىنى كۆچۈرۈش"
 
 #: PyStudio/PyStudio/Project/NewProjectDlg.py:44
 msgid "Create New Project"
@@ -267,17 +278,17 @@ msgstr ""
 #: PyStudio/PyStudio/Common/ToolConfig.py:176
 #: PyStudio/build/lib/PyStudio/Common/ToolConfig.py:166
 msgid "Currently active Python"
-msgstr ""
+msgstr "ھازىرقى جانلىق Python"
 
 #: PyStudio/PyStudio/Common/ToolConfig.py:612
 #: PyStudio/build/lib/PyStudio/Common/ToolConfig.py:594
 msgid "Cyclic import"
-msgstr ""
+msgstr "دەۋرىي كىرگۈزۈش"
 
 #: PyStudio/PyStudio/Common/ToolConfig.py:634
 #: PyStudio/build/lib/PyStudio/Common/ToolConfig.py:616
 msgid "Dangerous default value used as an argument"
-msgstr ""
+msgstr "خەتەرلىك كۆڭۈلدىكى قىممەت ئۆزگەرگۈچى قىلىنغان"
 
 #: PyStudio/PyStudio/Debugger/VariablesLists.py:181
 #: PyStudio/PyStudio/Debugger/VariablesLists.py:204
@@ -294,17 +305,17 @@ msgstr ""
 #: PyStudio/build/lib/PyStudio/Debugger/VariablesLists.py:301
 #: PyStudio/build/lib/PyStudio/Debugger/VariablesLists.py:326
 msgid "Data Retrieval Timeout"
-msgstr ""
+msgstr "سانلىق مەلۇمات تېپىش ۋاقتى ئاشتى."
 
 #: PyStudio/PyStudio/Common/ToolConfig.py:128
 #: PyStudio/build/lib/PyStudio/Common/ToolConfig.py:119
 msgid "Debugger"
-msgstr "デバッガ"
+msgstr "سازلىغۇچ"
 
 #: PyStudio/PyStudio/Debugger/DebugShelfWindow.py:76
 #: PyStudio/build/lib/PyStudio/Debugger/DebugShelfWindow.py:76
 msgid "Debugger Args"
-msgstr ""
+msgstr "سازلىغۇچ ئۆزگەرگۈچىسى"
 
 #: PyStudio/PyStudio/Debugger/DebugShelfWindow.py:97
 #: PyStudio/build/lib/PyStudio/Debugger/DebugShelfWindow.py:97
@@ -312,6 +323,8 @@ msgid ""
 "Debugger attached.\n"
 "\n"
 msgstr ""
+"سازلىغۇچ قوشۇلغان.\n"
+"\n"
 
 #: PyStudio/PyStudio/Debugger/PythonDebugger.py:59
 #: PyStudio/build/lib/PyStudio/Debugger/PythonDebugger.py:59
@@ -319,6 +332,8 @@ msgid ""
 "Debugger attached. Debuggee output starts now...\n"
 "\n"
 msgstr ""
+"سازلىغۇچ قوشۇلغان.سازلاشنى چىقىرىش باشلاندى.....\n"
+"\n"
 
 #: PyStudio/PyStudio/Debugger/DebugShelfWindow.py:387
 #: PyStudio/build/lib/PyStudio/Debugger/DebugShelfWindow.py:387
@@ -327,26 +342,28 @@ msgid ""
 "Debugging remote debuggee %s\n"
 "\n"
 msgstr ""
+"يىراقتىكى سازلغۇچنى سازلاش%s\n"
+"\n"
 
 #: PyStudio/PyStudio/Debugger/BreakPointsShelfWindow.py:164
 #: PyStudio/build/lib/PyStudio/Debugger/BreakPointsShelfWindow.py:164
 msgid "Delete All Breakpoints"
-msgstr ""
+msgstr "ئۈزۈشلەرنى ئۆچۈرۈش"
 
 #: PyStudio/PyStudio/Debugger/ExpressionsShelfWindow.py:52
 #: PyStudio/build/lib/PyStudio/Debugger/ExpressionsShelfWindow.py:52
 msgid "Delete All Expressions"
-msgstr ""
+msgstr "ئىپادىلەرنى ئۆچۈرۈش"
 
 #: PyStudio/PyStudio/Debugger/BreakPointsShelfWindow.py:162
 #: PyStudio/build/lib/PyStudio/Debugger/BreakPointsShelfWindow.py:162
 msgid "Delete Breakpoint"
-msgstr ""
+msgstr "ئۈزۈش ئۆچۈرۈش"
 
 #: PyStudio/PyStudio/Debugger/ExpressionsShelfWindow.py:50
 #: PyStudio/build/lib/PyStudio/Debugger/ExpressionsShelfWindow.py:50
 msgid "Delete Expression"
-msgstr ""
+msgstr "ئىپادىنى ئۆچۈرۈش"
 
 #: PyStudio/PyStudio/Project/ProjectTree.py:250
 msgid "Delete?"
@@ -355,7 +372,7 @@ msgstr ""
 #: PyStudio/PyStudio/Common/ToolConfig.py:537
 #: PyStudio/build/lib/PyStudio/Common/ToolConfig.py:519
 msgid "Description"
-msgstr ""
+msgstr "چۈشەندۈرۈشى"
 
 #: PyStudio/PyStudio/Debugger/DebugShelfWindow.py:95
 #: PyStudio/build/lib/PyStudio/Debugger/DebugShelfWindow.py:95
@@ -365,7 +382,7 @@ msgstr ""
 #: PyStudio/PyStudio/Common/ToolConfig.py:616
 #: PyStudio/build/lib/PyStudio/Common/ToolConfig.py:598
 msgid "Duplication"
-msgstr ""
+msgstr "كۆچۈرۈش"
 
 #: PyStudio/PyStudio/Project/ProjectTree.py:181
 msgid "Edit"
@@ -383,12 +400,12 @@ msgstr ""
 #: PyStudio/PyStudio/Common/ToolConfig.py:536
 #: PyStudio/build/lib/PyStudio/Common/ToolConfig.py:518
 msgid "Enabled"
-msgstr ""
+msgstr "قوزغىتىش"
 
 #: PyStudio/PyStudio/Debugger/ExpressionsShelfWindow.py:159
 #: PyStudio/build/lib/PyStudio/Debugger/ExpressionsShelfWindow.py:159
 msgid "Enter Code to Execute"
-msgstr ""
+msgstr "ئىجرا كودىنى كىرگۈزۈش"
 
 #: PyStudio/PyStudio/Project/ProjectTree.py:412
 msgid "Enter file name:"
@@ -401,7 +418,7 @@ msgstr ""
 #: PyStudio/PyStudio/ModuleFinder/FindShelfWindow.py:55
 #: PyStudio/build/lib/PyStudio/ModuleFinder/FindShelfWindow.py:55
 msgid "Enter module name to search for"
-msgstr ""
+msgstr "ئىزدەيدىغان بۆلەكچە ئىسمىنى كىرگۈزۈش"
 
 #: PyStudio/PyStudio/Project/ProjectTree.py:428
 msgid "Enter package name:"
@@ -418,12 +435,12 @@ msgstr ""
 #: PyStudio/build/lib/PyStudio/SyntaxChecker/CheckResultsList.py:158
 #: PyStudio/build/lib/PyStudio/SyntaxChecker/CheckResultsList.py:233
 msgid "Error"
-msgstr "エラー"
+msgstr "خاتالىق"
 
 #: PyStudio/PyStudio/Common/ToolConfig.py:607
 #: PyStudio/build/lib/PyStudio/Common/ToolConfig.py:589
 msgid "Errors / warnings by module"
-msgstr ""
+msgstr "بۆلەكچە خاتالىقى\\ئەسكەرتىشى"
 
 #: PyStudio/PyStudio/Common/ToolConfig.py:395
 #: PyStudio/build/lib/PyStudio/Common/ToolConfig.py:377
@@ -431,13 +448,14 @@ msgid "Escape Non-Ascii Characters for Execute/Evaluate"
 msgstr ""
 
 #: PyStudio/PyStudio/SyntaxChecker/LintShelfWindow.py:65
+#, fuzzy
 msgid "Evaluation"
-msgstr ""
+msgstr "ئومۇمىي مۆلچەرلەش"
 
 #: PyStudio/PyStudio/Common/ToolConfig.py:678
 #: PyStudio/build/lib/PyStudio/Common/ToolConfig.py:660
 msgid "Except doesn't do anything"
-msgstr ""
+msgstr "ھېچئىش قىلمىغاننىڭ سىرتىدا"
 
 #: PyStudio/PyStudio/Common/ToolConfig.py:679
 #: PyStudio/build/lib/PyStudio/Common/ToolConfig.py:661
@@ -447,12 +465,12 @@ msgstr ""
 #: PyStudio/PyStudio/Debugger/VariablesShelfWindow.py:70
 #: PyStudio/build/lib/PyStudio/Debugger/VariablesShelfWindow.py:70
 msgid "Exceptions"
-msgstr ""
+msgstr "مۇستەسنا"
 
 #: PyStudio/PyStudio/Debugger/ExpressionsShelfWindow.py:59
 #: PyStudio/build/lib/PyStudio/Debugger/ExpressionsShelfWindow.py:59
 msgid "Execute"
-msgstr ""
+msgstr "ئىجرا قىلىش(&X)"
 
 #: PyStudio/PyStudio/Common/ToolConfig.py:689
 #: PyStudio/build/lib/PyStudio/Common/ToolConfig.py:671
@@ -464,18 +482,18 @@ msgstr ""
 #: PyStudio/build/lib/PyStudio/Debugger/BreakPointsList.py:44
 #: PyStudio/build/lib/PyStudio/Debugger/ExpressionsList.py:46
 msgid "Expression"
-msgstr ""
+msgstr "ئىپادە"
 
 #: PyStudio/PyStudio/Common/ToolConfig.py:613
 #: PyStudio/build/lib/PyStudio/Common/ToolConfig.py:595
 msgid "External dependencies"
-msgstr "外部依存"
+msgstr "تاشقى باغلىنىشى"
 
 #: PyStudio/PyStudio/SyntaxChecker/LintShelfWindow.py:219
 #: PyStudio/build/lib/PyStudio/SyntaxChecker/LintShelfWindow.py:181
 #, python-format
 msgid "Failed to load results data: %s"
-msgstr ""
+msgstr "نەتىجە سانلىق مەلۇماتىنى يۈكلىيەلمىدى:%s"
 
 #: PyStudio/PyStudio/SyntaxChecker/LintShelfWindow.py:195
 #: PyStudio/build/lib/PyStudio/SyntaxChecker/LintShelfWindow.py:157
@@ -494,17 +512,17 @@ msgstr ""
 #: PyStudio/build/lib/PyStudio/Debugger/StackFrameList.py:45
 #: PyStudio/build/lib/PyStudio/ModuleFinder/FindResultsList.py:58
 msgid "File"
-msgstr "ファイル"
+msgstr "ھۆججەت"
 
 #: PyStudio/PyStudio/Debugger/AttachDialog.py:77
 #: PyStudio/build/lib/PyStudio/Debugger/AttachDialog.py:77
 msgid "Filename"
-msgstr "ファイル名"
+msgstr "ھۆججەت ئىسمى"
 
 #: PyStudio/PyStudio/Debugger/VariablesShelfWindow.py:84
 #: PyStudio/build/lib/PyStudio/Debugger/VariablesShelfWindow.py:84
 msgid "Filtering:"
-msgstr ""
+msgstr "سۈزۈۋاتىدۇ:"
 
 #: PyStudio/PyStudio/Common/ToolConfig.py:380
 #: PyStudio/build/lib/PyStudio/Common/ToolConfig.py:362
@@ -514,7 +532,7 @@ msgstr ""
 #: PyStudio/PyStudio/Common/ToolConfig.py:726
 #: PyStudio/build/lib/PyStudio/Common/ToolConfig.py:708
 msgid "Format detection error"
-msgstr ""
+msgstr "فورمات تەكشۈرۈش خاتالىقى"
 
 #: PyStudio/PyStudio/Common/ToolConfig.py:653
 #: PyStudio/build/lib/PyStudio/Common/ToolConfig.py:635
@@ -524,22 +542,22 @@ msgstr ""
 #: PyStudio/PyStudio/Debugger/StackFrameList.py:44
 #: PyStudio/build/lib/PyStudio/Debugger/StackFrameList.py:44
 msgid "Frame"
-msgstr ""
+msgstr "كاندۇك"
 
 #: PyStudio/PyStudio/Debugger/StackFrameList.py:47
 #: PyStudio/build/lib/PyStudio/Debugger/StackFrameList.py:47
 msgid "Function"
-msgstr ""
+msgstr "فۇنكسىيە"
 
 #: PyStudio/PyStudio/Common/ToolConfig.py:127
 #: PyStudio/build/lib/PyStudio/Common/ToolConfig.py:118
 msgid "General"
-msgstr ""
+msgstr "ئومۇمىي"
 
 #: PyStudio/PyStudio/Common/ToolConfig.py:609
 #: PyStudio/build/lib/PyStudio/Common/ToolConfig.py:591
 msgid "Global evaluation"
-msgstr ""
+msgstr "ئومۇمىي مۆلچەرلەش"
 
 #: PyStudio/PyStudio/Common/ToolConfig.py:665
 #: PyStudio/build/lib/PyStudio/Common/ToolConfig.py:647
@@ -554,12 +572,12 @@ msgstr ""
 #: PyStudio/PyStudio/Debugger/VariablesShelfWindow.py:69
 #: PyStudio/build/lib/PyStudio/Debugger/VariablesShelfWindow.py:69
 msgid "Globals"
-msgstr ""
+msgstr "ئومۇمىي ئۆزگەرگۈچىلەر"
 
 #: PyStudio/PyStudio/Debugger/AttachDialog.py:61
 #: PyStudio/build/lib/PyStudio/Debugger/AttachDialog.py:61
 msgid "Host:"
-msgstr "ホスト："
+msgstr "باش ئاپپارات："
 
 #: PyStudio/PyStudio/ModuleFinder/FindResultsList.py:46
 #: PyStudio/build/lib/PyStudio/ModuleFinder/FindResultsList.py:46
@@ -587,7 +605,7 @@ msgstr ""
 #: PyStudio/PyStudio/Debugger/ExpressionsShelfWindow.py:184
 #: PyStudio/build/lib/PyStudio/Debugger/ExpressionsShelfWindow.py:184
 msgid "Ignore Warning"
-msgstr ""
+msgstr "ئاگاھلاندۇرۇشنى قالدۇرۇش"
 
 #: PyStudio/PyStudio/Project/ProjectMgr.py:73
 msgid "Import Project"
@@ -609,32 +627,32 @@ msgstr ""
 #: PyStudio/PyStudio/Common/ToolConfig.py:699
 #: PyStudio/build/lib/PyStudio/Common/ToolConfig.py:681
 msgid "Interface is not a class"
-msgstr ""
+msgstr "ئارايۈز تىپى ئەمەس"
 
 #: PyStudio/PyStudio/Common/ToolConfig.py:629
 #: PyStudio/build/lib/PyStudio/Common/ToolConfig.py:611
 msgid "Interface not implemented"
-msgstr ""
+msgstr "ئارايۈز ئەمەلگە ئاشمىدى"
 
 #: PyStudio/PyStudio/ModuleFinder/FindResultsList.py:34
 #: PyStudio/build/lib/PyStudio/ModuleFinder/FindResultsList.py:34
 msgid "Internal Search Error"
-msgstr ""
+msgstr "ئىچكى ئىزدەش خاتالىقى"
 
 #: PyStudio/PyStudio/Common/ToolConfig.py:591
 #: PyStudio/build/lib/PyStudio/Common/ToolConfig.py:573
 msgid "Invalid name"
-msgstr ""
+msgstr "ئىناۋەتسىز ئىسىم"
 
 #: PyStudio/PyStudio/Debugger/MessageHandler.py:56
 #: PyStudio/build/lib/PyStudio/Debugger/MessageHandler.py:56
 msgid "Jump"
-msgstr "ジャンプ"
+msgstr "سەكرەش"
 
 #: PyStudio/PyStudio/Common/ToolConfig.py:638
 #: PyStudio/build/lib/PyStudio/Common/ToolConfig.py:620
 msgid "Lambda may not be necessary"
-msgstr ""
+msgstr "لامبىدانىڭ ھاجىتى يوق"
 
 #: PyStudio/PyStudio/Debugger/BreakPointsList.py:43
 #: PyStudio/PyStudio/Debugger/StackFrameList.py:46
@@ -643,17 +661,17 @@ msgstr ""
 #: PyStudio/build/lib/PyStudio/Debugger/StackFrameList.py:46
 #: PyStudio/build/lib/PyStudio/SyntaxChecker/CheckResultsList.py:48
 msgid "Line"
-msgstr "行"
+msgstr "قۇر"
 
 #: PyStudio/PyStudio/Common/ToolConfig.py:597
 #: PyStudio/build/lib/PyStudio/Common/ToolConfig.py:579
 msgid "Line too long"
-msgstr "行が長すぎます"
+msgstr "قۇر بەك ئۇزۇن"
 
 #: PyStudio/PyStudio/Common/ToolConfig.py:267
 #: PyStudio/build/lib/PyStudio/Common/ToolConfig.py:249
 msgid "Lint Run Mode"
-msgstr ""
+msgstr "يۇمشاق ئىجرا شەكلى"
 
 #: PyStudio/PyStudio/Common/ToolConfig.py:146
 msgid "Load Last Project"
@@ -664,13 +682,13 @@ msgstr ""
 #: PyStudio/build/lib/PyStudio/SyntaxChecker/LintShelfWindow.py:57
 #: PyStudio/build/lib/PyStudio/SyntaxChecker/LintShelfWindow.py:166
 msgid "Load Results"
-msgstr ""
+msgstr "نەتىجە يۈكلەش"
 
 #: PyStudio/PyStudio/SyntaxChecker/LintShelfWindow.py:217
 #: PyStudio/build/lib/PyStudio/SyntaxChecker/LintShelfWindow.py:179
 #, python-format
 msgid "Loaded code analysis data: %s"
-msgstr ""
+msgstr "كود تەھلىل قىممىتى يۈكلەندى:%s"
 
 #: PyStudio/PyStudio/Debugger/VariablesLists.py:181
 #: PyStudio/PyStudio/Debugger/VariablesLists.py:204
@@ -687,12 +705,12 @@ msgstr ""
 #: PyStudio/build/lib/PyStudio/Debugger/VariablesLists.py:275
 #: PyStudio/build/lib/PyStudio/Debugger/VariablesLists.py:326
 msgid "Loading..."
-msgstr "読み込み中…"
+msgstr "يۈكلەۋاتىدۇ…"
 
 #: PyStudio/PyStudio/Debugger/VariablesShelfWindow.py:68
 #: PyStudio/build/lib/PyStudio/Debugger/VariablesShelfWindow.py:68
 msgid "Locals"
-msgstr ""
+msgstr "يەرلىك"
 
 #: PyStudio/PyStudio/Project/NewProjectDlg.py:76
 msgid "Location to create new project."
@@ -701,37 +719,37 @@ msgstr ""
 #: PyStudio/PyStudio/Common/ToolConfig.py:272
 #: PyStudio/build/lib/PyStudio/Common/ToolConfig.py:254
 msgid "Manual"
-msgstr ""
+msgstr "قولدا"
 
 #: PyStudio/PyStudio/Common/ToolConfig.py:183
 #: PyStudio/build/lib/PyStudio/Common/ToolConfig.py:173
 msgid "Mark syntax errors in buffer after save"
-msgstr ""
+msgstr "سالىغاندىن كېيىن باففېردىكى سىنتاكىسلىق خاتالىقنى بەلگىلەش"
 
 #: PyStudio/PyStudio/Debugger/VariablesShelfWindow.py:82
 #: PyStudio/build/lib/PyStudio/Debugger/VariablesShelfWindow.py:82
 msgid "Maximum"
-msgstr ""
+msgstr "ئەڭ چوڭ"
 
 #: PyStudio/PyStudio/Debugger/VariablesShelfWindow.py:82
 #: PyStudio/build/lib/PyStudio/Debugger/VariablesShelfWindow.py:82
 msgid "Medium"
-msgstr ""
+msgstr "ئوتتۇراھال"
 
 #: PyStudio/PyStudio/Common/ToolConfig.py:306
 #: PyStudio/build/lib/PyStudio/Common/ToolConfig.py:288
 msgid "Message Type: "
-msgstr ""
+msgstr "ئۇچۇر تىپى "
 
 #: PyStudio/PyStudio/Common/ToolConfig.py:608
 #: PyStudio/build/lib/PyStudio/Common/ToolConfig.py:590
 msgid "Messages"
-msgstr ""
+msgstr "ئۇچۇرلار"
 
 #: PyStudio/PyStudio/Common/ToolConfig.py:606
 #: PyStudio/build/lib/PyStudio/Common/ToolConfig.py:588
 msgid "Messages by category"
-msgstr ""
+msgstr "كاتېگورىيە بويىنچە ئۇچۇرلار"
 
 #: PyStudio/PyStudio/Common/ToolConfig.py:596
 #: PyStudio/build/lib/PyStudio/Common/ToolConfig.py:578
@@ -746,7 +764,7 @@ msgstr ""
 #: PyStudio/PyStudio/Common/ToolConfig.py:697
 #: PyStudio/build/lib/PyStudio/Common/ToolConfig.py:679
 msgid "Method has no argument"
-msgstr ""
+msgstr "ئۇسۇلنىڭ ئۆزگەرگۈچىسى يوق"
 
 #: PyStudio/PyStudio/Common/ToolConfig.py:695
 #: PyStudio/build/lib/PyStudio/Common/ToolConfig.py:677
@@ -781,17 +799,17 @@ msgstr ""
 #: PyStudio/PyStudio/Common/ToolConfig.py:661
 #: PyStudio/build/lib/PyStudio/Common/ToolConfig.py:643
 msgid "Module import itself"
-msgstr ""
+msgstr "بۆلەكچىنىڭ ئۆزىگە كىرگۈزۈش"
 
 #: PyStudio/PyStudio/Common/ToolConfig.py:614
 #: PyStudio/build/lib/PyStudio/Common/ToolConfig.py:596
 msgid "Modules dependencies graph"
-msgstr ""
+msgstr "بۆلەكچە باغلىنىش گرافىكى"
 
 #: PyStudio/PyStudio/Common/ToolConfig.py:599
 #: PyStudio/build/lib/PyStudio/Common/ToolConfig.py:581
 msgid "More than one statement on a single line"
-msgstr ""
+msgstr "تاققۇردا بىردىن ئارتۇق بايانات بار"
 
 #: PyStudio/PyStudio/Project/ProjectTree.py:197
 msgid "Move to Recycle Bin"
@@ -808,19 +826,19 @@ msgstr ""
 #: PyStudio/build/lib/PyStudio/Debugger/ThreadsList.py:84
 #: PyStudio/build/lib/PyStudio/Debugger/VariablesLists.py:61
 msgid "Name"
-msgstr ""
+msgstr "ئىسمى"
 
 #: PyStudio/PyStudio/Common/ToolConfig.py:706
 #: PyStudio/build/lib/PyStudio/Common/ToolConfig.py:688
 msgid "Name not defined in module"
-msgstr ""
+msgstr "بۆلەكچە ئىسمى ئېنىقلانمىغان"
 
 #: PyStudio/PyStudio/Debugger/VariablesLists.py:182
 #: PyStudio/PyStudio/Debugger/VariablesLists.py:205
 #: PyStudio/build/lib/PyStudio/Debugger/VariablesLists.py:182
 #: PyStudio/build/lib/PyStudio/Debugger/VariablesLists.py:205
 msgid "Namespace Warning"
-msgstr ""
+msgstr "نامسىزلىق ئاگاھلاندۇرۇشى"
 
 #: PyStudio/PyStudio/Project/ProjectTree.py:193
 msgid "New"
@@ -829,7 +847,7 @@ msgstr ""
 #: PyStudio/PyStudio/Project/ProjectTree.py:412
 #, fuzzy
 msgid "New File"
-msgstr "ファイル"
+msgstr "ھۆججەت"
 
 #: PyStudio/PyStudio/Project/ProjectTree.py:187
 msgid "New File..."
@@ -864,12 +882,12 @@ msgstr ""
 #: PyStudio/PyStudio/SyntaxChecker/LintShelfWindow.py:199
 #: PyStudio/build/lib/PyStudio/SyntaxChecker/LintShelfWindow.py:161
 msgid "No data to save!"
-msgstr ""
+msgstr "ساقلايدىغان سانلىق مەلۇمات يوق"
 
 #: PyStudio/PyStudio/Common/ToolConfig.py:676
 #: PyStudio/build/lib/PyStudio/Common/ToolConfig.py:658
 msgid "No exception type(s) specified"
-msgstr ""
+msgstr "باشقا تىپلار بەلگىلەنمىگەن"
 
 #: PyStudio/PyStudio/Common/ToolConfig.py:701
 #: PyStudio/build/lib/PyStudio/Common/ToolConfig.py:683
@@ -879,17 +897,17 @@ msgstr ""
 #: PyStudio/PyStudio/Common/ToolConfig.py:714
 #: PyStudio/build/lib/PyStudio/Common/ToolConfig.py:696
 msgid "Object is not callable"
-msgstr ""
+msgstr "ئوبېكىت چاقىرىقسىز"
 
 #: PyStudio/PyStudio/Debugger/VariablesShelfWindow.py:82
 #: PyStudio/build/lib/PyStudio/Debugger/VariablesShelfWindow.py:82
 msgid "Off"
-msgstr ""
+msgstr "تاقاش"
 
 #: PyStudio/PyStudio/Common/ToolConfig.py:273
 #: PyStudio/build/lib/PyStudio/Common/ToolConfig.py:255
 msgid "Only run when requested"
-msgstr ""
+msgstr "سورالغاندا ئىجرا قىلىش"
 
 #: PyStudio/PyStudio/Project/ProjectMgr.py:75
 #: PyStudio/PyStudio/Project/ProjectMgr.py:238
@@ -912,7 +930,7 @@ msgstr ""
 #: PyStudio/build/lib/PyStudio/ModuleFinder/FindTabMenu.py:103
 #, python-format
 msgid "Open module '%s'"
-msgstr ""
+msgstr "'%s'بۆلەكچە ئېچىش"
 
 #: PyStudio/PyStudio/Project/ProjectTree.py:183
 msgid "Open..."
@@ -921,22 +939,22 @@ msgstr ""
 #: PyStudio/PyStudio/Common/ToolConfig.py:601
 #: PyStudio/build/lib/PyStudio/Common/ToolConfig.py:583
 msgid "Operator not followed by a space"
-msgstr ""
+msgstr "بوشلۇقتىن كېيىن ئەممەللەر يوق"
 
 #: PyStudio/PyStudio/Common/ToolConfig.py:600
 #: PyStudio/build/lib/PyStudio/Common/ToolConfig.py:582
 msgid "Operator not preceded by a space"
-msgstr ""
+msgstr "بوشلۇقتىن بۇرۇن ئەممەللەر يوق"
 
 #: PyStudio/PyStudio/Debugger/AttachDialog.py:76
 #: PyStudio/build/lib/PyStudio/Debugger/AttachDialog.py:76
 msgid "PID"
-msgstr "プロセスID"
+msgstr ""
 
 #: PyStudio/PyStudio/Debugger/PasswordDialog.py:33
 #: PyStudio/build/lib/PyStudio/Debugger/PasswordDialog.py:33
 msgid "Password"
-msgstr "パスワード"
+msgstr "پارول"
 
 #: PyStudio/PyStudio/Common/ToolConfig.py:375
 #: PyStudio/build/lib/PyStudio/Common/ToolConfig.py:357
@@ -954,7 +972,7 @@ msgstr ""
 #: PyStudio/PyStudio/Debugger/DebugShelfWindow.py:76
 #: PyStudio/build/lib/PyStudio/Debugger/DebugShelfWindow.py:76
 msgid "Program Args"
-msgstr ""
+msgstr "پروگرامما ئۆزگەرگۈچىسى"
 
 #: PyStudio/PyStudio/Project/NewProjectDlg.py:97
 msgid "Project Destination:"
@@ -983,7 +1001,7 @@ msgstr ""
 #: PyStudio/PyStudio/Common/ToolConfig.py:280
 #: PyStudio/build/lib/PyStudio/Common/ToolConfig.py:262
 msgid "PyLint Checkers"
-msgstr ""
+msgstr "PyLint تەكشۈرگۈچ"
 
 #: PyStudio/PyStudio/__init__.py:197
 msgid "PyProject"
@@ -992,21 +1010,22 @@ msgstr ""
 #: PyStudio/PyStudio/__init__.py:261
 #: PyStudio/build/lib/PyStudio/__init__.py:193
 msgid "PyStudio"
-msgstr ""
+msgstr "PyStudio"
 
 #: PyStudio/PyStudio/Common/ToolConfig.py:97
 #: PyStudio/build/lib/PyStudio/Common/ToolConfig.py:88
 msgid "PyStudio Config"
-msgstr ""
+msgstr "PyStudio سەپلەش"
 
 #: PyStudio/PyStudio/Project/ProjectTree.py:393
+#, fuzzy
 msgid "PyStudio Error"
-msgstr ""
+msgstr "PyStudio"
 
 #: PyStudio/PyStudio/Common/ToolConfig.py:177
 #: PyStudio/build/lib/PyStudio/Common/ToolConfig.py:167
 msgid "Python Path:"
-msgstr ""
+msgstr "Python يولى:"
 
 #: PyStudio/PyStudio/Common/ToolConfig.py:708
 #: PyStudio/build/lib/PyStudio/Common/ToolConfig.py:690
@@ -1059,13 +1078,13 @@ msgstr ""
 #: PyStudio/PyStudio/Debugger/AttachDialog.py:68
 #: PyStudio/build/lib/PyStudio/Debugger/AttachDialog.py:68
 msgid "Refresh"
-msgstr ""
+msgstr "يېڭىلاش"
 
 #: PyStudio/PyStudio/Debugger/ExpressionsShelfWindow.py:54
 #: PyStudio/build/lib/PyStudio/Debugger/ExpressionsShelfWindow.py:54
 #, fuzzy
 msgid "Refresh Expressions"
-msgstr "式を設定"
+msgstr "ئىپادىنى ئۆچۈرۈش"
 
 #: PyStudio/PyStudio/Debugger/VariablesShelfWindow.py:79
 #: PyStudio/build/lib/PyStudio/Debugger/VariablesShelfWindow.py:79
@@ -1090,7 +1109,7 @@ msgstr ""
 #: PyStudio/PyStudio/Project/ProjectTree.py:201
 #, fuzzy
 msgid "Rename"
-msgstr "ファイル名"
+msgstr "ھۆججەت ئىسمى"
 
 #: PyStudio/PyStudio/Common/ToolConfig.py:692
 #: PyStudio/build/lib/PyStudio/Common/ToolConfig.py:674
@@ -1105,7 +1124,7 @@ msgstr ""
 #: PyStudio/PyStudio/Debugger/DebugShelfWindow.py:62
 #: PyStudio/build/lib/PyStudio/Debugger/DebugShelfWindow.py:62
 msgid "Run"
-msgstr "実行"
+msgstr "ئىجرا قىلىش"
 
 #: PyStudio/PyStudio/Debugger/MessageHandler.py:55
 #: PyStudio/build/lib/PyStudio/Debugger/MessageHandler.py:55
@@ -1133,12 +1152,12 @@ msgstr ""
 #: PyStudio/PyStudio/Debugger/BreakPointsShelfWindow.py:160
 #: PyStudio/build/lib/PyStudio/Debugger/BreakPointsShelfWindow.py:160
 msgid "Set Breakpoint"
-msgstr "ブレークポイントを設定"
+msgstr ""
 
 #: PyStudio/PyStudio/Debugger/ExpressionsShelfWindow.py:48
 #: PyStudio/build/lib/PyStudio/Debugger/ExpressionsShelfWindow.py:48
 msgid "Set Expression"
-msgstr "式を設定"
+msgstr ""
 
 #: PyStudio/PyStudio/Debugger/PasswordDialog.py:58
 #: PyStudio/build/lib/PyStudio/Debugger/PasswordDialog.py:58
@@ -1181,7 +1200,7 @@ msgstr ""
 #: PyStudio/build/lib/PyStudio/Debugger/ThreadsList.py:41
 #: PyStudio/build/lib/PyStudio/Debugger/ThreadsList.py:85
 msgid "State"
-msgstr ""
+msgstr "ھالەت"
 
 #: PyStudio/PyStudio/Common/ToolConfig.py:635
 #: PyStudio/build/lib/PyStudio/Common/ToolConfig.py:617
@@ -1201,17 +1220,17 @@ msgstr ""
 #: PyStudio/PyStudio/Debugger/DebugShelfWindow.py:68
 #: PyStudio/build/lib/PyStudio/Debugger/DebugShelfWindow.py:68
 msgid "Step In"
-msgstr ""
+msgstr "قەدەملەپ كىرىش"
 
 #: PyStudio/PyStudio/Debugger/DebugShelfWindow.py:72
 #: PyStudio/build/lib/PyStudio/Debugger/DebugShelfWindow.py:72
 msgid "Step Out"
-msgstr "ステップアウト"
+msgstr "چىقىپ توختاش"
 
 #: PyStudio/PyStudio/Debugger/DebugShelfWindow.py:70
 #: PyStudio/build/lib/PyStudio/Debugger/DebugShelfWindow.py:70
 msgid "Step Over"
-msgstr "ステップオーバー"
+msgstr "ئاتلاپ توختاش"
 
 #: PyStudio/PyStudio/Debugger/DebugShelfWindow.py:64
 #: PyStudio/build/lib/PyStudio/Debugger/DebugShelfWindow.py:64
@@ -1259,12 +1278,12 @@ msgstr ""
 #: PyStudio/PyStudio/Debugger/StackThreadShelfWindow.py:51
 #: PyStudio/build/lib/PyStudio/Debugger/StackThreadShelfWindow.py:51
 msgid "Threads"
-msgstr "スレッド"
+msgstr ""
 
 #: PyStudio/PyStudio/Debugger/BreakPointsShelfWindow.py:55
 #: PyStudio/build/lib/PyStudio/Debugger/BreakPointsShelfWindow.py:55
 msgid "Toggle Breakpoint"
-msgstr ""
+msgstr "توختاش نۇقتىسىنى ئالماشتۇرۇش"
 
 #: PyStudio/PyStudio/Common/ToolConfig.py:620
 #: PyStudio/build/lib/PyStudio/Common/ToolConfig.py:602
@@ -1279,7 +1298,7 @@ msgstr ""
 #: PyStudio/PyStudio/Common/ToolConfig.py:624
 #: PyStudio/build/lib/PyStudio/Common/ToolConfig.py:606
 msgid "Too many arguments"
-msgstr ""
+msgstr "ئۆزگەرگۈچىلەر بەك كۆپ"
 
 #: PyStudio/PyStudio/Common/ToolConfig.py:623
 #: PyStudio/build/lib/PyStudio/Common/ToolConfig.py:605
@@ -1330,7 +1349,7 @@ msgstr ""
 #: PyStudio/build/lib/PyStudio/SyntaxChecker/CheckResultsList.py:47
 #: PyStudio/build/lib/PyStudio/SyntaxChecker/CheckResultsList.py:157
 msgid "Type"
-msgstr ""
+msgstr "تىپى"
 
 #: PyStudio/PyStudio/Common/ToolConfig.py:724
 #: PyStudio/build/lib/PyStudio/Common/ToolConfig.py:706
@@ -1343,9 +1362,9 @@ msgid "Unable to import module"
 msgstr ""
 
 #: PyStudio/PyStudio/Project/ProjectTree.py:392
-#, python-format
+#, fuzzy, python-format
 msgid "Unable to load project: %s"
-msgstr ""
+msgstr "نەتىجە سانلىق مەلۇماتىنى يۈكلىيەلمىدى:%s"
 
 #: PyStudio/PyStudio/Common/ToolConfig.py:713
 #: PyStudio/build/lib/PyStudio/Common/ToolConfig.py:695
@@ -1365,14 +1384,14 @@ msgstr ""
 #: PyStudio/PyStudio/Common/ToolConfig.py:721
 #: PyStudio/build/lib/PyStudio/Common/ToolConfig.py:703
 msgid "Unexpected error"
-msgstr ""
+msgstr "كۈتۈلمىگەن خاتالىق"
 
 #: PyStudio/PyStudio/ModuleFinder/FindResultsList.py:35
 #: PyStudio/PyStudio/ModuleFinder/FindResultsList.py:36
 #: PyStudio/build/lib/PyStudio/ModuleFinder/FindResultsList.py:35
 #: PyStudio/build/lib/PyStudio/ModuleFinder/FindResultsList.py:36
 msgid "Unknown Error"
-msgstr ""
+msgstr "نامەلۇم خاتالىق"
 
 #: PyStudio/PyStudio/Common/ToolConfig.py:703
 #: PyStudio/build/lib/PyStudio/Common/ToolConfig.py:685
@@ -1494,7 +1513,7 @@ msgstr ""
 #: PyStudio/build/lib/PyStudio/Debugger/ExpressionsList.py:47
 #: PyStudio/build/lib/PyStudio/Debugger/VariablesLists.py:62
 msgid "Value"
-msgstr "値"
+msgstr "قىممەت"
 
 #: PyStudio/PyStudio/Common/ToolConfig.py:580
 #: PyStudio/PyStudio/Debugger/AttachDialog.py:169
@@ -1511,11 +1530,12 @@ msgstr "値"
 #: PyStudio/build/lib/PyStudio/SyntaxChecker/CheckResultsList.py:234
 #: PyStudio/build/lib/PyStudio/SyntaxChecker/CheckResultsList.py:238
 msgid "Warning"
-msgstr ""
+msgstr "ئاگاھلاندۇرۇش"
 
 #: PyStudio/PyStudio/SyntaxChecker/LintShelfWindow.py:64
+#, fuzzy
 msgid "Warnings/Errors"
-msgstr ""
+msgstr "ئاگاھلاندۇرۇش"
 
 #: PyStudio/PyStudio/Common/ToolConfig.py:657
 #: PyStudio/build/lib/PyStudio/Common/ToolConfig.py:639
@@ -1581,7 +1601,7 @@ msgstr ""
 #: PyStudio/build/lib/PyStudio/Debugger/ThreadsList.py:60
 #: PyStudio/build/lib/PyStudio/Debugger/ThreadsList.py:96
 msgid "running"
-msgstr "実行中"
+msgstr "ئىجرادا"
 
 #: PyStudio/PyStudio/Common/ToolConfig.py:723
 #: PyStudio/build/lib/PyStudio/Common/ToolConfig.py:705
