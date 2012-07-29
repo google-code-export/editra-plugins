@@ -223,7 +223,7 @@ class ProjectTree(ed_basewin.EDBaseFileTree):
         self.PopupMenu(self._menu.Menu)
 
     #---- Event Handlers ----#
-  
+
     def OnContextMenu(self, evt):
         """Handle context menu events"""
         e_id = evt.Id
@@ -247,8 +247,8 @@ class ProjectTree(ed_basewin.EDBaseFileTree):
             else:
                 cmsg = _("Are you sure you want to delete '%s'?")
             name = os.path.basename(path)
-            result = wx.MessageBox(cmsg % name, _("Delete?"), 
-                                   style=wx.YES_NO|wx.CENTER|wx.ICON_QUESTION)
+            result = wx.MessageBox(cmsg % name, _("Delete?"),
+                                   style=wx.YES_NO | wx.CENTER | wx.ICON_QUESTION)
             if result == wx.YES:
                 self.FileController.MoveToTrash(path)
         elif e_id == ProjectTree.ID_RENAME_FILE:
@@ -256,7 +256,7 @@ class ProjectTree(ed_basewin.EDBaseFileTree):
             if item:
                 self.EditLabel(item)
         elif e_id == ProjectTree.ID_PROPERTIES:
-            pass # TODO: project properties dialog
+            pass  # TODO: project properties dialog
         else:
             # Handle Custom Menu options
             handler = self._menu.GetHandler(e_id)
@@ -266,9 +266,9 @@ class ProjectTree(ed_basewin.EDBaseFileTree):
     def DoOnActivate(self, active):
         """Handle main window activation"""
         if active and self.IsShown():
-            self.SuspendChecks(False) # Resume
+            self.SuspendChecks(False)  # Resume
         elif not active:
-            self.SuspendChecks(True) # Suspend
+            self.SuspendChecks(True)  # Suspend
 
     def DoOnDestroy(self):
         """Cleanup when window is destroyed"""
@@ -376,7 +376,7 @@ class ProjectTree(ed_basewin.EDBaseFileTree):
             self.RemoveWatchDirectory(self._proj.ProjectRoot)
         self._proj = proj
         if not self.Project:
-            return # cleared/closed current project
+            return  # cleared/closed current project
 
         # Repopulate root of tree
         item = self.AddWatchDirectory(self.Project.ProjectRoot)
@@ -386,11 +386,11 @@ class ProjectTree(ed_basewin.EDBaseFileTree):
             self.Expand(item)
             # Update last project info
             ToolConfig.SetConfigValue(ToolConfig.TLC_LAST_PROJECT, self.Project.Path)
-            ed_msg.PostMessage(PyStudioMessages.PYSTUDIO_PROJECT_LOADED, 
+            ed_msg.PostMessage(PyStudioMessages.PYSTUDIO_PROJECT_LOADED,
                                self.Project, self.Parent.MainWindow.Id)
         else:
             wx.MessageBox(_("Unable to load project: %s") % self.Project.ProjectName,
-                          _("PyStudio Error"), style=wx.OK|wx.CENTER|wx.ICON_ERROR)
+                          _("PyStudio Error"), style=wx.OK | wx.CENTER | wx.ICON_ERROR)
             return
 
     def OpenPathWithFM(self, path, revel=False):
@@ -416,7 +416,7 @@ class ProjectTree(ed_basewin.EDBaseFileTree):
 
     def CreateNewFolder(self, dirname, package=False):
         """Prompt user for new name to create a new folder or Python package
-        @param dirname: directory to create it in 
+        @param dirname: directory to create it in
         @keyword package: create a python package
 
         """
@@ -443,13 +443,13 @@ class ProjectTree(ed_basewin.EDBaseFileTree):
         @return: filtered list
 
         """
-        filters = ("*.pyc", "*.pyo", "*.psp") #TODO: add filter configuration
+        filters = ("*.pyc", "*.pyo", "*.psp")  # TODO: add filter configuration
         isHidden = ebmlib.IsHidden
         rval = list()
         rAdd = rval.append
         getBase = os.path.basename
         for path in paths:
-            if isHidden(path): #TODO support show hidden files
+            if isHidden(path):  # TODO: support show hidden files
                 continue
             name = getBase(path)
             if filter(lambda x: fnmatch.fnmatchcase(name, x), filters):

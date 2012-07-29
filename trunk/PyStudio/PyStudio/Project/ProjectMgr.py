@@ -76,8 +76,8 @@ class ProjectManager(ed_basewin.EdBaseCtrlBox):
                      _("Open an existing PyProject project file"))
          # TODO: Future release
 #        pmenu.AppendSeparator()
-#        item = wx.MenuItem(pmenu, 
-#                           ProjectManager.ID_CONF_PROJECT, 
+#        item = wx.MenuItem(pmenu,
+#                           ProjectManager.ID_CONF_PROJECT,
 #                           _("Project Settings"))
 #        item.Bitmap = wx.ArtProvider_GetBitmap(str(ed_glob.ID_PREF), wx.ART_MENU)
 #        pmenu.AppendItem(item)
@@ -158,10 +158,10 @@ class ProjectManager(ed_basewin.EdBaseCtrlBox):
 
     def OnMenu(self, evt):
         """Handles menu events for the Project Manager"""
-        actions = { ProjectManager.ID_NEW_PROJECT  : self.NewProject,
-                    ProjectManager.ID_IMPORT_PROJECT : self.ImportProject,
-                    ProjectManager.ID_OPEN_PROJECT : self.OpenProject,
-                    ProjectManager.ID_CONF_PROJECT : self.ShowConfig }
+        actions = {ProjectManager.ID_NEW_PROJECT: self.NewProject,
+                    ProjectManager.ID_IMPORT_PROJECT: self.ImportProject,
+                    ProjectManager.ID_OPEN_PROJECT: self.OpenProject,
+                    ProjectManager.ID_CONF_PROJECT: self.ShowConfig}
         actions.get(evt.Id, evt.Skip)()
 
     def OnShow(self, evt):
@@ -192,12 +192,12 @@ class ProjectManager(ed_basewin.EdBaseCtrlBox):
             if ebmlib.PathExists(ppath):
                 result = wx.MessageBox(_("The project '%s' already exists.\nDo you wish to overwrite it?") % projName,
                                        _("Project Exists"),
-                                       style=wx.ICON_WARNING|wx.YES_NO)
+                                       style=wx.ICON_WARNING | wx.YES_NO)
                 if result == wx.ID_NO:
                     return
             pfile = ProjectFile.ProjectFile(pxml, ppath)
             pfile.Save(force=True)
-            self.Tree.LoadProject(pfile) # Load the view
+            self.Tree.LoadProject(pfile)  # Load the view
 
     def NewProject(self):
         """Create a new project"""
@@ -223,9 +223,9 @@ class ProjectManager(ed_basewin.EdBaseCtrlBox):
                 util.Log("[PyStudio][info] New Project File: %s" % ppath)
                 pfile = ProjectFile.ProjectFile(pxml, ppath)
                 pfile.Save(force=True)
-                self.Tree.LoadProject(pfile) # Load the view
+                self.Tree.LoadProject(pfile)  # Load the view
             else:
-                pass # TODO: error handling
+                pass  # TODO: error handling
         dlg.Destroy()
 
     def OpenProject(self):
@@ -249,4 +249,3 @@ class ProjectManager(ed_basewin.EdBaseCtrlBox):
         # TODO: stub...
         dlg = ProjectCfgDlg.ProjectCfgDlg(self, title=_("Project Settings"))
         dlg.ShowModal()
-

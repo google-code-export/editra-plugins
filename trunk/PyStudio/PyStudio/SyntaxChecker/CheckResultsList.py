@@ -37,6 +37,7 @@ class CheckResultsList(eclib.EBaseListCtrl,
 
     """
     _cache = dict()
+
     def __init__(self, parent):
         super(CheckResultsList, self).__init__(parent)
 
@@ -93,7 +94,7 @@ class CheckResultsList(eclib.EBaseListCtrl,
             if fname in CheckResultsList._cache:
                 errorlist = CheckResultsList._cache[fname].GetLineData(lineno)
                 if errorlist and len(errorlist):
-                    errors = [ "%s %s" % err for err in errorlist ]
+                    errors = ["%s %s" % err for err in errorlist]
                     data['rdata'] = "\n".join(errors)
 
     def OnItemActivate(self, evt):
@@ -198,7 +199,7 @@ class CheckResultsList(eclib.EBaseListCtrl,
         """
         if fname is None:
             if not self.editor:
-                return # TODO: Log
+                return  # TODO: Log
             fname = self.editor.GetFileName()
         else:
             self.editor = PyStudioUtils.GetEditorOrOpenFile(self._mw, fname)
@@ -226,7 +227,7 @@ class CheckResultsList(eclib.EBaseListCtrl,
             self.Append(row)
             # Column Sorter
             self.itemDataMap[idx] = row
-            self.SetItemData(self.ItemCount-1, idx)
+            self.SetItemData(self.ItemCount - 1, idx)
             # End Column Sorter
             img = tmap.get(mtype.strip(), 2)
             self.SetItemImage(self.ItemCount - 1, img)
@@ -238,8 +239,8 @@ class CheckResultsList(eclib.EBaseListCtrl,
                         mark = ed_marker.LintMarkerWarning()
                     else:
                         mark = ed_marker.LintMarker()
-                    self.editor.AddMarker(mark,
-                                          int(row[1]) - 1) # TODO: store handles
+                    # TODO: store handles
+                    self.editor.AddMarker(mark, int(row[1]) - 1)
                 except ValueError:
                     pass
         self.SetColumnWidth(0, minLType)
@@ -254,7 +255,7 @@ class LintData(object):
         super(LintData, self).__init__()
 
         # Attributes
-        self._data = dict() # lineno -> [(errorType, errorText),]
+        self._data = dict()  # lineno -> [(errorType, errorText),]
 
         # Setup
         for val in data:
@@ -291,9 +292,9 @@ class LintData(object):
     @staticmethod
     def GetDisplayString(mtype):
         """Get the display string for the given mesage type"""
-        msgmap = { 'Error' : _("Error"),
-                   'Warning' : _("Warning"),
-                   'Convention' : _("Convention"),
-                   'Refactor' : _("Refactor"),
-                   '***' : _("Information") }
+        msgmap = {'Error': _("Error"),
+                  'Warning': _("Warning"),
+                  'Convention': _("Convention"),
+                  'Refactor': _("Refactor"),
+                  '***': _("Information")}
         return msgmap.get(mtype, _("Warning"))

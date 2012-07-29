@@ -49,22 +49,23 @@ class LintShelfWindow(BaseShelfWindow):
     __syntaxCheckers = {
         synglob.ID_LANG_PYTHON: PythonSyntaxChecker
     }
+
     def __init__(self, parent):
         """Initialize the window"""
         super(LintShelfWindow, self).__init__(parent)
 
         # Attributes
-        bstyle = eclib.SEGBOOK_STYLE_NO_DIVIDERS|eclib.SEGBOOK_STYLE_LEFT
+        bstyle = eclib.SEGBOOK_STYLE_NO_DIVIDERS | eclib.SEGBOOK_STYLE_LEFT
         self._nb = eclib.SegmentBook(self, style=bstyle)
         self._checkresultslist = CheckResultsList(self._nb)
         self._evaluation = EvaluationWindow(self._nb)
-        
+
         # Setup
         self._InitImageList()
         self._nb.AddPage(self._checkresultslist, _("Warnings/Errors"), img_id=0)
         self._nb.AddPage(self._evaluation, _("Evaluation"), img_id=1)
         ctrlbar = self.setup(self._nb, self._checkresultslist, self._evaluation)
-                             
+
         ctrlbar.AddControl(wx.StaticLine(ctrlbar, size=(-1, 16), style=wx.LI_VERTICAL),
                            wx.ALIGN_LEFT)
         self.savebtn = self.AddPlateButton(u"", ed_glob.ID_SAVE, wx.ALIGN_LEFT)
@@ -176,10 +177,12 @@ class LintShelfWindow(BaseShelfWindow):
         """Export the results to XML"""
         data = self._checkresultslist.GetCachedData()
         if data[1]:
-            dlg = wx.FileDialog(self.GetTopLevelParent(),
+            dlg = wx.FileDialog(self.TopLevelParent,
                                 _("Save Results"),
                                 wildcard="XML(*.xml)|*.xml",
-                                style=wx.FD_SAVE|wx.FD_CHANGE_DIR|wx.FD_OVERWRITE_PROMPT)
+                                style=wx.FD_SAVE |
+                                      wx.FD_CHANGE_DIR |
+                                      wx.FD_OVERWRITE_PROMPT)
             if dlg.ShowModal() == wx.ID_OK:
                 outpath = dlg.GetPath()
                 if not outpath.endswith('.xml'):
@@ -200,10 +203,10 @@ class LintShelfWindow(BaseShelfWindow):
 
     def OnOpenResults(self, evt):
         """Load the analysis results from xml"""
-        dlg = wx.FileDialog(self.GetTopLevelParent(),
+        dlg = wx.FileDialog(self.TopLevelParent,
                             _("Load Results"),
                             wildcard="XML(*.xml)|*.xml",
-                            style=wx.FD_OPEN|wx.FD_CHANGE_DIR)
+                            style=wx.FD_OPEN | wx.FD_CHANGE_DIR)
         if dlg.ShowModal() == wx.ID_OK:
             path = dlg.GetPath()
             results = AnalysisResults.Load(path)

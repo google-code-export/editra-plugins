@@ -112,4 +112,3 @@ class BaseShelfPlugin(plugin.Plugin):
     def IsStockable(self):
         """This item can be reloaded between sessions"""
         return True
-
