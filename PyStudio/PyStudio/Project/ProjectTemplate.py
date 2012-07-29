@@ -32,11 +32,9 @@ __revision__ = "$Revision$"
 #-----------------------------------------------------------------------------#
 # Imports
 import wx
-import sys
 import os
 
 # Editra Imports
-#sys.path.append(r"..\..\..\..\..\src") # TEST
 import ed_xml
 import util
 
@@ -123,7 +121,7 @@ class ProjectTemplate(ed_xml.EdXml):
         except OSError, msg:
             util.Log("[PyProject][err] Failed to create new project (%s)" % projName)
             util.Log("[PyProject][err] %s" % msg)
-            return False # TODO error reporting to user
+            return False  # TODO: error reporting to user
         return True
 
 class TemplateCollection(ed_xml.EdXml):
@@ -184,8 +182,8 @@ def MapDisplayName(templateId):
     @return: unicode or None
 
     """
-    name_map = { u"__EMPTY__" : _("Empty Project"),
-                 u"__BASIC__" : _("Basic Project") }
+    name_map = {u"__EMPTY__": _("Empty Project"),
+                u"__BASIC__": _("Basic Project")}
     return name_map.get(templateId, None)
 
 #-----------------------------------------------------------------------------#

@@ -2,7 +2,7 @@
 # Name: EvaluationWindow.py
 # Purpose: Pylint plugin
 # Author: Mike Rans
-# Copyright: (c) 2010 Mike Rans
+# Copyright: (c) 2012 Mike Rans
 # License: wxWindows License
 ###############################################################################
 
@@ -26,9 +26,9 @@ _ = wx.GetTranslation
 
 class EvaluationWindow(eclib.OutputBuffer):
     """Evaluation Window"""
-    
+
     def __init__(self, *args, **kwargs):
-        eclib.OutputBuffer.__init__(self, *args, **kwargs)
-        
+        super(EvaluationWindow, self).__init__(*args, **kwargs)
+
     def set_mainwindow(self, mw):
         self._mainw = mw

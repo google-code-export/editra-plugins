@@ -42,15 +42,15 @@ class NewProjectDlg(ed_basewin.EdBaseDialog):
     def __init__(self, parent):
         super(NewProjectDlg, self).__init__(parent,
                                             title=_("Create New Project"),
-                                            style=wx.DEFAULT_DIALOG_STYLE|wx.RESIZE_BORDER)
+                                            style=wx.DEFAULT_DIALOG_STYLE | wx.RESIZE_BORDER)
 
         # Attributes
         self.Panel = NewProjectPanel(self)
 
         # Setup
-        bszr = self.CreateButtonSizer(wx.OK|wx.CANCEL)
+        bszr = self.CreateButtonSizer(wx.OK | wx.CANCEL)
         self.Sizer.Add((10, 10), 0)
-        self.Sizer.Add(bszr, 0, wx.EXPAND|wx.ALL, 5)
+        self.Sizer.Add(bszr, 0, wx.EXPAND | wx.ALL, 5)
         self.SetInitialSize(size=(450, 400))
         self.CenterOnParent()
 
@@ -70,9 +70,9 @@ class NewProjectPanel(wx.Panel):
 
         # Attributes
         self._ptype = ProjectTypePanel(self)
-        self._pname = wx.TextCtrl(self) # TODO validator alpha-numeric only
+        self._pname = wx.TextCtrl(self)  # TODO validator alpha-numeric only
         self._pname.ToolTip = wx.ToolTip(_("Project directory will be created using this name."))
-        self._pdir = wx.DirPickerCtrl(self) # TODO: default path
+        self._pdir = wx.DirPickerCtrl(self)  # TODO: default path
         self._pdir.ToolTip = wx.ToolTip(_("Location to create new project."))
 
         # Setup
@@ -83,10 +83,10 @@ class NewProjectPanel(wx.Panel):
         sizer = wx.BoxSizer(wx.VERTICAL)
 
         # Type Selection Panel
-        sizer.Add(self._ptype, 1, wx.EXPAND|wx.ALL, 5)
+        sizer.Add(self._ptype, 1, wx.EXPAND | wx.ALL, 5)
 
         hline = wx.StaticLine(self, size=(-1, 1), style=wx.LI_HORIZONTAL)
-        sizer.Add(hline, 0, wx.EXPAND|wx.ALL, 5)
+        sizer.Add(hline, 0, wx.EXPAND | wx.ALL, 5)
 
         # Project Name / Location
         gszr = wx.FlexGridSizer(2, 2, 3, 3)
@@ -97,7 +97,7 @@ class NewProjectPanel(wx.Panel):
         llbl = wx.StaticText(self, label=_("Project Destination:"))
         gszr.Add(llbl, 0, wx.ALIGN_CENTER_VERTICAL)
         gszr.Add(self._pdir, 1, wx.EXPAND)
-        sizer.Add(gszr, 0, wx.EXPAND|wx.ALL, 10)
+        sizer.Add(gszr, 0, wx.EXPAND | wx.ALL, 10)
 
         self.SetSizer(sizer)
 
@@ -113,8 +113,8 @@ class NewProjectPanel(wx.Panel):
         @return: bool
 
         """
-        return all([self._pname.Value, 
-                    self._pdir.Path, 
+        return all([self._pname.Value,
+                    self._pdir.Path,
                     self._ptype.HasSelection()])
 
 #-----------------------------------------------------------------------------#
@@ -127,10 +127,11 @@ class ProjectTypePanel(wx.Panel):
         # Attributes
         typeBox = wx.StaticBox(self, label=_("Project Type"))
         self._tbox = wx.StaticBoxSizer(typeBox, wx.VERTICAL)
-        descBox = wx.StaticBox(self, label=_("Preview"), size=(300,200))
+        descBox = wx.StaticBox(self, label=_("Preview"), size=(300, 200))
         self._dbox = wx.StaticBoxSizer(descBox, wx.VERTICAL)
         self._preview = TemplatePreview(self)
-        self._templates = ProjectTemplate.GetDefaultTemplates() # TODO: load from user config
+        # TODO: load from user config
+        self._templates = ProjectTemplate.GetDefaultTemplates()
         names = self._templates.GetTemplateNames()
         self._tlist = wx.ListBox(self, choices=names, style=wx.LB_SINGLE)
 
@@ -145,12 +146,12 @@ class ProjectTypePanel(wx.Panel):
         sizer = wx.BoxSizer(wx.HORIZONTAL)
 
         # Type Selection List
-        self._tbox.Add(self._tlist, 1, wx.EXPAND|wx.ALL, 5)
-        sizer.Add(self._tbox, 1, wx.EXPAND|wx.ALL, 10)
+        self._tbox.Add(self._tlist, 1, wx.EXPAND | wx.ALL, 5)
+        sizer.Add(self._tbox, 1, wx.EXPAND | wx.ALL, 10)
 
         # Description Box
-        self._dbox.Add(self._preview, 1, wx.EXPAND|wx.ALL, 5)
-        sizer.Add(self._dbox, 1, wx.EXPAND|wx.ALL, 10)
+        self._dbox.Add(self._preview, 1, wx.EXPAND | wx.ALL, 5)
+        sizer.Add(self._dbox, 1, wx.EXPAND | wx.ALL, 10)
 
         self.SetSizer(sizer)
 
@@ -184,8 +185,8 @@ class TemplatePreview(wx.TreeCtrl):
 
     """
     def __init__(self, parent):
-        super(TemplatePreview, self).__init__(parent, 
-                                              style=wx.TR_DEFAULT_STYLE|wx.TR_FULL_ROW_HIGHLIGHT)
+        super(TemplatePreview, self).__init__(parent,
+                                              style=wx.TR_DEFAULT_STYLE | wx.TR_FULL_ROW_HIGHLIGHT)
 
         # Setup
         self._il = wx.ImageList(16, 16)
@@ -232,7 +233,7 @@ class TemplatePreview(wx.TreeCtrl):
         @param pname: unicode
 
         """
-        if self._projNameId != None:
+        if self._projNameId is not None:
             self.SetItemText(self._projNameId, pname)
 
 #-----------------------------------------------------------------------------#

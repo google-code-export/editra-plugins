@@ -58,7 +58,7 @@ class PyStudioUtils():
             # Give up and do what we can
             _value = unicode(_value, 'latin1', errors='replace')
         return _value
-                
+
     @staticmethod
     def GetDefaultPython():
         if wx.Platform == "__WXMSW__":
@@ -161,7 +161,7 @@ class PyStudioUtils():
     def error_dialog(parent, error):
         if error == '':
             return
-        dlg = wx.MessageDialog(parent, error, _("Error"), wx.OK|wx.ICON_ERROR)
+        dlg = wx.MessageDialog(parent, error, _("Error"), wx.OK | wx.ICON_ERROR)
         dlg.ShowModal()
         dlg.Destroy()
 
@@ -183,12 +183,12 @@ class RunProcInThread(threading.Thread):
         self.args = args
         self.kwargs = kwargs
         self.param = None
-        
+
         self.setDaemon(True)
 
     def pass_parameter(self, param):
         self.param = param
-    
+
     def run(self):
         try:
             data = self.fn(*self.args, **self.kwargs)
