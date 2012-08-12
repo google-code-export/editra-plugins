@@ -4,8 +4,12 @@ Changelog
 #-----------------------------------------------------------------------------#
 
 Version 0.5
-Released:
+Released: 08/12/2012
 
++Add basic Python project management features in new PyProject component.
++Add Pep 8 Checker
++Add raw PyLint output window to capture overall score information from
+analysis run.
 +Code Analysis results window allows sorting of results
 +Fix use case where debugger settings were not getting stored into profile.
 +Fix Clear button on Code Analysis window not working after file has been closed.
