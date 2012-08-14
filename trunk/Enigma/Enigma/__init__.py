@@ -24,10 +24,17 @@ import plugin
 import util
 import ed_msg
 
+# Local imports
+import Enigma.emachine as emachine
+
 #-----------------------------------------------------------------------------#
 # Globals
 ID_ENIGMA = wx.NewId()
+ID_BASE16_ENC = wx.NewId()
+ID_BASE32_ENC = wx.NewId()
 ID_BASE64_ENC = wx.NewId()
+ID_BASE16_DEC = wx.NewId()
+ID_BASE32_DEC = wx.NewId()
 ID_BASE64_DEC = wx.NewId()
 
 _ = wx.GetTranslation
@@ -73,7 +80,12 @@ class Enigma(plugin.Plugin):
             # Build Submenu
             subMen = wx.Menu()
 
+            b16enc = subMen.Append(ID_BASE16_ENC, _("Base16 Encode"))
+            b32enc = subMen.Append(ID_BASE32_ENC, _("Base32 Encode"))
             b64enc = subMen.Append(ID_BASE64_ENC, _("Base64 Encode"))
+
+            b16dec = subMen.Append(ID_BASE16_DEC, _("Base16 Decode"))
+            b32dec = subMen.Append(ID_BASE32_DEC, _("Base32 Decode"))
             b64dec = subMen.Append(ID_BASE64_DEC, _("Base64 Decode"))
 
             menu.AppendMenu(ID_ENIGMA, u"Enigma", subMen)
@@ -86,18 +98,35 @@ class Enigma(plugin.Plugin):
                 for item in (b64enc, b64dec):
                     item.Enable(has_sel)
 
-            menumgr.AddHandler(ID_BASE64_ENC, OnEnDe)
-            menumgr.AddHandler(ID_BASE64_DEC, OnEnDe)
+            for mid in (ID_BASE16_DEC, ID_BASE16_ENC,
+                        ID_BASE32_DEC, ID_BASE32_ENC,
+                        ID_BASE64_DEC, ID_BASE64_ENC):
+                menumgr.AddHandler(mid, OnEnDe)
 
 #-----------------------------------------------------------------------------#
 
+_DECODERS = {ID_BASE16_DEC : "base16",
+             ID_BASE32_DEC : "base32",
+             ID_BASE64_DEC : "base64"}
+
+_ENCODERS = {ID_BASE16_ENC : "base16",
+             ID_BASE32_ENC : "base32",
+             ID_BASE64_ENC : "base64"}
+
 def OnEnDe(buff, evt):
     """Handle context menu events"""
-    if evt.Id == ID_BASE64_DEC:
-        util.Log("[Enigma] Base64 Decode")
-        pass
-    elif evt.Id == ID_BASE64_ENC:
-        util.Log("[Enigma] Base64 Encode")
-        pass
-    else:
-        evt.Skip()
+    try:
+        if evt.Id in _DECODERS:
+            util.Log("[Enigma] Enigma Decode")
+            decoder = emachine.EnigmaMachine.factoryCreate(_DECODERS.get(evt.Id))
+            txt = decoder.decode(buff.GetSelectedText())
+            buff.ReplaceSelection(txt)
+        elif evt.Id == _ENCODERS:
+            util.Log("[Enigma] Enigma Encode")
+            encoder = emachine.EnigmaMachine.factoryCreate(_ENCODERS.get(evt.Id))
+            txt = encoder.encode(buff.GetSelectedText())
+            buff.ReplaceSelection(txt)
+        else:
+            evt.Skip()
+    except Exception, msg:
+        util.Log("[Enigma][err] % s" % msg)
