@@ -27,7 +27,8 @@ if setup != None:
         url="http://editra.org",
         platforms=["Linux", "OS X", "Windows"],
         packages=['','PyStudio','PyStudio.Common','PyStudio.SyntaxChecker',
-                  'PyStudio.ModuleFinder','PyStudio.Debugger'],
+                  'PyStudio.ModuleFinder','PyStudio.Debugger',
+                  'PyStudio.Project'],
         entry_points='''
         [Editra.plugins]
         SyntaxChecker = PyStudio:PyAnalysis

@@ -2,6 +2,13 @@ PyStudio Plugin
 Changelog
 
 #-----------------------------------------------------------------------------#
+Version 0.6
+Released:
+
++Fix bad build of 0.5, project component not getting bundled in binaries.
+
+
+#-----------------------------------------------------------------------------#
 
 Version 0.5
 Released: 08/12/2012
