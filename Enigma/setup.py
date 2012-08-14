@@ -26,9 +26,9 @@ if setup != None:
         license="wxWindows",
         url="http://editra.org",
         platforms=["Linux", "OS X", "Windows"],
-        packages=['Enigma',],
+        packages=['', 'Enigma',],
         entry_points='''
         [Editra.plugins]
-        Enigma = Enigma:Enigma
+        Machine = Enigma:EnigmaPlugin
         '''
         )

@@ -7,6 +7,8 @@
 ###############################################################################
 
 """Text Encoder/Decoder interface
+  * Base16 encoder/decoder
+  * Base32 encoder/decoder
   * Base64 encoder/decoder
 
 """
