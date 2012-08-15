@@ -166,7 +166,8 @@ class ProjectManager(ed_basewin.EdBaseCtrlBox):
 
     def OnShow(self, evt):
         """Activate/deactivate processing when window is shown/hidden"""
-        self._tree.SuspendChecks(not evt.IsShown())
+        if self and self._tree:
+            self._tree.SuspendChecks(not evt.IsShown())
         evt.Skip()
 
     def OnUpdateButtons(self, evt):
