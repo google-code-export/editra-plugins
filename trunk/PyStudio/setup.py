@@ -19,7 +19,7 @@ import os
 if setup != None:
     setup(
         name='PyStudio',
-        version='0.6',
+        version='0.7',
         description=__doc__,
         author=__author__,
         author_email="rans@email.com",
@@ -28,6 +28,7 @@ if setup != None:
         platforms=["Linux", "OS X", "Windows"],
         packages=['','PyStudio','PyStudio.Common','PyStudio.SyntaxChecker',
                   'PyStudio.ModuleFinder','PyStudio.Debugger',
+                  'PyStudio.Controller',
                   'PyStudio.Project'],
         entry_points='''
         [Editra.plugins]

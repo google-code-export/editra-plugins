@@ -30,13 +30,10 @@ import ed_basewin
 import syntax.synglob as synglob
 
 # Local libs
-from PyStudio.Common import ToolConfig
-import PyStudio.Common.Images as Images
-import PyStudio.Project.ProjectXml as ProjectXml
-import PyStudio.Project.ProjectFile as ProjectFile
-import PyStudio.Project.NewProjectDlg as NewProjectDlg
+from PyStudio.Common import ToolConfig, Images
+from PyStudio.Project import ProjectXml, ProjectFile, NewProjectDlg
 from PyStudio.Project.ProjectTree import ProjectTree
-import PyStudio.Project.ProjectCfgDlg as ProjectCfgDlg
+from PyStudio.Project import ProjectCfgDlg
 
 #-----------------------------------------------------------------------------#
 # Globals
