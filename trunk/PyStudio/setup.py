@@ -26,6 +26,7 @@ if setup != None:
         license="wxWindows",
         url="http://editra.org",
         platforms=["Linux", "OS X", "Windows"],
+        package_data={'PyStudio' : ['locale/*/LC_MESSAGES/*.mo']},
         packages=['','PyStudio','PyStudio.Common','PyStudio.SyntaxChecker',
                   'PyStudio.ModuleFinder','PyStudio.Debugger',
                   'PyStudio.Controller',

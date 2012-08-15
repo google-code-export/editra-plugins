@@ -7,6 +7,7 @@ Released:
 
 +Fix more import issues on Windows
 +Fix dead object error on exit
++Add translations (German, Spanish, Japanese, Latvian, Russian)
 
 #-----------------------------------------------------------------------------#
 Version 0.6
