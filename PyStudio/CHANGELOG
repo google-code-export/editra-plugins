@@ -2,6 +2,13 @@ PyStudio Plugin
 Changelog
 
 #-----------------------------------------------------------------------------#
+Version 0.7
+Released:
+
++Fix more import issues on Windows
++Fix dead object error on exit
+
+#-----------------------------------------------------------------------------#
 Version 0.6
 Released:
 
