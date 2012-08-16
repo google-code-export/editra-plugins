@@ -36,6 +36,7 @@ ID_ENIGMA = wx.NewId()
 ID_BASE16_ENC = wx.NewId()
 ID_BASE32_ENC = wx.NewId()
 ID_BASE64_ENC = wx.NewId()
+ID_BASE64_ENC_UNIX = wx.NewId()
 ID_BASE16_DEC = wx.NewId()
 ID_BASE32_DEC = wx.NewId()
 ID_BASE64_DEC = wx.NewId()
@@ -86,6 +87,7 @@ class EnigmaPlugin(plugin.Plugin):
             b16enc = subMen.Append(ID_BASE16_ENC, _("Base16 Encode"))
             b32enc = subMen.Append(ID_BASE32_ENC, _("Base32 Encode"))
             b64enc = subMen.Append(ID_BASE64_ENC, _("Base64 Encode"))
+            b64enc = subMen.Append(ID_BASE64_ENC_UNIX, _("Base64 Encode with Unix EOL"))
 
             subMen.AppendSeparator()
 
@@ -106,7 +108,8 @@ class EnigmaPlugin(plugin.Plugin):
 
             for mid in (ID_BASE16_DEC, ID_BASE16_ENC,
                         ID_BASE32_DEC, ID_BASE32_ENC,
-                        ID_BASE64_DEC, ID_BASE64_ENC):
+                        ID_BASE64_DEC, ID_BASE64_ENC,
+                                       ID_BASE64_ENC_UNIX):
                 menumgr.AddHandler(mid, OnEnDe)
 
 #-----------------------------------------------------------------------------#
@@ -117,7 +120,8 @@ _DECODERS = {ID_BASE16_DEC : "base16",
 
 _ENCODERS = {ID_BASE16_ENC : "base16",
              ID_BASE32_ENC : "base32",
-             ID_BASE64_ENC : "base64"}
+             ID_BASE64_ENC : "base64",
+             ID_BASE64_ENC_UNIX : "base64"}
 
 def OnEnDe(buff, evt):
     """Handle context menu events"""
@@ -131,6 +135,10 @@ def OnEnDe(buff, evt):
             util.Log("[Enigma] Enigma Encode")
             encoder = emachine.EnigmaMachine.FactoryCreate(_ENCODERS.get(evt.Id))
             txt = encoder.encode(buff.GetSelectedText())
+            if evt.Id == ID_BASE64_ENC_UNIX:
+                # Add line feeds every 64 chars
+                tmp = [txt[i:i+64] for i in range(0, len(txt), 64)]
+                txt = "\n".join(tmp)
             buff.ReplaceSelection(txt)
         else:
             evt.Skip()

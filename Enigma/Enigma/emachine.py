@@ -73,6 +73,7 @@ class Base16(EnigmaMachine):
 
         """
         try:
+            txt = txt.replace("\n", "") # handle decode of unix eol
             txt = base64.b16decode(txt)
         except TypeError:
             pass # Log to status bar of error
