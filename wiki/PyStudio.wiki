@@ -11,7 +11,7 @@ Provides a collection of tools to aid in the development of Python applications.
 
 = Main Features =
 
-  * PyProject (Project Management *new version 0.5*)
+  * PyProject (Project Management *new version 0.7*)
   * PyDebugger (Integrated Remote Python Debugger via [http://winpdb.org/ Winpdb] backend)
   * PyFind (Python Module Finder)
   * [PyAnalysis Code Analysis] (Integrated Code Analysis via [http://www.logilab.org/857 PyLint])
