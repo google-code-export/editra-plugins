@@ -22,6 +22,7 @@ __revision__ = "$Revision:  $"
 import wx
 
 # Editra Libs
+import ed_glob
 import plugin
 import iface
 import util
@@ -79,15 +80,13 @@ class EnigmaPlugin(plugin.Plugin):
         menumgr = msg.GetData()
         menu = menumgr.GetMenu()
         if menu:
-            menu.AppendSeparator()
-
             # Build Submenu
             subMen = wx.Menu()
 
             b16enc = subMen.Append(ID_BASE16_ENC, _("Base16 Encode"))
             b32enc = subMen.Append(ID_BASE32_ENC, _("Base32 Encode"))
             b64enc = subMen.Append(ID_BASE64_ENC, _("Base64 Encode"))
-            b64enc = subMen.Append(ID_BASE64_ENC_UNIX, _("Base64 Encode with Unix EOL"))
+            b64encUn = subMen.Append(ID_BASE64_ENC_UNIX, _("Base64 Encode with Unix EOL"))
 
             subMen.AppendSeparator()
 
@@ -95,22 +94,18 @@ class EnigmaPlugin(plugin.Plugin):
             b32dec = subMen.Append(ID_BASE32_DEC, _("Base32 Decode"))
             b64dec = subMen.Append(ID_BASE64_DEC, _("Base64 Decode"))
 
-            menu.AppendMenu(ID_ENIGMA, u"Enigma", subMen)
+            menu.InsertMenu(0, ID_ENIGMA, u"Enigma", subMen)
+            menu.InsertSeparator(1)
 
             buf = menumgr.GetUserData('buffer')
             if buf:
                 # Only enable the menu item if there is a selection in the
                 # buffer.
                 has_sel = buf.HasSelection()
-                for item in (b16enc, b32enc, b64enc,
-                             b16enc, b32enc, b64dec):
+                for item in (b16enc, b32enc, b64enc, b64encUn,
+                             b16dec, b32dec, b64dec):
                     item.Enable(has_sel)
-
-            for mid in (ID_BASE16_DEC, ID_BASE16_ENC,
-                        ID_BASE32_DEC, ID_BASE32_ENC,
-                        ID_BASE64_DEC, ID_BASE64_ENC,
-                                       ID_BASE64_ENC_UNIX):
-                menumgr.AddHandler(mid, OnEnDe)
+                    menumgr.AddHandler(item.Id, OnEnDe)
 
 #-----------------------------------------------------------------------------#
 
