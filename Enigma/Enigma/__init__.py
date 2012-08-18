@@ -7,13 +7,14 @@
 ###############################################################################
 
 """Text Encoder/Decoder tools
+Buffer context menu extension
   * Base16 encoder/decoder
   * Base32 encoder/decoder
-  * Base64 encoder/decoder
+  * Base64 encoder/decoder (w/Unix EOL)
 
 """
 
-__author__ = "Cody Precord <cprecord@editra.org>"
+__author__ = "Cody Precord"
 __svnid__ = "$Id:  $"
 __revision__ = "$Revision:  $"
 
