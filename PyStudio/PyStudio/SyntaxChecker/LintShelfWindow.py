@@ -66,7 +66,8 @@ class LintShelfWindow(BaseShelfWindow):
         self._nb.AddPage(self._evaluation, _("Evaluation"), img_id=1)
         ctrlbar = self.setup(self._nb, self._checkresultslist, self._evaluation)
 
-        ctrlbar.AddControl(wx.StaticLine(ctrlbar, size=(-1, 16), style=wx.LI_VERTICAL),
+        ctrlbar.AddControl(wx.StaticLine(ctrlbar, size=(-1, 16), 
+                                         style=wx.LI_VERTICAL),
                            wx.ALIGN_LEFT)
         self.savebtn = self.AddPlateButton(u"", ed_glob.ID_SAVE, wx.ALIGN_LEFT)
         self.savebtn.ToolTip = wx.ToolTip(_("Save Results"))
@@ -75,10 +76,15 @@ class LintShelfWindow(BaseShelfWindow):
         self._lbl = wx.StaticText(ctrlbar)
         ctrlbar.AddControl(self._lbl)
         ctrlbar.AddStretchSpacer()
-        self.layout("Analyze", self.OnRunLint, self.OnJobTimer)
+        self.layout("PyLint", self.OnRunLint, self.OnJobTimer)
         self.TaskButton.SetBitmap(Images.Lint.Bitmap)
-        self.formatbtn = self.AddPlateButton(_("Pep8 Check"), Images.Lint.Bitmap, wx.ALIGN_RIGHT)
-        self.clearbtn = self.AddPlateButton(_("Clear"), ed_glob.ID_DELETE, wx.ALIGN_RIGHT)
+        self.TaskButton.ToolTip = wx.ToolTip(_("Run Pylint Analysis"))
+        self.formatbtn = self.AddPlateButton(_("Pep8"), 
+                                             Images.Lint.Bitmap, wx.ALIGN_RIGHT)
+        self.formatbtn.ToolTip = wx.ToolTip(_("Run Pep8 Check"))
+        self.clearbtn = self.AddPlateButton("", ed_glob.ID_DELETE, 
+                                            wx.ALIGN_RIGHT)
+        self.clearbtn.ToolTip = wx.ToolTip(_("Clear"))
 
         # Attributes
         self._checker = None
@@ -126,10 +132,12 @@ class LintShelfWindow(BaseShelfWindow):
             btn.Refresh()
 
     def _onfileaccess(self, editor, checkformat=False):
+        """process checking for the current editor file"""
         if not editor:
             return
         self._checkresultslist.set_editor(editor)
         self._checkresultslist.Clear()
+        self._evaluation.SetText("")
 
         # With the text control (ed_stc.EditraStc) this will return the full
         # path of the file or a wx.EmptyString if the buffer does not contain
@@ -161,7 +169,10 @@ class LintShelfWindow(BaseShelfWindow):
 
     def OnClear(self, evt):
         """Clear the results"""
-        self._checkresultslist.Clear()
+        if evt.Id == self.clearbtn.Id:
+            self._checkresultslist.Clear()
+        else:
+            evt.Skip()
 
     def OnPageChanged(self, msg):
         """ Notebook tab was changed """
@@ -175,52 +186,60 @@ class LintShelfWindow(BaseShelfWindow):
 
     def OnSaveResults(self, evt):
         """Export the results to XML"""
-        data = self._checkresultslist.GetCachedData()
-        if data[1]:
-            dlg = wx.FileDialog(self.TopLevelParent,
-                                _("Save Results"),
-                                wildcard="XML(*.xml)|*.xml",
-                                style=wx.FD_SAVE |
-                                      wx.FD_CHANGE_DIR |
-                                      wx.FD_OVERWRITE_PROMPT)
-            if dlg.ShowModal() == wx.ID_OK:
-                outpath = dlg.GetPath()
-                if not outpath.endswith('.xml'):
-                    outpath += u'.xml'
-                results = AnalysisResults()
-                results.path = data[0]
-                for result in data[1].GetOrderedData():
-                    # errType, line, errText
-                    results.AddResult(result[1], result[0], result[2])
-                if results.Write(outpath):
-                    msg = _("Saved PyLint results to: %s") % outpath
-                else:
-                    msg = _("Failed to save PyLint Results")
-                self._mw.PushStatusText(msg, 0)
-            dlg.Destroy()
+        if evt.Id == self.savebtn.Id:
+            data = self._checkresultslist.GetCachedData()
+            if data[1]:
+                dlg = wx.FileDialog(self.TopLevelParent,
+                                    _("Save Results"),
+                                    wildcard="XML(*.xml)|*.xml",
+                                    style=wx.FD_SAVE |
+                                          wx.FD_CHANGE_DIR |
+                                          wx.FD_OVERWRITE_PROMPT)
+                if dlg.ShowModal() == wx.ID_OK:
+                    outpath = dlg.GetPath()
+                    if not outpath.endswith('.xml'):
+                        outpath += u'.xml'
+                    results = AnalysisResults()
+                    results.path = data[0]
+                    for result in data[1].GetOrderedData():
+                        # errType, line, errText
+                        results.AddResult(result[1], result[0], result[2])
+                    if results.Write(outpath):
+                        msg = _("Saved PyLint results to: %s") % outpath
+                    else:
+                        msg = _("Failed to save PyLint Results")
+                    self._mw.PushStatusText(msg, 0)
+                dlg.Destroy()
+            else:
+                self._mw.PushStatusText(_("No data to save!"), 0)
         else:
-            self._mw.PushStatusText(_("No data to save!"), 0)
+            evt.Skip()
 
     def OnOpenResults(self, evt):
         """Load the analysis results from xml"""
-        dlg = wx.FileDialog(self.TopLevelParent,
-                            _("Load Results"),
-                            wildcard="XML(*.xml)|*.xml",
-                            style=wx.FD_OPEN | wx.FD_CHANGE_DIR)
-        if dlg.ShowModal() == wx.ID_OK:
-            path = dlg.GetPath()
-            results = AnalysisResults.Load(path)
-            if results:
-                data = list()
-                for result in results.results:
-                    data.append((result.errType, result.errMsg, result.line))
-                self._lbl.Label = results.path
-                self._checkresultslist.LoadData(data, fname=results.path)
-                self._checkresultslist.RefreshRows()
-                self._mw.PushStatusText(_("Loaded code analysis data: %s") % path, 0)
-            else:
-                self._mw.PushStatusText(_("Failed to load results data: %s") % path, 0)
-        dlg.Destroy()
+        if evt.Id == self.openbtn.Id:
+            dlg = wx.FileDialog(self.TopLevelParent,
+                                _("Load Results"),
+                                wildcard="XML(*.xml)|*.xml",
+                                style=wx.FD_OPEN | wx.FD_CHANGE_DIR)
+            if dlg.ShowModal() == wx.ID_OK:
+                path = dlg.GetPath()
+                results = AnalysisResults.Load(path)
+                if results:
+                    data = list()
+                    for result in results.results:
+                        data.append((result.errType, result.errMsg, result.line))
+                    self._lbl.Label = results.path
+                    self._checkresultslist.LoadData(data, fname=results.path)
+                    self._checkresultslist.RefreshRows()
+                    status = _("Loaded code analysis data: %s") % path
+                    self._mw.PushStatusText(status, 0)
+                else:
+                    status = _("Failed to load results data: %s") % path
+                    self._mw.PushStatusText(status, 0)
+            dlg.Destroy()
+        else:
+            evt.Skip()
 
     def OnFileLoad(self, msg):
         """Load File message"""
@@ -243,21 +262,28 @@ class LintShelfWindow(BaseShelfWindow):
 
     def OnRunLint(self, event):
         """Run PyLint Code Analysis on the current buffer"""
-        editor = wx.GetApp().GetCurrentBuffer()
-        if editor:
-            self.formatbtn.Enable(False)
-            self.taskbtn.Enable(False)
-            wx.CallAfter(self._onfileaccess, editor)
+        if event.Id == self.TaskButton.Id:
+            editor = wx.GetApp().GetCurrentBuffer()
+            if editor:
+                self.formatbtn.Enable(False)
+                self.taskbtn.Enable(False)
+                wx.CallAfter(self._onfileaccess, editor)
+        else:
+            event.Skip()
 
     def OnChkFormat(self, event):
         """Run Pep8 Code Analysis on the current buffer"""
-        editor = wx.GetApp().GetCurrentBuffer()
-        if editor:
-            self.formatbtn.Enable(False)
-            self.taskbtn.Enable(False)
-            wx.CallAfter(self._onfileaccess, editor, True)
+        if event.Id == self.formatbtn.Id:
+            editor = wx.GetApp().GetCurrentBuffer()
+            if editor:
+                self.formatbtn.Enable(False)
+                self.taskbtn.Enable(False)
+                wx.CallAfter(self._onfileaccess, editor, True)
+        else:
+            event.Skip()
 
     def get_format_checker(self, filetype, vardict, filename):
+        """Get the current format checker"""
         try:
             return self.__formatCheckers[filetype](vardict, filename)
         except Exception:
@@ -265,6 +291,7 @@ class LintShelfWindow(BaseShelfWindow):
         return None
 
     def get_syntax_checker(self, filetype, vardict, filename):
+        """Get the current syntax checker"""
         try:
             return self.__syntaxCheckers[filetype](vardict, filename)
         except Exception:
@@ -287,6 +314,7 @@ class LintShelfWindow(BaseShelfWindow):
         self._jobtimer.Start(250, True)
 
     def _OnSyntaxData(self, data):
+        """Process syntax checker data returned from checker"""
         # Data is something like
         # [('Syntax Error', '__all__ = ["CSVSMonitorThread"]', 7)]
         self.formatbtn.Enable(True)
