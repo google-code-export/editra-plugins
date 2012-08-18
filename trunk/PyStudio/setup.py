@@ -14,12 +14,10 @@ except ImportError:
     print "You must have setup tools installed in order to build this plugin"
     setup = None
 
-import os
-
 if setup != None:
     setup(
         name='PyStudio',
-        version='0.7',
+        version='0.8',
         description=__doc__,
         author=__author__,
         author_email="rans@email.com",

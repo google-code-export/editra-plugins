@@ -68,6 +68,7 @@ class CheckResultsList(eclib.EBaseListCtrl,
         self.Bind(wx.EVT_WINDOW_DESTROY, self.OnDestroy)
 
     def GetListCtrl(self):
+        """Interface method to get current view"""
         return self
 
     def OnDestroy(self, evt):
