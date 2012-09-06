@@ -5,6 +5,7 @@ Changelog
 Version 0.8
 Released:
 
++Fix dead object error in GetEditorForFile.
 
 #-----------------------------------------------------------------------------#
 Version 0.7
