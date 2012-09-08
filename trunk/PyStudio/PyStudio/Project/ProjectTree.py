@@ -173,9 +173,14 @@ class ProjectTree(ed_basewin.EDBaseFileTree):
         @param item: TreeItem
 
         """
-        path = self.GetPyData(item)
+        path = None
+        try:
+            path = self.GetPyData(item)
+        except wx.PyAssertionError:
+            return # non tree area was clicked (or empty)
         self._menu.Clear()
         menu = wx.Menu()
+
         # Populate menu for current item with standard options
         if not os.path.isdir(path):
             tmpitem = wx.MenuItem(menu, ProjectTree.ID_EDIT_FILE, _("Edit"))
