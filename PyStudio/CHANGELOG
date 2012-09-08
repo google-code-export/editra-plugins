@@ -6,6 +6,7 @@ Version 0.8
 Released:
 
 +Fix dead object error in GetEditorForFile.
++Fix error when right clicking in empty area of PyProject window.
 
 #-----------------------------------------------------------------------------#
 Version 0.7
