@@ -113,10 +113,24 @@ class CompileEntryPoint(object):
         path = data[0]
         err = data[1]
         if err:
-            pat = re.compile("\('.*', ([0-9]+),")
-            matchs = pat.findall(err)
-            if len(matchs) and matchs[0].isdigit():
-                line = max(0, int(matchs[0])-1)
+            line = -1
+
+            # Python 3 outputs correct exception to stderr
+            pat = re.compile('File "(.+)", line ([0-9]+)')
+            matches = pat.findall(err)
+            if len(matches) and len(matches[0]) == 2:
+                match = matches[0]
+                if match[1].isdigit():
+                    line = int(matches[0][1])
+
+            # Python 2 py_compile outputs a tuple of args
+            if line < 0:
+                pat = re.compile("\('.*', ([0-9]+),")
+                matchs = pat.findall(err)
+                if len(matchs) and matchs[0].isdigit():
+                    line = max(0, int(matchs[0])-1)
+
+            if line >= 0:
                 mw = wx.GetApp().GetActiveWindow()
                 buff = PyStudioUtils.GetEditorForFile(mw, path)
                 if buff:
